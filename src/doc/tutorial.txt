@@ -1,0 +1,208 @@
+<h2>Programmer Tutorial</h2>
+
+<p>
+Getting started with SeExpr is relatively easy.  SeExpr gives you a way to
+evaluate one or many evaluations of an expression. What changes between
+different applications of expressions is mainly the particular variables that
+are accessible (sometimes also the set of functions).  Each application of
+expressions generally has it's own subclass of SeExpression that gets
+instantiated.  To get started we're going to go through a simple application
+that is an ascii graphing calculator. This is located in the
+src/demos/asciiGraph.cpp part of the source tree.
+<p>
+
+<h2>Problem Overview</h2>
+
+We are going to write a function grapher that displays in ASCII. In particular
+for a given f(x) we can evaluate it at all the x's in a window and draw the
+resulting y's.
+For example if
+the user ran our program
+<pre>
+./asciiGraph "val=.5*PI*x;7*sin(val)/val"
+</pre>
+we would get
+<pre>
+                              |                             
+                              |                             
+                             ###                            
+                            # |#                            
+                           ## |##                           
+                           #  | #                           
+                          ##  | ##                          
+                          #   |  #                          
+                         ##   |  ##                         
+                         #    |   #                         
+                         #    |   ##                        
+             ####       #     |    #       ####             
+#######-----##--###-----#-----|----##-----##--###-----######
+      ######      ##   #      |     #    #      ######      
+                   ## ##      |     ## ##                   
+                    ###       |      ###                    
+                              |                             
+                              |                             
+                              |                             
+</pre>
+or if we did
+<pre>
+./asciiGraph "x-3"
+</pre>
+we'd get
+<pre>
+
+                              |                         ####
+                              |                     ####    
+------------------------------|-----------------####--------
+                              |             ####            
+                              |         #####               
+                              |     #####                   
+                              | ####                        
+                            ####                            
+                        ####  |                             
+                    ####      |                             
+                ####          |                             
+            #####             |                             
+        ####                  |                             
+    ####                      |                             
+####                          |                             
+                              |                             
+
+</pre>
+
+<h2>Implement the subclass</h2>
+
+First we subclass SeExpression and give it a constructor, typically one that
+takes an expression string.
+<pre>
+class GrapherExpr:public SeExpression
+{
+public:
+    //! Constructor that takes the expression to parse
+    GrapherExpr(const std::string& expr)
+        :SeExpression(expr)
+    {}
+...
+};
+</pre>
+
+<h3>A simple variable reference</h3>
+This is not a very interesting subclass of expression until we add some
+additional variables.  Variables on some applications may be very dynamic. In
+this case, however, we only need 'x', so we make a SeExprScalarVarRef  subclass 
+
+<pre>
+class GrapherExpr:public SeExpression
+{
+...
+    //! Simple variable that just returns its internal value
+    struct SimpleVar:public SeExprScalarVarRef
+    {
+        double val; // independent variable
+        void eval(const SeExprVarNode* node,SeVec3d& result)
+        {result[0]=val;}
+    }
+...
+};
+</pre>
+Once we have this we need an instance to store our variable and provide a
+reference to that. We make it mutable, because resolveVar() is const. One does
+not need to store a variable reference in a given expression. In fact, it may be
+useful to use the same SeExprVarRef from multiple expressions!  For example, if
+you have 10 expressions that all have access to the same variables, this is
+an important optimization.
+<pre>
+class GrapherExpr:public SeExpression
+{
+...
+    mutable SimpleVar x;
+...
+};
+</pre>
+<h3>Binding our variable reference</h3>
+If we now tried to use expressions, the variable would still not be found by our
+expressions. To make it bindable we need to override the resolveVar() function
+as follows:
+<pre>
+    //! resolve function that only supports one external variable 'x'
+    SeExprVarRef* resolveVar(const std::string& name) const
+    {
+        if(name == "x") return &x;
+        return 0;
+    }
+...
+};
+</pre>
+
+<h3>Variable setting</h3>
+Next we need to make a way of setting the variable. As the controlling code will
+use the expression evaluation, it will repeatedly alternate between setting the
+independent variables that are used and calling evaluate().  What it has to do
+depends very much on the application. In this case we only need to set the
+independent variable x as:
+<pre>
+class GrapherExpr:public SeExpression
+{
+...
+    void setX(double x_input)
+    {x.val=x_input;}
+...
+};
+</pre>
+
+<h2>Evaluating expressions</h2>
+
+Evaluating an expression is pretty easy. But before we can do that we need to
+make an instance. 
+<pre>
+    GrapherExpr expr("x+x^2");
+</pre>
+However, there might be errors in the expression you must check with isValid()
+before you can evaluate. Then you can print a parse error as well
+<pre>
+    if(!expr.isValid()){
+        std::cerr"expression faield "&lt;&lt;expr.parseError()&lt;&lt;std::endl;
+        exit(1);
+    }
+</pre>
+Finally, we can loop through all the x points in the graph and find out the y
+value as follows:
+
+
+<pre>
+   // evaluate the graph
+    const int samplesPerPixel=10;
+    const double one_over_samples_per_pixel=1./samplesPerPixel;
+    for(int i=0;i&lt;w;i++){
+        for(int sample=0;sample&lt;samplesPerPixel;sample++){
+            // transform from device to logical coordinatex
+            double dx=double(sample)*one_over_samples_per_pixel;
+            double x=double(dx+i)/double(w)*(xmax-xmin)+xmin;
+            // prep the expression engine for evaluation
+            expr.setX(x);
+            // evaluate and pull scalar value
+            SeVec3d val=expr.evaluate();
+            double y=val[0];
+            // transform from logical to device coordinate
+            int j=(y-ymin)/(ymax-ymin)*h;
+            // store to the buffer
+            if(j&gt;=0 && j&lt;h)
+                buffer[i+j*w]='#';
+        }
+    }    for(int i=0;i&lt;w;i++){
+</pre>
+
+<h2>Running the program</h2>
+
+Usage is
+<pre>
+./asciiGraph <expression>
+</pre>
+
+Be sure to put the expressions in quotation marks i.e. Some fun examples.
+<pre>
+./asciiGraph 'x'
+./asciiGraph 'x^2'
+./asciiGraph '.1*x^3-2*x'
+./asciiGraph 'fit(noise(.5*x),0,1,-10,10)'
+./asciiGraph 'fit(smoothstep(x,-8,8),0,1,-9,9)'
+</pre>

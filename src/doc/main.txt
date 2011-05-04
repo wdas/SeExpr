@@ -1,0 +1,45 @@
+/*! \mainpage SeExpr
+ * \image html seexprlogo.png
+ * \section maindoc User and Programmer Tutorials
+ *  - \subpage userdoc -  User Documentation
+ *  - \subpage plugins -  Custom Function Plugins
+ * \section demos Demo Appliactions
+ *     - \subpage mytut (code at asciiGraph.cpp)
+ *     - Image Synthesizer  (at imageSynth.cpp)
+ *     - SeGrapher Qt Grapher (at demos/segraph)
+ *     - Renderman Shadeop (at demos/rman)
+ * \section mainapi Main API pages
+ *  - SeExpression - Main class to parse a single expression
+ *  - SeExprVarRef - Binding of an external variable to an expression context.
+ *  - SeExprFunc - Define a custom function that calls C++ code
+ *  - SeExprFuncX - Manual argument parsing C++ code
+ *  - SeExprFuncNode - Node that calls a function (needed for SeExprFuncX arg parsing)
+ * \section useful Useful classes and functions
+ *  - SeVec3d - Class to hold and manipulate 3-vectors
+ *  - SeExprBuiltins.h - Useful builtin functions that are also available in C++
+ *  - SeExpr::SeCurve - Hermite interpolation curve.
+ *
+ * \section internals Internals
+ *  - SeExprNode - Parse Tree Node
+ *  - SeExprParser.h - Entry point to bison/flex parser
+ * 
+ * \section Other
+ *  - \subpage license
+ */
+
+/**
+\page mytut Simple ASCII Grapher Tutorial
+\htmlinclude tutorial.txt
+*/
+/**
+\page userdoc User Documentation
+\htmlinclude userdoc.txt
+*/
+/**
+\page plugins SeExpr Plugins
+\htmlinclude plugins.txt
+*/
+/**
+\page license License
+\htmlinclude license.txt
+*/
