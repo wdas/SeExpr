@@ -72,10 +72,10 @@ template<int d> uint32_t hashReduce(uint32_t index[d])
         unsigned char c[4];
     } u1, u2;
     // blend with seed (constants from Numerical Recipes, attrib. from Knuth)
-    u2.i=0;
+    u1.i=0;
     for(int k=0;k<d;k++){
         static const uint32_t M = 1664525, C = 1013904223;
-        u2.i=u2.i*M+index[k]+C;
+        u1.i=u1.i*M+index[k]+C;
     }
     // tempering (from Matsumoto)
     u1.i ^= (u1.i >> 11);
@@ -97,14 +97,9 @@ void CellNoise(const T* in,T* out)
 {
     uint32_t index[d_in];
     int dim=0;
-    for(int k=0;k<d_in;k++){
-        index[k]=uint32_t(floor(in[k]));
-        //std::cout<<"x "<<in[k]<<" index "<<index[k]<<std::endl;
-    }
+    for(int k=0;k<d_in;k++) index[k]=uint32_t(floor(in[k]));
     while(1){
-        //std::cerr<<"we got hash "<<hashReduce<d_in>(index)<<std::endl;;
         out[dim]=hashReduce<d_in>(index) * (1.0/0xffffffffu);
-        //std::cerr<<" out is "<<out[dim]<<std::endl;
         if(++dim>=d_out) break;
         for(int k=0;k<d_in;k++) index[k]+=1000;
     }
