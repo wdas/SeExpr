@@ -32,18 +32,63 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
-#ifndef SeExprParser_h
-#define SeExprParser_h
+#ifndef TYPETESTER_H
+#define TYPETESTER_H
 
-#ifndef MAKEDEPEND
-#include <string>
-#endif
+#include <SeExpression.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 
-class SeExprNode;
-class SeExpression;
-bool SeExprParse(SeExprNode*& parseTree,
-    std::string& error, int& errorStart, int& errorEnd,
-    std::vector<std::pair<int,int> >& _comments,
-    const SeExpression* expr, const char* str, bool wantVec=true);
+#include "SeExprNode.h"
+#include "SeExprFunc.h"
+#include "TypeBuilder.h"
 
-#endif
+/**
+   @file TypeTester.h
+*/
+//! Simple expression class to check all final types of tests
+class TypeTesterExpr : public TypeBuilderExpr
+{
+public:
+    typedef SeExprType(*FindResultOne)  (const SeExprType &);
+    typedef SeExprType(*FindResultTwo)  (const SeExprType &, const SeExprType &);
+    typedef SeExprType(*FindResultThree)(const SeExprType &, const SeExprType &, const SeExprType &);
+
+    TypeTesterExpr()
+        : TypeBuilderExpr()
+    {};
+
+    TypeTesterExpr(const std::string &e, const SeExprType & type = SeExprType::AnyType_varying())
+        :  TypeBuilderExpr(e, type)
+    {};
+
+    void test(const std::string & expr,
+              SeExprType expected_result,
+              SeExprType actual_result,
+              const std::string & givenString,
+              int verbosity_level);
+
+    void testSingle(const std::string & expr,
+                    FindResultOne proc,
+                    int verbosity_level);
+
+    void testDouble(const std::string & expr,
+                    FindResultTwo proc,
+                    int verbosity_level);
+
+    void testTriple(const std::string & expr,
+                    FindResultThree proc,
+                    int verbosity_level);
+
+    virtual SeExprVarRef* resolveVar(const std::string& name) const {
+        return TypeBuilderExpr::resolveVar(name);
+    };
+
+    SeExprFunc* resolveFunc(const std::string& name) const
+    {
+        return TypeBuilderExpr::resolveFunc(name);
+    };
+};
+
+#endif // TYPETESTER_H

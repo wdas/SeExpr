@@ -35,7 +35,7 @@
 #include <string>
 #include <map>
 #include <stdlib.h>
-
+#include <iostream>
 #ifndef SEEXPR_WIN32
 #include <dlfcn.h>
 #include <dirent.h>
@@ -89,12 +89,13 @@ namespace {
 }
 
 
-bool SeExprFuncX::prep(SeExprFuncNode* node, bool wantVec, std::string& error)
+SeExprType SeExprFuncX::prep(SeExprFuncNode* node, SeExprType wanted, SeExprVarEnv & env)
 {
     /* call base node prep by default:
        this passes wantVec to all the children and sets isVec true if any
        child is a vec */
-    return node->SeExprNode::prep(wantVec, error);
+    /* TODO: check that this is correct behavior */
+    return node->SeExprNode::prep(wanted, env);
 }
 
 

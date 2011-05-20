@@ -112,12 +112,22 @@ int main()
         SE_TEST_ASSERT_EQUAL(expr.evaluate()[0],3);
     }
 
-    // Simple prescedence rules
+    // Simple precedence rules
     {
-        SimpleExpression expr1("1*2+3");
-        SE_TEST_ASSERT_EQUAL(expr1.evaluate()[0],5);
-        SimpleExpression expr2("1*(2+3)");
-        SE_TEST_ASSERT_EQUAL(expr2.evaluate()[0],5);
+	SimpleExpression expr1("1+2*3");
+	SE_TEST_ASSERT_EQUAL(expr1.evaluate()[0],7);
+	SimpleExpression expr2("(1+2)*3");
+	SE_TEST_ASSERT_EQUAL(expr2.evaluate()[0],9);
+    }
+
+    //  Vector assignment test
+    {
+	SimpleExpression expr1("$foo=[0,1,2]; $foo=3; $foo");
+	SimpleExpression expr2("3");
+	SE_TEST_ASSERT_VECTOR_EQUAL(expr1.evaluate(),expr2.evaluate());
+	SimpleExpression expr3("$foo=3; $foo=[0,1,2]; $foo");
+	SimpleExpression expr4("[0,1,2]");
+	SE_TEST_ASSERT_VECTOR_EQUAL(expr3.evaluate(),expr4.evaluate());
     }
 
     return 0;

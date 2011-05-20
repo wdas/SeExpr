@@ -41,6 +41,9 @@
 #include <vector>
 #include "SeVec3d.h"
 
+#include "SeExprType.h"
+#include "SeExprEnv.h"
+
 class SeExprNode;
 class SeExprVarNode;
 class SeExprLocalVarRef;
@@ -50,21 +53,39 @@ class SeExpression;
 //! abstract class for implementing variable references
 class SeExprVarRef
 {
+    SeExprVarRef()
+        : _type(SeExprType::ErrorType_varying())
+    {};
+
  public:
+    SeExprVarRef(const SeExprType & type)
+        : _type(type)
+    {};
+
     virtual ~SeExprVarRef() {}
 
-    //! returns true for a vector type, false for a scalar type
-    virtual bool isVec() = 0;
+    //! sets (current) type to given type
+    virtual void setType(const SeExprType & type) { _type = type; };
+
+    //! returns (current) type
+    virtual SeExprType type() const { return _type; };
 
     //! returns this variable's value by setting result, node refers to 
     //! where in the parse tree the evaluation is occurring
     virtual void eval(const SeExprVarNode* node, SeVec3d& result) = 0;
+
+ private:
+    SeExprType _type;
 };
 
 /// simple vector variable reference reference base class
 class SeExprVectorVarRef : public SeExprVarRef
 {
  public:
+    SeExprVectorVarRef()
+        : SeExprVarRef(SeExprType::FPNType_varying(3))
+    {};
+
     virtual bool isVec() { return 1; }
 };
 
@@ -73,21 +94,29 @@ class SeExprVectorVarRef : public SeExprVarRef
 class SeExprScalarVarRef : public SeExprVarRef
 {
  public:
+    SeExprScalarVarRef()
+        : SeExprVarRef(SeExprType::FP1Type_varying())
+    {};
+
     virtual bool isVec() { return 0; }
 };
 
 /// uses internally to represent local variables
 class SeExprLocalVarRef : public SeExprVarRef
 {
+    SeExprLocalVarRef()
+        : SeExprVarRef(SeExprType::ErrorType_varying())
+    {};
+
  public:
     SeVec3d val;
-    SeExprLocalVarRef() : _isVec(false) {}
-    void setIsVec() { _isVec = true; }
+
+    SeExprLocalVarRef(const SeExprType & type)
+        :SeExprVarRef(type)
+    {};
+
     virtual void eval(const SeExprVarNode*, SeVec3d& result) 
     { result = val; }
-    virtual bool isVec() { return _isVec; }
- private:
-    bool _isVec;
 };
 
 
@@ -115,13 +144,18 @@ class SeExpression
     };
 
     SeExpression( );
-    SeExpression( const std::string &e, bool wantVec=1 );
+    //SeExpression( const std::string &e, bool wantVec=true );
+    SeExpression( const std::string &e, const SeExprType & type = SeExprType::AnyType_varying());
     virtual ~SeExpression();
 
     /** Sets the expression to desire a vector or a scalar.
         This will allow the evaluation to potentially be optimized if 
         only a scalar is desired. */
     void setWantVec(bool wantVec);
+
+    /** Sets desired return value.
+        This will allow the evaluation to potentially be optimized. */
+    void setReturnType(const SeExprType & type);
 
     /** Set expression string to e.  
         This invalidates all parsed state. */
@@ -149,6 +183,10 @@ class SeExpression
         The error structure gives location information as well as the errors itself. */
     const std::vector<Error>& getErrors() const
     {return _errors;}
+
+    /** Get a reference to a list of the ranges where comments occurred */
+    const std::vector<std::pair<int,int> >& getComments() const
+    {return _comments;}
 
     /** Check if expression is constant.
 	Expr will be parsed if needed.  No binding is required. */
@@ -183,6 +221,11 @@ class SeExpression
 	functions will be bound if needed. */
     bool isVec() const;
 
+    /** Return the return type of the expression.  Currently may not
+        match the type set in setReturnType.  Expr will be parsed and
+        variables and functions will be bound if needed. */
+    const SeExprType & returnType() const;
+
     /** Evaluate the expression.  This will parse and bind if needed */
     SeVec3d evaluate() const;
 
@@ -197,7 +240,12 @@ class SeExpression
 
     /** records an error in prep or parse stage */
     void addError(const std::string& error,const int startPos,const int endPos) const
+
     {_errors.push_back(Error(error,startPos,endPos));}
+
+    /** records a comment */
+    void addComment(int pos,int length)
+    {_comments.push_back(std::pair<int,int>(pos,length+pos-1));}
 
     /** Returns a read only map of local variables that were set **/
     const LocalVarTable& getLocalVars() const {return _localVars;}
@@ -223,12 +271,17 @@ class SeExpression
     /** True if the expression wants a vector */
     bool _wantVec;
 
+    /** Return type desired. */
+    mutable SeExprType _returnType;
+
     /** The expression. */
     std::string _expression;
     
+ protected:
     /** Parse tree (null if syntax is bad). */
     mutable SeExprNode *_parseTree;
 
+ private:
     /** Flag set once expr is parsed/prepped (parsing is automatic and lazy) */
     mutable bool _parsed, _prepped;
     
@@ -237,6 +290,9 @@ class SeExpression
 
     /** Cached parse error location {startline,startcolumn,endline,endcolumn} */
     mutable std::vector<Error> _errors;
+
+    /** Cached comments */
+    mutable std::vector<std::pair<int,int> > _comments;
 
     /** Variables used in this expr */
     mutable std::set<std::string> _vars;
@@ -267,9 +323,9 @@ class SeExpression
 
     /** get local variable reference. This is potentially useful for expression debuggers
         and/or uses of expressions where mutable variables are desired */
-    SeExprLocalVarRef* getLocalVar(const char* n) const {
-	return &_localVars[n]; 
-    }
+    /* SeExprLocalVarRef* getLocalVar(const char* n) const { */
+    /*     return &_localVars[n];  */
+    /* } */
 };
 
 #endif

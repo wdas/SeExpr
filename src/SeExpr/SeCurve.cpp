@@ -80,8 +80,9 @@ preparePoints()
     // Setup boundary conditions on sentinel values
     CV& end=*(_cvData.end()-1);
     CV& begin=*(_cvData.begin());
-    int realCVs=_cvData.size();
-    if(realCVs>2){
+    int realCVs=_cvData.size()-2;
+    assert(realCVs>=0);
+    if(realCVs>0){
         begin._val=_cvData[1]._val;
         begin._deriv=T();
         begin._interp=kNone;
@@ -89,14 +90,7 @@ preparePoints()
         end._val=_cvData[lastIndex-1]._val;
         end._deriv=T();
         end._interp=kNone;
-    }else if(realCVs==1){
-        CV& mid=*(_cvData.begin()+1);
-        begin._pos=mid._pos-1.;
-        end._pos=mid._pos+1.;
-        begin._interp=end._interp=kNone;
-        begin._val=end._val=mid._val;
-        begin._deriv=end._deriv=T();
-    }else if(_cvData.size()==0){
+    }else{
         begin._pos=end._pos=0;
         begin._val=end._val=T();
         begin._interp=kNone;

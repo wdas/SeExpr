@@ -1007,12 +1007,28 @@ static const char* vnoise_docstring=
 	typedef SeVec3d VoronoiFunc(VoronoiPointData& data, int n, const SeVec3d* args);
 	CachedVoronoiFunc(VoronoiFunc* vfunc) : SeExprFuncX(true),_vfunc(vfunc) {}
 
-	virtual bool prep(SeExprFuncNode* node, bool wantVec, std::string& error)
+	virtual SeExprType prep(SeExprFuncNode* node, SeExprType wanted, SeExprVarEnv & env)
 	{
 	    node->setData(new VoronoiPointData);
 	    // force wantVec to true - args are always vecs even of result is not
-	    return SeExprFuncX::prep(node, true, error);
+            //TODO: check that this is correct
+            SeExprType _type = SeExprFuncX::prep(node, SeExprType::FPNType_varying(3), env);
+            {
+                //isScalar computation
+                _isScalar = false;
+                // int n = node->numChildren();
+                // for(int i = 0; _isScalar && i < n; i++)
+                //     _isScalar = node->child(i)->type().isFP1();
+            }
+	    return _type;
+            //return SeExprFuncX::prep(node, true);
 	}
+
+        //TODO: check that this is correct
+        virtual bool isScalar() const { return _isScalar; }
+
+        //TODO: check that this is correct
+        virtual SeExprType retType() const { return SeExprType::FPNType_varying(3); }
 
 	virtual void eval(const SeExprFuncNode* node, SeVec3d& result) const
 	{
@@ -1293,31 +1309,50 @@ static const char* vnoise_docstring=
 
     class CurveFuncX:public SeExprFuncX
     {
-        virtual bool prep(SeExprFuncNode* node, bool wantVec, std::string& error)
+        virtual SeExprType prep(SeExprFuncNode* node, SeExprType wanted, SeExprVarEnv & env)
         {
             // check number of arguments
             int nargs = node->nargs();
             if ((nargs - 1) % 3) {
                 node->addError("Wrong number of arguments, should be multiple of 3 plus 1");
-                return false;
+                //TODO: check that this is correct
+                return SeExprType::ErrorType_varying();
+                //return false;
             }
             
             bool noErrors=true;
-            noErrors &= node->child(0)->prep(1, error);
-            
+            //TODO: check that this is correct
+            noErrors &= node->child(0)->prep(SeExprType::FPNType_varying(3), env).isValid();
+            //noErrors &= node->child(0)->prep(1);
+
+            //TODO: check that this is correct
+            {
+                //isScalar computation
+                _isScalar = true;
+                int n = node->numChildren();
+                for(int i = 0; _isScalar && i < n; i++)
+                    _isScalar = node->child(i)->type().isFP1();
+            }
+
             CurveData<double>* data = new CurveData<double>;
             for (int i = 1; i < nargs-2; i+=3) {
                 
                 SeVec3d pos;
-                if(node->child(i)->prep(0, error)) node->child(i)->eval(pos);
+                //TODO: check that this is correct
+                if(node->child(i)->prep(SeExprType::FP1Type_varying(), env).isValid()) node->child(i)->eval(pos);
+                //if(node->child(i)->prep(0)) node->child(i)->eval(pos);
                 else noErrors=false;
                 
                 SeVec3d val;
-                if(node->child(i+1)->prep(0, error)) node->child(i+1)->eval(val);
+                //TODO: check that this is correct
+                if(node->child(i+1)->prep(SeExprType::FP1Type_varying(), env).isValid()) node->child(i+1)->eval(val);
+                //if(node->child(i+1)->prep(0)) node->child(i+1)->eval(val);
                 else noErrors=false;
                 
                 SeVec3d interp;
-                if(node->child(i+2)->prep(0, error)) node->child(i+2)->eval(interp);
+                //TODO: check that this is correct
+                if(node->child(i+2)->prep(SeExprType::FP1Type_varying(), env).isValid()) node->child(i+2)->eval(interp);
+                //if(node->child(i+2)->prep(0)) node->child(i+2)->eval(interp);
                 else noErrors=false;
                 int interpInt=(int)interp[0];                
                 SeCurve<double>::InterpType interpolant=(SeCurve<double>::InterpType)interpInt;
@@ -1332,9 +1367,20 @@ static const char* vnoise_docstring=
             data->curve.preparePoints();
             
             node->setData((SeExprFuncNode::Data*)(data));
-            return noErrors;
+            //TODO: check that this is correct
+            if(noErrors)
+                return wanted;
+            else
+                return SeExprType::ErrorType_varying();
+            //return noErrors;
         }
-    
+
+        //TODO: check that this is correct
+        virtual bool isScalar() const { return _isScalar; }
+
+        //TODO: check that this is correct
+        virtual SeExprType retType() const { return SeExprType::FP1Type_varying(); }
+
         virtual void eval(const SeExprFuncNode* node, SeVec3d& result) const 
         {
             SeVec3d param;
@@ -1366,26 +1412,43 @@ static const char* vnoise_docstring=
     
     class CCurveFuncX:public SeExprFuncX
     {
-        virtual bool prep(SeExprFuncNode* node, bool wantVec, std::string& error)
+        virtual SeExprType prep(SeExprFuncNode* node, SeExprType wanted, SeExprVarEnv & env)
         {
             // check number of arguments
             int nargs = node->nargs();
             if ((nargs - 1) % 3) {
                 node->addError("Wrong number of arguments, should be multiple of 3 plus 1");
-                return false;
+                //TODO: check that this is correct
+                return SeExprType::ErrorType_varying();
+                //return false;
             }
             bool noErrors=true;
-            noErrors &= node->child(0)->prep(1, error); // parameter value
+            //TODO: check that this is correct
+            noErrors &= node->child(0)->prep(SeExprType::FPNType_varying(3), env).isValid(); // parameter value
+            //noErrors &= node->child(0)->prep(1); // parameter value
             
+            //TODO: check that this is correct
+            {
+                //isScalar computation
+                _isScalar = true;
+                int n = node->numChildren();
+                for(int i = 0; _isScalar && i < n; i++)
+                    _isScalar = node->child(i)->type().isFP1();
+            }
+
             CurveData<SeVec3d>* data = new CurveData<SeVec3d>;
             for (int i = 1; i < nargs-2; i+=3) {
                 // position of cv
                 SeVec3d pos;
-                if (node->child(i)->prep(0, error)) node->child(i)->eval(pos);
+                //TODO: check that this is correct
+                if (node->child(i)->prep(SeExprType::FP1Type_varying(), env).isValid()) node->child(i)->eval(pos);
+                //if (node->child(i)->prep(0)) node->child(i)->eval(pos);
                 else noErrors=false;
                 // value of cv, if not vector promote i
                 SeVec3d val;
-                if (node->child(i+1)->prep(1, error)){
+                //TODO: check that this is correct
+                if (node->child(i+1)->prep(SeExprType::FP1Type_varying(), env).isValid()){
+                //if (node->child(i+1)->prep(1)){
                     node->child(i+1)->eval(val);
                     if (!node->child(i+1)->isVec()) {
                         val[1] = val[2] = val[0];
@@ -1393,7 +1456,9 @@ static const char* vnoise_docstring=
                 }else noErrors=false;
                 // interpolation type
                 SeVec3d interp;
-                if (node->child(i+2)->prep(0, error)) node->child(i+2)->eval(interp);
+                //TODO: check that this is correct
+                if (node->child(i+2)->prep(SeExprType::FP1Type_varying(), env).isValid()) node->child(i+2)->eval(interp);
+                //if (node->child(i+2)->prep(0)) node->child(i+2)->eval(interp);
                 else noErrors=false;
                 SeCurve<SeVec3d>::InterpType interpolant=(SeCurve<SeVec3d>::InterpType)(int)interp[0];
                 if(!SeCurve<SeVec3d>::interpTypeValid(interpolant)){
@@ -1406,9 +1471,20 @@ static const char* vnoise_docstring=
 
             data->curve.preparePoints();
             node->setData((SeExprFuncNode::Data*)(data));
-            return noErrors;
+            //TODO: check that this is correct
+            if(noErrors)
+                return wanted;
+            else
+                return SeExprType::ErrorType_varying();
+            //return noErrors;
         }
         
+        //TODO: check that this is correct
+        virtual bool isScalar() const { return _isScalar; }
+
+        //TODO: check that this is correct
+        virtual SeExprType retType() const { return SeExprType::FPNType_varying(3); }
+
         virtual void eval(const SeExprFuncNode* node, SeVec3d& result) const 
         {
             SeVec3d param;
@@ -1442,20 +1518,36 @@ static const char* vnoise_docstring=
             std::vector<std::pair<int,int> > ranges;
             std::string format;
         };
-            
-        virtual bool prep(SeExprFuncNode* node, bool wantVec, std::string& error)
+
+        virtual SeExprType prep(SeExprFuncNode* node, SeExprType wanted, SeExprVarEnv & env)
         {
             // check number of arguments
             int nargs = node->nargs();
             if(!node->isStrArg(0)){
                 node->addError("first argument must be format");
-                return false;
+                //TODO: check that this is correct
+                return SeExprType::ErrorType_varying();
+                //return false;
             }
 
             bool valid=true;
             for(int i=1;i<nargs;i++)
-                valid&=node->child(i)->prep(1,error);
-            if(!valid) return false;
+                //TODO: check that this is correct
+                valid&=node->child(i)->prep(SeExprType::FP1Type_varying(), env).isValid();
+                //valid&=node->child(i)->prep(1);
+
+            //TODO: check that this is correct
+            {
+                //isScalar computation
+                _isScalar = true;
+                int n = node->numChildren();
+                for(int i = 0; _isScalar && i < n; i++)
+                    _isScalar = node->child(i)->type().isFP1();
+            }
+
+            //TODO: check that this is correct
+            if(!valid) return SeExprType::ErrorType_varying();
+            //if(!valid) return false;
 
             // parse format string
             unsigned int bakeStart=0;
@@ -1473,7 +1565,9 @@ static const char* vnoise_docstring=
                 if(percentStart+1==format.length()){
                     node->addError("Unexpected end of format string");
                     delete data;
-                    return false;
+                    //TODO: check that this is correct
+                    return SeExprType::ErrorType_varying();
+                    //return false;
                 }
                 else if(format[percentStart+1]=='%'){
                     searchStart=percentStart+2;
@@ -1491,7 +1585,9 @@ static const char* vnoise_docstring=
                 }else{
                     node->addError("Invalid format string, only %v is allowed");
                     delete data;
-                    return false;
+                    //TODO: check that this is correct
+                    return SeExprType::ErrorType_varying();
+                    //return false;
                 }
             }
             if(bakeStart!=format.length())
@@ -1500,7 +1596,9 @@ static const char* vnoise_docstring=
             if(items!=nargs-1){
                 node->addError("Wrong number of arguments for format string");
                 delete data;
-                return false;
+                //TODO: check that this is correct
+                return SeExprType::ErrorType_varying();
+                //return false;
             }
 
             node->setData(data);
@@ -1508,8 +1606,16 @@ static const char* vnoise_docstring=
                 const std::pair<int,int>& range=data->ranges[i];
                 std::cerr<<"range "<<range.first<<","<<range.second<<std::endl;
             }
-            return true;
+            //TODO: check that this is correct
+            return wanted;
+            //return true;
         }
+
+        //TODO: check that this is correct
+        virtual bool isScalar() const { return true; };
+
+        //TODO: check that this is correct
+        virtual SeExprType retType() const { return SeExprType::FP1Type_varying(); };
 
         virtual void eval(const SeExprFuncNode* node, SeVec3d& result) const 
         {

@@ -32,18 +32,52 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
-#ifndef SeExprParser_h
-#define SeExprParser_h
 
-#ifndef MAKEDEPEND
-#include <string>
-#endif
+#ifndef SeExprWalker_h
+#define SeExprWalker_h
 
 class SeExprNode;
-class SeExpression;
-bool SeExprParse(SeExprNode*& parseTree,
-    std::string& error, int& errorStart, int& errorEnd,
-    std::vector<std::pair<int,int> >& _comments,
-    const SeExpression* expr, const char* str, bool wantVec=true);
 
+namespace SeExpr{
+
+template<class T,bool constnode> struct ADD_CONST{typedef T TYPE;};
+template<class T> struct ADD_CONST<T,true>{typedef const T TYPE;};
+
+
+template<bool constnode=false>
+class Examiner
+{
+public:
+    typedef typename ADD_CONST<SeExprNode,constnode>::TYPE T_NODE;
+
+    virtual bool examine(T_NODE *examinee) = 0;
+    virtual void reset() = 0;
+};
+
+template<bool constnode=false> 
+class Walker
+{
+ public:
+    typedef Examiner<constnode> T_EXAMINER;
+    typedef typename T_EXAMINER::T_NODE T_NODE;
+
+    Walker(T_EXAMINER* examiner)
+	: _examiner(examiner)
+    { _examiner->reset(); };
+
+    /// Preorder walk
+    void walk(T_NODE * examinee);
+
+ protected:
+    void internalWalk(T_NODE* examinee);
+    void walkChildren(T_NODE* parent);
+
+ private:
+    T_EXAMINER * _examiner;
+};
+
+typedef Examiner<true> ConstExaminer;
+typedef Walker<true> ConstWalker;
+
+}
 #endif

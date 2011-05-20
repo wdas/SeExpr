@@ -44,10 +44,13 @@
 #    include <string.h>
 #    include <string>
 #    include <math.h>
+#    include <vector>
 #endif
 
 #include "SePlatform.h"
 #include "SeExprParser.h"
+#include "SeExprNode.h"
+#include "SeExpression.h"
 
 #ifdef SEEXPR_WIN32
 #    define YY_NO_UNISTD_H
@@ -61,9 +64,14 @@
 // TODO: make this thread safe
 static int columnNumber=0; // really buffer position
 static int lineNumber=0; // not used
-void resetCounters(){
-   columnNumber=lineNumber=0;
+std::vector<std::pair<int,int> >* comments=0;
+//! For lexer's internal use only!
+void SeExprLexerResetState(std::vector<std::pair<int,int> >& commentsIn){
+    comments=&commentsIn;
+    columnNumber=lineNumber=0;
 }
+
+int yypos();
 
 #define YY_USER_ACTION { \
     yylloc.first_line=lineNumber;yylloc.first_column=columnNumber; \
@@ -79,6 +87,15 @@ IDENT                   [a-zA-Z_][a-zA-Z0-9_.]*
 
 %%
 BEGIN(0);
+
+extern                  { return EXTERN; }
+def                     { return DEF; }
+FLOAT                   { return FP; }
+STRING                  { return STRING; }
+CONSTANT                { return LIFETIME_CONSTANT; }
+UNIFORM                 { return LIFETIME_UNIFORM; }
+VARYING                 { return LIFETIME_VARYING; }
+ERROR                   { return LIFETIME_ERROR; }
 
 if			{ return IF; }
 else			{ return ELSE; }
@@ -120,7 +137,9 @@ ${IDENT}"::"{IDENT}	{ yylval.s = strdup(&yytext[1]); return VAR; }
 "\\n"			/* ignore quoted newline */;
 "\\t"			/* ignore quoted tab */;
 [ \t\n]			/* ignore whitespace */;
-\#([^\\\n]|\\[^n\n])*	/* skip trailing comment (up to end of line) */;
+\#([^\\\n]|\\[^n\n])*	{ /* match comment */ 
+                         int startPos=yypos(),endPos=yypos()+strlen(&yytext[1])+1;
+			  comments->push_back(std::pair<int,int>(startPos,endPos));}
 
 <*>.			{ return yytext[0]; }
 
@@ -133,3 +152,5 @@ int yypos()
 {
     return yy_c_buf_p - YY_CURRENT_BUFFER->yy_ch_buf - yyleng;
 }
+
+

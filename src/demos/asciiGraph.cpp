@@ -54,8 +54,12 @@ public:
 
 private:
     //! Simple variable that just returns its internal value
-    struct SimpleVar:public SeExprScalarVarRef
+    struct SimpleVar:public SeExprVarRef
     {
+	SimpleVar()
+	    : SeExprVarRef(SeExprType::FP1Type_varying()), val(0.0)
+	{}
+
         double val; // independent variable
         void eval(const SeExprVarNode* node,SeVec3d& result)
         {result[0]=val;}
@@ -86,7 +90,7 @@ int main(int argc,char *argv[])
     GrapherExpr expr(exprStr);
 
     if(!expr.isValid()){
-        std::cerr<<"expression faield "<<expr.parseError()<<std::endl;
+        std::cerr<<"expression failed "<<expr.parseError()<<std::endl;
         exit(1);
     }
     double xmin=-10,xmax=10,ymin=-10,ymax=10;
@@ -119,8 +123,9 @@ int main(int argc,char *argv[])
             double x=double(dx+i)/double(w)*(xmax-xmin)+xmin;
             // prep the expression engine for evaluation
             expr.setX(x);
-            // evaluate and pull scalar value
-            SeVec3d val=expr.evaluate();
+            // evaluate and pull scalar value - currently does not work
+            //TODO: fix eval and then use actual call
+            SeVec3d val=0.0;//expr.evaluate();
             double y=val[0];
             // transform from logical to device coordinate
             int j=(y-ymin)/(ymax-ymin)*h;

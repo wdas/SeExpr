@@ -44,19 +44,20 @@
 #include "SeExprParser.h"
 #include "SeExprFunc.h"
 #include "SeExpression.h"
+#include "SeExprType.h"
+#include "SeExprEnv.h"
 
 using namespace std;
 
 SeExpression::SeExpression()
-    : _wantVec(0), _parseTree(0), _parsed(0), _prepped(0)
+    : _wantVec(true), _returnType(SeExprType::AnyType_varying()), _parseTree(0), _parsed(0), _prepped(0)
 {
     SeExprFunc::init();
 }
 
 
-SeExpression::SeExpression( const std::string &e, bool wantVec )
-    : _wantVec(wantVec),  _expression(e), _parseTree(0),
-      _parsed(0), _prepped(0)
+SeExpression::SeExpression( const std::string &e, const SeExprType & type)
+    : _wantVec(true), _returnType(type), _expression(e), _parseTree(0), _parsed(0), _prepped(0)
 {
     SeExprFunc::init();
 }
@@ -78,12 +79,20 @@ void SeExpression::reset()
     _localVars.clear();
     _errors.clear();
     _threadUnsafeFunctionCalls.clear();
+    _comments.clear();
 }
 
 void SeExpression::setWantVec(bool wantVec)
 {
     reset();
     _wantVec = wantVec;
+    std::cerr << "Use of setWantVec is deprecated. If you are seeing this, you used setWantVec.  Please use setReturnType instead." << std::endl;
+}
+
+void SeExpression::setReturnType(const SeExprType & type)
+{
+    reset();
+    _returnType = type;
 }
 
 void SeExpression::setExpr(const std::string& e)
@@ -128,8 +137,9 @@ SeExpression::parse() const
     if (_parsed) return;
     _parsed = true;
     int tempStartPos,tempEndPos;
-    SeExprParse(_parseTree, _parseError, tempStartPos, tempEndPos, 
-        this, _expression.c_str(), _wantVec);
+    SeExprParse(_parseTree,
+        _parseError, tempStartPos, tempEndPos, 
+        _comments, this, _expression.c_str(), _wantVec);
     if(!_parseTree){
         addError(_parseError,tempStartPos,tempEndPos);
     }
@@ -141,12 +151,8 @@ SeExpression::prep() const
     if (_prepped) return;
     _prepped = true;
     parseIfNeeded();
-    std::string temporary_error="";
-    if (_parseTree && !_parseTree->prep(wantVec(),temporary_error)){
-        if(temporary_error!=""){
-            _parseTree->addError(temporary_error);
-        }
-
+    SeExprVarEnv env;
+    if (_parseTree && !_parseTree->prep(_returnType, env).isValid()) {
         // build line lookup table
         std::vector<int> lines;
         const char* start=_expression.c_str();
@@ -177,6 +183,13 @@ SeExpression::isVec() const
 {
     prepIfNeeded();
     return _parseTree ? _parseTree->isVec() : _wantVec;
+}
+
+const SeExprType &
+SeExpression::returnType() const
+{
+    prepIfNeeded();
+    return _parseTree->type();
 }
 
 SeVec3d

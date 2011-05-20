@@ -32,18 +32,41 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
-#ifndef SeExprParser_h
-#define SeExprParser_h
-
 #ifndef MAKEDEPEND
+#include <string.h>
 #include <string>
+#include <vector>
 #endif
 
-class SeExprNode;
-class SeExpression;
-bool SeExprParse(SeExprNode*& parseTree,
-    std::string& error, int& errorStart, int& errorEnd,
-    std::vector<std::pair<int,int> >& _comments,
-    const SeExpression* expr, const char* str, bool wantVec=true);
+#include "SeExprNode.h"
+#include "SeExprPatterns.h"
+#include "SeExprWalker.h"
 
-#endif
+namespace SeExpr{
+
+template<bool constnode> void Walker<constnode>::
+walk(T_NODE* examinee)
+{
+    _examiner->reset();
+    internalWalk(examinee);
+};
+
+template<bool constnode> void Walker<constnode>::
+internalWalk(T_NODE* examinee)
+{
+    /// If examine returns false, do not recurse
+    if(_examiner->examine(examinee)) walkChildren(examinee);
+};
+
+template<bool constnode> void Walker<constnode>::
+walkChildren(T_NODE* parent)
+{
+    for(int i = 0; i < parent->numChildren(); i++)
+	internalWalk(parent->child(i));
+};
+
+
+template class Walker<false>;
+template class Walker<true>;
+
+}

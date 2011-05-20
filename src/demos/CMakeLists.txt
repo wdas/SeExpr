@@ -35,6 +35,10 @@ ADD_EXECUTABLE(asciiGraph "asciiGraph.cpp")
 target_link_libraries(asciiGraph ${SEEXPR_LIBRARIES})
 install(TARGETS asciiGraph DESTINATION bin)
 
+ADD_EXECUTABLE(asciiCalc "asciiCalculator.cpp")
+target_link_libraries(asciiCalc ${SEEXPR_LIBRARIES})
+install(TARGETS asciiCalc DESTINATION bin)
+
 
 
 ADD_SUBDIRECTORY (imageSynth)

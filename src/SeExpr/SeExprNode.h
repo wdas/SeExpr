@@ -36,6 +36,8 @@
 #ifndef SeExprNode_h
 #define SeExprNode_h
 
+#include <cstdlib>
+
 #ifndef MAKEDEPEND
 #include <string.h>
 #include <string>
@@ -43,6 +45,8 @@
 #endif
 
 #include "SeExpression.h"
+#include "SeExprType.h"
+#include "SeExprEnv.h"
 #include "SeVec3d.h"
 
 class SeExprFunc;
@@ -51,20 +55,40 @@ class SeExprFunc;
 class SeExprNode {
 public:
     SeExprNode(const SeExpression* expr);
+    SeExprNode(const SeExpression* expr,
+               const SeExprType & type);
     /// These constructors supply one or more children.
-    SeExprNode(const SeExpression* expr, SeExprNode* a);
-    SeExprNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b);
-    SeExprNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b, SeExprNode* c);
+    SeExprNode(const SeExpression* expr,
+               SeExprNode* a);
+    SeExprNode(const SeExpression* expr,
+               SeExprNode* a,
+               const SeExprType & type);
+    SeExprNode(const SeExpression* expr,
+               SeExprNode* a,
+               SeExprNode* b);
+    SeExprNode(const SeExpression* expr,
+               SeExprNode* a,
+               SeExprNode* b,
+               const SeExprType & type);
+    SeExprNode(const SeExpression* expr,
+               SeExprNode* a,
+               SeExprNode* b,
+               SeExprNode* c);
+    SeExprNode(const SeExpression* expr,
+               SeExprNode* a,
+               SeExprNode* b,
+               SeExprNode* c,
+               const SeExprType & type);
     virtual ~SeExprNode();
 
     /// True if node has a vector result.
     bool isVec() const { return _isVec; }
 
-    /// Evaluation method.  Note: v[1] and v[2] are undefined if !isVec
-    virtual void eval(SeVec3d& v) const;
-
     /// Access expression
     const SeExpression* expr() const { return _expr; }
+
+    /// Access to original string representation of current expression
+    std::string toString() const { return expr()->getExpr().substr(startPos(), length()); };
 
     /// Access parent node - root node has no parent
     const SeExprNode* parent() const { return _parent; }
@@ -73,30 +97,139 @@ public:
     const SeExprNode* child(int i) const { return _children[i]; }
     SeExprNode* child(int i) { return _children[i]; }
 
-    /// Get canonical error value
-    inline void setErrorResult(SeVec3d& v) const { v[0] = v[1] = v[2] = 0.001; }
-    
     /// Add a child to the child list (for parser use only)
     void addChild(SeExprNode* child);
 
     /// Transfer children from surrogate parent (for parser use only)
     void addChildren(SeExprNode* surrogate);
 
+    /// Transfer children from surrogate parent (does not delete surrogate)
+    void addChildren_without_delete(SeExprNode* surrogate);
+
     /** Prepare the node (for parser use only).  See the discussion at
-	the start of SeExprNode.cpp for more info. NOTE: error is deprecated,
-        instead use addError() function for better error localization
+	the start of SeExprNode.cpp for more info.
     */
-    virtual bool prep(bool wantVec, std::string& error);
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+
+    /// Evaluation method.  Note: v[1] and v[2] are undefined if !isVec
+    virtual void eval(SeVec3d& v) const;
+
+    /// The type of the node
+    const SeExprType & type() const { return _type; };
 
     /// Remember the line and column position in the input string 
     inline void setPosition(const short int startPos,const short int endPos)
     {_startPos=startPos;_endPos=endPos;}
 
-    /// Register error
-    inline void addError(const std::string& error)
-    {_expr->addError(error,_startPos,_endPos);}
+    /// Access start position in input string
+    inline const short int startPos() const { return _startPos; }
+    /// Access end position in input string
+    inline const short int endPos() const { return _endPos; }
+    /// Access length of input string
+    inline const short int length() const { return endPos() - startPos(); };
 
-protected:
+    /// Register error
+    inline void addError(const std::string& error) { _expr->addError(error, _startPos, _endPos); }
+
+ protected: /*protected functions*/
+
+    ///Set type
+    inline void setType         ()                      { _type = SeExprType::ErrorType_error();        };
+    inline void setType         (const SeExprType & t)  { _type = t;                                    };
+    inline void setType_varying (const SeExprType & t)  { setType(t); _type.becomeLifetimeVarying ();   };
+    inline void setType_uniform (const SeExprType & t)  { setType(t); _type.becomeLifetimeUniform ();   };
+    inline void setType_constant(const SeExprType & t)  { setType(t); _type.becomeLifetimeConstant();   };
+    inline void setType_error   (const SeExprType & t)  { setType(t); _type.becomeLifetimeError();      };
+    inline void setType         (const SeExprType & t,
+                                 const SeExprType & t1) { setType(t); _type.becomeLifetime(t1);         };
+    inline void setType         (const SeExprType & t,
+                                 const SeExprType & t1,
+                                 const SeExprType & t2) { setType(t); _type.becomeLifetime(t1, t2);     };
+    inline void setType         (const SeExprType & t,
+                                 const SeExprType & t1,
+                                 const SeExprType & t2,
+                                 const SeExprType & t3) { setType(t); _type.becomeLifetime(t1, t2, t3); };
+    inline void setType_std     (const SeExprType & t)  {
+        setType(t);
+        int num = numChildren();
+        if(num > 0)
+            _type.becomeLifetime(child(0)->type());
+        for(int i = 1; i < num; i++)
+            _type.becomeLifetime(_type, child(i)->type());
+    };
+
+    /// Prep system error abstraction
+    //   generalCheck passes (no error) if check is true
+    inline bool generalCheck(      bool          check,
+                             const std::string & message) {
+        if(!check) addError(message);
+        return check;
+    };
+
+    /// Prep system error abstraction
+    //   generalCheck passes (no error) if check is true
+    inline bool generalCheck(      bool          check,
+                             const std::string & message,
+                                   bool        & error  ) {
+        if(!check) {
+            addError(message);
+            error = true;
+        }
+        return check;
+    };
+
+    /// Prep system error abstraction (with prep check of children)
+    //   generalCheck passes (no error) if check is true
+    inline bool generalCheck(      bool           check,
+                             const std::string  & message,
+                                   bool         & error,
+                                   SeExprVarEnv & env    ) {
+        if(!check) {
+            addError(message);
+            error = true;
+            SeExprNode::prep(SeExprType::AnyType_varying(), env);
+        }
+        return check;
+    };
+
+    /// Register type mismatch
+    inline std::string expectedTypeMismatchString(const SeExprType & expected,
+                                                  const SeExprType & received) {
+        return ("Type mismatch. Expected: " + expected.toString() +
+                " Received: "               + received.toString()); };
+
+
+    /// Register type mismatch
+    inline std::string generalTypeMismatchString(const SeExprType & first,
+                                                 const SeExprType & second) {
+        return ("Type mismatch. First: " + first .toString() +
+                " Second: "              + second.toString()); };
+
+    /// types match (true if they do)
+    inline bool isa_with_error(const SeExprType & expected,
+                               const SeExprType & received,
+                               bool & error) {
+        return generalCheck(received.isa(expected),
+                            expectedTypeMismatchString(expected, received),
+                            error); };
+
+    /// types match (true if they do)
+    inline bool isUnder_with_error(const SeExprType & expected,
+                                   const SeExprType & received,
+                                         bool       & error   ) {
+        return generalCheck(received.isUnder(expected),
+                            expectedTypeMismatchString(expected, received),
+                            error); };
+
+    /// types match (true if they do)
+    inline bool typesMatch(const SeExprType & first,
+                           const SeExprType & second,
+                                 bool       & error  ) {
+        return generalCheck(first.isa(second),
+                            generalTypeMismatchString(first, second),
+                            error); };
+
+protected: /*protected data members*/
     /// Owning expression (node can't modify)
     const SeExpression* _expr;
 
@@ -109,8 +242,88 @@ protected:
     /// True if node has a vector result
     bool _isVec;
 
+    // Type of node
+    SeExprType _type;
+
     /// Position line and collumn
     unsigned short int _startPos,_endPos;
+};
+
+
+/// Node that contains entire program
+class SeExprModuleNode : public SeExprNode
+{
+public:
+    SeExprModuleNode(const SeExpression* expr) :
+	SeExprNode(expr) {}
+
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual void eval(SeVec3d& result) const;
+};
+
+
+/// Node that contains prototype of function
+class SeExprPrototypeNode : public SeExprNode
+{
+public:
+    SeExprPrototypeNode(const SeExpression * expr,
+                        const std::string  & name,
+                        const SeExprType   & retType)
+        : SeExprNode(expr),
+        _name(name),
+        _retTypeSet(true),
+        _retType(retType),
+        _argTypes(),
+        _env()
+    {};
+
+    SeExprPrototypeNode(const SeExpression * expr,
+                        const std::string  & name)
+        : SeExprNode(expr),
+        _name(name),
+        _retTypeSet(false),
+        _argTypes(),
+        _env()
+    {}
+
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+
+    void addArgTypes(SeExprNode * surrogate);
+    void addArgs    (SeExprNode * surrogate);
+
+    inline void setReturnType(const SeExprType & type) { _retType = type; _retTypeSet = true; };
+
+    inline bool isReturnTypeSet() const { return _retTypeSet; };
+
+    inline SeExprType returnType() const { return (_retTypeSet ? _retType : SeExprType::ErrorType_varying()); };
+
+    inline       SeExprType     argType(int i) const { return _argTypes[i]; };
+    inline const SeExprNode   * arg    (int i) const { return child(i);     };
+    inline       SeExprVarEnv & env    ()            { return _env;         };
+
+    virtual void eval(SeVec3d& result) const;
+
+ private:
+    std::string             _name;
+    bool                    _retTypeSet;
+    SeExprType              _retType;
+    std::vector<SeExprType> _argTypes;
+    SeExprVarEnv            _env;
+};
+
+
+/// Node that contains local function
+class SeExprLocalFunctionNode : public SeExprNode
+{
+public:
+    SeExprLocalFunctionNode(const SeExpression        * expr,
+                                  SeExprPrototypeNode * prototype,
+                                  SeExprNode          * block)
+        : SeExprNode(expr, prototype, block)
+    {}
+
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual void eval(SeVec3d& result) const;
 };
 
 
@@ -121,7 +334,7 @@ public:
     SeExprBlockNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
-    virtual bool prep(bool wantVec, std::string& error);
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -134,7 +347,7 @@ public:
 			 SeExprNode* a, SeExprNode* b, SeExprNode* c) :
 	SeExprNode(expr, a, b, c) {}
 
-    virtual bool prep(bool wantVec, std::string& error);
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -146,12 +359,16 @@ public:
     SeExprAssignNode(const SeExpression* expr, const char* name, SeExprNode* e) :
 	SeExprNode(expr, e), _name(name), _var(0) {}
 
-    virtual bool prep(bool wantVec, std::string& error);
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
+
+    const std::string& name        () const { return _name;         };
+    const SeExprType & assignedType() const { return _assignedType; };
 
 private:
     std::string _name;
     SeExprLocalVarRef* _var;
+    SeExprType _assignedType;
 };
 
 
@@ -159,41 +376,59 @@ private:
 class SeExprVecNode : public SeExprNode
 {
 public:
-    SeExprVecNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b, SeExprNode* c) :
-	SeExprNode(expr, a, b, c) {}
+    SeExprVecNode(const SeExpression* expr, SeExprNode* surrogate)
+        : SeExprNode(expr)
+    {
+        addChildren_without_delete(surrogate);
+    };
 
-    virtual bool prep(bool wantVec, std::string& error);
+    SeExprVecNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b, SeExprNode* c)
+        : SeExprNode(expr, a, b, c)
+    {};
+
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
+
+    SeVec3d value() const;
 };
 
+/// NOde that computes with a single operand
+class SeExprUnaryOpNode : public SeExprNode
+{
+public:
+    SeExprUnaryOpNode(const SeExpression* expr, SeExprNode* a)
+        : SeExprNode(expr, a)
+    {}
+
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+};
 
 /// Node that computes a negation (scalar or vector)
-class SeExprNegNode : public SeExprNode
+class SeExprNegNode : public SeExprUnaryOpNode
 {
 public:
     SeExprNegNode(const SeExpression* expr, SeExprNode* a) :
-	SeExprNode(expr, a) {}
+	SeExprUnaryOpNode(expr, a) {}
 
     virtual void eval(SeVec3d& result) const;
 };
 
 /// Node that computes an inversion (1-x) (scalar or vector)
-class SeExprInvertNode : public SeExprNode
+class SeExprInvertNode : public SeExprUnaryOpNode
 {
 public:
     SeExprInvertNode(const SeExpression* expr, SeExprNode* a) :
-	SeExprNode(expr, a) {}
+	SeExprUnaryOpNode(expr, a) {}
 
     virtual void eval(SeVec3d& result) const;
 };
 
-
 /// Note that computes a logical not
-class SeExprNotNode : public SeExprNode
+class SeExprNotNode : public SeExprUnaryOpNode
 {
 public:
     SeExprNotNode(const SeExpression* expr, SeExprNode* a) :
-	SeExprNode(expr, a) {}
+	SeExprUnaryOpNode(expr, a) {}
 
     virtual void eval(SeVec3d& result) const;
 };
@@ -206,31 +441,40 @@ public:
     SeExprCondNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b, SeExprNode* c) :
 	SeExprNode(expr, a, b, c) {}
 
-    virtual bool prep(bool wantVec, std::string& error);
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
 
+/// Node that computes a logical operation (two operands)
+class SeExprLogicalOpNode : public SeExprNode
+{
+public:
+    SeExprLogicalOpNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
+	SeExprNode(expr, a, b) {}
+
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+};
+
+
 /// Node that evaluates a logical AND
-class SeExprAndNode : public SeExprNode
+class SeExprAndNode : public SeExprLogicalOpNode
 {
 public:
     SeExprAndNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprLogicalOpNode(expr, a, b) {}
 
-    virtual bool prep(bool wantVec, std::string& error);
     virtual void eval(SeVec3d& result) const;
 };
 
 
 /// Node that evaluates a logical OR
-class SeExprOrNode : public SeExprNode
+class SeExprOrNode : public SeExprLogicalOpNode
 {
 public:
     SeExprOrNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprLogicalOpNode(expr, a, b) {}
 
-    virtual bool prep(bool wantVec, std::string& error);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -242,7 +486,7 @@ public:
     SeExprSubscriptNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
-    virtual bool prep(bool wantVec, std::string& error);
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -254,18 +498,7 @@ public:
     SeExprCompareEqNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
-    virtual bool prep(bool wantVec, std::string& error);
-};
-
-
-/// Node that implements a numeric comparison
-class SeExprCompareNode : public SeExprNode
-{
-public:
-    SeExprCompareNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
-
-    virtual bool prep(bool wantVec, std::string& error);
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
 };
 
 
@@ -288,6 +521,17 @@ public:
 	SeExprCompareEqNode(expr, a, b) {}
 
     virtual void eval(SeVec3d& result) const;
+};
+
+
+/// Node that implements a numeric comparison
+class SeExprCompareNode : public SeExprNode
+{
+public:
+    SeExprCompareNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
+	SeExprNode(expr, a, b) {}
+
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
 };
 
 
@@ -335,67 +579,78 @@ public:
 };
 
 
+/// Node that implements an binary operator
+class SeExprBinaryOpNode : public SeExprNode
+{
+public:
+    SeExprBinaryOpNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
+	SeExprNode(expr, a, b) {}
+
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+};
+
+
 /// Node that implements an arithmetic operator
-class SeExprAddNode : public SeExprNode
+class SeExprAddNode : public SeExprBinaryOpNode
 {
 public:
     SeExprAddNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprBinaryOpNode(expr, a, b) {}
 
     virtual void eval(SeVec3d& result) const;
 };
 
 
 /// Node that implements an arithmetic operator
-class SeExprSubNode : public SeExprNode
+class SeExprSubNode : public SeExprBinaryOpNode
 {
 public:
     SeExprSubNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprBinaryOpNode(expr, a, b) {}
 
     virtual void eval(SeVec3d& result) const;
 };
 
 
 /// Node that implements an arithmetic operator
-class SeExprMulNode : public SeExprNode
+class SeExprMulNode : public SeExprBinaryOpNode
 {
 public:
     SeExprMulNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprBinaryOpNode(expr, a, b) {}
 
     virtual void eval(SeVec3d& result) const;
 };
 
 
 /// Node that implements an arithmetic operator
-class SeExprDivNode : public SeExprNode
+class SeExprDivNode : public SeExprBinaryOpNode
 {
 public:
     SeExprDivNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprBinaryOpNode(expr, a, b) {}
 
     virtual void eval(SeVec3d& result) const;
 };
 
 
 /// Node that implements an arithmetic operator
-class SeExprModNode : public SeExprNode
+class SeExprModNode : public SeExprBinaryOpNode
 {
 public:
     SeExprModNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprBinaryOpNode(expr, a, b) {}
 
     virtual void eval(SeVec3d& result) const;
 };
 
 
 /// Node that implements an arithmetic operator
-class SeExprExpNode : public SeExprNode
+class SeExprExpNode : public SeExprBinaryOpNode
 {
 public:
     SeExprExpNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprBinaryOpNode(expr, a, b) {}
 
     virtual void eval(SeVec3d& result) const;
 };
@@ -408,7 +663,11 @@ public:
 	SeExprNode(expr), _name(name), _var(0), _data(0) 
     { expr->addVar(name); }
 
-    virtual bool prep(bool wantVec, std::string& error);
+    SeExprVarNode(const SeExpression* expr, const char* name, const SeExprType & type) :
+       SeExprNode(expr, type), _name(name), _var(0), _data(0)
+    { expr->addVar(name); }
+
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
     const char* name() const { return _name.c_str(); }
     
@@ -431,7 +690,10 @@ public:
     SeExprNumNode(const SeExpression* expr, double val) :
 	SeExprNode(expr), _val(val) {}
 
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const { result[0] = _val; }
+
+    double value() const { return _val; };
 
 private:
     double _val;
@@ -445,10 +707,9 @@ public:
     SeExprStrNode(const SeExpression* expr, const char* str) :
 	SeExprNode(expr), _str(str) {}
 
-    virtual bool prep(bool wantVec, std::string& error)
-    { addError("Invalid string parameter: "+_str); return 0; }
-
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const { result[0] = 0; }
+
     const char* str() const { return _str.c_str(); }
 
 private:
@@ -467,11 +728,13 @@ public:
     }
     virtual ~SeExprFuncNode() { delete _data; }
 
-    virtual bool prep(bool wantVec, std::string& error);
+    //! return true if no errors
+    bool prepArgs(std::string const & name, SeExprType wanted, SeExprVarEnv & env);
+
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
     void setIsVec(bool isVec) { _isVec = isVec; }
     const char* name() const { return _name.c_str(); }
-
 
     //! return the number of arguments
     int nargs() const { return _nargs; }
