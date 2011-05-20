@@ -86,7 +86,7 @@ int main(int argc,char *argv[])
     GrapherExpr expr(exprStr);
 
     if(!expr.isValid()){
-        std::cerr<<"expression faield "<<expr.parseError()<<std::endl;
+        std::cerr<<"expression failed "<<expr.parseError()<<std::endl;
         exit(1);
     }
     double xmin=-10,xmax=10,ymin=-10,ymax=10;

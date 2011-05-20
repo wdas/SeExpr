@@ -73,9 +73,6 @@ public:
     const SeExprNode* child(int i) const { return _children[i]; }
     SeExprNode* child(int i) { return _children[i]; }
 
-    /// Get canonical error value
-    inline void setErrorResult(SeVec3d& v) const { v[0] = v[1] = v[2] = 0.001; }
-    
     /// Add a child to the child list (for parser use only)
     void addChild(SeExprNode* child);
 
@@ -83,10 +80,9 @@ public:
     void addChildren(SeExprNode* surrogate);
 
     /** Prepare the node (for parser use only).  See the discussion at
-	the start of SeExprNode.cpp for more info. NOTE: error is deprecated,
-        instead use addError() function for better error localization
+	the start of SeExprNode.cpp for more info.
     */
-    virtual bool prep(bool wantVec, std::string& error);
+    virtual bool prep(bool wantVec);
 
     /// Remember the line and column position in the input string 
     inline void setPosition(const short int startPos,const short int endPos)
@@ -121,7 +117,7 @@ public:
     SeExprBlockNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
-    virtual bool prep(bool wantVec, std::string& error);
+    virtual bool prep(bool wantVec);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -134,7 +130,7 @@ public:
 			 SeExprNode* a, SeExprNode* b, SeExprNode* c) :
 	SeExprNode(expr, a, b, c) {}
 
-    virtual bool prep(bool wantVec, std::string& error);
+    virtual bool prep(bool wantVec);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -146,7 +142,7 @@ public:
     SeExprAssignNode(const SeExpression* expr, const char* name, SeExprNode* e) :
 	SeExprNode(expr, e), _name(name), _var(0) {}
 
-    virtual bool prep(bool wantVec, std::string& error);
+    virtual bool prep(bool wantVec);
     virtual void eval(SeVec3d& result) const;
 
 private:
@@ -162,7 +158,7 @@ public:
     SeExprVecNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b, SeExprNode* c) :
 	SeExprNode(expr, a, b, c) {}
 
-    virtual bool prep(bool wantVec, std::string& error);
+    virtual bool prep(bool wantVec);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -206,7 +202,7 @@ public:
     SeExprCondNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b, SeExprNode* c) :
 	SeExprNode(expr, a, b, c) {}
 
-    virtual bool prep(bool wantVec, std::string& error);
+    virtual bool prep(bool wantVec);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -218,7 +214,7 @@ public:
     SeExprAndNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
-    virtual bool prep(bool wantVec, std::string& error);
+    virtual bool prep(bool wantVec);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -230,7 +226,7 @@ public:
     SeExprOrNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
-    virtual bool prep(bool wantVec, std::string& error);
+    virtual bool prep(bool wantVec);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -242,7 +238,7 @@ public:
     SeExprSubscriptNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
-    virtual bool prep(bool wantVec, std::string& error);
+    virtual bool prep(bool wantVec);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -254,7 +250,7 @@ public:
     SeExprCompareEqNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
-    virtual bool prep(bool wantVec, std::string& error);
+    virtual bool prep(bool wantVec);
 };
 
 
@@ -265,7 +261,7 @@ public:
     SeExprCompareNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
-    virtual bool prep(bool wantVec, std::string& error);
+    virtual bool prep(bool wantVec);
 };
 
 
@@ -408,7 +404,7 @@ public:
 	SeExprNode(expr), _name(name), _var(0), _data(0) 
     { expr->addVar(name); }
 
-    virtual bool prep(bool wantVec, std::string& error);
+    virtual bool prep(bool wantVec);
     virtual void eval(SeVec3d& result) const;
     const char* name() const { return _name.c_str(); }
     
@@ -445,7 +441,7 @@ public:
     SeExprStrNode(const SeExpression* expr, const char* str) :
 	SeExprNode(expr), _str(str) {}
 
-    virtual bool prep(bool wantVec, std::string& error)
+    virtual bool prep(bool wantVec)
     { addError("Invalid string parameter: "+_str); return 0; }
 
     virtual void eval(SeVec3d& result) const { result[0] = 0; }
@@ -467,7 +463,7 @@ public:
     }
     virtual ~SeExprFuncNode() { delete _data; }
 
-    virtual bool prep(bool wantVec, std::string& error);
+    virtual bool prep(bool wantVec);
     virtual void eval(SeVec3d& result) const;
     void setIsVec(bool isVec) { _isVec = isVec; }
     const char* name() const { return _name.c_str(); }

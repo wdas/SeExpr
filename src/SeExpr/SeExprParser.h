@@ -42,6 +42,6 @@
 class SeExprNode;
 class SeExpression;
 bool SeExprParse(SeExprNode*& parseTree, std::string& error, int& errorStart, int& errorEnd,
-		 const SeExpression* expr, const char* str, bool wantVec=0);
+		 const SeExpression* expr, const char* str, bool wantVec=true);
 
 #endif

@@ -115,7 +115,7 @@ class SeExpression
     };
 
     SeExpression( );
-    SeExpression( const std::string &e, bool wantVec=1 );
+    SeExpression( const std::string &e, bool wantVec=true );
     virtual ~SeExpression();
 
     /** Sets the expression to desire a vector or a scalar.

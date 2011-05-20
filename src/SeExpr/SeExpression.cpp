@@ -48,7 +48,7 @@
 using namespace std;
 
 SeExpression::SeExpression()
-    : _wantVec(0), _parseTree(0), _parsed(0), _prepped(0)
+    : _wantVec(true), _parseTree(0), _parsed(0), _prepped(0)
 {
     SeExprFunc::init();
 }
@@ -141,12 +141,7 @@ SeExpression::prep() const
     if (_prepped) return;
     _prepped = true;
     parseIfNeeded();
-    std::string temporary_error="";
-    if (_parseTree && !_parseTree->prep(wantVec(),temporary_error)){
-        if(temporary_error!=""){
-            _parseTree->addError(temporary_error);
-        }
-
+    if (_parseTree && !_parseTree->prep(wantVec())) {
         // build line lookup table
         std::vector<int> lines;
         const char* start=_expression.c_str();

@@ -138,7 +138,7 @@ SeExprNode::addChildren(SeExprNode* surrogate)
 
 
 bool
-SeExprNode::prep(bool wantVec, std::string& error)
+SeExprNode::prep(bool wantVec)
 {
     /* The default behavior is to pass down the wantVec flag to
        all children and set isVec to true if any child is a vec. */
@@ -147,7 +147,7 @@ SeExprNode::prep(bool wantVec, std::string& error)
     _isVec = 0;
     for (iter = _children.begin(); iter != _children.end(); iter++) {
 	SeExprNode* child = *iter;
-	if (!child->prep(wantVec, error)) valid=false;
+	if (!child->prep(wantVec)) valid=false;
 	if (child->isVec()) _isVec = 1;
     }
     return valid;
@@ -168,15 +168,15 @@ SeExprNode::eval(SeVec3d& result) const
 
 
 bool
-SeExprBlockNode::prep(bool wantVec, std::string& error)
+SeExprBlockNode::prep(bool wantVec)
 {
     // prepare variable assignments (request vector type)
     bool valid=true;
 
-    if (!child(0)->prep(1, error)) valid=false;
+    if (!child(0)->prep(1)) valid=false;
 
     // prepare expression
-    if (!child(1)->prep(wantVec, error)) valid=false;
+    if (!child(1)->prep(wantVec)) valid=false;
 
     _isVec = child(1)->isVec();
     return valid;
@@ -194,15 +194,15 @@ SeExprBlockNode::eval(SeVec3d& result) const
 
 
 bool
-SeExprIfThenElseNode::prep(bool wantVec, std::string& error)
+SeExprIfThenElseNode::prep(bool wantVec)
 {
     bool valid=true;
     // prepare condition expression (request vector type)
-    if (!child(0)->prep(0, error)) valid=false;
+    if (!child(0)->prep(0)) valid=false;
 
     // prepare then/else blocks
-    if (!child(1)->prep(1, error)) valid=false;
-    if (!child(2)->prep(1, error)) valid=false;
+    if (!child(1)->prep(1)) valid=false;
+    if (!child(2)->prep(1)) valid=false;
     _isVec = 0;
     return valid;
 }
@@ -223,10 +223,10 @@ SeExprIfThenElseNode::eval(SeVec3d& result) const
 
 
 bool
-SeExprAssignNode::prep(bool wantVec, std::string& error)
+SeExprAssignNode::prep(bool wantVec)
 {
     // prepare expression
-    if (!child(0)->prep(1, error)) return 0;
+    if (!child(0)->prep(1)) return 0;
     _isVec = child(0)->isVec();
 
     // add to var table
@@ -244,17 +244,17 @@ SeExprAssignNode::eval(SeVec3d& result) const
 	const SeExprNode* node = child(0);
 	node->eval(_var->val);
 	if (_var->isVec() && !node->isVec())
-	    result[1] = result[2] = result[0];
+	    _var->val[1] = _var->val[2] = _var->val[0];
     }
     else result = 0.0;
 }
 
 
 bool
-SeExprVecNode::prep(bool wantVec, std::string& error)
+SeExprVecNode::prep(bool wantVec)
 {
     // want scalar children, result is vector
-    if (!SeExprNode::prep(0, error)) return 0;
+    if (!SeExprNode::prep(0)) return 0;
     _isVec = wantVec;
     return 1;
 }
@@ -275,13 +275,13 @@ SeExprVecNode::eval(SeVec3d& result) const
 
 
 bool
-SeExprCondNode::prep(bool wantVec, std::string& error)
+SeExprCondNode::prep(bool wantVec)
 {
     bool valid=true;
     // want scalar condition, result can be scalar or vector
-    if (!child(0)->prep(0, error)) valid=false;
-    if (!child(1)->prep(wantVec, error)) valid=false;
-    if (!child(2)->prep(wantVec, error)) valid=false;
+    if (!child(0)->prep(0)) valid=false;
+    if (!child(1)->prep(wantVec)) valid=false;
+    if (!child(2)->prep(wantVec)) valid=false;
     _isVec = wantVec && (child(1)->isVec() || child(2)->isVec());
     return valid;
 }
@@ -300,10 +300,10 @@ SeExprCondNode::eval(SeVec3d& result) const
 
 
 bool
-SeExprAndNode::prep(bool wantVec, std::string& error)
+SeExprAndNode::prep(bool wantVec)
 {
     // want scalar children, result is scalar
-    if (!SeExprNode::prep(0, error)) return 0;
+    if (!SeExprNode::prep(0)) return 0;
     _isVec = 0;
     return 1;
 }
@@ -325,10 +325,10 @@ SeExprAndNode::eval(SeVec3d& result) const
 
 
 bool
-SeExprOrNode::prep(bool wantVec, std::string& error)
+SeExprOrNode::prep(bool wantVec)
 {
     // want scalar children, result is scalar
-    if (!SeExprNode::prep(0, error)) return 0;
+    if (!SeExprNode::prep(0)) return 0;
     _isVec = 0;
     return 1;
 }
@@ -350,13 +350,13 @@ SeExprOrNode::eval(SeVec3d& result) const
 
 
 bool
-SeExprSubscriptNode::prep(bool wantVec, std::string& error)
+SeExprSubscriptNode::prep(bool wantVec)
 {
     bool valid=true;
     // want vector first child and scalar second child
     // result is scalar
-    if (!child(0)->prep(1, error)) valid=false;
-    if (!child(1)->prep(0, error)) valid=false;
+    if (!child(0)->prep(1)) valid=false;
+    if (!child(1)->prep(0)) valid=false;
     _isVec = 0;
     return valid;
 }
@@ -433,21 +433,21 @@ SeExprNotNode::eval(SeVec3d& result) const
 
 
 bool
-SeExprCompareEqNode::prep(bool wantVec, std::string& error)
+SeExprCompareEqNode::prep(bool wantVec)
 {
     wantVec = true; // children can be vector for ==, !=
-    if (!SeExprNode::prep(wantVec, error)) return 0;
+    if (!SeExprNode::prep(wantVec)) return 0;
     _isVec = 0; // result is always scalar
     return 1;
 }
 
 
 bool
-SeExprCompareNode::prep(bool wantVec, std::string& error)
+SeExprCompareNode::prep(bool wantVec)
 {
 
     wantVec = false; // for <, >, <=, >=, only scalar values are used
-    if (!SeExprNode::prep(wantVec, error)) return 0;
+    if (!SeExprNode::prep(wantVec)) return 0;
     _isVec = 0; // result is always scalar
     return 1;
 }
@@ -673,7 +673,7 @@ SeExprExpNode::eval(SeVec3d& result) const
 
 
 bool
-SeExprVarNode::prep(bool wantVec, std::string& error)
+SeExprVarNode::prep(bool wantVec)
 {
     // ask expression to resolve var
     _var = _expr->resolveLocalVar(name());
@@ -696,7 +696,7 @@ SeExprVarNode::eval(SeVec3d& result) const
 
 
 bool
-SeExprFuncNode::prep(bool wantVec, std::string& error)
+SeExprFuncNode::prep(bool wantVec)
 {
     // ask expression to resolve func
     _func = _expr->resolveFunc(_name);
@@ -725,17 +725,12 @@ SeExprFuncNode::prep(bool wantVec, std::string& error)
     if (_func->type() == SeExprFunc::FUNCX) {
 	_isVec = 1; // assume vec result - funcx can override
         if(!_func->funcx()->isThreadSafe()) _expr->setThreadUnsafe(_name);
-	return _func->funcx()->prep(this, wantVec, error);
+	return _func->funcx()->prep(this, wantVec);
     }
 
     // if a vector result is wanted or the function expects vector args,
     // then prepare the arguments for vector evaluation
-    if (!SeExprNode::prep(wantVec || _func->hasVecArgs(), error)){
-        // TODO: remove this once string argument is gone
-        if(error!="") addError(error);
-        error=""; // remove error so it isn't double reported
-        return 0;
-    }
+    if (!SeExprNode::prep(wantVec || _func->hasVecArgs())){ return 0; }
     
     // a vector result will be produced if a vector result is wanted
     // and the either the function can produce a vector or the function

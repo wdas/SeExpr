@@ -58,10 +58,8 @@ public:
         :_threadSafe(threadSafe)
     {}
 
-    /** prep the expression by doing all type checking argument checking, etc.
-        NOTE: error is deprecated,
-        instead use addError() function for better error localization */
-    virtual bool prep(SeExprFuncNode* node, bool wantVec, std::string& error);
+    /** prep the expression by doing all type checking argument checking, etc. */
+    virtual bool prep(SeExprFuncNode* node, bool wantVec);
 
     /** evaluate the expression. the given node is where in the parse tree
         the evaluation is for */

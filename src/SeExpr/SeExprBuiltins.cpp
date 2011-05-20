@@ -1007,11 +1007,11 @@ static const char* vnoise_docstring=
 	typedef SeVec3d VoronoiFunc(VoronoiPointData& data, int n, const SeVec3d* args);
 	CachedVoronoiFunc(VoronoiFunc* vfunc) : SeExprFuncX(true),_vfunc(vfunc) {}
 
-	virtual bool prep(SeExprFuncNode* node, bool wantVec, std::string& error)
+	virtual bool prep(SeExprFuncNode* node, bool wantVec)
 	{
 	    node->setData(new VoronoiPointData);
 	    // force wantVec to true - args are always vecs even of result is not
-	    return SeExprFuncX::prep(node, true, error);
+	    return SeExprFuncX::prep(node, true);
 	}
 
 	virtual void eval(const SeExprFuncNode* node, SeVec3d& result) const
@@ -1293,7 +1293,7 @@ static const char* vnoise_docstring=
 
     class CurveFuncX:public SeExprFuncX
     {
-        virtual bool prep(SeExprFuncNode* node, bool wantVec, std::string& error)
+        virtual bool prep(SeExprFuncNode* node, bool wantVec)
         {
             // check number of arguments
             int nargs = node->nargs();
@@ -1303,21 +1303,21 @@ static const char* vnoise_docstring=
             }
             
             bool noErrors=true;
-            noErrors &= node->child(0)->prep(1, error);
+            noErrors &= node->child(0)->prep(1);
             
             CurveData<double>* data = new CurveData<double>;
             for (int i = 1; i < nargs-2; i+=3) {
                 
                 SeVec3d pos;
-                if(node->child(i)->prep(0, error)) node->child(i)->eval(pos);
+                if(node->child(i)->prep(0)) node->child(i)->eval(pos);
                 else noErrors=false;
                 
                 SeVec3d val;
-                if(node->child(i+1)->prep(0, error)) node->child(i+1)->eval(val);
+                if(node->child(i+1)->prep(0)) node->child(i+1)->eval(val);
                 else noErrors=false;
                 
                 SeVec3d interp;
-                if(node->child(i+2)->prep(0, error)) node->child(i+2)->eval(interp);
+                if(node->child(i+2)->prep(0)) node->child(i+2)->eval(interp);
                 else noErrors=false;
                 int interpInt=(int)interp[0];                
                 SeCurve<double>::InterpType interpolant=(SeCurve<double>::InterpType)interpInt;
@@ -1366,7 +1366,7 @@ static const char* vnoise_docstring=
     
     class CCurveFuncX:public SeExprFuncX
     {
-        virtual bool prep(SeExprFuncNode* node, bool wantVec, std::string& error)
+        virtual bool prep(SeExprFuncNode* node, bool wantVec)
         {
             // check number of arguments
             int nargs = node->nargs();
@@ -1375,17 +1375,17 @@ static const char* vnoise_docstring=
                 return false;
             }
             bool noErrors=true;
-            noErrors &= node->child(0)->prep(1, error); // parameter value
+            noErrors &= node->child(0)->prep(1); // parameter value
             
             CurveData<SeVec3d>* data = new CurveData<SeVec3d>;
             for (int i = 1; i < nargs-2; i+=3) {
                 // position of cv
                 SeVec3d pos;
-                if (node->child(i)->prep(0, error)) node->child(i)->eval(pos);
+                if (node->child(i)->prep(0)) node->child(i)->eval(pos);
                 else noErrors=false;
                 // value of cv, if not vector promote i
                 SeVec3d val;
-                if (node->child(i+1)->prep(1, error)){
+                if (node->child(i+1)->prep(1)){
                     node->child(i+1)->eval(val);
                     if (!node->child(i+1)->isVec()) {
                         val[1] = val[2] = val[0];
@@ -1393,7 +1393,7 @@ static const char* vnoise_docstring=
                 }else noErrors=false;
                 // interpolation type
                 SeVec3d interp;
-                if (node->child(i+2)->prep(0, error)) node->child(i+2)->eval(interp);
+                if (node->child(i+2)->prep(0)) node->child(i+2)->eval(interp);
                 else noErrors=false;
                 SeCurve<SeVec3d>::InterpType interpolant=(SeCurve<SeVec3d>::InterpType)(int)interp[0];
                 if(!SeCurve<SeVec3d>::interpTypeValid(interpolant)){
@@ -1443,7 +1443,7 @@ static const char* vnoise_docstring=
             std::string format;
         };
             
-        virtual bool prep(SeExprFuncNode* node, bool wantVec, std::string& error)
+        virtual bool prep(SeExprFuncNode* node, bool wantVec)
         {
             // check number of arguments
             int nargs = node->nargs();
@@ -1454,7 +1454,7 @@ static const char* vnoise_docstring=
 
             bool valid=true;
             for(int i=1;i<nargs;i++)
-                valid&=node->child(i)->prep(1,error);
+                valid&=node->child(i)->prep(1);
             if(!valid) return false;
 
             // parse format string

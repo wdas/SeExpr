@@ -80,7 +80,7 @@ public:
     
 private:
     //! Simple variable that just returns its internal value
-    struct SimpleVar:public SeExprScalarVarRef
+    struct SimpleVar:public SeExprVectorVarRef
     {
 	SimpleVar()
 	    :val(SeVec3d(0.0))
