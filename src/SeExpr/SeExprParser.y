@@ -37,6 +37,7 @@
 #ifndef MAKEDEPEND
 #include <algorithm>
 #include <vector>
+#include <string>
 #include <stdio.h>
 #endif
 #include "SeExprNode.h"
@@ -81,7 +82,6 @@ inline SeExprNode* Remember(SeExprNode* n,const int startPos,const int endPos)
     { ParseNodes.push_back(n); n->setPosition(startPos,endPos); return n; }
 inline void Forget(SeExprNode* n) 
     { ParseNodes.erase(std::find(ParseNodes.begin(), ParseNodes.end(), n)); }
-
 /* These are handy node constructors for 0-3 arguments */
 #define NODE(startPos,endPos,name) Remember(new SeExpr##name(Expr),startPos,endPos)
 #define NODE1(startPos,endPos,name,a) Remember(new SeExpr##name(Expr,a),startPos,endPos)
@@ -145,10 +145,9 @@ optassigns:
     ;
 
 assigns:
-      assign			{ $$ = NODE1(@$.first_column,@$.last_column,Node, $1); /* create var list */}
-    | assigns assign		{ $$ = $1; $1->addChild($2); /* add to list */}
+      assign  		        { $$ = NODE1(@$.first_column,@$.last_column,Node, $1); /* create var list */}
+    | assigns assign    	{ $$ = $1; $1->addChild($2); /* add to list */}
     ;
- 
 
 assign:
       ifthenelse		{ $$ = $1; }
@@ -190,7 +189,7 @@ assign:
     | NAME ModEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
                                 SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,ModNode,varNode,$3);
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | 
+    |
     ;
 
 ifthenelse:
@@ -305,19 +304,21 @@ static void yyerror(const char* /*msg*/)
    along.
  */
 
-extern void resetCounters();
+extern void SeExprLexerResetState(std::vector<std::pair<int,int> >& comments);
 
 static SeExprInternal::Mutex mutex;
 
-bool SeExprParse(SeExprNode*& parseTree, std::string& error, int& errorStart, int& errorEnd,
-		 const SeExpression* expr, const char* str, bool wantVec)
+bool SeExprParse(SeExprNode*& parseTree,
+    std::string& error, int& errorStart, int& errorEnd,
+    std::vector<std::pair<int,int> >& comments,
+    const SeExpression* expr, const char* str, bool wantVec)
 {
     SeExprInternal::AutoMutex locker(mutex);
 
     // glue around crippled C interface - ugh!
     Expr = expr;
     ParseStr = str;
-    resetCounters(); // reset lineNumber and columnNumber in scanner
+    SeExprLexerResetState(comments);
     yy_buffer_state* buffer = yy_scan_string(str);
     ParseResult = 0;
     int resultCode = yyparse();
@@ -347,3 +348,4 @@ bool SeExprParse(SeExprNode*& parseTree, std::string& error, int& errorStart, in
 
     return parseTree != 0;
 }
+

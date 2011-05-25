@@ -36,6 +36,8 @@
 #ifndef SeExprNode_h
 #define SeExprNode_h
 
+#include <cstdlib>
+
 #ifndef MAKEDEPEND
 #include <string.h>
 #include <string>
@@ -66,6 +68,9 @@ public:
     /// Access expression
     const SeExpression* expr() const { return _expr; }
 
+    /// Access to original string representation of current expression
+    std::string toString() const { return expr()->getExpr().substr(startPos(), length()); };
+
     /// Access parent node - root node has no parent
     const SeExprNode* parent() const { return _parent; }
     /// Access children
@@ -87,6 +92,13 @@ public:
     /// Remember the line and column position in the input string 
     inline void setPosition(const short int startPos,const short int endPos)
     {_startPos=startPos;_endPos=endPos;}
+
+    /// Access start position in input string
+    inline const short int startPos() const { return _startPos; }
+    /// Access end position in input string
+    inline const short int endPos() const { return _endPos; }
+    /// Access length of input string
+    inline const short int length() const { return endPos() - startPos(); };
 
     /// Register error
     inline void addError(const std::string& error)
@@ -145,6 +157,8 @@ public:
     virtual bool prep(bool wantVec);
     virtual void eval(SeVec3d& result) const;
 
+    const std::string& name() const { return _name; };
+
 private:
     std::string _name;
     SeExprLocalVarRef* _var;
@@ -155,13 +169,15 @@ private:
 class SeExprVecNode : public SeExprNode
 {
 public:
-    SeExprVecNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b, SeExprNode* c) :
-	SeExprNode(expr, a, b, c) {}
+    SeExprVecNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b, SeExprNode* c)
+        : SeExprNode(expr, a, b, c)
+    {};
 
     virtual bool prep(bool wantVec);
     virtual void eval(SeVec3d& result) const;
-};
 
+    SeVec3d value() const;
+};
 
 /// Node that computes a negation (scalar or vector)
 class SeExprNegNode : public SeExprNode
@@ -429,6 +445,8 @@ public:
 
     virtual void eval(SeVec3d& result) const { result[0] = _val; }
 
+    double value() const { return _val; };
+
 private:
     double _val;
 };
@@ -442,7 +460,8 @@ public:
 	SeExprNode(expr), _str(str) {}
 
     virtual bool prep(bool wantVec)
-    { addError("Invalid string parameter: "+_str); return 0; }
+    { return 1; }
+    //{ addError("Invalid string parameter: "+_str); return 0; }
 
     virtual void eval(SeVec3d& result) const { result[0] = 0; }
     const char* str() const { return _str.c_str(); }

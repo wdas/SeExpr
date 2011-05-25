@@ -78,6 +78,7 @@ void SeExpression::reset()
     _localVars.clear();
     _errors.clear();
     _threadUnsafeFunctionCalls.clear();
+    _comments.clear();
 }
 
 void SeExpression::setWantVec(bool wantVec)
@@ -128,8 +129,9 @@ SeExpression::parse() const
     if (_parsed) return;
     _parsed = true;
     int tempStartPos,tempEndPos;
-    SeExprParse(_parseTree, _parseError, tempStartPos, tempEndPos, 
-        this, _expression.c_str(), _wantVec);
+    SeExprParse(_parseTree,
+        _parseError, tempStartPos, tempEndPos, 
+        _comments, this, _expression.c_str(), _wantVec);
     if(!_parseTree){
         addError(_parseError,tempStartPos,tempEndPos);
     }

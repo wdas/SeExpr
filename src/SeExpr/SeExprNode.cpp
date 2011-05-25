@@ -274,6 +274,23 @@ SeExprVecNode::eval(SeVec3d& result) const
 }
 
 
+SeVec3d
+SeExprVecNode::value() const {
+    if(const SeExprNumNode* f = dynamic_cast<const SeExprNumNode*>(child(0))) {
+        double first = f->value();
+        if(const SeExprNumNode* s = dynamic_cast<const SeExprNumNode*>(child(1))) {
+            double second = s->value();
+            if(const SeExprNumNode* t = dynamic_cast<const SeExprNumNode*>(child(2))) {
+                double third = t->value();
+                return SeVec3d(first, second, third);
+            };
+        };
+    };
+
+    return SeVec3d(0.0);
+};
+
+
 bool
 SeExprCondNode::prep(bool wantVec)
 {

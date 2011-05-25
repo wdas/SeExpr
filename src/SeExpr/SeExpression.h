@@ -150,6 +150,10 @@ class SeExpression
     const std::vector<Error>& getErrors() const
     {return _errors;}
 
+    /** Get a reference to a list of the ranges where comments occurred */
+    const std::vector<std::pair<int,int> >& getComments() const
+    {return _comments;}
+
     /** Check if expression is constant.
 	Expr will be parsed if needed.  No binding is required. */
     bool isConstant() const;
@@ -197,7 +201,12 @@ class SeExpression
 
     /** records an error in prep or parse stage */
     void addError(const std::string& error,const int startPos,const int endPos) const
+
     {_errors.push_back(Error(error,startPos,endPos));}
+
+    /** records a comment */
+    void addComment(int pos,int length)
+    {_comments.push_back(std::pair<int,int>(pos,length+pos-1));}
 
     /** Returns a read only map of local variables that were set **/
     const LocalVarTable& getLocalVars() const {return _localVars;}
@@ -226,9 +235,11 @@ class SeExpression
     /** The expression. */
     std::string _expression;
     
+ protected:
     /** Parse tree (null if syntax is bad). */
     mutable SeExprNode *_parseTree;
 
+ private:
     /** Flag set once expr is parsed/prepped (parsing is automatic and lazy) */
     mutable bool _parsed, _prepped;
     
@@ -237,6 +248,9 @@ class SeExpression
 
     /** Cached parse error location {startline,startcolumn,endline,endcolumn} */
     mutable std::vector<Error> _errors;
+
+    /** Cached comments */
+    mutable std::vector<std::pair<int,int> > _comments;
 
     /** Variables used in this expr */
     mutable std::set<std::string> _vars;

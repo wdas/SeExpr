@@ -31,7 +31,9 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
-foreach(item basic)
+set(TEST basic listVar patterns)
+
+foreach(item ${TEST})
     ADD_EXECUTABLE(${item} "${item}.cpp")
     target_link_libraries(${item} ${SEEXPR_LIBRARIES})
     install(TARGETS ${item} DESTINATION test)
