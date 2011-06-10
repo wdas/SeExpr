@@ -45,6 +45,7 @@
 #endif
 
 #include "SeExpression.h"
+#include "SeExprType.h"
 #include "SeVec3d.h"
 
 class SeExprFunc;
@@ -87,7 +88,10 @@ public:
     /** Prepare the node (for parser use only).  See the discussion at
 	the start of SeExprNode.cpp for more info.
     */
-    virtual bool prep(bool wantVec);
+    virtual SeExprType prep(SeExprType wanted);
+
+    /// The type of the node
+    SeExprType type() const { if(_typeChecked) return _type; };
 
     /// Remember the line and column position in the input string 
     inline void setPosition(const short int startPos,const short int endPos)
@@ -117,6 +121,12 @@ protected:
     /// True if node has a vector result
     bool _isVec;
 
+    /// True if node has been successfully type checked
+    bool _typeChecked;
+
+    // Type of node
+    SeExprType _type;
+
     /// Position line and collumn
     unsigned short int _startPos,_endPos;
 };
@@ -129,7 +139,7 @@ public:
     SeExprBlockNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
-    virtual bool prep(bool wantVec);
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -142,7 +152,7 @@ public:
 			 SeExprNode* a, SeExprNode* b, SeExprNode* c) :
 	SeExprNode(expr, a, b, c) {}
 
-    virtual bool prep(bool wantVec);
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -154,7 +164,7 @@ public:
     SeExprAssignNode(const SeExpression* expr, const char* name, SeExprNode* e) :
 	SeExprNode(expr, e), _name(name), _var(0) {}
 
-    virtual bool prep(bool wantVec);
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 
     const std::string& name() const { return _name; };
@@ -173,7 +183,7 @@ public:
         : SeExprNode(expr, a, b, c)
     {};
 
-    virtual bool prep(bool wantVec);
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 
     SeVec3d value() const;
@@ -186,6 +196,7 @@ public:
     SeExprNegNode(const SeExpression* expr, SeExprNode* a) :
 	SeExprNode(expr, a) {}
 
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -196,6 +207,7 @@ public:
     SeExprInvertNode(const SeExpression* expr, SeExprNode* a) :
 	SeExprNode(expr, a) {}
 
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -207,6 +219,7 @@ public:
     SeExprNotNode(const SeExpression* expr, SeExprNode* a) :
 	SeExprNode(expr, a) {}
 
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -218,7 +231,7 @@ public:
     SeExprCondNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b, SeExprNode* c) :
 	SeExprNode(expr, a, b, c) {}
 
-    virtual bool prep(bool wantVec);
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -230,7 +243,7 @@ public:
     SeExprAndNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
-    virtual bool prep(bool wantVec);
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -242,7 +255,7 @@ public:
     SeExprOrNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
-    virtual bool prep(bool wantVec);
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -254,7 +267,7 @@ public:
     SeExprSubscriptNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
-    virtual bool prep(bool wantVec);
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -266,7 +279,7 @@ public:
     SeExprCompareEqNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
-    virtual bool prep(bool wantVec);
+    virtual SeExprType prep(SeExprType wanted);
 };
 
 
@@ -277,7 +290,7 @@ public:
     SeExprCompareNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
-    virtual bool prep(bool wantVec);
+    virtual SeExprType prep(SeExprType wanted);
 };
 
 
@@ -288,6 +301,7 @@ public:
     SeExprEqNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprCompareEqNode(expr, a, b) {}
 
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -299,6 +313,7 @@ public:
     SeExprNeNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprCompareEqNode(expr, a, b) {}
 
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -310,6 +325,7 @@ public:
     SeExprLtNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprCompareNode(expr, a, b) {}
 
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -321,6 +337,7 @@ public:
     SeExprGtNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprCompareNode(expr, a, b) {}
 
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -332,6 +349,7 @@ public:
     SeExprLeNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprCompareNode(expr, a, b) {}
 
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -343,6 +361,7 @@ public:
     SeExprGeNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprCompareNode(expr, a, b) {}
 
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -354,6 +373,7 @@ public:
     SeExprAddNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -365,6 +385,7 @@ public:
     SeExprSubNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -376,6 +397,7 @@ public:
     SeExprMulNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -387,6 +409,7 @@ public:
     SeExprDivNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -398,6 +421,7 @@ public:
     SeExprModNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -409,6 +433,7 @@ public:
     SeExprExpNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -420,7 +445,7 @@ public:
 	SeExprNode(expr), _name(name), _var(0), _data(0) 
     { expr->addVar(name); }
 
-    virtual bool prep(bool wantVec);
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
     const char* name() const { return _name.c_str(); }
     
@@ -443,6 +468,7 @@ public:
     SeExprNumNode(const SeExpression* expr, double val) :
 	SeExprNode(expr), _val(val) {}
 
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const { result[0] = _val; }
 
     double value() const { return _val; };
@@ -459,11 +485,9 @@ public:
     SeExprStrNode(const SeExpression* expr, const char* str) :
 	SeExprNode(expr), _str(str) {}
 
-    virtual bool prep(bool wantVec)
-    { return 1; }
-    //{ addError("Invalid string parameter: "+_str); return 0; }
-
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const { result[0] = 0; }
+
     const char* str() const { return _str.c_str(); }
 
 private:
@@ -482,7 +506,7 @@ public:
     }
     virtual ~SeExprFuncNode() { delete _data; }
 
-    virtual bool prep(bool wantVec);
+    virtual SeExprType prep(SeExprType wanted);
     virtual void eval(SeVec3d& result) const;
     void setIsVec(bool isVec) { _isVec = isVec; }
     const char* name() const { return _name.c_str(); }
