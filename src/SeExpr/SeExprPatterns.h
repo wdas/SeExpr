@@ -38,6 +38,8 @@
 
 #include "SeExprNode.h"
 
+namespace SeExpr{
+
 inline const SeExprVarNode*
 isVariable(const SeExprNode* testee)
 {
@@ -216,4 +218,5 @@ isCcurveAssign(const SeExprNode* testee)
     return 0;
 };
 
+}
 #endif

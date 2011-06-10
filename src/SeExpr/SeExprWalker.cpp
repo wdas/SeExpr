@@ -40,105 +40,33 @@
 
 #include "SeExprNode.h"
 #include "SeExprPatterns.h"
-#include "SeExprSpec.h"
 #include "SeExprWalker.h"
 
-void
-SeExprWalker::walk(SeExprNode* examinee)
+namespace SeExpr{
+
+template<bool constnode> void Walker<constnode>::
+walk(T_NODE* examinee)
 {
     _examiner->reset();
     internalWalk(examinee);
 };
 
-void
-SeExprWalker::internalWalk(SeExprNode* examinee)
+template<bool constnode> void Walker<constnode>::
+internalWalk(T_NODE* examinee)
 {
     /// If examine returns false, do not recurse
     if(_examiner->examine(examinee)) walkChildren(examinee);
 };
 
-void
-SeExprWalker::walkChildren(SeExprNode* parent)
+template<bool constnode> void Walker<constnode>::
+walkChildren(T_NODE* parent)
 {
     for(int i = 0; i < parent->numChildren(); i++)
 	internalWalk(parent->child(i));
 };
 
-void
-SeExprConstWalker::walk(const SeExprNode* examinee)
-{
-    _examiner->reset();
-    internalWalk(examinee);
-};
 
-void
-SeExprConstWalker::internalWalk(const SeExprNode* examinee)
-{
-    /// If examine returns false, do not recurse
-    if(_examiner->examine(examinee)) walkChildren(examinee);
-};
+template class Walker<false>;
+template class Walker<true>;
 
-void
-SeExprConstWalker::walkChildren(const SeExprNode* parent)
-{
-    for(int i = 0; i < parent->numChildren(); i++)
-	internalWalk(parent->child(i));
-};
-
-bool
-SeExprVarListExaminer::examine(const SeExprNode* examinee)
-{
-    if(const SeExprVarNode* var = isVariable(examinee)) {
-        _varList.push_back(var);
-	return false;
-    };
-
-    return true;
-};
-
-SeExprSpecExaminer::~SeExprSpecExaminer() {
-    std::vector<const SeExprSpec*>::iterator       i = _specList.begin();
-    std::vector<const SeExprSpec*>::iterator const e = _specList.end  ();
-    for(; i != e; ++i)
-        delete *i;
-};
-
-bool
-SeExprSpecExaminer::examine(const SeExprNode* examinee)
-{
-    if(const SeExprScalarAssignSpec* s_spec =
-       SeExprScalarAssignSpec::match(examinee)) {
-        _specList.push_back(s_spec);
-        return false;
-    } else if(const SeExprVectorAssignSpec* v_spec =
-              SeExprVectorAssignSpec::match(examinee)) {
-        _specList.push_back(v_spec);
-        return false;
-    } else if(const SeExprCurveAssignSpec* c_spec =
-              SeExprCurveAssignSpec::match(examinee)) {
-        _specList.push_back(c_spec);
-        return false;
-    } else if(const SeExprCcurveAssignSpec* cc_spec =
-              SeExprCcurveAssignSpec::match(examinee)) {
-        _specList.push_back(cc_spec);
-        return false;
-    } else if(const SeExprStrSpec* str_spec =
-              SeExprStrSpec::match(examinee)) {
-        _specList.push_back(str_spec);
-        return false;
-    };
-
-    return true;
-};
-
-inline std::vector<const SeExprSpec*>::const_iterator
-SeExprSpecExaminer::begin() const
-{
-    return _specList.begin();
-};
-
-inline std::vector<const SeExprSpec*>::const_iterator const
-SeExprSpecExaminer::end() const
-{
-    return _specList.end();
-};
+}

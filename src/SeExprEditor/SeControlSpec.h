@@ -33,8 +33,8 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
-#ifndef SeExprSpec_h
-#define SeExprSpec_h
+#ifndef SeControlSpec_h
+#define SeControlSpec_h
 
 #ifndef MAKEDEPEND
 #include <string.h>
@@ -43,24 +43,32 @@
 #endif
 #include <cstdio>
 
+#include "SeExprWalker.h"
 #include "SeExprNode.h"
 #include "SeCurve.h"
 
-class SeExprSpec {
+namespace SeExpr{
+
+//! Generic SeExpression control specification
+class ControlSpec {
  public:
-    SeExprSpec(const SeExprNode& node)
+    ControlSpec(const SeExprNode& node)
         :_start(node.startPos()), _end(node.endPos())
     {};
 
+    //! Generates a replacement string based on changes to the spec
     virtual std::string toString() const = 0;
  protected:
+    //! Name of control
     std::string _name;
+    //! Start position of text in original source
     int _start;
+    //! End position of text in original source
     int _end;
 };
 
-
-class SeExprScalarAssignSpec : public SeExprSpec {
+//! Variable equals scalar control specification
+class SeExprScalarAssignSpec : public ControlSpec {
  public:
     SeExprScalarAssignSpec(const SeExprAssignNode& node);
     virtual std::string toString() const;
@@ -68,11 +76,14 @@ class SeExprScalarAssignSpec : public SeExprSpec {
     static const SeExprScalarAssignSpec* match(const SeExprNode* node);
 
  private:
+    //! Range of values
     double _min,_max;
+    //! Current Value
     double _val;
 };
 
-class SeExprVectorAssignSpec : public SeExprSpec {
+//! Variable equals vector control specification
+class SeExprVectorAssignSpec : public ControlSpec {
  public:
     SeExprVectorAssignSpec(const SeExprAssignNode& node);
     virtual std::string toString() const;
@@ -80,11 +91,15 @@ class SeExprVectorAssignSpec : public SeExprSpec {
     static const SeExprVectorAssignSpec* match(const SeExprNode* node);
 
  private:
+    //! Range of values
     double _min,_max;
+    //! Current Value
     SeVec3d _val;
 };
 
-class SeExprCurveAssignSpec : public SeExprSpec {
+//! Curve assignment expression. Assignment of curve to a variable.
+template<class T>
+class SeExprCurveAssignSpec : public ControlSpec {
 
  public:
     SeExprCurveAssignSpec(const SeExprAssignNode& node);
@@ -92,28 +107,18 @@ class SeExprCurveAssignSpec : public SeExprSpec {
     static const SeExprCurveAssignSpec* match(const SeExprNode* node);
 
  private:
+    //! Lookup subexpression text
     std::string _lookupText;
-    const SeExprFuncNode* cnode;
-    std::vector<SeExpr::SeCurve<double>::CV> _vec;
+    //! Control points of curve spline
+    std::vector<typename SeExpr::SeCurve<T>::CV> _vec;
 };
 
-class SeExprCcurveAssignSpec : public SeExprSpec {
-public:
-    SeExprCcurveAssignSpec(const SeExprAssignNode& node);
-    virtual std::string toString() const;
-    static const SeExprCcurveAssignSpec* match(const SeExprNode* node);
-
- private:
-    std::string _lookupText;
-    std::vector<SeExpr::SeCurve<SeVec3d>::CV> _vec;
-};
-
-class SeExprStrSpec : public SeExprSpec {
+class SeExprStrSpec : public ControlSpec {
     enum Type {STRING,FILE,DIRECTORY};
  public:
     //! Takes name and type comments and takes ownership of them!
     SeExprStrSpec(const SeExprStrNode& node,char* name,Type type)
-        : SeExprSpec(node),_str(node.str()),_type(type)
+        : ControlSpec(node),_str(node.str()),_type(type)
     {
         _name=name;
     }
@@ -125,4 +130,25 @@ private:
     Type _type;
 };
 
+
+
+/// Examiner that builds a list of specs potentially used in widgets (for qdgui)
+class SpecExaminer : public Examiner<true> {
+
+ public:
+    ~SpecExaminer();
+
+    virtual bool examine(const SeExprNode* examinee);
+    virtual void reset() { _specList.clear(); };
+    inline int length() const { return _specList.size(); };
+    inline const ControlSpec* spec(int i) const { return _specList[i]; };
+    inline std::vector<const ControlSpec*>::const_iterator       begin() const;
+    inline std::vector<const ControlSpec*>::const_iterator const end  () const;
+
+ private:
+    std::vector<const ControlSpec*> _specList;
+
+};
+
+}
 #endif

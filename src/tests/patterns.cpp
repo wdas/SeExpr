@@ -39,8 +39,9 @@
 
 #include "SeExprWalker.h"
 #include "SeExprPatterns.h"
-#include "SeExprSpec.h"
 #include "SeExprFunc.h"
+#include "SeControlSpec.h"
+
 
 /**
    @file assignmentPatterns.cpp
@@ -83,14 +84,11 @@ public:
     {};
     
     inline void walk () { _walker.walk (_parseTree); };
-
-    inline const SeExprSpecExaminer & examiner () { walk (); return _examiner;  };
-
     void specs() { if(isValid()) { walk(); printSpecs(_examiner); }; };
 
 private:
-    SeExprSpecExaminer _examiner;
-    SeExprConstWalker  _walker;
+    SeExpr::SpecExaminer _examiner;
+    SeExpr::ConstWalker  _walker;
     
     template<typename Examiner>
     void printSpecs(Examiner examiner) {

@@ -38,6 +38,31 @@
 #include <cstring>
 
 #include "SeExprWalker.h"
+#include "SeExprPatterns.h"
+
+using namespace SeExpr;
+
+/// Examiner that builds a list of all variable references
+class VarListExaminer : public ConstExaminer {
+
+ public:
+    virtual bool examine(T_NODE* examinee){
+        if(const SeExprVarNode* var = isVariable(examinee)) {
+            _varList.push_back(var);
+            return false;
+        };
+        return true;
+    }
+    virtual void reset() {_varList.clear();};
+    inline int length() const {return _varList.size();};
+    inline const SeExprVarNode* var(int i) const {return _varList[i];};
+ private:
+    std::vector<const SeExprVarNode*> _varList;
+};
+
+
+
+
 
 /**
    @file listVar.cpp
@@ -72,8 +97,8 @@ public:
 
 private:
     bool _hasWalked;
-    SeExprVarListExaminer examiner;
-    SeExprConstWalker walker;
+    VarListExaminer examiner;
+    ConstWalker walker;
     
     //! resolve function that only supports one external variable 'x'
     SeExprVarRef* resolveVar(const std::string& name) const {

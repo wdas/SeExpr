@@ -43,7 +43,56 @@
 
 #include "SeExprNode.h"
 #include "SeExprPatterns.h"
-#include "SeExprSpec.h"
+#include "SeControlSpec.h"
+
+namespace SeExpr{
+
+SpecExaminer::~SpecExaminer() {
+    std::vector<const ControlSpec*>::iterator i = _specList.begin();
+    std::vector<const ControlSpec*>::iterator const e = _specList.end  ();
+    for(; i != e; ++i)
+        delete *i;
+};
+
+bool
+SpecExaminer::examine(const SeExprNode* examinee)
+{
+    if(const SeExprScalarAssignSpec* s_spec =
+       SeExprScalarAssignSpec::match(examinee)) {
+        _specList.push_back(s_spec);
+        return false;
+    } else if(const SeExprVectorAssignSpec* v_spec =
+              SeExprVectorAssignSpec::match(examinee)) {
+        _specList.push_back(v_spec);
+        return false;
+    } else if(const SeExprCurveAssignSpec<double>* c_spec =
+        SeExprCurveAssignSpec<double>::match(examinee)) {
+        _specList.push_back(c_spec);
+        return false;
+    } else if(const SeExprCurveAssignSpec<SeVec3d>* cc_spec =
+        SeExprCurveAssignSpec<SeVec3d>::match(examinee)) {
+        _specList.push_back(cc_spec);
+        return false;
+    } else if(const SeExprStrSpec* str_spec =
+              SeExprStrSpec::match(examinee)) {
+        _specList.push_back(str_spec);
+        return false;
+    };
+
+    return true;
+};
+
+inline std::vector<const ControlSpec*>::const_iterator
+SpecExaminer::begin() const
+{
+    return _specList.begin();
+};
+
+inline std::vector<const ControlSpec*>::const_iterator const
+SpecExaminer::end() const
+{
+    return _specList.end();
+};
 
 
 //! Returns true if no newline separates comment and node
@@ -70,7 +119,7 @@ inline std::string findComment(const SeExprNode& node){
 
 SeExprScalarAssignSpec::
 SeExprScalarAssignSpec(const SeExprAssignNode& node)
-    : SeExprSpec(node),_min(0),_max(1),
+    : ControlSpec(node),_min(0),_max(1),
      _val(static_cast<const SeExprNumNode*>(node.child(0))->value())
      
 {
@@ -105,7 +154,7 @@ SeExprScalarAssignSpec::match(const SeExprNode* node)
 
 SeExprVectorAssignSpec::
 SeExprVectorAssignSpec(const SeExprAssignNode& node)
-    : SeExprSpec(node),_min(0),_max(1),
+    : ControlSpec(node),_min(0),_max(1),
      _val(SeVec3d(static_cast<const SeExprNumNode*>(node.child(0)->child(0))->value(),
              static_cast<const SeExprNumNode*>(node.child(0)->child(1))->value(),
              static_cast<const SeExprNumNode*>(node.child(0)->child(2))->value()))
@@ -130,24 +179,24 @@ SeExprVectorAssignSpec::toString() const
 }
 
 
-SeExprCurveAssignSpec::
+template<class T> SeExprCurveAssignSpec<T>::
 SeExprCurveAssignSpec(const SeExprAssignNode& node)
-    : SeExprSpec(node),
+    : ControlSpec(node),
      _vec()
 {
     _name=node.name();
-        const SeExprFuncNode* cnode=static_cast<const SeExprFuncNode*>(node.child(0));
-        _lookupText=cnode->child(0)->toString();
-        int num = cnode->numChildren();
-        for(int i = 1; i < num - 2; i += 3)
-            _vec.push_back(SeExpr::SeCurve<double>::CV(
-                    static_cast<const SeExprNumNode*>(cnode->child(i))->value(),
-                    static_cast<const SeExprNumNode*>(cnode->child(i+1))->value(),
-                    (SeExpr::SeCurve<double>::InterpType) static_cast<const SeExprNumNode*>(cnode->child(i+2))->value()));
+    const SeExprFuncNode* cnode=static_cast<const SeExprFuncNode*>(node.child(0));
+    _lookupText=cnode->child(0)->toString();
+    int num = cnode->numChildren();
+    for(int i = 1; i < num - 2; i += 3)
+        _vec.push_back(typename SeCurve<T>::CV(
+                static_cast<const SeExprNumNode*>(cnode->child(i))->value(),
+                static_cast<const SeExprNumNode*>(cnode->child(i+1))->value(),
+                (typename SeCurve<T>::InterpType) static_cast<const SeExprNumNode*>(cnode->child(i+2))->value()));
 }
 
-const SeExprVectorAssignSpec*
-SeExprVectorAssignSpec::match(const SeExprNode* node)
+const SeExprVectorAssignSpec* SeExprVectorAssignSpec::
+match(const SeExprNode* node)
 {
     if(const SeExprAssignNode* assign = isVectorAssign(node)) {
         return new SeExprVectorAssignSpec(*assign);
@@ -156,8 +205,8 @@ SeExprVectorAssignSpec::match(const SeExprNode* node)
     return 0;
 }
 
-std::string
-SeExprCurveAssignSpec::toString() const
+template<class T> std::string SeExprCurveAssignSpec<T>::
+toString() const
 {
     std::stringstream ss;
 
@@ -173,8 +222,8 @@ SeExprCurveAssignSpec::toString() const
     return ss.str();
 }
 
-const SeExprCurveAssignSpec*
-SeExprCurveAssignSpec::match(const SeExprNode* node)
+template<class T> const SeExprCurveAssignSpec<T>* SeExprCurveAssignSpec<T>::
+match(const SeExprNode* node)
 {
     if(const SeExprAssignNode* assign = isCurveAssign(node))
         return new SeExprCurveAssignSpec(*assign);
@@ -182,9 +231,11 @@ SeExprCurveAssignSpec::match(const SeExprNode* node)
     return 0;
 }
 
+#if 0
+
 SeExprCcurveAssignSpec::
 SeExprCcurveAssignSpec(const SeExprAssignNode& node)
-    : SeExprSpec(node),
+    : ControlSpec(node),
      _vec()
 {
     _name=node.name();
@@ -193,10 +244,10 @@ SeExprCcurveAssignSpec(const SeExprAssignNode& node)
     int num = cnode->numChildren();
     for(int i = 1; i < num - 2; i += 3)
         if(dynamic_cast<const SeExprNumNode*>(cnode->child(i+1)))
-            _vec.push_back(SeExpr::SeCurve<SeVec3d>::CV(
+            _vec.push_back(SeCurve<SeVec3d>::CV(
                     static_cast<const SeExprNumNode*>(cnode->child(i))->value(),
                     static_cast<const SeExprNumNode*>(cnode->child(i+1))->value(),
-                    (SeExpr::SeCurve<SeVec3d>::InterpType) static_cast<const SeExprNumNode*>(cnode->child(i+2))->value()));
+                    (SeCurve<SeVec3d>::InterpType) static_cast<const SeExprNumNode*>(cnode->child(i+2))->value()));
 }
 
 std::string
@@ -230,6 +281,8 @@ SeExprCcurveAssignSpec::match(const SeExprNode* node)
 
     return 0;
 }
+
+#endif
 
 std::string
 SeExprStrSpec::toString() const
@@ -267,4 +320,4 @@ SeExprStrSpec::match(const SeExprNode* node)
     }
     return 0;
 }
-
+}

@@ -93,11 +93,14 @@ SET(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/${VARIANT_DIRECTORY}-${FLAVORDIR}"
 ## Make modules able to see partio library
 # Setup environment variable to link partio
 SET( SEEXPR_LIBRARIES SeExpr )
+SET( SEEXPR_EDITOR_LIBRARIES SeExprEditor )
 # make it so partio can be found
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/SeExpr )
+INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/SeExprEditor )
 
 ## Traverse subdirectories
 ADD_SUBDIRECTORY (src/SeExpr)
+ADD_SUBDIRECTORY (src/SeExprEditor)
 ADD_SUBDIRECTORY (src/tests)
 ADD_SUBDIRECTORY (src/doc)
 ADD_SUBDIRECTORY (src/demos)

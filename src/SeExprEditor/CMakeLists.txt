@@ -31,10 +31,9 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
-set(TEST basic listVar patterns)
-
-foreach(item ${TEST})
-    ADD_EXECUTABLE(${item} "${item}.cpp")
-    target_link_libraries(${item} ${SEEXPR_LIBRARIES} ${SEEXPR_EDITOR_LIBRARIES})
-    install(TARGETS ${item} DESTINATION test)
-endforeach(item)
+FILE(GLOB cpp "*.cpp")
+FILE(GLOB public_includes "*.h")
+ADD_LIBRARY (SeExprEditor SHARED ${cpp})
+target_link_libraries(SeExprEditor ${SEEXPR_LIBRARIES} ${SEEXPR_EDITOR_LIBRARIES})
+INSTALL (TARGETS SeExprEditor DESTINATION lib)
+INSTALL (FILES ${public_includes} DESTINATION include)

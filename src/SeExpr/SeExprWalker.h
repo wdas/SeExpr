@@ -36,95 +36,48 @@
 #ifndef SeExprWalker_h
 #define SeExprWalker_h
 
-#include "SeExprNode.h"
-#include "SeExprSpec.h"
+class SeExprNode;
 
-class SeExprExaminer {
- public:
-    virtual bool examine(SeExprNode* examinee) = 0;
+namespace SeExpr{
 
+template<class T,bool constnode> struct ADD_CONST{typedef T TYPE;};
+template<class T> struct ADD_CONST<T,true>{typedef const T TYPE;};
+
+
+template<bool constnode=false>
+class Examiner
+{
+public:
+    typedef typename ADD_CONST<SeExprNode,constnode>::TYPE T_NODE;
+
+    virtual bool examine(T_NODE *examinee) = 0;
     virtual void reset() = 0;
 };
 
-class SeExprConstExaminer {
+template<bool constnode=false> 
+class Walker
+{
  public:
-    virtual bool examine(const SeExprNode* examinee) = 0;
+    typedef Examiner<constnode> T_EXAMINER;
+    typedef typename T_EXAMINER::T_NODE T_NODE;
 
-    virtual void reset() = 0;
-};
-
-class SeExprWalker {
- public:
-    SeExprWalker(SeExprExaminer * examiner)
+    Walker(T_EXAMINER* examiner)
 	: _examiner(examiner)
     { _examiner->reset(); };
 
     /// Preorder walk
-    void walk(SeExprNode * examinee);
+    void walk(T_NODE * examinee);
 
  protected:
-    void internalWalk(SeExprNode * examinee);
-    void walkChildren(SeExprNode * parent);
+    void internalWalk(T_NODE* examinee);
+    void walkChildren(T_NODE* parent);
 
  private:
-    SeExprExaminer * _examiner;
+    T_EXAMINER * _examiner;
 };
 
-class SeExprConstWalker {
- public:
-    SeExprConstWalker(SeExprConstExaminer * examiner)
-	: _examiner(examiner)
-    { _examiner->reset(); };
+typedef Examiner<true> ConstExaminer;
+typedef Walker<true> ConstWalker;
 
-    /// Preorder walk
-    void walk(const SeExprNode * examinee);
-
- protected:
-    void internalWalk(const SeExprNode * examinee);
-    void walkChildren(const SeExprNode * parent);
-
- private:
-    SeExprConstExaminer * _examiner;
-};
-
-/// Examiner that builds a list of all variable references
-class SeExprVarListExaminer : public SeExprConstExaminer {
-
- public:
-    virtual bool examine(const SeExprNode* examinee);
-
-    virtual void reset() { _varList.clear(); };
-
-    inline int length() const { return _varList.size(); };
-
-    inline const SeExprVarNode* var(int i) const { return _varList[i]; };
- 
- private:
-    std::vector<const SeExprVarNode*> _varList;
-
-};
-
-/// Examiner that builds a list of specs potentially used in widgets (for qdgui)
-class SeExprSpecExaminer : public SeExprConstExaminer {
-
- public:
-    ~SeExprSpecExaminer();
-
-    virtual bool examine(const SeExprNode* examinee);
-
-    virtual void reset() { _specList.clear(); };
-
-    inline int length() const { return _specList.size(); };
-
-    inline const SeExprSpec* spec(int i) const { return _specList[i]; };
-
-    inline std::vector<const SeExprSpec*>::const_iterator       begin() const;
-    inline std::vector<const SeExprSpec*>::const_iterator const end  () const;
-
- private:
-    std::vector<const SeExprSpec*> _specList;
-
-};
-
-
+}
 #endif
