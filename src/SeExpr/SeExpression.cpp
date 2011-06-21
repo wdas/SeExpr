@@ -44,6 +44,7 @@
 #include "SeExprParser.h"
 #include "SeExprFunc.h"
 #include "SeExpression.h"
+#include "SeExprEnv.h"
 
 using namespace std;
 
@@ -143,7 +144,8 @@ SeExpression::prep() const
     if (_prepped) return;
     _prepped = true;
     parseIfNeeded();
-    if (_parseTree && !_parseTree->prep(wantVec())) {
+    SeExprVarEnv env;
+    if (_parseTree && !_parseTree->prep(SeExprType::AnyType(), env).isValid()) {
         // build line lookup table
         std::vector<int> lines;
         const char* start=_expression.c_str();

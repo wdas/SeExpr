@@ -38,6 +38,9 @@
 #include "SeVec3d.h"
 #include <vector>
 
+#include "SeExprType.h"
+#include "SeExprEnv.h"
+
 class SeExpression;
 class SeExprFuncNode;
 
@@ -59,7 +62,9 @@ public:
     {}
 
     /** prep the expression by doing all type checking argument checking, etc. */
-    virtual bool prep(SeExprFuncNode* node, bool wantVec);
+    virtual SeExprType prep(SeExprFuncNode* node, SeExprType wanted, SeExprVarEnv & env);
+
+    virtual bool isScalar() const = 0;
 
     /** evaluate the expression. the given node is where in the parse tree
         the evaluation is for */
@@ -67,6 +72,10 @@ public:
     virtual ~SeExprFuncX(){}
 
     bool isThreadSafe() const {return _threadSafe;}
+
+ protected:
+    bool _isScalar;
+
 private:
     bool _threadSafe;
 };
@@ -144,6 +153,8 @@ public:
     bool hasVecArgs() const { return _type >= VEC; }
     bool isVec() const { return _type >= VECVEC; }
 
+    bool isScalar() const { return !funcx() ? funcx()->isScalar() : false; };
+
     SeExprFunc() : _type(NONE), _func(0), _minargs(0), _maxargs(0) {}
 
     //! No argument function
@@ -181,6 +192,7 @@ public:
     SeExprFunc(SeExprFuncX& f, int minargs=1, int maxargs=1)
 	: _type(FUNCX), _func((void*)&f), _minargs(minargs), _maxargs(maxargs) {}
 
+    inline SeExprType retType() const { return _retType; };
     int type() const { return _type; }
     int minArgs() const { return _minargs; }
     int maxArgs() const { return _maxargs; }
@@ -201,6 +213,7 @@ public:
     SeExprFuncX* funcx() const { return (SeExprFuncX*)_func; }
 
 private:
+    SeExprType _retType;
     FuncType _type;
     void* _func;
     int _minargs;

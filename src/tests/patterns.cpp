@@ -56,14 +56,18 @@ public:
             : SeExprFuncX(false)
         {};
 
-        bool prep(SeExprFuncNode* node,bool wantVec,std::string& error) 
+        SeExprType prep(SeExprFuncNode* node, SeExprType wanted, SeExprVarEnv & env)
         {
             bool valid=true;
             for(int i=0;i<node->numChildren();i++){
                 if(!node->isStrArg(i))
-                    valid&=node->child(i)->prep(wantVec);
+                    valid&=node->child(i)->prep(SeExprType::AnyType(), env).isValid();
             }
-            return true;}
+            return wanted;
+        }
+
+        virtual bool isScalar() const { return true; };
+
         void eval(const SeExprFuncNode* node,SeVec3d& result) const
         {result=SeVec3d();}
     } dummyFuncX;

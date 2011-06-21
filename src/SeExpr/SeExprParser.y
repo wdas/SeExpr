@@ -189,7 +189,6 @@ assign:
     | NAME ModEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
                                 SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,ModNode,varNode,$3);
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    |
     ;
 
 ifthenelse:

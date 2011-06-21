@@ -88,9 +88,9 @@ namespace{
 		groupIndex++;
 	    }
 
-            for(int i=0;i<indexMap._keys.size();i++){
-                const char* name=indexMap._keys[i]?indexMap._keys[i]:"";
-            }
+            // for(size_t i=0;i<indexMap._keys.size();i++){
+            //     const char* name=indexMap._keys[i]?indexMap._keys[i]:"";
+            // }
 	}
     };
     typedef std::map<const char*, SeRmanVarMap*> SeRmanVarMapMap;
@@ -129,8 +129,8 @@ namespace{
 		    do {
 			varnames.push_back(tokenize(var));
 			groupStarts.push_back(groupStart);
-		    } while (var = strtok_r(0, ",", &vargroup_end));
-		} while (vargroup = strtok_r(0, " ", &varlist_end));
+		    } while ((var = strtok_r(0, ",", &vargroup_end)));
+		} while ((vargroup = strtok_r(0, " ", &varlist_end)));
 
 		// build new varmap
 		int nvars = varnames.size();
@@ -507,7 +507,7 @@ extern "C" {
 
 	// SeExprEval(exprHandle, varValues, CsVal)
         {"void SeExprEval(uniform float, color[], output color)", SeExprEval, NULL, NULL },
-        NULL
+        {NULL}
     };
 
     RslFunctionTable RslPublicFunctions(funcs, init);

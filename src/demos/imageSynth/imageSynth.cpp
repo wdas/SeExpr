@@ -53,7 +53,7 @@ public:
     {}
 
     //! Simple variable that just returns its internal value
-    struct Var:public SeExprScalarVarRef
+    struct Var:public SeExprVarRef
     {
         Var(const double val):val(val){}
         Var(){}

@@ -41,6 +41,8 @@
 #include <vector>
 #include "SeVec3d.h"
 
+#include "SeExprType.h"
+
 class SeExprNode;
 class SeExprVarNode;
 class SeExprLocalVarRef;
@@ -51,14 +53,28 @@ class SeExpression;
 class SeExprVarRef
 {
  public:
+    SeExprVarRef()
+        : _type(SeExprType::ErrorType())
+    {};
+
+    SeExprVarRef(const SeExprType & type)
+        : _type(type)
+    {};
+
     virtual ~SeExprVarRef() {}
 
-    //! returns true for a vector type, false for a scalar type
-    virtual bool isVec() = 0;
+    //! sets (current) type to given type
+    virtual void setType(const SeExprType & type) { _type = type; };
+
+    //! returns (current) type
+    virtual SeExprType type() const { return _type; };
 
     //! returns this variable's value by setting result, node refers to 
     //! where in the parse tree the evaluation is occurring
     virtual void eval(const SeExprVarNode* node, SeVec3d& result) = 0;
+
+ private:
+    SeExprType _type;
 };
 
 /// simple vector variable reference reference base class
@@ -81,13 +97,19 @@ class SeExprLocalVarRef : public SeExprVarRef
 {
  public:
     SeVec3d val;
-    SeExprLocalVarRef() : _isVec(false) {}
-    void setIsVec() { _isVec = true; }
+
+    SeExprLocalVarRef()
+        :SeExprVarRef()
+    {};
+
+    SeExprLocalVarRef(const SeExprType & type)
+        :SeExprVarRef(type)
+    {};
+
+    bool isVec() { return 1; };
+
     virtual void eval(const SeExprVarNode*, SeVec3d& result) 
     { result = val; }
-    virtual bool isVec() { return _isVec; }
- private:
-    bool _isVec;
 };
 
 

@@ -64,9 +64,12 @@
 
 #ifndef MAKEDEPEND
 #include <math.h>
+#include <sstream>
 #endif
 #include "SeVec3d.h"
+#include "SeExprType.h"
 #include "SeExpression.h"
+#include "SeExprEnv.h"
 #include "SeExprNode.h"
 #include "SeExprFunc.h"
 
@@ -137,20 +140,24 @@ SeExprNode::addChildren(SeExprNode* surrogate)
 }
 
 
-bool
-SeExprNode::prep(bool wantVec)
+SeExprType
+SeExprNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    /* The default behavior is to pass down the wantVec flag to
-       all children and set isVec to true if any child is a vec. */
-    bool valid=true;
-    std::vector<SeExprNode*>::iterator iter;
-    _isVec = 0;
-    for (iter = _children.begin(); iter != _children.end(); iter++) {
-	SeExprNode* child = *iter;
-	if (!child->prep(wantVec)) valid=false;
-	if (child->isVec()) _isVec = 1;
-    }
-    return valid;
+    /** The default behavior is to call prep on children (giving AnyType as desired type).
+     *  If all children return valid types, returns NoneType.
+     *  Otherwise,                          returns ErrorType.
+     *  *Note:* Ignores wanted type.
+     */
+    _type = SeExprType::NoneType();
+
+    std::vector<SeExprNode*>::iterator       child   = _children.begin();
+    std::vector<SeExprNode*>::iterator const e_child = _children.end  ();
+
+    for(; child != e_child; child++)
+        if(!((*child)->prep(SeExprType::AnyType(), env)).isValid())
+            _type = SeExprType::ErrorType();
+
+    return _type;
 }
 
 
@@ -167,19 +174,17 @@ SeExprNode::eval(SeVec3d& result) const
 }
 
 
-bool
-SeExprBlockNode::prep(bool wantVec)
+SeExprType
+SeExprBlockNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    // prepare variable assignments (request vector type)
-    bool valid=true;
+    bool valid = child(0)->prep(SeExprType::AnyType(), env).isValid();
 
-    if (!child(0)->prep(1)) valid=false;
+    _type = child(1)->prep(wanted, env);
 
-    // prepare expression
-    if (!child(1)->prep(wantVec)) valid=false;
+    if(!valid)
+        _type = SeExprType::ErrorType();
 
-    _isVec = child(1)->isVec();
-    return valid;
+    return _type;
 }
 
 
@@ -193,18 +198,45 @@ SeExprBlockNode::eval(SeVec3d& result) const
 }
 
 
-bool
-SeExprIfThenElseNode::prep(bool wantVec)
+SeExprType
+SeExprIfThenElseNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    bool valid=true;
-    // prepare condition expression (request vector type)
-    if (!child(0)->prep(0)) valid=false;
+    SeExprVarEnv           thenEnv,  elseEnv;
+    SeExprType   condType, thenType, elseType;
 
-    // prepare then/else blocks
-    if (!child(1)->prep(1)) valid=false;
-    if (!child(2)->prep(1)) valid=false;
-    _isVec = 0;
-    return valid;
+    bool error = false;
+    _type = SeExprType::ErrorType();
+
+    condType = child(0)->prep(SeExprType::FP1Type(),env);
+
+    if(!condType.isValid())
+        error = true;
+    else if(!condType.isa(SeExprType::FP1Type())) {
+        error = true;
+        addError("Expected FP1 type in condition expression of if statement but found " + condType.toString());
+    }
+
+    thenEnv  = SeExprVarEnv::newScope(env);
+    thenType = child(1)->prep(SeExprType::AnyType(), thenEnv);
+
+    elseEnv  = SeExprVarEnv::newScope(env);
+    elseType = child(2)->prep(SeExprType::AnyType(), elseEnv);
+
+    if(!thenType.isValid() ||
+       !elseType.isValid())
+        error = true;
+
+    if(env.changesMatch(thenEnv, elseEnv)) {
+        env.add(thenEnv);
+    } else {
+        error = true;
+        addError("Types of variables do not match after if statement");
+    }
+
+    if(!error)
+        _type = SeExprType::NoneType();
+
+    return _type;
 }
 
 
@@ -222,17 +254,17 @@ SeExprIfThenElseNode::eval(SeVec3d& result) const
 }
 
 
-bool
-SeExprAssignNode::prep(bool wantVec)
+SeExprType
+SeExprAssignNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    // prepare expression
-    if (!child(0)->prep(1)) return 0;
-    _isVec = child(0)->isVec();
+    _type = SeExprType::NoneType();
 
-    // add to var table
-    _var = _expr->getLocalVar(_name.c_str());
-    if (_isVec) _var->setIsVec();
-    return 1;
+    _assignedType = child(0)->prep(SeExprType::AnyType(), env);
+
+    //This could add errors to the variable environment
+    env.add(_name, new SeExprLocalVarRef(_assignedType));
+
+    return _type;
 }
 
 
@@ -250,13 +282,32 @@ SeExprAssignNode::eval(SeVec3d& result) const
 }
 
 
-bool
-SeExprVecNode::prep(bool wantVec)
+SeExprType
+SeExprVecNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    // want scalar children, result is vector
-    if (!SeExprNode::prep(0)) return 0;
-    _isVec = wantVec;
-    return 1;
+    //assume that if wanted is not FP1, then it is FPN
+    // it is the caller's responsibility to make sure the returned types match
+    if(wanted.isFP1())
+        _type = SeExprType::FP1Type();
+    else
+        _type = SeExprType::FPNType(numChildren());
+
+    std::vector<SeExprNode*>::iterator       child   = _children.begin();
+    std::vector<SeExprNode*>::iterator const e_child = _children.end  ();
+
+    for(int count = 1; child != e_child; child++, count++) {
+        SeExprType childType = (*child)->prep(SeExprType::FP1Type(), env);
+        if(!childType.isValid())
+            _type = SeExprType::ErrorType();
+        else if(!childType.isa(SeExprType::FP1Type())) {
+            _type = SeExprType::ErrorType();
+            std::stringstream temp;
+            temp << count;
+            addError("Expected FP1 type in vector literal but found " + childType.toString() + " in position " + temp.str());
+        }
+    }
+
+    return _type;
 }
 
 
@@ -291,16 +342,56 @@ SeExprVecNode::value() const {
 };
 
 
-bool
-SeExprCondNode::prep(bool wantVec)
+SeExprType
+SeExprCondNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    bool valid=true;
-    // want scalar condition, result can be scalar or vector
-    if (!child(0)->prep(0)) valid=false;
-    if (!child(1)->prep(wantVec)) valid=false;
-    if (!child(2)->prep(wantVec)) valid=false;
-    _isVec = wantVec && (child(1)->isVec() || child(2)->isVec());
-    return valid;
+    //TODO: determine if extra environments are necessary - currently included, just in case
+    SeExprVarEnv           thenEnv,  elseEnv;
+    SeExprType   condType, thenType, elseType;
+
+    bool error = false;
+    _type = SeExprType::ErrorType();
+
+    condType = child(0)->prep(SeExprType::FP1Type(),env);
+
+    if(!condType.isValid())
+        error = true;
+    else if(!condType.isa(SeExprType::FP1Type())) {
+        error = true;
+        addError("Expected FP1 type in condition of ternary conditional expression but found " + condType.toString());
+    }
+
+    thenEnv  = SeExprVarEnv::newScope(env);
+    thenType = child(1)->prep(wanted, thenEnv);
+
+    elseEnv  = SeExprVarEnv::newScope(env);
+    elseType = child(2)->prep(wanted, elseEnv);
+
+    if(!thenType.isValid() ||
+       !elseType.isValid())
+        error = true;
+    else {
+        if(thenType.isa(wanted)) {
+            error = true;
+            addError("Expected " + wanted.toString() + " type from then branch of ternary conditional expression but found " + thenType.toString());
+        } else if(elseType.isa(wanted)) {
+            error = true;
+            addError("Expected " + wanted.toString() + " type from else branch of ternary conditional expression but found " + elseType.toString());
+        }
+    }
+
+    ///TODO: determine if this is needed (probably not)
+    if(env.changesMatch(thenEnv, elseEnv)) {
+        env.add(thenEnv);
+    } else {
+        error = true;
+        addError("Types of variables do not match after ternary conditional expression");
+    }
+
+    if(!error)
+        _type = thenType;
+
+    return _type;
 }
 
 
@@ -316,13 +407,39 @@ SeExprCondNode::eval(SeVec3d& result) const
 }
 
 
-bool
-SeExprAndNode::prep(bool wantVec)
+SeExprType
+SeExprAndNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    // want scalar children, result is scalar
-    if (!SeExprNode::prep(0)) return 0;
-    _isVec = 0;
-    return 1;
+    //TODO: determine if extra environment is necessary - currently included, just in case
+    SeExprVarEnv            secondEnv;
+    SeExprType   firstType, secondType;
+
+    bool error = false;
+    _type = SeExprType::ErrorType();
+
+    firstType = child(0)->prep(SeExprType::FP1Type(), env);
+
+    if(!firstType.isValid())
+        error = true;
+    else if(!firstType.isa(SeExprType::FP1Type())) {
+        error = true;
+        addError("Expected FP1 type from first operand of and expression but found " + firstType.toString());
+    }
+
+    secondEnv  = SeExprVarEnv::newScope(env);
+    secondType = child(1)->prep(SeExprType::FP1Type(), secondEnv);
+
+    if(!secondType.isValid())
+        error = true;
+    else if(!secondType.isa(SeExprType::FP1Type())) {
+        error = true;
+        addError("Expected FP1 type from second operand of and expression but found " + secondType.toString());
+    }
+
+    if(!error)
+        _type = SeExprType::FP1Type();
+
+    return _type;
 }
 
 
@@ -341,13 +458,39 @@ SeExprAndNode::eval(SeVec3d& result) const
 }
 
 
-bool
-SeExprOrNode::prep(bool wantVec)
+SeExprType
+SeExprOrNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    // want scalar children, result is scalar
-    if (!SeExprNode::prep(0)) return 0;
-    _isVec = 0;
-    return 1;
+    //TODO: determine if extra environment is necessary - currently included, just in case
+    SeExprVarEnv            secondEnv;
+    SeExprType   firstType, secondType;
+
+    bool error = false;
+    _type = SeExprType::ErrorType();
+
+    firstType = child(0)->prep(SeExprType::FP1Type(), env);
+
+    if(!firstType.isValid())
+        error = true;
+    else if(!firstType.isa(SeExprType::FP1Type())) {
+        error = true;
+        addError("Expected FP1 type from first operand of or expression but found " + firstType.toString());
+    }
+
+    secondEnv  = SeExprVarEnv::newScope(env);
+    secondType = child(1)->prep(SeExprType::FP1Type(), secondEnv);
+
+    if(!secondType.isValid())
+        error = true;
+    else if(!secondType.isa(SeExprType::FP1Type())) {
+        error = true;
+        addError("Expected FP1 type from second operand of or expression but found " + secondType.toString());
+    }
+
+    if(!error)
+        _type = SeExprType::FP1Type();
+
+    return _type;
 }
 
 
@@ -366,16 +509,37 @@ SeExprOrNode::eval(SeVec3d& result) const
 }
 
 
-bool
-SeExprSubscriptNode::prep(bool wantVec)
+SeExprType
+SeExprSubscriptNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    bool valid=true;
-    // want vector first child and scalar second child
-    // result is scalar
-    if (!child(0)->prep(1)) valid=false;
-    if (!child(1)->prep(0)) valid=false;
-    _isVec = 0;
-    return valid;
+    //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    SeExprType vecType, scriptType;
+
+    bool error = false;
+    _type = SeExprType::ErrorType();
+
+    vecType = child(0)->prep(SeExprType::NumericType(), env);
+
+    if(!vecType.isValid())
+        error = true;
+    else if(!vecType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from vector operand of subscript operator but found " + vecType.toString());
+    }
+
+    scriptType = child(1)->prep(SeExprType::FP1Type(), env);
+
+    if(!scriptType.isValid())
+        error = true;
+    else if(!scriptType.isa(SeExprType::FP1Type())) {
+        error = true;
+        addError("Expected FP1 type from subscript operand of subscript operator but found " + scriptType.toString());
+    }
+
+    if(!error)
+        _type = SeExprType::FP1Type();
+
+    return _type;
 }
 
 
@@ -407,6 +571,23 @@ SeExprSubscriptNode::eval(SeVec3d& result) const
 }
 
 
+SeExprType
+SeExprNegNode::prep(SeExprType wanted, SeExprVarEnv & env)
+{
+    _type = wanted.isNumeric() ? wanted : SeExprType::NumericType();
+
+    _type = child(0)->prep(_type, env);
+
+    if(_type.isValid() &&
+       !_type.isa(SeExprType::NumericType())) {
+        addError("Expected Numeric type from operand to negation operator but found " + _type.toString());
+        _type = SeExprType::ErrorType();
+    }
+
+    return _type;
+}
+
+
 void
 SeExprNegNode::eval(SeVec3d& result) const
 {
@@ -418,6 +599,23 @@ SeExprNegNode::eval(SeVec3d& result) const
 	result[1] = -a[1];
 	result[2] = -a[2];
     }
+}
+
+
+SeExprType
+SeExprInvertNode::prep(SeExprType wanted, SeExprVarEnv & env)
+{
+    _type = wanted.isNumeric() ? wanted : SeExprType::NumericType();
+
+    _type = child(0)->prep(_type, env);
+
+    if(_type.isValid() &&
+       !_type.isa(SeExprType::NumericType())) {
+        addError("Expected Numeric type from operand to inversion operator but found " + _type.toString());
+        _type = SeExprType::ErrorType();
+    }
+
+    return _type;
 }
 
 
@@ -435,6 +633,23 @@ SeExprInvertNode::eval(SeVec3d& result) const
 }
 
 
+SeExprType
+SeExprNotNode::prep(SeExprType wanted, SeExprVarEnv & env)
+{
+    _type = wanted.isNumeric() ? wanted : SeExprType::NumericType();
+
+    _type = child(0)->prep(_type, env);
+
+    if(_type.isValid() &&
+       !_type.isa(SeExprType::NumericType())) {
+        addError("Expected Numeric type from operand to not operator but found " + _type.toString());
+        _type = SeExprType::ErrorType();
+    }
+
+    return _type;
+}
+
+
 void
 SeExprNotNode::eval(SeVec3d& result) const
 {
@@ -449,24 +664,42 @@ SeExprNotNode::eval(SeVec3d& result) const
 }
 
 
-bool
-SeExprCompareEqNode::prep(bool wantVec)
+SeExprType
+SeExprEqNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    wantVec = true; // children can be vector for ==, !=
-    if (!SeExprNode::prep(wantVec)) return 0;
-    _isVec = 0; // result is always scalar
-    return 1;
-}
+    //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    SeExprType firstType, secondType;
 
+    bool error = false;
+    _type = SeExprType::ErrorType();
 
-bool
-SeExprCompareNode::prep(bool wantVec)
-{
+    firstType = child(0)->prep(SeExprType::NumericType(), env);
 
-    wantVec = false; // for <, >, <=, >=, only scalar values are used
-    if (!SeExprNode::prep(wantVec)) return 0;
-    _isVec = 0; // result is always scalar
-    return 1;
+    if(!firstType.isValid())
+        error = true;
+    else if(!firstType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from first operand to == operator but found" + firstType.toString());
+    }
+
+    secondType = child(1)->prep(SeExprType::NumericType(), env);
+
+    if(!secondType.isValid())
+        error = true;
+    else if(!secondType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from second operand to == operator but found" + secondType.toString());
+    }
+
+    if(!firstType.compatibleNum(secondType)) {
+        error = true;
+        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for == operator");
+    }
+
+    if(!error)
+        _type = SeExprType::FP1Type();
+
+    return _type;
 }
 
 
@@ -485,6 +718,45 @@ SeExprEqNode::eval(SeVec3d& result) const
 }
 
 
+SeExprType
+SeExprNeNode::prep(SeExprType wanted, SeExprVarEnv & env)
+{
+    //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    SeExprType firstType, secondType;
+
+    bool error = false;
+    _type = SeExprType::ErrorType();
+
+    firstType = child(0)->prep(SeExprType::NumericType(), env);
+
+    if(!firstType.isValid())
+        error = true;
+    else if(!firstType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from first operand to != operator but found" + firstType.toString());
+    }
+
+    secondType = child(1)->prep(SeExprType::NumericType(), env);
+
+    if(!secondType.isValid())
+        error = true;
+    else if(!secondType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from second operand to != operator but found" + secondType.toString());
+    }
+
+    if(!firstType.compatibleNum(secondType)) {
+        error = true;
+        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for != operator");
+    }
+
+    if(!error)
+        _type = SeExprType::FP1Type();
+
+    return _type;
+}
+
+
 void
 SeExprNeNode::eval(SeVec3d& result) const
 {
@@ -497,6 +769,45 @@ SeExprNeNode::eval(SeVec3d& result) const
     if (!child0->isVec()) a[1] = a[2] = a[0];
     if (!child1->isVec()) b[1] = b[2] = b[0];
     result[0] = a[0] != b[0] || a[1] != b[1] || a[2] != b[2];
+}
+
+
+SeExprType
+SeExprLtNode::prep(SeExprType wanted, SeExprVarEnv & env)
+{
+    //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    SeExprType firstType, secondType;
+
+    bool error = false;
+    _type = SeExprType::ErrorType();
+
+    firstType = child(0)->prep(SeExprType::NumericType(), env);
+
+    if(!firstType.isValid())
+        error = true;
+    else if(!firstType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from first operand to < operator but found" + firstType.toString());
+    }
+
+    secondType = child(1)->prep(SeExprType::NumericType(), env);
+
+    if(!secondType.isValid())
+        error = true;
+    else if(!secondType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from second operand to < operator but found" + secondType.toString());
+    }
+
+    if(!firstType.compatibleNum(secondType)) {
+        error = true;
+        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for < operator");
+    }
+
+    if(!error)
+        _type = SeExprType::FP1Type();
+
+    return _type;
 }
 
 
@@ -513,6 +824,45 @@ SeExprLtNode::eval(SeVec3d& result) const
 }
 
 
+SeExprType
+SeExprGtNode::prep(SeExprType wanted, SeExprVarEnv & env)
+{
+    //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    SeExprType firstType, secondType;
+
+    bool error = false;
+    _type = SeExprType::ErrorType();
+
+    firstType = child(0)->prep(SeExprType::NumericType(), env);
+
+    if(!firstType.isValid())
+        error = true;
+    else if(!firstType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from first operand to > operator but found" + firstType.toString());
+    }
+
+    secondType = child(1)->prep(SeExprType::NumericType(), env);
+
+    if(!secondType.isValid())
+        error = true;
+    else if(!secondType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from second operand to > operator but found" + secondType.toString());
+    }
+
+    if(!firstType.compatibleNum(secondType)) {
+        error = true;
+        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for > operator");
+    }
+
+    if(!error)
+        _type = SeExprType::FP1Type();
+
+    return _type;
+}
+
+
 void
 SeExprGtNode::eval(SeVec3d& result) const
 {
@@ -523,6 +873,45 @@ SeExprGtNode::eval(SeVec3d& result) const
     child1->eval(b);
 
     result[0] = a[0] > b[0];
+}
+
+
+SeExprType
+SeExprLeNode::prep(SeExprType wanted, SeExprVarEnv & env)
+{
+    //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    SeExprType firstType, secondType;
+
+    bool error = false;
+    _type = SeExprType::ErrorType();
+
+    firstType = child(0)->prep(SeExprType::NumericType(), env);
+
+    if(!firstType.isValid())
+        error = true;
+    else if(!firstType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from first operand to <= operator but found" + firstType.toString());
+    }
+
+    secondType = child(1)->prep(SeExprType::NumericType(), env);
+
+    if(!secondType.isValid())
+        error = true;
+    else if(!secondType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from second operand to <= operator but found" + secondType.toString());
+    }
+
+    if(!firstType.compatibleNum(secondType)) {
+        error = true;
+        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for <= operator");
+    }
+
+    if(!error)
+        _type = SeExprType::FP1Type();
+
+    return _type;
 }
 
 
@@ -539,6 +928,45 @@ SeExprLeNode::eval(SeVec3d& result) const
 }
 
 
+SeExprType
+SeExprGeNode::prep(SeExprType wanted, SeExprVarEnv & env)
+{
+    //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    SeExprType firstType, secondType;
+
+    bool error = false;
+    _type = SeExprType::ErrorType();
+
+    firstType = child(0)->prep(SeExprType::NumericType(), env);
+
+    if(!firstType.isValid())
+        error = true;
+    else if(!firstType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from first operand to >= operator but found" + firstType.toString());
+    }
+
+    secondType = child(1)->prep(SeExprType::NumericType(), env);
+
+    if(!secondType.isValid())
+        error = true;
+    else if(!secondType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from second operand to >= operator but found" + secondType.toString());
+    }
+
+    if(!firstType.compatibleNum(secondType)) {
+        error = true;
+        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for >= operator");
+    }
+
+    if(!error)
+        _type = SeExprType::FP1Type();
+
+    return _type;
+}
+
+
 void
 SeExprGeNode::eval(SeVec3d& result) const
 {
@@ -549,6 +977,45 @@ SeExprGeNode::eval(SeVec3d& result) const
     child1->eval(b);
 
     result[0] = a[0] >= b[0];
+}
+
+
+SeExprType
+SeExprAddNode::prep(SeExprType wanted, SeExprVarEnv & env)
+{
+    //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    SeExprType firstType, secondType;
+
+    bool error = false;
+    _type = SeExprType::ErrorType();
+
+    firstType = child(0)->prep(SeExprType::NumericType(), env);
+
+    if(!firstType.isValid())
+        error = true;
+    else if(!firstType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from first operand to + operator but found" + firstType.toString());
+    }
+
+    secondType = child(1)->prep(SeExprType::NumericType(), env);
+
+    if(!secondType.isValid())
+        error = true;
+    else if(!secondType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from second operand to + operator but found" + secondType.toString());
+    }
+
+    if(!firstType.compatibleNum(secondType)) {
+        error = true;
+        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for + operator");
+    }
+
+    if(!error)
+        _type = (firstType.isFP1() ? secondType : firstType);
+
+    return _type;
 }
 
 
@@ -573,6 +1040,45 @@ SeExprAddNode::eval(SeVec3d& result) const
 }
 
 
+SeExprType
+SeExprSubNode::prep(SeExprType wanted, SeExprVarEnv & env)
+{
+    //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    SeExprType firstType, secondType;
+
+    bool error = false;
+    _type = SeExprType::ErrorType();
+
+    firstType = child(0)->prep(SeExprType::NumericType(), env);
+
+    if(!firstType.isValid())
+        error = true;
+    else if(!firstType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from first operand to - operator but found" + firstType.toString());
+    }
+
+    secondType = child(1)->prep(SeExprType::NumericType(), env);
+
+    if(!secondType.isValid())
+        error = true;
+    else if(!secondType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from second operand to - operator but found" + secondType.toString());
+    }
+
+    if(!firstType.compatibleNum(secondType)) {
+        error = true;
+        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for - operator");
+    }
+
+    if(!error)
+        _type = (firstType.isFP1() ? secondType : firstType);
+
+    return _type;
+}
+
+
 void
 SeExprSubNode::eval(SeVec3d& result) const
 {
@@ -594,6 +1100,45 @@ SeExprSubNode::eval(SeVec3d& result) const
 }
 
 
+SeExprType
+SeExprMulNode::prep(SeExprType wanted, SeExprVarEnv & env)
+{
+    //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    SeExprType firstType, secondType;
+
+    bool error = false;
+    _type = SeExprType::ErrorType();
+
+    firstType = child(0)->prep(SeExprType::NumericType(), env);
+
+    if(!firstType.isValid())
+        error = true;
+    else if(!firstType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from first operand to * operator but found" + firstType.toString());
+    }
+
+    secondType = child(1)->prep(SeExprType::NumericType(), env);
+
+    if(!secondType.isValid())
+        error = true;
+    else if(!secondType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from second operand to * operator but found" + secondType.toString());
+    }
+
+    if(!firstType.compatibleNum(secondType)) {
+        error = true;
+        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for * operator");
+    }
+
+    if(!error)
+        _type = (firstType.isFP1() ? secondType : firstType);
+
+    return _type;
+}
+
+
 void
 SeExprMulNode::eval(SeVec3d& result) const
 {
@@ -612,6 +1157,45 @@ SeExprMulNode::eval(SeVec3d& result) const
 	if (!child1->isVec()) b[1] = b[2] = b[0];
 	result = a * b;
     }
+}
+
+
+SeExprType
+SeExprDivNode::prep(SeExprType wanted, SeExprVarEnv & env)
+{
+    //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    SeExprType firstType, secondType;
+
+    bool error = false;
+    _type = SeExprType::ErrorType();
+
+    firstType = child(0)->prep(SeExprType::NumericType(), env);
+
+    if(!firstType.isValid())
+        error = true;
+    else if(!firstType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from first operand to / operator but found" + firstType.toString());
+    }
+
+    secondType = child(1)->prep(SeExprType::NumericType(), env);
+
+    if(!secondType.isValid())
+        error = true;
+    else if(!secondType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from second operand to / operator but found" + secondType.toString());
+    }
+
+    if(!firstType.compatibleNum(secondType)) {
+        error = true;
+        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for / operator");
+    }
+
+    if(!error)
+        _type = (firstType.isFP1() ? secondType : firstType);
+
+    return _type;
 }
 
 
@@ -643,6 +1227,45 @@ static double niceMod(double a, double b)
 }
 
 
+SeExprType
+SeExprModNode::prep(SeExprType wanted, SeExprVarEnv & env)
+{
+    //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    SeExprType firstType, secondType;
+
+    bool error = false;
+    _type = SeExprType::ErrorType();
+
+    firstType = child(0)->prep(SeExprType::NumericType(), env);
+
+    if(!firstType.isValid())
+        error = true;
+    else if(!firstType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from first operand to % operator but found" + firstType.toString());
+    }
+
+    secondType = child(1)->prep(SeExprType::NumericType(), env);
+
+    if(!secondType.isValid())
+        error = true;
+    else if(!secondType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from second operand to % operator but found" + secondType.toString());
+    }
+
+    if(!firstType.compatibleNum(secondType)) {
+        error = true;
+        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for % operator");
+    }
+
+    if(!error)
+        _type = (firstType.isFP1() ? secondType : firstType);
+
+    return _type;
+}
+
+
 void
 SeExprModNode::eval(SeVec3d& result) const
 {
@@ -663,6 +1286,45 @@ SeExprModNode::eval(SeVec3d& result) const
 	result[1] = niceMod(a[1], b[1]);
 	result[2] = niceMod(a[2], b[2]);
     }
+}
+
+
+SeExprType
+SeExprExpNode::prep(SeExprType wanted, SeExprVarEnv & env)
+{
+    //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    SeExprType firstType, secondType;
+
+    bool error = false;
+    _type = SeExprType::ErrorType();
+
+    firstType = child(0)->prep(SeExprType::NumericType(), env);
+
+    if(!firstType.isValid())
+        error = true;
+    else if(!firstType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from first operand to ^ operator but found" + firstType.toString());
+    }
+
+    secondType = child(1)->prep(SeExprType::NumericType(), env);
+
+    if(!secondType.isValid())
+        error = true;
+    else if(!secondType.isa(SeExprType::NumericType())) {
+        error = true;
+        addError("Expected Numeric type from second operand to ^ operator but found" + secondType.toString());
+    }
+
+    if(!firstType.compatibleNum(secondType)) {
+        error = true;
+        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for ^ operator");
+    }
+
+    if(!error)
+        _type = (firstType.isFP1() ? secondType : firstType);
+
+    return _type;
 }
 
 
@@ -689,18 +1351,20 @@ SeExprExpNode::eval(SeVec3d& result) const
 }
 
 
-bool
-SeExprVarNode::prep(bool wantVec)
+SeExprType
+SeExprVarNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
+    _type = SeExprType::ErrorType();
+
     // ask expression to resolve var
-    _var = _expr->resolveLocalVar(name());
+    _var = env.find(name());
     if (!_var) _var = _expr->resolveVar(name());
-    if (!_var) {
+    if (!_var)
         addError(std::string("No variable named $")+name());
-	return 0;
-    }
-    _isVec = _var->isVec();
-    return 1;
+    else
+        _type = _var->type();
+
+    return _type;
 }
 
 
@@ -712,55 +1376,81 @@ SeExprVarNode::eval(SeVec3d& result) const
 }
 
 
-bool
-SeExprFuncNode::prep(bool wantVec)
+SeExprType
+SeExprNumNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
+    _type = SeExprType::FP1Type();
+
+    return _type;
+}
+
+
+SeExprType
+SeExprStrNode::prep(SeExprType wanted, SeExprVarEnv & env)
+{
+    _type = SeExprType::StringType();
+
+    return _type;
+}
+
+
+SeExprType
+SeExprFuncNode::prep(SeExprType wanted, SeExprVarEnv & env)
+{
+    bool error = false;
+    int  _dim  = 0;
+
+    _type = SeExprType::ErrorType();
+
     // ask expression to resolve func
     _func = _expr->resolveFunc(_name);
     // otherwise, look in global func table
     if (!_func) _func = SeExprFunc::lookup(_name);
-    if (!_func) {
-	addError("No function named "+_name);
-	return 0;
+
+    if(!_func) {
+        error = true;
+        addError("Function " + _name + " has no definition");
+        SeExprNode::prep(SeExprType::AnyType(), env);
+    } else if(!_func->funcx()) {
+        //every function should be a funcx
+        //TODO: make funcx default, so this check can be removed
+        error = true;
+        addError("Function " + _name + " does not have a valid form.");
+    }
+    else {
+        if(!_func->funcx()->isThreadSafe())
+            _expr->setThreadUnsafe(_name);
+	if(!(_func->funcx()->prep(this, wanted, env)).isValid())
+            error = true;
+        else {
+            SeExprType retType = _func->retType();
+
+            if(retType.isString() ||
+               retType.isFPN   ())
+                _type = retType;
+            else if(wanted.isFPN()) {
+                //check if function needs to be promoted to a vector
+                if(_func->isScalar()) {
+                    _dim = 1;
+                    for(int i = 0; i < numChildren(); i++)
+                        if(child(i)->type().isFPN()) {
+                            if(_dim == 1)
+                                _dim = child(i)->type().dim();
+                            else if(_dim != child(i)->type().dim()) {
+                                error = true;
+                                addError("Scalar Function Promotion Failed: Different dimensions among arguments");
+                            }
+                        }
+                    _type = SeExprType::FPNType(_dim);
+                }
+            }
+        }
     }
 
-    _nargs = numChildren();
-    if (_nargs < _func->minArgs()) {
-	addError("Too few args for function "+_name);
-	return 0;
-    }
-    if (_nargs > _func->maxArgs() && _func->maxArgs() >= 0) {
-	addError("Too many args for function "+_name);
-	return 0;
-    }
+    if(error)
+        _type = SeExprType::ErrorType();
 
-    // alloc storage for args
-    _scalarArgs.resize(_nargs);
-    _vecArgs.resize(_nargs);
-
-    // funcx is a catchall that does all its own processing
-    if (_func->type() == SeExprFunc::FUNCX) {
-	_isVec = 1; // assume vec result - funcx can override
-        if(!_func->funcx()->isThreadSafe()) _expr->setThreadUnsafe(_name);
-	return _func->funcx()->prep(this, wantVec);
-    }
-
-    // if a vector result is wanted or the function expects vector args,
-    // then prepare the arguments for vector evaluation
-    if (!SeExprNode::prep(wantVec || _func->hasVecArgs())){ return 0; }
-    
-    // a vector result will be produced if a vector result is wanted
-    // and the either the function can produce a vector or the function
-    // is purely scalar but one or more args are vectors.
-    _isVec = 0;
-    if (wantVec) {
-	if (_func->isVec()) _isVec = 1;
-	else if (!_func->hasVecArgs()) {
-	    for (int i = 0; i < _nargs; i++)
-		if (child(i)->isVec()) { _isVec = 1; break; }
-	}
-    }
-    return 1;
+    return _type;
 }
 
 SeVec3d*
