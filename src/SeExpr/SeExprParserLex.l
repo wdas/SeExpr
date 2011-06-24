@@ -88,6 +88,11 @@ IDENT                   [a-zA-Z_][a-zA-Z0-9_.]*
 %%
 BEGIN(0);
 
+extern                  { return EXTERN; }
+FLOAT                   { return FP; }
+STRING                  { return STRING; }
+
+
 if			{ return IF; }
 else			{ return ELSE; }
 

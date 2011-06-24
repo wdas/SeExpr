@@ -98,7 +98,7 @@ inline void Forget(SeExprNode* n)
 		      be freed with free() */
 }
 
-%token IF ELSE
+%token IF ELSE EXTERN FP STRING
 %token <s> NAME VAR STR
 %token <d> NUMBER
 %token AddEq SubEq MultEq DivEq ExpEq ModEq
@@ -115,7 +115,8 @@ inline void Forget(SeExprNode* n)
 %right UNARY '!' '~'
 %right '^'
 %left '['
-%type <n> optassigns assigns assign ifthenelse optelse e optargs args arg
+%type <n> module declarationList declaration typeDeclare typeListOptional typeList formalTypeListOptional formalTypeList
+%type <n> block optassigns assigns assign ifthenelse optelse e optargs args arg
 
 /* Some notes about the parse tree construction:
 
@@ -133,9 +134,54 @@ inline void Forget(SeExprNode* n)
 //       $foo or foo. Currently we allow either.
 
 /* The root expression rule */
-expr:
-      assigns e                 { ParseResult = NODE2(@$.first_column,@$.last_column,BlockNode, $1, $2); }
-    | e                         { ParseResult = $1; }
+module:
+      declarationList block     { ParseResult = $2; }//1; $1->addChild($2); }
+    | block                     { ParseResult = $1; }
+    ;
+
+declarationList:
+      declaration               { $$ = 0; }//NODE1(@$.first_column, @$.last_column, Node, $1); }
+    | declarationList declaration
+                                { $$ = 0; }//$1; $1->addChild($2); }
+    ;
+
+declaration:
+      EXTERN typeDeclare NAME '(' typeListOptional       ')'
+                                { $$ = 0; }
+    |        typeDeclare NAME '(' formalTypeListOptional ')' '{' block '}'
+                                { $$ = 0; }
+    ;
+
+typeDeclare:
+      FP                        { $$ = 0; }
+    | FP '[' NUMBER ']'         { $$ = 0; }
+    | STRING                    { $$ = 0; }
+    ;
+
+typeListOptional:
+      /* empty */               { $$ = 0; }
+    | typeList                  { $$ = $1; }
+    ;
+
+typeList:
+      typeDeclare               { $$ = $1; }
+    | typeList ',' typeDeclare  { $$ = $1; }
+    ;
+
+formalTypeListOptional:
+      /* empty */               { $$ = 0; }
+    | formalTypeList            { $$ = $1; }
+    ;
+
+formalTypeList:
+      typeDeclare VAR           { $$ = 0; }
+    | formalTypeList ',' typeDeclare VAR
+                                { $$ = $1; }
+    ;
+
+block:
+      assigns e                 { $$ = NODE2(@$.first_column,@$.last_column,BlockNode, $1, $2); }
+    | e                         { $$ = $1; }
     ;
 
 /* local variable assignments */
