@@ -56,6 +56,10 @@ private:
     //! Simple variable that just returns its internal value
     struct SimpleVar:public SeExprVarRef
     {
+	SimpleVar()
+	    : SeExprVarRef(SeExprType::FP1Type()), val(0.0)
+	{}
+
         double val; // independent variable
         void eval(const SeExprVarNode* node,SeVec3d& result)
         {result[0]=val;}

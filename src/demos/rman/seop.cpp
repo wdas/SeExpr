@@ -191,7 +191,10 @@ namespace{
     class SeRmanVar : public SeExprVarRef
     {
      public:
-	SeRmanVar(ThreadData& td) : td(td), index(0) {}
+        SeRmanVar(ThreadData& td)
+	    : SeExprVarRef(SeExprType::FPNType(3)), td(td), index(0)
+	{}
+	//SeRmanVar(ThreadData& td) : td(td), index(0) {}
 	virtual bool isVec() { return 1; } // treat all vars as vectors
 	void setIndex(int i) { index = i; }
 	virtual void eval(const SeExprVarNode* node, SeVec3d& result)

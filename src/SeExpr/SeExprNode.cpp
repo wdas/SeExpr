@@ -80,7 +80,15 @@ SeExprNode::SeExprNode(const SeExpression* expr)
 }
 
 
-SeExprNode::SeExprNode(const SeExpression* expr, SeExprNode* a)
+SeExprNode::SeExprNode(const SeExpression* expr,
+                       const SeExprType & type)
+    : _expr(expr), _parent(0), _isVec(0), _type(type)
+{
+}
+
+
+SeExprNode::SeExprNode(const SeExpression* expr,
+                       SeExprNode* a)
     : _expr(expr), _parent(0), _isVec(0)
 {
     _children.reserve(1);
@@ -88,7 +96,19 @@ SeExprNode::SeExprNode(const SeExpression* expr, SeExprNode* a)
 }
 
 
-SeExprNode::SeExprNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b)
+SeExprNode::SeExprNode(const SeExpression* expr,
+                       SeExprNode* a,
+                       const SeExprType & type)
+    : _expr(expr), _parent(0), _isVec(0), _type(type)
+{
+    _children.reserve(1);
+    addChild(a);
+}
+
+
+SeExprNode::SeExprNode(const SeExpression* expr,
+                       SeExprNode* a,
+                       SeExprNode* b)
     : _expr(expr), _parent(0), _isVec(0)
 {
     _children.reserve(2);
@@ -97,9 +117,37 @@ SeExprNode::SeExprNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b)
 }
 
 
-SeExprNode::SeExprNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b,
+SeExprNode::SeExprNode(const SeExpression* expr,
+                       SeExprNode* a,
+                       SeExprNode* b,
+                       const SeExprType & type)
+    : _expr(expr), _parent(0), _isVec(0), _type(type)
+{
+    _children.reserve(2);
+    addChild(a);
+    addChild(b);
+}
+
+
+SeExprNode::SeExprNode(const SeExpression* expr,
+                       SeExprNode* a,
+                       SeExprNode* b,
 		       SeExprNode* c)
     : _expr(expr), _parent(0), _isVec(0)
+{
+    _children.reserve(3);
+    addChild(a);
+    addChild(b);
+    addChild(c);
+}
+
+
+SeExprNode::SeExprNode(const SeExpression* expr,
+                       SeExprNode* a,
+                       SeExprNode* b,
+		       SeExprNode* c,
+                       const SeExprType & type)
+    : _expr(expr), _parent(0), _isVec(0), _type(type)
 {
     _children.reserve(3);
     addChild(a);
@@ -275,8 +323,9 @@ SeExprAssignNode::eval(SeVec3d& result) const
 	// eval expression and store in variable
 	const SeExprNode* node = child(0);
 	node->eval(_var->val);
-	if (_var->isVec() && !node->isVec())
-	    _var->val[1] = _var->val[2] = _var->val[0];
+        //assume that eval made the correct assignment
+	//if (_var->isVec() && !node->isVec())
+        //_var->val[1] = _var->val[2] = _var->val[0];
     }
     else result = 0.0;
 }

@@ -52,11 +52,11 @@ class SeExpression;
 //! abstract class for implementing variable references
 class SeExprVarRef
 {
- public:
     SeExprVarRef()
         : _type(SeExprType::ErrorType())
     {};
 
+ public:
     SeExprVarRef(const SeExprType & type)
         : _type(type)
     {};
@@ -81,6 +81,10 @@ class SeExprVarRef
 class SeExprVectorVarRef : public SeExprVarRef
 {
  public:
+    SeExprVectorVarRef()
+        : SeExprVarRef(SeExprType::FPNType(3))
+    {};
+
     virtual bool isVec() { return 1; }
 };
 
@@ -89,24 +93,26 @@ class SeExprVectorVarRef : public SeExprVarRef
 class SeExprScalarVarRef : public SeExprVarRef
 {
  public:
+    SeExprScalarVarRef()
+        : SeExprVarRef(SeExprType::FP1Type())
+    {};
+
     virtual bool isVec() { return 0; }
 };
 
 /// uses internally to represent local variables
 class SeExprLocalVarRef : public SeExprVarRef
 {
+    SeExprLocalVarRef()
+        : SeExprVarRef(SeExprType::ErrorType())
+    {};
+
  public:
     SeVec3d val;
-
-    SeExprLocalVarRef()
-        :SeExprVarRef()
-    {};
 
     SeExprLocalVarRef(const SeExprType & type)
         :SeExprVarRef(type)
     {};
-
-    bool isVec() { return 1; };
 
     virtual void eval(const SeExprVarNode*, SeVec3d& result) 
     { result = val; }
@@ -303,9 +309,9 @@ class SeExpression
 
     /** get local variable reference. This is potentially useful for expression debuggers
         and/or uses of expressions where mutable variables are desired */
-    SeExprLocalVarRef* getLocalVar(const char* n) const {
-	return &_localVars[n]; 
-    }
+    /* SeExprLocalVarRef* getLocalVar(const char* n) const { */
+    /*     return &_localVars[n];  */
+    /* } */
 };
 
 #endif

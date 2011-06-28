@@ -51,8 +51,14 @@ class SeExprType {
                tANY};
 
     SeExprType()
-        : _type(tANY),_n(1)
+        : _type(tERROR),_n(1)
     {};
+
+    SeExprType(Type type, int n)
+        : _type(type), _n(n)
+    {
+        assert(n >= 1);
+    };
 
     inline Type type() const { return _type; };
     inline int  dim () const { return _n;    };
@@ -81,6 +87,7 @@ class SeExprType {
 
     inline bool isUnderAny    () const { return isNone  () || isUnderValue(); };
     inline bool isUnderValue  () const { return isString() || isFP        (); };
+    inline bool isUnderNumeric() const { return isFP    ();                   };
 
     inline bool isa(const SeExprType & other) const {
         if(*this == other)           //this and other are equal
@@ -117,8 +124,8 @@ class SeExprType {
     ///  either both have the same dimension or
     ///         at least one has dimension of 1 (is a scalar)
     inline bool compatibleNum(const SeExprType & other) const {
-        return (isNumeric()       &&
-                other.isNumeric() &&
+        return (isUnderNumeric()       &&
+                other.isUnderNumeric() &&
                 (dim()       == other.dim() ||
                  dim()       == 1           ||
                  other.dim() == 1));
@@ -144,12 +151,6 @@ class SeExprType {
     };
 
  private:
-    SeExprType(Type type, int n)
-        : _type(type), _n(n)
-    {
-        assert(n >= 1);
-    };
-
     Type _type;
     int  _n;
 };

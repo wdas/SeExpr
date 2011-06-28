@@ -39,7 +39,9 @@
 #include <vector>
 #include <string>
 #include <stdio.h>
+#include <iostream>
 #endif
+#include "SeExprType.h"
 #include "SeExprNode.h"
 #include "SeExprParser.h"
 #include "SeExpression.h"
@@ -87,6 +89,7 @@ inline void Forget(SeExprNode* n)
 #define NODE1(startPos,endPos,name,a) Remember(new SeExpr##name(Expr,a),startPos,endPos)
 #define NODE2(startPos,endPos,name,a,b) Remember(new SeExpr##name(Expr,a,b),startPos,endPos)
 #define NODE3(startPos,endPos,name,a,b,c) Remember(new SeExpr##name(Expr,a,b,c),startPos,endPos)
+#define NODE4(startPos,endPos,name,a,b,c,t) Remember(new SeExpr##name(Expr,a,b,c,t),startPos,endPos)
 %}
 
 %union {
@@ -96,6 +99,10 @@ inline void Forget(SeExprNode* n)
     char* s;       /* return value for name tokens.  Note: the string
 		      is allocated with strdup() in the lexer and must
 		      be freed with free() */
+    struct {
+        SeExprType::Type type;
+        int              n;
+    } t;  // return value for types
 }
 
 %token IF ELSE EXTERN FP STRING
@@ -115,7 +122,8 @@ inline void Forget(SeExprNode* n)
 %right UNARY '!' '~'
 %right '^'
 %left '['
-%type <n> module declarationList declaration typeDeclare typeListOptional typeList formalTypeListOptional formalTypeList
+%type <t> typeDeclare
+%type <n> module declarationList declaration typeListOptional typeList formalTypeListOptional formalTypeList
 %type <n> block optassigns assigns assign ifthenelse optelse e optargs args arg
 
 /* Some notes about the parse tree construction:
@@ -153,30 +161,47 @@ declaration:
     ;
 
 typeDeclare:
-      FP                        { $$ = 0; }
-    | FP '[' NUMBER ']'         { $$ = 0; }
-    | STRING                    { $$ = 0; }
+      FP                        { $$.type = SeExprType::tFP;
+                                  $$.n    = 1; }
+    | FP '[' NUMBER ']'         { $$.type = SeExprType::tFP;
+                                  $$.n    = $3; }
+    | STRING                    { $$.type = SeExprType::tSTRING;
+                                  $$.n    = 1; }
     ;
 
 typeListOptional:
-      /* empty */               { $$ = 0; }
+      /* empty */               { $$ = NODE(@$.first_column, @$.last_column, Node); }
     | typeList                  { $$ = $1; }
     ;
 
 typeList:
-      typeDeclare               { $$ = $1; }
-    | typeList ',' typeDeclare  { $$ = $1; }
+      typeDeclare               { $$ = NODE(@$.first_column, @$.last_column, Node);
+                                  SeExprType type = SeExprType($1.type, $1.n);
+                                  SeExprNode* varNode = NODE2(@$.first_column, @$.last_column, VarNode, 0, type);
+                                  $$->addChild(varNode); }
+    | typeList ',' typeDeclare  { $$ = $1;
+                                  SeExprType type = SeExprType($3.type, $3.n);
+                                  SeExprNode* varNode = NODE2(@3.first_column, @3.last_column, VarNode, 0, type);
+                                  $$->addChild(varNode); }
     ;
 
 formalTypeListOptional:
-      /* empty */               { $$ = 0; }
+      /* empty */               { $$ = NODE(@$.first_column, @$.last_column, Node); }
     | formalTypeList            { $$ = $1; }
     ;
 
 formalTypeList:
-      typeDeclare VAR           { $$ = 0; }
+      typeDeclare VAR           { $$ = NODE(@$.first_column, @$.last_column, Node);
+                                  SeExprType type = SeExprType($1.type, $1.n);
+                                  SeExprNode* varNode = NODE2(@$.first_column, @$.last_column, VarNode, $2, type);
+                                  $$->addChild(varNode);
+                                  free($2); }
     | formalTypeList ',' typeDeclare VAR
-                                { $$ = $1; }
+                                { $$ = $1;
+                                  SeExprType type = SeExprType($3.type, $3.n);
+                                  SeExprNode* varNode = NODE2(@3.first_column, @4.last_column, VarNode, $4, type);
+                                  $$->addChild(varNode);
+                                  free($4); }
     ;
 
 block:

@@ -55,10 +55,30 @@ class SeExprFunc;
 class SeExprNode {
 public:
     SeExprNode(const SeExpression* expr);
+    SeExprNode(const SeExpression* expr,
+               const SeExprType & type);
     /// These constructors supply one or more children.
-    SeExprNode(const SeExpression* expr, SeExprNode* a);
-    SeExprNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b);
-    SeExprNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b, SeExprNode* c);
+    SeExprNode(const SeExpression* expr,
+               SeExprNode* a);
+    SeExprNode(const SeExpression* expr,
+               SeExprNode* a,
+               const SeExprType & type);
+    SeExprNode(const SeExpression* expr,
+               SeExprNode* a,
+               SeExprNode* b);
+    SeExprNode(const SeExpression* expr,
+               SeExprNode* a,
+               SeExprNode* b,
+               const SeExprType & type);
+    SeExprNode(const SeExpression* expr,
+               SeExprNode* a,
+               SeExprNode* b,
+               SeExprNode* c);
+    SeExprNode(const SeExpression* expr,
+               SeExprNode* a,
+               SeExprNode* b,
+               SeExprNode* c,
+               const SeExprType & type);
     virtual ~SeExprNode();
 
     /// True if node has a vector result.
@@ -421,6 +441,10 @@ class SeExprVarNode : public SeExprNode
 public:
     SeExprVarNode(const SeExpression* expr, const char* name) :
 	SeExprNode(expr), _name(name), _var(0), _data(0) 
+    { expr->addVar(name); }
+
+    SeExprVarNode(const SeExpression* expr, const char* name, const SeExprType & type) :
+       SeExprNode(expr, type), _name(name), _var(0), _data(0)
     { expr->addVar(name); }
 
     virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);

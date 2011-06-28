@@ -55,8 +55,14 @@ public:
     //! Simple variable that just returns its internal value
     struct Var:public SeExprVarRef
     {
-        Var(const double val):val(val){}
-        Var(){}
+        Var(const double val)
+	    : SeExprVarRef(SeExprType::FP1Type()), val(val)
+	{}
+
+	Var()
+	    : SeExprVarRef(SeExprType::FP1Type()), val(0.0)
+	{}
+
         double val; // independent variable
         void eval(const SeExprVarNode* node,SeVec3d& result)
         {result[0]=val;}
