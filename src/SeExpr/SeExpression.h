@@ -190,10 +190,10 @@ class SeExpression
     void reset();
 
     /** override resolveVar to add external variables */
-    virtual SeExprVarRef* resolveVar(const std::string& name) const {return 0;}
+    virtual SeExprVarRef* resolveVar(const std::string& /*name*/) const {return 0;}
 
     /** override resolveFunc to add external functions */
-    virtual SeExprFunc* resolveFunc(const std::string& name) const {return 0;}
+    virtual SeExprFunc* resolveFunc(const std::string& /*name*/) const {return 0;}
 
     /** records an error in prep or parse stage */
     void addError(const std::string& error,const int startPos,const int endPos) const

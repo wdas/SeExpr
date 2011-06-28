@@ -536,7 +536,7 @@ static const char* vnoise_docstring=
     static const char* cnoise_docstring="color cnoise ( vector v)\n"
         "color noise formed with original perlin noise at location (C2 interpolant)";
 
-    double snoise4(int n, const SeVec3d* args)
+    double snoise4(int /*n*/, const SeVec3d* args)
     {
 	double result;
 	double procargs[4] = { args[0][0], args[0][1], args[0][2], args[1][0] };
@@ -547,7 +547,7 @@ static const char* vnoise_docstring=
         "4D signed noise w/ range -1 to 1 formed with original perlin noise at location (C2 interpolant)";
 
 
-    SeVec3d vnoise4(int n, const SeVec3d* args)
+    SeVec3d vnoise4(int /*n*/, const SeVec3d* args)
     {
 	SeVec3d result;
 	double procargs[4] = { args[0][0], args[0][1], args[0][2], args[1][0] };
@@ -1007,7 +1007,7 @@ static const char* vnoise_docstring=
 	typedef SeVec3d VoronoiFunc(VoronoiPointData& data, int n, const SeVec3d* args);
 	CachedVoronoiFunc(VoronoiFunc* vfunc) : SeExprFuncX(true),_vfunc(vfunc) {}
 
-	virtual bool prep(SeExprFuncNode* node, bool wantVec)
+	virtual bool prep(SeExprFuncNode* node, bool /*wantVec*/)
 	{
 	    node->setData(new VoronoiPointData);
 	    // force wantVec to true - args are always vecs even of result is not
@@ -1293,7 +1293,7 @@ static const char* vnoise_docstring=
 
     class CurveFuncX:public SeExprFuncX
     {
-        virtual bool prep(SeExprFuncNode* node, bool wantVec)
+        virtual bool prep(SeExprFuncNode* node, bool /*wantVec*/)
         {
             // check number of arguments
             int nargs = node->nargs();
@@ -1366,7 +1366,7 @@ static const char* vnoise_docstring=
     
     class CCurveFuncX:public SeExprFuncX
     {
-        virtual bool prep(SeExprFuncNode* node, bool wantVec)
+        virtual bool prep(SeExprFuncNode* node, bool /*wantVec*/)
         {
             // check number of arguments
             int nargs = node->nargs();
@@ -1443,7 +1443,7 @@ static const char* vnoise_docstring=
             std::string format;
         };
             
-        virtual bool prep(SeExprFuncNode* node, bool wantVec)
+        virtual bool prep(SeExprFuncNode* node, bool /*wantVec*/)
         {
             // check number of arguments
             int nargs = node->nargs();
@@ -1544,7 +1544,7 @@ static const char* vnoise_docstring=
         "printf(string format,[vec0, vec1,  ...])\n"
         "Prints out a string to STDOUT, Format parameter allowed is %v";
 
-    void defineBuiltins(SeExprFunc::Define define,SeExprFunc::Define3 define3)
+    void defineBuiltins(SeExprFunc::Define /*define*/,SeExprFunc::Define3 define3)
     {
 	// functions from math.h (global namespace)
 //#define FUNC(func)	  define(#func, SeExprFunc(::func))

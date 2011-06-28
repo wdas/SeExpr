@@ -53,7 +53,7 @@ namespace{
 	return result;
     }
 
-    int SeTokenize(RslContext* ctx, int argc, const RslArg* argv[])
+    int SeTokenize(RslContext* /*ctx*/, int /*argc*/, const RslArg* argv[])
     {
         RslStringIter result(argv[0]);
         const char* str = *RslStringIter(argv[1]);

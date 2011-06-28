@@ -194,7 +194,7 @@ SeExprBlockNode::eval(SeVec3d& result) const
 
 
 bool
-SeExprIfThenElseNode::prep(bool wantVec)
+SeExprIfThenElseNode::prep(bool /*wantVec*/)
 {
     bool valid=true;
     // prepare condition expression (request vector type)
@@ -223,7 +223,7 @@ SeExprIfThenElseNode::eval(SeVec3d& result) const
 
 
 bool
-SeExprAssignNode::prep(bool wantVec)
+SeExprAssignNode::prep(bool /*wantVec*/)
 {
     // prepare expression
     if (!child(0)->prep(1)) return 0;
@@ -300,7 +300,7 @@ SeExprCondNode::eval(SeVec3d& result) const
 
 
 bool
-SeExprAndNode::prep(bool wantVec)
+SeExprAndNode::prep(bool /*wantVec*/)
 {
     // want scalar children, result is scalar
     if (!SeExprNode::prep(0)) return 0;
@@ -325,7 +325,7 @@ SeExprAndNode::eval(SeVec3d& result) const
 
 
 bool
-SeExprOrNode::prep(bool wantVec)
+SeExprOrNode::prep(bool /*wantVec*/)
 {
     // want scalar children, result is scalar
     if (!SeExprNode::prep(0)) return 0;
@@ -350,7 +350,7 @@ SeExprOrNode::eval(SeVec3d& result) const
 
 
 bool
-SeExprSubscriptNode::prep(bool wantVec)
+SeExprSubscriptNode::prep(bool /*wantVec*/)
 {
     bool valid=true;
     // want vector first child and scalar second child
@@ -673,7 +673,7 @@ SeExprExpNode::eval(SeVec3d& result) const
 
 
 bool
-SeExprVarNode::prep(bool wantVec)
+SeExprVarNode::prep(bool /*wantVec*/)
 {
     // ask expression to resolve var
     _var = _expr->resolveLocalVar(name());

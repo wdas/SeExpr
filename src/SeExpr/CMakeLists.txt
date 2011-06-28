@@ -92,10 +92,15 @@ endif( (BISON_EXE STREQUAL "BISON_EXE-NOTFOUND") OR (FLEX_EXE STREQUAL "FLEX_EXE
 
 ## Make the SeExpr library
 ADD_LIBRARY (SeExpr SHARED ${io_cpp} ${core_cpp} ${parser_cpp})
+ADD_LIBRARY (SeExpr-static  ${io_cpp} ${core_cpp} ${parser_cpp})
+SET_TARGET_PROPERTIES(SeExpr-static PROPERTIES OUTPUT_NAME "SeExpr")
+
+
 IF(NOT WIN32)
    TARGET_LINK_LIBRARIES(SeExpr "dl" "pthread")
+   TARGET_LINK_LIBRARIES(SeExpr-static "dl" "pthread")
 ENDIF(NOT WIN32)
 ## Install binary and includes
 FILE(GLOB public_includes "*.h")
-INSTALL (TARGETS SeExpr DESTINATION lib)
+INSTALL (TARGETS SeExpr SeExpr-static DESTINATION lib64)
 INSTALL (FILES ${public_includes} DESTINATION include)

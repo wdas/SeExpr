@@ -88,7 +88,7 @@ private:
 	
 	SeVec3d val; // independent variable
 	
-	void eval(const SeExprVarNode* node,SeVec3d& result)
+	void eval(const SeExprVarNode* /*node*/,SeVec3d& result)
 	{
 	    result = val;
 	}
@@ -121,7 +121,7 @@ void quit(const std::string & str) {
 };
 
 
-int main(int argc,char *argv[])
+int main()
 {
     CalculatorExpr expr;
     std::string str;

@@ -57,7 +57,7 @@ private:
     struct SimpleVar:public SeExprScalarVarRef
     {
         double val; // independent variable
-        void eval(const SeExprVarNode* node,SeVec3d& result)
+        void eval(const SeExprVarNode* /*node*/,SeVec3d& result)
         {result[0]=val;}
     };
     

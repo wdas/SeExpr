@@ -441,7 +441,7 @@ public:
     SeExprStrNode(const SeExpression* expr, const char* str) :
 	SeExprNode(expr), _str(str) {}
 
-    virtual bool prep(bool wantVec)
+    virtual bool prep(bool /*wantVec*/)
     { addError("Invalid string parameter: "+_str); return 0; }
 
     virtual void eval(SeVec3d& result) const { result[0] = 0; }

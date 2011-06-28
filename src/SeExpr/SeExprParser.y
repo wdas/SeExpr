@@ -310,7 +310,7 @@ extern void resetCounters();
 static SeExprInternal::Mutex mutex;
 
 bool SeExprParse(SeExprNode*& parseTree, std::string& error, int& errorStart, int& errorEnd,
-		 const SeExpression* expr, const char* str, bool wantVec)
+    const SeExpression* expr, const char* str, bool /*wantVec*/)
 {
     SeExprInternal::AutoMutex locker(mutex);
 

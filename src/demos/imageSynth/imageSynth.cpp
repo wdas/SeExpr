@@ -58,7 +58,7 @@ public:
         Var(const double val):val(val){}
         Var(){}
         double val; // independent variable
-        void eval(const SeExprVarNode* node,SeVec3d& result)
+        void eval(const SeExprVarNode* /*node*/,SeVec3d& result)
         {result[0]=val;}
     };
     //! variable map
