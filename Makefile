@@ -1,9 +1,15 @@
+
+prefix ?= $(CURDIR)/$(shell uname)-$(shell fa.arch -r)-$(shell uname -m)-optimize
+DESTDIR =
+
 all:
 	mkdir -p build
 	cd build; cmake ../
 	cd build; make -j 32 doc all
-	cd build; make install
 clean:
-	echo cleaned
+	rm -rf build
 install: all
-	echo installed
+	cd build; make install
+	echo "lib64" > ${DESTDIR}${prefix}/.release.SeExpr
+	echo "share" >> ${DESTDIR}${prefix}/.release.SeExpr
+	echo "include" >> ${DESTDIR}${prefix}/.release.SeExpr
