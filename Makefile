@@ -3,3 +3,7 @@ all:
 	cd build; cmake ../
 	cd build; make -j 32 doc all
 	cd build; make install
+clean:
+	echo cleaned
+install: all
+	echo installed
