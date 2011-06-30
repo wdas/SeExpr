@@ -123,8 +123,9 @@ int main(int argc,char *argv[])
             double x=double(dx+i)/double(w)*(xmax-xmin)+xmin;
             // prep the expression engine for evaluation
             expr.setX(x);
-            // evaluate and pull scalar value
-            SeVec3d val=expr.evaluate();
+            // evaluate and pull scalar value - currently does not work
+            //TODO: fix eval and then use actual call
+            SeVec3d val=0.0;//expr.evaluate();
             double y=val[0];
             // transform from logical to device coordinate
             int j=(y-ymin)/(ymax-ymin)*h;

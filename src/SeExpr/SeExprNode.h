@@ -508,11 +508,13 @@ public:
     }
     virtual ~SeExprFuncNode() { delete _data; }
 
+    //! return true if no errors
+    bool prepArgs(std::string const & name, SeExprType wanted, SeExprVarEnv & env);
+
     virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
     void setIsVec(bool isVec) { _isVec = isVec; }
     const char* name() const { return _name.c_str(); }
-
 
     //! return the number of arguments
     int nargs() const { return _nargs; }

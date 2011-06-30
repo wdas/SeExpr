@@ -1015,17 +1015,20 @@ static const char* vnoise_docstring=
             SeExprType _type = SeExprFuncX::prep(node, SeExprType::FPNType(3), env);
             {
                 //isScalar computation
-                _isScalar = true;
-                int n = node->numChildren();
-                for(int i = 0; _isScalar && i < n; i++)
-                    _isScalar = node->child(i)->type().isFP1();
+                _isScalar = false;
+                // int n = node->numChildren();
+                // for(int i = 0; _isScalar && i < n; i++)
+                //     _isScalar = node->child(i)->type().isFP1();
             }
 	    return _type;
             //return SeExprFuncX::prep(node, true);
 	}
 
-            //TODO: check that this is correct
+        //TODO: check that this is correct
         virtual bool isScalar() const { return _isScalar; }
+
+        //TODO: check that this is correct
+        virtual SeExprType retType() const { return SeExprType::FPNType(3); }
 
 	virtual void eval(const SeExprFuncNode* node, SeVec3d& result) const
 	{
@@ -1375,6 +1378,9 @@ static const char* vnoise_docstring=
         //TODO: check that this is correct
         virtual bool isScalar() const { return _isScalar; }
 
+        //TODO: check that this is correct
+        virtual SeExprType retType() const { return SeExprType::FP1Type(); }
+
         virtual void eval(const SeExprFuncNode* node, SeVec3d& result) const 
         {
             SeVec3d param;
@@ -1475,6 +1481,9 @@ static const char* vnoise_docstring=
         
         //TODO: check that this is correct
         virtual bool isScalar() const { return _isScalar; }
+
+        //TODO: check that this is correct
+        virtual SeExprType retType() const { return SeExprType::FPNType(3); }
 
         virtual void eval(const SeExprFuncNode* node, SeVec3d& result) const 
         {
@@ -1603,7 +1612,10 @@ static const char* vnoise_docstring=
         }
 
         //TODO: check that this is correct
-        virtual bool isScalar() const { return _isScalar; }
+        virtual bool isScalar() const { return true; };
+
+        //TODO: check that this is correct
+        virtual SeExprType retType() const { return SeExprType::FP1Type(); };
 
         virtual void eval(const SeExprFuncNode* node, SeVec3d& result) const 
         {

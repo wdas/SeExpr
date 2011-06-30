@@ -66,7 +66,8 @@ public:
             return wanted;
         }
 
-        virtual bool isScalar() const { return true; };
+        virtual bool       isScalar() const { return true;                  };
+        virtual SeExprType retType () const { return SeExprType::FP1Type(); };
 
         void eval(const SeExprFuncNode* node,SeVec3d& result) const
         {result=SeVec3d();}

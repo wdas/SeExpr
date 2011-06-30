@@ -64,7 +64,8 @@ public:
     /** prep the expression by doing all type checking argument checking, etc. */
     virtual SeExprType prep(SeExprFuncNode* node, SeExprType wanted, SeExprVarEnv & env);
 
-    virtual bool isScalar() const = 0;
+    virtual bool       isScalar() const = 0;
+    virtual SeExprType retType () const = 0;
 
     /** evaluate the expression. the given node is where in the parse tree
         the evaluation is for */
@@ -150,47 +151,72 @@ public:
 	// extension type
 	FUNCX
     };
-    bool hasVecArgs() const { return _type >= VEC; }
-    bool isVec() const { return _type >= VECVEC; }
 
-    bool isScalar() const { return !funcx() ? funcx()->isScalar() : false; };
+    bool isScalar() const { return _scalar; };
 
-    SeExprFunc() : _type(NONE), _func(0), _minargs(0), _maxargs(0) {}
-
+    SeExprFunc()
+        : _type(NONE), _retType(SeExprType::NoneType()), _scalar(false), _func(0), _minargs(0), _maxargs(0)
+    {};
     //! No argument function
-    SeExprFunc(Func0* f) : _type(FUNC0), _func((void*)f), _minargs(0), _maxargs(0) {}
+    SeExprFunc(Func0* f)
+        : _type(FUNC0), _retType(SeExprType::FP1Type()), _scalar(true), _func((void*)f), _minargs(0), _maxargs(0)
+    {};
     //! User defined function with prototype double f(double)
-    SeExprFunc(Func1* f) : _type(FUNC1), _func((void*)f), _minargs(1), _maxargs(1) {}
+    SeExprFunc(Func1* f)
+        : _type(FUNC1), _retType(SeExprType::FP1Type()), _scalar(true), _func((void*)f), _minargs(1), _maxargs(1)
+    {};
     //! User defined function with prototype double f(double,double)
-    SeExprFunc(Func2* f) : _type(FUNC2), _func((void*)f), _minargs(2), _maxargs(2) {}
+    SeExprFunc(Func2* f)
+        : _type(FUNC2), _retType(SeExprType::FP1Type()), _scalar(true), _func((void*)f), _minargs(2), _maxargs(2)
+    {};
     //! User defined function with prototype double f(double,double,double)
-    SeExprFunc(Func3* f) : _type(FUNC3), _func((void*)f), _minargs(3), _maxargs(3) {}
+    SeExprFunc(Func3* f)
+        : _type(FUNC3), _retType(SeExprType::FP1Type()), _scalar(true), _func((void*)f), _minargs(3), _maxargs(3)
+    {};
     //! User defined function with prototype double f(double,double,double,double)
-    SeExprFunc(Func4* f) : _type(FUNC4), _func((void*)f), _minargs(4), _maxargs(4) {}
+    SeExprFunc(Func4* f)
+        : _type(FUNC4), _retType(SeExprType::FP1Type()), _scalar(true), _func((void*)f), _minargs(4), _maxargs(4)
+    {};
     //! User defined function with prototype double f(double,double,double,double,double)
-    SeExprFunc(Func5* f) : _type(FUNC5), _func((void*)f), _minargs(5), _maxargs(5) {}
+    SeExprFunc(Func5* f)
+        : _type(FUNC5), _retType(SeExprType::FP1Type()), _scalar(true), _func((void*)f), _minargs(5), _maxargs(5)
+    {};
     //! User defined function with prototype double f(double,double,double,double,double,double)
-    SeExprFunc(Func6* f) : _type(FUNC6), _func((void*)f), _minargs(6), _maxargs(6) {}
+    SeExprFunc(Func6* f)
+        : _type(FUNC6), _retType(SeExprType::FP1Type()), _scalar(true), _func((void*)f), _minargs(6), _maxargs(6)
+    {};
     //! User defined function with prototype double f(vector)
-    SeExprFunc(Func1v* f) : _type(FUNC1V), _func((void*)f), _minargs(1), _maxargs(1) {}
+    SeExprFunc(Func1v* f)
+        : _type(FUNC1V), _retType(SeExprType::FP1Type()), _scalar(true), _func((void*)f), _minargs(1), _maxargs(1)
+    {};
     //! User defined function with prototype double f(vector,vector)
-    SeExprFunc(Func2v* f) : _type(FUNC2V), _func((void*)f), _minargs(2), _maxargs(2) {}
+    SeExprFunc(Func2v* f)
+        : _type(FUNC2V), _retType(SeExprType::FP1Type()), _scalar(true), _func((void*)f), _minargs(2), _maxargs(2)
+    {};
     //! User defined function with prototype vector f(vector)
-    SeExprFunc(Func1vv* f) : _type(FUNC1VV), _func((void*)f), _minargs(1), _maxargs(1) {}
+    SeExprFunc(Func1vv* f)
+        : _type(FUNC1VV), _retType(SeExprType::FPNType(3)), _scalar(false), _func((void*)f), _minargs(1), _maxargs(1)
+    {};
     //! User defined function with prototype vector f(vector,vector)
-    SeExprFunc(Func2vv* f) : _type(FUNC2VV), _func((void*)f), _minargs(2), _maxargs(2) {}
+    SeExprFunc(Func2vv* f)
+        : _type(FUNC2VV), _retType(SeExprType::FPNType(3)), _scalar(false), _func((void*)f), _minargs(2), _maxargs(2)
+    {};
     //! User defined function with arbitrary number of arguments double f(double,...)
-    SeExprFunc(Funcn* f, int minargs, int maxargs)
-	: _type(FUNCN), _func((void*)f), _minargs(minargs), _maxargs(maxargs) {}
+    SeExprFunc(Funcn* f, int min, int max)
+	: _type(FUNCN), _retType(SeExprType::FP1Type()), _scalar(true), _func((void*)f), _minargs(min), _maxargs(max)
+    {};
     //! User defined function with arbitrary number of arguments double f(vector,...)
-    SeExprFunc(Funcnv* f, int minargs, int maxargs)
-	: _type(FUNCNV), _func((void*)f), _minargs(minargs), _maxargs(maxargs) {}
+    SeExprFunc(Funcnv* f, int min, int max)
+	: _type(FUNCNV), _retType(SeExprType::FP1Type()), _scalar(true), _func((void*)f), _minargs(min), _maxargs(max)
+    {};
     //! User defined function with arbitrary number of arguments vector f(vector,...)
-    SeExprFunc(Funcnvv* f, int minargs, int maxargs)
-	: _type(FUNCNVV), _func((void*)f), _minargs(minargs), _maxargs(maxargs) {}
+    SeExprFunc(Funcnvv* f, int min, int max)
+	: _type(FUNCNVV), _retType(SeExprType::FPNType(3)), _scalar(false), _func((void*)f), _minargs(min), _maxargs(max)
+    {};
     //! User defined function with custom argument parsing
-    SeExprFunc(SeExprFuncX& f, int minargs=1, int maxargs=1)
-	: _type(FUNCX), _func((void*)&f), _minargs(minargs), _maxargs(maxargs) {}
+    SeExprFunc(SeExprFuncX& f, int min=1, int max=1)
+	: _type(FUNCX), _retType(f.retType()), _scalar(f.isScalar()), _func((void*)&f), _minargs(min), _maxargs(max)
+    {};
 
     inline SeExprType retType() const { return _retType; };
     int type() const { return _type; }
@@ -213,11 +239,12 @@ public:
     SeExprFuncX* funcx() const { return (SeExprFuncX*)_func; }
 
 private:
+    FuncType   _type;
     SeExprType _retType;
-    FuncType _type;
-    void* _func;
-    int _minargs;
-    int _maxargs;
+    bool       _scalar;
+    void*      _func;
+    int        _minargs;
+    int        _maxargs;
 };
 
 #endif

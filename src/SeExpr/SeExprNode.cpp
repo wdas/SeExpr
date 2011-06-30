@@ -196,14 +196,18 @@ SeExprNode::prep(SeExprType wanted, SeExprVarEnv & env)
      *  Otherwise,                          returns ErrorType.
      *  *Note:* Ignores wanted type.
      */
+    bool error = false;
+
     _type = SeExprType::NoneType();
 
     std::vector<SeExprNode*>::iterator       child   = _children.begin();
     std::vector<SeExprNode*>::iterator const e_child = _children.end  ();
 
     for(; child != e_child; child++)
-        if(!((*child)->prep(SeExprType::AnyType(), env)).isValid())
-            _type = SeExprType::ErrorType();
+        error = error || (!((*child)->prep(SeExprType::AnyType(), env)).isValid());
+
+    if(error)
+        _type = SeExprType::ErrorType();
 
     return _type;
 }
@@ -253,7 +257,7 @@ SeExprIfThenElseNode::prep(SeExprType wanted, SeExprVarEnv & env)
     SeExprType   condType, thenType, elseType;
 
     bool error = false;
-    _type = SeExprType::ErrorType();
+    _type = SeExprType::NoneType();
 
     condType = child(0)->prep(SeExprType::FP1Type(),env);
 
@@ -281,8 +285,8 @@ SeExprIfThenElseNode::prep(SeExprType wanted, SeExprVarEnv & env)
         addError("Types of variables do not match after if statement");
     }
 
-    if(!error)
-        _type = SeExprType::NoneType();
+    if(error)
+        _type = SeExprType::ErrorType();
 
     return _type;
 }
@@ -309,6 +313,9 @@ SeExprAssignNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     _assignedType = child(0)->prep(SeExprType::AnyType(), env);
 
+    if(!_assignedType.isValid())
+        _type = SeExprType::ErrorType();
+
     //This could add errors to the variable environment
     env.add(_name, new SeExprLocalVarRef(_assignedType));
 
@@ -334,27 +341,26 @@ SeExprAssignNode::eval(SeVec3d& result) const
 SeExprType
 SeExprVecNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    //assume that if wanted is not FP1, then it is FPN
-    // it is the caller's responsibility to make sure the returned types match
-    if(wanted.isFP1())
-        _type = SeExprType::FP1Type();
-    else
-        _type = SeExprType::FPNType(numChildren());
+    bool error = false;
+    _type = SeExprType::FPNType(numChildren());
 
-    std::vector<SeExprNode*>::iterator       child   = _children.begin();
-    std::vector<SeExprNode*>::iterator const e_child = _children.end  ();
+    std::vector<SeExprNode*>::iterator       ic = _children.begin();
+    std::vector<SeExprNode*>::iterator const ec = _children.end  ();
 
-    for(int count = 1; child != e_child; child++, count++) {
-        SeExprType childType = (*child)->prep(SeExprType::FP1Type(), env);
+    for(int count = 1; ic != ec; ic++, count++) {
+        SeExprType childType = (*ic)->prep(SeExprType::FP1Type(), env);
         if(!childType.isValid())
-            _type = SeExprType::ErrorType();
+            error = true;
         else if(!childType.isa(SeExprType::FP1Type())) {
-            _type = SeExprType::ErrorType();
-            std::stringstream temp;
-            temp << count;
-            addError("Expected FP1 type in vector literal but found " + childType.toString() + " in position " + temp.str());
+            error = true;
+            std::stringstream countstream;
+            countstream << count;
+            addError("Expected FP1 type in vector literal but found " + childType.toString() + " in position " + countstream.str());
         }
     }
+
+    if(error)
+        _type = SeExprType::ErrorType();
 
     return _type;
 }
@@ -394,9 +400,8 @@ SeExprVecNode::value() const {
 SeExprType
 SeExprCondNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    //TODO: determine if extra environments are necessary - currently included, just in case
-    SeExprVarEnv           thenEnv,  elseEnv;
-    SeExprType   condType, thenType, elseType;
+    //TODO: determine if extra environments are necessary
+    SeExprType condType, thenType, elseType;
 
     bool error = false;
     _type = SeExprType::ErrorType();
@@ -410,11 +415,9 @@ SeExprCondNode::prep(SeExprType wanted, SeExprVarEnv & env)
         addError("Expected FP1 type in condition of ternary conditional expression but found " + condType.toString());
     }
 
-    thenEnv  = SeExprVarEnv::newScope(env);
-    thenType = child(1)->prep(wanted, thenEnv);
+    thenType = child(1)->prep(wanted, env);
 
-    elseEnv  = SeExprVarEnv::newScope(env);
-    elseType = child(2)->prep(wanted, elseEnv);
+    elseType = child(2)->prep(wanted, env);
 
     if(!thenType.isValid() ||
        !elseType.isValid())
@@ -423,18 +426,12 @@ SeExprCondNode::prep(SeExprType wanted, SeExprVarEnv & env)
         if(thenType.isa(wanted)) {
             error = true;
             addError("Expected " + wanted.toString() + " type from then branch of ternary conditional expression but found " + thenType.toString());
-        } else if(elseType.isa(wanted)) {
+        }
+
+        if(elseType.isa(wanted)) {
             error = true;
             addError("Expected " + wanted.toString() + " type from else branch of ternary conditional expression but found " + elseType.toString());
         }
-    }
-
-    ///TODO: determine if this is needed (probably not)
-    if(env.changesMatch(thenEnv, elseEnv)) {
-        env.add(thenEnv);
-    } else {
-        error = true;
-        addError("Types of variables do not match after ternary conditional expression");
     }
 
     if(!error)
@@ -459,12 +456,11 @@ SeExprCondNode::eval(SeVec3d& result) const
 SeExprType
 SeExprAndNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    //TODO: determine if extra environment is necessary - currently included, just in case
-    SeExprVarEnv            secondEnv;
-    SeExprType   firstType, secondType;
+    //TODO: determine if extra environment is necessary
+    SeExprType firstType, secondType;
 
     bool error = false;
-    _type = SeExprType::ErrorType();
+    _type = SeExprType::FP1Type();
 
     firstType = child(0)->prep(SeExprType::FP1Type(), env);
 
@@ -475,8 +471,7 @@ SeExprAndNode::prep(SeExprType wanted, SeExprVarEnv & env)
         addError("Expected FP1 type from first operand of and expression but found " + firstType.toString());
     }
 
-    secondEnv  = SeExprVarEnv::newScope(env);
-    secondType = child(1)->prep(SeExprType::FP1Type(), secondEnv);
+    secondType = child(1)->prep(SeExprType::FP1Type(), env);
 
     if(!secondType.isValid())
         error = true;
@@ -485,8 +480,8 @@ SeExprAndNode::prep(SeExprType wanted, SeExprVarEnv & env)
         addError("Expected FP1 type from second operand of and expression but found " + secondType.toString());
     }
 
-    if(!error)
-        _type = SeExprType::FP1Type();
+    if(error)
+        _type = SeExprType::ErrorType();
 
     return _type;
 }
@@ -510,12 +505,11 @@ SeExprAndNode::eval(SeVec3d& result) const
 SeExprType
 SeExprOrNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    //TODO: determine if extra environment is necessary - currently included, just in case
-    SeExprVarEnv            secondEnv;
-    SeExprType   firstType, secondType;
+    //TODO: determine if extra environment is necessary
+    SeExprType firstType, secondType;
 
     bool error = false;
-    _type = SeExprType::ErrorType();
+    _type = SeExprType::FP1Type();
 
     firstType = child(0)->prep(SeExprType::FP1Type(), env);
 
@@ -526,8 +520,7 @@ SeExprOrNode::prep(SeExprType wanted, SeExprVarEnv & env)
         addError("Expected FP1 type from first operand of or expression but found " + firstType.toString());
     }
 
-    secondEnv  = SeExprVarEnv::newScope(env);
-    secondType = child(1)->prep(SeExprType::FP1Type(), secondEnv);
+    secondType = child(1)->prep(SeExprType::FP1Type(), env);
 
     if(!secondType.isValid())
         error = true;
@@ -536,8 +529,8 @@ SeExprOrNode::prep(SeExprType wanted, SeExprVarEnv & env)
         addError("Expected FP1 type from second operand of or expression but found " + secondType.toString());
     }
 
-    if(!error)
-        _type = SeExprType::FP1Type();
+    if(error)
+        _type = SeExprType::ErrorType();
 
     return _type;
 }
@@ -565,7 +558,7 @@ SeExprSubscriptNode::prep(SeExprType wanted, SeExprVarEnv & env)
     SeExprType vecType, scriptType;
 
     bool error = false;
-    _type = SeExprType::ErrorType();
+    _type = SeExprType::FP1Type();
 
     vecType = child(0)->prep(SeExprType::NumericType(), env);
 
@@ -585,8 +578,8 @@ SeExprSubscriptNode::prep(SeExprType wanted, SeExprVarEnv & env)
         addError("Expected FP1 type from subscript operand of subscript operator but found " + scriptType.toString());
     }
 
-    if(!error)
-        _type = SeExprType::FP1Type();
+    if(error)
+        _type = SeExprType::ErrorType();
 
     return _type;
 }
@@ -623,9 +616,7 @@ SeExprSubscriptNode::eval(SeVec3d& result) const
 SeExprType
 SeExprNegNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    _type = wanted.isNumeric() ? wanted : SeExprType::NumericType();
-
-    _type = child(0)->prep(_type, env);
+    _type = child(0)->prep(wanted, env);
 
     if(_type.isValid() &&
        !_type.isa(SeExprType::NumericType())) {
@@ -654,9 +645,7 @@ SeExprNegNode::eval(SeVec3d& result) const
 SeExprType
 SeExprInvertNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    _type = wanted.isNumeric() ? wanted : SeExprType::NumericType();
-
-    _type = child(0)->prep(_type, env);
+    _type = child(0)->prep(wanted, env);
 
     if(_type.isValid() &&
        !_type.isa(SeExprType::NumericType())) {
@@ -685,9 +674,7 @@ SeExprInvertNode::eval(SeVec3d& result) const
 SeExprType
 SeExprNotNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    _type = wanted.isNumeric() ? wanted : SeExprType::NumericType();
-
-    _type = child(0)->prep(_type, env);
+    _type = child(0)->prep(wanted, env);
 
     if(_type.isValid() &&
        !_type.isa(SeExprType::NumericType())) {
@@ -720,7 +707,7 @@ SeExprEqNode::prep(SeExprType wanted, SeExprVarEnv & env)
     SeExprType firstType, secondType;
 
     bool error = false;
-    _type = SeExprType::ErrorType();
+    _type = SeExprType::FP1Type();
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
@@ -740,13 +727,15 @@ SeExprEqNode::prep(SeExprType wanted, SeExprVarEnv & env)
         addError("Expected Numeric type from second operand to == operator but found" + secondType.toString());
     }
 
-    if(!firstType.compatibleNum(secondType)) {
+    if(firstType.isValid()  &&
+       secondType.isValid() &&
+       !firstType.compatibleNum(secondType)) {
         error = true;
         addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for == operator");
     }
 
-    if(!error)
-        _type = SeExprType::FP1Type();
+    if(error)
+        _type = SeExprType::ErrorType();
 
     return _type;
 }
@@ -774,7 +763,7 @@ SeExprNeNode::prep(SeExprType wanted, SeExprVarEnv & env)
     SeExprType firstType, secondType;
 
     bool error = false;
-    _type = SeExprType::ErrorType();
+    _type = SeExprType::FP1Type();
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
@@ -794,13 +783,15 @@ SeExprNeNode::prep(SeExprType wanted, SeExprVarEnv & env)
         addError("Expected Numeric type from second operand to != operator but found" + secondType.toString());
     }
 
-    if(!firstType.compatibleNum(secondType)) {
+    if(firstType.isValid()  &&
+       secondType.isValid() &&
+       !firstType.compatibleNum(secondType)) {
         error = true;
         addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for != operator");
     }
 
-    if(!error)
-        _type = SeExprType::FP1Type();
+    if(error)
+        _type = SeExprType::ErrorType();
 
     return _type;
 }
@@ -828,7 +819,7 @@ SeExprLtNode::prep(SeExprType wanted, SeExprVarEnv & env)
     SeExprType firstType, secondType;
 
     bool error = false;
-    _type = SeExprType::ErrorType();
+    _type = SeExprType::FP1Type();
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
@@ -848,13 +839,15 @@ SeExprLtNode::prep(SeExprType wanted, SeExprVarEnv & env)
         addError("Expected Numeric type from second operand to < operator but found" + secondType.toString());
     }
 
-    if(!firstType.compatibleNum(secondType)) {
+    if(firstType.isValid()  &&
+       secondType.isValid() &&
+       !firstType.compatibleNum(secondType)) {
         error = true;
         addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for < operator");
     }
 
-    if(!error)
-        _type = SeExprType::FP1Type();
+    if(error)
+        _type = SeExprType::ErrorType();
 
     return _type;
 }
@@ -880,7 +873,7 @@ SeExprGtNode::prep(SeExprType wanted, SeExprVarEnv & env)
     SeExprType firstType, secondType;
 
     bool error = false;
-    _type = SeExprType::ErrorType();
+    _type = SeExprType::FP1Type();
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
@@ -900,13 +893,15 @@ SeExprGtNode::prep(SeExprType wanted, SeExprVarEnv & env)
         addError("Expected Numeric type from second operand to > operator but found" + secondType.toString());
     }
 
-    if(!firstType.compatibleNum(secondType)) {
+    if(firstType.isValid()  &&
+       secondType.isValid() &&
+       !firstType.compatibleNum(secondType)) {
         error = true;
         addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for > operator");
     }
 
-    if(!error)
-        _type = SeExprType::FP1Type();
+    if(error)
+        _type = SeExprType::ErrorType();
 
     return _type;
 }
@@ -932,7 +927,7 @@ SeExprLeNode::prep(SeExprType wanted, SeExprVarEnv & env)
     SeExprType firstType, secondType;
 
     bool error = false;
-    _type = SeExprType::ErrorType();
+    _type = SeExprType::FP1Type();
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
@@ -952,13 +947,15 @@ SeExprLeNode::prep(SeExprType wanted, SeExprVarEnv & env)
         addError("Expected Numeric type from second operand to <= operator but found" + secondType.toString());
     }
 
-    if(!firstType.compatibleNum(secondType)) {
+    if(firstType.isValid()  &&
+       secondType.isValid() &&
+       !firstType.compatibleNum(secondType)) {
         error = true;
         addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for <= operator");
     }
 
-    if(!error)
-        _type = SeExprType::FP1Type();
+    if(error)
+        _type = SeExprType::ErrorType();
 
     return _type;
 }
@@ -984,7 +981,7 @@ SeExprGeNode::prep(SeExprType wanted, SeExprVarEnv & env)
     SeExprType firstType, secondType;
 
     bool error = false;
-    _type = SeExprType::ErrorType();
+    _type = SeExprType::FP1Type();
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
@@ -1004,13 +1001,15 @@ SeExprGeNode::prep(SeExprType wanted, SeExprVarEnv & env)
         addError("Expected Numeric type from second operand to >= operator but found" + secondType.toString());
     }
 
-    if(!firstType.compatibleNum(secondType)) {
+    if(firstType.isValid()  &&
+       secondType.isValid() &&
+       !firstType.compatibleNum(secondType)) {
         error = true;
         addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for >= operator");
     }
 
-    if(!error)
-        _type = SeExprType::FP1Type();
+    if(error)
+        _type = SeExprType::ErrorType();
 
     return _type;
 }
@@ -1056,7 +1055,9 @@ SeExprAddNode::prep(SeExprType wanted, SeExprVarEnv & env)
         addError("Expected Numeric type from second operand to + operator but found" + secondType.toString());
     }
 
-    if(!firstType.compatibleNum(secondType)) {
+    if(firstType.isValid()  &&
+       secondType.isValid() &&
+       !firstType.compatibleNum(secondType)) {
         error = true;
         addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for + operator");
     }
@@ -1116,7 +1117,9 @@ SeExprSubNode::prep(SeExprType wanted, SeExprVarEnv & env)
         addError("Expected Numeric type from second operand to - operator but found" + secondType.toString());
     }
 
-    if(!firstType.compatibleNum(secondType)) {
+    if(firstType.isValid()  &&
+       secondType.isValid() &&
+       !firstType.compatibleNum(secondType)) {
         error = true;
         addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for - operator");
     }
@@ -1176,7 +1179,9 @@ SeExprMulNode::prep(SeExprType wanted, SeExprVarEnv & env)
         addError("Expected Numeric type from second operand to * operator but found" + secondType.toString());
     }
 
-    if(!firstType.compatibleNum(secondType)) {
+    if(firstType.isValid()  &&
+       secondType.isValid() &&
+       !firstType.compatibleNum(secondType)) {
         error = true;
         addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for * operator");
     }
@@ -1236,7 +1241,9 @@ SeExprDivNode::prep(SeExprType wanted, SeExprVarEnv & env)
         addError("Expected Numeric type from second operand to / operator but found" + secondType.toString());
     }
 
-    if(!firstType.compatibleNum(secondType)) {
+    if(firstType.isValid()  &&
+       secondType.isValid() &&
+       !firstType.compatibleNum(secondType)) {
         error = true;
         addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for / operator");
     }
@@ -1303,7 +1310,9 @@ SeExprModNode::prep(SeExprType wanted, SeExprVarEnv & env)
         addError("Expected Numeric type from second operand to % operator but found" + secondType.toString());
     }
 
-    if(!firstType.compatibleNum(secondType)) {
+    if(firstType.isValid()  &&
+       secondType.isValid() &&
+       !firstType.compatibleNum(secondType)) {
         error = true;
         addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for % operator");
     }
@@ -1365,7 +1374,9 @@ SeExprExpNode::prep(SeExprType wanted, SeExprVarEnv & env)
         addError("Expected Numeric type from second operand to ^ operator but found" + secondType.toString());
     }
 
-    if(!firstType.compatibleNum(secondType)) {
+    if(firstType.isValid()  &&
+       secondType.isValid() &&
+       !firstType.compatibleNum(secondType)) {
         error = true;
         addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for ^ operator");
     }
@@ -1442,12 +1453,35 @@ SeExprStrNode::prep(SeExprType wanted, SeExprVarEnv & env)
     return _type;
 }
 
+bool
+SeExprFuncNode::prepArgs(std::string const & name, SeExprType wanted, SeExprVarEnv & env)
+{
+    bool error = false;
+    int count;
+
+    std::vector<SeExprNode*>::iterator       ic = _children.begin();
+    std::vector<SeExprNode*>::iterator const ec = _children.end  ();
+
+    for(count = 0; ic != ec; ++ic, ++count) {
+        SeExprType childType = (*ic)->prep(wanted, env);
+        if(!childType.isValid())
+            error = true;
+        else if(!childType.isa(wanted)) {
+            error = true;
+            std::stringstream countstream;
+            countstream << count;
+            addError("Expected " + wanted.toString() + " type from " + countstream.str() + " operand to " + name + " function but found" + childType.toString());
+        }
+    }
+
+    return !error; //return convention is true if no errors
+}
 
 SeExprType
 SeExprFuncNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
     bool error = false;
-    int  _dim  = 0;
+    //int  _dim  = 0;
 
     _type = SeExprType::ErrorType();
 
@@ -1457,41 +1491,41 @@ SeExprFuncNode::prep(SeExprType wanted, SeExprVarEnv & env)
     if (!_func) _func = SeExprFunc::lookup(_name);
 
     if(!_func) {
-        error = true;
+        //error = true; //not needed: _type is already Error and won't change if control gets here
         addError("Function " + _name + " has no definition");
         SeExprNode::prep(SeExprType::AnyType(), env);
-    } else if(!_func->funcx()) {
-        //every function should be a funcx
-        //TODO: make funcx default, so this check can be removed
-        error = true;
-        addError("Function " + _name + " does not have a valid form.");
-    }
-    else {
-        if(!_func->funcx()->isThreadSafe())
-            _expr->setThreadUnsafe(_name);
-	if(!(_func->funcx()->prep(this, wanted, env)).isValid())
-            error = true;
-        else {
-            SeExprType retType = _func->retType();
+    } else {
+        _type = _func->retType();
+        _nargs = numChildren();
 
-            if(retType.isString() ||
-               retType.isFPN   ())
-                _type = retType;
-            else if(wanted.isFPN()) {
-                //check if function needs to be promoted to a vector
-                if(_func->isScalar()) {
-                    _dim = 1;
-                    for(int i = 0; i < numChildren(); i++)
-                        if(child(i)->type().isFPN()) {
-                            if(_dim == 1)
-                                _dim = child(i)->type().dim();
-                            else if(_dim != child(i)->type().dim()) {
-                                error = true;
-                                addError("Scalar Function Promotion Failed: Different dimensions among arguments");
-                            }
-                        }
-                    _type = SeExprType::FPNType(_dim);
-                }
+        if(_nargs < _func->minArgs()) {
+            error = true;
+            addError("Too few args for function "+_name);
+            SeExprNode::prep(SeExprType::AnyType(), env);
+        } else if(_nargs > _func->maxArgs() && _func->maxArgs() >= 0) {
+            error = true;
+            addError("Too many args for function "+_name);
+            SeExprNode::prep(SeExprType::AnyType(), env);
+        }
+        else {
+            _vecArgs.resize(_nargs);
+            _scalarArgs.resize(_nargs);
+
+            if(_func->type() == SeExprFunc::FUNCX) {
+                //FuncX function:
+                if(!_func->funcx()->isThreadSafe()) _expr->setThreadUnsafe(_name);
+                if(!(_func->funcx()->prep(this, wanted, env)).isValid())
+                    error = true;
+            }
+            else {
+                //standard function:
+                //TODO: give actual name, not placeholder - or take out name altogether
+                error = !(prepArgs("placeholder",//_func->name(),
+                                   (_func->isScalar() ? SeExprType::FP1Type() : SeExprType::FPNType(3)),
+                                   env));
+                //TODO:
+                // check if this call is lifted/promoted
+                // combine both checks?
             }
         }
     }
@@ -1552,7 +1586,8 @@ SeExprFuncNode::eval(SeVec3d& result) const
     }
 
     // handle the case of a scalar func applied to a vector
-    bool applyScalarToVec = _isVec && !_func->isVec();
+    bool applyScalarToVec = _isVec && _func->isScalar();
+    //bool applyScalarToVec = _isVec && !_func->isVec();
     int niter = applyScalarToVec ? 3 : 1;
 
     // eval args and call the function
