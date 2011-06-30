@@ -1520,12 +1520,33 @@ SeExprFuncNode::prep(SeExprType wanted, SeExprVarEnv & env)
             else {
                 //standard function:
                 //TODO: give actual name, not placeholder - or take out name altogether
-                error = !(prepArgs("placeholder",//_func->name(),
+                error = !(prepArgs(_name,
                                    (_func->isScalar() ? SeExprType::FP1Type() : SeExprType::FPNType(3)),
                                    env));
-                //TODO:
-                // check if this call is lifted/promoted
-                // combine both checks?
+
+                if(wanted.isFPN()           && //wanted is a vector
+                   _func->isScalar()        && //takes scalar arguments only
+                   _func->retType().isFP1()) { //returns a scalar
+                    int _dim = 1;
+                    for(int i = 0; i < _nargs; i++) {
+                        int cdim = child(i)->type().dim();
+                        //Note: This assumes that every type (except FPN types) have dim() > 1
+                        if(cdim > 1) {
+                            if(_dim > 1) {
+                                if(_dim != cdim) {
+                                    error = true;
+                                    addError("Arguments to promotable function, " + _name + ", are of different lengths");
+                                }
+                            }
+                            else
+                                _dim = cdim;
+                        }
+                    }
+
+                    if(!error   &&
+                       _dim > 1)
+                        _type = SeExprType::FPNType(_dim);
+                }
             }
         }
     }

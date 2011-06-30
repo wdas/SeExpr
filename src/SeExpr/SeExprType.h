@@ -87,7 +87,6 @@ class SeExprType {
 
     inline bool isUnderAny    () const { return isNone  () || isUnderValue(); };
     inline bool isUnderValue  () const { return isString() || isFP        (); };
-    inline bool isUnderNumeric() const { return isFP    ();                   };
 
     inline bool isa(const SeExprType & other) const {
         if(*this == other)           //this and other are equal
@@ -124,8 +123,8 @@ class SeExprType {
     ///  either both have the same dimension or
     ///         at least one has dimension of 1 (is a scalar)
     inline bool compatibleNum(const SeExprType & other) const {
-        return (isUnderNumeric()       &&
-                other.isUnderNumeric() &&
+        return (isFP()       &&
+                other.isFP() &&
                 (dim()       == other.dim() ||
                  dim()       == 1           ||
                  other.dim() == 1));
