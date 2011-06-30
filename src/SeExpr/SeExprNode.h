@@ -199,6 +199,12 @@ private:
 class SeExprVecNode : public SeExprNode
 {
 public:
+    SeExprVecNode(const SeExpression* expr, SeExprNode* surrogate)
+        : SeExprNode(expr)
+    {
+        addChildren(surrogate);
+    };
+
     SeExprVecNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b, SeExprNode* c)
         : SeExprNode(expr, a, b, c)
     {};

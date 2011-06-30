@@ -124,7 +124,7 @@ inline void Forget(SeExprNode* n)
 %left '['
 %type <t> typeDeclare
 %type <n> module declarationList declaration typeListOptional typeList formalTypeListOptional formalTypeList
-%type <n> block optassigns assigns assign ifthenelse optelse e optargs args arg
+%type <n> block optassigns assigns assign ifthenelse optelse e optargs args arg exprlist
 
 /* Some notes about the parse tree construction:
 
@@ -276,7 +276,7 @@ optelse:
 /* An expression or sub-expression */
 e:
       '(' e ')'			{ $$ = $2; }
-    | '[' e ',' e ',' e ']'     { $$ = NODE3(@$.first_column,@$.last_column,VecNode, $2, $4, $6); }
+    | '[' exprlist ']'          { $$ = NODE1(@$.first_column,@$.last_column,VecNode, $2); }
     | e '[' e ']'               { $$ = NODE2(@$.first_column,@$.last_column,SubscriptNode, $1, $3); }
     | e '?' e ':' e		{ $$ = NODE3(@$.first_column,@$.last_column,CondNode, $1, $3, $5); }
     | e OR e			{ $$ = NODE2(@$.first_column,@$.last_column,OrNode, $1, $3); }
@@ -310,6 +310,12 @@ e:
     | VAR			{ $$ = NODE1(@$.first_column,@$.last_column,VarNode, $1); free($1); /* free name string */ }
     | NAME			{ $$ = NODE1(@$.first_column,@$.last_column,VarNode, $1); free($1); /* free name string */ }
     | NUMBER			{ $$ = NODE1(@$.first_column,@$.last_column,NumNode, $1); /*printf("line %d",@$.last_column);*/}
+    ;
+
+exprlist:
+      e                         { $$ = NODE1(@$.first_column,@$.last_column,Node,$1); }
+    | exprlist ',' e            { $$ = $1;
+                                  $1->addChild($3); }
     ;
 
 /* An optional argument list */
