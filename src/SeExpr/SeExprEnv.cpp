@@ -108,8 +108,8 @@ SeExprVarEnv::changesMatch(const SeExprVarEnv & env1, const SeExprVarEnv & env2)
         const KeyType & name = ienv->first;
         const ValType * var  = ienv->second;
 
-        if(lookup(name) != var)
-            match = env2.lookup(name) == var;
+        if(lookup(name)->type() != var->type())
+            match = env2.lookup(name)->type() == var->type();
     }
 
     ienv = env2.begin();
@@ -119,8 +119,8 @@ SeExprVarEnv::changesMatch(const SeExprVarEnv & env1, const SeExprVarEnv & env2)
         const KeyType & name = ienv->first;
         const ValType * var  = ienv->second;
 
-        if(lookup(name) != var)
-            match = env1.lookup(name) == var;
+        if(lookup(name)->type() != var->type())
+            match = env1.lookup(name)->type() == var->type();
     }
 
     return match;
