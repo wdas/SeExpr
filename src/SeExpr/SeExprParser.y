@@ -124,7 +124,7 @@ inline void Forget(SeExprNode* n)
 %left '['
 %type <t> typeDeclare
 %type <n> module declarationList declaration typeListOptional typeList formalTypeListOptional formalTypeList
-%type <n> block optassigns assigns assign ifthenelse optelse e optargs args arg exprlist
+%type <n> block optassigns assigns assign str ifthenelse optelse e optargs args arg exprlist
 
 /* Some notes about the parse tree construction:
 
@@ -223,6 +223,7 @@ assigns:
 assign:
       ifthenelse		{ $$ = $1; }
     | VAR '=' e ';'		{ $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, $3); free($1); }
+    | VAR '=' str ';'		{ $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, $3); free($1); }
     | VAR AddEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
                                 SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,AddNode,varNode,$3);
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
@@ -242,6 +243,7 @@ assign:
                                 SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,ModNode,varNode,$3);
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
     | NAME '=' e ';'		{ $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, $3); free($1); }
+    | NAME '=' str ';'		{ $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, $3); free($1); }
     | NAME AddEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
                                 SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,AddNode,varNode,$3);
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
@@ -262,8 +264,12 @@ assign:
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
     ;
 
+str:
+      STR			{ $$ = NODE1(@$.first_column,@$.last_column,StrNode, $1); free($1); /* free name string */}
+    ;
+
 ifthenelse:
-    IF '(' e ')' '{' optassigns '}' optelse
+      IF '(' e ')' '{' optassigns '}' optelse
 				{ $$ = NODE3(@$.first_column,@$.last_column,IfThenElseNode, $3, $6, $8); }
     ;
 
@@ -332,7 +338,7 @@ args:
 
 arg:
       e				{ $$ = $1; }
-    | STR			{ $$ = NODE1(@$.first_column,@$.last_column,StrNode, $1); free($1); /* free name string */}
+    | str                       { $$ = $1; }
     ;
 
 %%
