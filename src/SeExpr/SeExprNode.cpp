@@ -423,12 +423,12 @@ SeExprCondNode::prep(SeExprType wanted, SeExprVarEnv & env)
        !elseType.isValid())
         error = true;
     else {
-        if(thenType.isa(wanted)) {
+        if(!thenType.isa(wanted)) {
             error = true;
             addError("Expected " + wanted.toString() + " type from then branch of ternary conditional expression but found " + thenType.toString());
         }
 
-        if(elseType.isa(wanted)) {
+        if(!elseType.isa(wanted)) {
             error = true;
             addError("Expected " + wanted.toString() + " type from else branch of ternary conditional expression but found " + elseType.toString());
         }
