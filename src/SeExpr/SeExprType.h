@@ -98,7 +98,7 @@ class SeExprType {
         else if(other.isNumeric())   //other is Numeric, this should be under Numeric
             return isFP();
         else if(other.isFP1())       //other is FP1, this should be under Numeric
-            return isFP();
+            return isFPN();
         else if(other.isFP())        //other is FPN, this should be either FP1 or FPN(other.dim())
             return isFP1() || isFPN(other.dim());
         else
