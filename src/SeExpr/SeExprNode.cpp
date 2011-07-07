@@ -261,12 +261,9 @@ SeExprIfThenElseNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     condType = child(0)->prep(SeExprType::FP1Type(),env);
 
-    if(!condType.isValid())
+    if(!condType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),condType))
         error = true;
-    else if(!condType.isa(SeExprType::FP1Type())) {
-        error = true;
-        addError("Expected FP1 type in condition expression of if statement but found " + condType.toString());
-    }
 
     thenEnv  = SeExprVarEnv::newScope(env);
     thenType = child(1)->prep(SeExprType::AnyType(), thenEnv);
@@ -347,16 +344,12 @@ SeExprVecNode::prep(SeExprType wanted, SeExprVarEnv & env)
     std::vector<SeExprNode*>::iterator       ic = _children.begin();
     std::vector<SeExprNode*>::iterator const ec = _children.end  ();
 
-    for(int count = 1; ic != ec; ic++, count++) {
+    for(; ic != ec; ic++) {
         SeExprType childType = (*ic)->prep(SeExprType::FP1Type(), env);
-        if(!childType.isValid())
+        if(!childType.isValid() ||
+           !isUnder_with_error(SeExprType::NumericType(),childType))
+            //TODO: add way to tell what element of vector has the type mismatch
             error = true;
-        else if(!childType.isa(SeExprType::FP1Type())) {
-            error = true;
-            std::stringstream countstream;
-            countstream << count;
-            addError("Expected FP1 type in vector literal but found " + childType.toString() + " in position " + countstream.str());
-        }
     }
 
     if(error)
@@ -408,31 +401,21 @@ SeExprCondNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     condType = child(0)->prep(SeExprType::FP1Type(),env);
 
-    if(!condType.isValid())
+    if(!condType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),condType))
         error = true;
-    else if(!condType.isa(SeExprType::FP1Type())) {
-        error = true;
-        addError("Expected FP1 type in condition of ternary conditional expression but found " + condType.toString());
-    }
 
     thenType = child(1)->prep(wanted, env);
 
     elseType = child(2)->prep(wanted, env);
 
     if(!thenType.isValid() ||
-       !elseType.isValid())
+       !isa_with_error(wanted,thenType))
         error = true;
-    else {
-        if(!thenType.isa(wanted)) {
-            error = true;
-            addError("Expected " + wanted.toString() + " type from then branch of ternary conditional expression but found " + thenType.toString());
-        }
 
-        if(!elseType.isa(wanted)) {
-            error = true;
-            addError("Expected " + wanted.toString() + " type from else branch of ternary conditional expression but found " + elseType.toString());
-        }
-    }
+    if(!elseType.isValid() ||
+       !isa_with_error(wanted,elseType))
+        error = true;
 
     if(!error)
         _type = thenType;
@@ -464,21 +447,15 @@ SeExprAndNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     firstType = child(0)->prep(SeExprType::FP1Type(), env);
 
-    if(!firstType.isValid())
+    if(!firstType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),firstType))
         error = true;
-    else if(!firstType.isa(SeExprType::FP1Type())) {
-        error = true;
-        addError("Expected FP1 type from first operand of and expression but found " + firstType.toString());
-    }
 
     secondType = child(1)->prep(SeExprType::FP1Type(), env);
 
-    if(!secondType.isValid())
+    if(!secondType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),secondType))
         error = true;
-    else if(!secondType.isa(SeExprType::FP1Type())) {
-        error = true;
-        addError("Expected FP1 type from second operand of and expression but found " + secondType.toString());
-    }
 
     if(error)
         _type = SeExprType::ErrorType();
@@ -513,21 +490,15 @@ SeExprOrNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     firstType = child(0)->prep(SeExprType::FP1Type(), env);
 
-    if(!firstType.isValid())
+    if(!firstType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),firstType))
         error = true;
-    else if(!firstType.isa(SeExprType::FP1Type())) {
-        error = true;
-        addError("Expected FP1 type from first operand of or expression but found " + firstType.toString());
-    }
 
     secondType = child(1)->prep(SeExprType::FP1Type(), env);
 
-    if(!secondType.isValid())
+    if(!secondType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),secondType))
         error = true;
-    else if(!secondType.isa(SeExprType::FP1Type())) {
-        error = true;
-        addError("Expected FP1 type from second operand of or expression but found " + secondType.toString());
-    }
 
     if(error)
         _type = SeExprType::ErrorType();
@@ -562,21 +533,15 @@ SeExprSubscriptNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     vecType = child(0)->prep(SeExprType::NumericType(), env);
 
-    if(!vecType.isValid())
+    if(!vecType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),vecType))
         error = true;
-    else if(!vecType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from vector operand of subscript operator but found " + vecType.toString());
-    }
 
     scriptType = child(1)->prep(SeExprType::FP1Type(), env);
 
-    if(!scriptType.isValid())
+    if(!scriptType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),scriptType))
         error = true;
-    else if(!scriptType.isa(SeExprType::FP1Type())) {
-        error = true;
-        addError("Expected FP1 type from subscript operand of subscript operator but found " + scriptType.toString());
-    }
 
     if(error)
         _type = SeExprType::ErrorType();
@@ -619,10 +584,8 @@ SeExprNegNode::prep(SeExprType wanted, SeExprVarEnv & env)
     _type = child(0)->prep(wanted, env);
 
     if(_type.isValid() &&
-       !_type.isa(SeExprType::NumericType())) {
-        addError("Expected Numeric type from operand to negation operator but found " + _type.toString());
+       !isUnder_with_error(SeExprType::NumericType(),_type))
         _type = SeExprType::ErrorType();
-    }
 
     return _type;
 }
@@ -648,10 +611,8 @@ SeExprInvertNode::prep(SeExprType wanted, SeExprVarEnv & env)
     _type = child(0)->prep(wanted, env);
 
     if(_type.isValid() &&
-       !_type.isa(SeExprType::NumericType())) {
-        addError("Expected Numeric type from operand to inversion operator but found " + _type.toString());
+       !isUnder_with_error(SeExprType::NumericType(),_type))
         _type = SeExprType::ErrorType();
-    }
 
     return _type;
 }
@@ -677,10 +638,8 @@ SeExprNotNode::prep(SeExprType wanted, SeExprVarEnv & env)
     _type = child(0)->prep(wanted, env);
 
     if(_type.isValid() &&
-       !_type.isa(SeExprType::NumericType())) {
-        addError("Expected Numeric type from operand to not operator but found " + _type.toString());
+       !isUnder_with_error(SeExprType::NumericType(),_type))
         _type = SeExprType::ErrorType();
-    }
 
     return _type;
 }
@@ -704,6 +663,7 @@ SeExprType
 SeExprEqNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    //TODO: determine if firstType and secondType need to be directly compared for compatibility (currently not)
     SeExprType firstType, secondType;
 
     bool error = false;
@@ -711,28 +671,15 @@ SeExprEqNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
-    if(!firstType.isValid())
+    if(!firstType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),firstType))
         error = true;
-    else if(!firstType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from first operand to == operator but found" + firstType.toString());
-    }
 
     secondType = child(1)->prep(SeExprType::NumericType(), env);
 
-    if(!secondType.isValid())
+    if(!secondType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),secondType))
         error = true;
-    else if(!secondType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from second operand to == operator but found" + secondType.toString());
-    }
-
-    if(firstType.isValid()  &&
-       secondType.isValid() &&
-       !firstType.compatibleNum(secondType)) {
-        error = true;
-        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for == operator");
-    }
 
     if(error)
         _type = SeExprType::ErrorType();
@@ -760,6 +707,7 @@ SeExprType
 SeExprNeNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    //TODO: determine if firstType and secondType need to be directly compared for compatibility (currently not)
     SeExprType firstType, secondType;
 
     bool error = false;
@@ -767,28 +715,15 @@ SeExprNeNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
-    if(!firstType.isValid())
+    if(!firstType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),firstType))
         error = true;
-    else if(!firstType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from first operand to != operator but found" + firstType.toString());
-    }
 
     secondType = child(1)->prep(SeExprType::NumericType(), env);
 
-    if(!secondType.isValid())
+    if(!secondType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),secondType))
         error = true;
-    else if(!secondType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from second operand to != operator but found" + secondType.toString());
-    }
-
-    if(firstType.isValid()  &&
-       secondType.isValid() &&
-       !firstType.compatibleNum(secondType)) {
-        error = true;
-        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for != operator");
-    }
 
     if(error)
         _type = SeExprType::ErrorType();
@@ -816,6 +751,7 @@ SeExprType
 SeExprLtNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    //TODO: determine if firstType and secondType need to be directly compared for compatibility (currently not)
     SeExprType firstType, secondType;
 
     bool error = false;
@@ -823,28 +759,15 @@ SeExprLtNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
-    if(!firstType.isValid())
+    if(!firstType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),firstType))
         error = true;
-    else if(!firstType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from first operand to < operator but found" + firstType.toString());
-    }
 
     secondType = child(1)->prep(SeExprType::NumericType(), env);
 
-    if(!secondType.isValid())
+    if(!secondType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),secondType))
         error = true;
-    else if(!secondType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from second operand to < operator but found" + secondType.toString());
-    }
-
-    if(firstType.isValid()  &&
-       secondType.isValid() &&
-       !firstType.compatibleNum(secondType)) {
-        error = true;
-        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for < operator");
-    }
 
     if(error)
         _type = SeExprType::ErrorType();
@@ -870,6 +793,7 @@ SeExprType
 SeExprGtNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    //TODO: determine if firstType and secondType need to be directly compared for compatibility (currently not)
     SeExprType firstType, secondType;
 
     bool error = false;
@@ -877,28 +801,15 @@ SeExprGtNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
-    if(!firstType.isValid())
+    if(!firstType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),firstType))
         error = true;
-    else if(!firstType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from first operand to > operator but found" + firstType.toString());
-    }
 
     secondType = child(1)->prep(SeExprType::NumericType(), env);
 
-    if(!secondType.isValid())
+    if(!secondType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),secondType))
         error = true;
-    else if(!secondType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from second operand to > operator but found" + secondType.toString());
-    }
-
-    if(firstType.isValid()  &&
-       secondType.isValid() &&
-       !firstType.compatibleNum(secondType)) {
-        error = true;
-        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for > operator");
-    }
 
     if(error)
         _type = SeExprType::ErrorType();
@@ -924,6 +835,7 @@ SeExprType
 SeExprLeNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    //TODO: determine if firstType and secondType need to be directly compared for compatibility (currently not)
     SeExprType firstType, secondType;
 
     bool error = false;
@@ -931,28 +843,15 @@ SeExprLeNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
-    if(!firstType.isValid())
+    if(!firstType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),firstType))
         error = true;
-    else if(!firstType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from first operand to <= operator but found" + firstType.toString());
-    }
 
     secondType = child(1)->prep(SeExprType::NumericType(), env);
 
-    if(!secondType.isValid())
+    if(!secondType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),secondType))
         error = true;
-    else if(!secondType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from second operand to <= operator but found" + secondType.toString());
-    }
-
-    if(firstType.isValid()  &&
-       secondType.isValid() &&
-       !firstType.compatibleNum(secondType)) {
-        error = true;
-        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for <= operator");
-    }
 
     if(error)
         _type = SeExprType::ErrorType();
@@ -978,6 +877,7 @@ SeExprType
 SeExprGeNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    //TODO: determine if firstType and secondType need to be directly compared for compatibility (currently not)
     SeExprType firstType, secondType;
 
     bool error = false;
@@ -985,28 +885,15 @@ SeExprGeNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
-    if(!firstType.isValid())
+    if(!firstType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),firstType))
         error = true;
-    else if(!firstType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from first operand to >= operator but found" + firstType.toString());
-    }
 
     secondType = child(1)->prep(SeExprType::NumericType(), env);
 
-    if(!secondType.isValid())
+    if(!secondType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),secondType))
         error = true;
-    else if(!secondType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from second operand to >= operator but found" + secondType.toString());
-    }
-
-    if(firstType.isValid()  &&
-       secondType.isValid() &&
-       !firstType.compatibleNum(secondType)) {
-        error = true;
-        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for >= operator");
-    }
 
     if(error)
         _type = SeExprType::ErrorType();
@@ -1032,6 +919,7 @@ SeExprType
 SeExprAddNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    //TODO: determine if firstType and secondType need to be directly compared for compatibility (currently not)
     SeExprType firstType, secondType;
 
     bool error = false;
@@ -1039,28 +927,15 @@ SeExprAddNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
-    if(!firstType.isValid())
+    if(!firstType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),firstType))
         error = true;
-    else if(!firstType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from first operand to + operator but found" + firstType.toString());
-    }
 
     secondType = child(1)->prep(SeExprType::NumericType(), env);
 
-    if(!secondType.isValid())
+    if(!secondType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),secondType))
         error = true;
-    else if(!secondType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from second operand to + operator but found" + secondType.toString());
-    }
-
-    if(firstType.isValid()  &&
-       secondType.isValid() &&
-       !firstType.compatibleNum(secondType)) {
-        error = true;
-        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for + operator");
-    }
 
     if(!error)
         _type = (firstType.isFP1() ? secondType : firstType);
@@ -1094,6 +969,7 @@ SeExprType
 SeExprSubNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    //TODO: determine if firstType and secondType need to be directly compared for compatibility (currently not)
     SeExprType firstType, secondType;
 
     bool error = false;
@@ -1101,28 +977,15 @@ SeExprSubNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
-    if(!firstType.isValid())
+    if(!firstType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),firstType))
         error = true;
-    else if(!firstType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from first operand to - operator but found" + firstType.toString());
-    }
 
     secondType = child(1)->prep(SeExprType::NumericType(), env);
 
-    if(!secondType.isValid())
+    if(!secondType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),secondType))
         error = true;
-    else if(!secondType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from second operand to - operator but found" + secondType.toString());
-    }
-
-    if(firstType.isValid()  &&
-       secondType.isValid() &&
-       !firstType.compatibleNum(secondType)) {
-        error = true;
-        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for - operator");
-    }
 
     if(!error)
         _type = (firstType.isFP1() ? secondType : firstType);
@@ -1156,6 +1019,7 @@ SeExprType
 SeExprMulNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    //TODO: determine if firstType and secondType need to be directly compared for compatibility (currently not)
     SeExprType firstType, secondType;
 
     bool error = false;
@@ -1163,28 +1027,15 @@ SeExprMulNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
-    if(!firstType.isValid())
+    if(!firstType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),firstType))
         error = true;
-    else if(!firstType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from first operand to * operator but found" + firstType.toString());
-    }
 
     secondType = child(1)->prep(SeExprType::NumericType(), env);
 
-    if(!secondType.isValid())
+    if(!secondType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),secondType))
         error = true;
-    else if(!secondType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from second operand to * operator but found" + secondType.toString());
-    }
-
-    if(firstType.isValid()  &&
-       secondType.isValid() &&
-       !firstType.compatibleNum(secondType)) {
-        error = true;
-        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for * operator");
-    }
 
     if(!error)
         _type = (firstType.isFP1() ? secondType : firstType);
@@ -1218,6 +1069,7 @@ SeExprType
 SeExprDivNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    //TODO: determine if firstType and secondType need to be directly compared for compatibility (currently not)
     SeExprType firstType, secondType;
 
     bool error = false;
@@ -1225,28 +1077,15 @@ SeExprDivNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
-    if(!firstType.isValid())
+    if(!firstType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),firstType))
         error = true;
-    else if(!firstType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from first operand to / operator but found" + firstType.toString());
-    }
 
     secondType = child(1)->prep(SeExprType::NumericType(), env);
 
-    if(!secondType.isValid())
+    if(!secondType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),secondType))
         error = true;
-    else if(!secondType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from second operand to / operator but found" + secondType.toString());
-    }
-
-    if(firstType.isValid()  &&
-       secondType.isValid() &&
-       !firstType.compatibleNum(secondType)) {
-        error = true;
-        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for / operator");
-    }
 
     if(!error)
         _type = (firstType.isFP1() ? secondType : firstType);
@@ -1287,6 +1126,7 @@ SeExprType
 SeExprModNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    //TODO: determine if firstType and secondType need to be directly compared for compatibility (currently not)
     SeExprType firstType, secondType;
 
     bool error = false;
@@ -1294,28 +1134,15 @@ SeExprModNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
-    if(!firstType.isValid())
+    if(!firstType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),firstType))
         error = true;
-    else if(!firstType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from first operand to % operator but found" + firstType.toString());
-    }
 
     secondType = child(1)->prep(SeExprType::NumericType(), env);
 
-    if(!secondType.isValid())
+    if(!secondType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),secondType))
         error = true;
-    else if(!secondType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from second operand to % operator but found" + secondType.toString());
-    }
-
-    if(firstType.isValid()  &&
-       secondType.isValid() &&
-       !firstType.compatibleNum(secondType)) {
-        error = true;
-        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for % operator");
-    }
 
     if(!error)
         _type = (firstType.isFP1() ? secondType : firstType);
@@ -1351,6 +1178,7 @@ SeExprType
 SeExprExpNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    //TODO: determine if firstType and secondType need to be directly compared for compatibility (currently not)
     SeExprType firstType, secondType;
 
     bool error = false;
@@ -1358,28 +1186,15 @@ SeExprExpNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
-    if(!firstType.isValid())
+    if(!firstType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),firstType))
         error = true;
-    else if(!firstType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from first operand to ^ operator but found" + firstType.toString());
-    }
 
     secondType = child(1)->prep(SeExprType::NumericType(), env);
 
-    if(!secondType.isValid())
+    if(!secondType.isValid() ||
+       !isUnder_with_error(SeExprType::NumericType(),secondType))
         error = true;
-    else if(!secondType.isa(SeExprType::NumericType())) {
-        error = true;
-        addError("Expected Numeric type from second operand to ^ operator but found" + secondType.toString());
-    }
-
-    if(firstType.isValid()  &&
-       secondType.isValid() &&
-       !firstType.compatibleNum(secondType)) {
-        error = true;
-        addError("Types " + firstType.toString() + " and " + secondType.toString() + " are not compatible types for ^ operator");
-    }
 
     if(!error)
         _type = (firstType.isFP1() ? secondType : firstType);
@@ -1464,13 +1279,9 @@ SeExprFuncNode::prepArgs(std::string const & name, SeExprType wanted, SeExprVarE
 
     for(count = 0; ic != ec; ++ic, ++count) {
         SeExprType childType = (*ic)->prep(wanted, env);
-        if(!childType.isValid())
+        if(!childType.isValid() ||
+           !isa_with_error(wanted,childType)) {
             error = true;
-        else if(!childType.isa(wanted)) {
-            error = true;
-            std::stringstream countstream;
-            countstream << count;
-            addError("Expected " + wanted.toString() + " type from " + countstream.str() + " operand to " + name + " function but found" + childType.toString());
         }
     }
 

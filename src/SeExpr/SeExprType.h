@@ -71,38 +71,57 @@ class SeExprType {
                 dim () == other.dim ());
     };
 
-    ///type is not an error or an uninitialized type
-    inline bool isValid  ()      const { return !isError();                  };
+    ///type is not an error
+    inline bool isValid() const { return !isError(); };
 
-    inline bool isAny    ()      const { return type() == tANY;              };
-    inline bool isNone   ()      const { return type() == tNONE;             };
-    inline bool isValue  ()      const { return type() == tVALUE;            };
-    inline bool isString ()      const { return type() == tSTRING;           };
-    inline bool isNumeric()      const { return type() == tNUMERIC;          };
-    inline bool isFP     ()      const { return type() == tFP;               };
-    inline bool isFP1    ()      const { return isFP()        && dim() == 1; };
-    inline bool isFPN    (int i) const { return isFP()        && dim() == i; };
-    inline bool isFPN    ()      const { return isFP()        && dim()  > 1; };
-    inline bool isError  ()      const { return type() == tERROR;            };
+    //strictly equal relation
+    inline bool isAny    ()      const { return type() == tANY;                   };
+    inline bool isNone   ()      const { return type() == tNONE;                  };
+    inline bool isValue  ()      const { return type() == tVALUE;                 };
+    inline bool isString ()      const { return type() == tSTRING;                };
+    inline bool isNumeric()      const { return type() == tNUMERIC;               };
+    inline bool isFP1    ()      const { return type() == tFP      && dim() == 1; };
+    inline bool isFPN    ()      const { return type() == tFP      && dim()  > 1; };
+    inline bool isFPN    (int i) const { return type() == tFP      && dim() == i; };
+    inline bool isError  ()      const { return type() == tERROR;                 };
 
-    inline bool isUnderAny    () const { return isNone  () || isUnderValue(); };
-    inline bool isUnderValue  () const { return isString() || isFP        (); };
+    //general strictly equal relation
+    inline bool is(const SeExprType & other) const { return (*this == other); };
 
+    //strictly under relation - does not contain itself
+    inline bool isUnderAny    () const { return isNone  () || isaValue  (); };
+    inline bool isUnderValue  () const { return isString() || isaNumeric(); };
+    inline bool isUnderNumeric() const { return isFP1   () || isFPN     (); };
+
+    //general strictly under relation
+    inline bool isUnder(const SeExprType & other) const {
+        if(other.isAny    ()) return isUnderAny    ();
+        if(other.isValue  ()) return isUnderValue  ();
+        if(other.isNumeric()) return isUnderNumeric();
+        /*else*/              return false;
+    };
+
+    //equivalent (under, equal, or promotable) relation
+    inline bool isaAny    ()      const { return isAny         () || isUnderAny    ();  };
+    inline bool isaNone   ()      const { return isNone        ();                      };
+    inline bool isaValue  ()      const { return isValue       () || isUnderValue  ();  };
+    inline bool isaString ()      const { return isString      ();                      };
+    inline bool isaNumeric()      const { return isNumeric     () || isUnderNumeric();  };
+    inline bool isaFP1    ()      const { return isUnderNumeric();                      };
+    inline bool isaFPN    ()      const { return isUnderNumeric();                      };
+    inline bool isaFPN    (int i) const { return isFP1         () || isFPN         (i); };
+
+    //general equivalent (under, equal, or promotable) relation
     inline bool isa(const SeExprType & other) const {
-        if(*this == other)           //this and other are equal
-            return true;
-        else if(other.isAny())       //other is Any, this should be under Any
-            return isUnderAny();
-        else if(other.isValue())     //other is Value, this should be under Value
-            return isUnderValue();
-        else if(other.isNumeric())   //other is Numeric, this should be under Numeric
-            return isFP();
-        else if(other.isFP1())       //other is FP1, this should be under Numeric
-            return isFPN();
-        else if(other.isFP())        //other is FPN, this should be either FP1 or FPN(other.dim())
-            return isFP1() || isFPN(other.dim());
-        else
-            return false;
+        if(*this == other)    return true;
+        if(other.isAny    ()) return isaAny    ();
+        if(other.isNone   ()) return isNone    ();
+        if(other.isValue  ()) return isaValue  ();
+        if(other.isString ()) return isString  ();
+        if(other.isNumeric()) return isaNumeric();
+        if(other.isFP1    ()) return isaFP1    ();
+        if(other.isFPN    ()) return isaFPN    (other.dim());
+        /*else*/              return false;
     };
 
     inline bool check(const SeExprType & other) const {
@@ -118,34 +137,15 @@ class SeExprType {
     static inline SeExprType FPNType    (int d) { return SeExprType(tFP,d);      };
     static inline SeExprType ErrorType  ()      { return SeExprType(tERROR,1);   };
 
-    ///two types are compatible vectors if:
-    ///  both types are numeric and
-    ///  either both have the same dimension or
-    ///         at least one has dimension of 1 (is a scalar)
-    inline bool compatibleNum(const SeExprType & other) const {
-        return (isFP()       &&
-                other.isFP() &&
-                (dim()       == other.dim() ||
-                 dim()       == 1           ||
-                 other.dim() == 1));
-    };
-
-    /* inline bool compatible(const SeExprType & other) const { */
-    /*     return (isValid()       && */
-    /*             other.isValid() && */
-    /*             (*this == other || */
-    /*              compatibleNum(other))); */
-    /* }; */
-
     inline std::string toString() const {
-        if(isAny    ()            ) return "Any";
-        if(isNone   ()            ) return "None";
-        if(isValue  ()            ) return "Value";
-        if(isString ()            ) return "String";
-        if(isNumeric()            ) return "Numeric";
-        if(isFP1    ()            ) return "FP1";
-        if(isFP     () && !isFP1()) return "FP" + dim();
-        if(isError  ()            ) return "Error";
+        if(isAny    ()) return "Any";
+        if(isNone   ()) return "None";
+        if(isValue  ()) return "Value";
+        if(isString ()) return "String";
+        if(isNumeric()) return "Numeric";
+        if(isFP1    ()) return "FP1";
+        if(isFPN    ()) return "FP" + dim();
+        if(isError  ()) return "Error";
         return "toString Error";
     };
 

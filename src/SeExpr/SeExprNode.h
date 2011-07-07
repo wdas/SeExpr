@@ -129,6 +129,26 @@ public:
     inline void addError(const std::string& error)
     {_expr->addError(error,_startPos,_endPos);}
 
+    /// Register type mismatch
+    inline void typeMismatch(const SeExprType & expected,
+                             const SeExprType & received)
+    { addError("Type mismatch. Expected: " + expected.toString() +
+               " Received: "               + received.toString()); }
+
+    /// types match (true if they do)
+    inline bool isa_with_error(const SeExprType & expected,
+                               const SeExprType & received)
+    {   bool match = received.isa(expected);
+        if(!match) typeMismatch(expected, received);
+        return match; }
+
+    /// types match (true if they do)
+    inline bool isUnder_with_error(const SeExprType & expected,
+                                   const SeExprType & received)
+    {   bool match = received.isUnder(expected);
+        if(!match) typeMismatch(expected, received);
+        return match; }
+
 protected:
     /// Owning expression (node can't modify)
     const SeExpression* _expr;
