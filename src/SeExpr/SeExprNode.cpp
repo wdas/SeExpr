@@ -178,7 +178,7 @@ SeExprNode::addChildren(SeExprNode* surrogate)
 {
     std::vector<SeExprNode*>::iterator iter;
     for (iter = surrogate->_children.begin();
-	 iter != surrogate->_children.end(); 
+	 iter != surrogate->_children.end();
 	 iter++)
     {
 	addChild(*iter);
@@ -265,17 +265,17 @@ SeExprIfThenElseNode::prep(SeExprType wanted, SeExprVarEnv & env)
        !isUnder_with_error(SeExprType::NumericType(),condType))
         error = true;
 
-    thenEnv  = SeExprVarEnv::newScope(env);
+    thenEnv  = SeExprVarEnv::newBranch(env);
     thenType = child(1)->prep(SeExprType::AnyType(), thenEnv);
 
-    elseEnv  = SeExprVarEnv::newScope(env);
+    elseEnv  = SeExprVarEnv::newBranch(env);
     elseType = child(2)->prep(SeExprType::AnyType(), elseEnv);
 
     if(!thenType.isValid() ||
        !elseType.isValid())
         error = true;
 
-    if(env.changesMatch(thenEnv, elseEnv)) {
+    if(SeExprVarEnv::branchesMatch(thenEnv, elseEnv)) {
         env.add(thenEnv);
     } else {
         error = true;

@@ -57,15 +57,15 @@ class SeExprVarEnv {
         : _map(), _parent(0)
     {};
 
-    ValType       * find        (const KeyType      & name);
-    ValType const * lookup      (const KeyType      & name)                            const;
-    bool            changesMatch(const SeExprVarEnv & env1, const SeExprVarEnv & env2) const;
-    void            add         (const KeyType      & name,  ValType      * var);
-    void            add         (const SeExprVarEnv & env);
+    ValType       * find  (const KeyType      & name);
+    ValType const * lookup(const KeyType      & name)                const;
+    void            add   (const KeyType      & name, ValType * var);
+    void            add   (const SeExprVarEnv & env);
 
     inline int size() const { return _map.size(); };
 
-    static SeExprVarEnv newScope(SeExprVarEnv & env);
+    static bool         branchesMatch(const SeExprVarEnv & env1, const SeExprVarEnv & env2);
+    static SeExprVarEnv newBranch    (      SeExprVarEnv & env);
 
  protected:
     DictType::      iterator       begin()       { return _map.begin(); };

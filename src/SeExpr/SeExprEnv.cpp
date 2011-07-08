@@ -97,7 +97,7 @@ SeExprVarEnv::lookup(const KeyType & name) const
 };
 
 bool
-SeExprVarEnv::changesMatch(const SeExprVarEnv & env1, const SeExprVarEnv & env2) const
+SeExprVarEnv::branchesMatch(const SeExprVarEnv & env1, const SeExprVarEnv & env2)
 {
     bool match = true;
 
@@ -108,8 +108,7 @@ SeExprVarEnv::changesMatch(const SeExprVarEnv & env1, const SeExprVarEnv & env2)
         const KeyType & name = ienv->first;
         const ValType * var  = ienv->second;
 
-        if(lookup(name)->type() != var->type())
-            match = env2.lookup(name)->type() == var->type();
+        match = env2.lookup(name)->type() == var->type();
     }
 
     ienv = env2.begin();
@@ -119,8 +118,7 @@ SeExprVarEnv::changesMatch(const SeExprVarEnv & env1, const SeExprVarEnv & env2)
         const KeyType & name = ienv->first;
         const ValType * var  = ienv->second;
 
-        if(lookup(name)->type() != var->type())
-            match = env1.lookup(name)->type() == var->type();
+        match = env1.lookup(name)->type() == var->type();
     }
 
     return match;
@@ -148,7 +146,7 @@ SeExprVarEnv::add(const SeExprVarEnv & env)
 };
 
 SeExprVarEnv
-SeExprVarEnv::newScope(SeExprVarEnv & env)
+SeExprVarEnv::newBranch(SeExprVarEnv & env)
 {
     return SeExprVarEnv(&env);
 };
