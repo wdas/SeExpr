@@ -106,6 +106,9 @@ public:
     /// Transfer children from surrogate parent (for parser use only)
     void addChildren(SeExprNode* surrogate);
 
+    /// Transfer children from surrogate parent (does not delete surrogate)
+    void addChildren_without_delete(SeExprNode* surrogate);
+
     /** Prepare the node (for parser use only).  See the discussion at
 	the start of SeExprNode.cpp for more info.
     */
@@ -222,7 +225,7 @@ public:
     SeExprVecNode(const SeExpression* expr, SeExprNode* surrogate)
         : SeExprNode(expr)
     {
-        addChildren(surrogate);
+        addChildren_without_delete(surrogate);
     };
 
     SeExprVecNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b, SeExprNode* c)

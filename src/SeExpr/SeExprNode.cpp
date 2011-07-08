@@ -188,6 +188,20 @@ SeExprNode::addChildren(SeExprNode* surrogate)
 }
 
 
+void
+SeExprNode::addChildren_without_delete(SeExprNode* surrogate)
+{
+    std::vector<SeExprNode*>::iterator iter;
+    for (iter = surrogate->_children.begin();
+	 iter != surrogate->_children.end();
+	 iter++)
+    {
+	addChild(*iter);
+    }
+    surrogate->_children.clear();
+}
+
+
 SeExprType
 SeExprNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
