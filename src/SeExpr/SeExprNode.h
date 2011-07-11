@@ -133,10 +133,16 @@ public:
     {_expr->addError(error,_startPos,_endPos);}
 
     /// Register type mismatch
-    inline void typeMismatch(const SeExprType & expected,
-                             const SeExprType & received)
+    inline void expectedTypeMismatch(const SeExprType & expected,
+                                     const SeExprType & received)
     { addError("Type mismatch. Expected: " + expected.toString() +
                " Received: "               + received.toString()); }
+
+    /// Register type mismatch
+    inline void generalTypeMismatch(const SeExprType & first,
+                                    const SeExprType & second)
+    { addError("Type mismatch. First: " + first .toString() +
+               " Second: "              + second.toString()); }
 
     /// types match (true if they do)
     inline bool isa_with_error(const SeExprType & expected,
@@ -144,7 +150,7 @@ public:
                                      bool       & error   )
     {   bool match = received.isa(expected);
         if(!match) {
-            typeMismatch(expected, received);
+            expectedTypeMismatch(expected, received);
             error = true; }
         return match; }
 
@@ -154,15 +160,27 @@ public:
                                          bool       & error   )
     {   bool match = received.isUnder(expected);
         if(!match) {
-            typeMismatch(expected, received);
+            expectedTypeMismatch(expected, received);
             error = true; }
         return match; }
 
+    /// types match (true if they do)
+    inline bool typesMatch(const SeExprType & first,
+                           const SeExprType & second,
+                                 bool       & error  )
+    {   bool match = first.isa(second);
+        if(!match) {
+            generalTypeMismatch(first, second);
+            error = true;
+        }
+        return match;
+    }
+
     /// prep system error abstraction
     //   generalCheck passes (no error) if check is true
-    inline bool generalCheck(bool          check,
-                             std::string   message,
-                             bool        & error  )
+    inline bool generalCheck(      bool          check,
+                             const std::string & message,
+                                   bool        & error  )
     {   if(!check) {
             addError(message);
             error = true; }
@@ -170,10 +188,10 @@ public:
 
     /// prep system error abstraction (with prep check of children)
     //   generalCheck passes (no error) if check is true
-    inline bool generalCheck(bool           check,
-                             std::string    message,
-                             bool         & error,
-                             SeExprVarEnv & env    )
+    inline bool generalCheck(      bool           check,
+                             const std::string  & message,
+                                   bool         & error,
+                                   SeExprVarEnv & env    )
     {   if(!check) {
             addError(message);
             error = true;

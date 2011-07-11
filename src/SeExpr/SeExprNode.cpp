@@ -281,13 +281,11 @@ SeExprIfThenElseNode::prep(SeExprType wanted, SeExprVarEnv & env)
     elseEnv  = SeExprVarEnv::newBranch(env);
     elseType = child(2)->prep(SeExprType::AnyType(), elseEnv);
 
-    if(!thenType.isValid() ||
-       !elseType.isValid())
-        error = true;
+    if(!thenType.isValid() || !elseType.isValid()) error = true;
 
-    if(SeExprVarEnv::branchesMatch(thenEnv, elseEnv)) {
+    if(SeExprVarEnv::branchesMatch(thenEnv, elseEnv))
         env.add(thenEnv);
-    } else {
+    else {
         error = true;
         addError("Types of variables do not match after if statement");
     }
@@ -472,6 +470,8 @@ SeExprCondNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     if(elseType.isValid()) isa_with_error(wanted, elseType, error);
 
+    if(thenType.isValid() && elseType.isValid()) typesMatch(thenType, elseType, error);
+
     if(!error) _type = thenType;
 
     return _type;
@@ -598,7 +598,6 @@ SeExprType
 SeExprCompareNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
-    //TODO: determine if firstType and secondType need to be directly compared for compatibility (currently not)
     SeExprType firstType, secondType;
 
     bool error = false;
@@ -611,6 +610,8 @@ SeExprCompareNode::prep(SeExprType wanted, SeExprVarEnv & env)
     secondType = child(1)->prep(SeExprType::NumericType(), env);
 
     if(secondType.isValid()) isUnder_with_error(SeExprType::NumericType(), secondType, error);
+
+    if(firstType.isValid() && secondType.isValid()) typesMatch(firstType, secondType, error);
 
     if(error) _type = SeExprType::ErrorType();
 
@@ -723,6 +724,8 @@ SeExprBinaryOpNode::prep(SeExprType wanted, SeExprVarEnv & env)
     secondType = child(1)->prep(SeExprType::NumericType(), env);
 
     if(secondType.isValid()) isUnder_with_error(SeExprType::NumericType(), secondType, error);
+
+    if(firstType.isValid() && secondType.isValid()) typesMatch(firstType, secondType, error);
 
     if(!error) _type = (firstType.isFP1() ? secondType : firstType);
 
