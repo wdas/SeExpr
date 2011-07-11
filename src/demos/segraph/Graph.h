@@ -42,7 +42,6 @@
 #include "Functions.h"
 #include <iostream>
 
-#include <python2.6/Python.h>
 static const int divs=1;
 
 //! Draws graph and handles the state of the graph coordinate system
@@ -52,8 +51,6 @@ class Graph:public QWidget
 public:
     enum OperationCode{NONE=0,FIND_MIN,FIND_MAX,FIND_ROOT};
 private:
-
-    PyObject* callable;
 
     Functions& funcs;
     float logBase;
