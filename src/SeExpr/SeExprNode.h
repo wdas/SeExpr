@@ -140,17 +140,45 @@ public:
 
     /// types match (true if they do)
     inline bool isa_with_error(const SeExprType & expected,
-                               const SeExprType & received)
+                               const SeExprType & received,
+                                     bool       & error   )
     {   bool match = received.isa(expected);
-        if(!match) typeMismatch(expected, received);
+        if(!match) {
+            typeMismatch(expected, received);
+            error = true; }
         return match; }
 
     /// types match (true if they do)
     inline bool isUnder_with_error(const SeExprType & expected,
-                                   const SeExprType & received)
+                                   const SeExprType & received,
+                                         bool       & error   )
     {   bool match = received.isUnder(expected);
-        if(!match) typeMismatch(expected, received);
+        if(!match) {
+            typeMismatch(expected, received);
+            error = true; }
         return match; }
+
+    /// prep system error abstraction
+    //   generalCheck passes (no error) if check is true
+    inline bool generalCheck(bool          check,
+                             std::string   message,
+                             bool        & error  )
+    {   if(!check) {
+            addError(message);
+            error = true; }
+        return check; }
+
+    /// prep system error abstraction (with prep check of children)
+    //   generalCheck passes (no error) if check is true
+    inline bool generalCheck(bool           check,
+                             std::string    message,
+                             bool         & error,
+                             SeExprVarEnv & env    )
+    {   if(!check) {
+            addError(message);
+            error = true;
+            SeExprNode::prep(SeExprType::AnyType(), env); }
+        return check; }
 
 protected:
     /// Owning expression (node can't modify)
@@ -238,37 +266,44 @@ public:
     SeVec3d value() const;
 };
 
+/// NOde that computes with a single operand
+class SeExprUnaryOpNode : public SeExprNode
+{
+public:
+    SeExprUnaryOpNode(const SeExpression* expr, SeExprNode* a)
+        : SeExprNode(expr, a)
+    {}
+
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+};
+
 /// Node that computes a negation (scalar or vector)
-class SeExprNegNode : public SeExprNode
+class SeExprNegNode : public SeExprUnaryOpNode
 {
 public:
     SeExprNegNode(const SeExpression* expr, SeExprNode* a) :
-	SeExprNode(expr, a) {}
+	SeExprUnaryOpNode(expr, a) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
 /// Node that computes an inversion (1-x) (scalar or vector)
-class SeExprInvertNode : public SeExprNode
+class SeExprInvertNode : public SeExprUnaryOpNode
 {
 public:
     SeExprInvertNode(const SeExpression* expr, SeExprNode* a) :
-	SeExprNode(expr, a) {}
+	SeExprUnaryOpNode(expr, a) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
-
 /// Note that computes a logical not
-class SeExprNotNode : public SeExprNode
+class SeExprNotNode : public SeExprUnaryOpNode
 {
 public:
     SeExprNotNode(const SeExpression* expr, SeExprNode* a) :
-	SeExprNode(expr, a) {}
+	SeExprUnaryOpNode(expr, a) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -285,26 +320,35 @@ public:
 };
 
 
-/// Node that evaluates a logical AND
-class SeExprAndNode : public SeExprNode
+/// Node that computes a logical operation (two operands)
+class SeExprLogicalOpNode : public SeExprNode
 {
 public:
-    SeExprAndNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
+    SeExprLogicalOpNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
     virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+};
+
+
+/// Node that evaluates a logical AND
+class SeExprAndNode : public SeExprLogicalOpNode
+{
+public:
+    SeExprAndNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
+	SeExprLogicalOpNode(expr, a, b) {}
+
     virtual void eval(SeVec3d& result) const;
 };
 
 
 /// Node that evaluates a logical OR
-class SeExprOrNode : public SeExprNode
+class SeExprOrNode : public SeExprLogicalOpNode
 {
 public:
     SeExprOrNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprLogicalOpNode(expr, a, b) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -322,145 +366,155 @@ public:
 
 
 /// Node that implements a numeric comparison
-class SeExprEqNode : public SeExprNode
+class SeExprCompareNode : public SeExprNode
+{
+public:
+    SeExprCompareNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
+	SeExprNode(expr, a, b) {}
+
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+};
+
+
+/// Node that implements a numeric comparison
+class SeExprEqNode : public SeExprCompareNode
 {
 public:
     SeExprEqNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprCompareNode(expr, a, b) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
 
 /// Node that implements a numeric comparison
-class SeExprNeNode : public SeExprNode
+class SeExprNeNode : public SeExprCompareNode
 {
 public:
     SeExprNeNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprCompareNode(expr, a, b) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
 
 /// Node that implements a numeric comparison
-class SeExprLtNode : public SeExprNode
+class SeExprLtNode : public SeExprCompareNode
 {
 public:
     SeExprLtNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprCompareNode(expr, a, b) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
 
 /// Node that implements a numeric comparison
-class SeExprGtNode : public SeExprNode
+class SeExprGtNode : public SeExprCompareNode
 {
 public:
     SeExprGtNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprCompareNode(expr, a, b) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
 
 /// Node that implements a numeric comparison
-class SeExprLeNode : public SeExprNode
+class SeExprLeNode : public SeExprCompareNode
 {
 public:
     SeExprLeNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprCompareNode(expr, a, b) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
 
 /// Node that implements a numeric comparison
-class SeExprGeNode : public SeExprNode
+class SeExprGeNode : public SeExprCompareNode
 {
 public:
     SeExprGeNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprCompareNode(expr, a, b) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
 
+/// Node that implements an binary operator
+class SeExprBinaryOpNode : public SeExprNode
+{
+public:
+    SeExprBinaryOpNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
+	SeExprNode(expr, a, b) {}
+
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+};
+
+
 /// Node that implements an arithmetic operator
-class SeExprAddNode : public SeExprNode
+class SeExprAddNode : public SeExprBinaryOpNode
 {
 public:
     SeExprAddNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprBinaryOpNode(expr, a, b) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
 
 /// Node that implements an arithmetic operator
-class SeExprSubNode : public SeExprNode
+class SeExprSubNode : public SeExprBinaryOpNode
 {
 public:
     SeExprSubNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprBinaryOpNode(expr, a, b) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
 
 /// Node that implements an arithmetic operator
-class SeExprMulNode : public SeExprNode
+class SeExprMulNode : public SeExprBinaryOpNode
 {
 public:
     SeExprMulNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprBinaryOpNode(expr, a, b) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
 
 /// Node that implements an arithmetic operator
-class SeExprDivNode : public SeExprNode
+class SeExprDivNode : public SeExprBinaryOpNode
 {
 public:
     SeExprDivNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprBinaryOpNode(expr, a, b) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
 
 /// Node that implements an arithmetic operator
-class SeExprModNode : public SeExprNode
+class SeExprModNode : public SeExprBinaryOpNode
 {
 public:
     SeExprModNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprBinaryOpNode(expr, a, b) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
 
 /// Node that implements an arithmetic operator
-class SeExprExpNode : public SeExprNode
+class SeExprExpNode : public SeExprBinaryOpNode
 {
 public:
     SeExprExpNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprBinaryOpNode(expr, a, b) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
