@@ -94,7 +94,11 @@ class SeExprType {
     inline Lifetime lt  () const { return _lifetime; };
 
     ///Returns true if this and other match type and dimension
-    inline bool operator==(const SeExprType & other) const;
+    inline bool operator==(const SeExprType & other) const {
+        return (type() == other.type() &&
+                dim () == other.dim ());
+    };
+
 
     ///Returns true if this and other do not match on type and dimension
     inline bool operator!=(const SeExprType & other) const { return !(*this == other); };
@@ -122,7 +126,12 @@ class SeExprType {
     inline bool isUnderNumeric() const { return isFP1   () || isFPN     (); };
 
     //general strictly under relation
-    inline bool isUnder(const SeExprType & other) const;
+    inline bool isUnder(const SeExprType & other) const {
+        if     (other.isAny    ()) return isUnderAny    ();
+        else if(other.isValue  ()) return isUnderValue  ();
+        else if(other.isNumeric()) return isUnderNumeric();
+        else                       return false;
+    };
 
     //equivalent (under, equal, or promotable) relation
     inline bool isaAny    ()      const { return isAny         () || isUnderAny    ();  };
@@ -135,7 +144,17 @@ class SeExprType {
     inline bool isaFPN    (int i) const { return isFP1         () || isFPN         (i); };
 
     //general equivalent (under, equal, or promotable) relation
-    inline bool isa(const SeExprType & other) const;
+    inline bool isa(const SeExprType & other) const {
+        if     (*this == other)    return true;
+        else if(other.isAny    ()) return isaAny    ();
+        else if(other.isNone   ()) return isaNone   ();
+        else if(other.isValue  ()) return isaValue  ();
+        else if(other.isString ()) return isaString ();
+        else if(other.isNumeric()) return isaNumeric();
+        else if(other.isFP1    ()) return isaFP1    ();
+        else if(other.isFPN    ()) return isaFPN    (other.dim());
+        else                       return false;
+    };
 
     //validity and isa check
     inline bool check(const SeExprType & other) const { return isValid() && isa(other); };
@@ -160,10 +179,60 @@ class SeExprType {
     inline void becomeLT(const SeExprType & first) { _lifetime = first.lt(); };
 
     //combination lifetime assignments
-    inline void becomeLT(const SeExprType & first, const SeExprType & second);
-    inline void becomeLT(const SeExprType & first, const SeExprType & second, const SeExprType & third);
+    inline void becomeLT(const SeExprType & first,
+                         const SeExprType & second) {
+        if     (first.lt() == second.lt()) becomeLT(first);
+        else if(first .isLTError  ()  ||
+                second.isLTError  ())    becomeLTError();
+        else if(first .isLTVarying()  ||
+                second.isLTVarying())    becomeLTVarying();
+        else if(first .isLTUniform()  ||
+                second.isLTUniform())    becomeLTUniform();
+        else                             becomeLTConstant();
+    };
 
-    inline std::string toString() const;
+    inline void becomeLT(const SeExprType & first,
+                         const SeExprType & second,
+                         const SeExprType & third) {
+        if     (first.lt() == second.lt()  &&
+                first.lt() == third .lt()) becomeLT(first);
+        else if(first .isLTError  ()  ||
+                second.isLTError  ()  ||
+                third .isLTError  ())    becomeLTError();
+        else if(first .isLTVarying()  ||
+                second.isLTVarying()  ||
+                third .isLTVarying())    becomeLTVarying();
+        else if(first .isLTUniform()  ||
+                second.isLTUniform()  ||
+                third .isLTUniform())    becomeLTUniform();
+        else                             becomeLTConstant();
+    };
+
+    inline std::string toString() const {
+        std::stringstream ss;
+
+        if     (isAny    ()) ss << "Any";
+        else if(isNone   ()) ss << "None";
+        else if(isValue  ()) ss << "Value";
+        else if(isString ()) ss << "String";
+        else if(isNumeric()) ss << "Numeric";
+        else if(isFP1    ()) ss << "FLOAT[1]";
+        else if(isFPN    ()) ss << "FLOAT[" << dim() << "]";
+        else if(isError  ()) ss << "Error";
+        else                 ss << "toString Type Error";
+
+        ss << "(";
+
+        if     (isLTConstant()) ss << "c";
+        else if(isLTUniform ()) ss << "u";
+        else if(isLTVarying ()) ss << "v";
+        else if(isLTError   ()) ss << "e";
+        else                    ss << "toString Lifetime Error";
+
+        ss << ")";
+
+        return ss.str();
+    };
 
  private:
     Type     _type;
