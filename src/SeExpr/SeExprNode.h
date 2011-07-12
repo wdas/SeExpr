@@ -84,9 +84,6 @@ public:
     /// True if node has a vector result.
     bool isVec() const { return _isVec; }
 
-    /// Evaluation method.  Note: v[1] and v[2] are undefined if !isVec
-    virtual void eval(SeVec3d& v) const;
-
     /// Access expression
     const SeExpression* expr() const { return _expr; }
 
@@ -114,6 +111,9 @@ public:
     */
     virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
 
+    /// Evaluation method.  Note: v[1] and v[2] are undefined if !isVec
+    virtual void eval(SeVec3d& v) const;
+
     /// The type of the node
     SeExprType type() const { return _type; };
 
@@ -129,74 +129,43 @@ public:
     inline const short int length() const { return endPos() - startPos(); };
 
     /// Register error
-    inline void addError(const std::string& error)
-    {_expr->addError(error,_startPos,_endPos);}
-
-    /// Register type mismatch
-    inline void expectedTypeMismatch(const SeExprType & expected,
-                                     const SeExprType & received)
-    { addError("Type mismatch. Expected: " + expected.toString() +
-               " Received: "               + received.toString()); }
-
-    /// Register type mismatch
-    inline void generalTypeMismatch(const SeExprType & first,
-                                    const SeExprType & second)
-    { addError("Type mismatch. First: " + first .toString() +
-               " Second: "              + second.toString()); }
-
-    /// types match (true if they do)
-    inline bool isa_with_error(const SeExprType & expected,
-                               const SeExprType & received,
-                                     bool       & error   )
-    {   bool match = received.isa(expected);
-        if(!match) {
-            expectedTypeMismatch(expected, received);
-            error = true; }
-        return match; }
-
-    /// types match (true if they do)
-    inline bool isUnder_with_error(const SeExprType & expected,
-                                   const SeExprType & received,
-                                         bool       & error   )
-    {   bool match = received.isUnder(expected);
-        if(!match) {
-            expectedTypeMismatch(expected, received);
-            error = true; }
-        return match; }
-
-    /// types match (true if they do)
-    inline bool typesMatch(const SeExprType & first,
-                           const SeExprType & second,
-                                 bool       & error  )
-    {   bool match = first.isa(second);
-        if(!match) {
-            generalTypeMismatch(first, second);
-            error = true;
-        }
-        return match;
-    }
+    inline void addError(const std::string& error) { _expr->addError(error, _startPos, _endPos); }
 
     /// prep system error abstraction
     //   generalCheck passes (no error) if check is true
     inline bool generalCheck(      bool          check,
                              const std::string & message,
-                                   bool        & error  )
-    {   if(!check) {
-            addError(message);
-            error = true; }
-        return check; }
+                                   bool        & error  );
 
     /// prep system error abstraction (with prep check of children)
     //   generalCheck passes (no error) if check is true
     inline bool generalCheck(      bool           check,
                              const std::string  & message,
                                    bool         & error,
-                                   SeExprVarEnv & env    )
-    {   if(!check) {
-            addError(message);
-            error = true;
-            SeExprNode::prep(SeExprType::AnyType(), env); }
-        return check; }
+                                   SeExprVarEnv & env    );
+
+    /// Register type mismatch
+    inline std::string expectedTypeMismatchString(const SeExprType & expected,
+                                                  const SeExprType & received);
+
+    /// Register type mismatch
+    inline std::string generalTypeMismatchString(const SeExprType & first,
+                                                 const SeExprType & second);
+
+    /// types match (true if they do)
+    inline bool isa_with_error(const SeExprType & expected,
+                               const SeExprType & received,
+                               bool & error);
+
+    /// types match (true if they do)
+    inline bool isUnder_with_error(const SeExprType & expected,
+                                   const SeExprType & received,
+                                         bool       & error   );
+
+    /// types match (true if they do)
+    inline bool typesMatch(const SeExprType & first,
+                           const SeExprType & second,
+                                 bool       & error  );
 
 protected:
     /// Owning expression (node can't modify)

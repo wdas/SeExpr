@@ -239,6 +239,88 @@ SeExprNode::eval(SeVec3d& result) const
 }
 
 
+bool
+SeExprNode::generalCheck(      bool          check,
+                         const std::string & message,
+                               bool        & error  )
+{
+    if(!check) {
+        addError(message);
+        error = true; }
+
+    return check;
+}
+
+
+bool
+SeExprNode::generalCheck(      bool           check,
+                         const std::string  & message,
+                               bool         & error,
+                               SeExprVarEnv & env    )
+{
+    if(!check) {
+        addError(message);
+        error = true;
+        SeExprNode::prep(SeExprType::AnyType(), env); }
+    return check;
+}
+
+
+std::string
+SeExprNode::expectedTypeMismatchString(const SeExprType & expected,
+                                 const SeExprType & received)
+{
+    return ("Type mismatch. Expected: " +
+            expected.toString()         +
+            " Received: "               +
+            received.toString());
+}
+
+
+std::string
+SeExprNode::generalTypeMismatchString(const SeExprType & first,
+                                const SeExprType & second)
+{
+    return ("Type mismatch. First: " +
+            first .toString()        +
+            " Second: "              +
+            second.toString());
+}
+
+
+bool
+SeExprNode::isa_with_error(const SeExprType & expected,
+                           const SeExprType & received,
+                                 bool       & error   )
+{
+    return generalCheck(received.isa(expected),
+                        expectedTypeMismatchString(expected, received),
+                        error);
+}
+
+
+bool
+SeExprNode::isUnder_with_error(const SeExprType & expected,
+                               const SeExprType & received,
+                                     bool       & error   )
+{
+    return generalCheck(received.isUnder(expected),
+                        expectedTypeMismatchString(expected, received),
+                        error);
+}
+
+
+bool
+SeExprNode::typesMatch(const SeExprType & first,
+                       const SeExprType & second,
+                             bool       & error  )
+{
+    return generalCheck(first.isa(second),
+                        generalTypeMismatchString(first, second),
+                        error);
+}
+
+
 SeExprType
 SeExprBlockNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
@@ -879,7 +961,7 @@ SeExprVarNode::prep(SeExprType wanted, SeExprVarEnv & env)
     _var = env.find(name());
     if (!_var) _var = _expr->resolveVar(name());
     if (!_var)
-        addError(std::string("No variable named $")+name());
+        addError(std::string("No variable named $") + name());
     else
         _type = _var->type();
 
