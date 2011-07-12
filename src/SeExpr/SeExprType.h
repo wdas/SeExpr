@@ -56,6 +56,10 @@ class SeExprType {
                    ltVARYING,
                    ltERROR};
 
+    /*
+     * Core type functions
+     */
+
     SeExprType()
         : _type(tERROR),_n(1), _lifetime(ltERROR)
     {};
@@ -74,19 +78,28 @@ class SeExprType {
         assert(type == tFP || n == 1);
     };
 
+    //general constructors
+    static inline SeExprType AnyType    ()      { return SeExprType(tANY,1);     };
+    static inline SeExprType NoneType   ()      { return SeExprType(tNONE,1);    };
+    static inline SeExprType ValueType  ()      { return SeExprType(tVALUE,1);   };
+    static inline SeExprType StringType ()      { return SeExprType(tSTRING,1);  };
+    static inline SeExprType NumericType()      { return SeExprType(tNUMERIC,1); };
+    static inline SeExprType FP1Type    ()      { return SeExprType(tFP,1);      };
+    static inline SeExprType FPNType    (int d) { return SeExprType(tFP,d);      };
+    static inline SeExprType ErrorType  ()      { return SeExprType(tERROR,1);   };
+
+    //accessors
     inline Type     type() const { return _type;     };
     inline int      dim () const { return _n;        };
     inline Lifetime lt  () const { return _lifetime; };
 
+    ///Returns true if this and other match type and dimension
+    inline bool operator==(const SeExprType & other) const;
+
+    ///Returns true if this and other do not match on type and dimension
     inline bool operator!=(const SeExprType & other) const { return !(*this == other); };
 
-    ///Returns true if this and other match type and dimension
-    inline bool operator==(const SeExprType & other) const {
-        return (type() == other.type() &&
-                dim () == other.dim ());
-    };
-
-    ///type is not an error
+    ///validity check: type is not an error
     inline bool isValid() const { return !isError(); };
 
     //strictly equal relation
@@ -109,12 +122,7 @@ class SeExprType {
     inline bool isUnderNumeric() const { return isFP1   () || isFPN     (); };
 
     //general strictly under relation
-    inline bool isUnder(const SeExprType & other) const {
-        if     (other.isAny    ()) return isUnderAny    ();
-        else if(other.isValue  ()) return isUnderValue  ();
-        else if(other.isNumeric()) return isUnderNumeric();
-        else                       return false;
-    };
+    inline bool isUnder(const SeExprType & other) const;
 
     //equivalent (under, equal, or promotable) relation
     inline bool isaAny    ()      const { return isAny         () || isUnderAny    ();  };
@@ -127,95 +135,35 @@ class SeExprType {
     inline bool isaFPN    (int i) const { return isFP1         () || isFPN         (i); };
 
     //general equivalent (under, equal, or promotable) relation
-    inline bool isa(const SeExprType & other) const {
-        if     (*this == other)    return true;
-        else if(other.isAny    ()) return isaAny    ();
-        else if(other.isNone   ()) return isaNone   ();
-        else if(other.isValue  ()) return isaValue  ();
-        else if(other.isString ()) return isaString ();
-        else if(other.isNumeric()) return isaNumeric();
-        else if(other.isFP1    ()) return isaFP1    ();
-        else if(other.isFPN    ()) return isaFPN    (other.dim());
-        else                       return false;
-    };
+    inline bool isa(const SeExprType & other) const;
 
-    inline bool check(const SeExprType & other) const {
-        return isValid() && isa(other);
-    };
-
-    static inline SeExprType AnyType    ()      { return SeExprType(tANY,1);     };
-    static inline SeExprType NoneType   ()      { return SeExprType(tNONE,1);    };
-    static inline SeExprType ValueType  ()      { return SeExprType(tVALUE,1);   };
-    static inline SeExprType StringType ()      { return SeExprType(tSTRING,1);  };
-    static inline SeExprType NumericType()      { return SeExprType(tNUMERIC,1); };
-    static inline SeExprType FP1Type    ()      { return SeExprType(tFP,1);      };
-    static inline SeExprType FPNType    (int d) { return SeExprType(tFP,d);      };
-    static inline SeExprType ErrorType  ()      { return SeExprType(tERROR,1);   };
+    //validity and isa check
+    inline bool check(const SeExprType & other) const { return isValid() && isa(other); };
 
     /*
      * Lifetime-related functions
      */
 
-    //
+    //lifetime matchers
     inline bool isLTConstant() const { return lt() == ltCONSTANT; };
     inline bool isLTUniform () const { return lt() == ltUNIFORM;  };
     inline bool isLTVarying () const { return lt() == ltVARYING;  };
     inline bool isLTError   () const { return lt() == ltERROR;    };
 
+    //static lifetime assignment
     inline void becomeLTConstant() { _lifetime = ltCONSTANT; };
     inline void becomeLTUniform () { _lifetime = ltUNIFORM;  };
     inline void becomeLTVarying () { _lifetime = ltVARYING;  };
     inline void becomeLTError   () { _lifetime = ltERROR;    };
 
-    inline void becomeLT(const SeExprType & first)   { _lifetime = first.lt(); };
-    inline void becomeLT(const SeExprType & first,
-                         const SeExprType & second) {
-        if     (first.lt() == second.lt()) becomeLT(first);
-        else if(first .isLTError  ()  ||
-                second.isLTError  ())    becomeLTError();
-        else if(first .isLTVarying()  ||
-                second.isLTVarying())    becomeLTVarying();
-        else if(first .isLTUniform()  ||
-                second.isLTUniform())    becomeLTUniform();
-        else                             becomeLTConstant();
-    };
-    inline void becomeLT(const SeExprType & first,
-                         const SeExprType & second,
-                         const SeExprType & third) {
-        if     (first.lt() == second.lt()  &&
-                first.lt() == third .lt()) becomeLT(first);
-        else if(first .isLTError  ()  ||
-                second.isLTError  ()  ||
-                third .isLTError  ())    becomeLTError();
-        else if(first .isLTVarying()  ||
-                second.isLTVarying()  ||
-                third .isLTVarying())    becomeLTVarying();
-        else if(first .isLTUniform()  ||
-                second.isLTUniform()  ||
-                third .isLTUniform())    becomeLTUniform();
-        else                             becomeLTConstant();
-    };
+    //dynamic lifetime assignment
+    inline void becomeLT(const SeExprType & first) { _lifetime = first.lt(); };
 
-    inline std::string toString() const {
-        std::stringstream ss;
-        if     (isAny    ()) ss << "Any";
-        else if(isNone   ()) ss << "None";
-        else if(isValue  ()) ss << "Value";
-        else if(isString ()) ss << "String";
-        else if(isNumeric()) ss << "Numeric";
-        else if(isFP1    ()) ss << "FLOAT[1]";
-        else if(isFPN    ()) ss << "FLOAT[" << dim() << "]";
-        else if(isError  ()) ss << "Error";
-        else                 ss << "toString Type Error";
+    //combination lifetime assignments
+    inline void becomeLT(const SeExprType & first, const SeExprType & second);
+    inline void becomeLT(const SeExprType & first, const SeExprType & second, const SeExprType & third);
 
-        if     (isLTConstant()) ss << "(c)";
-        else if(isLTUniform ()) ss << "(u)";
-        else if(isLTVarying ()) ss << "(v)";
-        else if(isLTError   ()) ss << "(e)";
-        else                    ss << "(toString Lifetime Error)";
-
-        return ss.str();
-    };
+    inline std::string toString() const;
 
  private:
     Type     _type;
