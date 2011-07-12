@@ -51,19 +51,32 @@ class SeExprType {
                tVALUE,
                tANY};
 
+    enum Lifetime {ltCONSTANT,
+                   ltUNIFORM,
+                   ltVARYING,
+                   ltERROR};
+
     SeExprType()
-        : _type(tERROR),_n(1)
+        : _type(tERROR),_n(1), _lifetime(ltERROR)
     {};
 
     SeExprType(Type type, int n)
-        : _type(type), _n(n)
+        : _type(type), _n(n), _lifetime(ltVARYING)
     {
         assert(n >= 1);
         assert(type == tFP || n == 1);
     };
 
-    inline Type type() const { return _type; };
-    inline int  dim () const { return _n;    };
+    SeExprType(Type type, int n, Lifetime lt)
+        : _type(type), _n(n), _lifetime(lt)
+    {
+        assert(n >= 1);
+        assert(type == tFP || n == 1);
+    };
+
+    inline Type     type() const { return _type;     };
+    inline int      dim () const { return _n;        };
+    inline Lifetime lt  () const { return _lifetime; };
 
     inline bool operator!=(const SeExprType & other) const { return !(*this == other); };
 
@@ -97,10 +110,10 @@ class SeExprType {
 
     //general strictly under relation
     inline bool isUnder(const SeExprType & other) const {
-        if(other.isAny    ()) return isUnderAny    ();
-        if(other.isValue  ()) return isUnderValue  ();
-        if(other.isNumeric()) return isUnderNumeric();
-        /*else*/              return false;
+        if     (other.isAny    ()) return isUnderAny    ();
+        else if(other.isValue  ()) return isUnderValue  ();
+        else if(other.isNumeric()) return isUnderNumeric();
+        else                       return false;
     };
 
     //equivalent (under, equal, or promotable) relation
@@ -115,15 +128,15 @@ class SeExprType {
 
     //general equivalent (under, equal, or promotable) relation
     inline bool isa(const SeExprType & other) const {
-        if(*this == other)    return true;
-        if(other.isAny    ()) return isaAny    ();
-        if(other.isNone   ()) return isNone    ();
-        if(other.isValue  ()) return isaValue  ();
-        if(other.isString ()) return isString  ();
-        if(other.isNumeric()) return isaNumeric();
-        if(other.isFP1    ()) return isaFP1    ();
-        if(other.isFPN    ()) return isaFPN    (other.dim());
-        /*else*/              return false;
+        if     (*this == other)    return true;
+        else if(other.isAny    ()) return isaAny    ();
+        else if(other.isNone   ()) return isaNone   ();
+        else if(other.isValue  ()) return isaValue  ();
+        else if(other.isString ()) return isaString ();
+        else if(other.isNumeric()) return isaNumeric();
+        else if(other.isFP1    ()) return isaFP1    ();
+        else if(other.isFPN    ()) return isaFPN    (other.dim());
+        else                       return false;
     };
 
     inline bool check(const SeExprType & other) const {
@@ -139,9 +152,53 @@ class SeExprType {
     static inline SeExprType FPNType    (int d) { return SeExprType(tFP,d);      };
     static inline SeExprType ErrorType  ()      { return SeExprType(tERROR,1);   };
 
+    /*
+     * Lifetime-related functions
+     */
+
+    //
+    inline bool isLTConstant() const { return lt() == ltCONSTANT; };
+    inline bool isLTUniform () const { return lt() == ltUNIFORM;  };
+    inline bool isLTVarying () const { return lt() == ltVARYING;  };
+    inline bool isLTError   () const { return lt() == ltERROR;    };
+
+    inline void becomeLTConstant() { _lifetime = ltCONSTANT; };
+    inline void becomeLTUniform () { _lifetime = ltUNIFORM;  };
+    inline void becomeLTVarying () { _lifetime = ltVARYING;  };
+    inline void becomeLTError   () { _lifetime = ltERROR;    };
+
+    inline void becomeLT(const SeExprType & first)   { _lifetime = first.lt(); };
+    inline void becomeLT(const SeExprType & first,
+                         const SeExprType & second) {
+        if     (first.lt() == second.lt()) becomeLT(first);
+        else if(first .isLTError  ()  ||
+                second.isLTError  ())    becomeLTError();
+        else if(first .isLTVarying()  ||
+                second.isLTVarying())    becomeLTVarying();
+        else if(first .isLTUniform()  ||
+                second.isLTUniform())    becomeLTUniform();
+        else                             becomeLTConstant();
+    };
+    inline void becomeLT(const SeExprType & first,
+                         const SeExprType & second,
+                         const SeExprType & third) {
+        if     (first.lt() == second.lt()  &&
+                first.lt() == third .lt()) becomeLT(first);
+        else if(first .isLTError  ()  ||
+                second.isLTError  ()  ||
+                third .isLTError  ())    becomeLTError();
+        else if(first .isLTVarying()  ||
+                second.isLTVarying()  ||
+                third .isLTVarying())    becomeLTVarying();
+        else if(first .isLTUniform()  ||
+                second.isLTUniform()  ||
+                third .isLTUniform())    becomeLTUniform();
+        else                             becomeLTConstant();
+    };
+
     inline std::string toString() const {
         std::stringstream ss;
-             if(isAny    ()) ss << "Any";
+        if     (isAny    ()) ss << "Any";
         else if(isNone   ()) ss << "None";
         else if(isValue  ()) ss << "Value";
         else if(isString ()) ss << "String";
@@ -149,14 +206,21 @@ class SeExprType {
         else if(isFP1    ()) ss << "FLOAT[1]";
         else if(isFPN    ()) ss << "FLOAT[" << dim() << "]";
         else if(isError  ()) ss << "Error";
-        else                 ss << "toString error";
+        else                 ss << "toString Type Error";
+
+        if     (isLTConstant()) ss << "(c)";
+        else if(isLTUniform ()) ss << "(u)";
+        else if(isLTVarying ()) ss << "(v)";
+        else if(isLTError   ()) ss << "(e)";
+        else                    ss << "(toString Lifetime Error)";
 
         return ss.str();
     };
 
  private:
-    Type _type;
-    int  _n;
+    Type     _type;
+    int      _n;
+    Lifetime _lifetime;
 };
 
 #endif
