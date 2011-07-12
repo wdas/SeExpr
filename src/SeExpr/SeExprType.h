@@ -39,6 +39,7 @@
 #include <string>
 #include <map>
 #include <cassert>
+#include <sstream>
 
 class SeExprType {
  public:
@@ -58,6 +59,7 @@ class SeExprType {
         : _type(type), _n(n)
     {
         assert(n >= 1);
+        assert(type == tFP || n == 1);
     };
 
     inline Type type() const { return _type; };
@@ -138,15 +140,18 @@ class SeExprType {
     static inline SeExprType ErrorType  ()      { return SeExprType(tERROR,1);   };
 
     inline std::string toString() const {
-        if(isAny    ()) return "Any";
-        if(isNone   ()) return "None";
-        if(isValue  ()) return "Value";
-        if(isString ()) return "String";
-        if(isNumeric()) return "Numeric";
-        if(isFP1    ()) return "FP1";
-        if(isFPN    ()) return "FP" + dim();
-        if(isError  ()) return "Error";
-        return "toString Error";
+        std::stringstream ss;
+             if(isAny    ()) ss << "Any";
+        else if(isNone   ()) ss << "None";
+        else if(isValue  ()) ss << "Value";
+        else if(isString ()) ss << "String";
+        else if(isNumeric()) ss << "Numeric";
+        else if(isFP1    ()) ss << "FP1";
+        else if(isFPN    ()) ss << "FP" << dim();
+        else if(isError  ()) ss << "Error";
+        else                 ss << "toString error";
+
+        return ss.str();
     };
 
  private:
