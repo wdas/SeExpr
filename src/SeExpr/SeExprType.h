@@ -146,8 +146,8 @@ class SeExprType {
         else if(isValue  ()) ss << "Value";
         else if(isString ()) ss << "String";
         else if(isNumeric()) ss << "Numeric";
-        else if(isFP1    ()) ss << "FP1";
-        else if(isFPN    ()) ss << "FP" << dim();
+        else if(isFP1    ()) ss << "FLOAT[1]";
+        else if(isFPN    ()) ss << "FLOAT[" << dim() << "]";
         else if(isError  ()) ss << "Error";
         else                 ss << "toString error";
 
