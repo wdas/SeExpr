@@ -1033,7 +1033,7 @@ SeExprFuncNode::prep(SeExprType wanted, SeExprVarEnv & env)
         //check that the function has the right number of arguments
         if(generalCheck(_nargs >= _func->minArgs(),   "Too few args for function "  + _name, error, env) &&
            generalCheck(_nargs <= _func->maxArgs() ||
-                             0 <= _func->maxArgs(),   "Too many args for function " + _name, error, env)) {
+                             0  > _func->maxArgs(),   "Too many args for function " + _name, error, env)) {
             _vecArgs.resize(_nargs);
             _scalarArgs.resize(_nargs);
 
