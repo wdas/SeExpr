@@ -212,15 +212,16 @@ SeExprNode::prep(SeExprType wanted, SeExprVarEnv & env)
      */
     bool error = false;
 
-    _type = SeExprType::NoneType();
-
     std::vector<SeExprNode*>::iterator       child   = _children.begin();
     std::vector<SeExprNode*>::iterator const e_child = _children.end  ();
 
     for(; child != e_child; child++)
         error = error || (!((*child)->prep(SeExprType::AnyType(), env)).isValid());
 
-    if(error) _type = SeExprType::ErrorType();
+    if(error)
+        setType();
+    else
+        setType_std(SeExprType::NoneType());
 
     return _type;
 }
@@ -239,96 +240,16 @@ SeExprNode::eval(SeVec3d& result) const
 }
 
 
-bool
-SeExprNode::generalCheck(      bool          check,
-                         const std::string & message,
-                               bool        & error  )
-{
-    if(!check) {
-        addError(message);
-        error = true; }
-
-    return check;
-}
-
-
-bool
-SeExprNode::generalCheck(      bool           check,
-                         const std::string  & message,
-                               bool         & error,
-                               SeExprVarEnv & env    )
-{
-    if(!check) {
-        addError(message);
-        error = true;
-        SeExprNode::prep(SeExprType::AnyType(), env); }
-    return check;
-}
-
-
-std::string
-SeExprNode::expectedTypeMismatchString(const SeExprType & expected,
-                                 const SeExprType & received)
-{
-    return ("Type mismatch. Expected: " +
-            expected.toString()         +
-            " Received: "               +
-            received.toString());
-}
-
-
-std::string
-SeExprNode::generalTypeMismatchString(const SeExprType & first,
-                                const SeExprType & second)
-{
-    return ("Type mismatch. First: " +
-            first .toString()        +
-            " Second: "              +
-            second.toString());
-}
-
-
-bool
-SeExprNode::isa_with_error(const SeExprType & expected,
-                           const SeExprType & received,
-                                 bool       & error   )
-{
-    return generalCheck(received.isa(expected),
-                        expectedTypeMismatchString(expected, received),
-                        error);
-}
-
-
-bool
-SeExprNode::isUnder_with_error(const SeExprType & expected,
-                               const SeExprType & received,
-                                     bool       & error   )
-{
-    return generalCheck(received.isUnder(expected),
-                        expectedTypeMismatchString(expected, received),
-                        error);
-}
-
-
-bool
-SeExprNode::typesMatch(const SeExprType & first,
-                       const SeExprType & second,
-                             bool       & error  )
-{
-    return generalCheck(first.isa(second),
-                        generalTypeMismatchString(first, second),
-                        error);
-}
-
-
 SeExprType
 SeExprBlockNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    bool error = !child(0)->prep(SeExprType::AnyType(), env).isValid();
+    SeExprType assignType = child(0)->prep(SeExprType::AnyType(), env);
+    SeExprType resultType = child(1)->prep(SeExprType::AnyType(), env);
 
-    _type = child(1)->prep(wanted, env);
-
-    if(error) _type = SeExprType::ErrorType();
+    if(!assignType.isValid())
+        setType();
+    else
+        setType(resultType);
 
     return _type;
 }
@@ -351,7 +272,6 @@ SeExprIfThenElseNode::prep(SeExprType wanted, SeExprVarEnv & env)
     SeExprType   condType, thenType, elseType;
 
     bool error = false;
-    _type = SeExprType::NoneType();
 
     condType = child(0)->prep(SeExprType::FP1Type(),env);
 
@@ -365,14 +285,16 @@ SeExprIfThenElseNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     if(!thenType.isValid() || !elseType.isValid()) error = true;
 
-    if(SeExprVarEnv::branchesMatch(thenEnv, elseEnv))
+    if(generalCheck(SeExprVarEnv::branchesMatch(thenEnv, elseEnv), "Types of variables do not match after if statement", error))
         env.add(thenEnv);
-    else {
-        error = true;
-        addError("Types of variables do not match after if statement");
-    }
 
-    if(error) _type = SeExprType::ErrorType();
+    if(error)
+        setType();
+    else
+        setType(SeExprType::NoneType(),
+                condType,
+                thenType,
+                elseType);
 
     return _type;
 }
@@ -395,14 +317,15 @@ SeExprIfThenElseNode::eval(SeVec3d& result) const
 SeExprType
 SeExprAssignNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    _type = SeExprType::NoneType();
-
     _assignedType = child(0)->prep(SeExprType::AnyType(), env);
-
-    if(!_assignedType.isValid()) _type = SeExprType::ErrorType();
 
     //This could add errors to the variable environment
     env.add(_name, new SeExprLocalVarRef(_assignedType));
+
+    if(!_assignedType.isValid())
+        setType();
+    else
+        setType(SeExprType::NoneType(), _assignedType);
 
     return _type;
 }
@@ -427,7 +350,6 @@ SeExprType
 SeExprVecNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
     bool error = false;
-    _type = SeExprType::FPNType(numChildren());
 
     std::vector<SeExprNode*>::iterator       ic = _children.begin();
     std::vector<SeExprNode*>::iterator const ec = _children.end  ();
@@ -438,7 +360,10 @@ SeExprVecNode::prep(SeExprType wanted, SeExprVarEnv & env)
         //TODO: add way to tell what element of vector has the type mismatch
     }
 
-    if(error) _type = SeExprType::ErrorType();
+    if(error)
+        setType();
+    else
+        setType_std(SeExprType::FPNType(numChildren()));
 
     return _type;
 }
@@ -479,11 +404,13 @@ SeExprType
 SeExprUnaryOpNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
     bool error = false;
-    _type = child(0)->prep(wanted, env);
+
+    setType(child(0)->prep(wanted, env));
 
     if(_type.isValid()) isUnder_with_error(SeExprType::NumericType(), _type, error);
 
-    if(error) _type = SeExprType::ErrorType();
+    if(error)
+        setType();
 
     return _type;
 }
@@ -538,7 +465,6 @@ SeExprCondNode::prep(SeExprType wanted, SeExprVarEnv & env)
     SeExprType condType, thenType, elseType;
 
     bool error = false;
-    _type = SeExprType::ErrorType();
 
     condType = child(0)->prep(SeExprType::FP1Type(),env);
 
@@ -554,7 +480,13 @@ SeExprCondNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     if(thenType.isValid() && elseType.isValid()) typesMatch(thenType, elseType, error);
 
-    if(!error) _type = thenType;
+    if(error)
+        setType();
+    else
+        setType(thenType,
+                condType,
+                thenType,
+                elseType);
 
     return _type;
 }
@@ -579,7 +511,6 @@ SeExprLogicalOpNode::prep(SeExprType wanted, SeExprVarEnv & env)
     SeExprType firstType, secondType;
 
     bool error = false;
-    _type = SeExprType::FP1Type();
 
     firstType = child(0)->prep(SeExprType::FP1Type(), env);
 
@@ -589,7 +520,12 @@ SeExprLogicalOpNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     if(secondType.isValid()) isa_with_error(SeExprType::FP1Type(), secondType, error);
 
-    if(error) _type = SeExprType::ErrorType();
+    if(error)
+        setType();
+    else
+        setType(SeExprType::FP1Type(),
+                firstType,
+                secondType);
 
     return _type;
 }
@@ -632,7 +568,6 @@ SeExprSubscriptNode::prep(SeExprType wanted, SeExprVarEnv & env)
     SeExprType vecType, scriptType;
 
     bool error = false;
-    _type = SeExprType::FP1Type();
 
     vecType = child(0)->prep(SeExprType::NumericType(), env);
 
@@ -642,7 +577,12 @@ SeExprSubscriptNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     if(scriptType.isValid()) isUnder_with_error(SeExprType::NumericType(), scriptType, error);
 
-    if(error) _type = SeExprType::ErrorType();
+    if(error)
+        setType();
+    else
+        setType(SeExprType::FP1Type(),
+                vecType,
+                scriptType);
 
     return _type;
 }
@@ -683,7 +623,6 @@ SeExprCompareNode::prep(SeExprType wanted, SeExprVarEnv & env)
     SeExprType firstType, secondType;
 
     bool error = false;
-    _type = SeExprType::FP1Type();
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
@@ -695,7 +634,12 @@ SeExprCompareNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     if(firstType.isValid() && secondType.isValid()) typesMatch(firstType, secondType, error);
 
-    if(error) _type = SeExprType::ErrorType();
+    if(error)
+        setType();
+    else
+        setType(SeExprType::FP1Type(),
+                firstType,
+                secondType);
 
     return _type;
 }
@@ -793,11 +737,9 @@ SeExprType
 SeExprBinaryOpNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
-    //TODO: determine if firstType and secondType need to be directly compared for compatibility (currently not)
     SeExprType firstType, secondType;
 
     bool error = false;
-    _type = SeExprType::ErrorType();
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
@@ -809,7 +751,12 @@ SeExprBinaryOpNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     if(firstType.isValid() && secondType.isValid()) typesMatch(firstType, secondType, error);
 
-    if(!error) _type = (firstType.isFP1() ? secondType : firstType);
+    if(error)
+        setType();
+    else
+        setType((firstType.isFP1() ? secondType : firstType),
+                firstType,
+                secondType);
 
     return _type;
 }
@@ -955,15 +902,15 @@ SeExprExpNode::eval(SeVec3d& result) const
 SeExprType
 SeExprVarNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    _type = SeExprType::ErrorType();
-
     // ask expression to resolve var
     _var = env.find(name());
-    if (!_var) _var = _expr->resolveVar(name());
-    if (!_var)
-        addError(std::string("No variable named $") + name());
+
+    if(!_var) _var = _expr->resolveVar(name());
+
+    if(generalCheck(!_var, "No variable named $") + name())
+        setType(_var->type());
     else
-        _type = _var->type();
+        setType();
 
     return _type;
 }
@@ -980,7 +927,7 @@ SeExprVarNode::eval(SeVec3d& result) const
 SeExprType
 SeExprNumNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    _type = SeExprType::FP1Type();
+    setType_c(SeExprType::FP1Type());
 
     return _type;
 }
@@ -989,7 +936,7 @@ SeExprNumNode::prep(SeExprType wanted, SeExprVarEnv & env)
 SeExprType
 SeExprStrNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    _type = SeExprType::StringType();
+    setType_c(SeExprType::StringType());
 
     return _type;
 }
@@ -1016,59 +963,61 @@ SeExprType
 SeExprFuncNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
     bool error = false;
-    int _dim = 1;  //used for promotion checking
+    int  _dim  = 1; //used for promotion checking
 
-    _type = SeExprType::ErrorType();
+    _nargs = numChildren();
+
+    _vecArgs.resize(_nargs);
+    _scalarArgs.resize(_nargs);
 
     // ask expression to resolve func
     _func = _expr->resolveFunc(_name);
     // otherwise, look in global func table
     if (!_func) _func = SeExprFunc::lookup(_name);
 
-    //check that function exisits
-    if(generalCheck(_func, "Function " + _name + "has no definition", error, env)) {
-        _type = _func->retType();
-        _nargs = numChildren();
+    //check that function exisits and that the function has the right number of arguments
+    if(generalCheck(_func,                        "Function " + _name + "has no definition", error, env) &&
+       generalCheck(_nargs >= _func->minArgs(),   "Too few args for function "  + _name,     error, env) &&
+       generalCheck(_nargs <= _func->maxArgs() ||
+                         0  > _func->maxArgs(),   "Too many args for function " + _name,     error, env)) {
+        //check if the fuction is a FuncX
+        if(_func->type() == SeExprFunc::FUNCX) {
+            //FuncX function:
+            if(!_func->funcx()->isThreadSafe())                    _expr->setThreadUnsafe(_name);
+            if(!_func->funcx()->prep(this, wanted, env).isValid()) error = true;
+            //TODO: Make sure FuncX puts proper return type in retType(), NOT in _type - this may be a change in convention
+        }
+        else {
+            //standard function:
+            //check if arguments have errors
+            error = !prepArgs(_name,
+                              (_func->isScalar() ? SeExprType::FP1Type() : SeExprType::FPNType(3)),
+                              env);
 
-        //check that the function has the right number of arguments
-        if(generalCheck(_nargs >= _func->minArgs(),   "Too few args for function "  + _name, error, env) &&
-           generalCheck(_nargs <= _func->maxArgs() ||
-                             0  > _func->maxArgs(),   "Too many args for function " + _name, error, env)) {
-            _vecArgs.resize(_nargs);
-            _scalarArgs.resize(_nargs);
+            if(!error                   && //no errors
+               wanted.isFPN()           && //wanted is a vector
+               _func->isScalar()        && //takes scalar arguments only
+               _func->retType().isFP1())   //returns a scalar
+                for(int i = 0; i < _nargs; i++) {
+                    int cdim = child(i)->type().dim();
 
-            //check if the fuction is a FuncX
-            if(_func->type() == SeExprFunc::FUNCX) {
-                //FuncX function:
-                if(!_func->funcx()->isThreadSafe())                    _expr->setThreadUnsafe(_name);
-                if(!_func->funcx()->prep(this, wanted, env).isValid()) error = true;
-            }
-            else
-                //standard function:
-                //check if arguments have errors
-                if(prepArgs(_name,
-                            (_func->isScalar() ? SeExprType::FP1Type() : SeExprType::FPNType(3)),
-                            env))
-                    if(wanted.isFPN()           && //wanted is a vector
-                       _func->isScalar()        && //takes scalar arguments only
-                       _func->retType().isFP1()) { //returns a scalar
-                        for(int i = 0; i < _nargs; i++) {
-                            int cdim = child(i)->type().dim();
-
-                            //Note: This assumes that every type (except FPN types) have dim() == 1
-                            if(generalCheck(cdim == 1    ||
-                                            _dim == 1    ||
-                                            _dim == cdim,   "Arguments to promotable function, " + _name + ", are of different lengths", error) &&
-                               cdim  > 1 &&
-                               _dim == 1)
-                                _dim = cdim;
-                        }
-                        _type = SeExprType::FPNType(_dim);
-                    }
+                    //Note: This assumes that every type (except FPN types) have dim() == 1
+                    if(generalCheck(cdim == 1    ||
+                                    _dim == 1    ||
+                                    _dim == cdim,   "Arguments to promotable function, " + _name + ", are of different lengths", error))
+                        if(cdim  > 1 &&
+                           _dim == 1)
+                            _dim = cdim;
+                }
         }
     }
 
-    if(error) _type = SeExprType::ErrorType();
+    if(error)
+        setType();
+    else if(_func->type() == SeExprFunc::FUNCX) //FuncX function
+        setType_std(_func->retType());
+    else  //standard function
+        setType_std(SeExprType::FPNType(_dim));
 
     return _type;
 }
