@@ -35,7 +35,7 @@
 #include <string>
 #include <map>
 #include <stdlib.h>
-
+#include <iostream>
 #ifndef SEEXPR_WIN32
 #include <dlfcn.h>
 #include <dirent.h>
@@ -143,7 +143,8 @@ void SeExprFunc::initInternal()
     Functions = new FuncTable;
     SeExpr::defineBuiltins(defineInternal,defineInternal3);
     const char* path = getenv("SE_EXPR_PLUGINS");
-    if (path) loadPlugins(path);
+    std::cerr << "Plugins are currently *NOT* loaded." << std::endl;
+    //if (path) loadPlugins(path);
 }
 
 void
