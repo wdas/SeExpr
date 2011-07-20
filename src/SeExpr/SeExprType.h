@@ -67,22 +67,22 @@ class SeExprType {
     SeExprType(Type type, int n)
         : _type(type), _n(n), _lifetime(ltVARYING)
     {
-        assert(n >= 1);
-        assert(type == tFP || n == 1);
+        assert(_n >= 1);
+        assert(_type == tFP || _n == 1);
     };
 
     SeExprType(Type type, int n, Lifetime lt)
         : _type(type), _n(n), _lifetime(lt)
     {
-        assert(n >= 1);
-        assert(type == tFP || n == 1);
+        assert(_n >= 1);
+        assert(_type == tFP || _n == 1);
     };
 
     SeExprType(const SeExprType & other)
         : _type(other.type()), _n(other.dim()), _lifetime(other.lt())
     {
-        assert(n >= 1);
-        assert(type == tFP || n == 1);
+        assert(_n >= 1);
+        assert(_type == tFP || _n == 1);
     };
 
     //general constructors - varying (implicit)
