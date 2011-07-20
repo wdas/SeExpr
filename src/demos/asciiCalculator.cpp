@@ -109,6 +109,7 @@ private:
 		std::cerr << "Use of invalid result line." << std::endl;
 	    return &(stack[position]);
 	};
+		std::cerr << "Use of undefined variable." << std::endl;
 	return 0;
     };
 };
