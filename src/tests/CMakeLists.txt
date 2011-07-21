@@ -31,7 +31,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
-set(TEST basic listVar patterns typePrinter)
+set(TEST basic listVar patterns TypePrinter TypeTester)
 
 foreach(item ${TEST})
     ADD_EXECUTABLE(${item} "${item}.cpp")

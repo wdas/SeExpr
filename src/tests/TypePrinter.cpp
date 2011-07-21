@@ -40,9 +40,10 @@
 #include "SeExprWalker.h"
 #include "SeExprNode.h"
 #include "SeExprFunc.h"
+#include "TypeBuilder.h"
 
 /**
-   @file typePrinter.cpp
+   @file TypePrinter.cpp
 */
 class TypePrintExaminer : public SeExpr::Examiner<true> {
 public:
@@ -62,35 +63,19 @@ TypePrintExaminer::examine(const SeExprNode* examinee)
 
 
 //! Simple expression class to print out all intermediate types
-class TypePrinterExpr : public SeExpression
+class TypePrinterExpr : public TypeBuilderExpr
 {
 public:
-    struct DummyFuncX:SeExprFuncX
-    {
-        DummyFuncX()
-            : SeExprFuncX(false)
-        {};
-
-        virtual bool       isScalar() const { return true;                  };
-        virtual SeExprType retType () const { return SeExprType::FP1Type(); };
-
-        void eval(const SeExprFuncNode* node,SeVec3d& result) const
-        {result=SeVec3d();}
-    } dummyFuncX;
-    mutable SeExprFunc dummyFunc;
-
-    //! Constructor that takes the expression to parse
-    TypePrinterExpr(const std::string& expr) :
-        SeExpression(expr), dummyFunc(dummyFuncX,0,16),
-        _examiner(),
-        _walker(&_examiner)
+    TypePrinterExpr()
+         : TypeBuilderExpr(),
+          _examiner(),
+          _walker(&_examiner)
     {};
 
-    //! Empty constructor
-    TypePrinterExpr() :
-        SeExpression(), dummyFunc(dummyFuncX,0,16),
-        _examiner(),
-        _walker(&_examiner)
+    TypePrinterExpr(const std::string &e, const SeExprType & type = SeExprType::AnyType())
+        :  TypeBuilderExpr(e, type),
+          _examiner(),
+          _walker(&_examiner)
     {};
 
     inline void walk () { if(isValid()) _walker.walk(_parseTree); };
@@ -99,17 +84,16 @@ private:
     TypePrintExaminer _examiner;
     SeExpr::ConstWalker  _walker;
 
-    //! resolve function that only supports one external variable 'x'
+protected:
     SeExprVarRef* resolveVar(const std::string& name) const {
-	return 0;
+        return TypeBuilderExpr::resolveVar(name);
     };
 
     SeExprFunc* resolveFunc(const std::string& name) const
     {
-        return &dummyFunc;
+        return TypeBuilderExpr::resolveFunc(name);
     }
 };
-
 
 void get_or_quit(std::string & str) {
     getline(std::cin, str);
