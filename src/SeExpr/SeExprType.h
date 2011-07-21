@@ -143,7 +143,8 @@ class SeExprType {
     ///Returns true if this and other match type and dimension
     inline bool operator==(const SeExprType & other) const {
         return (type() == other.type() &&
-                dim () == other.dim ());
+                dim () == other.dim () &&
+                lt  () == other.lt  ());
     };
 
 
@@ -151,7 +152,7 @@ class SeExprType {
     inline bool operator!=(const SeExprType & other) const { return !(*this == other); };
 
     ///validity check: type is not an error
-    inline bool isValid() const { return !isError(); };
+    inline bool isValid() const { return !isError() && !isLTError(); };
 
     //strictly equal relation
     inline bool isAny    ()      const { return type() == tANY;                   };
