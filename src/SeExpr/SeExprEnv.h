@@ -40,7 +40,8 @@
 #include <cassert>
 
 #include "SeExprType.h"
-#include "SeExpression.h"
+
+class SeExprVarRef;
 
 class SeExprVarEnv {
  private:

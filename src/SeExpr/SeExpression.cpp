@@ -44,6 +44,7 @@
 #include "SeExprParser.h"
 #include "SeExprFunc.h"
 #include "SeExpression.h"
+#include "SeExprType.h"
 #include "SeExprEnv.h"
 
 using namespace std;

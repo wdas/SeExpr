@@ -42,6 +42,7 @@
 #include "SeVec3d.h"
 
 #include "SeExprType.h"
+#include "SeExprEnv.h"
 
 class SeExprNode;
 class SeExprVarNode;

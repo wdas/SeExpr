@@ -35,6 +35,7 @@
 
 #include "SeExprType.h"
 #include "SeExprEnv.h"
+#include "SeExpression.h"
 
 #include <vector>
 
