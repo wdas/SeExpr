@@ -32,6 +32,9 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
+#ifndef TYPEITERATOR_H
+#define TYPEITERATOR_H
+
 #include <SeExpression.h>
 #include <cstdlib>
 #include <cstdio>
@@ -131,6 +134,14 @@ public:
         else if(state() == 3) return SeExprType::StringType() .toString();
         else                  return SeExprType::ErrorType () .toString(); //state() == 4
     };
+
+    virtual const std::string givenUniformString() const {
+        if     (state() == 0) return SeExprType::FP1Type   () .toUniformString();
+        else if(state() == 1) return SeExprType::FPNType   (2).toUniformString();
+        else if(state() == 2) return SeExprType::FPNType   (3).toUniformString();
+        else if(state() == 3) return SeExprType::StringType() .toUniformString();
+        else                  return SeExprType::ErrorType () .toUniformString(); //state() == 4
+    };
 };
 
 class LifetimeVarTypeIterator : public AbstractVarTypeIterator {
@@ -167,6 +178,13 @@ public:
         else if(state() == 2) return SeExprType::FP1Type_v().toString();
         else                  return SeExprType::FP1Type_e().toString(); //state() == 3
     };
+
+    virtual const std::string givenUniformString() const {
+        if     (state() == 0) return SeExprType::FP1Type_c().toUniformString();
+        else if(state() == 1) return SeExprType::FP1Type_u().toUniformString();
+        else if(state() == 2) return SeExprType::FP1Type_v().toUniformString();
+        else                  return SeExprType::FP1Type_e().toUniformString(); //state() == 3
+    };
 };
 
 class SingleWholeTypeIterator : public AbstractTypeIterator {
@@ -194,6 +212,8 @@ class SingleWholeTypeIterator : public AbstractTypeIterator {
     virtual SeExprType result() const { return _proc(current()); };
 
     virtual const std::string givenString() const { return current().toString(); };
+
+    virtual const std::string givenUniformString() const { return current().toUniformString(); };
 
  protected:
     SeExprType current() const {
@@ -244,6 +264,9 @@ class DoubleWholeTypeIterator : public AbstractTypeIterator {
 
     virtual const std::string givenString() const { return (first_current() .toString() + " " +
                                                             second_current().toString()); };
+
+    virtual const std::string givenUniformString() const { return (first_current() .toUniformString() + " " +
+                                                                   second_current().toUniformString()); };
 
  protected:
     SeExprType first_current() const {
@@ -309,6 +332,10 @@ public:
                                                             second_current().toString() + " " +
                                                             third_current ().toString()); };
 
+    virtual const std::string givenUniformString() const { return (first_current ().toUniformString() + " " +
+                                                                   second_current().toUniformString() + " " +
+                                                                   third_current ().toUniformString()); };
+
  protected:
     SeExprType first_current() const {
         if(!_inLT) return _primary1 .current();
@@ -337,3 +364,5 @@ private:
     ProcType                _proc;
     bool                    _inLT;
 };
+
+#endif // TYPEITERATOR_H

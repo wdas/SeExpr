@@ -51,6 +51,10 @@
 class TypeTesterExpr : public TypeBuilderExpr
 {
 public:
+    typedef SeExprType(*FindResultOne)  (const SeExprType &);
+    typedef SeExprType(*FindResultTwo)  (const SeExprType &, const SeExprType &);
+    typedef SeExprType(*FindResultThree)(const SeExprType &, const SeExprType &, const SeExprType &);
+
     TypeTesterExpr()
         : TypeBuilderExpr()
     {};
@@ -64,7 +68,9 @@ public:
                      const std::string & givenString,
                      int verbosity_level);
 
-    inline void testSingle(const std::string & expr, int verbosity_level);
+    inline void testSingle(const std::string & expr,
+                           FindResultOne proc,
+                           int verbosity_level);
 
 protected:
     SeExprVarRef* resolveVar(const std::string& name) const {

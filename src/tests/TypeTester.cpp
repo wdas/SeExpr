@@ -47,23 +47,26 @@
    @file TypeTester.cpp
 */
 
-inline void
+void
 TypeTesterExpr::test(const std::string & expr, SeExprType result, const std::string & givenString, int verbosity_level) {
     setExpr(expr);
     setReturnType(result);
 
     if(verbosity_level >= 2)
-        std::cout << "\t\tChecking expression: " << expr              << std::endl
-                  << "\t\t\tGiven:        "      << givenString       << std::endl
-                  << "\t\t\tAgainst type: "      << result.toString() << "\t";
+        std::cout << "\tChecking expression: " << expr                     << std::endl
+                  << "\t\tGiven:        "      << givenString              << std::endl
+                  << "\t\tAgainst type: "      << result.toUniformString() << "\t";
 
     if(isValid()) {
         if(result != returnType()) {
             std::cerr << "Failed check." << std::endl;
-            if(verbosity_level >= 1)
-                std::cerr << "Expression: "  << expr                    << std::endl
-                          << "\tExpected: "  << result      .toString() << std::endl
-                          << "\tReceived: "  << returnType().toString() << std::endl;
+            if     (verbosity_level == 1)
+                std::cerr << "\t\tExpression: "  << expr                           << std::endl
+                          << "\t\tExpected: "  << result      .toUniformString() << std::endl
+                          << "\t\tReceived: "  << returnType().toUniformString() << std::endl;
+            else if(verbosity_level == 2)
+                std::cerr << "\t\tExpected: "  << result      .toUniformString() << std::endl
+                          << "\t\tReceived: "  << returnType().toUniformString() << std::endl;
         }
         else if(verbosity_level >= 2)
             std::cout << "Check passed!" << std::endl;
@@ -73,19 +76,41 @@ TypeTesterExpr::test(const std::string & expr, SeExprType result, const std::str
                 std::cout << "Check passed!" << std::endl;
 };
 
-SeExprType identity(const SeExprType & type) { return type; };
+SeExprType
+identity(const SeExprType & type)
+{
+    return type;
+};
 
-inline void
-TypeTesterExpr::testSingle(const std::string & expr, int verbosity_level) {
+SeExprType
+numeric(const SeExprType & type)
+{
+    if(type.isUnderNumeric()) return type;
+    else                      return SeExprType::ErrorType();
+};
+
+SeExprType
+numericToScalar(const SeExprType & type)
+{
+    if(type.isUnderNumeric()) return SeExprType::FP1Type  ().becomeLT(type);
+    else                      return SeExprType::ErrorType();
+};
+
+void
+TypeTesterExpr::testSingle(const std::string & expr, AbstractTypeIterator::FindResultOne proc, int verbosity_level) {
     SeExprType result;
-    AbstractTypeIterator::FindResultOne proc = identity;
     SingleWholeTypeIterator iter("v", proc, this);
 
-    if(verbosity_level >= 2)
-        std::cout << "\tChecking type of expression: " << expr << std::endl;
+    if(verbosity_level >= 1)
+        std::cout << "Checking type of expression: " << expr << std::endl;
 
     for(iter.start(); !iter.isEnd(); iter.next())
-        test(expr, iter.result(), iter.givenString(), verbosity_level);
+        test(expr, iter.result(), iter.givenUniformString(), verbosity_level);
+};
+
+void
+test(const std::string & str, TypeTesterExpr & expr, AbstractTypeIterator::FindResultOne proc, int verbosity_level) {
+    expr.testSingle(str, proc, verbosity_level);
 };
 
 int main(int argc,char *argv[])
@@ -109,11 +134,7 @@ int main(int argc,char *argv[])
     TypeTesterExpr expr;
     std::string str;
 
-    std::cout << "SeExpr Type Tester:" << std::endl;
-
-    str = "$a = $v; $a";
-    std::cout << "Testing " << str << std::endl;
-    expr.testSingle(str, verbosity_level);
+    test("$a = $v; $a", expr, identity,        verbosity_level);
 
     return 0;
 }
