@@ -135,6 +135,10 @@ int main(int argc,char *argv[])
     std::string str;
 
     test("$a = $v; $a", expr, identity,        verbosity_level);
+    test("[$v]",        expr, numericToScalar, verbosity_level);
+    test("-$v",         expr, numeric,         verbosity_level);
+    test("!$v",         expr, numeric,         verbosity_level);
+    test("~$v",         expr, numeric,         verbosity_level);
 
     return 0;
 }
