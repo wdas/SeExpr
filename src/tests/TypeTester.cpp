@@ -64,7 +64,7 @@ TypeTesterExpr::test(const std::string & expr, SeExprType result, const std::str
                 std::cerr << "\t\tExpression: "  << expr                           << std::endl
                           << "\t\tExpected: "  << result      .toUniformString() << std::endl
                           << "\t\tReceived: "  << returnType().toUniformString() << std::endl;
-            else if(verbosity_level == 2)
+            else if(verbosity_level >= 2)
                 std::cerr << "\t\tExpected: "  << result      .toUniformString() << std::endl
                           << "\t\tReceived: "  << returnType().toUniformString() << std::endl;
         }
@@ -96,6 +96,47 @@ numericToScalar(const SeExprType & type)
     else                      return SeExprType::ErrorType();
 };
 
+SeExprType
+numericToScalar(const SeExprType & first,
+                const SeExprType & second)
+{
+    if(first .isUnderNumeric() &&
+       second.isUnderNumeric())   return SeExprType::FP1Type  ().becomeLT(first, second);
+    else                          return SeExprType::ErrorType();
+};
+
+SeExprType
+numericComparison(const SeExprType & first,
+                  const SeExprType & second)
+{
+    if(first.match(second)) return SeExprType::FP1Type  ().becomeLT(first, second);
+    else                    return SeExprType::ErrorType();
+};
+
+SeExprType
+numericToNumeric(const SeExprType & first,
+                 const SeExprType & second)
+{
+    //if first and second are both numeric and both match:
+    //   both first and second are FP1,
+    //   first is FP1 and second is FPN,
+    //   first is FPN and second is FP1, or
+    //   both first and second are FPN (and the same N)
+    if(first .isUnderNumeric() &&
+       second.isUnderNumeric() &&
+       first.match(second))       return SeExprType::FPNType  ((first.isFP1()) ? second.dim() : first.dim()).combineLT(first, second);
+    else                          return SeExprType::ErrorType();
+};
+
+SeExprType
+numericTo2Vector(const SeExprType & first,
+                 const SeExprType & second)
+{
+    if(first .isUnderNumeric() &&
+       second.isUnderNumeric())   return SeExprType::FPNType  (2).combineLT(first, second);
+    else                          return SeExprType::ErrorType();
+};
+
 void
 TypeTesterExpr::testSingle(const std::string & expr, AbstractTypeIterator::FindResultOne proc, int verbosity_level) {
     SeExprType result;
@@ -109,8 +150,25 @@ TypeTesterExpr::testSingle(const std::string & expr, AbstractTypeIterator::FindR
 };
 
 void
-test(const std::string & str, TypeTesterExpr & expr, AbstractTypeIterator::FindResultOne proc, int verbosity_level) {
+TypeTesterExpr::testDouble(const std::string & expr, AbstractTypeIterator::FindResultTwo proc, int verbosity_level) {
+    SeExprType result;
+    DoubleWholeTypeIterator iter("x", "y", proc, this);
+
+    if(verbosity_level >= 1)
+        std::cout << "Checking type of expression: " << expr << std::endl;
+
+    for(iter.start(); !iter.isEnd(); iter.next())
+        test(expr, iter.result(), iter.givenUniformString(), verbosity_level);
+};
+
+void
+testOne(const std::string & str, TypeTesterExpr & expr, AbstractTypeIterator::FindResultOne proc, int verbosity_level) {
     expr.testSingle(str, proc, verbosity_level);
+};
+
+void
+testTwo(const std::string & str, TypeTesterExpr & expr, AbstractTypeIterator::FindResultTwo proc, int verbosity_level) {
+    expr.testDouble(str, proc, verbosity_level);
 };
 
 int main(int argc,char *argv[])
@@ -134,11 +192,12 @@ int main(int argc,char *argv[])
     TypeTesterExpr expr;
     std::string str;
 
-    test("$a = $v; $a", expr, identity,        verbosity_level);
-    test("[$v]",        expr, numericToScalar, verbosity_level);
-    test("-$v",         expr, numeric,         verbosity_level);
-    test("!$v",         expr, numeric,         verbosity_level);
-    test("~$v",         expr, numeric,         verbosity_level);
+    testOne("$a = $v; $a", expr, identity,        verbosity_level);
+    testOne("[$v]",        expr, numericToScalar, verbosity_level);
+    testOne("-$v",         expr, numeric,         verbosity_level);
+    testOne("!$v",         expr, numeric,         verbosity_level);
+    testOne("~$v",         expr, numeric,         verbosity_level);
+    testTwo("$x && $y",    expr, numericToScalar, verbosity_level);
 
     return 0;
 }

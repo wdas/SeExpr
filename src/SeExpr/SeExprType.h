@@ -205,7 +205,7 @@ class SeExprType {
     };
 
     //validity and isa check
-    inline bool check(const SeExprType & other) const { return isValid() && isa(other); };
+    inline bool match(const SeExprType & other) const { return isValid() && isa(other); };
 
     /*
      * Lifetime-related functions

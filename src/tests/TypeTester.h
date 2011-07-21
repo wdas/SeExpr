@@ -63,13 +63,17 @@ public:
         :  TypeBuilderExpr(e, type)
     {};
 
-    inline void test(const std::string & expr,
+    void test(const std::string & expr,
                      SeExprType result,
                      const std::string & givenString,
                      int verbosity_level);
 
-    inline void testSingle(const std::string & expr,
+    void testSingle(const std::string & expr,
                            FindResultOne proc,
+                           int verbosity_level);
+
+    void testDouble(const std::string & expr,
+                           FindResultTwo proc,
                            int verbosity_level);
 
 protected:
