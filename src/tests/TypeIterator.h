@@ -195,16 +195,19 @@ class SingleWholeTypeIterator : public AbstractTypeIterator {
         : AbstractTypeIterator(     parent),
         _primary              (var, parent),
         _lifetime             (var, parent),
-        _proc                 (proc),
-        _inLT                 (false)
+        _proc                 (proc)
     {};
 
     virtual void start() { _primary.start(); };
 
     virtual void next() {
-        if     (!_primary.isEnd()) { _primary .next (); if(_primary.isEnd()){_lifetime.start(); _inLT = true; } }
-        else if(!_inLT)            { _lifetime.start(); _inLT = true; }
-        else                         _lifetime.next ();
+        if(!_primary.isEnd()) {
+            _primary.next();
+            if(_primary.isEnd())
+                _lifetime.start();
+        } else
+            if(!_lifetime.isEnd())
+                _lifetime.next();
     };
 
     virtual bool isEnd() const { return _lifetime.isEnd(); };
@@ -217,8 +220,8 @@ class SingleWholeTypeIterator : public AbstractTypeIterator {
 
  protected:
     SeExprType current() const {
-        if(!_inLT) return _primary .current();
-        else       return _lifetime.current();
+        if(!_primary.isEnd()) return _primary .current();
+        else                  return _lifetime.current();
     };
 
  private:
@@ -227,7 +230,6 @@ class SingleWholeTypeIterator : public AbstractTypeIterator {
     PrimaryVarTypeIterator  _primary;
     LifetimeVarTypeIterator _lifetime;
     ProcType                _proc;
-    bool                    _inLT;
 };
 
 class DoubleWholeTypeIterator : public AbstractTypeIterator {
@@ -241,21 +243,35 @@ class DoubleWholeTypeIterator : public AbstractTypeIterator {
         _lifetime1            (var1, parent),
         _primary2             (var2, parent),
         _lifetime2            (var2, parent),
-        _proc                 (proc),
-        _inLT                 (false)
+        _proc                 (proc)
     {};
 
-    virtual void start()       {
+    virtual void start() {
         _primary1.start();
         _primary2.start();
     };
 
-    virtual void next ()       {
-        if     (!_primary2 .isEnd())   _primary2 .next ();
-        else if(!_primary1 .isEnd()) { _primary2 .start(); _primary1 .next ();               }
-        else if(!_inLT)              { _lifetime2.start(); _lifetime1.start(); _inLT = true; }
-        else if(!_lifetime2.isEnd())   _lifetime2.next ();
-        else if(!_lifetime1.isEnd()) { _lifetime2.start(); _lifetime1.next ();               };
+    virtual void next () {
+        if(!_primary1.isEnd()) {
+            _primary2.next ();
+            if(_primary2.isEnd()) {
+                _primary1.next();
+                if(!_primary1.isEnd())
+                    _primary2.start();
+                else {
+                    _lifetime2.start();
+                    _lifetime1.start();
+                }
+            }
+        } else
+            if(!_lifetime1.isEnd()) {
+                _lifetime2.next ();
+                if(_lifetime2.isEnd()) {
+                    _lifetime1.next();
+                    if(!_lifetime1.isEnd())
+                        _lifetime2.start();
+                }
+            }
     };
 
     virtual bool isEnd() const { return _lifetime2.isEnd(); };
@@ -270,13 +286,13 @@ class DoubleWholeTypeIterator : public AbstractTypeIterator {
 
  protected:
     SeExprType first_current() const {
-        if(!_inLT) return _primary1 .current();
-        else       return _lifetime1.current();
+        if(!_primary1.isEnd()) return _primary1 .current();
+        else                   return _lifetime1.current();
     };
 
     SeExprType second_current() const {
-        if(!_inLT) return _primary2 .current();
-        else       return _lifetime2.current();
+        if(!_primary1.isEnd()) return _primary2 .current();
+        else                   return _lifetime2.current();
     };
 
 private:
