@@ -357,6 +357,7 @@ SeExprVecNode::prep(SeExprType wanted, SeExprVarEnv & env)
     for(; ic != ec; ic++) {
         SeExprType childType = (*ic)->prep(SeExprType::FP1Type(), env);
         if(childType.isValid()) isUnder_with_error(SeExprType::NumericType(), childType, error);
+        else error = true;
         //TODO: add way to tell what element of vector has the type mismatch
     }
 
