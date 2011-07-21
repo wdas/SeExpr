@@ -144,13 +144,18 @@ class SeExpression
     };
 
     SeExpression( );
-    SeExpression( const std::string &e, bool wantVec=true );
+    //SeExpression( const std::string &e, bool wantVec=true );
+    SeExpression( const std::string &e, const SeExprType & type = SeExprType::AnyType());
     virtual ~SeExpression();
 
     /** Sets the expression to desire a vector or a scalar.
         This will allow the evaluation to potentially be optimized if 
         only a scalar is desired. */
     void setWantVec(bool wantVec);
+
+    /** Sets desired return value.
+        This will allow the evaluation to potentially be optimized. */
+    void setReturnType(const SeExprType & type);
 
     /** Set expression string to e.  
         This invalidates all parsed state. */
@@ -216,6 +221,11 @@ class SeExpression
 	functions will be bound if needed. */
     bool isVec() const;
 
+    /** Return the return type of the expression.  Currently may not
+        match the type set in setReturnType.  Expr will be parsed and
+        variables and functions will be bound if needed. */
+    const SeExprType & returnType() const;
+
     /** Evaluate the expression.  This will parse and bind if needed */
     SeVec3d evaluate() const;
 
@@ -260,6 +270,9 @@ class SeExpression
 
     /** True if the expression wants a vector */
     bool _wantVec;
+
+    /** Return type desired. */
+    mutable SeExprType _returnType;
 
     /** The expression. */
     std::string _expression;

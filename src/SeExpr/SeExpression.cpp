@@ -50,15 +50,14 @@
 using namespace std;
 
 SeExpression::SeExpression()
-    : _wantVec(true), _parseTree(0), _parsed(0), _prepped(0)
+    : _wantVec(true), _returnType(SeExprType::AnyType()), _parseTree(0), _parsed(0), _prepped(0)
 {
     SeExprFunc::init();
 }
 
 
-SeExpression::SeExpression( const std::string &e, bool wantVec )
-    : _wantVec(wantVec),  _expression(e), _parseTree(0),
-      _parsed(0), _prepped(0)
+SeExpression::SeExpression( const std::string &e, const SeExprType & type)
+    : _wantVec(true), _returnType(type), _expression(e), _parseTree(0), _parsed(0), _prepped(0)
 {
     SeExprFunc::init();
 }
@@ -87,6 +86,13 @@ void SeExpression::setWantVec(bool wantVec)
 {
     reset();
     _wantVec = wantVec;
+    std::cerr << "Use of setWantVec is deprecated. If you are seeing this, you used setWantVec.  Please use setReturnType instead." << std::endl;
+}
+
+void SeExpression::setReturnType(const SeExprType & type)
+{
+    reset();
+    _returnType = type;
 }
 
 void SeExpression::setExpr(const std::string& e)
@@ -177,6 +183,13 @@ SeExpression::isVec() const
 {
     prepIfNeeded();
     return _parseTree ? _parseTree->isVec() : _wantVec;
+}
+
+const SeExprType &
+SeExpression::returnType() const
+{
+    prepIfNeeded();
+    return _parseTree->type();
 }
 
 SeVec3d
