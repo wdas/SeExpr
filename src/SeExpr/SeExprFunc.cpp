@@ -143,8 +143,7 @@ void SeExprFunc::initInternal()
     Functions = new FuncTable;
     SeExpr::defineBuiltins(defineInternal,defineInternal3);
     const char* path = getenv("SE_EXPR_PLUGINS");
-    std::cerr << "Plugins are currently *NOT* loaded." << std::endl;
-    //if (path) loadPlugins(path);
+    if (path) loadPlugins(path);
 }
 
 void
