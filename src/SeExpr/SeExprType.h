@@ -152,7 +152,7 @@ class SeExprType {
     inline bool operator!=(const SeExprType & other) const { return !(*this == other); };
 
     ///validity check: type is not an error
-    inline bool isValid() const { return !isError() && !isLTError(); };
+    inline bool isValid() const { return !isError() || !isLTError(); };
 
     //strictly equal relation
     inline bool isAny    ()      const { return type() == tANY;                   };
@@ -218,16 +218,16 @@ class SeExprType {
     inline bool isLTError   () const { return lt() == ltERROR;    };
 
     //static lifetime assignment
-    inline void becomeLTConstant() { _lifetime = ltCONSTANT; };
-    inline void becomeLTUniform () { _lifetime = ltUNIFORM;  };
-    inline void becomeLTVarying () { _lifetime = ltVARYING;  };
-    inline void becomeLTError   () { _lifetime = ltERROR;    };
+    inline const SeExprType & becomeLTConstant() { _lifetime = ltCONSTANT; return *this; };
+    inline const SeExprType & becomeLTUniform () { _lifetime = ltUNIFORM;  return *this; };
+    inline const SeExprType & becomeLTVarying () { _lifetime = ltVARYING;  return *this; };
+    inline const SeExprType & becomeLTError   () { _lifetime = ltERROR;    return *this; };
 
     //dynamic lifetime assignment
-    inline void becomeLT(const SeExprType & first) { _lifetime = first.lt(); };
+    inline const SeExprType & becomeLT(const SeExprType & first) { _lifetime = first.lt(); return *this; };
 
     //combination lifetime assignments
-    inline void becomeLT(const SeExprType & first,
+    inline const SeExprType & becomeLT(const SeExprType & first,
                          const SeExprType & second) {
         if     (first.lt() == second.lt()) becomeLT(first);
         else if(first .isLTError  ()  ||
@@ -237,8 +237,10 @@ class SeExprType {
         else if(first .isLTUniform()  ||
                 second.isLTUniform())    becomeLTUniform();
         else                             becomeLTConstant();
+
+        return *this;
     };
-    inline void becomeLT(const SeExprType & first,
+    inline const SeExprType & becomeLT(const SeExprType & first,
                          const SeExprType & second,
                          const SeExprType & third) {
         if     (first.lt() == second.lt()  &&
@@ -253,21 +255,28 @@ class SeExprType {
                 second.isLTUniform()  ||
                 third .isLTUniform())    becomeLTUniform();
         else                             becomeLTConstant();
+
+        return *this;
     };
 
     //fusing lifetimes
-    inline void combineLT(const SeExprType & first)  {
-        becomeLT(*this, first); };
-    inline void combineLT(const SeExprType & first,
+    inline const SeExprType & combineLT(const SeExprType & first)  { becomeLT(*this, first); return *this; };
+    inline const SeExprType & combineLT(const SeExprType & first,
                           const SeExprType & second) {
         combineLT(first);
-        combineLT(second); };
-    inline void combineLT(const SeExprType & first,
+        combineLT(second);
+
+        return *this;
+    };
+    inline const SeExprType & combineLT(const SeExprType & first,
                           const SeExprType & second,
                           const SeExprType & third)  {
         combineLT(first);
         combineLT(second);
-        combineLT(third); };
+        combineLT(third);
+
+        return *this;
+    };
 
     inline std::string toString() const {
         std::stringstream ss;
@@ -295,7 +304,58 @@ class SeExprType {
         return ss.str();
     };
 
+    inline std::string toUniformString() const {
+        //assumes dimension of FPN is never greater than 9
+        const int max = 8;
+        std::stringstream ss;
+
+        if     (isAny    ()) ss << "Any";
+        else if(isNone   ()) ss << "None";
+        else if(isValue  ()) ss << "Value";
+        else if(isString ()) ss << "String";
+        else if(isNumeric()) ss << "Numeric";
+        else if(isFP1    ()) ss << "FLOAT[1]";
+        else if(isFPN    ()) ss << "FLOAT[" << dim() << "]";
+        else if(isError  ()) ss << "Error";
+        else                 ss << "<toString Type Error>";
+
+        ss << "(";
+
+        if     (isLTConstant()) ss << "c";
+        else if(isLTUniform ()) ss << "u";
+        else if(isLTVarying ()) ss << "v";
+        else if(isLTError   ()) ss << "e";
+        else                    ss << "<toString Lifetime Error>";
+
+        ss << ")";
+
+        if     (isAny    ()) ss << whitespace(max - 3);
+        else if(isNone   ()) ss << whitespace(max - 4);
+        else if(isValue  ()) ss << whitespace(max - 5);
+        else if(isString ()) ss << whitespace(max - 6);
+        else if(isNumeric()) ss << whitespace(max - 7);
+        else if(isFP1    ()) ss << whitespace(max - 8);
+        else if(isFPN    ()) ss << whitespace(max - 8);
+        else if(isError  ()) ss << whitespace(max - 5);
+        else                 ss << whitespace(max);
+
+        return ss.str();
+    };
+
  private:
+    inline std::string whitespace(int n) const {
+        if     (n == 1) return " ";
+        else if(n == 2) return "  ";
+        else if(n == 3) return "   ";
+        else if(n == 4) return "    ";
+        else if(n == 5) return "     ";
+        else if(n == 6) return "      ";
+        else if(n == 7) return "       ";
+        else if(n == 8) return "        ";
+        else if(n == 9) return "         ";
+        else            return "";
+    };
+
     Type     _type;
     int      _n;
     Lifetime _lifetime;
