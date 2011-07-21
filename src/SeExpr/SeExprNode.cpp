@@ -617,7 +617,7 @@ SeExprSubscriptNode::eval(SeVec3d& result) const
 
 
 SeExprType
-SeExprCompareNode::prep(SeExprType wanted, SeExprVarEnv & env)
+SeExprCompareEqNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
     SeExprType firstType, secondType;
@@ -626,11 +626,11 @@ SeExprCompareNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
-    if(firstType.isValid()) isUnder_with_error(SeExprType::NumericType(), firstType, error);
+    if(firstType.isValid()) isUnder_with_error(SeExprType::ValueType(), firstType, error);
 
     secondType = child(1)->prep(SeExprType::NumericType(), env);
 
-    if(secondType.isValid()) isUnder_with_error(SeExprType::NumericType(), secondType, error);
+    if(secondType.isValid()) isUnder_with_error(SeExprType::ValueType(), secondType, error);
 
     if(firstType.isValid() && secondType.isValid()) typesMatch(firstType, secondType, error);
 
@@ -674,6 +674,35 @@ SeExprNeNode::eval(SeVec3d& result) const
     if (!child0->isVec()) a[1] = a[2] = a[0];
     if (!child1->isVec()) b[1] = b[2] = b[0];
     result[0] = a[0] != b[0] || a[1] != b[1] || a[2] != b[2];
+}
+
+
+SeExprType
+SeExprCompareNode::prep(SeExprType wanted, SeExprVarEnv & env)
+{
+    //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
+    SeExprType firstType, secondType;
+
+    bool error = false;
+
+    firstType = child(0)->prep(SeExprType::NumericType(), env);
+
+    if(firstType.isValid()) isUnder_with_error(SeExprType::NumericType(), firstType, error);
+
+    secondType = child(1)->prep(SeExprType::NumericType(), env);
+
+    if(secondType.isValid()) isUnder_with_error(SeExprType::NumericType(), secondType, error);
+
+    if(firstType.isValid() && secondType.isValid()) typesMatch(firstType, secondType, error);
+
+    if(error)
+        setType();
+    else
+        setType(SeExprType::FP1Type(),
+                firstType,
+                secondType);
+
+    return _type;
 }
 
 

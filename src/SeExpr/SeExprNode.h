@@ -415,10 +415,10 @@ public:
 
 
 /// Node that implements a numeric comparison
-class SeExprCompareNode : public SeExprNode
+class SeExprCompareEqNode : public SeExprNode
 {
 public:
-    SeExprCompareNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
+    SeExprCompareEqNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
     virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
@@ -426,24 +426,35 @@ public:
 
 
 /// Node that implements a numeric comparison
-class SeExprEqNode : public SeExprCompareNode
+class SeExprEqNode : public SeExprCompareEqNode
 {
 public:
     SeExprEqNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprCompareNode(expr, a, b) {}
+	SeExprCompareEqNode(expr, a, b) {}
 
     virtual void eval(SeVec3d& result) const;
 };
 
 
 /// Node that implements a numeric comparison
-class SeExprNeNode : public SeExprCompareNode
+class SeExprNeNode : public SeExprCompareEqNode
 {
 public:
     SeExprNeNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprCompareNode(expr, a, b) {}
+	SeExprCompareEqNode(expr, a, b) {}
 
     virtual void eval(SeVec3d& result) const;
+};
+
+
+/// Node that implements a numeric comparison
+class SeExprCompareNode : public SeExprNode
+{
+public:
+    SeExprCompareNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
+	SeExprNode(expr, a, b) {}
+
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
 };
 
 
