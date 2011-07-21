@@ -52,27 +52,32 @@ TypeTesterExpr::test(const std::string & expr, SeExprType result, const std::str
     setExpr(expr);
     setReturnType(result);
 
-    if(verbosity_level >= 2)
-        std::cout << "\tChecking expression: " << expr                     << std::endl
-                  << "\t\tGiven:        "      << givenString              << std::endl
-                  << "\t\tAgainst type: "      << result.toUniformString() << "\t";
+    if(verbosity_level >= 3)
+        std::cout << "\tChecking expression:\t" << expr                     << std::endl
+                  << "\t\tGiven:        "       << givenString              << std::endl
+                  << "\t\tAgainst type: "       << result.toUniformString() << "\t";
 
     if(isValid()) {
         if(result != returnType()) {
             std::cerr << "Failed check." << std::endl;
             if     (verbosity_level == 1)
                 std::cerr << "\t\tExpression: "  << expr                           << std::endl
-                          << "\t\tExpected: "  << result      .toUniformString() << std::endl
-                          << "\t\tReceived: "  << returnType().toUniformString() << std::endl;
-            else if(verbosity_level >= 2)
-                std::cerr << "\t\tExpected: "  << result      .toUniformString() << std::endl
-                          << "\t\tReceived: "  << returnType().toUniformString() << std::endl;
+                          << "\t\tExpected:   "  << result      .toUniformString() << std::endl
+                          << "\t\tReceived:   "  << returnType().toUniformString() << std::endl;
+            else if(verbosity_level == 2)
+                std::cerr << "\t\tExpression: "  << expr                           << std::endl
+                          << "\t\tGiven:      "  << givenString                    << std::endl
+                          << "\t\tExpected:   "  << result      .toUniformString() << std::endl
+                          << "\t\tReceived:   "  << returnType().toUniformString() << std::endl;
+            else if(verbosity_level >= 3)
+                std::cerr << "\t\tExpected:   "  << result      .toUniformString() << std::endl
+                          << "\t\tReceived:   "  << returnType().toUniformString() << std::endl;
         }
-        else if(verbosity_level >= 2)
+        else if(verbosity_level >= 3)
             std::cout << "Check passed!" << std::endl;
     } else //error
         if(result.isError() || result.isLTError())
-            if(verbosity_level >= 2)
+            if(verbosity_level >= 3)
                 std::cout << "Check passed!" << std::endl;
 };
 
@@ -184,6 +189,9 @@ int main(int argc,char *argv[])
             break;
         case '2':
             verbosity_level = 2;
+            break;
+        case '3':
+            verbosity_level = 3;
             break;
         default:
             break;
