@@ -39,6 +39,81 @@
 #include <vector>
 
 SeExprVarEnv::ValType *
+SeExprVarEnv::find(const KeyType & name)
+{
+    ValType * answer = localFind(name);
+    if(answer)
+        return answer;
+    else
+        return parFind(name);
+};
+
+SeExprVarEnv::ValType const *
+SeExprVarEnv::lookup(const KeyType & name) const
+{
+    ValType const * answer = localLookup(name);
+    if(answer)
+        return answer;
+    else
+        return parLookup(name);
+};
+
+void
+SeExprVarEnv::add(const KeyType & name, ValType * var)
+{
+    ValType * old = localFind(name);
+
+    if(old)
+        *old = *var;
+    else
+        _map.insert(std::pair<KeyType,ValType*>(name,var));
+};
+
+void
+SeExprVarEnv::add(const SeExprVarEnv & env)
+{
+    DictType::const_iterator       ienv = env.begin();
+    DictType::const_iterator const eenv = env.end  ();
+
+    for(; ienv != eenv; ++ienv)
+        add(ienv->first, ienv->second);
+};
+
+bool
+SeExprVarEnv::branchesMatch(const SeExprVarEnv & env1, const SeExprVarEnv & env2)
+{
+    bool match = true;
+
+    DictType::const_iterator       ienv  = env1.begin();
+    DictType::const_iterator const eenv1 = env1.end  ();
+
+    for(; match && ienv != eenv1; ++ienv) {
+        const KeyType & name = ienv->first;
+        const ValType * var  = ienv->second;
+
+        match = env2.lookup(name)->type() == var->type();
+    }
+
+    ienv = env2.begin();
+    DictType::const_iterator const eenv2 = env2.end();
+
+    for(; match && ienv != eenv2; ++ienv) {
+        const KeyType & name = ienv->first;
+        const ValType * var  = ienv->second;
+
+        match = env1.lookup(name)->type() == var->type();
+    }
+
+    return match;
+}
+
+SeExprVarEnv
+SeExprVarEnv::newBranch(SeExprVarEnv & env)
+{
+    return SeExprVarEnv(&env);
+};
+
+SeExprVarEnv::ValType *
 SeExprVarEnv::localFind(const KeyType & name)
 {
     DictType::iterator iter = _map.find(name);
@@ -74,79 +149,4 @@ SeExprVarEnv::parLookup(const KeyType & name) const
         return _parent->lookup(name);
     else
         return 0;
-};
-
-SeExprVarEnv::ValType *
-SeExprVarEnv::find(const KeyType & name)
-{
-    ValType * answer = localFind(name);
-    if(answer)
-        return answer;
-    else
-        return parFind(name);
-};
-
-SeExprVarEnv::ValType const *
-SeExprVarEnv::lookup(const KeyType & name) const
-{
-    ValType const * answer = localLookup(name);
-    if(answer)
-        return answer;
-    else
-        return parLookup(name);
-};
-
-bool
-SeExprVarEnv::branchesMatch(const SeExprVarEnv & env1, const SeExprVarEnv & env2)
-{
-    bool match = true;
-
-    DictType::const_iterator       ienv  = env1.begin();
-    DictType::const_iterator const eenv1 = env1.end  ();
-
-    for(; match && ienv != eenv1; ++ienv) {
-        const KeyType & name = ienv->first;
-        const ValType * var  = ienv->second;
-
-        match = env2.lookup(name)->type() == var->type();
-    }
-
-    ienv = env2.begin();
-    DictType::const_iterator const eenv2 = env2.end();
-
-    for(; match && ienv != eenv2; ++ienv) {
-        const KeyType & name = ienv->first;
-        const ValType * var  = ienv->second;
-
-        match = env1.lookup(name)->type() == var->type();
-    }
-
-    return match;
-}
-
-void
-SeExprVarEnv::add(const KeyType & name, ValType * var)
-{
-    ValType * old = localFind(name);
-
-    if(old)
-        *old = *var;
-    else
-        _map.insert(std::pair<KeyType,ValType*>(name,var));
-};
-
-void
-SeExprVarEnv::add(const SeExprVarEnv & env)
-{
-    DictType::const_iterator       ienv = env.begin();
-    DictType::const_iterator const eenv = env.end  ();
-
-    for(; ienv != eenv; ++ienv)
-        add(ienv->first, ienv->second);
-};
-
-SeExprVarEnv
-SeExprVarEnv::newBranch(SeExprVarEnv & env)
-{
-    return SeExprVarEnv(&env);
 };
