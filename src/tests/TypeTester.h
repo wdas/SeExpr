@@ -64,17 +64,21 @@ public:
     {};
 
     void test(const std::string & expr,
-                     SeExprType result,
-                     const std::string & givenString,
-                     int verbosity_level);
+              SeExprType result,
+              const std::string & givenString,
+              int verbosity_level);
 
     void testSingle(const std::string & expr,
-                           FindResultOne proc,
-                           int verbosity_level);
+                    FindResultOne proc,
+                    int verbosity_level);
 
     void testDouble(const std::string & expr,
-                           FindResultTwo proc,
-                           int verbosity_level);
+                    FindResultTwo proc,
+                    int verbosity_level);
+
+    void testTriple(const std::string & expr,
+                    FindResultThree proc,
+                    int verbosity_level);
 
 protected:
     SeExprVarRef* resolveVar(const std::string& name) const {

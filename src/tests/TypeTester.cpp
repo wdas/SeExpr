@@ -125,10 +125,10 @@ SeExprType
 generalComparison(const SeExprType & first,
                   const SeExprType & second)
 {
-    if(first .isValid()    &&
-       second.isValid()    &&
-       first.match(second))   return SeExprType::FP1Type  ().becomeLT(first, second);
-    else                      return SeExprType::ErrorType();
+    if(first .isUnderValue() &&
+       second.isUnderValue() &&
+       first.match(second))     return SeExprType::FP1Type  ().becomeLT(first, second);
+    else                        return SeExprType::ErrorType();
 };
 
 SeExprType
@@ -165,6 +165,29 @@ numericTo2Vector(const SeExprType & first,
     else                          return SeExprType::ErrorType();
 };
 
+SeExprType
+numericTo3Vector(const SeExprType & first,
+                 const SeExprType & second,
+                 const SeExprType & third)
+{
+    if(first .isUnderNumeric() &&
+       second.isUnderNumeric() &&
+       third .isUnderNumeric())   return SeExprType::FPNType  (3).becomeLT(first, second, third);
+    else                          return SeExprType::ErrorType();
+};
+
+SeExprType
+conditional(const SeExprType & first,
+            const SeExprType & second,
+            const SeExprType & third)
+{
+    if(first .isUnderNumeric() &&
+       second.isUnderValue  () &&
+       third .isUnderValue  () &&
+       second == third)           return SeExprType(second).becomeLT(first, second, third);
+    else                          return SeExprType::ErrorType();
+};
+
 void
 TypeTesterExpr::testSingle(const std::string & expr, AbstractTypeIterator::FindResultOne proc, int verbosity_level) {
     SeExprType result;
@@ -190,6 +213,18 @@ TypeTesterExpr::testDouble(const std::string & expr, AbstractTypeIterator::FindR
 };
 
 void
+TypeTesterExpr::testTriple(const std::string & expr, AbstractTypeIterator::FindResultThree proc, int verbosity_level) {
+    SeExprType result;
+    TripleWholeTypeIterator iter("x", "y", "z", proc, this);
+
+    if(verbosity_level >= 1)
+        std::cout << "Checking expression: " << expr << std::endl;
+
+    for(iter.start(); !iter.isEnd(); iter.next())
+        test(expr, iter.result(), iter.givenUniformString(), verbosity_level);
+};
+
+void
 testOne(const std::string & str, TypeTesterExpr & expr, AbstractTypeIterator::FindResultOne proc, int verbosity_level) {
     expr.testSingle(str, proc, verbosity_level);
 };
@@ -197,6 +232,11 @@ testOne(const std::string & str, TypeTesterExpr & expr, AbstractTypeIterator::Fi
 void
 testTwo(const std::string & str, TypeTesterExpr & expr, AbstractTypeIterator::FindResultTwo proc, int verbosity_level) {
     expr.testDouble(str, proc, verbosity_level);
+};
+
+void
+testThree(const std::string & str, TypeTesterExpr & expr, AbstractTypeIterator::FindResultThree proc, int verbosity_level) {
+    expr.testTriple(str, proc, verbosity_level);
 };
 
 int main(int argc,char *argv[])
@@ -244,6 +284,9 @@ int main(int argc,char *argv[])
     testTwo("$x % $y",     expr, numericToNumeric,  verbosity_level);
     testTwo("$x ^ $y",     expr, numericToNumeric,  verbosity_level);
     testTwo("[$x, $y]",    expr, numericTo2Vector,  verbosity_level);
+    testThree("[$x, $y, $z]", expr, numericTo3Vector,  verbosity_level);
+    testThree("$x ? $y : $z", expr, conditional,  verbosity_level);
+    testThree("if($x) { $a = $y; } else { $a = $z; } $a", expr, conditional,  verbosity_level);
 
     return 0;
 }
