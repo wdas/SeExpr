@@ -228,7 +228,7 @@ class SeExprType {
 
     //combination lifetime assignments
     inline const SeExprType & becomeLT(const SeExprType & first,
-                         const SeExprType & second) {
+                                       const SeExprType & second) {
         if     (first.lt() == second.lt()) becomeLT(first);
         else if(first .isLTError  ()  ||
                 second.isLTError  ())    becomeLTError();
@@ -241,8 +241,8 @@ class SeExprType {
         return *this;
     };
     inline const SeExprType & becomeLT(const SeExprType & first,
-                         const SeExprType & second,
-                         const SeExprType & third) {
+                                       const SeExprType & second,
+                                       const SeExprType & third) {
         if     (first.lt() == second.lt()  &&
                 first.lt() == third .lt()) becomeLT(first);
         else if(first .isLTError  ()  ||
@@ -262,15 +262,15 @@ class SeExprType {
     //fusing lifetimes
     inline const SeExprType & combineLT(const SeExprType & first)  { becomeLT(*this, first); return *this; };
     inline const SeExprType & combineLT(const SeExprType & first,
-                          const SeExprType & second) {
+                                        const SeExprType & second) {
         combineLT(first);
         combineLT(second);
 
         return *this;
     };
     inline const SeExprType & combineLT(const SeExprType & first,
-                          const SeExprType & second,
-                          const SeExprType & third)  {
+                                        const SeExprType & second,
+                                        const SeExprType & third)  {
         combineLT(first);
         combineLT(second);
         combineLT(third);
