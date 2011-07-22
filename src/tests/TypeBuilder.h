@@ -172,10 +172,7 @@ protected:
         if(name=="z")  return &z;
 
         /*else*/
-        std::cerr << "You are here. Why are you here?" << std::endl;
-        std::cerr << "\t(Hint: You used an undefined variable. Maybe.)" << std::endl;
-        flush(std::cerr);
-	return &SE;
+	return 0;
     };
 
     SeExprFunc* resolveFunc(const std::string& name) const
