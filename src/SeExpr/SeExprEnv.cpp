@@ -92,16 +92,6 @@ SeExprVarEnv::add(const SeExprVarEnv & env)
     env.copied();
 };
 
-void
-SeExprVarEnv::add_as_error(const SeExprVarEnv & env)
-{
-    DictType::const_iterator       ienv = env.begin();
-    DictType::const_iterator const eenv = env.end  ();
-
-    for(; ienv != eenv; ++ienv)
-        add(ienv->first, new SeExprVarRef(SeExprType::ErrorType()));
-};
-
 bool
 SeExprVarEnv::branchesMatch(const SeExprVarEnv & env1, const SeExprVarEnv & env2)
 {
