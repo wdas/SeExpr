@@ -49,6 +49,10 @@
 
 void
 TypeTesterExpr::test(const std::string & expr, SeExprType result, const std::string & givenString, int verbosity_level) {
+    bool       error      = false;
+    bool       parseError = false;
+    SeExprType returned   = SeExprType::ErrorType();
+
     setExpr(expr);
     setReturnType(result);
 
@@ -58,27 +62,34 @@ TypeTesterExpr::test(const std::string & expr, SeExprType result, const std::str
                   << "\t\tAgainst type: "       << result.toUniformString() << "\t";
 
     if(isValid()) {
-        if(result != returnType()) {
-            std::cerr << "Failed check." << std::endl;
-            if     (verbosity_level == 1)
-                std::cerr << "\t\tExpression: "  << expr                           << std::endl
-                          << "\t\tExpected:   "  << result      .toUniformString() << std::endl
-                          << "\t\tReceived:   "  << returnType().toUniformString() << std::endl;
-            else if(verbosity_level == 2)
-                std::cerr << "\t\tExpression: "  << expr                           << std::endl
-                          << "\t\tGiven:      "  << givenString                    << std::endl
-                          << "\t\tExpected:   "  << result      .toUniformString() << std::endl
-                          << "\t\tReceived:   "  << returnType().toUniformString() << std::endl;
-            else if(verbosity_level >= 3)
-                std::cerr << "\t\tExpected:   "  << result      .toUniformString() << std::endl
-                          << "\t\tReceived:   "  << returnType().toUniformString() << std::endl;
-        }
+        if(result != returnType())
+            error = true;
+    } else {
+        parseError = true;
+        if(!result.isError() &&
+           !result.isLTError())
+            error = true;
+    }
+
+    if(!parseError) returned = returnType();
+
+    if(error) {
+        std::cerr << "Failed check." << std::endl;
+        if     (verbosity_level == 1)
+            std::cerr << "\t\tExpression: "  << expr                       << std::endl
+                      << "\t\tExpected:   "  << result  .toUniformString() << std::endl
+                      << "\t\tReceived:   "  << returned.toUniformString() << std::endl;
+        else if(verbosity_level == 2)
+            std::cerr << "\t\tExpression: "  << expr                       << std::endl
+                      << "\t\tGiven:      "  << givenString                << std::endl
+                      << "\t\tExpected:   "  << result  .toUniformString() << std::endl
+                      << "\t\tReceived:   "  << returned.toUniformString() << std::endl;
         else if(verbosity_level >= 3)
-            std::cout << "Check passed!" << std::endl;
-    } else //error
-        if(result.isError() || result.isLTError())
-            if(verbosity_level >= 3)
-                std::cout << "Check passed!" << std::endl;
+            std::cerr << "\t\tExpected:   "  << result  .toUniformString() << std::endl
+                      << "\t\tReceived:   "  << returned.toUniformString() << std::endl;
+    }
+    else if(verbosity_level >= 3)
+        std::cout << "Check passed!" << std::endl;
 };
 
 SeExprType
@@ -111,11 +122,23 @@ numericToScalar(const SeExprType & first,
 };
 
 SeExprType
+generalComparison(const SeExprType & first,
+                  const SeExprType & second)
+{
+    if(first .isValid()    &&
+       second.isValid()    &&
+       first.match(second))   return SeExprType::FP1Type  ().becomeLT(first, second);
+    else                      return SeExprType::ErrorType();
+};
+
+SeExprType
 numericComparison(const SeExprType & first,
                   const SeExprType & second)
 {
-    if(first.match(second)) return SeExprType::FP1Type  ().becomeLT(first, second);
-    else                    return SeExprType::ErrorType();
+    if(first .isUnderNumeric() &&
+       second.isUnderNumeric() &&
+       first.match(second))       return SeExprType::FP1Type  ().becomeLT(first, second);
+    else                          return SeExprType::ErrorType();
 };
 
 SeExprType
@@ -129,7 +152,7 @@ numericToNumeric(const SeExprType & first,
     //   both first and second are FPN (and the same N)
     if(first .isUnderNumeric() &&
        second.isUnderNumeric() &&
-       first.match(second))       return SeExprType::FPNType  ((first.isFP1()) ? second.dim() : first.dim()).combineLT(first, second);
+       first.match(second))       return SeExprType::FPNType  ((first.isFP1()) ? second.dim() : first.dim()).becomeLT(first, second);
     else                          return SeExprType::ErrorType();
 };
 
@@ -138,7 +161,7 @@ numericTo2Vector(const SeExprType & first,
                  const SeExprType & second)
 {
     if(first .isUnderNumeric() &&
-       second.isUnderNumeric())   return SeExprType::FPNType  (2).combineLT(first, second);
+       second.isUnderNumeric())   return SeExprType::FPNType  (2).becomeLT(first, second);
     else                          return SeExprType::ErrorType();
 };
 
