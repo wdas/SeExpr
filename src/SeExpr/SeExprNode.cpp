@@ -287,12 +287,13 @@ SeExprIfThenElseNode::prep(SeExprType wanted, SeExprVarEnv & env)
     elseEnv  = SeExprVarEnv::newBranch(env);
     elseType = child(2)->prep(SeExprType::AnyType(), elseEnv);
 
-    if(thenType.isValid() && elseType.isValid()) {
+    if(!error             &&
+       thenType.isValid() &&
+       elseType.isValid()) {
         if(generalCheck(SeExprVarEnv::branchesMatch(thenEnv, elseEnv), "Types of variables do not match after if statement", error))
             env.add(thenEnv);
     } else
         error = true;
-
 
     if(error)
         setType();
@@ -498,7 +499,7 @@ SeExprCondNode::prep(SeExprType wanted, SeExprVarEnv & env)
         error = true;
 
     if(thenType.isValid() && elseType.isValid())
-        typesMatch(thenType, elseType, error);
+        generalCheck(thenType == elseType, "Types of conditional branches do not match", error);
 
     if(error)
         setType();
@@ -990,7 +991,7 @@ SeExprVarNode::prep(SeExprType wanted, SeExprVarEnv & env)
     if(!_var)
         _var = _expr->resolveVar(name());
 
-    if(generalCheck(!_var, "No variable named $") + name())
+    if(generalCheck(_var, std::string("No variable named $") + name()))
         setType(_var->type());
     else
         setType();
