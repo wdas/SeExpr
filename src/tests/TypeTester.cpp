@@ -171,7 +171,7 @@ TypeTesterExpr::testSingle(const std::string & expr, AbstractTypeIterator::FindR
     SingleWholeTypeIterator iter("v", proc, this);
 
     if(verbosity_level >= 1)
-        std::cout << "Checking type of expression: " << expr << std::endl;
+        std::cout << "Checking expression: " << expr << std::endl;
 
     for(iter.start(); !iter.isEnd(); iter.next())
         test(expr, iter.result(), iter.givenUniformString(), verbosity_level);
@@ -183,7 +183,7 @@ TypeTesterExpr::testDouble(const std::string & expr, AbstractTypeIterator::FindR
     DoubleWholeTypeIterator iter("x", "y", proc, this);
 
     if(verbosity_level >= 1)
-        std::cout << "Checking type of expression: " << expr << std::endl;
+        std::cout << "Checking expression: " << expr << std::endl;
 
     for(iter.start(); !iter.isEnd(); iter.next())
         test(expr, iter.result(), iter.givenUniformString(), verbosity_level);
@@ -223,12 +223,27 @@ int main(int argc,char *argv[])
     TypeTesterExpr expr;
     std::string str;
 
-    testOne("$a = $v; $a", expr, identity,        verbosity_level);
-    testOne("[$v]",        expr, numericToScalar, verbosity_level);
-    testOne("-$v",         expr, numeric,         verbosity_level);
-    testOne("!$v",         expr, numeric,         verbosity_level);
-    testOne("~$v",         expr, numeric,         verbosity_level);
-    testTwo("$x && $y",    expr, numericToScalar, verbosity_level);
+    testOne("$a = $v; $a", expr, identity,          verbosity_level);
+    testOne("[$v]",        expr, numericToScalar,   verbosity_level);
+    testOne("-$v",         expr, numeric,           verbosity_level);
+    testOne("!$v",         expr, numeric,           verbosity_level);
+    testOne("~$v",         expr, numeric,           verbosity_level);
+    testTwo("$x && $y",    expr, numericToScalar,   verbosity_level);
+    testTwo("$x || $y",    expr, numericToScalar,   verbosity_level);
+    testTwo("$x[$y]",      expr, numericToScalar,   verbosity_level);
+    testTwo("$x == $y",    expr, generalComparison, verbosity_level);
+    testTwo("$x != $y",    expr, generalComparison, verbosity_level);
+    testTwo("$x <  $y",    expr, numericComparison, verbosity_level);
+    testTwo("$x >  $y",    expr, numericComparison, verbosity_level);
+    testTwo("$x <= $y",    expr, numericComparison, verbosity_level);
+    testTwo("$x >= $y",    expr, numericComparison, verbosity_level);
+    testTwo("$x + $y",     expr, numericToNumeric,  verbosity_level);
+    testTwo("$x - $y",     expr, numericToNumeric,  verbosity_level);
+    testTwo("$x * $y",     expr, numericToNumeric,  verbosity_level);
+    testTwo("$x / $y",     expr, numericToNumeric,  verbosity_level);
+    testTwo("$x % $y",     expr, numericToNumeric,  verbosity_level);
+    testTwo("$x ^ $y",     expr, numericToNumeric,  verbosity_level);
+    testTwo("[$x, $y]",    expr, numericTo2Vector,  verbosity_level);
 
     return 0;
 }
