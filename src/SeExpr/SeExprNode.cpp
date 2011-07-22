@@ -216,7 +216,8 @@ SeExprNode::prep(SeExprType wanted, SeExprVarEnv & env)
     std::vector<SeExprNode*>::iterator const e_child = _children.end  ();
 
     for(; child != e_child; child++)
-        error = error || (!((*child)->prep(SeExprType::AnyType(), env)).isValid());
+        error = (error ||
+                 (!((*child)->prep(SeExprType::AnyType(), env)).isValid()));
 
     if(error)
         setType();
@@ -275,7 +276,10 @@ SeExprIfThenElseNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     condType = child(0)->prep(SeExprType::FP1Type(),env);
 
-    if(condType.isValid()) isUnder_with_error(SeExprType::NumericType(), condType, error);
+    if(condType.isValid())
+        isUnder_with_error(SeExprType::NumericType(), condType, error);
+    else
+        error = true;
 
     thenEnv  = SeExprVarEnv::newBranch(env);
     thenType = child(1)->prep(SeExprType::AnyType(), thenEnv);
@@ -283,10 +287,12 @@ SeExprIfThenElseNode::prep(SeExprType wanted, SeExprVarEnv & env)
     elseEnv  = SeExprVarEnv::newBranch(env);
     elseType = child(2)->prep(SeExprType::AnyType(), elseEnv);
 
-    if(!thenType.isValid() || !elseType.isValid()) error = true;
+    if(thenType.isValid() && elseType.isValid()) {
+        if(generalCheck(SeExprVarEnv::branchesMatch(thenEnv, elseEnv), "Types of variables do not match after if statement", error))
+            env.add(thenEnv);
+    } else
+        error = true;
 
-    if(generalCheck(SeExprVarEnv::branchesMatch(thenEnv, elseEnv), "Types of variables do not match after if statement", error))
-        env.add(thenEnv);
 
     if(error)
         setType();
@@ -356,8 +362,10 @@ SeExprVecNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     for(; ic != ec; ic++) {
         SeExprType childType = (*ic)->prep(SeExprType::FP1Type(), env);
-        if(childType.isValid()) isUnder_with_error(SeExprType::NumericType(), childType, error);
-        else error = true;
+        if(childType.isValid())
+            isUnder_with_error(SeExprType::NumericType(), childType, error);
+        else
+            error = true;
         //TODO: add way to tell what element of vector has the type mismatch
     }
 
@@ -408,7 +416,8 @@ SeExprUnaryOpNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     setType(child(0)->prep(wanted, env));
 
-    if(_type.isValid()) isUnder_with_error(SeExprType::NumericType(), _type, error);
+    if(_type.isValid())
+        isUnder_with_error(SeExprType::NumericType(), _type, error);
 
     if(error)
         setType();
@@ -469,17 +478,27 @@ SeExprCondNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     condType = child(0)->prep(SeExprType::FP1Type(),env);
 
-    if(condType.isValid()) isUnder_with_error(SeExprType::NumericType(), condType, error);
+    if(condType.isValid())
+        isUnder_with_error(SeExprType::NumericType(), condType, error);
+    else
+        error = true;
 
     thenType = child(1)->prep(wanted, env);
 
     elseType = child(2)->prep(wanted, env);
 
-    if(thenType.isValid()) isa_with_error(wanted, thenType, error);
+    if(thenType.isValid())
+        isa_with_error(wanted, thenType, error);
+    else
+        error = true;
 
-    if(elseType.isValid()) isa_with_error(wanted, elseType, error);
+    if(elseType.isValid())
+        isa_with_error(wanted, elseType, error);
+    else
+        error = true;
 
-    if(thenType.isValid() && elseType.isValid()) typesMatch(thenType, elseType, error);
+    if(thenType.isValid() && elseType.isValid())
+        typesMatch(thenType, elseType, error);
 
     if(error)
         setType();
@@ -515,11 +534,17 @@ SeExprLogicalOpNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     firstType = child(0)->prep(SeExprType::FP1Type(), env);
 
-    if(firstType.isValid()) isa_with_error(SeExprType::FP1Type(), firstType, error);
+    if(firstType.isValid())
+        isa_with_error(SeExprType::FP1Type(), firstType, error);
+    else
+        error = true;
 
     secondType = child(1)->prep(SeExprType::FP1Type(), env);
 
-    if(secondType.isValid()) isa_with_error(SeExprType::FP1Type(), secondType, error);
+    if(secondType.isValid())
+        isa_with_error(SeExprType::FP1Type(), secondType, error);
+    else
+        error = true;
 
     if(error)
         setType();
@@ -572,11 +597,17 @@ SeExprSubscriptNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     vecType = child(0)->prep(SeExprType::NumericType(), env);
 
-    if(vecType.isValid()) isUnder_with_error(SeExprType::NumericType(), vecType, error);
+    if(vecType.isValid())
+        isUnder_with_error(SeExprType::NumericType(), vecType, error);
+    else
+        error = true;
 
     scriptType = child(1)->prep(SeExprType::FP1Type(), env);
 
-    if(scriptType.isValid()) isUnder_with_error(SeExprType::NumericType(), scriptType, error);
+    if(scriptType.isValid())
+        isUnder_with_error(SeExprType::NumericType(), scriptType, error);
+    else
+        error = true;
 
     if(error)
         setType();
@@ -627,13 +658,20 @@ SeExprCompareEqNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
-    if(firstType.isValid()) isUnder_with_error(SeExprType::ValueType(), firstType, error);
+    if(firstType.isValid())
+        isUnder_with_error(SeExprType::ValueType(), firstType, error);
+    else
+        error = true;
 
     secondType = child(1)->prep(SeExprType::NumericType(), env);
 
-    if(secondType.isValid()) isUnder_with_error(SeExprType::ValueType(), secondType, error);
+    if(secondType.isValid())
+        isUnder_with_error(SeExprType::ValueType(), secondType, error);
+    else
+        error = true;
 
-    if(firstType.isValid() && secondType.isValid()) typesMatch(firstType, secondType, error);
+    if(firstType.isValid() && secondType.isValid())
+        typesMatch(firstType, secondType, error);
 
     if(error)
         setType();
@@ -688,13 +726,20 @@ SeExprCompareNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
-    if(firstType.isValid()) isUnder_with_error(SeExprType::NumericType(), firstType, error);
+    if(firstType.isValid())
+        isUnder_with_error(SeExprType::NumericType(), firstType, error);
+    else
+        error = true;
 
     secondType = child(1)->prep(SeExprType::NumericType(), env);
 
-    if(secondType.isValid()) isUnder_with_error(SeExprType::NumericType(), secondType, error);
+    if(secondType.isValid())
+        isUnder_with_error(SeExprType::NumericType(), secondType, error);
+    else
+        error = true;
 
-    if(firstType.isValid() && secondType.isValid()) typesMatch(firstType, secondType, error);
+    if(firstType.isValid() && secondType.isValid())
+        typesMatch(firstType, secondType, error);
 
     if(error)
         setType();
@@ -773,13 +818,20 @@ SeExprBinaryOpNode::prep(SeExprType wanted, SeExprVarEnv & env)
 
     firstType = child(0)->prep(SeExprType::NumericType(), env);
 
-    if(firstType.isValid()) isUnder_with_error(SeExprType::NumericType(), firstType, error);
+    if(firstType.isValid())
+        isUnder_with_error(SeExprType::NumericType(), firstType, error);
+    else
+        error = true;
 
     secondType = child(1)->prep(SeExprType::NumericType(), env);
 
-    if(secondType.isValid()) isUnder_with_error(SeExprType::NumericType(), secondType, error);
+    if(secondType.isValid())
+        isUnder_with_error(SeExprType::NumericType(), secondType, error);
+    else
+        error = true;
 
-    if(firstType.isValid() && secondType.isValid()) typesMatch(firstType, secondType, error);
+    if(firstType.isValid() && secondType.isValid())
+        typesMatch(firstType, secondType, error);
 
     if(error)
         setType();
@@ -935,7 +987,8 @@ SeExprVarNode::prep(SeExprType wanted, SeExprVarEnv & env)
     // ask expression to resolve var
     _var = env.find(name());
 
-    if(!_var) _var = _expr->resolveVar(name());
+    if(!_var)
+        _var = _expr->resolveVar(name());
 
     if(generalCheck(!_var, "No variable named $") + name())
         setType(_var->type());
@@ -982,7 +1035,10 @@ SeExprFuncNode::prepArgs(std::string const & name, SeExprType wanted, SeExprVarE
 
     for(count = 0; ic != ec; ++ic, ++count) {
         SeExprType childType = (*ic)->prep(wanted, env);
-        if(childType.isValid()) isa_with_error(wanted, childType, error);
+        if(childType.isValid())
+            isa_with_error(wanted, childType, error);
+        else
+            error = true;
         //TODO: give actual name, not placeholder - or take out name altogether
     }
 
