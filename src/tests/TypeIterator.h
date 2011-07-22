@@ -320,8 +320,7 @@ public:
         _lifetime2            (var2, parent),
         _primary3             (var3, parent),
         _lifetime3            (var3, parent),
-        _proc                 (proc),
-        _inLT                 (false)
+        _proc                 (proc)
     {};
 
     virtual void start()       {
@@ -331,13 +330,41 @@ public:
     };
 
     virtual void next ()       {
-        if     (!_primary3 .isEnd())   _primary3 .next ();
-        else if(!_primary2 .isEnd()) { _primary3 .start(); _primary2 .next ();                                   }
-        else if(!_primary1 .isEnd()) { _primary3 .start(); _primary2 .start(); _primary1 .next ();               }
-        else if(!_inLT)              { _lifetime3.start(); _lifetime2.start(); _lifetime1.start(); _inLT = true; }
-        else if(!_lifetime3.isEnd())   _lifetime3.next ();
-        else if(!_lifetime2.isEnd()) { _lifetime3.start(); _lifetime2.next ();                                   }
-        else if(!_lifetime1.isEnd()) { _lifetime3.start(); _lifetime2.start(); _lifetime1.next ();               };
+        if(!_primary1.isEnd()) {
+            _primary3.next ();
+            if(_primary3.isEnd()) {
+                _primary2.next();
+                if(_primary2.isEnd()) {
+                    _primary1.next();
+                    if(!_primary1.isEnd()) {
+                        _primary2.start();
+                        _primary3.start();
+                    }
+                    else {
+                        _lifetime1.start();
+                        _lifetime2.start();
+                        _lifetime3.start();
+                    }
+                }
+                else
+                    _primary3.start();
+            }
+        } else
+            if(!_lifetime1.isEnd()) {
+                _lifetime3.next ();
+                if(_lifetime3.isEnd()) {
+                    _lifetime2.next();
+                    if(_lifetime2.isEnd()) {
+                        _lifetime1.next();
+                        if(!_lifetime1.isEnd()) {
+                            _lifetime2.start();
+                            _lifetime3.start();
+                        }
+                    }
+                    else
+                        _lifetime3.start();
+                }
+            }
     };
 
     virtual bool isEnd() const { return _lifetime3.isEnd(); };
@@ -354,18 +381,18 @@ public:
 
  protected:
     SeExprType first_current() const {
-        if(!_inLT) return _primary1 .current();
-        else       return _lifetime1.current();
+        if(!_primary1.isEnd()) return _primary1 .current();
+        else                   return _lifetime1.current();
     };
 
     SeExprType second_current() const {
-        if(!_inLT) return _primary2 .current();
-        else       return _lifetime2.current();
+        if(!_primary1.isEnd()) return _primary2 .current();
+        else                   return _lifetime2.current();
     };
 
     SeExprType third_current() const {
-        if(!_inLT) return _primary3 .current();
-        else       return _lifetime3.current();
+        if(!_primary1.isEnd()) return _primary3 .current();
+        else                   return _lifetime3.current();
     };
 
 private:
