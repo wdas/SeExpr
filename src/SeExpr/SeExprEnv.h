@@ -50,18 +50,21 @@ class SeExprVarEnv {
     std::map<KeyType, ValType *> typedef DictType;
 
     SeExprVarEnv(SeExprVarEnv * parent)
-        : _map(), _parent(parent)
+        : _map(), _parent(parent), _anotherOwns(false)
     {};
 
  public:
     SeExprVarEnv()
-        : _map(), _parent(0)
+        : _map(), _parent(0), _anotherOwns(false)
     {};
 
-    ValType       * find  (const KeyType      & name);
-    ValType const * lookup(const KeyType      & name)                const;
-    void            add   (const KeyType      & name, ValType * var);
-    void            add   (const SeExprVarEnv & env);
+    ~SeExprVarEnv();
+
+    ValType       * find        (const KeyType      & name);
+    ValType const * lookup      (const KeyType      & name)                const;
+    void            add         (const KeyType      & name, ValType * var);
+    void            add         (const SeExprVarEnv & env);
+    void            add_as_error(const SeExprVarEnv & env);
 
     inline int size() const { return _map.size(); };
 
@@ -69,10 +72,11 @@ class SeExprVarEnv {
     static SeExprVarEnv newBranch    (      SeExprVarEnv & env);
 
  protected:
-    DictType::      iterator       begin()       { return _map.begin(); };
-    DictType::const_iterator       begin() const { return _map.begin(); };
-    DictType::      iterator const end  ()       { return _map.end  (); };
-    DictType::const_iterator const end  () const { return _map.end  (); };
+    DictType::      iterator       begin ()       { return _map.begin(); };
+    DictType::const_iterator       begin () const { return _map.begin(); };
+    DictType::      iterator const end   ()       { return _map.end  (); };
+    DictType::const_iterator const end   () const { return _map.end  (); };
+    void                           copied() const { _anotherOwns = true; };
 
  private:
     ValType       * localFind  (const KeyType & name);
@@ -82,6 +86,7 @@ class SeExprVarEnv {
 
     DictType       _map;
     SeExprVarEnv * _parent;
+    mutable bool   _anotherOwns;
 };
 
 class SeExprFuncRef {

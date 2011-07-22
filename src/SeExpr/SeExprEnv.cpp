@@ -39,6 +39,16 @@
 
 #include <vector>
 
+SeExprVarEnv::~SeExprVarEnv() {
+    if(!_anotherOwns) {
+        DictType::const_iterator       ienv = begin();
+        DictType::const_iterator const eenv = end  ();
+
+        for(; ienv != eenv; ++ienv)
+            delete ienv->second;
+    }
+};
+
 SeExprVarEnv::ValType *
 SeExprVarEnv::find(const KeyType & name)
 {
@@ -78,6 +88,18 @@ SeExprVarEnv::add(const SeExprVarEnv & env)
 
     for(; ienv != eenv; ++ienv)
         add(ienv->first, ienv->second);
+
+    env.copied();
+};
+
+void
+SeExprVarEnv::add_as_error(const SeExprVarEnv & env)
+{
+    DictType::const_iterator       ienv = env.begin();
+    DictType::const_iterator const eenv = env.end  ();
+
+    for(; ienv != eenv; ++ienv)
+        add(ienv->first, new SeExprVarRef(SeExprType::ErrorType()));
 };
 
 bool
