@@ -291,7 +291,7 @@ SeExprIfThenElseNode::prep(SeExprType wanted, SeExprVarEnv & env)
        thenType.isValid() &&
        elseType.isValid()) {
         if(generalCheck(SeExprVarEnv::branchesMatch(thenEnv, elseEnv), "Types of variables do not match after if statement", error))
-            env.add(thenEnv);
+            env.add(thenEnv, condType);
     } else
         error = true;
 

@@ -81,13 +81,15 @@ SeExprVarEnv::add(const KeyType & name, ValType * var)
 };
 
 void
-SeExprVarEnv::add(const SeExprVarEnv & env)
+SeExprVarEnv::add(SeExprVarEnv & env, const SeExprType & modifyingType)
 {
-    DictType::const_iterator       ienv = env.begin();
-    DictType::const_iterator const eenv = env.end  ();
+    DictType::iterator       ienv = env.begin();
+    DictType::iterator const eenv = env.end  ();
 
-    for(; ienv != eenv; ++ienv)
+    for(; ienv != eenv; ++ienv) {
+        (ienv->second)->combineLifetime(modifyingType);
         add(ienv->first, ienv->second);
+    }
 
     env.copied();
 };

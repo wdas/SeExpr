@@ -61,9 +61,9 @@ class SeExprVarEnv {
     ~SeExprVarEnv();
 
     ValType       * find  (const KeyType      & name);
-    ValType const * lookup(const KeyType      & name)                const;
-    void            add   (const KeyType      & name, ValType * var);
-    void            add   (const SeExprVarEnv & env);
+    ValType const * lookup(const KeyType      & name)                                   const;
+    void            add   (const KeyType      & name,       ValType    * var);
+    void            add   (      SeExprVarEnv & env,  const SeExprType & modifyingType);
 
     inline int size() const { return _map.size(); };
 
