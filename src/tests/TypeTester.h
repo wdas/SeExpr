@@ -80,8 +80,7 @@ public:
                     FindResultThree proc,
                     int verbosity_level);
 
-protected:
-    SeExprVarRef* resolveVar(const std::string& name) const {
+    virtual SeExprVarRef* resolveVar(const std::string& name) const {
         return TypeBuilderExpr::resolveVar(name);
     };
 

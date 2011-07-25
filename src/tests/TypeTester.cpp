@@ -189,53 +189,64 @@ conditional(const SeExprType & first,
 };
 
 void
-TypeTesterExpr::testSingle(const std::string & expr, AbstractTypeIterator::FindResultOne proc, int verbosity_level) {
+TypeTesterExpr::testSingle(const std::string & expr, SingleWholeTypeIterator::ProcType proc, int verbosity_level) {
     SeExprType result;
     SingleWholeTypeIterator iter("v", proc, this);
 
     if(verbosity_level >= 1)
         std::cout << "Checking expression: " << expr << std::endl;
 
-    for(iter.start(); !iter.isEnd(); iter.next())
+    int remaining = iter.start();
+    test(expr, iter.result(), iter.givenUniformString(), verbosity_level);
+
+    while(remaining) {
+        remaining = iter.next();
         test(expr, iter.result(), iter.givenUniformString(), verbosity_level);
+    };
 };
 
 void
-TypeTesterExpr::testDouble(const std::string & expr, AbstractTypeIterator::FindResultTwo proc, int verbosity_level) {
+TypeTesterExpr::testDouble(const std::string & expr, DoubleWholeTypeIterator::ProcType proc, int verbosity_level) {
     SeExprType result;
     DoubleWholeTypeIterator iter("x", "y", proc, this);
 
     if(verbosity_level >= 1)
         std::cout << "Checking expression: " << expr << std::endl;
 
-    for(iter.start(); !iter.isEnd(); iter.next())
+    int remaining = iter.start();
+    test(expr, iter.result(), iter.givenUniformString(), verbosity_level);
+
+    while(remaining) {
+        remaining = iter.next();
         test(expr, iter.result(), iter.givenUniformString(), verbosity_level);
+    };
 };
 
 void
-TypeTesterExpr::testTriple(const std::string & expr, AbstractTypeIterator::FindResultThree proc, int verbosity_level) {
+TypeTesterExpr::testTriple(const std::string & expr, TripleWholeTypeIterator::ProcType proc, int verbosity_level) {
     SeExprType result;
     TripleWholeTypeIterator iter("x", "y", "z", proc, this);
 
     if(verbosity_level >= 1)
         std::cout << "Checking expression: " << expr << std::endl;
 
-    for(iter.start(); !iter.isEnd(); iter.next())
+    int remaining = iter.start();
+    for(; remaining > 0; remaining = iter.next())
         test(expr, iter.result(), iter.givenUniformString(), verbosity_level);
 };
 
 void
-testOne(const std::string & str, TypeTesterExpr & expr, AbstractTypeIterator::FindResultOne proc, int verbosity_level) {
+testOne(const std::string & str, TypeTesterExpr & expr, SingleWholeTypeIterator::ProcType proc, int verbosity_level) {
     expr.testSingle(str, proc, verbosity_level);
 };
 
 void
-testTwo(const std::string & str, TypeTesterExpr & expr, AbstractTypeIterator::FindResultTwo proc, int verbosity_level) {
+testTwo(const std::string & str, TypeTesterExpr & expr, DoubleWholeTypeIterator::ProcType proc, int verbosity_level) {
     expr.testDouble(str, proc, verbosity_level);
 };
 
 void
-testThree(const std::string & str, TypeTesterExpr & expr, AbstractTypeIterator::FindResultThree proc, int verbosity_level) {
+testThree(const std::string & str, TypeTesterExpr & expr, TripleWholeTypeIterator::ProcType proc, int verbosity_level) {
     expr.testTriple(str, proc, verbosity_level);
 };
 
@@ -263,30 +274,32 @@ int main(int argc,char *argv[])
     TypeTesterExpr expr;
     std::string str;
 
-    testOne("$a = $v; $a", expr, identity,          verbosity_level);
-    testOne("[$v]",        expr, numericToScalar,   verbosity_level);
-    testOne("-$v",         expr, numeric,           verbosity_level);
-    testOne("!$v",         expr, numeric,           verbosity_level);
-    testOne("~$v",         expr, numeric,           verbosity_level);
-    testTwo("$x && $y",    expr, numericToScalar,   verbosity_level);
-    testTwo("$x || $y",    expr, numericToScalar,   verbosity_level);
-    testTwo("$x[$y]",      expr, numericToScalar,   verbosity_level);
-    testTwo("$x == $y",    expr, generalComparison, verbosity_level);
-    testTwo("$x != $y",    expr, generalComparison, verbosity_level);
-    testTwo("$x <  $y",    expr, numericComparison, verbosity_level);
-    testTwo("$x >  $y",    expr, numericComparison, verbosity_level);
-    testTwo("$x <= $y",    expr, numericComparison, verbosity_level);
-    testTwo("$x >= $y",    expr, numericComparison, verbosity_level);
-    testTwo("$x + $y",     expr, numericToNumeric,  verbosity_level);
-    testTwo("$x - $y",     expr, numericToNumeric,  verbosity_level);
-    testTwo("$x * $y",     expr, numericToNumeric,  verbosity_level);
-    testTwo("$x / $y",     expr, numericToNumeric,  verbosity_level);
-    testTwo("$x % $y",     expr, numericToNumeric,  verbosity_level);
-    testTwo("$x ^ $y",     expr, numericToNumeric,  verbosity_level);
-    testTwo("[$x, $y]",    expr, numericTo2Vector,  verbosity_level);
-    testThree("[$x, $y, $z]", expr, numericTo3Vector,  verbosity_level);
-    testThree("$x ? $y : $z", expr, conditional,  verbosity_level);
-    testThree("if($x) { $a = $y; } else { $a = $z; } $a", expr, conditional,  verbosity_level);
+    testOne("$a = $v; $a", expr, identity,        verbosity_level);
+    testOne("[$v]",        expr, numericToScalar, verbosity_level);
+    testOne("-$v",         expr, numeric,         verbosity_level);
+    testOne("!$v",         expr, numeric,         verbosity_level);
+    testOne("~$v",         expr, numeric,         verbosity_level);
+
+    testTwo("$x && $y", expr, numericToScalar,   verbosity_level);
+    testTwo("$x || $y", expr, numericToScalar,   verbosity_level);
+    testTwo("$x[$y]",   expr, numericToScalar,   verbosity_level);
+    testTwo("$x == $y", expr, generalComparison, verbosity_level);
+    testTwo("$x != $y", expr, generalComparison, verbosity_level);
+    testTwo("$x <  $y", expr, numericComparison, verbosity_level);
+    testTwo("$x >  $y", expr, numericComparison, verbosity_level);
+    testTwo("$x <= $y", expr, numericComparison, verbosity_level);
+    testTwo("$x >= $y", expr, numericComparison, verbosity_level);
+    testTwo("$x + $y",  expr, numericToNumeric,  verbosity_level);
+    testTwo("$x - $y",  expr, numericToNumeric,  verbosity_level);
+    testTwo("$x * $y",  expr, numericToNumeric,  verbosity_level);
+    testTwo("$x / $y",  expr, numericToNumeric,  verbosity_level);
+    testTwo("$x % $y",  expr, numericToNumeric,  verbosity_level);
+    testTwo("$x ^ $y",  expr, numericToNumeric,  verbosity_level);
+    testTwo("[$x, $y]", expr, numericTo2Vector,  verbosity_level);
+
+    testThree("[$x, $y, $z]",                             expr, numericTo3Vector,  verbosity_level);
+    testThree("$x ? $y : $z",                             expr, conditional,       verbosity_level);
+    testThree("if($x) { $a = $y; } else { $a = $z; } $a", expr, conditional,       verbosity_level);
 
     return 0;
 }

@@ -115,6 +115,31 @@ public:
           z (SeExprType::FP1Type   () )
     {};
 
+    //! resolve function
+    SeExprVarRef* resolveVar(const std::string& name) const {
+        if(name=="F1") return &F1;
+        if(name=="F2") return &F2;
+        if(name=="F3") return &F3;
+        if(name=="ST") return &ST;
+        if(name=="SE") return &SE;
+        if(name=="LC") return &LC;
+        if(name=="LU") return &LU;
+        if(name=="LV") return &LV;
+        if(name=="LE") return &LE;
+        if(name=="v")  return &v;
+        if(name=="x")  return &x;
+        if(name=="y")  return &y;
+        if(name=="z")  return &z;
+
+        /*else*/
+	return 0;
+    };
+
+    SeExprFunc* resolveFunc(const std::string& name) const
+    {
+        return &dummyFunc;
+    };
+
     void setVar(const std::string & to,
                 const std::string & from) {
         if(to=="v") v = SeExprNothingVarRef(resolveVar(from)->type());
@@ -153,32 +178,6 @@ private:
     // mutable SeExprNothingVarRef x(SeExprType::FP1Type() );
     // mutable SeExprNothingVarRef y(SeExprType::FP1Type() );
     // mutable SeExprNothingVarRef z(SeExprType::FP1Type() );
-
-protected:
-    //! resolve function
-    SeExprVarRef* resolveVar(const std::string& name) const {
-        if(name=="F1") return &F1;
-        if(name=="F2") return &F2;
-        if(name=="F3") return &F3;
-        if(name=="ST") return &ST;
-        if(name=="SE") return &SE;
-        if(name=="LC") return &LC;
-        if(name=="LU") return &LU;
-        if(name=="LV") return &LV;
-        if(name=="LE") return &LE;
-        if(name=="v")  return &v;
-        if(name=="x")  return &x;
-        if(name=="y")  return &y;
-        if(name=="z")  return &z;
-
-        /*else*/
-	return 0;
-    };
-
-    SeExprFunc* resolveFunc(const std::string& name) const
-    {
-        return &dummyFunc;
-    };
 };
 
 #endif //TYPEBUILDER_H

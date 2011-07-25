@@ -49,363 +49,356 @@
    @file TypeIterator.h
 */
 
-class AbstractTypeIterator {
-public:
-    typedef SeExprType(*FindResultOne)  (const SeExprType &);
-    typedef SeExprType(*FindResultTwo)  (const SeExprType &, const SeExprType &);
-    typedef SeExprType(*FindResultThree)(const SeExprType &, const SeExprType &, const SeExprType &);
-
-    AbstractTypeIterator(TypeTesterExpr * parent)
-        : _parent(parent)
+class EnvironmentManager {
+ public:
+    EnvironmentManager(const std::string & name, TypeTesterExpr * parent)
+        : _name(name),
+        _parent(parent)
     {};
 
-    virtual void start() = 0;
-    virtual void next () = 0;
-    virtual bool isEnd() const = 0;
+    inline TypeTesterExpr * parent()       { return _parent; };
+    inline TypeTesterExpr * parent() const { return _parent; };
 
-    virtual       SeExprType  result     () const = 0;
-    virtual const std::string givenString() const = 0;
+    inline void set(const std::string & from) { parent()->setVar(_name, from); };
 
-protected:
-    inline TypeTesterExpr * parent () { return _parent; };
+    inline SeExprType  type           (const std::string & from) const { return parent()->resolveVar(from)->type(); };
+    inline std::string toString       (const std::string & from) const { return type(from).toString();              };
+    inline std::string toUniformString(const std::string & from) const { return type(from).toUniformString();       };
 
-private:
+ private:
+    std::string      _name;
     TypeTesterExpr * _parent;
 };
 
-class AbstractVarTypeIterator : public AbstractTypeIterator {
-public:
-    AbstractVarTypeIterator(const std::string & var, int typeCount, TypeTesterExpr * parent)
-        : AbstractTypeIterator(parent), _name(var), _max(typeCount), _state(0)
-    {};
-
-    virtual void start()       { _state = 0;            };
-    virtual void next ()       { _state++;              };
-    virtual bool isEnd() const { return _state >= _max; };
-
-    virtual       SeExprType current     () const = 0;
-    virtual       SeExprType  result     () const = 0;
-    virtual const std::string givenString() const = 0;
-
-protected:
-    void set  (const std::string & from)       { parent()->setVar(_name, from); };
-    int  state()                         const { return _state;                 };
-
-private:
-    std::string _name;
-    int         _max;
-    int         _state;
-};
-
-class PrimaryVarTypeIterator : public AbstractVarTypeIterator {
-public:
-    PrimaryVarTypeIterator(const std::string & var, TypeTesterExpr * parent)
-        : AbstractVarTypeIterator(var, 5, parent)
-    {};
-
-    virtual void start() {
-        AbstractVarTypeIterator::start();
-        set("F1");
-    };
-
-    virtual void next() {
-        AbstractVarTypeIterator::next();
-
-        if     (state() == 1) set("F2");
-        else if(state() == 2) set("F3");
-        else if(state() == 3) set("ST");
-        else if(state() == 4) set("SE");
-    };
-
-    virtual SeExprType current() const {
-        if     (state() == 0) return SeExprType::FP1Type   ();
-        else if(state() == 1) return SeExprType::FPNType   (2);
-        else if(state() == 2) return SeExprType::FPNType   (3);
-        else if(state() == 3) return SeExprType::StringType();
-        else                  return SeExprType::ErrorType (); //state() == 4
-    };
-
-    virtual SeExprType result() const { return SeExprType::ErrorType(); };
-
-    virtual const std::string givenString() const {
-        if     (state() == 0) return SeExprType::FP1Type   () .toString();
-        else if(state() == 1) return SeExprType::FPNType   (2).toString();
-        else if(state() == 2) return SeExprType::FPNType   (3).toString();
-        else if(state() == 3) return SeExprType::StringType() .toString();
-        else                  return SeExprType::ErrorType () .toString(); //state() == 4
-    };
-
-    virtual const std::string givenUniformString() const {
-        if     (state() == 0) return SeExprType::FP1Type   () .toUniformString();
-        else if(state() == 1) return SeExprType::FPNType   (2).toUniformString();
-        else if(state() == 2) return SeExprType::FPNType   (3).toUniformString();
-        else if(state() == 3) return SeExprType::StringType() .toUniformString();
-        else                  return SeExprType::ErrorType () .toUniformString(); //state() == 4
-    };
-};
-
-class LifetimeVarTypeIterator : public AbstractVarTypeIterator {
-public:
-    LifetimeVarTypeIterator(const std::string & var, TypeTesterExpr * parent)
-        : AbstractVarTypeIterator(var, 4, parent)
-    {};
-
-    virtual void start() {
-        AbstractVarTypeIterator::start();
-        set("LC");
-    };
-
-    virtual void next() {
-        AbstractVarTypeIterator::next();
-
-        if     (state() == 1) set("LU");
-        else if(state() == 2) set("LV");
-        else if(state() == 3) set("LE");
-    };
-
-    virtual SeExprType current() const {
-        if     (state() == 0) return SeExprType::FP1Type_c();
-        else if(state() == 1) return SeExprType::FP1Type_u();
-        else if(state() == 2) return SeExprType::FP1Type_v();
-        else                  return SeExprType::FP1Type_e(); //state() == 3
-    };
-
-    virtual SeExprType result() const { return SeExprType::ErrorType(); };
-
-    virtual const std::string givenString() const {
-        if     (state() == 0) return SeExprType::FP1Type_c().toString();
-        else if(state() == 1) return SeExprType::FP1Type_u().toString();
-        else if(state() == 2) return SeExprType::FP1Type_v().toString();
-        else                  return SeExprType::FP1Type_e().toString(); //state() == 3
-    };
-
-    virtual const std::string givenUniformString() const {
-        if     (state() == 0) return SeExprType::FP1Type_c().toUniformString();
-        else if(state() == 1) return SeExprType::FP1Type_u().toUniformString();
-        else if(state() == 2) return SeExprType::FP1Type_v().toUniformString();
-        else                  return SeExprType::FP1Type_e().toUniformString(); //state() == 3
-    };
-};
-
-class SingleWholeTypeIterator : public AbstractTypeIterator {
+class Counter {
  public:
-    SingleWholeTypeIterator(const std::string & var,
-                            const AbstractTypeIterator::FindResultOne proc,
-                            TypeTesterExpr * parent)
-        : AbstractTypeIterator(     parent),
-        _primary              (var, parent),
-        _lifetime             (var, parent),
-        _proc                 (proc)
+    Counter(int max)
+        : _max  (max),
+        _current(0)
     {};
 
-    virtual void start() { _primary.start(); };
+    inline int max      () const {                                   return _max;             };
+    inline int remaining() const {                                   return max() - _current; };
+    inline int start    ()       {                     _current = 1; return remaining();      };
+    inline int next     ()       { if(remaining() > 0) _current++;   return remaining();      };
 
-    virtual void next() {
-        if(!_primary.isEnd()) {
-            _primary.next();
-            if(_primary.isEnd())
-                _lifetime.start();
-        } else
-            if(!_lifetime.isEnd())
-                _lifetime.next();
+ private:
+    int _max;
+    int _current;
+};
+
+class PrimaryTypeIterator {
+ public:
+    PrimaryTypeIterator(const std::string & var, TypeTesterExpr * parent)
+        : _manager(var, parent),
+        _counter  (5),
+        _current  ("Iterator Error")
+    {};
+
+    inline int start() { set("F1"); return _counter.start(); };
+
+    inline int next () {
+        int at = _counter.next();
+        if     (at == 3) set("F2");
+        else if(at == 2) set("F3");
+        else if(at == 1) set("ST");
+        else if(at == 0) set("SE");
+        return at;
     };
 
-    virtual bool isEnd() const { return _lifetime.isEnd(); };
+    inline int         max            () const { return _counter.max            ();         };
+    inline SeExprType  current        () const { return _manager.type           (_current); };
+    inline std::string toString       () const { return _manager.toString       (_current); };
+    inline std::string toUniformString() const { return _manager.toUniformString(_current); };
+    inline int         remaining      () const { return _counter.remaining      ();         };
 
-    virtual SeExprType result() const { return _proc(current()); };
+ private:
+    inline void set(const std::string & str) { _current = str; _manager.set(str); };
 
-    virtual const std::string givenString() const { return current().toString(); };
+    EnvironmentManager _manager;
+    Counter            _counter;
+    std::string        _current;
+};
 
-    virtual const std::string givenUniformString() const { return current().toUniformString(); };
+class LifetimeTypeIterator {
+ public:
+    LifetimeTypeIterator(const std::string & var, TypeTesterExpr * parent)
+        : _manager(var, parent),
+        _counter  (4),
+        _current  ("Iterator Error")
+    {};
 
- protected:
-    SeExprType current() const {
-        if(!_primary.isEnd()) return _primary .current();
-        else                  return _lifetime.current();
+    inline int start() { set("LC"); return _counter.start(); };
+
+    inline int next () {
+        int at = _counter.next();
+        if     (at == 2) set("LU");
+        else if(at == 1) set("LV");
+        else if(at == 0) set("LE");
+        return at;
+    };
+
+    inline int         max            () const { return _counter.max            ();         };
+    inline SeExprType  current        () const { return _manager.type           (_current); };
+    inline std::string toString       () const { return _manager.toString       (_current); };
+    inline std::string toUniformString() const { return _manager.toUniformString(_current); };
+    inline int         remaining      () const { return _counter.remaining      ();         };
+
+ private:
+    inline void set(const std::string & str) { _current = str; _manager.set(str); };
+
+    EnvironmentManager _manager;
+    Counter            _counter;
+    std::string        _current;
+};
+
+template<typename IteratorClass>
+class DoubleTypeIterator {
+ public:
+    DoubleTypeIterator(const std::string & var1,
+                       const std::string & var2,
+                       TypeTesterExpr * parent)
+        : _first(var1, parent),
+        _second (var2, parent)
+    {};
+
+    inline int start() {
+        _first .start();
+        _second.start();
+
+        return remaining();
+    };
+
+    inline int next () {
+        if(_second.remaining() > 0)
+            _second.next();
+        else if(_first.remaining() > 0) {
+            _second.start();
+            _first.next();
+        }
+
+        return remaining();
+    };
+
+    inline int max() const { return _first.max() * _second.max(); };
+
+    inline SeExprType first () const { return _first .current(); };
+    inline SeExprType second() const { return _second.current(); };
+
+    inline std::string toString       () const { return (_first .toString       () + " " +
+                                                         _second.toString       ()); };
+    inline std::string toUniformString() const { return (_first .toUniformString() + " " +
+                                                         _second.toUniformString()); };
+
+    inline int remaining() const { return (_second.max      () * _first.remaining() +
+                                           _second.remaining()); };
+
+ private:
+    IteratorClass _first;
+    IteratorClass _second;
+};
+
+template<typename IteratorClass>
+class TripleTypeIterator {
+ public:
+    TripleTypeIterator(const std::string & var1,
+                       const std::string & var2,
+                       const std::string & var3,
+                       TypeTesterExpr * parent)
+        : _first(var1, parent),
+        _second (var2, var3, parent)
+    {};
+
+    inline int start() {
+        _first .start();
+        _second.start();
+
+        return remaining();
+    };
+
+    inline int next () {
+        if(_second.remaining() > 0)
+            _second.next();
+        else if(_first.remaining() > 0) {
+            _second.start();
+            _first.next();
+        }
+
+        return remaining();
+    };
+
+    inline int max() const { return _first.max() * _second.max(); };
+
+    inline SeExprType first () const { return _first .current(); };
+    inline SeExprType second() const { return _second.first  (); };
+    inline SeExprType third () const { return _second.second (); };
+
+    inline std::string toString       () const { return (_first .toString       () + " " +
+                                                         _second.toString       ()); };
+    inline std::string toUniformString() const { return (_first .toUniformString() + " " +
+                                                         _second.toUniformString()); };
+
+    inline int remaining() const { return (_second.max      () * _first.remaining() +
+                                           _second.remaining()); };
+
+ private:
+    IteratorClass                     _first;
+    DoubleTypeIterator<IteratorClass> _second;
+};
+
+class SingleWholeTypeIterator {
+ public:
+    typedef SeExprType(*ProcType)(const SeExprType &);
+
+    SingleWholeTypeIterator(const std::string & var,
+                            const ProcType proc,
+                            TypeTesterExpr * parent)
+        : _primary(var, parent),
+        _lifetime (var, parent),
+        _proc     (proc),
+        _switch   (false)
+    {};
+
+    inline int start() {
+        _primary.start();
+        _switch = false;
+
+        return remaining();
+    };
+
+    inline int next() {
+        if(_primary.remaining() > 0)   _primary .next ();
+        else if(_switch == false)    { _lifetime.start(); _switch = true; }
+        else                           _lifetime.next ();
+
+        return remaining();
+    };
+
+    inline SeExprType result() const { return _proc(current()); };
+
+    inline const std::string givenString       () const { return current().toString       (); };
+    inline const std::string givenUniformString() const { return current().toUniformString(); };
+
+    inline int remaining() const { return _primary.remaining() + _lifetime.remaining(); };
+
+    inline SeExprType current() const {
+        if(!_switch) return _primary .current();
+        else         return _lifetime.current();
     };
 
  private:
-    typedef AbstractTypeIterator::FindResultOne ProcType;
-
-    PrimaryVarTypeIterator  _primary;
-    LifetimeVarTypeIterator _lifetime;
-    ProcType                _proc;
+    PrimaryTypeIterator  _primary;
+    LifetimeTypeIterator _lifetime;
+    ProcType             _proc;
+    bool                 _switch;
 };
 
-class DoubleWholeTypeIterator : public AbstractTypeIterator {
+class DoubleWholeTypeIterator {
  public:
+    typedef SeExprType(*ProcType)(const SeExprType &, const SeExprType &);
+
     DoubleWholeTypeIterator(const std::string & var1,
                             const std::string & var2,
-                            const AbstractTypeIterator::FindResultTwo proc,
+                            const ProcType proc,
                             TypeTesterExpr * parent)
-        : AbstractTypeIterator(      parent),
-        _primary1             (var1, parent),
-        _lifetime1            (var1, parent),
-        _primary2             (var2, parent),
-        _lifetime2            (var2, parent),
-        _proc                 (proc)
+        : _primary(var1, var2, parent),
+        _lifetime (var1, var2, parent),
+        _proc     (proc),
+        _switch   (false)
     {};
 
-    virtual void start() {
-        _primary1.start();
-        _primary2.start();
+    inline int start() { _primary.start(); _switch = false; return remaining(); };
+
+    inline int next() {
+        if(_primary.remaining() > 0)   _primary .next ();
+        else if(_switch == false)    { _lifetime.start(); _switch = true; }
+        else                           _lifetime.next ();
+
+        return remaining();
     };
 
-    virtual void next () {
-        if(!_primary1.isEnd()) {
-            _primary2.next ();
-            if(_primary2.isEnd()) {
-                _primary1.next();
-                if(!_primary1.isEnd())
-                    _primary2.start();
-                else {
-                    _lifetime2.start();
-                    _lifetime1.start();
-                }
-            }
-        } else
-            if(!_lifetime1.isEnd()) {
-                _lifetime2.next ();
-                if(_lifetime2.isEnd()) {
-                    _lifetime1.next();
-                    if(!_lifetime1.isEnd())
-                        _lifetime2.start();
-                }
-            }
+    inline SeExprType result() const { return _proc(first(), second()); };
+
+    inline const std::string givenString       () const { return (first ().toString       () + " " +
+                                                                  second().toString       ()); };
+    inline const std::string givenUniformString() const { return (first ().toUniformString() + " " +
+                                                                  second().toUniformString()); };
+
+    inline int remaining() const { return _primary.remaining() + _lifetime.remaining(); };
+
+    inline SeExprType first() const {
+        if(!_switch) return _primary .first();
+        else         return _lifetime.first();
     };
 
-    virtual bool isEnd() const { return _lifetime2.isEnd(); };
-
-    virtual SeExprType result() const { return _proc(first_current(), second_current()); };
-
-    virtual const std::string givenString() const { return (first_current() .toString() + " " +
-                                                            second_current().toString()); };
-
-    virtual const std::string givenUniformString() const { return (first_current() .toUniformString() + " " +
-                                                                   second_current().toUniformString()); };
-
- protected:
-    SeExprType first_current() const {
-        if(!_primary1.isEnd()) return _primary1 .current();
-        else                   return _lifetime1.current();
+    inline SeExprType second() const {
+        if(!_switch) return _primary .second();
+        else         return _lifetime.second();
     };
 
-    SeExprType second_current() const {
-        if(!_primary1.isEnd()) return _primary2 .current();
-        else                   return _lifetime2.current();
-    };
-
-private:
-    typedef AbstractTypeIterator::FindResultTwo ProcType;
-
-    PrimaryVarTypeIterator  _primary1;
-    LifetimeVarTypeIterator _lifetime1;
-    PrimaryVarTypeIterator  _primary2;
-    LifetimeVarTypeIterator _lifetime2;
-    ProcType                _proc;
-    bool                    _inLT;
+ private:
+    DoubleTypeIterator<PrimaryTypeIterator>  _primary;
+    DoubleTypeIterator<LifetimeTypeIterator> _lifetime;
+    ProcType                                 _proc;
+    bool                                     _switch;
 };
 
-class TripleWholeTypeIterator : public AbstractTypeIterator {
-public:
+class TripleWholeTypeIterator {
+ public:
+    typedef SeExprType(*ProcType)(const SeExprType &, const SeExprType &, const SeExprType &);
+
     TripleWholeTypeIterator(const std::string & var1,
                             const std::string & var2,
                             const std::string & var3,
-                            const AbstractTypeIterator::FindResultThree proc,
+                            const ProcType proc,
                             TypeTesterExpr * parent)
-        : AbstractTypeIterator(      parent),
-        _primary1             (var1, parent),
-        _lifetime1            (var1, parent),
-        _primary2             (var2, parent),
-        _lifetime2            (var2, parent),
-        _primary3             (var3, parent),
-        _lifetime3            (var3, parent),
-        _proc                 (proc)
+        : _primary(var1, var2, var3, parent),
+        _lifetime (var1, var2, var3, parent),
+        _proc     (proc),
+        _switch   (false)
     {};
 
-    virtual void start()       {
-        _primary1.start();
-        _primary2.start();
-        _primary3.start();
+    inline int start() { _primary.start(); _switch = false; return remaining(); };
+
+    inline int next() {
+        if(_primary.remaining() > 0)   _primary .next ();
+        else if(_switch == false)    { _lifetime.start(); _switch = true; }
+        else                           _lifetime.next ();
+
+        return remaining();
     };
 
-    virtual void next ()       {
-        if(!_primary1.isEnd()) {
-            _primary3.next ();
-            if(_primary3.isEnd()) {
-                _primary2.next();
-                if(_primary2.isEnd()) {
-                    _primary1.next();
-                    if(!_primary1.isEnd()) {
-                        _primary2.start();
-                        _primary3.start();
-                    }
-                    else {
-                        _lifetime1.start();
-                        _lifetime2.start();
-                        _lifetime3.start();
-                    }
-                }
-                else
-                    _primary3.start();
-            }
-        } else
-            if(!_lifetime1.isEnd()) {
-                _lifetime3.next ();
-                if(_lifetime3.isEnd()) {
-                    _lifetime2.next();
-                    if(_lifetime2.isEnd()) {
-                        _lifetime1.next();
-                        if(!_lifetime1.isEnd()) {
-                            _lifetime2.start();
-                            _lifetime3.start();
-                        }
-                    }
-                    else
-                        _lifetime3.start();
-                }
-            }
+    inline SeExprType result() const { return _proc(first(), second(), third()); };
+
+    inline const std::string givenString       () const { return (first ().toString       () + " " +
+                                                                  second().toString       () + " " +
+                                                                  third ().toString       ()); };
+    inline const std::string givenUniformString() const { return (first ().toUniformString() + " " +
+                                                                  second().toUniformString() + " " +
+                                                                  third ().toUniformString()); };
+
+    inline int remaining() const { return _primary.remaining() + _lifetime.remaining(); };
+
+    inline SeExprType first() const {
+        if(!_switch) return _primary .first();
+        else         return _lifetime.first();
     };
 
-    virtual bool isEnd() const { return _lifetime3.isEnd(); };
-
-    virtual SeExprType result() const { return _proc(first_current(), second_current(), third_current()); };
-
-    virtual const std::string givenString() const { return (first_current ().toString() + " " +
-                                                            second_current().toString() + " " +
-                                                            third_current ().toString()); };
-
-    virtual const std::string givenUniformString() const { return (first_current ().toUniformString() + " " +
-                                                                   second_current().toUniformString() + " " +
-                                                                   third_current ().toUniformString()); };
-
- protected:
-    SeExprType first_current() const {
-        if(!_primary1.isEnd()) return _primary1 .current();
-        else                   return _lifetime1.current();
+    inline SeExprType second() const {
+        if(!_switch) return _primary .second();
+        else         return _lifetime.second();
     };
 
-    SeExprType second_current() const {
-        if(!_primary1.isEnd()) return _primary2 .current();
-        else                   return _lifetime2.current();
+    inline SeExprType third() const {
+        if(!_switch) return _primary .third();
+        else         return _lifetime.third();
     };
 
-    SeExprType third_current() const {
-        if(!_primary1.isEnd()) return _primary3 .current();
-        else                   return _lifetime3.current();
-    };
-
-private:
-    typedef AbstractTypeIterator::FindResultThree ProcType;
-
-    PrimaryVarTypeIterator  _primary1;
-    LifetimeVarTypeIterator _lifetime1;
-    PrimaryVarTypeIterator  _primary2;
-    LifetimeVarTypeIterator _lifetime2;
-    PrimaryVarTypeIterator  _primary3;
-    LifetimeVarTypeIterator _lifetime3;
-    ProcType                _proc;
-    bool                    _inLT;
+ private:
+    TripleTypeIterator<PrimaryTypeIterator>  _primary;
+    TripleTypeIterator<LifetimeTypeIterator> _lifetime;
+    ProcType                                 _proc;
+    bool                                     _switch;
 };
 
 #endif // TYPEITERATOR_H
