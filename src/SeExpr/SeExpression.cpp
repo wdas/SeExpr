@@ -152,7 +152,7 @@ SeExpression::prep() const
     _prepped = true;
     parseIfNeeded();
     SeExprVarEnv env;
-    if (_parseTree && !_parseTree->prep(SeExprType::AnyType(), env).isValid()) {
+    if (_parseTree && !_parseTree->prep(_returnType, env).isValid()) {
         // build line lookup table
         std::vector<int> lines;
         const char* start=_expression.c_str();
