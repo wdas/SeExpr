@@ -65,6 +65,7 @@ public:
         {result=SeVec3d();}
     } dummyFuncX;
     mutable SeExprFunc dummyFunc;
+    mutable SeExprFunc func;
 
     class SeExprNothingVarRef : public SeExprVarRef {
     public:
@@ -82,6 +83,7 @@ public:
     TypeBuilderExpr()
         : SeExpression::SeExpression(),
           dummyFunc(dummyFuncX,0,16),
+          func(dummyFuncX,3,3),
           F1(SeExprType::FP1Type   () ),
           F2(SeExprType::FPNType   (2)),
           F3(SeExprType::FPNType   (3)),
@@ -137,7 +139,9 @@ public:
 
     SeExprFunc* resolveFunc(const std::string& name) const
     {
-        return &dummyFunc;
+        if(name=="func") return &func;
+        else             return 0;
+        /* else             return &dummyFunc; */
     };
 
     void setVar(const std::string & to,
@@ -159,25 +163,12 @@ private:
     mutable SeExprNothingVarRef LU;
     mutable SeExprNothingVarRef LV;
     mutable SeExprNothingVarRef LE;
-    // mutable SeExprNothingVarRef F1(SeExprType::FP1Type   () );
-    // mutable SeExprNothingVarRef F2(SeExprType::FPNType   (2));
-    // mutable SeExprNothingVarRef F3(SeExprType::FPNType   (3));
-    // mutable SeExprNothingVarRef ST(SeExprType::StringType() );
-    // mutable SeExprNothingVarRef SE(SeExprType::ErrorType () );
-    // mutable SeExprNothingVarRef LC(SeExprType::FP1Type_c () );
-    // mutable SeExprNothingVarRef LU(SeExprType::FP1Type_u () );
-    // mutable SeExprNothingVarRef LV(SeExprType::FP1Type_v () );
-    // mutable SeExprNothingVarRef LE(SeExprType::FP1Type_e () );
 
     //Use variables
     mutable SeExprNothingVarRef v;
     mutable SeExprNothingVarRef x;
     mutable SeExprNothingVarRef y;
     mutable SeExprNothingVarRef z;
-    // mutable SeExprNothingVarRef v(SeExprType::FP1Type() );
-    // mutable SeExprNothingVarRef x(SeExprType::FP1Type() );
-    // mutable SeExprNothingVarRef y(SeExprType::FP1Type() );
-    // mutable SeExprNothingVarRef z(SeExprType::FP1Type() );
 };
 
 #endif //TYPEBUILDER_H
