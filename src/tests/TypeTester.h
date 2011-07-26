@@ -64,7 +64,8 @@ public:
     {};
 
     void test(const std::string & expr,
-              SeExprType result,
+              SeExprType expected_result,
+              SeExprType actual_result,
               const std::string & givenString,
               int verbosity_level);
 

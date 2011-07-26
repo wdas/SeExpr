@@ -48,26 +48,29 @@
 */
 
 void
-TypeTesterExpr::test(const std::string & expr, SeExprType result, const std::string & givenString, int verbosity_level) {
+TypeTesterExpr::test(const std::string & expr,
+                     SeExprType expected_result,
+                     SeExprType actual_result,
+                     const std::string & givenString,
+                     int verbosity_level) {
     bool       error      = false;
     bool       parseError = false;
     SeExprType returned   = SeExprType::ErrorType();
 
     setExpr(expr);
-    setReturnType(result);
+    setReturnType(expected_result);
 
     if(verbosity_level >= 3)
-        std::cout << "\tChecking expression:\t" << expr                     << std::endl
-                  << "\t\tGiven:        "       << givenString              << std::endl
-                  << "\t\tAgainst type: "       << result.toUniformString() << "\t";
+        std::cout << "\tChecking expression:\t" << expr                            << std::endl
+                  << "\t\tGiven:        "       << givenString                     << std::endl
+                  << "\t\tAgainst type: "       << actual_result.toUniformString() << "\t";
 
     if(isValid()) {
-        if(result != returnType())
+        if(actual_result != returnType())
             error = true;
     } else {
         parseError = true;
-        if(!result.isError() &&
-           !result.isLTError())
+        if(actual_result.isValid())
             error = true;
     }
 
@@ -76,17 +79,17 @@ TypeTesterExpr::test(const std::string & expr, SeExprType result, const std::str
     if(error) {
         std::cerr << "Failed check." << std::endl;
         if     (verbosity_level == 1)
-            std::cerr << "\t\tExpression: "  << expr                       << std::endl
-                      << "\t\tExpected:   "  << result  .toUniformString() << std::endl
-                      << "\t\tReceived:   "  << returned.toUniformString() << std::endl;
+            std::cerr << "\t\tExpression: "  << expr                            << std::endl
+                      << "\t\tExpected:   "  << actual_result.toUniformString() << std::endl
+                      << "\t\tReceived:   "  << returned     .toUniformString() << std::endl;
         else if(verbosity_level == 2)
-            std::cerr << "\t\tExpression: "  << expr                       << std::endl
-                      << "\t\tGiven:      "  << givenString                << std::endl
-                      << "\t\tExpected:   "  << result  .toUniformString() << std::endl
-                      << "\t\tReceived:   "  << returned.toUniformString() << std::endl;
+            std::cerr << "\t\tExpression: "  << expr                            << std::endl
+                      << "\t\tGiven:      "  << givenString                     << std::endl
+                      << "\t\tExpected:   "  << actual_result.toUniformString() << std::endl
+                      << "\t\tReceived:   "  << returned     .toUniformString() << std::endl;
         else if(verbosity_level >= 3)
-            std::cerr << "\t\tExpected:   "  << result  .toUniformString() << std::endl
-                      << "\t\tReceived:   "  << returned.toUniformString() << std::endl;
+            std::cerr << "\t\tExpected:   "  << actual_result.toUniformString() << std::endl
+                      << "\t\tReceived:   "  << returned     .toUniformString() << std::endl;
     }
     else if(verbosity_level >= 3)
         std::cout << "Check passed!" << std::endl;
@@ -197,11 +200,11 @@ TypeTesterExpr::testSingle(const std::string & expr, SingleWholeTypeIterator::Pr
         std::cout << "Checking expression: " << expr << std::endl;
 
     int remaining = iter.start();
-    test(expr, iter.result(), iter.givenUniformString(), verbosity_level);
+    test(expr, iter.result(), iter.result(), iter.givenUniformString(), verbosity_level);
 
     while(remaining) {
         remaining = iter.next();
-        test(expr, iter.result(), iter.givenUniformString(), verbosity_level);
+        test(expr, iter.result(), iter.result(), iter.givenUniformString(), verbosity_level);
     };
 };
 
@@ -214,11 +217,11 @@ TypeTesterExpr::testDouble(const std::string & expr, DoubleWholeTypeIterator::Pr
         std::cout << "Checking expression: " << expr << std::endl;
 
     int remaining = iter.start();
-    test(expr, iter.result(), iter.givenUniformString(), verbosity_level);
+    test(expr, iter.result(), iter.result(), iter.givenUniformString(), verbosity_level);
 
     while(remaining) {
         remaining = iter.next();
-        test(expr, iter.result(), iter.givenUniformString(), verbosity_level);
+        test(expr, iter.result(), iter.result(), iter.givenUniformString(), verbosity_level);
     };
 };
 
@@ -231,8 +234,12 @@ TypeTesterExpr::testTriple(const std::string & expr, TripleWholeTypeIterator::Pr
         std::cout << "Checking expression: " << expr << std::endl;
 
     int remaining = iter.start();
-    for(; remaining > 0; remaining = iter.next())
-        test(expr, iter.result(), iter.givenUniformString(), verbosity_level);
+    test(expr, iter.result(), iter.result(), iter.givenUniformString(), verbosity_level);
+
+    while(remaining) {
+        remaining = iter.next();
+        test(expr, iter.result(), iter.result(), iter.givenUniformString(), verbosity_level);
+    };
 };
 
 void
@@ -300,6 +307,24 @@ int main(int argc,char *argv[])
     testThree("[$x, $y, $z]",                             expr, numericTo3Vector,  verbosity_level);
     testThree("$x ? $y : $z",                             expr, conditional,       verbosity_level);
     testThree("if($x) { $a = $y; } else { $a = $z; } $a", expr, conditional,       verbosity_level);
+
+    if(verbosity_level >= 1)
+        std::cout << "Checking function expressions." << std::endl;
+    //function tests:
+    std::string compress1 = "func(0,0,0)";
+    expr.test(compress1, SeExprType::FP1Type_c(), SeExprType::FP1Type_c(), compress1, verbosity_level);
+    std::string compress2 = "func(0,0)";
+    expr.test(compress2, SeExprType::FP1Type_c(), SeExprType::ErrorType(), compress2, verbosity_level);
+    std::string compress3 = "func(0,0,0,0)";
+    expr.test(compress3, SeExprType::FP1Type_c(), SeExprType::ErrorType(), compress3, verbosity_level);
+    std::string compress4 = "compress([1,2],0,0)";
+    expr.test(compress4, SeExprType::FPNType_c(2), SeExprType::FPNType_c(2), compress4, verbosity_level);
+    std::string compress5 = "compress(0,[1,2],0)";
+    expr.test(compress5, SeExprType::FPNType_c(2), SeExprType::FPNType_c(2), compress5, verbosity_level);
+    std::string compress6 = "compress(0,0,[1,2,3])";
+    expr.test(compress6, SeExprType::FPNType_c(3), SeExprType::FPNType_c(3), compress6, verbosity_level);
+    std::string compress7 = "compress(0,[1,2],[3,2,1])";
+    expr.test(compress7, SeExprType::FPNType_c(2), SeExprType::ErrorType(), compress7, verbosity_level);
 
     return 0;
 }
