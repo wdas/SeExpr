@@ -134,28 +134,28 @@ public:
  protected: /*protected functions*/
 
     ///Set type
-    inline void setType    ()                      { _type = SeExprType::ErrorType_e();              };
-    inline void setType    (const SeExprType & t)  { _type = t;                                      };
-    inline void setType_v  (const SeExprType & t)  { setType(t); _type.becomeLTVarying ();           };
-    inline void setType_u  (const SeExprType & t)  { setType(t); _type.becomeLTUniform ();           };
-    inline void setType_c  (const SeExprType & t)  { setType(t); _type.becomeLTConstant();           };
-    inline void setType_e  (const SeExprType & t)  { setType(t); _type.becomeLTError   ();           };
-    inline void setType    (const SeExprType & t,
-                            const SeExprType & t1) { setType(t); _type.becomeLT        (t1);         };
-    inline void setType    (const SeExprType & t,
-                            const SeExprType & t1,
-                            const SeExprType & t2) { setType(t); _type.becomeLT        (t1, t2);     };
-    inline void setType    (const SeExprType & t,
-                            const SeExprType & t1,
-                            const SeExprType & t2,
-                            const SeExprType & t3) { setType(t); _type.becomeLT        (t1, t2, t3); };
-    inline void setType_std(const SeExprType & t)  {
+    inline void setType         ()                      { _type = SeExprType::ErrorType_error();        };
+    inline void setType         (const SeExprType & t)  { _type = t;                                    };
+    inline void setType_varying (const SeExprType & t)  { setType(t); _type.becomeLifetimeVarying ();   };
+    inline void setType_uniform (const SeExprType & t)  { setType(t); _type.becomeLifetimeUniform ();   };
+    inline void setType_constant(const SeExprType & t)  { setType(t); _type.becomeLifetimeConstant();   };
+    inline void setType_error   (const SeExprType & t)  { setType(t); _type.becomeLifetimeError();      };
+    inline void setType         (const SeExprType & t,
+                                 const SeExprType & t1) { setType(t); _type.becomeLifetime(t1);         };
+    inline void setType         (const SeExprType & t,
+                                 const SeExprType & t1,
+                                 const SeExprType & t2) { setType(t); _type.becomeLifetime(t1, t2);     };
+    inline void setType         (const SeExprType & t,
+                                 const SeExprType & t1,
+                                 const SeExprType & t2,
+                                 const SeExprType & t3) { setType(t); _type.becomeLifetime(t1, t2, t3); };
+    inline void setType_std     (const SeExprType & t)  {
         setType(t);
         int num = numChildren();
         if(num > 0)
-            _type.becomeLT(child(0)->type());
+            _type.becomeLifetime(child(0)->type());
         for(int i = 1; i < num; i++)
-            _type.combineLT(child(i)->type());
+            _type.combineLifetime(child(i)->type());
     };
 
     /// Prep system error abstraction

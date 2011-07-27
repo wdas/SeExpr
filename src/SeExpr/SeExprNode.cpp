@@ -1011,7 +1011,7 @@ SeExprVarNode::eval(SeVec3d& result) const
 SeExprType
 SeExprNumNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    setType_c(SeExprType::FP1Type());
+    setType_constant(SeExprType::FP1Type());
 
     return _type;
 }
@@ -1020,7 +1020,7 @@ SeExprNumNode::prep(SeExprType wanted, SeExprVarEnv & env)
 SeExprType
 SeExprStrNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
-    setType_c(SeExprType::StringType());
+    setType_constant(SeExprType::StringType());
 
     return _type;
 }

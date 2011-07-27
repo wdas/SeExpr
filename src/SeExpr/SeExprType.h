@@ -96,44 +96,44 @@ class SeExprType {
     static inline SeExprType ErrorType  ()      { return SeExprType(tERROR,1,ltERROR); };
 
     //general constructors - varying (explicit)
-    static inline SeExprType AnyType_v    ()      { return SeExprType(tANY,1,ltVARYING);     };
-    static inline SeExprType NoneType_v   ()      { return SeExprType(tNONE,1,ltVARYING);    };
-    static inline SeExprType ValueType_v  ()      { return SeExprType(tVALUE,1,ltVARYING);   };
-    static inline SeExprType StringType_v ()      { return SeExprType(tSTRING,1,ltVARYING);  };
-    static inline SeExprType NumericType_v()      { return SeExprType(tNUMERIC,1,ltVARYING); };
-    static inline SeExprType FP1Type_v    ()      { return SeExprType(tFP,1,ltVARYING);      };
-    static inline SeExprType FPNType_v    (int d) { return SeExprType(tFP,d,ltVARYING);      };
-    static inline SeExprType ErrorType_v  ()      { return SeExprType(tERROR,1,ltVARYING);   };
+    static inline SeExprType AnyType_varying    ()      { return SeExprType(tANY,1,ltVARYING);     };
+    static inline SeExprType NoneType_varying   ()      { return SeExprType(tNONE,1,ltVARYING);    };
+    static inline SeExprType ValueType_varying  ()      { return SeExprType(tVALUE,1,ltVARYING);   };
+    static inline SeExprType StringType_varying ()      { return SeExprType(tSTRING,1,ltVARYING);  };
+    static inline SeExprType NumericType_varying()      { return SeExprType(tNUMERIC,1,ltVARYING); };
+    static inline SeExprType FP1Type_varying    ()      { return SeExprType(tFP,1,ltVARYING);      };
+    static inline SeExprType FPNType_varying    (int d) { return SeExprType(tFP,d,ltVARYING);      };
+    static inline SeExprType ErrorType_varying  ()      { return SeExprType(tERROR,1,ltVARYING);   };
 
     //general constructors - uniform (explicit)
-    static inline SeExprType AnyType_u    ()      { return SeExprType(tANY,1,ltUNIFORM);     };
-    static inline SeExprType NoneType_u   ()      { return SeExprType(tNONE,1,ltUNIFORM);    };
-    static inline SeExprType ValueType_u  ()      { return SeExprType(tVALUE,1,ltUNIFORM);   };
-    static inline SeExprType StringType_u ()      { return SeExprType(tSTRING,1,ltUNIFORM);  };
-    static inline SeExprType NumericType_u()      { return SeExprType(tNUMERIC,1,ltUNIFORM); };
-    static inline SeExprType FP1Type_u    ()      { return SeExprType(tFP,1,ltUNIFORM);      };
-    static inline SeExprType FPNType_u    (int d) { return SeExprType(tFP,d,ltUNIFORM);      };
-    static inline SeExprType ErrorType_u  ()      { return SeExprType(tERROR,1,ltUNIFORM);   };
+    static inline SeExprType AnyType_uniform    ()      { return SeExprType(tANY,1,ltUNIFORM);     };
+    static inline SeExprType NoneType_uniform   ()      { return SeExprType(tNONE,1,ltUNIFORM);    };
+    static inline SeExprType ValueType_uniform  ()      { return SeExprType(tVALUE,1,ltUNIFORM);   };
+    static inline SeExprType StringType_uniform ()      { return SeExprType(tSTRING,1,ltUNIFORM);  };
+    static inline SeExprType NumericType_uniform()      { return SeExprType(tNUMERIC,1,ltUNIFORM); };
+    static inline SeExprType FP1Type_uniform    ()      { return SeExprType(tFP,1,ltUNIFORM);      };
+    static inline SeExprType FPNType_uniform    (int d) { return SeExprType(tFP,d,ltUNIFORM);      };
+    static inline SeExprType ErrorType_uniform  ()      { return SeExprType(tERROR,1,ltUNIFORM);   };
 
     //general constructors - constant (explicit)
-    static inline SeExprType AnyType_c    ()      { return SeExprType(tANY,1,ltCONSTANT);     };
-    static inline SeExprType NoneType_c   ()      { return SeExprType(tNONE,1,ltCONSTANT);    };
-    static inline SeExprType ValueType_c  ()      { return SeExprType(tVALUE,1,ltCONSTANT);   };
-    static inline SeExprType StringType_c ()      { return SeExprType(tSTRING,1,ltCONSTANT);  };
-    static inline SeExprType NumericType_c()      { return SeExprType(tNUMERIC,1,ltCONSTANT); };
-    static inline SeExprType FP1Type_c    ()      { return SeExprType(tFP,1,ltCONSTANT);      };
-    static inline SeExprType FPNType_c    (int d) { return SeExprType(tFP,d,ltCONSTANT);      };
-    static inline SeExprType ErrorType_c  ()      { return SeExprType(tERROR,1,ltCONSTANT);   };
+    static inline SeExprType AnyType_constant    ()      { return SeExprType(tANY,1,ltCONSTANT);     };
+    static inline SeExprType NoneType_constant   ()      { return SeExprType(tNONE,1,ltCONSTANT);    };
+    static inline SeExprType ValueType_constant  ()      { return SeExprType(tVALUE,1,ltCONSTANT);   };
+    static inline SeExprType StringType_constant ()      { return SeExprType(tSTRING,1,ltCONSTANT);  };
+    static inline SeExprType NumericType_constant()      { return SeExprType(tNUMERIC,1,ltCONSTANT); };
+    static inline SeExprType FP1Type_constant    ()      { return SeExprType(tFP,1,ltCONSTANT);      };
+    static inline SeExprType FPNType_constant    (int d) { return SeExprType(tFP,d,ltCONSTANT);      };
+    static inline SeExprType ErrorType_constant  ()      { return SeExprType(tERROR,1,ltCONSTANT);   };
 
     //general constructors - error (lifetime - explicit)
-    static inline SeExprType AnyType_e    ()      { return SeExprType(tANY,1,ltERROR);     };
-    static inline SeExprType NoneType_e   ()      { return SeExprType(tNONE,1,ltERROR);    };
-    static inline SeExprType ValueType_e  ()      { return SeExprType(tVALUE,1,ltERROR);   };
-    static inline SeExprType StringType_e ()      { return SeExprType(tSTRING,1,ltERROR);  };
-    static inline SeExprType NumericType_e()      { return SeExprType(tNUMERIC,1,ltERROR); };
-    static inline SeExprType FP1Type_e    ()      { return SeExprType(tFP,1,ltERROR);      };
-    static inline SeExprType FPNType_e    (int d) { return SeExprType(tFP,d,ltERROR);      };
-    static inline SeExprType ErrorType_e  ()      { return SeExprType(tERROR,1,ltERROR);   };
+    static inline SeExprType AnyType_error    ()      { return SeExprType(tANY,1,ltERROR);     };
+    static inline SeExprType NoneType_error   ()      { return SeExprType(tNONE,1,ltERROR);    };
+    static inline SeExprType ValueType_error  ()      { return SeExprType(tVALUE,1,ltERROR);   };
+    static inline SeExprType StringType_error ()      { return SeExprType(tSTRING,1,ltERROR);  };
+    static inline SeExprType NumericType_error()      { return SeExprType(tNUMERIC,1,ltERROR); };
+    static inline SeExprType FP1Type_error    ()      { return SeExprType(tFP,1,ltERROR);      };
+    static inline SeExprType FPNType_error    (int d) { return SeExprType(tFP,d,ltERROR);      };
+    static inline SeExprType ErrorType_error  ()      { return SeExprType(tERROR,1,ltERROR);   };
 
     //accessors
     inline Type     type() const { return _type;     };
@@ -152,7 +152,7 @@ class SeExprType {
     inline bool operator!=(const SeExprType & other) const { return !(*this == other); };
 
     ///validity check: type is not an error
-    inline bool isValid() const { return !isError() && !isLTError(); };
+    inline bool isValid() const { return !isError() && !isLifetimeError(); };
 
     //strictly equal relation
     inline bool isAny    ()      const { return type() == tANY;                   };
@@ -212,69 +212,73 @@ class SeExprType {
      */
 
     //lifetime matchers
-    inline bool isLTConstant() const { return lt() == ltCONSTANT; };
-    inline bool isLTUniform () const { return lt() == ltUNIFORM;  };
-    inline bool isLTVarying () const { return lt() == ltVARYING;  };
-    inline bool isLTError   () const { return lt() == ltERROR;    };
+    inline bool isLifetimeConstant() const { return lt() == ltCONSTANT; };
+    inline bool isLifetimeUniform () const { return lt() == ltUNIFORM;  };
+    inline bool isLifetimeVarying () const { return lt() == ltVARYING;  };
+    inline bool isLifetimeError   () const { return lt() == ltERROR;    };
 
     //static lifetime assignment
-    inline const SeExprType & becomeLTConstant() { _lifetime = ltCONSTANT; return *this; };
-    inline const SeExprType & becomeLTUniform () { _lifetime = ltUNIFORM;  return *this; };
-    inline const SeExprType & becomeLTVarying () { _lifetime = ltVARYING;  return *this; };
-    inline const SeExprType & becomeLTError   () { _lifetime = ltERROR;    return *this; };
+    inline const SeExprType & becomeLifetimeConstant() { _lifetime = ltCONSTANT; return *this; };
+    inline const SeExprType & becomeLifetimeUniform () { _lifetime = ltUNIFORM;  return *this; };
+    inline const SeExprType & becomeLifetimeVarying () { _lifetime = ltVARYING;  return *this; };
+    inline const SeExprType & becomeLifetimeError   () { _lifetime = ltERROR;    return *this; };
 
     //dynamic lifetime assignment
-    inline const SeExprType & becomeLT(const SeExprType & first) { _lifetime = first.lt(); return *this; };
+    inline const SeExprType & becomeLifetime(const SeExprType & first) {
+        _lifetime = first.lt();
+        return *this;
+    };
 
     //combination lifetime assignments
-    inline const SeExprType & becomeLT(const SeExprType & first,
-                                       const SeExprType & second) {
-        if     (first.lt() == second.lt()) becomeLT(first);
-        else if(first .isLTError  ()  ||
-                second.isLTError  ())    becomeLTError();
-        else if(first .isLTVarying()  ||
-                second.isLTVarying())    becomeLTVarying();
-        else if(first .isLTUniform()  ||
-                second.isLTUniform())    becomeLTUniform();
-        else                             becomeLTConstant();
+    inline const SeExprType & becomeLifetime(const SeExprType & first,
+                                             const SeExprType & second) {
+        if     (first.lt() == second.lt())     becomeLifetime(first);
+        else if(first .isLifetimeError  ()  ||
+                second.isLifetimeError  ())    becomeLifetimeError();
+        else if(first .isLifetimeVarying()  ||
+                second.isLifetimeVarying())    becomeLifetimeVarying();
+        else if(first .isLifetimeUniform()  ||
+                second.isLifetimeUniform())    becomeLifetimeUniform();
+        else                                   becomeLifetimeConstant();
 
         return *this;
     };
-    inline const SeExprType & becomeLT(const SeExprType & first,
+    inline const SeExprType & becomeLifetime(const SeExprType & first,
                                        const SeExprType & second,
                                        const SeExprType & third) {
         if     (first.lt() == second.lt()  &&
-                first.lt() == third .lt()) becomeLT(first);
-        else if(first .isLTError  ()  ||
-                second.isLTError  ()  ||
-                third .isLTError  ())    becomeLTError();
-        else if(first .isLTVarying()  ||
-                second.isLTVarying()  ||
-                third .isLTVarying())    becomeLTVarying();
-        else if(first .isLTUniform()  ||
-                second.isLTUniform()  ||
-                third .isLTUniform())    becomeLTUniform();
-        else                             becomeLTConstant();
+                first.lt() == third .lt())     becomeLifetime(first);
+        else if(first .isLifetimeError  ()  ||
+                second.isLifetimeError  ()  ||
+                third .isLifetimeError  ())    becomeLifetimeError();
+        else if(first .isLifetimeVarying()  ||
+                second.isLifetimeVarying()  ||
+                third .isLifetimeVarying())    becomeLifetimeVarying();
+        else if(first .isLifetimeUniform()  ||
+                second.isLifetimeUniform()  ||
+                third .isLifetimeUniform())    becomeLifetimeUniform();
+        else                                   becomeLifetimeConstant();
 
         return *this;
     };
 
     //fusing lifetimes
-    inline const SeExprType & combineLT(const SeExprType & first)  { becomeLT(*this, first); return *this; };
-    inline const SeExprType & combineLT(const SeExprType & first,
-                                        const SeExprType & second) {
-        combineLT(first);
-        combineLT(second);
-
+    inline const SeExprType & combineLifetime(const SeExprType & first) {
+        becomeLifetime(*this, first);
         return *this;
     };
-    inline const SeExprType & combineLT(const SeExprType & first,
-                                        const SeExprType & second,
-                                        const SeExprType & third)  {
-        combineLT(first);
-        combineLT(second);
-        combineLT(third);
-
+    inline const SeExprType & combineLifetime(const SeExprType & first,
+                                              const SeExprType & second) {
+        combineLifetime(first);
+        combineLifetime(second);
+        return *this;
+    };
+    inline const SeExprType & combineLifetime(const SeExprType & first,
+                                              const SeExprType & second,
+                                              const SeExprType & third)  {
+        combineLifetime(first);
+        combineLifetime(second);
+        combineLifetime(third);
         return *this;
     };
 
@@ -293,10 +297,10 @@ class SeExprType {
 
         ss << "(";
 
-        if     (isLTConstant()) ss << "c";
-        else if(isLTUniform ()) ss << "u";
-        else if(isLTVarying ()) ss << "v";
-        else if(isLTError   ()) ss << "e";
+        if     (isLifetimeConstant()) ss << "c";
+        else if(isLifetimeUniform ()) ss << "u";
+        else if(isLifetimeVarying ()) ss << "v";
+        else if(isLifetimeError   ()) ss << "e";
         else                    ss << "toString Lifetime Error";
 
         ss << ")";
@@ -304,58 +308,7 @@ class SeExprType {
         return ss.str();
     };
 
-    inline std::string toUniformString() const {
-        //assumes dimension of FPN is never greater than 9
-        const int max = 8;
-        std::stringstream ss;
-
-        if     (isAny    ()) ss << "Any";
-        else if(isNone   ()) ss << "None";
-        else if(isValue  ()) ss << "Value";
-        else if(isString ()) ss << "String";
-        else if(isNumeric()) ss << "Numeric";
-        else if(isFP1    ()) ss << "FLOAT[1]";
-        else if(isFPN    ()) ss << "FLOAT[" << dim() << "]";
-        else if(isError  ()) ss << "Error";
-        else                 ss << "<toString Type Error>";
-
-        ss << "(";
-
-        if     (isLTConstant()) ss << "c";
-        else if(isLTUniform ()) ss << "u";
-        else if(isLTVarying ()) ss << "v";
-        else if(isLTError   ()) ss << "e";
-        else                    ss << "<toString Lifetime Error>";
-
-        ss << ")";
-
-        if     (isAny    ()) ss << whitespace(max - 3);
-        else if(isNone   ()) ss << whitespace(max - 4);
-        else if(isValue  ()) ss << whitespace(max - 5);
-        else if(isString ()) ss << whitespace(max - 6);
-        else if(isNumeric()) ss << whitespace(max - 7);
-        else if(isFP1    ()) ss << whitespace(max - 8);
-        else if(isFPN    ()) ss << whitespace(max - 8);
-        else if(isError  ()) ss << whitespace(max - 5);
-        else                 ss << whitespace(max);
-
-        return ss.str();
-    };
-
  private:
-    inline std::string whitespace(int n) const {
-        if     (n == 1) return " ";
-        else if(n == 2) return "  ";
-        else if(n == 3) return "   ";
-        else if(n == 4) return "    ";
-        else if(n == 5) return "     ";
-        else if(n == 6) return "      ";
-        else if(n == 7) return "       ";
-        else if(n == 8) return "        ";
-        else if(n == 9) return "         ";
-        else            return "";
-    };
-
     Type     _type;
     int      _n;
     Lifetime _lifetime;

@@ -61,9 +61,9 @@ TypeTesterExpr::test(const std::string & expr,
     setReturnType(expected_result);
 
     if(verbosity_level >= 3)
-        std::cout << "\tChecking expression:\t" << expr                            << std::endl
-                  << "\t\tGiven:        "       << givenString                     << std::endl
-                  << "\t\tAgainst type: "       << actual_result.toUniformString() << "\t";
+        std::cout << "\tChecking expression:\t" << expr                     << std::endl
+                  << "\t\tGiven:        "       << givenString              << std::endl
+                  << "\t\tAgainst type: "       << actual_result.toString() << " ";
 
     if(isValid()) {
         if(actual_result != returnType())
@@ -79,17 +79,17 @@ TypeTesterExpr::test(const std::string & expr,
     if(error) {
         std::cerr << "Failed check." << std::endl;
         if     (verbosity_level == 1)
-            std::cerr << "\t\tExpression: "  << expr                            << std::endl
-                      << "\t\tExpected:   "  << actual_result.toUniformString() << std::endl
-                      << "\t\tReceived:   "  << returned     .toUniformString() << std::endl;
+            std::cerr << "\t\tExpression: "  << expr                     << std::endl
+                      << "\t\tExpected:   "  << actual_result.toString() << std::endl
+                      << "\t\tReceived:   "  << returned     .toString() << std::endl;
         else if(verbosity_level == 2)
-            std::cerr << "\t\tExpression: "  << expr                            << std::endl
-                      << "\t\tGiven:      "  << givenString                     << std::endl
-                      << "\t\tExpected:   "  << actual_result.toUniformString() << std::endl
-                      << "\t\tReceived:   "  << returned     .toUniformString() << std::endl;
+            std::cerr << "\t\tExpression: "  << expr                     << std::endl
+                      << "\t\tGiven:      "  << givenString              << std::endl
+                      << "\t\tExpected:   "  << actual_result.toString() << std::endl
+                      << "\t\tReceived:   "  << returned     .toString() << std::endl;
         else if(verbosity_level >= 3)
-            std::cerr << "\t\tExpected:   "  << actual_result.toUniformString() << std::endl
-                      << "\t\tReceived:   "  << returned     .toUniformString() << std::endl;
+            std::cerr << "\t\tExpected:   "  << actual_result.toString() << std::endl
+                      << "\t\tReceived:   "  << returned     .toString() << std::endl;
     }
     else if(verbosity_level >= 3)
         std::cout << "Check passed!" << std::endl;
@@ -111,7 +111,7 @@ numeric(const SeExprType & type)
 SeExprType
 numericToScalar(const SeExprType & type)
 {
-    if(type.isUnderNumeric()) return SeExprType::FP1Type  ().becomeLT(type);
+    if(type.isUnderNumeric()) return SeExprType::FP1Type  ().becomeLifetime(type);
     else                      return SeExprType::ErrorType();
 };
 
@@ -120,7 +120,7 @@ numericToScalar(const SeExprType & first,
                 const SeExprType & second)
 {
     if(first .isUnderNumeric() &&
-       second.isUnderNumeric())   return SeExprType::FP1Type  ().becomeLT(first, second);
+       second.isUnderNumeric())   return SeExprType::FP1Type  ().becomeLifetime(first, second);
     else                          return SeExprType::ErrorType();
 };
 
@@ -130,7 +130,7 @@ generalComparison(const SeExprType & first,
 {
     if(first .isUnderValue() &&
        second.isUnderValue() &&
-       first.match(second))     return SeExprType::FP1Type  ().becomeLT(first, second);
+       first.match(second))     return SeExprType::FP1Type  ().becomeLifetime(first, second);
     else                        return SeExprType::ErrorType();
 };
 
@@ -140,7 +140,7 @@ numericComparison(const SeExprType & first,
 {
     if(first .isUnderNumeric() &&
        second.isUnderNumeric() &&
-       first.match(second))       return SeExprType::FP1Type  ().becomeLT(first, second);
+       first.match(second))       return SeExprType::FP1Type  ().becomeLifetime(first, second);
     else                          return SeExprType::ErrorType();
 };
 
@@ -155,7 +155,9 @@ numericToNumeric(const SeExprType & first,
     //   both first and second are FPN (and the same N)
     if(first .isUnderNumeric() &&
        second.isUnderNumeric() &&
-       first.match(second))       return SeExprType::FPNType  ((first.isFP1()) ? second.dim() : first.dim()).becomeLT(first, second);
+       first.match(second))       return SeExprType::FPNType  (first.isFP1() ?
+                                                               second.dim()  :
+                                                               first.dim()    ).becomeLifetime(first, second);
     else                          return SeExprType::ErrorType();
 };
 
@@ -164,7 +166,7 @@ numericTo2Vector(const SeExprType & first,
                  const SeExprType & second)
 {
     if(first .isUnderNumeric() &&
-       second.isUnderNumeric())   return SeExprType::FPNType  (2).becomeLT(first, second);
+       second.isUnderNumeric())   return SeExprType::FPNType  (2).becomeLifetime(first, second);
     else                          return SeExprType::ErrorType();
 };
 
@@ -175,7 +177,7 @@ numericTo3Vector(const SeExprType & first,
 {
     if(first .isUnderNumeric() &&
        second.isUnderNumeric() &&
-       third .isUnderNumeric())   return SeExprType::FPNType  (3).becomeLT(first, second, third);
+       third .isUnderNumeric())   return SeExprType::FPNType  (3).becomeLifetime(first, second, third);
     else                          return SeExprType::ErrorType();
 };
 
@@ -187,7 +189,7 @@ conditional(const SeExprType & first,
     if(first .isUnderNumeric() &&
        second.isUnderValue  () &&
        third .isUnderValue  () &&
-       second == third)           return SeExprType(second).becomeLT(first, second, third);
+       second == third)           return SeExprType(second).becomeLifetime(first, second, third);
     else                          return SeExprType::ErrorType();
 };
 
@@ -200,11 +202,11 @@ TypeTesterExpr::testSingle(const std::string & expr, SingleWholeTypeIterator::Pr
         std::cout << "Checking expression: " << expr << std::endl;
 
     int remaining = iter.start();
-    test(expr, iter.result(), iter.result(), iter.givenUniformString(), verbosity_level);
+    test(expr, iter.result(), iter.result(), iter.givenString(), verbosity_level);
 
     while(remaining) {
         remaining = iter.next();
-        test(expr, iter.result(), iter.result(), iter.givenUniformString(), verbosity_level);
+        test(expr, iter.result(), iter.result(), iter.givenString(), verbosity_level);
     };
 };
 
@@ -217,11 +219,11 @@ TypeTesterExpr::testDouble(const std::string & expr, DoubleWholeTypeIterator::Pr
         std::cout << "Checking expression: " << expr << std::endl;
 
     int remaining = iter.start();
-    test(expr, iter.result(), iter.result(), iter.givenUniformString(), verbosity_level);
+    test(expr, iter.result(), iter.result(), iter.givenString(), verbosity_level);
 
     while(remaining) {
         remaining = iter.next();
-        test(expr, iter.result(), iter.result(), iter.givenUniformString(), verbosity_level);
+        test(expr, iter.result(), iter.result(), iter.givenString(), verbosity_level);
     };
 };
 
@@ -234,11 +236,11 @@ TypeTesterExpr::testTriple(const std::string & expr, TripleWholeTypeIterator::Pr
         std::cout << "Checking expression: " << expr << std::endl;
 
     int remaining = iter.start();
-    test(expr, iter.result(), iter.result(), iter.givenUniformString(), verbosity_level);
+    test(expr, iter.result(), iter.result(), iter.givenString(), verbosity_level);
 
     while(remaining) {
         remaining = iter.next();
-        test(expr, iter.result(), iter.result(), iter.givenUniformString(), verbosity_level);
+        test(expr, iter.result(), iter.result(), iter.givenString(), verbosity_level);
     };
 };
 
@@ -312,19 +314,19 @@ int main(int argc,char *argv[])
         std::cout << "Checking function expressions." << std::endl;
     //function tests:
     std::string compress1 = "func(0,0,0)";
-    expr.test(compress1, SeExprType::FP1Type_c(), SeExprType::FP1Type_c(), compress1, verbosity_level);
+    expr.test(compress1, SeExprType::FP1Type_constant(),  SeExprType::FP1Type_constant(),  compress1, verbosity_level);
     std::string compress2 = "func(0,0)";
-    expr.test(compress2, SeExprType::FP1Type_c(), SeExprType::ErrorType(), compress2, verbosity_level);
+    expr.test(compress2, SeExprType::FP1Type_constant(),  SeExprType::ErrorType(),         compress2, verbosity_level);
     std::string compress3 = "func(0,0,0,0)";
-    expr.test(compress3, SeExprType::FP1Type_c(), SeExprType::ErrorType(), compress3, verbosity_level);
+    expr.test(compress3, SeExprType::FP1Type_constant(),  SeExprType::ErrorType(),         compress3, verbosity_level);
     std::string compress4 = "compress([1,2],0,0)";
-    expr.test(compress4, SeExprType::FPNType_c(2), SeExprType::FPNType_c(2), compress4, verbosity_level);
+    expr.test(compress4, SeExprType::FPNType_constant(2), SeExprType::FPNType_constant(2), compress4, verbosity_level);
     std::string compress5 = "compress(0,[1,2],0)";
-    expr.test(compress5, SeExprType::FPNType_c(2), SeExprType::FPNType_c(2), compress5, verbosity_level);
+    expr.test(compress5, SeExprType::FPNType_constant(2), SeExprType::FPNType_constant(2), compress5, verbosity_level);
     std::string compress6 = "compress(0,0,[1,2,3])";
-    expr.test(compress6, SeExprType::FPNType_c(3), SeExprType::FPNType_c(3), compress6, verbosity_level);
+    expr.test(compress6, SeExprType::FPNType_constant(3), SeExprType::FPNType_constant(3), compress6, verbosity_level);
     std::string compress7 = "compress(0,[1,2],[3,2,1])";
-    expr.test(compress7, SeExprType::FPNType_c(2), SeExprType::ErrorType(), compress7, verbosity_level);
+    expr.test(compress7, SeExprType::FPNType_constant(2), SeExprType::ErrorType(),         compress7, verbosity_level);
 
     return 0;
 }

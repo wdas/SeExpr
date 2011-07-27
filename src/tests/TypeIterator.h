@@ -61,9 +61,9 @@ class EnvironmentManager {
 
     inline void set(const std::string & from) { parent()->setVar(_name, from); };
 
-    inline SeExprType  type           (const std::string & from) const { return parent()->resolveVar(from)->type(); };
-    inline std::string toString       (const std::string & from) const { return type(from).toString();              };
-    inline std::string toUniformString(const std::string & from) const { return type(from).toUniformString();       };
+    inline SeExprType type(const std::string & from) const { return parent()->resolveVar(from)->type(); };
+
+    inline std::string toString(const std::string & from) const { return type(from).toString(); };
 
  private:
     std::string      _name;
@@ -106,11 +106,10 @@ class PrimaryTypeIterator {
         return at;
     };
 
-    inline int         max            () const { return _counter.max            ();         };
-    inline SeExprType  current        () const { return _manager.type           (_current); };
-    inline std::string toString       () const { return _manager.toString       (_current); };
-    inline std::string toUniformString() const { return _manager.toUniformString(_current); };
-    inline int         remaining      () const { return _counter.remaining      ();         };
+    inline int         max      () const { return _counter.max      ();         };
+    inline SeExprType  current  () const { return _manager.type     (_current); };
+    inline std::string toString () const { return _manager.toString (_current); };
+    inline int         remaining() const { return _counter.remaining();         };
 
  private:
     inline void set(const std::string & str) { _current = str; _manager.set(str); };
@@ -138,11 +137,10 @@ class LifetimeTypeIterator {
         return at;
     };
 
-    inline int         max            () const { return _counter.max            ();         };
-    inline SeExprType  current        () const { return _manager.type           (_current); };
-    inline std::string toString       () const { return _manager.toString       (_current); };
-    inline std::string toUniformString() const { return _manager.toUniformString(_current); };
-    inline int         remaining      () const { return _counter.remaining      ();         };
+    inline int         max      () const { return _counter.max      ();         };
+    inline SeExprType  current  () const { return _manager.type     (_current); };
+    inline std::string toString () const { return _manager.toString (_current); };
+    inline int         remaining() const { return _counter.remaining();         };
 
  private:
     inline void set(const std::string & str) { _current = str; _manager.set(str); };
@@ -182,13 +180,11 @@ class DoubleTypeIterator {
 
     inline int max() const { return _first.max() * _second.max(); };
 
-    inline SeExprType first () const { return _first .current(); };
-    inline SeExprType second() const { return _second.current(); };
+    inline SeExprType first () const { return _first .current (); };
+    inline SeExprType second() const { return _second.current (); };
 
-    inline std::string toString       () const { return (_first .toString       () + " " +
-                                                         _second.toString       ()); };
-    inline std::string toUniformString() const { return (_first .toUniformString() + " " +
-                                                         _second.toUniformString()); };
+    inline std::string toString() const { return (_first .toString() + " " +
+                                                  _second.toString()); };
 
     inline int remaining() const { return (_second.max      () * _first.remaining() +
                                            _second.remaining()); };
@@ -233,10 +229,8 @@ class TripleTypeIterator {
     inline SeExprType second() const { return _second.first  (); };
     inline SeExprType third () const { return _second.second (); };
 
-    inline std::string toString       () const { return (_first .toString       () + " " +
-                                                         _second.toString       ()); };
-    inline std::string toUniformString() const { return (_first .toUniformString() + " " +
-                                                         _second.toUniformString()); };
+    inline std::string toString() const { return (_first .toString() + " " +
+                                                  _second.toString()); };
 
     inline int remaining() const { return (_second.max      () * _first.remaining() +
                                            _second.remaining()); };
@@ -276,8 +270,7 @@ class SingleWholeTypeIterator {
 
     inline SeExprType result() const { return _proc(current()); };
 
-    inline const std::string givenString       () const { return current().toString       (); };
-    inline const std::string givenUniformString() const { return current().toUniformString(); };
+    inline const std::string givenString() const { return current().toString(); };
 
     inline int remaining() const { return _primary.remaining() + _lifetime.remaining(); };
 
@@ -319,10 +312,8 @@ class DoubleWholeTypeIterator {
 
     inline SeExprType result() const { return _proc(first(), second()); };
 
-    inline const std::string givenString       () const { return (first ().toString       () + " " +
-                                                                  second().toString       ()); };
-    inline const std::string givenUniformString() const { return (first ().toUniformString() + " " +
-                                                                  second().toUniformString()); };
+    inline const std::string givenString() const { return (first ().toString() + " " +
+                                                           second().toString()); };
 
     inline int remaining() const { return _primary.remaining() + _lifetime.remaining(); };
 
@@ -370,12 +361,9 @@ class TripleWholeTypeIterator {
 
     inline SeExprType result() const { return _proc(first(), second(), third()); };
 
-    inline const std::string givenString       () const { return (first ().toString       () + " " +
-                                                                  second().toString       () + " " +
-                                                                  third ().toString       ()); };
-    inline const std::string givenUniformString() const { return (first ().toUniformString() + " " +
-                                                                  second().toUniformString() + " " +
-                                                                  third ().toUniformString()); };
+    inline const std::string givenString() const { return (first ().toString() + " " +
+                                                           second().toString() + " " +
+                                                           third ().toString()); };
 
     inline int remaining() const { return _primary.remaining() + _lifetime.remaining(); };
 

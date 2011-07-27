@@ -68,10 +68,10 @@ class SeExprVarRef
     virtual void setType(const SeExprType & type) { _type = type; };
 
     //! sets (current) lifetime to given type without changing primary type
-    virtual void setLifetime(const SeExprType & type) { _type.becomeLT(type); };
+    virtual void setLifetime(const SeExprType & type) { _type.becomeLifetime(type); };
 
     //! combines (current) lifetime with given type's without changing primary type
-    virtual void combineLifetime(const SeExprType & type) { _type.combineLT(type); };
+    virtual void combineLifetime(const SeExprType & type) { _type.combineLifetime(type); };
 
     //! returns (current) type
     virtual SeExprType type() const { return _type; };
