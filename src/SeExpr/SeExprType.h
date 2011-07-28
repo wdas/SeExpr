@@ -64,6 +64,10 @@ class SeExprType {
         : _type(tERROR),_n(1), _lifetime(ltERROR)
     {};
 
+    SeExprType(Type type)
+        : _type(type), _n(1), _lifetime(ltVARYING)
+    {};
+
     SeExprType(Type type, int n)
         : _type(type), _n(n), _lifetime(ltVARYING)
     {
@@ -86,14 +90,14 @@ class SeExprType {
     };
 
     //general constructors - varying (implicit)
-    static inline SeExprType AnyType    ()      { return SeExprType(tANY,1);           };
-    static inline SeExprType NoneType   ()      { return SeExprType(tNONE,1);          };
-    static inline SeExprType ValueType  ()      { return SeExprType(tVALUE,1);         };
-    static inline SeExprType StringType ()      { return SeExprType(tSTRING,1);        };
-    static inline SeExprType NumericType()      { return SeExprType(tNUMERIC,1);       };
-    static inline SeExprType FP1Type    ()      { return SeExprType(tFP,1);            };
-    static inline SeExprType FPNType    (int d) { return SeExprType(tFP,d);            };
-    static inline SeExprType ErrorType  ()      { return SeExprType(tERROR,1,ltERROR); };
+    static inline SeExprType AnyType    ()      { return SeExprType(tANY);           };
+    static inline SeExprType NoneType   ()      { return SeExprType(tNONE);          };
+    static inline SeExprType ValueType  ()      { return SeExprType(tVALUE);         };
+    static inline SeExprType StringType ()      { return SeExprType(tSTRING);        };
+    static inline SeExprType NumericType()      { return SeExprType(tNUMERIC);       };
+    static inline SeExprType FP1Type    ()      { return SeExprType(tFP);            };
+    static inline SeExprType FPNType    (int d) { return SeExprType(tFP,d);          };
+    static inline SeExprType ErrorType  ()      { return SeExprType(tERROR,ltERROR); };
 
     //general constructors - varying (explicit)
     static inline SeExprType AnyType_varying    ()      { return SeExprType(tANY,1,ltVARYING);     };
