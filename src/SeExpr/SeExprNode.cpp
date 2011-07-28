@@ -1082,7 +1082,6 @@ SeExprFuncNode::prep(SeExprType wanted, SeExprVarEnv & env)
                               env);
 
             if(!error                   && //no errors
-               wanted.isFPN()           && //wanted is a vector
                _func->isScalar()        && //takes scalar arguments only
                _func->retType().isFP1())   //returns a scalar
                 for(int i = 0; i < _nargs; i++) {
