@@ -100,14 +100,17 @@ inline void Forget(SeExprNode* n)
 		      is allocated with strdup() in the lexer and must
 		      be freed with free() */
     struct {
-        SeExprType::Type type;
-        int              n;
+        SeExprType::Type     type;
+        int                  dim;
+        SeExprType::Lifetime lifetime;
     } t;  // return value for types
+    SeExprType::Lifetime l; // return value for lifetime qualifiers
 }
 
-%token IF ELSE EXTERN FP STRING
+%token IF ELSE EXTERN DEF FP STRING
 %token <s> NAME VAR STR
 %token <d> NUMBER
+%token <l> LIFETIME_CONSTANT LIFETIME_UNIFORM LIFETIME_VARYING LIFETIME_ERROR
 %token AddEq SubEq MultEq DivEq ExpEq ModEq
 %token '(' ')' 
 %left ARROW
@@ -123,6 +126,7 @@ inline void Forget(SeExprNode* n)
 %right '^'
 %left '['
 %type <t> typeDeclare
+%type <l> lifetimeOptional
 %type <n> module declarationList declaration typeListOptional typeList formalTypeListOptional formalTypeList
 %type <n> block optassigns assigns assign ifthenelse optelse e optargs args arg exprlist
 
@@ -143,30 +147,65 @@ inline void Forget(SeExprNode* n)
 
 /* The root expression rule */
 module:
-      declarationList block     { ParseResult = $2; }//1; $1->addChild($2); }
-    | block                     { ParseResult = $1; }
+      declarationList block     { ParseResult = $1; ParseResult->setPosition(@$.first_column, @$.last_column);
+                                  ParseResult->addChild($2); }
+    | block                     { ParseResult = NODE(@$.first_column, @$.last_column, ModuleNode);
+                                  ParseResult->addChild($1); }
     ;
 
 declarationList:
-      declaration               { $$ = 0; }//NODE1(@$.first_column, @$.last_column, Node, $1); }
+      declaration               { $$ = NODE(@$.first_column, @$.last_column, ModuleNode); $$->addChild($1); }
     | declarationList declaration
-                                { $$ = 0; }//$1; $1->addChild($2); }
+                                { $$ = $1; $$->setPosition(@$.first_column, @$.last_column);
+                                  $$->addChild($2); }
     ;
 
 declaration:
       EXTERN typeDeclare NAME '(' typeListOptional       ')'
-                                { $$ = 0; }
-    |        typeDeclare NAME '(' formalTypeListOptional ')' '{' block '}'
-                                { $$ = 0; }
+                                { SeExprType type = SeExprType($2.type, $2.dim, $2.lifetime);
+                                    SeExprPrototypeNode * prototype =
+                                        (SeExprPrototypeNode*)NODE2(@$.first_column, @$.last_column, PrototypeNode, $3, type);
+                                  prototype->addArgTypes($5);
+                                  Forget($5);
+                                  $$ = prototype;
+                                  free($3); }
+    | DEF    typeDeclare NAME '(' formalTypeListOptional ')' '{' block '}'
+                                { SeExprType type = SeExprType($2.type, $2.dim, $2.lifetime);
+                                  SeExprPrototypeNode * prototype =
+                                      (SeExprPrototypeNode*)NODE2(@$.first_column, @6.last_column, PrototypeNode, $3, type);
+                                  prototype->addArgs($5);
+                                  Forget($5);
+                                  $$ = NODE2(@$.first_column, @$.last_column, LocalFunctionNode, prototype, $8);
+                                  free($3); }
+    | DEF                NAME '(' formalTypeListOptional ')' '{' block '}'
+                                { SeExprPrototypeNode * prototype =
+                                        (SeExprPrototypeNode*)NODE1(@$.first_column, @5.last_column, PrototypeNode, $2);
+                                  prototype->addArgs($4);
+                                  Forget($4);
+                                  $$ = NODE2(@$.first_column, @$.last_column, LocalFunctionNode, prototype, $7);
+                                  free($2); }
+    ;
+
+lifetimeOptional:
+      /* empty */               { $$ = SeExprType::ltVARYING; }
+    | LIFETIME_CONSTANT         { $$ = SeExprType::ltCONSTANT; }
+    | LIFETIME_UNIFORM          { $$ = SeExprType::ltUNIFORM; }
+    | LIFETIME_VARYING          { $$ = SeExprType::ltVARYING; }
+    | LIFETIME_ERROR            { $$ = SeExprType::ltERROR; } //For testing purposes only
     ;
 
 typeDeclare:
-      FP                        { $$.type = SeExprType::tFP;
-                                  $$.n    = 1; }
-    | FP '[' NUMBER ']'         { $$.type = SeExprType::tFP;
-                                  $$.n    = $3; }
-    | STRING                    { $$.type = SeExprType::tSTRING;
-                                  $$.n    = 1; }
+      FP lifetimeOptional       { $$.type     = SeExprType::tFP;
+                                  $$.dim      = 1;
+                                  $$.lifetime = $2; }
+    | FP '[' NUMBER ']' lifetimeOptional
+                                { $$.type = ($3 > 0 ? SeExprType::tFP : SeExprType::tERROR);
+                                  //TODO: This causes an error but does not report it to user. Change this.
+                                  $$.dim  = ($3 > 0 ? $3 : 0);
+                                  $$.lifetime = $5; }
+    | STRING lifetimeOptional   { $$.type = SeExprType::tSTRING;
+                                  $$.dim  = 1;
+                                  $$.lifetime = $2; }
     ;
 
 typeListOptional:
@@ -176,11 +215,11 @@ typeListOptional:
 
 typeList:
       typeDeclare               { $$ = NODE(@$.first_column, @$.last_column, Node);
-                                  SeExprType type = SeExprType($1.type, $1.n);
+                                  SeExprType type = SeExprType($1.type, $1.dim, $1.lifetime);
                                   SeExprNode* varNode = NODE2(@$.first_column, @$.last_column, VarNode, 0, type);
                                   $$->addChild(varNode); }
     | typeList ',' typeDeclare  { $$ = $1;
-                                  SeExprType type = SeExprType($3.type, $3.n);
+                                  SeExprType type = SeExprType($3.type, $3.dim, $3.lifetime);
                                   SeExprNode* varNode = NODE2(@3.first_column, @3.last_column, VarNode, 0, type);
                                   $$->addChild(varNode); }
     ;
@@ -192,13 +231,13 @@ formalTypeListOptional:
 
 formalTypeList:
       typeDeclare VAR           { $$ = NODE(@$.first_column, @$.last_column, Node);
-                                  SeExprType type = SeExprType($1.type, $1.n);
+                                  SeExprType type = SeExprType($1.type, $1.dim, $1.lifetime);
                                   SeExprNode* varNode = NODE2(@$.first_column, @$.last_column, VarNode, $2, type);
                                   $$->addChild(varNode);
                                   free($2); }
     | formalTypeList ',' typeDeclare VAR
                                 { $$ = $1;
-                                  SeExprType type = SeExprType($3.type, $3.n);
+                                  SeExprType type = SeExprType($3.type, $3.dim, $3.lifetime);
                                   SeExprNode* varNode = NODE2(@3.first_column, @4.last_column, VarNode, $4, type);
                                   $$->addChild(varNode);
                                   free($4); }

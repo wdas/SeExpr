@@ -89,9 +89,13 @@ IDENT                   [a-zA-Z_][a-zA-Z0-9_.]*
 BEGIN(0);
 
 extern                  { return EXTERN; }
+def                     { return DEF; }
 FLOAT                   { return FP; }
 STRING                  { return STRING; }
-
+CONSTANT                { return LIFETIME_CONSTANT; }
+UNIFORM                 { return LIFETIME_UNIFORM; }
+VARYING                 { return LIFETIME_VARYING; }
+ERROR                   { return LIFETIME_ERROR; }
 
 if			{ return IF; }
 else			{ return ELSE; }

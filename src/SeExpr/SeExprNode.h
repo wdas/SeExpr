@@ -250,6 +250,83 @@ protected: /*protected data members*/
 };
 
 
+/// Node that contains entire program
+class SeExprModuleNode : public SeExprNode
+{
+public:
+    SeExprModuleNode(const SeExpression* expr) :
+	SeExprNode(expr) {}
+
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual void eval(SeVec3d& result) const;
+};
+
+
+/// Node that contains prototype of function
+class SeExprPrototypeNode : public SeExprNode
+{
+public:
+    SeExprPrototypeNode(const SeExpression * expr,
+                        const std::string  & name,
+                        const SeExprType   & retType)
+        : SeExprNode(expr),
+        _name(name),
+        _retTypeSet(true),
+        _retType(retType),
+        _argTypes(),
+        _env()
+    {};
+
+    SeExprPrototypeNode(const SeExpression * expr,
+                        const std::string  & name)
+        : SeExprNode(expr),
+        _name(name),
+        _retTypeSet(false),
+        _argTypes(),
+        _env()
+    {}
+
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+
+    void addArgTypes(SeExprNode * surrogate);
+    void addArgs    (SeExprNode * surrogate);
+
+    inline void setReturnType(const SeExprType & type) { _retType = type; _retTypeSet = true; };
+
+    inline bool isReturnTypeSet() const { return _retTypeSet; };
+
+    inline SeExprType returnType() const { return (_retTypeSet ? _retType : SeExprType::ErrorType()); };
+
+    inline       SeExprType     argType(int i) const { return _argTypes[i]; };
+    inline const SeExprNode   * arg    (int i) const { return child(i);     };
+    inline       SeExprVarEnv & env    ()            { return _env;         };
+
+    virtual void eval(SeVec3d& result) const;
+
+ private:
+    std::string             _name;
+    bool                    _retTypeSet;
+    SeExprType              _retType;
+    std::vector<SeExprType> _argTypes;
+    SeExprVarEnv            _env;
+};
+
+
+/// Node that contains local function
+class SeExprLocalFunctionNode : public SeExprNode
+{
+public:
+    SeExprLocalFunctionNode(const SeExpression        * expr,
+                                  SeExprPrototypeNode * prototype,
+                                  SeExprNode          * block)
+        : SeExprNode(expr, prototype, block)
+    {}
+
+    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual void eval(SeVec3d& result) const;
+};
+
+
 /// Node that computes local variables before evaluating expression
 class SeExprBlockNode : public SeExprNode
 {

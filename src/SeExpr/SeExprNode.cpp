@@ -242,6 +242,143 @@ SeExprNode::eval(SeVec3d& result) const
 
 
 SeExprType
+SeExprModuleNode::prep(SeExprType wanted, SeExprVarEnv & env)
+{
+    bool error = false;
+
+    std::vector<SeExprNode*>::iterator       i_child = _children.begin();
+    std::vector<SeExprNode*>::iterator const e_child = _children.end  ();
+
+    for(; i_child != e_child; i_child++)
+        error = (error ||
+                 (!((*i_child)->prep(SeExprType::AnyType(), env)).isValid()));
+
+    if(error)
+        setType();
+    else
+        setType(child(numChildren() - 1)->type());
+
+    return _type;
+}
+
+
+void
+SeExprModuleNode::eval(SeVec3d& result) const
+{
+    // eval block, then eval primary expr
+    SeVec3d val;
+    child(0)->eval(val);
+    child(1)->eval(result);
+}
+
+
+SeExprType
+SeExprPrototypeNode::prep(SeExprType wanted, SeExprVarEnv & env)
+{
+    bool error = false;
+
+    if(_retTypeSet)
+        generalCheck(returnType().isValid(), "Function has bad return type", error);
+
+    for(int c = 0; c < numChildren(); c++)
+        generalCheck(child(c)->type().isValid(), "Function has a parameter with a bad type", error);
+
+    if(error)
+        setType();
+    else
+        setType(SeExprType::NoneType());
+
+    return _type;
+}
+
+
+void
+SeExprPrototypeNode::addArgTypes(SeExprNode* surrogate)
+{
+    SeExprNode::addChildren(surrogate);
+
+    SeExprType type;
+    for(int i = 0; i < numChildren(); i++)
+        _argTypes.push_back(child(i)->type());
+}
+
+
+void
+SeExprPrototypeNode::addArgs(SeExprNode* surrogate)
+{
+    SeExprNode::addChildren(surrogate);
+
+    SeExprNode * child;
+    SeExprType type;
+    for(int i = 0; i < numChildren(); i++) {
+        child = this->child(i);
+        type = child->type();
+
+        _argTypes.push_back(type);
+        _env.add(((SeExprVarNode*)child)->name(), new SeExprLocalVarRef(type));
+    }
+}
+
+
+void
+SeExprPrototypeNode::eval(SeVec3d& result) const
+{
+    // eval block, then eval primary expr
+    SeVec3d val;
+    child(0)->eval(val);
+    child(1)->eval(result);
+}
+
+
+SeExprType
+SeExprLocalFunctionNode::prep(SeExprType wanted, SeExprVarEnv & env)
+{
+    bool error = false;
+
+    SeExprVarEnv          ignored;
+    SeExprPrototypeNode * prototype  = (SeExprPrototypeNode*)child(0);
+    SeExprNode          * block      = child(1);
+    SeExprType            wantedType = SeExprType::ValueType();
+    SeExprType            blockType;
+
+    //prep prototype and check for errors
+    if(!prototype->prep(SeExprType::NoneType(), ignored).isValid())
+        error = true;
+
+    //prep block and check for errors
+    if(!error && prototype->isReturnTypeSet())
+        wantedType = prototype->returnType();
+
+    blockType = block->prep(wantedType, prototype->env());
+
+    if(!error && blockType.isValid()) {
+        if(prototype->isReturnTypeSet())
+            generalCheck(blockType.is(wantedType), "In function result of block does not match given return type", error);
+        else
+            prototype->setReturnType(blockType);
+    } else
+        error = true;
+
+    if(error)
+        setType();
+    else
+        setType(SeExprType::NoneType());
+
+    return _type;
+}
+
+
+void
+SeExprLocalFunctionNode::eval(SeVec3d& result) const
+{
+    // eval block, then eval primary expr
+    SeVec3d val;
+    child(0)->eval(val);
+    child(1)->eval(result);
+}
+
+
+SeExprType
 SeExprBlockNode::prep(SeExprType wanted, SeExprVarEnv & env)
 {
     SeExprType assignType = child(0)->prep(SeExprType::AnyType(), env);
@@ -1063,7 +1200,7 @@ SeExprFuncNode::prep(SeExprType wanted, SeExprVarEnv & env)
     if (!_func) _func = SeExprFunc::lookup(_name);
 
     //check that function exisits and that the function has the right number of arguments
-    if(generalCheck(_func,                        "Function " + _name + "has no definition", error, env) &&
+    if(generalCheck(_func,                        "Function " + _name + " has no definition", error, env) &&
        generalCheck(_nargs >= _func->minArgs(),   "Too few args for function "  + _name,     error, env) &&
        generalCheck(_nargs <= _func->maxArgs() ||
                          0  > _func->maxArgs(),   "Too many args for function " + _name,     error, env)) {
