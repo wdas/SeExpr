@@ -192,7 +192,7 @@ namespace{
     {
      public:
         SeRmanVar(ThreadData& td)
-	    : SeExprVarRef(SeExprType::FPNType(3)), td(td), index(0)
+	    : SeExprVarRef(SeExprType::FPNType_varying(3)), td(td), index(0)
 	{}
 	//SeRmanVar(ThreadData& td) : td(td), index(0) {}
 	virtual bool isVec() { return 1; } // treat all vars as vectors

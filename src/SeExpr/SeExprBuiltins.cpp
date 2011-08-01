@@ -1012,7 +1012,7 @@ static const char* vnoise_docstring=
 	    node->setData(new VoronoiPointData);
 	    // force wantVec to true - args are always vecs even of result is not
             //TODO: check that this is correct
-            SeExprType _type = SeExprFuncX::prep(node, SeExprType::FPNType(3), env);
+            SeExprType _type = SeExprFuncX::prep(node, SeExprType::FPNType_varying(3), env);
             {
                 //isScalar computation
                 _isScalar = false;
@@ -1028,7 +1028,7 @@ static const char* vnoise_docstring=
         virtual bool isScalar() const { return _isScalar; }
 
         //TODO: check that this is correct
-        virtual SeExprType retType() const { return SeExprType::FPNType(3); }
+        virtual SeExprType retType() const { return SeExprType::FPNType_varying(3); }
 
 	virtual void eval(const SeExprFuncNode* node, SeVec3d& result) const
 	{
@@ -1316,13 +1316,13 @@ static const char* vnoise_docstring=
             if ((nargs - 1) % 3) {
                 node->addError("Wrong number of arguments, should be multiple of 3 plus 1");
                 //TODO: check that this is correct
-                return SeExprType::ErrorType();
+                return SeExprType::ErrorType_varying();
                 //return false;
             }
             
             bool noErrors=true;
             //TODO: check that this is correct
-            noErrors &= node->child(0)->prep(SeExprType::FPNType(3), env).isValid();
+            noErrors &= node->child(0)->prep(SeExprType::FPNType_varying(3), env).isValid();
             //noErrors &= node->child(0)->prep(1);
 
             //TODO: check that this is correct
@@ -1339,19 +1339,19 @@ static const char* vnoise_docstring=
                 
                 SeVec3d pos;
                 //TODO: check that this is correct
-                if(node->child(i)->prep(SeExprType::FP1Type(), env).isValid()) node->child(i)->eval(pos);
+                if(node->child(i)->prep(SeExprType::FP1Type_varying(), env).isValid()) node->child(i)->eval(pos);
                 //if(node->child(i)->prep(0)) node->child(i)->eval(pos);
                 else noErrors=false;
                 
                 SeVec3d val;
                 //TODO: check that this is correct
-                if(node->child(i+1)->prep(SeExprType::FP1Type(), env).isValid()) node->child(i+1)->eval(val);
+                if(node->child(i+1)->prep(SeExprType::FP1Type_varying(), env).isValid()) node->child(i+1)->eval(val);
                 //if(node->child(i+1)->prep(0)) node->child(i+1)->eval(val);
                 else noErrors=false;
                 
                 SeVec3d interp;
                 //TODO: check that this is correct
-                if(node->child(i+2)->prep(SeExprType::FP1Type(), env).isValid()) node->child(i+2)->eval(interp);
+                if(node->child(i+2)->prep(SeExprType::FP1Type_varying(), env).isValid()) node->child(i+2)->eval(interp);
                 //if(node->child(i+2)->prep(0)) node->child(i+2)->eval(interp);
                 else noErrors=false;
                 int interpInt=(int)interp[0];                
@@ -1371,7 +1371,7 @@ static const char* vnoise_docstring=
             if(noErrors)
                 return wanted;
             else
-                return SeExprType::ErrorType();
+                return SeExprType::ErrorType_varying();
             //return noErrors;
         }
 
@@ -1379,7 +1379,7 @@ static const char* vnoise_docstring=
         virtual bool isScalar() const { return _isScalar; }
 
         //TODO: check that this is correct
-        virtual SeExprType retType() const { return SeExprType::FP1Type(); }
+        virtual SeExprType retType() const { return SeExprType::FP1Type_varying(); }
 
         virtual void eval(const SeExprFuncNode* node, SeVec3d& result) const 
         {
@@ -1419,12 +1419,12 @@ static const char* vnoise_docstring=
             if ((nargs - 1) % 3) {
                 node->addError("Wrong number of arguments, should be multiple of 3 plus 1");
                 //TODO: check that this is correct
-                return SeExprType::ErrorType();
+                return SeExprType::ErrorType_varying();
                 //return false;
             }
             bool noErrors=true;
             //TODO: check that this is correct
-            noErrors &= node->child(0)->prep(SeExprType::FPNType(3), env).isValid(); // parameter value
+            noErrors &= node->child(0)->prep(SeExprType::FPNType_varying(3), env).isValid(); // parameter value
             //noErrors &= node->child(0)->prep(1); // parameter value
             
             //TODO: check that this is correct
@@ -1441,13 +1441,13 @@ static const char* vnoise_docstring=
                 // position of cv
                 SeVec3d pos;
                 //TODO: check that this is correct
-                if (node->child(i)->prep(SeExprType::FP1Type(), env).isValid()) node->child(i)->eval(pos);
+                if (node->child(i)->prep(SeExprType::FP1Type_varying(), env).isValid()) node->child(i)->eval(pos);
                 //if (node->child(i)->prep(0)) node->child(i)->eval(pos);
                 else noErrors=false;
                 // value of cv, if not vector promote i
                 SeVec3d val;
                 //TODO: check that this is correct
-                if (node->child(i+1)->prep(SeExprType::FP1Type(), env).isValid()){
+                if (node->child(i+1)->prep(SeExprType::FP1Type_varying(), env).isValid()){
                 //if (node->child(i+1)->prep(1)){
                     node->child(i+1)->eval(val);
                     if (!node->child(i+1)->isVec()) {
@@ -1457,7 +1457,7 @@ static const char* vnoise_docstring=
                 // interpolation type
                 SeVec3d interp;
                 //TODO: check that this is correct
-                if (node->child(i+2)->prep(SeExprType::FP1Type(), env).isValid()) node->child(i+2)->eval(interp);
+                if (node->child(i+2)->prep(SeExprType::FP1Type_varying(), env).isValid()) node->child(i+2)->eval(interp);
                 //if (node->child(i+2)->prep(0)) node->child(i+2)->eval(interp);
                 else noErrors=false;
                 SeCurve<SeVec3d>::InterpType interpolant=(SeCurve<SeVec3d>::InterpType)(int)interp[0];
@@ -1475,7 +1475,7 @@ static const char* vnoise_docstring=
             if(noErrors)
                 return wanted;
             else
-                return SeExprType::ErrorType();
+                return SeExprType::ErrorType_varying();
             //return noErrors;
         }
         
@@ -1483,7 +1483,7 @@ static const char* vnoise_docstring=
         virtual bool isScalar() const { return _isScalar; }
 
         //TODO: check that this is correct
-        virtual SeExprType retType() const { return SeExprType::FPNType(3); }
+        virtual SeExprType retType() const { return SeExprType::FPNType_varying(3); }
 
         virtual void eval(const SeExprFuncNode* node, SeVec3d& result) const 
         {
@@ -1526,14 +1526,14 @@ static const char* vnoise_docstring=
             if(!node->isStrArg(0)){
                 node->addError("first argument must be format");
                 //TODO: check that this is correct
-                return SeExprType::ErrorType();
+                return SeExprType::ErrorType_varying();
                 //return false;
             }
 
             bool valid=true;
             for(int i=1;i<nargs;i++)
                 //TODO: check that this is correct
-                valid&=node->child(i)->prep(SeExprType::FP1Type(), env).isValid();
+                valid&=node->child(i)->prep(SeExprType::FP1Type_varying(), env).isValid();
                 //valid&=node->child(i)->prep(1);
 
             //TODO: check that this is correct
@@ -1546,7 +1546,7 @@ static const char* vnoise_docstring=
             }
 
             //TODO: check that this is correct
-            if(!valid) return SeExprType::ErrorType();
+            if(!valid) return SeExprType::ErrorType_varying();
             //if(!valid) return false;
 
             // parse format string
@@ -1566,7 +1566,7 @@ static const char* vnoise_docstring=
                     node->addError("Unexpected end of format string");
                     delete data;
                     //TODO: check that this is correct
-                    return SeExprType::ErrorType();
+                    return SeExprType::ErrorType_varying();
                     //return false;
                 }
                 else if(format[percentStart+1]=='%'){
@@ -1586,7 +1586,7 @@ static const char* vnoise_docstring=
                     node->addError("Invalid format string, only %v is allowed");
                     delete data;
                     //TODO: check that this is correct
-                    return SeExprType::ErrorType();
+                    return SeExprType::ErrorType_varying();
                     //return false;
                 }
             }
@@ -1597,7 +1597,7 @@ static const char* vnoise_docstring=
                 node->addError("Wrong number of arguments for format string");
                 delete data;
                 //TODO: check that this is correct
-                return SeExprType::ErrorType();
+                return SeExprType::ErrorType_varying();
                 //return false;
             }
 
@@ -1615,7 +1615,7 @@ static const char* vnoise_docstring=
         virtual bool isScalar() const { return true; };
 
         //TODO: check that this is correct
-        virtual SeExprType retType() const { return SeExprType::FP1Type(); };
+        virtual SeExprType retType() const { return SeExprType::FP1Type_varying(); };
 
         virtual void eval(const SeExprFuncNode* node, SeVec3d& result) const 
         {

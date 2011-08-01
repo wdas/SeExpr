@@ -50,7 +50,7 @@
 using namespace std;
 
 SeExpression::SeExpression()
-    : _wantVec(true), _returnType(SeExprType::AnyType()), _parseTree(0), _parsed(0), _prepped(0)
+    : _wantVec(true), _returnType(SeExprType::AnyType_varying()), _parseTree(0), _parsed(0), _prepped(0)
 {
     SeExprFunc::init();
 }

@@ -87,8 +87,13 @@ SeExprVarEnv::add(SeExprVarEnv & env, const SeExprType & modifyingType)
     DictType::iterator const eenv = env.end  ();
 
     for(; ienv != eenv; ++ienv) {
-        (ienv->second)->combineLifetime(modifyingType);
-        add(ienv->first, ienv->second);
+        SeExprVarRef * ref  = ienv->second;
+        SeExprType     type = ref->type();
+
+        type.becomeLifetime(type, modifyingType);
+        ref->setType(type);
+
+        add(ienv->first, ref);
     }
 
     env.copied();

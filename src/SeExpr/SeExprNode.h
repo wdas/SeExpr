@@ -155,7 +155,7 @@ public:
         if(num > 0)
             _type.becomeLifetime(child(0)->type());
         for(int i = 1; i < num; i++)
-            _type.combineLifetime(child(i)->type());
+            _type.becomeLifetime(_type, child(i)->type());
     };
 
     /// Prep system error abstraction
@@ -187,7 +187,7 @@ public:
         if(!check) {
             addError(message);
             error = true;
-            SeExprNode::prep(SeExprType::AnyType(), env);
+            SeExprNode::prep(SeExprType::AnyType_varying(), env);
         }
         return check;
     };
@@ -295,7 +295,7 @@ public:
 
     inline bool isReturnTypeSet() const { return _retTypeSet; };
 
-    inline SeExprType returnType() const { return (_retTypeSet ? _retType : SeExprType::ErrorType()); };
+    inline SeExprType returnType() const { return (_retTypeSet ? _retType : SeExprType::ErrorType_varying()); };
 
     inline       SeExprType     argType(int i) const { return _argTypes[i]; };
     inline const SeExprNode   * arg    (int i) const { return child(i);     };

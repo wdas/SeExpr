@@ -54,7 +54,7 @@ class SeExpression;
 class SeExprVarRef
 {
     SeExprVarRef()
-        : _type(SeExprType::ErrorType())
+        : _type(SeExprType::ErrorType_varying())
     {};
 
  public:
@@ -66,12 +66,6 @@ class SeExprVarRef
 
     //! sets (current) type to given type
     virtual void setType(const SeExprType & type) { _type = type; };
-
-    //! sets (current) lifetime to given type without changing primary type
-    virtual void setLifetime(const SeExprType & type) { _type.becomeLifetime(type); };
-
-    //! combines (current) lifetime with given type's without changing primary type
-    virtual void combineLifetime(const SeExprType & type) { _type.combineLifetime(type); };
 
     //! returns (current) type
     virtual SeExprType type() const { return _type; };
@@ -89,7 +83,7 @@ class SeExprVectorVarRef : public SeExprVarRef
 {
  public:
     SeExprVectorVarRef()
-        : SeExprVarRef(SeExprType::FPNType(3))
+        : SeExprVarRef(SeExprType::FPNType_varying(3))
     {};
 
     virtual bool isVec() { return 1; }
@@ -101,7 +95,7 @@ class SeExprScalarVarRef : public SeExprVarRef
 {
  public:
     SeExprScalarVarRef()
-        : SeExprVarRef(SeExprType::FP1Type())
+        : SeExprVarRef(SeExprType::FP1Type_varying())
     {};
 
     virtual bool isVec() { return 0; }
@@ -111,7 +105,7 @@ class SeExprScalarVarRef : public SeExprVarRef
 class SeExprLocalVarRef : public SeExprVarRef
 {
     SeExprLocalVarRef()
-        : SeExprVarRef(SeExprType::ErrorType())
+        : SeExprVarRef(SeExprType::ErrorType_varying())
     {};
 
  public:
@@ -151,7 +145,7 @@ class SeExpression
 
     SeExpression( );
     //SeExpression( const std::string &e, bool wantVec=true );
-    SeExpression( const std::string &e, const SeExprType & type = SeExprType::AnyType());
+    SeExpression( const std::string &e, const SeExprType & type = SeExprType::AnyType_varying());
     virtual ~SeExpression();
 
     /** Sets the expression to desire a vector or a scalar.

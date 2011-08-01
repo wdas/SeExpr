@@ -57,7 +57,7 @@ private:
     struct SimpleVar:public SeExprVarRef
     {
 	SimpleVar()
-	    : SeExprVarRef(SeExprType::FP1Type()), val(0.0)
+	    : SeExprVarRef(SeExprType::FP1Type_varying()), val(0.0)
 	{}
 
         double val; // independent variable

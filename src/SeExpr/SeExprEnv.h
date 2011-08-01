@@ -45,8 +45,8 @@ class SeExprVarRef;
 
 class SeExprVarEnv {
  private:
-    std::string                typedef KeyType;
-    SeExprVarRef               typedef ValType;
+    std::string                  typedef KeyType;
+    SeExprVarRef                 typedef ValType;
     std::map<KeyType, ValType *> typedef DictType;
 
     SeExprVarEnv(SeExprVarEnv * parent)

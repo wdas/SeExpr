@@ -58,8 +58,8 @@ public:
             : SeExprFuncX(false)
         {};
 
-        virtual bool       isScalar() const { return true;                  };
-        virtual SeExprType retType () const { return SeExprType::FP1Type(); };
+        virtual bool       isScalar() const { return true;                          };
+        virtual SeExprType retType () const { return SeExprType::FP1Type_varying(); };
 
         void eval(const SeExprFuncNode* node,SeVec3d& result) const
         {result=SeVec3d();}
@@ -84,37 +84,37 @@ public:
         : SeExpression::SeExpression(),
           dummyFunc(dummyFuncX,0,16),
           func(dummyFuncX,3,3),
-          F1(SeExprType::FP1Type         () ),
-          F2(SeExprType::FPNType         (2)),
-          F3(SeExprType::FPNType         (3)),
-          ST(SeExprType::StringType      () ),
-          SE(SeExprType::ErrorType       () ),
-          LC(SeExprType::FP1Type_constant() ),
-          LU(SeExprType::FP1Type_uniform () ),
-          LV(SeExprType::FP1Type_varying () ),
-          LE(SeExprType::FP1Type_error   () ),
-          v (SeExprType::FP1Type         () ),
-          x (SeExprType::FP1Type         () ),
-          y (SeExprType::FP1Type         () ),
-          z (SeExprType::FP1Type         () )
+          F1(SeExprType::FP1Type_varying   () ),
+          F2(SeExprType::FPNType_varying   (2)),
+          F3(SeExprType::FPNType_varying   (3)),
+          ST(SeExprType::StringType_varying() ),
+          SE(SeExprType::ErrorType_varying () ),
+          LC(SeExprType::FP1Type_constant  () ),
+          LU(SeExprType::FP1Type_uniform   () ),
+          LV(SeExprType::FP1Type_varying   () ),
+          LE(SeExprType::FP1Type_error     () ),
+          v (SeExprType::FP1Type_varying   () ),
+          x (SeExprType::FP1Type_varying   () ),
+          y (SeExprType::FP1Type_varying   () ),
+          z (SeExprType::FP1Type_varying   () )
     {};
 
-    TypeBuilderExpr(const std::string &e, const SeExprType & type = SeExprType::AnyType())
+    TypeBuilderExpr(const std::string &e, const SeExprType & type = SeExprType::AnyType_varying())
         : SeExpression::SeExpression(e, type),
           dummyFunc(dummyFuncX,0,16),
-          F1(SeExprType::FP1Type         () ),
-          F2(SeExprType::FPNType         (2)),
-          F3(SeExprType::FPNType         (3)),
-          ST(SeExprType::StringType      () ),
-          SE(SeExprType::ErrorType       () ),
-          LC(SeExprType::FP1Type_constant() ),
-          LU(SeExprType::FP1Type_uniform () ),
-          LV(SeExprType::FP1Type_varying () ),
-          LE(SeExprType::FP1Type_error   () ),
-          v (SeExprType::FP1Type         () ),
-          x (SeExprType::FP1Type         () ),
-          y (SeExprType::FP1Type         () ),
-          z (SeExprType::FP1Type         () )
+          F1(SeExprType::FP1Type_varying   () ),
+          F2(SeExprType::FPNType_varying   (2)),
+          F3(SeExprType::FPNType_varying   (3)),
+          ST(SeExprType::StringType_varying() ),
+          SE(SeExprType::ErrorType_varying () ),
+          LC(SeExprType::FP1Type_constant  () ),
+          LU(SeExprType::FP1Type_uniform   () ),
+          LV(SeExprType::FP1Type_varying   () ),
+          LE(SeExprType::FP1Type_error     () ),
+          v (SeExprType::FP1Type_varying   () ),
+          x (SeExprType::FP1Type_varying   () ),
+          y (SeExprType::FP1Type_varying   () ),
+          z (SeExprType::FP1Type_varying   () )
     {};
 
     //! resolve function
