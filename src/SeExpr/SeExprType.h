@@ -90,14 +90,14 @@ class SeExprType {
     };
 
     //general constructors - varying (implicit)
-    static inline SeExprType AnyType    ()      { return SeExprType(tANY);           };
-    static inline SeExprType NoneType   ()      { return SeExprType(tNONE);          };
-    static inline SeExprType ValueType  ()      { return SeExprType(tVALUE);         };
-    static inline SeExprType StringType ()      { return SeExprType(tSTRING);        };
-    static inline SeExprType NumericType()      { return SeExprType(tNUMERIC);       };
-    static inline SeExprType FP1Type    ()      { return SeExprType(tFP);            };
-    static inline SeExprType FPNType    (int d) { return SeExprType(tFP,d);          };
-    static inline SeExprType ErrorType  ()      { return SeExprType(tERROR,ltERROR); };
+    static inline SeExprType AnyType    ()      { return SeExprType(tANY);             };
+    static inline SeExprType NoneType   ()      { return SeExprType(tNONE);            };
+    static inline SeExprType ValueType  ()      { return SeExprType(tVALUE);           };
+    static inline SeExprType StringType ()      { return SeExprType(tSTRING);          };
+    static inline SeExprType NumericType()      { return SeExprType(tNUMERIC);         };
+    static inline SeExprType FP1Type    ()      { return SeExprType(tFP);              };
+    static inline SeExprType FPNType    (int d) { return SeExprType(tFP,d);            };
+    static inline SeExprType ErrorType  ()      { return SeExprType(tERROR,1,ltERROR); };
 
     //general constructors - varying (explicit)
     static inline SeExprType AnyType_varying    ()      { return SeExprType(tANY,1,ltVARYING);     };
@@ -170,7 +170,19 @@ class SeExprType {
     inline bool isError  ()      const { return type() == tERROR;                 };
 
     //general strictly equal relation
-    inline bool is(const SeExprType & other) const { return (*this == other); };
+    inline bool is(const SeExprType & other) const {
+        //TODO: add lifetime constraint in correctly: *this is less strict than other
+        if     (*this == other)    return true;
+        else if(other.isAny    ()) return isAny    ();
+        else if(other.isNone   ()) return isNone   ();
+        else if(other.isValue  ()) return isValue  ();
+        else if(other.isString ()) return isString ();
+        else if(other.isNumeric()) return isNumeric();
+        else if(other.isFP1    ()) return isFP1    ();
+        else if(other.isFPN    ()) return isFPN    (other.dim());
+        else                       return false;
+    };
+    //    inline bool is(const SeExprType & other) const { return (*this == other); };
 
     //strictly under relation - does not contain itself
     inline bool isUnderAny    () const { return isNone  () || isaValue  (); };
