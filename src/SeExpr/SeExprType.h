@@ -35,6 +35,8 @@
 #ifndef SeExprType_h
 #define SeExprType_h
 
+// TODO: make all lt's called lifetime instead
+
 #include <vector>
 #include <string>
 #include <map>
@@ -43,18 +45,18 @@
 
 class SeExprType {
  public:
-    enum Type {tFP,
+    enum Type {tERROR=0,
+               tFP,
                tSTRING,
                tNONE,
-               tERROR,
                tNUMERIC,
                tVALUE,
                tANY};
 
-    enum Lifetime {ltCONSTANT,
+    enum Lifetime {ltERROR=0,
+                   ltCONSTANT,
                    ltUNIFORM,
-                   ltVARYING,
-                   ltERROR};
+                   ltVARYING};
 
     /*
      * Core type functions
@@ -90,6 +92,7 @@ class SeExprType {
     };
 
     //general constructors - varying (implicit)
+    // TODO: remove implicit
     static inline SeExprType AnyType    ()      { return SeExprType(tANY);             };
     static inline SeExprType NoneType   ()      { return SeExprType(tNONE);            };
     static inline SeExprType ValueType  ()      { return SeExprType(tVALUE);           };
@@ -221,6 +224,7 @@ class SeExprType {
     };
 
     //validity and isa check
+    // TODO: remove
     inline bool match(const SeExprType & other) const { return isValid() && isa(other); };
 
     /*
@@ -283,43 +287,25 @@ class SeExprType {
         becomeLifetime(*this, first);
         return *this;
     };
-    inline const SeExprType & combineLifetime(const SeExprType & first,
-                                              const SeExprType & second) {
-        combineLifetime(first);
-        combineLifetime(second);
-        return *this;
-    };
-    inline const SeExprType & combineLifetime(const SeExprType & first,
-                                              const SeExprType & second,
-                                              const SeExprType & third)  {
-        combineLifetime(first);
-        combineLifetime(second);
-        combineLifetime(third);
-        return *this;
-    };
 
     inline std::string toString() const {
         std::stringstream ss;
+
+        if     (isLifetimeConstant()) ss << "constant ";
+        else if(isLifetimeUniform ()) ss << "uniform ";
+        else if(isLifetimeVarying ()) ss << "varying ";
+        else if(isLifetimeError   ()) ss << "lifetime_error ";
+        else                    ss << "Invalid_Lifetime ";
 
         if     (isAny    ()) ss << "Any";
         else if(isNone   ()) ss << "None";
         else if(isValue  ()) ss << "Value";
         else if(isString ()) ss << "String";
         else if(isNumeric()) ss << "Numeric";
-        else if(isFP1    ()) ss << "FLOAT[1]";
+        else if(isFP1    ()) ss << "FLOAT";
         else if(isFPN    ()) ss << "FLOAT[" << dim() << "]";
         else if(isError  ()) ss << "Error";
-        else                 ss << "toString Type Error";
-
-        ss << "(";
-
-        if     (isLifetimeConstant()) ss << "c";
-        else if(isLifetimeUniform ()) ss << "u";
-        else if(isLifetimeVarying ()) ss << "v";
-        else if(isLifetimeError   ()) ss << "e";
-        else                    ss << "toString Lifetime Error";
-
-        ss << ")";
+        else                 ss << "Invalid_Type";
 
         return ss.str();
     };
