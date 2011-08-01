@@ -310,23 +310,30 @@ int main(int argc,char *argv[])
     testThree("$x ? $y : $z",                             expr, conditional,       verbosity_level);
     testThree("if($x) { $a = $y; } else { $a = $z; } $a", expr, conditional,       verbosity_level);
 
+    //function tests:
     if(verbosity_level >= 1)
         std::cout << "Checking function expressions." << std::endl;
-    //function tests:
-    std::string compress1 = "func(0,0,0)";
-    expr.test(compress1, SeExprType::FP1Type_constant(),  SeExprType::FP1Type_constant(),  compress1, verbosity_level);
-    std::string compress2 = "func(0,0)";
-    expr.test(compress2, SeExprType::FP1Type_constant(),  SeExprType::ErrorType(),         compress2, verbosity_level);
-    std::string compress3 = "func(0,0,0,0)";
-    expr.test(compress3, SeExprType::FP1Type_constant(),  SeExprType::ErrorType(),         compress3, verbosity_level);
-    std::string compress4 = "compress([1,2],0,0)";
-    expr.test(compress4, SeExprType::FPNType_constant(2), SeExprType::FPNType_constant(2), compress4, verbosity_level);
-    std::string compress5 = "compress(0,[1,2],0)";
-    expr.test(compress5, SeExprType::FPNType_constant(2), SeExprType::FPNType_constant(2), compress5, verbosity_level);
-    std::string compress6 = "compress(0,0,[1,2,3])";
-    expr.test(compress6, SeExprType::FPNType_constant(3), SeExprType::FPNType_constant(3), compress6, verbosity_level);
-    std::string compress7 = "compress(0,[1,2],[3,2,1])";
-    expr.test(compress7, SeExprType::FPNType_constant(2), SeExprType::ErrorType(),         compress7, verbosity_level);
+    std::string compress = "func(0,0,0)";
+    expr.test(compress, SeExprType::FP1Type_constant(),  SeExprType::FP1Type_constant(),  compress, verbosity_level);
+    compress = "func(0,0)";
+    expr.test(compress, SeExprType::FP1Type_constant(),  SeExprType::ErrorType(),         compress, verbosity_level);
+    compress = "func(0,0,0,0)";
+    expr.test(compress, SeExprType::FP1Type_constant(),  SeExprType::ErrorType(),         compress, verbosity_level);
+    compress = "compress([1,2],0,0)";
+    expr.test(compress, SeExprType::FPNType_constant(2), SeExprType::FPNType_constant(2), compress, verbosity_level);
+    compress = "compress(0,[1,2],0)";
+    expr.test(compress, SeExprType::FPNType_constant(2), SeExprType::FPNType_constant(2), compress, verbosity_level);
+    compress = "compress(0,0,[1,2,3])";
+    expr.test(compress, SeExprType::FPNType_constant(3), SeExprType::FPNType_constant(3), compress, verbosity_level);
+    compress = "compress(0,[1,2],[3,2,1])";
+    expr.test(compress, SeExprType::FPNType_constant(2), SeExprType::ErrorType(),         compress, verbosity_level);
+
+    //local function tests:
+    if(verbosity_level >= 1)
+        std::cout << "Checking local function definitions." << std::endl;
+    std::string funcdef = "def foo() { $a = 4; $a } 4";
+    expr.test(funcdef, SeExprType::FP1Type_constant(),  SeExprType::FP1Type_constant(),  funcdef, verbosity_level);
+
 
     return 0;
 }
