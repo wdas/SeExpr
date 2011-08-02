@@ -106,25 +106,37 @@ void get_or_quit(std::string & str) {
 int main(int argc,char *argv[])
 {
     TypePrinterExpr expr;
-    std::string str;
+    std::string     str;
+    bool            givenTest = false;
 
-    std::cout << "SeExpr Basic Pattern Matcher:";
-
-    while(true) {
-	std::cout << std::endl << "> ";
-
-        get_or_quit(str);
-
-        expr.setExpr(str);
-
-	if(!expr.isValid()) {
-	    std::cerr << "Expression failed: " << expr.parseError() << std::endl;
-	} else {
-            std::cout << "Expression types:"
-                      << std::endl;
-            expr.walk();
-	};
+    if(argc == 2) {
+        givenTest = true;
+        str = argv[1];
     };
+
+    if(givenTest) {
+        expr.setExpr(str);
+        if(expr.isValid()) {
+            std::cout << "Expression types:" << std::endl;
+            expr.walk();
+        } else
+	    std::cerr << "Expression failed: " << expr.parseError() << std::endl;
+    } else {
+        std::cout << "SeExpr Basic Pattern Matcher (Iteractive Mode):";
+
+        while(true) {
+            std::cout << std::endl << "> ";
+
+            get_or_quit(str);
+            expr.setExpr(str);
+
+            if(expr.isValid()) {
+                std::cout << "Expression types:" << std::endl;
+                expr.walk();
+            } else
+                std::cerr << "Expression failed: " << expr.parseError() << std::endl;
+        }
+    }
 
     return 0;
 }

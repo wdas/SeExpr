@@ -261,79 +261,109 @@ testThree(const std::string & str, TypeTesterExpr & expr, TripleWholeTypeIterato
 
 int main(int argc,char *argv[])
 {
-    int verbosity_level = 0;
-
-    for(int i = 0; i < argc; i++)
-        switch(argv[i][0]) {
-        case '0':
-            break;
-        case '1':
-            verbosity_level = 1;
-            break;
-        case '2':
-            verbosity_level = 2;
-            break;
-        case '3':
-            verbosity_level = 3;
-            break;
-        default:
-            break;
-        };
-
+    bool           end = false;
+    int            verbosity_level = 0;
     TypeTesterExpr expr;
-    std::string str;
+    std::string    str;
+    bool           givenTest       = false;
 
-    testOne("$a = $v; $a", expr, identity,        verbosity_level);
-    testOne("[$v]",        expr, numericToScalar, verbosity_level);
-    testOne("-$v",         expr, numeric,         verbosity_level);
-    testOne("!$v",         expr, numeric,         verbosity_level);
-    testOne("~$v",         expr, numeric,         verbosity_level);
+    for(int i = 0; i < argc && !end; i++) {
+        if(argv[i][0] == '-')
+            switch(argv[i][1]) {
+            case 'v':
+                if(argv[i][2] == '=') {
+                    switch(argv[i][3]) {
+                    case '0':
+                        verbosity_level = 0;
+                        break;
+                    case '1':
+                        verbosity_level = 1;
+                        break;
+                    case '2':
+                        verbosity_level = 2;
+                        break;
+                    case '3':
+                        verbosity_level = 3;
+                        break;
+                    default:
+                        break;
+                    };
+                };
+                break;
+            case 't':
+                givenTest = true;
+                if(argc > i + 1) {
+                    str = argv[i + 1];
+                    end = true;
+                };
+                break;
+            default:
+                break;
+            };
+    };
 
-    testTwo("$x && $y", expr, numericToScalar,   verbosity_level);
-    testTwo("$x || $y", expr, numericToScalar,   verbosity_level);
-    testTwo("$x[$y]",   expr, numericToScalar,   verbosity_level);
-    testTwo("$x == $y", expr, generalComparison, verbosity_level);
-    testTwo("$x != $y", expr, generalComparison, verbosity_level);
-    testTwo("$x <  $y", expr, numericComparison, verbosity_level);
-    testTwo("$x >  $y", expr, numericComparison, verbosity_level);
-    testTwo("$x <= $y", expr, numericComparison, verbosity_level);
-    testTwo("$x >= $y", expr, numericComparison, verbosity_level);
-    testTwo("$x + $y",  expr, numericToNumeric,  verbosity_level);
-    testTwo("$x - $y",  expr, numericToNumeric,  verbosity_level);
-    testTwo("$x * $y",  expr, numericToNumeric,  verbosity_level);
-    testTwo("$x / $y",  expr, numericToNumeric,  verbosity_level);
-    testTwo("$x % $y",  expr, numericToNumeric,  verbosity_level);
-    testTwo("$x ^ $y",  expr, numericToNumeric,  verbosity_level);
-    testTwo("[$x, $y]", expr, numericTo2Vector,  verbosity_level);
+    if(givenTest) {
+        expr.setExpr(str);
+        if(expr.isValid()) {
+            if(verbosity_level >= 3)
+                std::cout << "Test passed!" << std::endl;
+        } else {
+            std::cerr << "Test failed!" << std::endl;
+            if(verbosity_level >= 2)
+                std::cerr << expr.parseError() << std::endl;
+        }
+    } else {
+        testOne("$a = $v; $a", expr, identity,        verbosity_level);
+        testOne("[$v]",        expr, numericToScalar, verbosity_level);
+        testOne("-$v",         expr, numeric,         verbosity_level);
+        testOne("!$v",         expr, numeric,         verbosity_level);
+        testOne("~$v",         expr, numeric,         verbosity_level);
 
-    testThree("[$x, $y, $z]",                             expr, numericTo3Vector,  verbosity_level);
-    testThree("$x ? $y : $z",                             expr, conditional,       verbosity_level);
-    testThree("if($x) { $a = $y; } else { $a = $z; } $a", expr, conditional,       verbosity_level);
+        testTwo("$x && $y", expr, numericToScalar,   verbosity_level);
+        testTwo("$x || $y", expr, numericToScalar,   verbosity_level);
+        testTwo("$x[$y]",   expr, numericToScalar,   verbosity_level);
+        testTwo("$x == $y", expr, generalComparison, verbosity_level);
+        testTwo("$x != $y", expr, generalComparison, verbosity_level);
+        testTwo("$x <  $y", expr, numericComparison, verbosity_level);
+        testTwo("$x >  $y", expr, numericComparison, verbosity_level);
+        testTwo("$x <= $y", expr, numericComparison, verbosity_level);
+        testTwo("$x >= $y", expr, numericComparison, verbosity_level);
+        testTwo("$x + $y",  expr, numericToNumeric,  verbosity_level);
+        testTwo("$x - $y",  expr, numericToNumeric,  verbosity_level);
+        testTwo("$x * $y",  expr, numericToNumeric,  verbosity_level);
+        testTwo("$x / $y",  expr, numericToNumeric,  verbosity_level);
+        testTwo("$x % $y",  expr, numericToNumeric,  verbosity_level);
+        testTwo("$x ^ $y",  expr, numericToNumeric,  verbosity_level);
+        testTwo("[$x, $y]", expr, numericTo2Vector,  verbosity_level);
 
-    //function tests:
-    if(verbosity_level >= 1)
-        std::cout << "Checking function expressions." << std::endl;
-    std::string compress = "func(0,0,0)";
-    expr.test(compress, SeExprType::FP1Type_constant(),  SeExprType::FP1Type_constant(),  compress, verbosity_level);
-    compress = "func(0,0)";
-    expr.test(compress, SeExprType::FP1Type_constant(),  SeExprType::ErrorType_varying(), compress, verbosity_level);
-    compress = "func(0,0,0,0)";
-    expr.test(compress, SeExprType::FP1Type_constant(),  SeExprType::ErrorType_varying(), compress, verbosity_level);
-    compress = "compress([1,2],0,0)";
-    expr.test(compress, SeExprType::FPNType_constant(2), SeExprType::FPNType_constant(2), compress, verbosity_level);
-    compress = "compress(0,[1,2],0)";
-    expr.test(compress, SeExprType::FPNType_constant(2), SeExprType::FPNType_constant(2), compress, verbosity_level);
-    compress = "compress(0,0,[1,2,3])";
-    expr.test(compress, SeExprType::FPNType_constant(3), SeExprType::FPNType_constant(3), compress, verbosity_level);
-    compress = "compress(0,[1,2],[3,2,1])";
-    expr.test(compress, SeExprType::FPNType_constant(2), SeExprType::ErrorType_varying(), compress, verbosity_level);
+        testThree("[$x, $y, $z]",                             expr, numericTo3Vector,  verbosity_level);
+        testThree("$x ? $y : $z",                             expr, conditional,       verbosity_level);
+        testThree("if($x) { $a = $y; } else { $a = $z; } $a", expr, conditional,       verbosity_level);
 
-    //local function tests:
-    if(verbosity_level >= 1)
-        std::cout << "Checking local function definitions." << std::endl;
-    std::string funcdef = "def foo() { $a = 4; $a } 4";
-    expr.test(funcdef, SeExprType::FP1Type_constant(),  SeExprType::FP1Type_constant(),  funcdef, verbosity_level);
+        //function tests:
+        if(verbosity_level >= 1)
+            std::cout << "Checking function expressions." << std::endl;
+        std::string compress = "func(0,0,0)";
+        expr.test(compress, SeExprType::FP1Type_constant(),  SeExprType::FP1Type_constant(),  compress, verbosity_level);
+        compress = "func(0,0)";
+        expr.test(compress, SeExprType::FP1Type_constant(),  SeExprType::ErrorType_varying(), compress, verbosity_level);
+        compress = "func(0,0,0,0)";
+        expr.test(compress, SeExprType::FP1Type_constant(),  SeExprType::ErrorType_varying(), compress, verbosity_level);
+        compress = "compress([1,2],0,0)";
+        expr.test(compress, SeExprType::FPNType_constant(2), SeExprType::FPNType_constant(2), compress, verbosity_level);
+        compress = "compress(0,[1,2],0)";
+        expr.test(compress, SeExprType::FPNType_constant(2), SeExprType::FPNType_constant(2), compress, verbosity_level);
+        compress = "compress(0,0,[1,2,3])";
+        expr.test(compress, SeExprType::FPNType_constant(3), SeExprType::FPNType_constant(3), compress, verbosity_level);
+        compress = "compress(0,[1,2],[3,2,1])";
+        expr.test(compress, SeExprType::FPNType_constant(2), SeExprType::ErrorType_varying(), compress, verbosity_level);
 
+        //local function tests:
+        if(verbosity_level >= 1)
+            std::cout << "Checking local function definitions." << std::endl;
+        std::string funcdef = "def foo() { $a = 4; $a } 4";
+        expr.test(funcdef, SeExprType::FP1Type_constant(),  SeExprType::FP1Type_constant(),  funcdef, verbosity_level);
+    };
 
     return 0;
 }
