@@ -155,7 +155,7 @@ class SeExprType {
     inline bool isString ()      const { return type() == tSTRING;                };
     inline bool isNumeric()      const { return type() == tNUMERIC;               };
     inline bool isFP1    ()      const { return type() == tFP      && dim() == 1; };
-    inline bool isFPN    ()      const { return type() == tFP      && dim()  > 1; };
+    inline bool isFP_gt_1()      const { return type() == tFP      && dim()  > 1; };
     inline bool isFPN    (int i) const { return type() == tFP      && dim() == i; };
     inline bool isError  ()      const { return type() == tERROR;                 };
 
@@ -169,14 +169,14 @@ class SeExprType {
         else if(other.isString ()) return isString ();
         else if(other.isNumeric()) return isNumeric();
         else if(other.isFP1    ()) return isFP1    ();
-        else if(other.isFPN    ()) return isFPN    (other.dim());
+        else if(other.isFP_gt_1()) return isFPN    (other.dim());
         else                       return false;
     };
 
     //strictly under relation - does not contain itself
     inline bool isUnderAny    () const { return isNone  () || isaValue  (); };
     inline bool isUnderValue  () const { return isString() || isaNumeric(); };
-    inline bool isUnderNumeric() const { return isFP1   () || isFPN     (); };
+    inline bool isUnderNumeric() const { return isFP1   () || isFP_gt_1 (); };
 
     //general strictly under relation
     inline bool isUnder(const SeExprType & other) const {
@@ -193,7 +193,7 @@ class SeExprType {
     inline bool isaString ()      const { return isString      ();                      };
     inline bool isaNumeric()      const { return isNumeric     () || isUnderNumeric();  };
     inline bool isaFP1    ()      const { return isUnderNumeric();                      };
-    inline bool isaFPN    ()      const { return isUnderNumeric();                      };
+    inline bool isaFP_gt_1()      const { return isUnderNumeric();                      };
     inline bool isaFPN    (int i) const { return isFP1         () || isFPN         (i); };
 
     //general equivalent (under, equal, or promotable) relation
@@ -205,7 +205,7 @@ class SeExprType {
         else if(other.isString ()) return isaString ();
         else if(other.isNumeric()) return isaNumeric();
         else if(other.isFP1    ()) return isaFP1    ();
-        else if(other.isFPN    ()) return isaFPN    (other.dim());
+        else if(other.isFP_gt_1()) return isaFPN    (other.dim());
         else                       return false;
     };
 
@@ -273,7 +273,7 @@ class SeExprType {
         else if(isString ()) ss << "String";
         else if(isNumeric()) ss << "Numeric";
         else if(isFP1    ()) ss << "FLOAT";
-        else if(isFPN    ()) ss << "FLOAT[" << dim() << "]";
+        else if(isFP_gt_1()) ss << "FLOAT[" << dim() << "]";
         else if(isError  ()) ss << "Error";
         else                 ss << "Invalid_Type";
 
