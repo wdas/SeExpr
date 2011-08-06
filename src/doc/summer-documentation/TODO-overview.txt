@@ -1,0 +1,13 @@
+Work that needs to be done on SeExpr soon:
+
+Function defintions need to be added to global scope so that they can be used in final block (and other function defintions).
+
+Function declaration parameters need to have optional '$' (currently '$' is required).  This requires a slight change to parser.
+
+Nodes should keep wanted type from prep. By keeping the wanted type, each node can do promotion/demotion at execution easily.
+
+Sanity checks for changes between version 1 and version 2 of SeExpr need to be added.
+
+Interpreted execution of SeExpr 2.0 needs to be implemented.
+
+LLVM compilation of SeExpr 2.0 needs to be implemented.

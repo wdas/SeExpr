@@ -1,0 +1,31 @@
+In SeExpr 2.0, users can define functions within a SeExpr program for use within that program. There are several restrictions on the definitions and use of these functions to keep SeExpr programs human-readable and to simplify compilation.
+
+The syntax of an externally defined function is as follows:
+   extern RETURN_TYPE function_name(ARG_TYPE_1, ..., ARG_TYPE_N)
+where the capitalized terms are SeExpr types.
+
+For example:
+   extern FLOAT sin(FLOAT)
+is a valid declaration for an external definition of the sin function.
+
+The syntax of a function definition is as follows:
+def RETURN_TYPE function_name(ARG_TYPE_1 arg1, ..., ARG_TYPE_N argn) { assigns; expr }
+where the capitalized therms are SeExpr types.
+
+For both function declarations and function definitions, there is no limit on the number of arguments.  A function with no arguments can only return a constant value (see below for the explanation why this is so).
+
+The body of a function definition,"{ assigns; expr }", has two parts, its assignment statements, assigns, and its final expression, expr. When a function is called, any parameters it has are bound in the local scope. Then the assignment statements are executed in order.  Lastly, the final expression is evaluated and its value is returned.
+
+The return type, RETURN_TYPE, in a function defintion is optional, since the type of the value returned by the function can be inferred from the expression, expr. Including the return type helps clarify the cause of any type errors.  In an externally defined function declaration, the return type, RETURN_TYPE, is required.
+
+Restrictions:
+
+Since the return type, RETURN_TYPE, is used for type checking, no promotion or demotion is possible in a function definition.  Therefore the return type, RETURN_TYPE, and the type of the final expression, expr, must match exactly.
+
+Each user-defined function only has access to its own parameters. No user-defined function has access to any global variables or parameters.  So a function with no parameters has no values that can change, and can only return a fixed, or constant, value.  Also, no function can modify any variables outside of itself.
+
+Every user-defined function can call functions defined before itself within its body.  A user-defined function cannot call itself. A user-defined function cannot call a function defined after itself.
+
+Once a function has been defined, its name cannot be used again for any function definition or declaration.
+
+The above restrictions were designed intentionally so that recursion and side-effects are impossible.  Besides simplifying compilation and guaranteeing termination of every valid SeExpr program, these restrictions keep SeExpr programs from having unintended or unexpected behavior.

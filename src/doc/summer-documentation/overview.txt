@@ -1,0 +1,84 @@
+Walker:
+  -patterns: 5.17
+  -details:
+    -expand someday into full visitor framework
+      -double dispatch would be much more general than current walker framework
+      -current framework is done and working - visitor framework is not done (obviously)
+
+Comments:
+ -5.27
+ - lexer keeps track of all positions for all comments
+ - applications can use this information along with parsed details to match comments to individual assignments and uses
+
+Type system:
+ Error      Any
+           /   \
+       None     Value
+               /     \
+         String      Numeric
+                    /       \
+                FP[1] ----- FP[N] [N > 1]
+ Only FP[1] can be booleans (FP[N] are demoted)
+ Type checker continues after an error is found as best it is able. (The parser is very prone to terminating errors.)
+Lifetime qualifiers:
+
+Activation Record for interpreted version:
+
+Functions:
+ -externals (sin, cos, atan, compress, etc.)
+ -external user-defined (funcX: curve, ccurve, hsi, etc.)
+ -internal user-defined (def <type> name(<type> arg, ...) { block })
+  -not recursive
+  -no side-effects
+  -empty scope except for parameters
+  -return type can be inferred (and is optional to allow for error checking)
+ -automatic function promotion/demotion
+  -function promotion requires:
+    -no errors
+    -all parameters are scalar (or string) (isScalar())
+    -return type is scalar
+    -an argument can be scalar, string, or vector
+    -all vector arguments have the same length
+
+Promotion/demotion:
+  -prohibited contexts:
+    [1,2] + [4,3,2,1]
+    0 ? 1 : [2,3]
+  -allowed contexts:
+    0 == [1,2,3] (returns false, of course. Equivalent to [0,0,0] == [1,2,3].)
+
+Tests
+ Built suite to change types of variables and test all possible combinations
+  -relies on type system working correct - need simple test for 
+
+
+
+Need to add:
+-add function defintions to global scope so that they can be used in final block (and other function defintions)
+-function declaration parameters need to have optional '$' (currently '$' is required)
+-nodes should keep wanted type from prep - node can do promotion/demotion at execution - can avoid doing needless work
+-sanity checks for changes between version 1 and version 2 of SeExpr
+
+Would like to have:
+-error recovery in parser
+-string operations (concat, substring?)
+-loops?
+-splice notation v[0..2]
+-reorder/limit operator: .xyz .zyx .xxx (reorder/repeat different elements of vector)
+-once llvm compiler is working, does it optimize the different lifetime variables and expressions correctly? Test this!
+-user-defined functions as a library (not just at the beginning of a program)
+-multiple return values - both from functions and the whole program
+  -use parentheses to enclose and commas to delimit
+   -function definition:
+     def (FLOAT,STRING) foo(STRING $str) { (3.4, $str) }
+   -function calling:
+      ($val,$string) = foo("tada!");
+   -using a single value from a function returning multiple values:
+      foo("tada!")[1]
+   -program returning multiple values:
+      <function definitions and declarations> <assignments> (val1, val2, ...)
+-functions always return a lifetime of varying - currently this doesn't cause problems but it might later on
+-lifetime qualifier to local functions: def FLOAT foo(FLOAT $a, FLOAT $b) { $a + $b } CONSTANT
+ -error is thrown if lifetime is violated
+ -insures constant and uniform functions run when expected
+ -good for debugging and limiting expensive functions

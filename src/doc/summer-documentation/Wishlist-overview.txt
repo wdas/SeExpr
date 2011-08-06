@@ -1,0 +1,21 @@
+These are future tasks to be done on SeExpr 2.0.  They currently have a low priority, especially compared to the items in the TODO list.
+
+Error recovery/reporting in parser.  Currently the parser dies on an error without reporting what went wrong, which makes debugging difficult.
+
+String operations (concatenation, substring operations, etc.). Currently planned to be added as constant or uniform operations.  This restriction (no varying execution) keeps string operations fairly efficient.
+
+Loops. Certain uses of SeExpr could benefit greatly from allowing a loop construct.  However, there are concerns that including loops would slow down execution in unexpected ways.
+
+Splice notation. Example: $v[0..2]. Allowing splicing simplifies changing the length of a vector; however, it is unclear if there is any clear use.
+
+Reorder/limit operator: .xyz .zyx .xxx (reorder/repeat different elements of vector).  Like splicing, reordering elements could be useful, but there is no obvious current need for it.
+
+Adding library-like programs to be included. Allowing user-defined functions as a library and not just at the beginning of a program could be useful when such user-defined functions are used in multiple programs, but currently there is no immediate use.
+
+Multiple return values.  Allowing functions and whole SeExpr programs to return multiple values can simply programs.  However, the syntax for returning multiple values could make programs returning multiple values unreadable.  The current proposed syntax is to change final expressions (in function bodies and at the end of programs) to list return values, enclosed by parentheses and delimited by commas.
+
+Currently, all functions return the varying lifetime.  Future expansions, such as uniform only string operatioins would not work well (if at all) with this.
+
+Add lifetime qualifier to user-defined functions:
+   def FLOAT foo(FLOAT $a, FLOAT $b) { $a + $b } CONSTANT
+This addition would allow for explicit control of when functions could execute.  It would help debugging programs that are not as efficient as desired or expected.

@@ -1,0 +1,5 @@
+Currently in SeExpr, comments are parsed only to expose them to the SeExpression object parsing the SeExpr program.
+
+After a successful parse, the start and end positions of all the comments in order are available via the member function of the class SeExpression, getComments. The function getComments returns a vector of pairs of integers.  The first integer of each pair refers to the start position of a comment, and the second integer refers to the end position of that comment.
+
+The original program can be accessed via the member function of the class SeExpression, getExpr.  The start and end positions of the comments in getComments refer to offsets from the start of the string returned by the member function getExpr.

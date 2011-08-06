@@ -1,0 +1,77 @@
+The type system in SeExpr 2.0 has been enriched from the first version of SeExpr.  The type system of SeExpr described in this document is the primary type system.  The lifetime qualifier type system is separate and should be consulted for problems relating to lifetimes.
+
+The type system can be viewed as a hierarchy:
+
+ Error      Any
+           /   \
+       None     Value
+               /     \
+         String      Numeric
+                    /       \
+             FLOAT[1] ----- FLOAT[N] [N > 1]
+
+Details about each type:
+
+Error - The error type is used to report an unsuccessful type check.  By returning error, the type system knows to evetually fail the type check but to continue the check so that multiple errors can be reported.  By returning as many errors as the type system can identify, the user can correct multiple bugs at once making more efficient use of their time.  Note that error recovery currently only occurs in the type check system.  The parser does not do any error recovery currently.
+
+Any - The any type is used as a catch-all:  If a type is valid, then it is under Any.  There are many cases where the type check system only checks for a valid type, and the any type is used then.  The any type cannot appear directly in a SeExpr program.
+
+None - The none type is used as the return type for statements and function declarations/definitions which do not return a value.  The none type implies that there are no errors and no value was expected to be returned.  The none type cannot appear directly in a SeExpr program.
+
+Value - The value type is similar to the any type in that it is a catch-all.  Unlike the any type, the value type is used when an actual value is expected by the type check system, but the type of that value does not matter. The value type cannot appear directly in a SeExpr program.
+
+String - The string type represents a string.  Currently, strings can only be string literals. That is, there is no way to create new strings within a SeExpr program.  However, a variable can hold a string, and a function can take as string as a parameter and return a string.
+
+Numeric - The numeric type is similar to the value and any types; it is a catch-all.  However, it is a numeric value catch-all.  The type check system uses the numeric type whenever it wants a numeric value: A scalar or a vector of any length.  The numeric type cannot appear directly in a SeExpr program.
+
+FLOAT (or FLOAT[1]) - The scalar (float or double) type represents a single numeric value.  The scalar type also acts as SeExpr's boolean type.  In certain cases (see below), the scalar type can act as a vector of any length.  When a scalar acts as a vector, each element of that vector is the original value.  (So 4.1 becomes [4.1, 4.1], [4.1, 4.1, 4.1], etc. etc.)
+
+FLOAT[N] - The vector type represents a vector of N numeric values.  In certain cases (see below), the vector type can act as a scalar.  When a vector acts as a scalar, the scalar's value is the first element of the vector. (So [1,2,3] becomes 1.)
+
+
+Promotion/demotion:
+
+Scalars and vectors are interchangable in certain circumstances.
+
+The general rule for demotion is wherever a scalar is needed (ignoring promotion opportunities), a vector is acceptable and will be demoted to fit.  There are three places demotion can happen:
+  1) Boolean values: The conditional expression in if statements and conditional (ternary operator, a ? b : c) expressions, and the operands to logical operators.
+     Example: $a = [1,2,3]; ($a ? $a : [0,0,0]) =>
+              ([1,2,3] ? [1,2,3] : [0,0,0])     =>
+              (1 ? [1,2,3] : [0,0,0])           =>
+              [1,2,3]                           =>
+  2) Operands to the literal vector.
+     Example: $a = [1,2,3]; [$a, 0, $a] =>
+              [[1,2,3], 0, [1,2,3]]     =>
+              [1,       0, 1]
+  3) Subscript index.
+     Example $a = [1,2,3]; $a[$a] =>
+             [1,2,3][[1,2,3]]     =>
+             [1,2,3][1]           =>
+             2
+
+The general rule for promotion is wherever a vector of a certain size is desired (ignoring demotion opportunities), a scalar is acceptable and will be promoted to a vector of that size.  There are two places promotion can happen:
+  1) Comparison operands.
+     Example: 0 == [1,2,3]               =>
+              [0,0,0] == [1,2,3]         =>
+              0 == 1 && 0 == 2 && 0 == 3 =>
+              1      && 1      && 1      =>
+              1
+  2) Binary operator operands.
+     Example: 1 + [1,2,3]       =>
+              [1,1,1] + [1,2,3] =>
+              [2,3,4]
+
+Promotion and demotion cannot be chained: A single value is promoted or demoted at most once. So a vector of the wrong size cannot be demoted to a scalar and then promoted to a vector of the right size. I.e. [1,2] + [4,3,2,1] causes a type error.
+
+Function promotion: Scalar functions can also be promoted; however, the conditions are more complicated:
+     a) The function only takes scalars or strings as arguments.
+     b) The function returns a scalar.
+     c) All vector arguments are the same length.
+   Example: cos([PI, 0, PI/2])           =>
+            [cos(PI), cos(0), cos(PI/2)] =>
+            [-1,      1,      0]
+   Example: compress([.5,0,1],1,2)                               =>
+            [compress(.5,1,2), compress(0,1,2), compress(1,1,2)] =>
+            [1.5,              1,               2]
+   Example: compress([.5,0,1],[0,1],2) =>
+            TYPE ERROR
