@@ -61,7 +61,7 @@ public:
             bool valid=true;
             for(int i=0;i<node->numChildren();i++){
                 if(!node->isStrArg(i))
-                    valid&=node->child(i)->prep(SeExprType::AnyType_varying(), env).isValid();
+                    valid&=node->child(i)->prep(false, env).isValid();
             }
             return wanted;
         }

@@ -41,26 +41,7 @@
 #include "SeExprNode.h"
 #include "SeExprFunc.h"
 #include "TypeBuilder.h"
-
-/**
-   @file TypePrinter.cpp
-*/
-class TypePrintExaminer : public SeExpr::Examiner<true> {
-public:
-    virtual bool examine(const SeExprNode* examinee);
-    virtual void reset  ()                           {};
-};
-
-
-bool
-TypePrintExaminer::examine(const SeExprNode* examinee)
-{
-    std::cout <<           examinee->       toString() << std::endl;
-    std::cout << "    " << examinee->type().toString() << std::endl;
-
-    return true;
-};
-
+#include "TypePrinter.h"
 
 //! Simple expression class to print out all intermediate types
 class TypePrinterExpr : public TypeBuilderExpr
@@ -118,7 +99,6 @@ int main(int argc,char *argv[])
         expr.setExpr(str);
         if(expr.isValid()) {
             std::cout << "Expression types:" << std::endl;
-            expr.walk();
         } else
 	    std::cerr << "Expression failed: " << expr.parseError() << std::endl;
     } else {
@@ -129,11 +109,10 @@ int main(int argc,char *argv[])
 
             get_or_quit(str);
             expr.setExpr(str);
-
-            if(expr.isValid()) {
-                std::cout << "Expression types:" << std::endl;
-                expr.walk();
-            } else
+            bool valid=expr.isValid();
+            std::cout << "Expression types:" << std::endl;
+            expr.walk();
+            if(!valid)
                 std::cerr << "Expression failed: " << expr.parseError() << std::endl;
         }
     }

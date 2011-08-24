@@ -41,6 +41,8 @@
 #include <cassert>
 #include <sstream>
 
+static const char* typeStrings[] = {"ERROR","FP","STRING","NONE","NUMERIC","VALUE","ANY"};
+
 class SeExprType {
  public:
     enum Type {tERROR=0,
@@ -54,7 +56,8 @@ class SeExprType {
     enum Lifetime {ltERROR=0,
                    ltCONSTANT,
                    ltUNIFORM,
-                   ltVARYING};
+                   ltVARYING
+    };
 
     /*
      * Core type functions
@@ -64,6 +67,7 @@ class SeExprType {
         : _type(tERROR),_n(1), _lifetime(ltERROR)
     {};
 
+#if 1
     SeExprType(Type type)
         : _type(type), _n(1), _lifetime(ltVARYING)
     {};
@@ -81,13 +85,34 @@ class SeExprType {
         assert(_n >= 1);
         assert(_type == tFP || _n == 1);
     };
-
+#endif
     SeExprType(const SeExprType & other)
         : _type(other.type()), _n(other.dim()), _lifetime(other.lifetime())
     {
         assert(_n >= 1);
         assert(_type == tFP || _n == 1);
     };
+
+    // Basic types (named constructor parameter idiom)
+    SeExprType& None(){_type=tNONE;_n=1;return *this;}
+    SeExprType& FP(int d){_type=tFP;_n=d;return *this;}
+    SeExprType& String(){_type=tSTRING;_n=1;return *this;}
+    SeExprType& Error(){_type=tERROR;_n=1;return *this;}
+
+    // Lifetimes (named construct parameter idiom)
+    SeExprType& Constant(){_lifetime=ltCONSTANT;return *this;}
+    SeExprType& Uniform(){_lifetime=ltUNIFORM;return *this;}
+    SeExprType& Varying(){_lifetime=ltVARYING;return *this;}
+    SeExprType& LifeError(){_lifetime=ltERROR;return *this;}
+
+    bool isFP() const {return _type==tFP;}
+    bool isFP(int d) const {return _type==tFP && _n==d;}
+    bool isValue() const {return _type==tFP || _type==tSTRING;}
+
+    static bool valuesCompatible(const SeExprType& a,const SeExprType& b){
+        return  (a.isString() && b.isString())
+            || (a._type==tFP && b._type==tFP && (a._n==1 || b._n==1 || a._n==b._n));
+    }
 
     //general constructors - varying
     static inline SeExprType AnyType_varying    ()      { return SeExprType(tANY,1,ltVARYING);     };
@@ -151,7 +176,7 @@ class SeExprType {
     //strictly equal relation
     inline bool isAny    ()      const { return type() == tANY;                   };
     inline bool isNone   ()      const { return type() == tNONE;                  };
-    inline bool isValue  ()      const { return type() == tVALUE;                 };
+    //inline bool isValue  ()      const { return type() == tVALUE;                 };
     inline bool isString ()      const { return type() == tSTRING;                };
     inline bool isNumeric()      const { return type() == tNUMERIC;               };
     inline bool isFP1    ()      const { return type() == tFP      && dim() == 1; };
@@ -267,15 +292,19 @@ class SeExprType {
         else if(isLifetimeError   ()) ss << "lifetime_error ";
         else                          ss << "Invalid_Lifetime ";
 
+#if 0
         if     (isAny    ()) ss << "Any";
         else if(isNone   ()) ss << "None";
-        else if(isValue  ()) ss << "Value";
         else if(isString ()) ss << "String";
         else if(isNumeric()) ss << "Numeric";
         else if(isFP1    ()) ss << "FLOAT";
         else if(isFP_gt_1()) ss << "FLOAT[" << dim() << "]";
+        else if(isValue  ()) ss << "Value";
         else if(isError  ()) ss << "Error";
         else                 ss << "Invalid_Type";
+#endif
+        ss<<typeStrings[_type];
+        if(_type==tFP) ss<<"["<<_n<<"]";
 
         return ss.str();
     };

@@ -62,7 +62,7 @@ public:
     {}
 
     /** prep the expression by doing all type checking argument checking, etc. */
-    virtual SeExprType prep(SeExprFuncNode* node, SeExprType wanted, SeExprVarEnv & env);
+    virtual SeExprType prep(SeExprFuncNode* node, bool scalarWanted, SeExprVarEnv & env);
 
     virtual bool       isScalar() const = 0;
     virtual SeExprType retType () const = 0;

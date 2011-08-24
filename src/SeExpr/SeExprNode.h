@@ -109,7 +109,7 @@ public:
     /** Prepare the node (for parser use only).  See the discussion at
 	the start of SeExprNode.cpp for more info.
     */
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual SeExprType prep(bool dontNeedScalar, SeExprVarEnv & env);
 
     /// Evaluation method.  Note: v[1] and v[2] are undefined if !isVec
     virtual void eval(SeVec3d& v) const;
@@ -134,12 +134,7 @@ public:
  protected: /*protected functions*/
 
     ///Set type
-    inline void setType         ()                      { _type = SeExprType::ErrorType_error();        };
     inline void setType         (const SeExprType & t)  { _type = t;                                    };
-    inline void setType_varying (const SeExprType & t)  { setType(t); _type.becomeLifetimeVarying ();   };
-    inline void setType_uniform (const SeExprType & t)  { setType(t); _type.becomeLifetimeUniform ();   };
-    inline void setType_constant(const SeExprType & t)  { setType(t); _type.becomeLifetimeConstant();   };
-    inline void setType_error   (const SeExprType & t)  { setType(t); _type.becomeLifetimeError();      };
     inline void setType         (const SeExprType & t,
                                  const SeExprType & t1) { setType(t); _type.becomeLifetime(t1);         };
     inline void setType         (const SeExprType & t,
@@ -149,7 +144,8 @@ public:
                                  const SeExprType & t1,
                                  const SeExprType & t2,
                                  const SeExprType & t3) { setType(t); _type.becomeLifetime(t1, t2, t3); };
-    inline void setType_std     (const SeExprType & t)  {
+    //! Set's the type to the argument but uses the children to determine lifetime
+    inline void setTypeWithChildLife(const SeExprType & t)  {
         setType(t);
         int num = numChildren();
         if(num > 0)
@@ -158,6 +154,8 @@ public:
             _type.becomeLifetime(_type, child(i)->type());
     };
 
+#if 0
+    // TODO: delete this
     /// Prep system error abstraction
     //   generalCheck passes (no error) if check is true
     inline bool generalCheck(      bool          check,
@@ -165,6 +163,7 @@ public:
         if(!check) addError(message);
         return check;
     };
+#endif
 
     /// Prep system error abstraction
     //   generalCheck passes (no error) if check is true
@@ -187,7 +186,7 @@ public:
         if(!check) {
             addError(message);
             error = true;
-            SeExprNode::prep(SeExprType::AnyType_varying(), env);
+            SeExprNode::prep(false, env);
         }
         return check;
     };
@@ -204,6 +203,16 @@ public:
                                                  const SeExprType & second) {
         return ("Type mismatch. First: " + first .toString() +
                 " Second: "              + second.toString()); };
+
+    bool checkIsValue(const SeExprType& type,bool& error){
+        return generalCheck(type.isValue(),"Expected value type",error);
+    }
+    bool checkIsFP(const SeExprType& type,bool& error){
+        return generalCheck(type.isFP(),"Expected floating point type",error);
+    }
+    bool checkIsFP(int d,const SeExprType& type,bool& error){
+        return generalCheck(type.isFP(d),"Expected floating point type",error);
+    }
 
     /// types match (true if they do)
     inline bool isa_with_error(const SeExprType & expected,
@@ -222,12 +231,9 @@ public:
                             error); };
 
     /// types match (true if they do)
-    inline bool typesMatch(const SeExprType & first,
-                           const SeExprType & second,
-                                 bool       & error  ) {
-        return generalCheck(first.isa(second),
-                            generalTypeMismatchString(first, second),
-                            error); };
+    inline bool checkTypesCompatible(const SeExprType & first,const SeExprType & second,bool & error) {
+        return generalCheck(SeExprType::valuesCompatible(first,second),generalTypeMismatchString(first, second),error); 
+    };
 
 protected: /*protected data members*/
     /// Owning expression (node can't modify)
@@ -257,7 +263,7 @@ public:
     SeExprModuleNode(const SeExpression* expr) :
 	SeExprNode(expr) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -286,7 +292,7 @@ public:
         _env()
     {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
 
     void addArgTypes(SeExprNode * surrogate);
     void addArgs    (SeExprNode * surrogate);
@@ -322,7 +328,7 @@ public:
         : SeExprNode(expr, prototype, block)
     {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -334,7 +340,7 @@ public:
     SeExprBlockNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -347,7 +353,7 @@ public:
 			 SeExprNode* a, SeExprNode* b, SeExprNode* c) :
 	SeExprNode(expr, a, b, c) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -359,7 +365,7 @@ public:
     SeExprAssignNode(const SeExpression* expr, const char* name, SeExprNode* e) :
 	SeExprNode(expr, e), _name(name), _var(0) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 
     const std::string& name        () const { return _name;         };
@@ -386,7 +392,7 @@ public:
         : SeExprNode(expr, a, b, c)
     {};
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 
     SeVec3d value() const;
@@ -400,7 +406,7 @@ public:
         : SeExprNode(expr, a)
     {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
 };
 
 /// Node that computes a negation (scalar or vector)
@@ -441,7 +447,7 @@ public:
     SeExprCondNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b, SeExprNode* c) :
 	SeExprNode(expr, a, b, c) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
@@ -453,7 +459,7 @@ public:
     SeExprLogicalOpNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
 };
 
 
@@ -486,19 +492,19 @@ public:
     SeExprSubscriptNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 };
 
 
-/// Node that implements a numeric comparison
+/// Node that implements a numeric/string comparison
 class SeExprCompareEqNode : public SeExprNode
 {
 public:
     SeExprCompareEqNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
 };
 
 
@@ -531,7 +537,7 @@ public:
     SeExprCompareNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
 };
 
 
@@ -586,7 +592,7 @@ public:
     SeExprBinaryOpNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
 };
 
 
@@ -667,7 +673,7 @@ public:
        SeExprNode(expr, type), _name(name), _var(0), _data(0)
     { expr->addVar(name); }
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
     const char* name() const { return _name.c_str(); }
     
@@ -690,7 +696,7 @@ public:
     SeExprNumNode(const SeExpression* expr, double val) :
 	SeExprNode(expr), _val(val) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const { result[0] = _val; }
 
     double value() const { return _val; };
@@ -707,7 +713,7 @@ public:
     SeExprStrNode(const SeExpression* expr, const char* str) :
 	SeExprNode(expr), _str(str) {}
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const { result[0] = 0; }
 
     const char* str() const { return _str.c_str(); }
@@ -729,9 +735,9 @@ public:
     virtual ~SeExprFuncNode() { delete _data; }
 
     //! return true if no errors
-    bool prepArgs(std::string const & name, SeExprType wanted, SeExprVarEnv & env);
+    bool prepArgs(std::string const & name, bool wantScalar, SeExprVarEnv & env);
 
-    virtual SeExprType prep(SeExprType wanted, SeExprVarEnv & env);
+    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
     void setIsVec(bool isVec) { _isVec = isVec; }
     const char* name() const { return _name.c_str(); }

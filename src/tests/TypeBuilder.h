@@ -82,39 +82,40 @@ public:
     //! Empty constructor
     TypeBuilderExpr()
         : SeExpression::SeExpression(),
-          dummyFunc(dummyFuncX,0,16),
-          func(dummyFuncX,3,3),
-          F1(SeExprType::FP1Type_varying   () ),
-          F2(SeExprType::FPNType_varying   (2)),
-          F3(SeExprType::FPNType_varying   (3)),
-          ST(SeExprType::StringType_varying() ),
-          SE(SeExprType::ErrorType_varying () ),
-          LC(SeExprType::FP1Type_constant  () ),
-          LU(SeExprType::FP1Type_uniform   () ),
-          LV(SeExprType::FP1Type_varying   () ),
-          LE(SeExprType::FP1Type_error     () ),
-          v (SeExprType::FP1Type_varying   () ),
-          x (SeExprType::FP1Type_varying   () ),
-          y (SeExprType::FP1Type_varying   () ),
-          z (SeExprType::FP1Type_varying   () )
+         dummyFunc(dummyFuncX,0,16),
+         func(dummyFuncX,3,3),
+         F1(SeExprType().FP(1).Varying() ),
+         F2(SeExprType().FP(2).Varying()),
+         F3(SeExprType().FP(3).Varying()),
+         ST(SeExprType().String().Varying() ),
+         SE(SeExprType().Error().Varying() ),
+         LC(SeExprType().FP(1).Constant() ),
+         LU(SeExprType().FP(1).Uniform() ),
+         LV(SeExprType().FP(1).Varying() ),
+         LE(SeExprType().FP(1).Error() ),
+         v(SeExprType().FP(1).Varying() ),
+         x(SeExprType().FP(1).Varying() ),
+         y(SeExprType().FP(1).Varying() ),
+         z(SeExprType().FP(1).Varying() )
     {};
 
     TypeBuilderExpr(const std::string &e, const SeExprType & type = SeExprType::AnyType_varying())
         : SeExpression::SeExpression(e, type),
-          dummyFunc(dummyFuncX,0,16),
-          F1(SeExprType::FP1Type_varying   () ),
-          F2(SeExprType::FPNType_varying   (2)),
-          F3(SeExprType::FPNType_varying   (3)),
-          ST(SeExprType::StringType_varying() ),
-          SE(SeExprType::ErrorType_varying () ),
-          LC(SeExprType::FP1Type_constant  () ),
-          LU(SeExprType::FP1Type_uniform   () ),
-          LV(SeExprType::FP1Type_varying   () ),
-          LE(SeExprType::FP1Type_error     () ),
-          v (SeExprType::FP1Type_varying   () ),
-          x (SeExprType::FP1Type_varying   () ),
-          y (SeExprType::FP1Type_varying   () ),
-          z (SeExprType::FP1Type_varying   () )
+         dummyFunc(dummyFuncX,0,16),
+         func(dummyFuncX,3,3),
+         F1(SeExprType().FP(1).Varying() ),
+         F2(SeExprType().FP(2).Varying()),
+         F3(SeExprType().FP(3).Varying()),
+         ST(SeExprType().String().Varying() ),
+         SE(SeExprType().Error().Varying() ),
+         LC(SeExprType().FP(1).Constant() ),
+         LU(SeExprType().FP(1).Uniform() ),
+         LV(SeExprType().FP(1).Varying() ),
+         LE(SeExprType().FP(1).Error() ),
+         v(SeExprType().FP(1).Varying() ),
+         x(SeExprType().FP(1).Varying() ),
+         y(SeExprType().FP(1).Varying() ),
+         z(SeExprType().FP(1).Varying() )
     {};
 
     //! resolve function
@@ -150,6 +151,8 @@ public:
         if(to=="x") x = SeExprNothingVarRef(resolveVar(from)->type());
         if(to=="y") y = SeExprNothingVarRef(resolveVar(from)->type());
         if(to=="z") z = SeExprNothingVarRef(resolveVar(from)->type());
+        //TODO: rem ove
+        //std::cerr<<"v is "<<v.type().toString()<<" from "<<from<<" is "<<(resolveVar(from)->type().toString())<<std::endl;
     };
 
 private:

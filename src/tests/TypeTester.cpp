@@ -90,6 +90,10 @@ TypeTesterExpr::test(const std::string & expr,
         else if(verbosity_level >= 3)
             std::cerr << "\t\tExpected:   "  << actual_result.toString() << std::endl
                       << "\t\tReceived:   "  << returned     .toString() << std::endl;
+
+        if(verbosity_level >= 4){
+            _walker.walk(_parseTree);
+        }
     }
     else if(verbosity_level >= 3)
         std::cout << "Check passed!" << std::endl;
@@ -128,37 +132,35 @@ SeExprType
 generalComparison(const SeExprType & first,
                   const SeExprType & second)
 {
-    if(first .isUnderValue() &&
-       second.isUnderValue() &&
-       first.isa(second))       { SeExprType t = SeExprType::FP1Type_varying(); t.becomeLifetime(first, second); return t; }
-    else                        return SeExprType::ErrorType_varying();
+    if(SeExprType::valuesCompatible(first,second)){
+        SeExprType t=SeExprType().FP(1);t.becomeLifetime(first,second);
+        return t;
+    }else return SeExprType().Error();
 };
 
 SeExprType
 numericComparison(const SeExprType & first,
                   const SeExprType & second)
 {
-    if(first .isUnderNumeric() &&
-       second.isUnderNumeric() &&
-       first.isa(second))         { SeExprType t = SeExprType::FP1Type_varying(); t.becomeLifetime(first, second); return t; }
-    else                          return SeExprType::ErrorType_varying();
+    if(first.isFP() && second.isFP() && SeExprType::valuesCompatible(first,second)){
+        SeExprType t=SeExprType().FP(1);t.becomeLifetime(first,second);
+        return t;
+    }else return SeExprType().Error();
 };
 
 SeExprType
 numericToNumeric(const SeExprType & first,
                  const SeExprType & second)
 {
-    //if first and second are both numeric and first 'isa' second:
-    //   both first and second are FP1,
-    //   first is FP1 and second is FPN,
-    //   first is FPN and second is FP1, or
-    //   both first and second are FPN (and the same N)
-    if(first .isUnderNumeric() &&
-       second.isUnderNumeric() &&
-       first.isa(second))         { SeExprType t = SeExprType::FPNType_varying(first.isFP1() ?
-                                                                               second.dim()  :
-                                                                               first .dim()   ); t.becomeLifetime(first, second); return t; }
-    else                          return SeExprType::ErrorType_varying();
+    SeExprType type=SeExprType().Error();
+    if(first.isFP() && second.isFP()){
+        if(first.dim()==second.dim()) type=first;
+        else if(first.isFP(1)) type=second;
+        else if(second.isFP(1)) type=first;
+    }
+    type.becomeLifetime(first,second);
+    //std::cerr<<first.toString()<<"+"<<second.toString()<<"="<<type.toString()<<std::endl;;
+    return type;
 };
 
 SeExprType
@@ -272,22 +274,7 @@ int main(int argc,char *argv[])
             switch(argv[i][1]) {
             case 'v':
                 if(argv[i][2] == '=') {
-                    switch(argv[i][3]) {
-                    case '0':
-                        verbosity_level = 0;
-                        break;
-                    case '1':
-                        verbosity_level = 1;
-                        break;
-                    case '2':
-                        verbosity_level = 2;
-                        break;
-                    case '3':
-                        verbosity_level = 3;
-                        break;
-                    default:
-                        break;
-                    };
+                    verbosity_level=atoi(&argv[i][3]);
                 };
                 break;
             case 't':
@@ -313,6 +300,7 @@ int main(int argc,char *argv[])
                 std::cerr << expr.parseError() << std::endl;
         }
     } else {
+        std::cerr<<"LALA"<<std::endl;
         testOne("$a = $v; $a", expr, identity,        verbosity_level);
         testOne("[$v]",        expr, numericToScalar, verbosity_level);
         testOne("-$v",         expr, numeric,         verbosity_level);
@@ -363,6 +351,7 @@ int main(int argc,char *argv[])
             std::cout << "Checking local function definitions." << std::endl;
         std::string funcdef = "def foo() { $a = 4; $a } 4";
         expr.test(funcdef, SeExprType::FP1Type_constant(),  SeExprType::FP1Type_constant(),  funcdef, verbosity_level);
+
     };
 
     return 0;

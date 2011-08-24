@@ -282,6 +282,8 @@ class SeExpression
     mutable SeExprNode *_parseTree;
 
  private:
+    /** Flag if we are valid or not */
+    mutable bool _isValid;
     /** Flag set once expr is parsed/prepped (parsing is automatic and lazy) */
     mutable bool _parsed, _prepped;
     

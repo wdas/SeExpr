@@ -43,6 +43,7 @@
 #include "SeExprNode.h"
 #include "SeExprFunc.h"
 #include "TypeBuilder.h"
+#include "TypePrinter.h"
 
 /**
    @file TypeTester.h
@@ -55,12 +56,15 @@ public:
     typedef SeExprType(*FindResultTwo)  (const SeExprType &, const SeExprType &);
     typedef SeExprType(*FindResultThree)(const SeExprType &, const SeExprType &, const SeExprType &);
 
+    TypePrintExaminer _examiner;
+    SeExpr::ConstWalker  _walker;
+
     TypeTesterExpr()
-        : TypeBuilderExpr()
+        : TypeBuilderExpr(),_walker(&_examiner)
     {};
 
     TypeTesterExpr(const std::string &e, const SeExprType & type = SeExprType::AnyType_varying())
-        :  TypeBuilderExpr(e, type)
+        :  TypeBuilderExpr(e, type),_walker(&_examiner)
     {};
 
     void test(const std::string & expr,

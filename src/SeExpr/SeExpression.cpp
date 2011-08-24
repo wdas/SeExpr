@@ -47,17 +47,44 @@
 #include "SeExprType.h"
 #include "SeExprEnv.h"
 
+#include <cstdio>
+#include <typeinfo>
+#include <SeExprWalker.h>
+
+
 using namespace std;
 
+class TypePrintExaminer : public SeExpr::Examiner<true> {
+public:
+    virtual bool examine(const SeExprNode* examinee);
+    virtual void reset  ()                           {};
+};
+
+
+bool
+TypePrintExaminer::examine(const SeExprNode* examinee)
+{
+    const SeExprNode* curr=examinee;
+    int depth=0;
+    char buf[1024];
+    while(curr != 0) {depth++;curr=curr->parent();}
+    sprintf(buf,"%*s",depth*2," ");
+    std::cout <<buf<<"'"<<examinee->toString()<<"' "<<typeid(*examinee).name()
+              <<" type=" << examinee->type().toString() << std::endl;
+
+    return true;
+};
+
+
 SeExpression::SeExpression()
-    : _wantVec(true), _returnType(SeExprType::AnyType_varying()), _parseTree(0), _parsed(0), _prepped(0)
+    : _wantVec(true), _returnType(SeExprType::AnyType_varying()), _parseTree(0), _isValid(0), _parsed(0), _prepped(0)
 {
     SeExprFunc::init();
 }
 
 
 SeExpression::SeExpression( const std::string &e, const SeExprType & type)
-    : _wantVec(true), _returnType(type), _expression(e), _parseTree(0), _parsed(0), _prepped(0)
+    : _wantVec(true), _returnType(type), _expression(e), _parseTree(0), _isValid(0), _parsed(0), _prepped(0)
 {
     SeExprFunc::init();
 }
@@ -70,6 +97,7 @@ SeExpression::~SeExpression()
 void SeExpression::reset()
 {
     delete _parseTree;
+    _isValid = 0;
     _parseTree = 0;
     _parsed = 0;
     _prepped = 0;
@@ -104,13 +132,13 @@ void SeExpression::setExpr(const std::string& e)
 bool SeExpression::syntaxOK() const
 {
     parseIfNeeded();
-    return _parseTree != 0;
+    return _isValid;
 }
 
 bool SeExpression::isValid() const
 {
     prepIfNeeded();
-    return _parseTree != 0;
+    return _isValid;
 }
 
 bool SeExpression::isConstant() const
@@ -140,7 +168,7 @@ SeExpression::parse() const
     SeExprParse(_parseTree,
         _parseError, tempStartPos, tempEndPos, 
         _comments, this, _expression.c_str(), _wantVec);
-    if(!_parseTree){
+    if(!_isValid){
         addError(_parseError,tempStartPos,tempEndPos);
     }
 }
@@ -152,7 +180,7 @@ SeExpression::prep() const
     _prepped = true;
     parseIfNeeded();
     SeExprVarEnv env;
-    if (_parseTree && !_parseTree->prep(_returnType, env).isValid()) {
+    if (_parseTree && !_parseTree->prep(_returnType.isFP(1), env).isValid()) {
         // build line lookup table
         std::vector<int> lines;
         const char* start=_expression.c_str();
@@ -173,8 +201,15 @@ SeExpression::prep() const
         }
         _parseError=std::string(sstream.str());
 
-	delete _parseTree; _parseTree = 0;
-    }
+        // TODO: fix this back
+
+        //TypePrintExaminer _examiner;
+        //SeExpr::ConstWalker  _walker(&_examiner);
+        //_walker.walk(_parseTree);
+
+	//delete _parseTree; _parseTree = 0;
+		_isValid=false;
+    }else _isValid=true;
 }
 
 
@@ -182,7 +217,7 @@ bool
 SeExpression::isVec() const
 {
     prepIfNeeded();
-    return _parseTree ? _parseTree->isVec() : _wantVec;
+    return _isValid ? _parseTree->isVec() : _wantVec;
 }
 
 const SeExprType &
@@ -196,7 +231,7 @@ SeVec3d
 SeExpression::evaluate() const
 {
     prepIfNeeded();
-    if (_parseTree) {
+    if (_isValid) {
 	// set all local vars to zero
 	for (LocalVarTable::iterator iter = _localVars.begin();
 	     iter != _localVars.end(); iter++)
