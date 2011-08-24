@@ -40,133 +40,67 @@
 #include <vector>
 
 SeExprVarEnv::~SeExprVarEnv() {
-    if(!_anotherOwns) {
-        DictType::const_iterator       ienv = begin();
-        DictType::const_iterator const eenv = end  ();
-
-        for(; ienv != eenv; ++ienv)
+    if(!_anotherOwns) 
+        for(DictType::const_iterator ienv=_map.begin(); ienv != _map.end(); ++ienv)
             delete ienv->second;
-    }
-};
+}
 
-SeExprVarEnv::ValType *
-SeExprVarEnv::find(const KeyType & name)
+SeExprVarRef* SeExprVarEnv::find(const std::string & name)
 {
-    ValType * answer = localFind(name);
-    if(answer)
-        return answer;
-    else
-        return parFind(name);
-};
+    DictType::iterator iter=_map.find(name);
+    if(iter != _map.end()) return iter->second;
+    else if(_parent) return _parent->find(name);
+    else return 0;
+}
 
-SeExprVarEnv::ValType const *
-SeExprVarEnv::lookup(const KeyType & name) const
+SeExprVarRef const * SeExprVarEnv::lookup(const std::string & name) const
 {
-    ValType const * answer = localLookup(name);
-    if(answer)
-        return answer;
-    else
-        return parLookup(name);
-};
+    DictType::const_iterator iter=_map.find(name);
+    if(iter != _map.end()) return iter->second;
+    else if(_parent) return _parent->lookup(name);
+    return 0;
+}
 
-void
-SeExprVarEnv::add(const KeyType & name, ValType * var)
+void SeExprVarEnv::add(const std::string & name, SeExprVarRef * var)
 {
-    ValType * old = localFind(name);
+    DictType::iterator iter=_map.find(name);
+    if(iter != _map.end()) *iter->second=*var;
+    else _map.insert(std::pair<std::string,SeExprVarRef*>(name,var));
+}
 
-    if(old)
-        *old = *var;
-    else
-        _map.insert(std::pair<KeyType,ValType*>(name,var));
-};
-
-void
-SeExprVarEnv::add(SeExprVarEnv & env, const SeExprType & modifyingType)
+void SeExprVarEnv::add(SeExprVarEnv & env, const SeExprType & modifyingType)
 {
-    DictType::iterator       ienv = env.begin();
-    DictType::iterator const eenv = env.end  ();
-
-    for(; ienv != eenv; ++ienv) {
-        SeExprVarRef * ref  = ienv->second;
-        SeExprType     type = ref->type();
-
+    //! Iterate over all variables in env and copy types into our scope
+    for(DictType::iterator ienv=env._map.begin(); ienv != env._map.end(); ++ienv) {
+        SeExprVarRef* ref=ienv->second;
+        SeExprType type=ref->type();
         type.becomeLifetime(type, modifyingType);
         ref->setType(type);
-
-        add(ienv->first, ref);
+        add(ienv->first, ref); // add to this scope
     }
+    // this takes ownership of all members of env, so tell it not to delete them
+    env._anotherOwns=true;
+}
 
-    env.copied();
-};
-
-bool
-SeExprVarEnv::branchesMatch(const SeExprVarEnv & env1, const SeExprVarEnv & env2)
+bool SeExprVarEnv::branchesMatch(const SeExprVarEnv & env1, const SeExprVarEnv & env2)
 {
     bool match = true;
-
-    DictType::const_iterator       ienv  = env1.begin();
-    DictType::const_iterator const eenv1 = env1.end  ();
-
-    for(; match && ienv != eenv1; ++ienv) {
-        const KeyType & name = ienv->first;
-        const ValType * var  = ienv->second;
-
-        match = env2.lookup(name)->type() == var->type();
+    // Check each variable in env1 by looking up and checking type against env2
+    for(DictType::const_iterator ienv=env1._map.begin(); 
+        match && ienv != env1._map.end(); ++ienv) {
+        const std::string & name = ienv->first;
+        const SeExprVarRef * var  = ienv->second;
+        const SeExprVarRef* env2Var = env2.lookup(name);
+        match = env2Var && env2Var->type() == var->type();
     }
-
-    ienv = env2.begin();
-    DictType::const_iterator const eenv2 = env2.end();
-
-    for(; match && ienv != eenv2; ++ienv) {
-        const KeyType & name = ienv->first;
-        const ValType * var  = ienv->second;
-
-        match = env1.lookup(name)->type() == var->type();
+    // Check other map (only need to check for variables in env2 but not in env1
+    for(DictType::const_iterator ienv=env2._map.begin(); 
+        match && ienv != env2._map.end(); ++ienv) {
+        const std::string & name = ienv->first;
+        const SeExprVarRef * var  = ienv->second;
+        match = env1.lookup(name) != 0;
     }
 
     return match;
 }
 
-SeExprVarEnv
-SeExprVarEnv::newBranch(SeExprVarEnv & env)
-{
-    return SeExprVarEnv(&env);
-};
-
-SeExprVarEnv::ValType *
-SeExprVarEnv::localFind(const KeyType & name)
-{
-    DictType::iterator iter = _map.find(name);
-    if(iter == _map.end())
-        return 0;
-    else
-        return iter->second;
-};
-
-SeExprVarEnv::ValType const *
-SeExprVarEnv::localLookup(const KeyType & name) const
-{
-    DictType::const_iterator iter = _map.find(name);
-    if(iter == _map.end())
-        return 0;
-    else
-        return iter->second;
-};
-
-SeExprVarEnv::ValType *
-SeExprVarEnv::parFind(const KeyType & name)
-{
-    if(_parent)
-        return _parent->find(name);
-    else
-        return 0;
-};
-
-SeExprVarEnv::ValType const *
-SeExprVarEnv::parLookup(const KeyType & name) const
-{
-    if(_parent)
-        return _parent->lookup(name);
-    else
-        return 0;
-};

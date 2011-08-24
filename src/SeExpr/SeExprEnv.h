@@ -43,76 +43,40 @@
 
 class SeExprVarRef;
 
+//! Variable scope for tracking variable lookup
 class SeExprVarEnv {
  private:
-    std::string                  typedef KeyType;
-    SeExprVarRef                 typedef ValType;
-    std::map<KeyType, ValType *> typedef DictType;
+    typedef std::map<std::string,SeExprVarRef*> DictType;
+    DictType       _map;
+    SeExprVarEnv * _parent;
+    //! False if this env owns, true if some other env has taken ownership
+    //! e.g. see the IfThenElseNode
+    mutable bool   _anotherOwns;
 
+ public:
+    //! Create a scope that inherits from parent
     SeExprVarEnv(SeExprVarEnv * parent)
         : _map(), _parent(parent), _anotherOwns(false)
     {};
 
- public:
+    // TODO: figure out when anotherOwns is needed
+    //! Create a scope with no parent
     SeExprVarEnv()
         : _map(), _parent(0), _anotherOwns(false)
     {};
 
     ~SeExprVarEnv();
 
-    ValType       * find  (const KeyType      & name);
-    ValType const * lookup(const KeyType      & name)                                   const;
-    void            add   (const KeyType      & name,       ValType    * var);
-    void            add   (      SeExprVarEnv & env,  const SeExprType & modifyingType);
-
-    inline int size() const { return _map.size(); };
-
-    static bool         branchesMatch(const SeExprVarEnv & env1, const SeExprVarEnv & env2);
-    static SeExprVarEnv newBranch    (      SeExprVarEnv & env);
-
- protected:
-    DictType::      iterator       begin ()       { return _map.begin(); };
-    DictType::const_iterator       begin () const { return _map.begin(); };
-    DictType::      iterator const end   ()       { return _map.end  (); };
-    DictType::const_iterator const end   () const { return _map.end  (); };
-    void                           copied() const { _anotherOwns = true; };
-
- private:
-    ValType       * localFind  (const KeyType & name);
-    ValType const * localLookup(const KeyType & name) const;
-    ValType       * parFind    (const KeyType & name);
-    ValType const * parLookup  (const KeyType & name) const;
-
-    DictType       _map;
-    SeExprVarEnv * _parent;
-    mutable bool   _anotherOwns;
-};
-
-class SeExprFuncRef {
- public:
-    SeExprFuncRef(SeExprType ret, const std::vector<SeExprType>& args)
-        : _retType(ret), _args(args)
-    {};
-
-    inline       SeExprType                returnType() const { return _retType; };
-    inline const std::vector<SeExprType> & argTypes  () const { return _args;    };
-
- private:
-    SeExprType _retType;
-    std::vector<SeExprType> _args;
-};
-
-class ReturnValue {
- public:
-    ReturnValue();
-
- private:
-    union Ptrs {
-        float * flo;
-        double* dou;
-        char  * str;
-    };
-    Ptrs valuePtr;
+    //! Find a variable name by name (recursive to parents)
+    SeExprVarRef* find(const std::string& name);
+    //! Find a const variable reference name by name (recursive to parents)
+    SeExprVarRef const* lookup(const std::string& name) const;
+    //! Add a variable refernece
+    void add(const std::string& name,SeExprVarRef* var);
+    //! Add all variables into scope by name, but modify their lifetimes to the given type's lifetime
+    void add(SeExprVarEnv & env,const SeExprType & modifyingType);
+    //! Checks if each branch shares the same items and the same types!
+    static bool branchesMatch(const SeExprVarEnv & env1, const SeExprVarEnv & env2);
 };
 
 #endif

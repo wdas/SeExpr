@@ -418,10 +418,10 @@ SeExprIfThenElseNode::prep(SeExprType wanted, SeExprVarEnv & env)
     else
         error = true;
 
-    thenEnv  = SeExprVarEnv::newBranch(env);
+    thenEnv  = SeExprVarEnv(env);
     thenType = child(1)->prep(SeExprType::AnyType_varying(), thenEnv);
 
-    elseEnv  = SeExprVarEnv::newBranch(env);
+    elseEnv  = SeExprVarEnv(env);
     elseType = child(2)->prep(SeExprType::AnyType_varying(), elseEnv);
 
     if(!error             &&
