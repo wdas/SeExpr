@@ -40,6 +40,7 @@
 #include <cstdio>
 #include <cstring>
 #include <SeExpression.h>
+#include <SeInterpreter.h>
 #include <png.h>
 #include <fstream>
 
@@ -56,16 +57,19 @@ public:
     struct Var:public SeExprVarRef
     {
         Var(const double val)
-	    : SeExprVarRef(SeExprType::FP1Type_varying()), val(val)
+	    : SeExprVarRef(SeExprType().FP(1).Varying()), val(val)
 	{}
 
 	Var()
-	    : SeExprVarRef(SeExprType::FP1Type_varying()), val(0.0)
+	    : SeExprVarRef(SeExprType().FP(1).Varying()), val(0.0)
 	{}
 
         double val; // independent variable
-        void eval(const SeExprVarNode* node,SeVec3d& result)
+        void eval(double* result)
         {result[0]=val;}
+
+        void eval(char** result)
+        {assert(false);}
     };
     //! variable map
     mutable std::map<std::string,Var> vars;
@@ -116,6 +120,11 @@ int main(int argc,char *argv[]){
     if(!valid){
         std::cerr<<"Invalid expression "<<std::endl;
         std::cerr<<expr.parseError()<<std::endl;
+        return 1;
+    }
+    if(!expr.returnType().isFP(3)){
+        std::cerr<<"Expected color FP[3] got type "<<expr.returnType().toString()<<std::endl;
+        return 1;
     }
 
     // evaluate expression
@@ -129,7 +138,8 @@ int main(int argc,char *argv[]){
         for(int col=0;col<width;col++){
             u=one_over_width*(col+.5);
             v=one_over_height*(row+.5);
-            SeVec3d result=expr.evaluate();
+            const double* result=expr.evalFP();
+//            expr._interpreter->print();
             pixel[0]=clamp(result[0]*256.);
             pixel[1]=clamp(result[1]*256.);
             pixel[2]=clamp(result[2]*256.);

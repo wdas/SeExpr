@@ -57,12 +57,15 @@ private:
     struct SimpleVar:public SeExprVarRef
     {
 	SimpleVar()
-	    : SeExprVarRef(SeExprType::FP1Type_varying()), val(0.0)
+	    : SeExprVarRef(SeExprType().FP(1).Varying()), val(0.0)
 	{}
 
         double val; // independent variable
-        void eval(const SeExprVarNode* node,SeVec3d& result)
+        void eval(double* result)
         {result[0]=val;}
+
+        void eval(char** result)
+        {}
     };
     
     //! independent variable
@@ -92,7 +95,11 @@ int main(int argc,char *argv[])
     if(!expr.isValid()){
         std::cerr<<"expression failed "<<expr.parseError()<<std::endl;
         exit(1);
+    }else if(!expr.returnType().isFP(1)){
+        std::cerr<<"Expected expression of type "<<SeExprType().FP(1).Varying().toString()<<" got "<<expr.returnType().toString()<<std::endl;
+        exit(1);
     }
+
     double xmin=-10,xmax=10,ymin=-10,ymax=10;
     int w=60,h=30;
     char *buffer=new char[w*h];
@@ -123,9 +130,10 @@ int main(int argc,char *argv[])
             double x=double(dx+i)/double(w)*(xmax-xmin)+xmin;
             // prep the expression engine for evaluation
             expr.setX(x);
+            const double* val=expr.evalFP();
             // evaluate and pull scalar value - currently does not work
             //TODO: fix eval and then use actual call
-            SeVec3d val=0.0;//expr.evaluate();
+            //SeVec3d val=0.0;//expr.evaluate();
             double y=val[0];
             // transform from logical to device coordinate
             int j=(y-ymin)/(ymax-ymin)*h;

@@ -80,7 +80,7 @@ class SeVec3d
     double       &operator []( int i )          { return (_vec[i]); }
 
     //! Accesses indexed component of vector (const)
-    const double operator []( int i ) const    { return (_vec[i]); }
+    double operator []( int i ) const    { return (_vec[i]); }
 
     /** Assignment. */
     SeVec3d &operator =( const SeVec3d &v )

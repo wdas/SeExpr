@@ -61,13 +61,13 @@ public:
             bool valid=true;
             for(int i=0;i<node->numChildren();i++){
                 if(!node->isStrArg(i))
-                    valid&=node->child(i)->prep(SeExprType::AnyType_varying(), env).isValid();
+                    valid&=node->child(i)->prep(false, env).isValid();
             }
             return wanted;
         }
 
         virtual bool       isScalar() const { return true;                          };
-        virtual SeExprType retType () const { return SeExprType::FP1Type_varying(); };
+        virtual SeExprType retType () const { return SeExprType().FP(1).Varying(); };
 
         void eval(const SeExprFuncNode* node,SeVec3d& result) const
         {result=SeVec3d();}

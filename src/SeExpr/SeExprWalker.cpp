@@ -56,6 +56,7 @@ internalWalk(T_NODE* examinee)
 {
     /// If examine returns false, do not recurse
     if(_examiner->examine(examinee)) walkChildren(examinee);
+    _examiner->post(examinee);
 };
 
 template<bool constnode> void Walker<constnode>::

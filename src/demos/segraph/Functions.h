@@ -41,11 +41,19 @@
 #include <SeExpression.h>
 
 //! Simple variable that just returns its internal value
-struct SimpleVar:public SeExprScalarVarRef
+struct SimpleVar:public SeExprVarRef
 {
     double val; // independent variable
-        void eval(const SeExprVarNode* /*node*/,SeVec3d& result)
+
+    SimpleVar()
+        : SeExprVarRef(SeExprType().FP(1).Varying()), val(0.0)
+    {}
+
+    void eval(double* result)
     {result[0]=val;}
+    
+    void eval(char** result)
+    {}
 };
 
 //! Model representing all the functions that the grapher handles

@@ -47,17 +47,44 @@
 #include "SeExprType.h"
 #include "SeExprEnv.h"
 
+#include <cstdio>
+#include <typeinfo>
+#include <SeExprWalker.h>
+
+
 using namespace std;
 
+class TypePrintExaminer : public SeExpr::Examiner<true> {
+public:
+    virtual bool examine(const SeExprNode* examinee);
+    virtual void reset  ()                           {};
+};
+
+
+bool
+TypePrintExaminer::examine(const SeExprNode* examinee)
+{
+    const SeExprNode* curr=examinee;
+    int depth=0;
+    char buf[1024];
+    while(curr != 0) {depth++;curr=curr->parent();}
+    sprintf(buf,"%*s",depth*2," ");
+    std::cout <<buf<<"'"<<examinee->toString()<<"' "<<typeid(*examinee).name()
+              <<" type=" << examinee->type().toString() << std::endl;
+
+    return true;
+};
+
+
 SeExpression::SeExpression()
-    : _wantVec(true), _returnType(SeExprType::AnyType_varying()), _parseTree(0), _parsed(0), _prepped(0)
+    : _wantVec(true), _desiredReturnType(SeExprType().FP(3).Varying()), _varEnv(0), _parseTree(0), _isValid(0), _parsed(0), _prepped(0),_interpreter(0)
 {
     SeExprFunc::init();
 }
 
 
 SeExpression::SeExpression( const std::string &e, const SeExprType & type)
-    : _wantVec(true), _returnType(type), _expression(e), _parseTree(0), _parsed(0), _prepped(0)
+    : _wantVec(true), _desiredReturnType(type), _expression(e), _varEnv(0),  _parseTree(0), _isValid(0), _parsed(0), _prepped(0),_interpreter(0)
 {
     SeExprFunc::init();
 }
@@ -69,30 +96,25 @@ SeExpression::~SeExpression()
 
 void SeExpression::reset()
 {
-    delete _parseTree;
-    _parseTree = 0;
+    delete _parseTree;_parseTree=0;
+    delete _varEnv;_varEnv=0;
+    delete _interpreter;_interpreter=0;
+    _isValid = 0;
     _parsed = 0;
     _prepped = 0;
     _parseError = "";
     _vars.clear();
     _funcs.clear();
-    _localVars.clear();
+    //_localVars.clear();
     _errors.clear();
     _threadUnsafeFunctionCalls.clear();
     _comments.clear();
 }
 
-void SeExpression::setWantVec(bool wantVec)
+void SeExpression::setDesiredReturnType(const SeExprType & type)
 {
     reset();
-    _wantVec = wantVec;
-    std::cerr << "Use of setWantVec is deprecated. If you are seeing this, you used setWantVec.  Please use setReturnType instead." << std::endl;
-}
-
-void SeExpression::setReturnType(const SeExprType & type)
-{
-    reset();
-    _returnType = type;
+    _desiredReturnType=type;
 }
 
 void SeExpression::setExpr(const std::string& e)
@@ -104,13 +126,13 @@ void SeExpression::setExpr(const std::string& e)
 bool SeExpression::syntaxOK() const
 {
     parseIfNeeded();
-    return _parseTree != 0;
+    return _isValid;
 }
 
 bool SeExpression::isValid() const
 {
     prepIfNeeded();
-    return _parseTree != 0;
+    return _isValid;
 }
 
 bool SeExpression::isConstant() const
@@ -151,8 +173,60 @@ SeExpression::prep() const
     if (_prepped) return;
     _prepped = true;
     parseIfNeeded();
-    SeExprVarEnv env;
-    if (_parseTree && !_parseTree->prep(_returnType, env).isValid()) {
+    _varEnv=new SeExprVarEnv;
+
+
+    bool error=false;
+
+    if(!_parseTree){
+        // parse error
+        error=true;
+    }else if (!_parseTree->prep(_desiredReturnType.isFP(1), *_varEnv).isValid()) {
+        // prep error
+        error=true;
+    }else if(!SeExprType::valuesCompatible(_parseTree->type(),_desiredReturnType)){
+        // incompatible type error
+        error=true;
+        _parseTree->addError("Expression generated type "
+            +_parseTree->type().toString()+" incompatible with desired type "
+            +_desiredReturnType.toString());
+    }else{
+        if(_parseTree){
+            std::cerr<<"Parse tree desired type "<<_desiredReturnType.toString()<<" actual "<<_parseTree->type().toString()<<std::endl;
+            TypePrintExaminer _examiner;
+            SeExpr::ConstWalker  _walker(&_examiner);
+            _walker.walk(_parseTree);
+        }
+
+        _isValid=true;
+        _interpreter=new SeInterpreter;
+        _returnSlot=_parseTree->buildInterpreter(_interpreter);
+        _interpreter->print();
+        if(_desiredReturnType.isFP()){
+            int dimWanted=_desiredReturnType.dim();
+            int dimHave=_parseTree->type().dim();
+            if(dimWanted>dimHave){
+                _interpreter->addOp(getTemplatizedOp<Promote>(dimWanted));
+                int finalOp=_interpreter->allocFP(dimWanted);
+                _interpreter->addOperand(_returnSlot);
+                _interpreter->addOperand(finalOp);            
+                _returnSlot=finalOp;
+                _interpreter->endOp();
+            }
+        } 
+
+
+        // TODO: need promote
+        
+        _returnType=_parseTree->type();
+    }
+    
+
+    
+    if(error){
+        _isValid=false;
+        _returnType=SeExprType().Error();
+
         // build line lookup table
         std::vector<int> lines;
         const char* start=_expression.c_str();
@@ -164,7 +238,6 @@ SeExpression::prep() const
         lines.push_back(p-start);
 
         std::stringstream sstream;
-        sstream<<"Prep errors:"<<std::endl;
         for(unsigned int i=0;i<_errors.size();i++){
             int* bound=lower_bound(&*lines.begin(),&*lines.end(),_errors[i].startPos);
             int line=bound-&*lines.begin()+1;
@@ -172,9 +245,9 @@ SeExpression::prep() const
             sstream<<"  Line "<<line<<": "<<_errors[i].error<<std::endl;
         }
         _parseError=std::string(sstream.str());
-
-	delete _parseTree; _parseTree = 0;
     }
+
+    std::cerr<<"ending with isValid "<<_isValid<<std::endl;
 }
 
 
@@ -182,25 +255,28 @@ bool
 SeExpression::isVec() const
 {
     prepIfNeeded();
-    return _parseTree ? _parseTree->isVec() : _wantVec;
+    return _isValid ? _parseTree->isVec() : _wantVec;
 }
 
 const SeExprType &
 SeExpression::returnType() const
 {
     prepIfNeeded();
-    return _parseTree->type();
+    return _returnType;
 }
 
+#if 0
+// TODO: remove
 SeVec3d
 SeExpression::evaluate() const
 {
+// TODO: delete
     prepIfNeeded();
-    if (_parseTree) {
+    if (_isValid) {
 	// set all local vars to zero
-	for (LocalVarTable::iterator iter = _localVars.begin();
-	     iter != _localVars.end(); iter++)
-	    iter->second.val = 0.0;
+	//for (LocalVarTable::iterator iter = _localVars.begin();
+	//     iter != _localVars.end(); iter++)
+	//    iter->second.val = 0.0;
 
 	SeVec3d vec;
 	_parseTree->eval(vec);
@@ -209,4 +285,27 @@ SeExpression::evaluate() const
 	return vec;
     }
     else return SeVec3d(0,0,0);
+    return SeVec3d(0,0,0);
 }
+#endif
+
+const double* SeExpression::evalFP() const
+{
+    prepIfNeeded();
+    if (_isValid) {
+        _interpreter->eval();
+        return &_interpreter->d[_returnSlot];
+    }
+    return 0;
+}
+
+const char* SeExpression::evalStr() const
+{
+    prepIfNeeded();
+    if (_isValid) {
+        _interpreter->eval();
+        return _interpreter->s[_returnSlot];
+    }
+    return 0;
+}
+

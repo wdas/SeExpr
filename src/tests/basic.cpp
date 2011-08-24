@@ -82,7 +82,7 @@ int main()
         SeExpression expr("3+4");
         SE_TEST_ASSERT(expr.isValid());
         SE_TEST_ASSERT(!expr.isVec());
-        SeVec3d val=expr.evaluate();
+        const double* val=expr.evalFP();
         SE_TEST_ASSERT(expr.isConstant());
         SE_TEST_ASSERT_EQUAL(val[0],7);
     }
@@ -98,7 +98,7 @@ int main()
         SE_TEST_ASSERT(expr.usesVar("x"));
         SE_TEST_ASSERT(expr.usesVar("y"));
         SE_TEST_ASSERT(!expr.usesVar("z"));
-        SeVec3d val=expr.evaluate();
+        const double* val=expr.evalFP();
         SE_TEST_ASSERT_EQUAL(val[0],7);
     }
 
@@ -109,25 +109,29 @@ int main()
         SE_TEST_ASSERT(!expr.isVec());
         SE_TEST_ASSERT(!expr.isConstant());
         SE_TEST_ASSERT(expr.usesFunc("custom"));
-        SE_TEST_ASSERT_EQUAL(expr.evaluate()[0],3);
+        SE_TEST_ASSERT_EQUAL(expr.evalFP()[0],3);
     }
 
     // Simple precedence rules
     {
 	SimpleExpression expr1("1+2*3");
-	SE_TEST_ASSERT_EQUAL(expr1.evaluate()[0],7);
+	SE_TEST_ASSERT_EQUAL(expr1.evalFP()[0],7);
 	SimpleExpression expr2("(1+2)*3");
-	SE_TEST_ASSERT_EQUAL(expr2.evaluate()[0],9);
+	SE_TEST_ASSERT_EQUAL(expr2.evalFP()[0],9);
     }
 
     //  Vector assignment test
     {
 	SimpleExpression expr1("$foo=[0,1,2]; $foo=3; $foo");
-	SimpleExpression expr2("3");
-	SE_TEST_ASSERT_VECTOR_EQUAL(expr1.evaluate(),expr2.evaluate());
+        double val1=expr1.evalFP()[0];
+        
+	SE_TEST_ASSERT_EQUAL(val1,3);
+
 	SimpleExpression expr3("$foo=3; $foo=[0,1,2]; $foo");
 	SimpleExpression expr4("[0,1,2]");
-	SE_TEST_ASSERT_VECTOR_EQUAL(expr3.evaluate(),expr4.evaluate());
+        SeVec<double,3,true> val3(const_cast<double*>(expr3.evalFP()));
+        SeVec<double,3,true> val4(const_cast<double*>(expr4.evalFP()));
+	SE_TEST_ASSERT_VECTOR_EQUAL(val3,val4);
     }
 
     return 0;

@@ -41,26 +41,7 @@
 #include "SeExprNode.h"
 #include "SeExprFunc.h"
 #include "TypeBuilder.h"
-
-/**
-   @file TypePrinter.cpp
-*/
-class TypePrintExaminer : public SeExpr::Examiner<true> {
-public:
-    virtual bool examine(const SeExprNode* examinee);
-    virtual void reset  ()                           {};
-};
-
-
-bool
-TypePrintExaminer::examine(const SeExprNode* examinee)
-{
-    std::cout <<           examinee->       toString() << std::endl;
-    std::cout << "    " << examinee->type().toString() << std::endl;
-
-    return true;
-};
-
+#include "TypePrinter.h"
 
 //! Simple expression class to print out all intermediate types
 class TypePrinterExpr : public TypeBuilderExpr
@@ -72,13 +53,13 @@ public:
           _walker(&_examiner)
     {};
 
-    TypePrinterExpr(const std::string &e, const SeExprType & type = SeExprType::AnyType_varying())
-        :  TypeBuilderExpr(e, type),
+    TypePrinterExpr(const std::string &e)
+        :  TypeBuilderExpr(e),
           _examiner(),
           _walker(&_examiner)
     {};
 
-    inline void walk () { if(isValid()) _walker.walk(_parseTree); };
+    inline void walk () { if(_parseTree) _walker.walk(_parseTree); };
 
 private:
     TypePrintExaminer _examiner;
@@ -118,7 +99,6 @@ int main(int argc,char *argv[])
         expr.setExpr(str);
         if(expr.isValid()) {
             std::cout << "Expression types:" << std::endl;
-            expr.walk();
         } else
 	    std::cerr << "Expression failed: " << expr.parseError() << std::endl;
     } else {
@@ -129,12 +109,25 @@ int main(int argc,char *argv[])
 
             get_or_quit(str);
             expr.setExpr(str);
-
-            if(expr.isValid()) {
-                std::cout << "Expression types:" << std::endl;
-                expr.walk();
-            } else
+            bool valid=expr.isValid();
+            std::cout << "Expression types:" << std::endl;
+            expr.walk();
+            if(!valid)
                 std::cerr << "Expression failed: " << expr.parseError() << std::endl;
+            else if(expr.returnType().isFP() && expr.returnType().dim()<=16){
+
+                double foo[16];
+                for(int c=0;c<16;c++) foo[c]=0;
+                SeExprEvalResult res(16,foo);
+                
+                expr.evalNew(res);
+                for(int i=0;i<expr.returnType().dim();i++){
+                    std::cerr<<res.fp[i]<<" ";
+                }
+                std::cerr<<std::endl;
+            }else{
+                std::cerr<<"can't eval things that are not FP[<=16]"<<std::endl;
+            }
         }
     }
 

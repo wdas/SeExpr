@@ -33,35 +33,6 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
-/* Parse tree nodes - this is where the expression evaluation happens.
-
-   Some implementation notes: 
-
-   1) Vector vs scalar - Any node can accept vector or scalar inputs
-   and return a vector or scalar result.  If a node returns a scalar,
-   it is only required to set the [0] component and the other
-   components must be assumed to be invalid.
-
-   2) SeExprNode::prep - This is called for all nodes during parsing
-   once the syntax has been checked.  Anything can be done here, such
-   as function binding, variable lookups, etc., but the only thing
-   that must be done is to determine whether the result is going to be
-   vector or scalar.  This can in some cases depend on whether the
-   children are vector or scalar so the parser calls prep on the root
-   node and each node is expected to call prep on its children and
-   then set its own _isVec variable.  The wantVec param provides
-   context from the parent (and ultimately the owning expression) as
-   to whether a vector is desired, but nodes are not bound by this and
-   may produce a scalar even when a vector is wanted.
-   
-   The base class method implements the default behavior which is to
-   pass down the wantVec flag to all children and set isVec to true if
-   any child is a vec.
-
-   If the prep method fails, an error string should be set and false
-   should be returned.
-*/
-
 #ifndef MAKEDEPEND
 #include <math.h>
 #include <sstream>
@@ -72,6 +43,16 @@
 #include "SeExprEnv.h"
 #include "SeExprNode.h"
 #include "SeExprFunc.h"
+
+
+//TODO: add and other binary op demote to scalar if wantScalar
+//TODO: logical operations like foo<bar should they do vector returns... right now no... implicit demote
+//TODO: local function evaluation
+//TODO: buildInterpreter for higher level nodes so the return location can be routed back
+//TODO: SeExprFuncNode interpreter stuff
+//TODO: check each node for possibility of strings
+
+
 
 
 SeExprNode::SeExprNode(const SeExpression* expr)
@@ -203,90 +184,63 @@ SeExprNode::addChildren_without_delete(SeExprNode* surrogate)
 
 
 SeExprType
-SeExprNode::prep(SeExprType wanted, SeExprVarEnv & env)
+SeExprNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
     /** The default behavior is to call prep on children (giving AnyType as desired type).
      *  If all children return valid types, returns NoneType.
      *  Otherwise,                          returns ErrorType.
      *  *Note:* Ignores wanted type.
      */
+    bool error=false;
+
+    _maxChildDim=0;
+    for(int c=0;c<numChildren();c++){
+        error |= !child(c)->prep(false, env).isValid();
+        int childDim=child(c)->type().isFP() ? child(c)->type().dim() : 0;
+        if(childDim>_maxChildDim) _maxChildDim=childDim;
+    }
+
+    if(error) setType(SeExprType().Error());
+    else setTypeWithChildLife(SeExprType().None());
+
+    return _type;
+}
+
+SeExprType
+SeExprModuleNode::prep(bool wantScalar, SeExprVarEnv & env)
+{
     bool error = false;
 
-    std::vector<SeExprNode*>::iterator       child   = _children.begin();
-    std::vector<SeExprNode*>::iterator const e_child = _children.end  ();
-
-    for(; child != e_child; child++)
-        error = (error ||
-                 (!((*child)->prep(SeExprType::AnyType_varying(), env)).isValid()));
-
-    if(error)
-        setType();
-    else
-        setType_std(SeExprType::NoneType_varying());
+    for(int c=0;c<numChildren();c++)
+        error |= !child(c)->prep(false, env).isValid();
+    if(error) setType(SeExprType().Error());
+    else setType(child(numChildren()-1)->type());
 
     return _type;
 }
 
 
-void
-SeExprNode::eval(SeVec3d& result) const
-{
-    // the default behavior is to just eval all the children for
-    // their side-effects (i.e. setting variables)
-    // there is no result value
-    SeVec3d val;
-    for (int i = 0; i < numChildren(); i++)
-	child(i)->eval(val);
-    result = 0.0;
-}
-
-
 SeExprType
-SeExprModuleNode::prep(SeExprType wanted, SeExprVarEnv & env)
-{
-    bool error = false;
-
-    std::vector<SeExprNode*>::iterator       i_child = _children.begin();
-    std::vector<SeExprNode*>::iterator const e_child = _children.end  ();
-
-    for(; i_child != e_child; i_child++)
-        error = (error ||
-                 (!((*i_child)->prep(SeExprType::AnyType_varying(), env)).isValid()));
-
-    if(error)
-        setType();
-    else
-        setType(child(numChildren() - 1)->type());
-
-    return _type;
-}
-
-
-void
-SeExprModuleNode::eval(SeVec3d& result) const
-{
-    // eval block, then eval primary expr
-    SeVec3d val;
-    child(0)->eval(val);
-    child(1)->eval(result);
-}
-
-
-SeExprType
-SeExprPrototypeNode::prep(SeExprType wanted, SeExprVarEnv & env)
+SeExprPrototypeNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
     bool error = false;
 
     if(_retTypeSet)
-        generalCheck(returnType().isValid(), "Function has bad return type", error);
+        checkCondition(returnType().isValid(), "Function has bad return type", error);
 
-    for(int c = 0; c < numChildren(); c++)
-        generalCheck(child(c)->type().isValid(), "Function has a parameter with a bad type", error);
+    _argTypes.clear();
+    for(int c = 0; c < numChildren(); c++){
+        SeExprType type=child(c)->type();
+        checkCondition(type.isValid(), "Function has a parameter with a bad type", error);
+        _argTypes.push_back(type);
+        SeExprLocalVar* localVar = new SeExprLocalVar(type);
+        env.add(((SeExprVarNode*)child(c))->name(), localVar);
+        std::cerr<<"after create localvar phi "<<localVar->getPhi()<<std::endl;
+        child(c)->prep(wantScalar,env);
+    }
 
-    if(error)
-        setType();
-    else
-        setType(SeExprType::NoneType_varying());
+    if(error) setType(SeExprType().Error());
+    else setType(SeExprType().None().Varying());
 
     return _type;
 }
@@ -307,7 +261,7 @@ void
 SeExprPrototypeNode::addArgs(SeExprNode* surrogate)
 {
     SeExprNode::addChildren(surrogate);
-
+#if 0
     SeExprNode * child;
     SeExprType type;
     for(int i = 0; i < numChildren(); i++) {
@@ -315,220 +269,144 @@ SeExprPrototypeNode::addArgs(SeExprNode* surrogate)
         type = child->type();
 
         _argTypes.push_back(type);
-        _env.add(((SeExprVarNode*)child)->name(), new SeExprLocalVarRef(type));
+        _env.add(((SeExprVarNode*)child)->name(), new SeExprLocalVar(type));
     }
+#endif
 }
 
-
-void
-SeExprPrototypeNode::eval(SeVec3d& result) const
-{
-    // eval block, then eval primary expr
-    SeVec3d val;
-    child(0)->eval(val);
-    child(1)->eval(result);
-}
 
 
 SeExprType
-SeExprLocalFunctionNode::prep(SeExprType wanted, SeExprVarEnv & env)
+SeExprLocalFunctionNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
     bool error = false;
 
-    SeExprVarEnv          ignored;
-    SeExprPrototypeNode * prototype  = (SeExprPrototypeNode*)child(0);
-    SeExprNode          * block      = child(1);
-    SeExprType            wantedType = SeExprType::ValueType_varying();
-    SeExprType            blockType;
-
-    //prep prototype and check for errors
-    if(!prototype->prep(SeExprType::NoneType_varying(), ignored).isValid())
+    //prep prototype and check for errors 
+    SeExprPrototypeNode* prototype=(SeExprPrototypeNode*)child(0);
+    SeExprVarEnv functionEnv;
+    functionEnv.resetAndSetParent(&env);
+    if(!prototype->prep(false, functionEnv).isValid())
         error = true;
+
+    // decide what return type we want
+    bool returnWantsScalar=false;
+    if(!error && prototype->isReturnTypeSet())
+        returnWantsScalar = prototype->returnType().isFP(1);
 
     //prep block and check for errors
-    if(!error && prototype->isReturnTypeSet())
-        wantedType = prototype->returnType();
-
-    blockType = block->prep(wantedType, prototype->env());
+    SeExprNode* block = child(1);
+    SeExprType blockType = block->prep(returnWantsScalar, functionEnv);
 
     if(!error && blockType.isValid()) {
-        if(prototype->isReturnTypeSet())
-            generalCheck(blockType.is(wantedType), "In function result of block does not match given return type", error);
-        else
-            prototype->setReturnType(blockType);
-    } else
+        if(prototype->isReturnTypeSet()){
+            if(blockType != prototype->returnType()){
+                checkCondition(false, "In function result of block '"+blockType.toString()+"' does not match given return type "+prototype->returnType().toString(),error);
+            }
+            
+        }
+        else prototype->setReturnType(blockType);
+        // register the function in the symbol table
+
+        env.addFunction(prototype->name(), this);
+    } else{
+        checkCondition(false, "Invalid type for blockType is "+blockType.toString(),error);
         error = true;
+    }
+    return _type = error ? SeExprType().Error() : SeExprType().None().Varying();
+}
 
-    if(error)
-        setType();
-    else
-        setType(SeExprType::NoneType_varying());
+
+// TODO: write buildInterpreter for local function node
+SeExprType SeExprLocalFunctionNode::prep(SeExprFuncNode* callerNode,bool scalarWanted,SeExprVarEnv& env) const
+{
+    bool error=false;
+    callerNode->checkCondition(callerNode->numChildren() == prototype()->numChildren(),"Incorrect number of arguments to function call",error);
+    for(int i=0;i<callerNode->numChildren();i++){
+        // TODO: is this right?
+        //bool compatible=SeExprType::valuesCompatible(callerNode->child(i)->prep(false,env), prototype()->argType(i));
+        if(!callerNode->checkArg(i, prototype()->argType(i),env))
+            error=true;
+        //callerNode->child(i)->checkCondition(compatible,"Incorrect type for argument",error);
+    }
+    return error ? SeExprType().Error() : prototype()->returnType();
+}
+
+
+SeExprType
+SeExprBlockNode::prep(bool wantScalar, SeExprVarEnv & env)
+{
+    SeExprType assignType = child(0)->prep(false, env);
+    SeExprType resultType = child(1)->prep(wantScalar, env);
+
+    if(!assignType.isValid()) setType(SeExprType().Error());
+    else setType(resultType);
 
     return _type;
 }
 
 
-void
-SeExprLocalFunctionNode::eval(SeVec3d& result) const
-{
-    // eval block, then eval primary expr
-    SeVec3d val;
-    child(0)->eval(val);
-    child(1)->eval(result);
-}
-
-
 SeExprType
-SeExprBlockNode::prep(SeExprType wanted, SeExprVarEnv & env)
+SeExprIfThenElseNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
-    SeExprType assignType = child(0)->prep(SeExprType::AnyType_varying(), env);
-    SeExprType resultType = child(1)->prep(SeExprType::AnyType_varying(), env);
-
-    if(!assignType.isValid())
-        setType();
-    else
-        setType(resultType);
-
-    return _type;
-}
-
-
-void
-SeExprBlockNode::eval(SeVec3d& result) const
-{
-    // eval block, then eval primary expr
-    SeVec3d val;
-    child(0)->eval(val);
-    child(1)->eval(result);
-}
-
-
-SeExprType
-SeExprIfThenElseNode::prep(SeExprType wanted, SeExprVarEnv & env)
-{
-    SeExprVarEnv           thenEnv,  elseEnv;
     SeExprType   condType, thenType, elseType;
 
     bool error = false;
 
-    condType = child(0)->prep(SeExprType::FP1Type_varying(),env);
+    condType = child(0)->prep(true,env);
+    checkIsFP(condType,error);
 
-    if(condType.isValid())
-        isUnder_with_error(SeExprType::NumericType_varying(), condType, error);
-    else
-        error = true;
+    thenEnv.resetAndSetParent(&env);
+    elseEnv.resetAndSetParent(&env);
 
-    thenEnv  = SeExprVarEnv::newBranch(env);
-    thenType = child(1)->prep(SeExprType::AnyType_varying(), thenEnv);
+    thenType = child(1)->prep(false, thenEnv);
+    elseType = child(2)->prep(false, elseEnv);
 
-    elseEnv  = SeExprVarEnv::newBranch(env);
-    elseType = child(2)->prep(SeExprType::AnyType_varying(), elseEnv);
+    if(!error && thenType.isValid() && elseType.isValid()){
+        env.mergeBranches(condType,thenEnv,elseEnv);
+        // TODO: aselle insert the phi nodes!
+    }else error = true;
 
-    if(!error             &&
-       thenType.isValid() &&
-       elseType.isValid()) {
-        if(generalCheck(SeExprVarEnv::branchesMatch(thenEnv, elseEnv), "Types of variables do not match after if statement", error))
-            env.add(thenEnv, condType);
-    } else
-        error = true;
-
-    if(error)
-        setType();
-    else
-        setType(SeExprType::NoneType_varying(),
-                condType,
-                thenType,
-                elseType);
+    if(error) setType(SeExprType().Error());
+    else setType(SeExprType().None().setLifetime(condType,thenType,elseType));
 
     return _type;
 }
 
-
-void
-SeExprIfThenElseNode::eval(SeVec3d& result) const
-{
-    // eval condition, then choose then/else block
-    SeVec3d val;
-    child(0)->eval(val);
-    if (val[0])
-	child(1)->eval(val);
-    else
-	child(2)->eval(val);
-    result = 0.0;
-}
-
-
 SeExprType
-SeExprAssignNode::prep(SeExprType wanted, SeExprVarEnv & env)
+SeExprAssignNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
-    _assignedType = child(0)->prep(SeExprType::AnyType_varying(), env);
+    _assignedType = child(0)->prep(false, env);
 
-    //This could add errors to the variable environment
-    env.add(_name, new SeExprLocalVarRef(_assignedType));
+    //TODO: This could add errors to the variable environment
+    _localVar=new SeExprLocalVar(child(0)->type());
+    env.add(_name, _localVar);
+    bool error=false;
+	// TODO: fix
+    //checkIsValue(_assignedType,error);
+	checkCondition(_assignedType.isValid(),"tesT",error);
 
-    if(!_assignedType.isValid())
-        setType();
-    else
-        setType(SeExprType::NoneType_varying(), _assignedType);
-
+    if(error) setType(SeExprType().Error());
+    else setTypeWithChildLife(SeExprType().None());
     return _type;
 }
 
-
-void
-SeExprAssignNode::eval(SeVec3d& result) const
-{
-    if (_var) {
-	// eval expression and store in variable
-	const SeExprNode* node = child(0);
-	node->eval(_var->val);
-        //assume that eval made the correct assignment
-	//if (_var->isVec() && !node->isVec())
-        //_var->val[1] = _var->val[2] = _var->val[0];
-    }
-    else result = 0.0;
-}
-
-
 SeExprType
-SeExprVecNode::prep(SeExprType wanted, SeExprVarEnv & env)
+SeExprVecNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
     bool error = false;
 
-    std::vector<SeExprNode*>::iterator       ic = _children.begin();
-    std::vector<SeExprNode*>::iterator const ec = _children.end  ();
-
-    for(; ic != ec; ic++) {
-        SeExprType childType = (*ic)->prep(SeExprType::FP1Type_varying(), env);
-        if(childType.isValid())
-            isUnder_with_error(SeExprType::NumericType_varying(), childType, error);
-        else
-            error = true;
+    int max_child_d=0;
+    for(int c=0; c<numChildren(); c++) {
+        SeExprType childType = child(c)->prep(true, env);
         //TODO: add way to tell what element of vector has the type mismatch
+        checkIsFP(childType,error);
+        max_child_d=std::max(max_child_d,childType.dim());
     }
-
-    if(error)
-        setType();
-    else
-        setType_std(SeExprType::FPNType_varying(numChildren()));
-
+    
+    if(error) setType(SeExprType().Error());
+    else setTypeWithChildLife(SeExprType().FP(numChildren()));
     return _type;
 }
-
-
-void
-SeExprVecNode::eval(SeVec3d& result) const
-{
-    if (_isVec) {
-	SeVec3d v;
-	child(0)->eval(v); result[0] = v[0];
-	child(1)->eval(v); result[1] = v[0];
-	child(2)->eval(v); result[2] = v[0];
-    } else {
-	child(0)->eval(result);
-    }
-}
-
 
 SeVec3d
 SeExprVecNode::value() const {
@@ -548,813 +426,289 @@ SeExprVecNode::value() const {
 
 
 SeExprType
-SeExprUnaryOpNode::prep(SeExprType wanted, SeExprVarEnv & env)
+SeExprUnaryOpNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
     bool error = false;
 
-    setType(child(0)->prep(wanted, env));
-
-    if(_type.isValid())
-        isUnder_with_error(SeExprType::NumericType_varying(), _type, error);
-
-    if(error)
-        setType();
-
+    // TODO: aselle may want to implicitly demote to FP[1] if wantScalar is true!
+    SeExprType childType=child(0)->prep(wantScalar, env);
+    checkIsFP(childType,error);
+    if(error) setType(SeExprType().Error());
+    else setType(childType);
     return _type;
 }
 
-
-void
-SeExprNegNode::eval(SeVec3d& result) const
-{
-    SeVec3d a;
-    const SeExprNode* child0 = child(0);
-    child0->eval(a);
-    result[0] = -a[0];
-    if (_isVec) {
-	result[1] = -a[1];
-	result[2] = -a[2];
-    }
-}
-
-
-void
-SeExprInvertNode::eval(SeVec3d& result) const
-{
-    SeVec3d a;
-    const SeExprNode* child0 = child(0);
-    child0->eval(a);
-    result[0] = 1-a[0];
-    if (_isVec) {
-	result[1] = 1-a[1];
-	result[2] = 1-a[2];
-    }
-}
-
-
-void
-SeExprNotNode::eval(SeVec3d& result) const
-{
-    SeVec3d a;
-    const SeExprNode* child0 = child(0);
-    child0->eval(a);
-    result[0] = !a[0];
-    if (_isVec) {
-	result[1] = !a[1];
-	result[2] = !a[2];
-    }
-}
-
-
 SeExprType
-SeExprCondNode::prep(SeExprType wanted, SeExprVarEnv & env)
+SeExprCondNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
     //TODO: determine if extra environments are necessary, currently not included
     SeExprType condType, thenType, elseType;
 
     bool error = false;
 
-    condType = child(0)->prep(SeExprType::FP1Type_varying(),env);
+    condType = child(0)->prep(true,env);
 
-    if(condType.isValid())
-        isUnder_with_error(SeExprType::NumericType_varying(), condType, error);
-    else
-        error = true;
+    checkIsFP(condType, error);
 
-    thenType = child(1)->prep(wanted, env);
+    thenType = child(1)->prep(wantScalar, env);
+    elseType = child(2)->prep(wantScalar, env);
 
-    elseType = child(2)->prep(wanted, env);
+    checkIsValue(thenType,error);
+    checkIsValue(elseType,error);
+    checkCondition(thenType == elseType, "Types of conditional branches do not match", error);
 
-    if(thenType.isValid())
-        isa_with_error(wanted, thenType, error);
-    else
-        error = true;
-
-    if(elseType.isValid())
-        isa_with_error(wanted, elseType, error);
-    else
-        error = true;
-
-    if(thenType.isValid() && elseType.isValid())
-        generalCheck(thenType == elseType, "Types of conditional branches do not match", error);
-
-    if(error)
-        setType();
-    else
-        setType(thenType,
-                condType,
-                thenType,
-                elseType);
+    if(error) setType(SeExprType().Error());
+    else setType(thenType.setLifetime(condType,thenType,elseType));
 
     return _type;
 }
 
 
-void
-SeExprCondNode::eval(SeVec3d& result) const
-{
-    SeVec3d v;
-    child(0)->eval(v);
-    const SeExprNode* node = v[0] ? child(1) : child(2);
-    node->eval(result);
-    if (_isVec && !node->isVec())
-	result[1] = result[2] = result[0];
-}
-
-
 SeExprType
-SeExprLogicalOpNode::prep(SeExprType wanted, SeExprVarEnv & env)
-{
-    //TODO: determine if extra environments are necessary, currently not included
-    SeExprType firstType, secondType;
-
-    bool error = false;
-
-    firstType = child(0)->prep(SeExprType::FP1Type_varying(), env);
-
-    if(firstType.isValid())
-        isa_with_error(SeExprType::FP1Type_varying(), firstType, error);
-    else
-        error = true;
-
-    secondType = child(1)->prep(SeExprType::FP1Type_varying(), env);
-
-    if(secondType.isValid())
-        isa_with_error(SeExprType::FP1Type_varying(), secondType, error);
-    else
-        error = true;
-
-    if(error)
-        setType();
-    else
-        setType(SeExprType::FP1Type_varying(),
-                firstType,
-                secondType);
-
-    return _type;
-}
-
-
-void
-SeExprAndNode::eval(SeVec3d& result) const
-{
-    // operands and result must be scalar
-    SeVec3d a, b;
-    child(0)->eval(a);
-    if (!a[0]) {
-	result[0] = 0;
-    } else { 
-	child(1)->eval(b);
-	result[0] = (b[0] != 0.0); 
-    }
-}
-
-
-void
-SeExprOrNode::eval(SeVec3d& result) const
-{
-    // operands and result must be scalar
-    SeVec3d a, b;
-    child(0)->eval(a);
-    if (a[0]) {
-	result[0] = 1;
-    } else { 
-	child(1)->eval(b);
-	result[0] = (b[0] != 0.0); 
-    }
-}
-
-
-SeExprType
-SeExprSubscriptNode::prep(SeExprType wanted, SeExprVarEnv & env)
+SeExprSubscriptNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
     SeExprType vecType, scriptType;
 
     bool error = false;
 
-    vecType = child(0)->prep(SeExprType::NumericType_varying(), env);
+    vecType = child(0)->prep(false, env); // want scalar is false because we aren't just doing foo[0]
+    checkIsFP(vecType,error);
 
-    if(vecType.isValid())
-        isUnder_with_error(SeExprType::NumericType_varying(), vecType, error);
-    else
-        error = true;
+    scriptType = child(1)->prep(true, env);
+    checkIsFP(scriptType,error);
 
-    scriptType = child(1)->prep(SeExprType::FP1Type_varying(), env);
-
-    if(scriptType.isValid())
-        isUnder_with_error(SeExprType::NumericType_varying(), scriptType, error);
-    else
-        error = true;
-
-    if(error)
-        setType();
-    else
-        setType(SeExprType::FP1Type_varying(),
-                vecType,
-                scriptType);
+    if(error) setType(SeExprType().Error());
+    else setType(SeExprType().FP(1).setLifetime(vecType,scriptType));
 
     return _type;
 }
 
-
-void
-SeExprSubscriptNode::eval(SeVec3d& result) const
-{
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    SeVec3d a, b;
-    child0->eval(a);
-    child1->eval(b);
-    int index = int(b[0]);
-
-    if (child0->isVec()) {
-	switch(index) {
-	case 0:  result[0] = a[0]; break;
-	case 1:  result[0] = a[1]; break;
-	case 2:  result[0] = a[2]; break;
-	default: result[0] = 0; break;
-	}
-    } else {
-	switch(index) {
-	case 0:
-	case 1:
-	case 2:  result[0] = a[0]; break;
-	default: result[0] = 0; break;
-	}
-    }
-}
-
-
 SeExprType
-SeExprCompareEqNode::prep(SeExprType wanted, SeExprVarEnv & env)
+SeExprCompareEqNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
     SeExprType firstType, secondType;
 
     bool error = false;
 
-    firstType = child(0)->prep(SeExprType::NumericType_varying(), env);
-
-    if(firstType.isValid())
-        isUnder_with_error(SeExprType::ValueType_varying(), firstType, error);
-    else
-        error = true;
-
-    secondType = child(1)->prep(SeExprType::NumericType_varying(), env);
-
-    if(secondType.isValid())
-        isUnder_with_error(SeExprType::ValueType_varying(), secondType, error);
-    else
-        error = true;
+    firstType = child(0)->prep(false, env);
+    checkIsValue(firstType,error);
+    secondType = child(1)->prep(false, env);
+    checkIsValue(secondType,error);
 
     if(firstType.isValid() && secondType.isValid())
-        typesMatch(firstType, secondType, error);
+        checkTypesCompatible(firstType, secondType, error);
 
-    if(error)
-        setType();
-    else
-        setType(SeExprType::FP1Type_varying(),
-                firstType,
-                secondType);
+    if(error) setType(SeExprType().Error());
+    else setType(SeExprType().FP(1).setLifetime(firstType,secondType));
 
     return _type;
 }
 
 
-//TODO: make sure eval handles both scalars and n-length vectors
-void
-SeExprEqNode::eval(SeVec3d& result) const
-{
-    SeVec3d a, b;
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    child0->eval(a);
-    child1->eval(b);
-
-    if (!child0->isVec()) a[1] = a[2] = a[0];
-    if (!child1->isVec()) b[1] = b[2] = b[0];
-    result[0] = a[0] == b[0] && a[1] == b[1] && a[2] == b[2];
-}
-
-
-//TODO: make sure eval handles both scalars and n-length vectors
-void
-SeExprNeNode::eval(SeVec3d& result) const
-{
-    SeVec3d a, b;
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    child0->eval(a);
-    child1->eval(b);
-
-    if (!child0->isVec()) a[1] = a[2] = a[0];
-    if (!child1->isVec()) b[1] = b[2] = b[0];
-    result[0] = a[0] != b[0] || a[1] != b[1] || a[2] != b[2];
-}
-
-
 SeExprType
-SeExprCompareNode::prep(SeExprType wanted, SeExprVarEnv & env)
+SeExprCompareNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
+    // TODO: assume we want scalar
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
     SeExprType firstType, secondType;
 
     bool error = false;
 
-    firstType = child(0)->prep(SeExprType::NumericType_varying(), env);
-
-    if(firstType.isValid())
-        isUnder_with_error(SeExprType::NumericType_varying(), firstType, error);
-    else
-        error = true;
-
-    secondType = child(1)->prep(SeExprType::NumericType_varying(), env);
-
-    if(secondType.isValid())
-        isUnder_with_error(SeExprType::NumericType_varying(), secondType, error);
-    else
-        error = true;
+    firstType = child(0)->prep(true, env);
+    checkIsFP(firstType,error);
+    secondType = child(1)->prep(true, env);
+    checkIsFP(secondType,error);
 
     if(firstType.isValid() && secondType.isValid())
-        typesMatch(firstType, secondType, error);
+        checkTypesCompatible(firstType, secondType, error);
 
-    if(error)
-        setType();
-    else
-        setType(SeExprType::FP1Type_varying(),
-                firstType,
-                secondType);
+    if(error) setType(SeExprType().Error());
+    else setType(SeExprType().FP(1).setLifetime(firstType,secondType));
 
     return _type;
 }
 
 
-//TODO: make sure eval handles both scalars and n-length vectors
-void
-SeExprLtNode::eval(SeVec3d& result) const
-{
-    SeVec3d a, b;
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    child0->eval(a);
-    child1->eval(b);
-
-    result[0] = a[0] < b[0];
-}
-
-
-//TODO: make sure eval handles both scalars and n-length vectors
-void
-SeExprGtNode::eval(SeVec3d& result) const
-{
-    SeVec3d a, b;
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    child0->eval(a);
-    child1->eval(b);
-
-    result[0] = a[0] > b[0];
-}
-
-
-//TODO: make sure eval handles both scalars and n-length vectors
-void
-SeExprLeNode::eval(SeVec3d& result) const
-{
-    SeVec3d a, b;
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    child0->eval(a);
-    child1->eval(b);
-
-    result[0] = a[0] <= b[0];
-}
-
-
-//TODO: make sure eval handles both scalars and n-length vectors
-void
-SeExprGeNode::eval(SeVec3d& result) const
-{
-    SeVec3d a, b;
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    child0->eval(a);
-    child1->eval(b);
-
-    result[0] = a[0] >= b[0];
-}
-
-
 SeExprType
-SeExprBinaryOpNode::prep(SeExprType wanted, SeExprVarEnv & env)
+SeExprBinaryOpNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
+    // TODO: aselle this probably should set the type to be FP1 if wantScalar is true!
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
     SeExprType firstType, secondType;
 
     bool error = false;
 
-    firstType = child(0)->prep(SeExprType::NumericType_varying(), env);
+    firstType = child(0)->prep(false, env);
+    checkIsFP(firstType,error);
+    secondType = child(1)->prep(false, env);
+    checkIsFP(secondType,error);
+    checkTypesCompatible(firstType, secondType, error);
 
-    if(firstType.isValid())
-        isUnder_with_error(SeExprType::NumericType_varying(), firstType, error);
-    else
-        error = true;
-
-    secondType = child(1)->prep(SeExprType::NumericType_varying(), env);
-
-    if(secondType.isValid())
-        isUnder_with_error(SeExprType::NumericType_varying(), secondType, error);
-    else
-        error = true;
-
-    if(firstType.isValid() && secondType.isValid())
-        typesMatch(firstType, secondType, error);
-
-    if(error)
-        setType();
-    else
-        setType((firstType.isFP1() ? secondType : firstType),
-                firstType,
-                secondType);
+    if(error) setType(SeExprType().Error());
+    else setType((firstType.isFP(1) ? secondType : firstType)
+        .setLifetime(firstType,secondType));
 
     return _type;
 }
 
-
-void
-SeExprAddNode::eval(SeVec3d& result) const
-{
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    SeVec3d a, b;
-    child0->eval(a);
-    child1->eval(b);
-
-    if (!_isVec) {
-	result[0] = a[0] + b[0];
-    }
-    else {
-	// at least one child is a vector and the result is too
-	if (!child0->isVec()) a[1] = a[2] = a[0];
-	if (!child1->isVec()) b[1] = b[2] = b[0];
-	result = a + b;
-    }
-}
-
-
-void
-SeExprSubNode::eval(SeVec3d& result) const
-{
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    SeVec3d a, b;
-    child0->eval(a);
-    child1->eval(b);
-
-    if (!_isVec) {
-	result[0] = a[0] - b[0];
-    }
-    else {
-	// at least one child is a vector and the result is too
-	if (!child0->isVec()) a[1] = a[2] = a[0];
-	if (!child1->isVec()) b[1] = b[2] = b[0];
-	result = a - b;
-    }
-}
-
-
-void
-SeExprMulNode::eval(SeVec3d& result) const
-{
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    SeVec3d a, b;
-    child0->eval(a);
-    child1->eval(b);
-
-    if (!_isVec) {
-	result[0] = a[0] * b[0];
-    }
-    else {
-	// at least one child is a vector and the result is too
-	if (!child0->isVec()) a[1] = a[2] = a[0];
-	if (!child1->isVec()) b[1] = b[2] = b[0];
-	result = a * b;
-    }
-}
-
-
-void
-SeExprDivNode::eval(SeVec3d& result) const
-{
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    SeVec3d a, b;
-    child0->eval(a);
-    child1->eval(b);
-
-    if (!_isVec) {
-	result[0] = a[0] / b[0];
-    }
-    else {
-	// at least one child is a vector and the result is too
-	if (!child0->isVec()) a[1] = a[2] = a[0];
-	if (!child1->isVec()) b[1] = b[2] = b[0];
-	result = a / b;
-    }
-}
-
-
-static double niceMod(double a, double b)
-{
-    if (b == 0) return 0;
-    return a - floor(a/b)*b;
-}
-
-
-void
-SeExprModNode::eval(SeVec3d& result) const
-{
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    SeVec3d a, b;
-    child0->eval(a);
-    child1->eval(b);
-
-    if (!_isVec) {
-	result[0] = niceMod(a[0], b[0]);
-    }
-    else {
-	// at least one child is a vector and the result is too
-	if (!child0->isVec()) a[1] = a[2] = a[0];
-	if (!child1->isVec()) b[1] = b[2] = b[0];
-	result[0] = niceMod(a[0], b[0]);
-	result[1] = niceMod(a[1], b[1]);
-	result[2] = niceMod(a[2], b[2]);
-    }
-}
-
-
-void
-SeExprExpNode::eval(SeVec3d& result) const
-{
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    SeVec3d a, b;
-    child0->eval(a);
-    child1->eval(b);
-
-    if (!_isVec) {
-	result[0] = pow(a[0], b[0]);
-    }
-    else {
-	// at least one child is a vector and the result is too
-	if (!child0->isVec()) a[1] = a[2] = a[0];
-	if (!child1->isVec()) b[1] = b[2] = b[0];
-	result[0] = pow(a[0], b[0]);
-	result[1] = pow(a[1], b[1]);
-	result[2] = pow(a[2], b[2]);
-    }
-}
-
-
 SeExprType
-SeExprVarNode::prep(SeExprType wanted, SeExprVarEnv & env)
+SeExprVarNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
     // ask expression to resolve var
-    _var = env.find(name());
-
-    if(!_var)
-        _var = _expr->resolveVar(name());
-
-    if(generalCheck(_var, std::string("No variable named $") + name()))
+    bool error=false;
+    if((_localVar = env.find(name()))){
+        setType(_localVar->type());
+    }else if((_var = _expr->resolveVar(name()))){
         setType(_var->type());
-    else
-        setType();
-
-    return _type;
-}
-
-
-void
-SeExprVarNode::eval(SeVec3d& result) const
-{
-    if (_var) _var->eval(this, result);
-    else result = 0.0;
-}
-
-
-SeExprType
-SeExprNumNode::prep(SeExprType wanted, SeExprVarEnv & env)
-{
-    setType_constant(SeExprType::FP1Type_varying());
-
-    return _type;
-}
-
-
-SeExprType
-SeExprStrNode::prep(SeExprType wanted, SeExprVarEnv & env)
-{
-    setType_constant(SeExprType::StringType_varying());
-
-    return _type;
-}
-
-bool
-SeExprFuncNode::prepArgs(std::string const & name, SeExprType wanted, SeExprVarEnv & env)
-{
-    bool error = false;
-    int count;
-
-    std::vector<SeExprNode*>::iterator       ic = _children.begin();
-    std::vector<SeExprNode*>::iterator const ec = _children.end  ();
-
-    for(count = 0; ic != ec; ++ic, ++count) {
-        SeExprType childType = (*ic)->prep(wanted, env);
-        if(childType.isValid())
-            isa_with_error(wanted, childType, error);
-        else
-            error = true;
-        //TODO: give actual name, not placeholder - or take out name altogether
+    }else{
+        checkCondition(_var || _localVar, std::string("No variable named $") + name(),error);
+        setType(SeExprType().Error());
     }
+    return _type;
+}
 
-    return !error; //return convention is true if no errors
+
+SeExprType
+SeExprNumNode::prep(bool wantScalar, SeExprVarEnv & env)
+{
+    _type=SeExprType().FP(1).Constant();
+    return _type;
 }
 
 SeExprType
-SeExprFuncNode::prep(SeExprType wanted, SeExprVarEnv & env)
+SeExprStrNode::prep(bool wantScalar, SeExprVarEnv & env)
+{
+    _type=SeExprType().String().Constant();
+    return _type;
+}
+
+SeExprType
+SeExprFuncNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
     bool error = false;
-    int  _dim  = 1; //used for promotion checking
 
-    _nargs = numChildren();
+    int nargs=numChildren();
+    _promote.resize(nargs,0);
 
-    _vecArgs.resize(_nargs);
-    _scalarArgs.resize(_nargs);
-
-    // ask expression to resolve func
-    _func = _expr->resolveFunc(_name);
-    // otherwise, look in global func table
-    if (!_func) _func = SeExprFunc::lookup(_name);
+    // find function using per-expression callback and then global table
+    // TODO: put lookup of local functions here
+    _func=0;
+    if(SeExprLocalFunctionNode* localFunction=env.findFunction(_name)){
+        _localFunc = localFunction;
+        setTypeWithChildLife(localFunction->prep(this, wantScalar, env));
+        // TODO: we need to type check arguments here
+    }else{
+        if(!_func) _func = _expr->resolveFunc(_name);
+        if(!_func) _func = SeExprFunc::lookup(_name);
 
     //check that function exisits and that the function has the right number of arguments
-    if(generalCheck(_func,                        "Function " + _name + " has no definition", error, env) &&
-       generalCheck(_nargs >= _func->minArgs(),   "Too few args for function "  + _name,     error, env) &&
-       generalCheck(_nargs <= _func->maxArgs() ||
-                         0  > _func->maxArgs(),   "Too many args for function " + _name,     error, env)) {
-        //check if the fuction is a FuncX
-        if(_func->type() == SeExprFunc::FUNCX) {
-            //FuncX function:
-            if(!_func->funcx()->isThreadSafe())                    _expr->setThreadUnsafe(_name);
-            if(!_func->funcx()->prep(this, wanted, env).isValid()) error = true;
-            //TODO: Make sure FuncX puts proper return type in retType(), NOT in _type - this may be a change in convention
-        }
-        else {
-            //standard function:
-            //check if arguments have errors
-            error = !prepArgs(_name,
-                              (_func->isScalar() ? SeExprType::FP1Type_varying() : SeExprType::FPNType_varying(3)),
-                              env);
+        if(checkCondition(_func,"Function " + _name + " has no definition", error) 
+            && checkCondition(nargs >= _func->minArgs(),"Too few args for function"+_name,error)
+            && checkCondition(nargs <= _func->maxArgs() || _func->maxArgs() < 0, "Too many args for function "+_name,error)) {
 
-            if(!error                   && //no errors
-               _func->isScalar()        && //takes scalar arguments only
-               _func->retType().isFP1())   //returns a scalar
-                for(int i = 0; i < _nargs; i++) {
-                    int cdim = child(i)->type().dim();
-
-                    //Note: This assumes that every type (except FPN types) have dim() == 1
-                    if(generalCheck(cdim == 1    ||
-                                    _dim == 1    ||
-                                    _dim == cdim,   "Arguments to promotable function, " + _name + ", are of different lengths", error))
-                        if(cdim  > 1 &&
-                           _dim == 1)
-                            _dim = cdim;
-                }
+            const SeExprFuncX* funcx=_func->funcx();
+            SeExprType type=funcx->prep(this,wantScalar,env);
+            setTypeWithChildLife(type);
+        }else{ // didn't match num args or function not found
+            SeExprNode::prep(false,env); // prep arguments anyways to catch as many errors as possible!
+            setTypeWithChildLife(SeExprType().Error());
         }
     }
-
-    if(error)
-        setType();
-    else if(_func->type() == SeExprFunc::FUNCX) //FuncX function
-        setType_std(_func->retType());
-    else  //standard function
-        setType_std(SeExprType::FPNType_varying(_dim));
 
     return _type;
 }
 
-SeVec3d*
-SeExprFuncNode::evalArgs() const
+#if 0
+int SeExprFuncSimple::EvalOp(int* opData,double* fp,char** c,std::stack<int>& callStack)
 {
-    SeVec3d* a = vecArgs();
-    for (int i = 0; i < _nargs; i++) {
-	const SeExprNode* child = SeExprNode::child(i);
-	SeVec3d& A = a[i];
-	child->eval(A);
-	if (!child->isVec()) A[1] = A[2] = A[0];
+    SeExprFuncSimple* simple=reinterpret_cast<SeExprFuncSimple*>(c[opData[0]]);
+//    SeExprFuncNode::Data* simpleData=reinterpret_cast<SeExprFuncNode::Data*>(c[opData[1]]);
+    ArgHandle args(opData,fp,c);
+    simple->eval(args);
+    return 1;
+}
+#endif
+
+
+#if 0
+int SeExprLocalFunctionNode::
+buildInterpreterForCall(const SeExprFuncNode* callerNode, SeInterpreter* interpreter) const
+{
+    return 0;
+#if 0
+    std::vector<int> operands;
+    for(int c=0;c<node->numChildren();c++){
+        const SeExprNode* child=node->child(c);
+        // evaluate the argument
+        int operand=node->child(c)->buildInterpreter(interpreter);
+        if(node->promote(c) != 0) {
+            // promote the argument to the needed type
+            interpreter->addOp(getTemplatizedOp<Promote>(node->promote(c)));
+            int promotedOperand=interpreter->allocFP(node->promote(c));
+            interpreter->addOperand(operand);
+            interpreter->addOperand(promotedOperand);
+            operand=promotedOperand; // we wan the promoted arg
+            interpreter->endOp();
+        }
+        operands.push_back(operand);
     }
-    return a;
-}
+    int outoperand=-1;
+    int nargsData=interpreter->allocFP(1);
+    interpreter->d[nargsData]=callerNode->numChildren();
+    if(callerNode->type().isFP()) outoperand=interpreter->allocFP(callerNode->type().dim());
+    else if(callerNode->type().isString()) outoperand=interpreter->allocPtr();
+    else assert(false);
 
-SeVec3d
-SeExprFuncNode::evalArg(int n) const
-{
-    SeVec3d arg;
-    const SeExprNode* child = SeExprNode::child(n);
-    child->eval(arg);
-    if (!child->isVec()) arg[1] = arg[2] = arg[0];
-    return arg;
-}
-
-bool
-SeExprFuncNode::isStrArg(int n) const
-{
-    return n < _nargs && dynamic_cast<const SeExprStrNode*>(child(n)) != 0;
-}
-
-std::string
-SeExprFuncNode::getStrArg(int n) const
-{
-    if (n < _nargs)
-	return static_cast<const SeExprStrNode*>(child(n))->str();
-    return "";
-}
-
-
-void
-SeExprFuncNode::eval(SeVec3d& result) const
-{
-    if (!_func) { result = 0.0; return; }
-
-    // funcx is a catchall that does all its own processing
-    if (_func->type() == SeExprFunc::FUNCX) {
-	_func->funcx()->eval(this, result);
-	return;
+    interpreter->addOp(EvalOp);
+    int ptrLoc=interpreter->allocPtr();
+    int ptrDataLoc=interpreter->allocPtr();
+    interpreter->s[ptrLoc]=(char*)this;
+    interpreter->addOperand(ptrLoc); 
+    interpreter->addOperand(ptrDataLoc);
+    interpreter->addOperand(outoperand);
+    interpreter->addOperand(nargsData); 
+    for(size_t c=0;c<operands.size();c++){
+        interpreter->addOperand(operands[c]);
     }
+    interpreter->endOp(false); // do not eval because the function may not be evaluatable!
 
-    // handle the case of a scalar func applied to a vector
-    bool applyScalarToVec = _isVec && _func->isScalar();
-    //bool applyScalarToVec = _isVec && !_func->isVec();
-    int niter = applyScalarToVec ? 3 : 1;
+    // call into interpreter eval
+    int pc=interpreter->nextPC()-1;
+    const std::pair<SeInterpreter::OpF,int>& op=interpreter->ops[pc];
+    int* opCurr=(&interpreter->opData[0])+interpreter->ops[pc].second;
 
-    // eval args and call the function
-    SeVec3d* a = evalArgs();
-    for (int i = 0; i < niter; i++) {
-	switch (_func->type()) {
-	default: 
-	    result[i] = result[1] = result[2] = 0;
-	    break;
-	case SeExprFunc::FUNC0:
-	    result[i] = _func->func0()(); 
-	    break;
-	case SeExprFunc::FUNC1:
-	    result[i] = _func->func1()(a[0][i]);
-	    break;
-	case SeExprFunc::FUNC2:
-	    result[i] = _func->func2()(a[0][i], a[1][i]);
-	    break;
-	case SeExprFunc::FUNC3:
-	    result[i] = _func->func3()(a[0][i], a[1][i], a[2][i]);
-	    break;
-	case SeExprFunc::FUNC4:
-	    result[i] = _func->func4()(a[0][i], a[1][i], a[2][i], a[3][i]);
-	    break;
-	case SeExprFunc::FUNC5:
-	    result[i] = _func->func5()(a[0][i], a[1][i], a[2][i], a[3][i],
-				       a[4][i]);
-	    break;
-	case SeExprFunc::FUNC6:
-	    result[i] = _func->func6()(a[0][i], a[1][i], a[2][i], a[3][i],
-				       a[4][i], a[5][i]);
-	    break;
-	case SeExprFunc::FUNCN: 
-	    {
-		double* d = scalarArgs();
-		for (int n = 0; n < _nargs; n++) d[n] = a[n][i];
-		result[i] = _func->funcn()(_nargs, d);
-		break;
-	    }
-	case SeExprFunc::FUNC1V:
-	    result[i] = _func->func1v()(a[0]);
-	    break;
-	case SeExprFunc::FUNC2V:
-	    result[i] = _func->func2v()(a[0], a[1]);
-	    break;
-	case SeExprFunc::FUNCNV: 
-	    result[i] = _func->funcnv()(_nargs, a);
-	    break;
-	case SeExprFunc::FUNC1VV:
-	    result = _func->func1vv()(a[0]);
-	    break;
-	case SeExprFunc::FUNC2VV:
-	    result = _func->func2vv()(a[0], a[1]);
-	    break;
-	case SeExprFunc::FUNCNVV: 
-	    result = _func->funcnvv()(_nargs, a);
-	    break;
-	}
+    ArgHandle args(opCurr,&interpreter->d[0],&interpreter->s[0]);
+    interpreter->s[ptrDataLoc]=reinterpret_cast<char*>(evalConstant(args));
+    
+
+    return outoperand;
+#endif
+    return 0;
+}
+#endif
+
+int SeExprFuncNode::
+buildInterpreter(SeInterpreter* interpreter) const
+{
+    if(_localFunc) return _localFunc->buildInterpreterForCall(this,interpreter);
+    else if(_func) return _func->funcx()->buildInterpreter(this,interpreter);
+}
+
+bool SeExprFuncNode::
+checkArg(int arg,SeExprType type,SeExprVarEnv& env)
+{
+    SeExprType childType=child(arg)->prep(type.isFP(1),env);
+    std::cerr<<"we have "<<childType.toString()<<" and want "<<type.toString()<<std::endl;
+    _promote[arg]=0;
+    if(SeExprType::valuesCompatible(type,childType) && type.isLifeCompatible(childType)){
+        if(type.isFP() && type.dim() > childType.dim()){
+            std::cerr<<"setting promote "<<std::endl;
+            _promote[arg]=type.dim();
+        }
+        return true;
     }
-
+    child(arg)->addError("Expected "+type.toString()+" for argument, got "+childType.toString());
+    return false;
 }

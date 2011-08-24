@@ -46,15 +46,15 @@
 
 class SeExprNode;
 class SeExprVarNode;
-class SeExprLocalVarRef;
 class SeExprFunc;
 class SeExpression;
+class SeInterpreter;
 
 //! abstract class for implementing variable references
 class SeExprVarRef
 {
     SeExprVarRef()
-        : _type(SeExprType::ErrorType_varying())
+        : _type(SeExprType().Error().Varying())
     {};
 
  public:
@@ -70,11 +70,14 @@ class SeExprVarRef
     //! returns (current) type
     virtual SeExprType type() const { return _type; };
 
+    // TODO: this is deprecated!
     //! returns this variable's value by setting result, node refers to 
     //! where in the parse tree the evaluation is occurring
-    virtual void eval(const SeExprVarNode* node, SeVec3d& result) = 0;
+    //virtual void eval(double* result,char**)=0;
+    virtual void eval(double* result)=0;
+    virtual void eval(char** resultStr)=0;
 
- private:
+private:
     SeExprType _type;
 };
 
@@ -83,10 +86,17 @@ class SeExprVectorVarRef : public SeExprVarRef
 {
  public:
     SeExprVectorVarRef()
-        : SeExprVarRef(SeExprType::FPNType_varying(3))
+        : SeExprVarRef(SeExprType().FP(3).Varying())
     {};
 
     virtual bool isVec() { return 1; }
+    virtual void eval(const SeExprVarNode* node, SeVec3d& result)=0;
+    virtual void eval(double* result){
+        SeVec3d ret;
+        eval(0,ret);
+        for(int k=0;k<3;k++) result[k]=ret[k];
+    }
+    virtual void eval(char** result){assert(false);}
 };
 
 
@@ -95,36 +105,57 @@ class SeExprScalarVarRef : public SeExprVarRef
 {
  public:
     SeExprScalarVarRef()
-        : SeExprVarRef(SeExprType::FP1Type_varying())
+        : SeExprVarRef(SeExprType().FP(1).Varying())
     {};
 
     virtual bool isVec() { return 0; }
+    virtual void eval(const SeExprVarNode* node, SeVec3d& result)=0;
+    virtual void eval(double* result){
+        SeVec3d ret;
+        eval(0,ret);
+        for(int k=0;k<1;k++) result[k]=ret[k];
+    }
+    virtual void eval(char** result){assert(false);}
+
 };
 
+#if 0
 /// uses internally to represent local variables
 class SeExprLocalVarRef : public SeExprVarRef
 {
     SeExprLocalVarRef()
-        : SeExprVarRef(SeExprType::ErrorType_varying())
-    {};
+        : SeExprVarRef(SeExprType().Error().Varying()), val(0)
+    {}
 
  public:
-    SeVec3d val;
+    union{
+        double *val;
+        const char* s;
+    };
+    SeExprLocalVarRef(const SeExprType & intype)
+        :SeExprVarRef(intype),val(0)
+    {
+        if(type().isFP()) val=new double[type().dim()];
+    }
 
-    SeExprLocalVarRef(const SeExprType & type)
-        :SeExprVarRef(type)
-    {};
+    virtual ~SeExprLocalVarRef()
+    {delete [] val;}
 
-    virtual void eval(const SeExprVarNode*, SeVec3d& result) 
-    { result = val; }
+    virtual void evaluate(const SeExprVarNode* node,const SeExprEvalResult& evalResult){
+        if(type().isString()) *evalResult.str=s;
+        else{
+            int d=type().dim();
+            for(int k=0;k<d;k++) evalResult.fp[k]=val[k];
+        }
+    }
 };
-
+#endif
 
 /// main expression class
 class SeExpression
 {
  public:
-    typedef std::map<std::string, SeExprLocalVarRef> LocalVarTable;
+    //typedef std::map<std::string, SeExprLocalVarRef> LocalVarTable;
 
     //! Represents a parse or type checking error in an expression
     struct Error
@@ -145,17 +176,12 @@ class SeExpression
 
     SeExpression( );
     //SeExpression( const std::string &e, bool wantVec=true );
-    SeExpression( const std::string &e, const SeExprType & type = SeExprType::AnyType_varying());
+    SeExpression( const std::string &e, const SeExprType & type = SeExprType().FP(3));
     virtual ~SeExpression();
-
-    /** Sets the expression to desire a vector or a scalar.
-        This will allow the evaluation to potentially be optimized if 
-        only a scalar is desired. */
-    void setWantVec(bool wantVec);
 
     /** Sets desired return value.
         This will allow the evaluation to potentially be optimized. */
-    void setReturnType(const SeExprType & type);
+    void setDesiredReturnType(const SeExprType & type);
 
     /** Set expression string to e.  
         This invalidates all parsed state. */
@@ -226,8 +252,11 @@ class SeExpression
         variables and functions will be bound if needed. */
     const SeExprType & returnType() const;
 
-    /** Evaluate the expression.  This will parse and bind if needed */
-    SeVec3d evaluate() const;
+    /** Evaluates and returns float (check returnType()!) */
+    const double* evalFP() const;
+
+    /** Evaluates and returns string (check returnType()!) */
+    const char* evalStr() const;
 
     /** Reset expr - force reparse/rebind */
     void reset();
@@ -248,7 +277,7 @@ class SeExpression
     {_comments.push_back(std::pair<int,int>(pos,length+pos-1));}
 
     /** Returns a read only map of local variables that were set **/
-    const LocalVarTable& getLocalVars() const {return _localVars;}
+    //const LocalVarTable& getLocalVars() const {return _localVars;}
 
  private:
     /** No definition by design. */
@@ -271,17 +300,24 @@ class SeExpression
     /** True if the expression wants a vector */
     bool _wantVec;
 
-    /** Return type desired. */
+    /** Computed return type. */
     mutable SeExprType _returnType;
+
+    /** Computed return type. */
+    mutable SeExprType _desiredReturnType;
 
     /** The expression. */
     std::string _expression;
     
  protected:
+    /** Variable environment */
+    mutable SeExprVarEnv* _varEnv;
     /** Parse tree (null if syntax is bad). */
     mutable SeExprNode *_parseTree;
 
  private:
+    /** Flag if we are valid or not */
+    mutable bool _isValid;
     /** Flag set once expr is parsed/prepped (parsing is automatic and lazy) */
     mutable bool _parsed, _prepped;
     
@@ -301,25 +337,29 @@ class SeExpression
     mutable std::set<std::string> _funcs;
 
     /** Local variable table */
-    mutable LocalVarTable _localVars;
+    //mutable LocalVarTable _localVars;
 
     /** Whether or not we have unsafe functions */
     mutable std::vector<std::string> _threadUnsafeFunctionCalls;
 
+    /** Se interpreter */
+public:
+    // TODO: make this public for debugging during devel
+    mutable SeInterpreter* _interpreter;
+    mutable int _returnSlot;
+private:
+
     /* internal */ public:
 
-    //! add local variable (this is for internal use)
-    void addVar(const char* n) const { _vars.insert(n); }
-
-    //! add local function (this is for internal use)
+    //! add function evaluation (this is for internal use)
     void addFunc(const char* n) const { _funcs.insert(n); }
 
-    //! get local variable reference (this is for internal use)
-    SeExprVarRef* resolveLocalVar(const char* n) const {
-	LocalVarTable::iterator iter = _localVars.find(n);
-	if (iter != _localVars.end()) return &iter->second;
-	return 0;
-    }
+    ////! get local variable reference (this is for internal use)
+    //SeExprVarRef* resolveLocalVar(const char* n) const {
+    //    LocalVarTable::iterator iter = _localVars.find(n);
+    //    if (iter != _localVars.end()) return &iter->second;
+    //    return 0;
+    //}
 
     /** get local variable reference. This is potentially useful for expression debuggers
         and/or uses of expressions where mutable variables are desired */

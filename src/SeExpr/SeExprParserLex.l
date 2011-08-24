@@ -90,7 +90,7 @@ BEGIN(0);
 
 extern                  { return EXTERN; }
 def                     { return DEF; }
-FLOAT                   { return FP; }
+FLOAT                   { return FLOATPOINT; }
 STRING                  { return STRING; }
 CONSTANT                { return LIFETIME_CONSTANT; }
 UNIFORM                 { return LIFETIME_UNIFORM; }

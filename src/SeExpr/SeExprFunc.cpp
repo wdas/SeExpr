@@ -41,6 +41,8 @@
 #include <dirent.h>
 #endif
 
+
+
 #include "SeExpression.h"
 #include "SeExprFunc.h"
 #include "SeExprNode.h"
@@ -89,13 +91,13 @@ namespace {
 }
 
 
-SeExprType SeExprFuncX::prep(SeExprFuncNode* node, SeExprType wanted, SeExprVarEnv & env)
+SeExprType SeExprFuncX::prep(SeExprFuncNode* node, bool scalarWanted, SeExprVarEnv & env) const
 {
     /* call base node prep by default:
        this passes wantVec to all the children and sets isVec true if any
        child is a vec */
     /* TODO: check that this is correct behavior */
-    return node->SeExprNode::prep(wanted, env);
+    return node->SeExprNode::prep(scalarWanted, env);
 }
 
 
@@ -185,8 +187,8 @@ SeExprFunc::getDocString(const char* functionName)
 
 #ifndef SEEXPR_WIN32
 
-#ifdef __APPLE__
-static int MatchPluginName(struct dirent* dir)
+#if defined(__APPLE__) && !defined(__MAC_10_9)
+static int MatchPluginName(const struct dirent* dir)
 #else
 static int MatchPluginName(const struct dirent* dir)
 #endif

@@ -40,79 +40,120 @@
 #include <cassert>
 
 #include "SeExprType.h"
-
+#include <iostream>
 class SeExprVarRef;
+class SeExprLocalVar;
+class SeExprNode;
+class SeExprLocalFunctionNode;
 
+
+//! SeExprLocalVar reference
+class SeExprLocalVar
+{
+protected:
+    SeExprType _type;
+    SeExprLocalVar* _phi;
+public:
+
+    SeExprLocalVar(const SeExprType& type):_type(type),_phi(0)
+    {}
+
+    virtual ~SeExprLocalVar(){}
+
+    //! get the primary representative phi node (i.e. the global parent of a dependent phi node)
+    const SeExprLocalVar* getPhi() const{return _phi;}
+    //! returns type of the variable
+    SeExprType type() const{return _type;}
+    //! sets the representative phi node (like a brute force set unioning operation) phi is the set representative
+    virtual void setPhi(SeExprLocalVar* phi){_phi=phi;}
+};
+
+//! SeExprLocalVar join reference. This connects to other var references by a condition and
+class SeExprLocalVarPhi:public SeExprLocalVar
+{
+public:
+    SeExprLocalVarPhi(SeExprType condLife,SeExprLocalVar* thenVar,SeExprLocalVar* elseVar)
+        :SeExprLocalVar(SeExprType()),_thenVar(thenVar),_elseVar(elseVar)
+    {
+        if(_thenVar->type() != _elseVar->type()){
+            _type=SeExprType().Error();
+        }else{
+            _type=SeExprType(_thenVar->type()).setLifetime(condLife);
+            setPhi(this);
+        }
+    }
+
+    void setPhi(SeExprLocalVar* phi){
+        _phi=phi;
+        _thenVar->setPhi(phi);
+        _elseVar->setPhi(phi);
+    }
+
+    SeExprNode* _condNode;
+    SeExprLocalVar *_thenVar,*_elseVar;
+};
+
+//! Variable scope for tracking variable lookup
 class SeExprVarEnv {
  private:
-    std::string                  typedef KeyType;
-    SeExprVarRef                 typedef ValType;
-    std::map<KeyType, ValType *> typedef DictType;
+    typedef std::map<std::string,SeExprLocalVar*> VarDictType;
+    VarDictType _map;
+    typedef std::map<std::string,SeExprLocalFunctionNode*> FuncDictType;
+    FuncDictType _functions;
 
-    SeExprVarEnv(SeExprVarEnv * parent)
-        : _map(), _parent(parent), _anotherOwns(false)
-    {};
+    SeExprVarEnv * _parent;
+
+protected:
+    SeExprVarEnv(SeExprVarEnv& other);
+    SeExprVarEnv& operator=(SeExprVarEnv& other);
 
  public:
+    // TODO: figure out when anotherOwns is needed
+    //! Create a scope with no parent
     SeExprVarEnv()
-        : _map(), _parent(0), _anotherOwns(false)
+        : _parent(0)
     {};
 
     ~SeExprVarEnv();
-
-    ValType       * find  (const KeyType      & name);
-    ValType const * lookup(const KeyType      & name)                                   const;
-    void            add   (const KeyType      & name,       ValType    * var);
-    void            add   (      SeExprVarEnv & env,  const SeExprType & modifyingType);
-
-    inline int size() const { return _map.size(); };
-
-    static bool         branchesMatch(const SeExprVarEnv & env1, const SeExprVarEnv & env2);
-    static SeExprVarEnv newBranch    (      SeExprVarEnv & env);
-
- protected:
-    DictType::      iterator       begin ()       { return _map.begin(); };
-    DictType::const_iterator       begin () const { return _map.begin(); };
-    DictType::      iterator const end   ()       { return _map.end  (); };
-    DictType::const_iterator const end   () const { return _map.end  (); };
-    void                           copied() const { _anotherOwns = true; };
-
- private:
-    ValType       * localFind  (const KeyType & name);
-    ValType const * localLookup(const KeyType & name) const;
-    ValType       * parFind    (const KeyType & name);
-    ValType const * parLookup  (const KeyType & name) const;
-
-    DictType       _map;
-    SeExprVarEnv * _parent;
-    mutable bool   _anotherOwns;
+    
+    //! Resets the scope (deletes all variables) and sets parent
+    void resetAndSetParent(SeExprVarEnv* parent);
+    //! Find a function by name (recursive to parents)
+    SeExprLocalFunctionNode* findFunction(const std::string& name);
+    //! Find a variable name by name (recursive to parents)
+    SeExprLocalVar* find(const std::string& name);
+    //! Find a const variable reference name by name (recursive to parents)
+    SeExprLocalVar const* lookup(const std::string& name) const;
+    //! Add a function
+    void addFunction(const std::string& name,SeExprLocalFunctionNode* prototype);
+    //! Add a variable refernece
+    void add(const std::string& name,SeExprLocalVar* var);
+    //! Add all variables into scope by name, but modify their lifetimes to the given type's lifetime
+//    void add(SeExprVarEnv & env,const SeExprType & modifyingType);
+    //! Checks if each branch shares the same items and the same types!
+    // static bool branchesMatch(const SeExprVarEnv & env1, const SeExprVarEnv & env2);
+    void mergeBranches(const SeExprType& type,SeExprVarEnv& env1,SeExprVarEnv& env2);
 };
 
-class SeExprFuncRef {
- public:
-    SeExprFuncRef(SeExprType ret, const std::vector<SeExprType>& args)
-        : _retType(ret), _args(args)
-    {};
+//! Evaluation result.
+struct SeExprEvalResult
+{
+    SeExprEvalResult()
+        :n(0),fp(0),str(0)
+        {}
+    SeExprEvalResult(int n,double* fp)
+        :n(n),fp(fp),str(0)
+        {}
+    SeExprEvalResult(const char** c)
+        :n(1),fp(0),str(c)
+        {}
+    SeExprEvalResult(int n,double* fp,const char** c)
+        :n(n),fp(fp),str(c)
+    {}
 
-    inline       SeExprType                returnType() const { return _retType; };
-    inline const std::vector<SeExprType> & argTypes  () const { return _args;    };
+    int n;
+    double* fp;
+    const char** str;
 
- private:
-    SeExprType _retType;
-    std::vector<SeExprType> _args;
 };
-
-class ReturnValue {
- public:
-    ReturnValue();
-
- private:
-    union Ptrs {
-        float * flo;
-        double* dou;
-        char  * str;
-    };
-    Ptrs valuePtr;
-};
-
 #endif
