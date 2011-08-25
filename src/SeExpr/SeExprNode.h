@@ -51,13 +51,41 @@
 
 class SeExprFunc;
 
-/// Expression node base class.  Always constructed by parser in SeExprParser.y
+/** Expression node base class.  Always constructed by parser in SeExprParser.y
+   Parse tree nodes - this is where the expression evaluation happens.
+
+   Some implementation notes: 
+
+   1) Vector vs scalar - Any node can accept vector or scalar inputs
+   and return a vector or scalar result.  If a node returns a scalar,
+   it is only required to set the [0] component and the other
+   components must be assumed to be invalid.
+
+   2) SeExprNode::prep - This is called for all nodes during parsing
+   once the syntax has been checked.  Anything can be done here, such
+   as function binding, variable lookups, etc., but the only thing
+   that must be done is to determine whether the result is going to be
+   vector or scalar.  This can in some cases depend on whether the
+   children are vector or scalar so the parser calls prep on the root
+   node and each node is expected to call prep on its children and
+   then set its own _isVec variable.  The wantVec param provides
+   context from the parent (and ultimately the owning expression) as
+   to whether a vector is desired, but nodes are not bound by this and
+   may produce a scalar even when a vector is wanted.
+   
+   The base class method implements the default behavior which is to
+   pass down the wantVec flag to all children and set isVec to true if
+   any child is a vec.
+
+   If the prep method fails, an error string should be set and false
+   should be returned.
+*/
 class SeExprNode {
 public:
     SeExprNode(const SeExpression* expr);
     SeExprNode(const SeExpression* expr,
                const SeExprType & type);
-    /// These constructors supply one or more children.
+    /// @{ @name These constructors supply one or more children.
     SeExprNode(const SeExpression* expr,
                SeExprNode* a);
     SeExprNode(const SeExpression* expr,
@@ -79,7 +107,20 @@ public:
                SeExprNode* b,
                SeExprNode* c,
                const SeExprType & type);
+    /// @}
     virtual ~SeExprNode();
+
+
+    /// @{ @name Interface to implement for subclasses
+
+    /// Prepare the node (for parser use only).  See the discussion at
+    /// the start of SeExprNode.cpp for more info.
+    virtual SeExprType prep(bool dontNeedScalar, SeExprVarEnv & env);
+
+    /// Evaluation method.  Note: v[1] and v[2] are undefined if !isVec
+    virtual void eval(SeVec3d& v) const;
+    /// @}
+    
 
     /// True if node has a vector result.
     bool isVec() const { return _isVec; }
@@ -89,6 +130,8 @@ public:
 
     /// Access to original string representation of current expression
     std::string toString() const { return expr()->getExpr().substr(startPos(), length()); };
+
+    /// @{ @name Relationship Queries and Manipulation
 
     /// Access parent node - root node has no parent
     const SeExprNode* parent() const { return _parent; }
@@ -106,21 +149,16 @@ public:
     /// Transfer children from surrogate parent (does not delete surrogate)
     void addChildren_without_delete(SeExprNode* surrogate);
 
-    /** Prepare the node (for parser use only).  See the discussion at
-	the start of SeExprNode.cpp for more info.
-    */
-    virtual SeExprType prep(bool dontNeedScalar, SeExprVarEnv & env);
-
-    /// Evaluation method.  Note: v[1] and v[2] are undefined if !isVec
-    virtual void eval(SeVec3d& v) const;
+    /// @}
 
     /// The type of the node
     const SeExprType & type() const { return _type; };
 
+    /// @{ @name Access position in the input buffer that created this node 
+
     /// Remember the line and column position in the input string 
     inline void setPosition(const short int startPos,const short int endPos)
     {_startPos=startPos;_endPos=endPos;}
-
     /// Access start position in input string
     inline const short int startPos() const { return _startPos; }
     /// Access end position in input string
@@ -128,113 +166,61 @@ public:
     /// Access length of input string
     inline const short int length() const { return endPos() - startPos(); };
 
-    /// Register error
+    /// @}
+
+    /// Register error. This will allow users and sophisticated editors to highlight where in code problem was
     inline void addError(const std::string& error) { _expr->addError(error, _startPos, _endPos); }
 
  protected: /*protected functions*/
 
-    ///Set type
+    //! Set type of parameter
     inline void setType         (const SeExprType & t)  { _type = t;                                    };
-    inline void setType         (const SeExprType & t,
-                                 const SeExprType & t1) { setType(t); _type.becomeLifetime(t1);         };
-    inline void setType         (const SeExprType & t,
-                                 const SeExprType & t1,
-                                 const SeExprType & t2) { setType(t); _type.becomeLifetime(t1, t2);     };
-    inline void setType         (const SeExprType & t,
-                                 const SeExprType & t1,
-                                 const SeExprType & t2,
-                                 const SeExprType & t3) { setType(t); _type.becomeLifetime(t1, t2, t3); };
     //! Set's the type to the argument but uses the children to determine lifetime
     inline void setTypeWithChildLife(const SeExprType & t)  {
         setType(t);
         int num = numChildren();
         if(num > 0)
-            _type.becomeLifetime(child(0)->type());
+            _type.setLifetime(child(0)->type());
         for(int i = 1; i < num; i++)
-            _type.becomeLifetime(_type, child(i)->type());
+            _type.setLifetime(_type, child(i)->type());
     };
 
-#if 0
-    // TODO: delete this
-    /// Prep system error abstraction
-    //   generalCheck passes (no error) if check is true
-    inline bool generalCheck(      bool          check,
-                             const std::string & message) {
-        if(!check) addError(message);
-        return check;
-    };
-#endif
+    /// @{ @name Error Checking Helpers for Type Checking
 
-    /// Prep system error abstraction
-    //   generalCheck passes (no error) if check is true
-    inline bool generalCheck(      bool          check,
-                             const std::string & message,
-                                   bool        & error  ) {
+    /// Checks the boolean value and records an error string with node if it is false 
+    inline bool checkCondition(bool check,const std::string & message,bool& error) {
         if(!check) {
             addError(message);
             error = true;
         }
         return check;
     };
-
-    /// Prep system error abstraction (with prep check of children)
-    //   generalCheck passes (no error) if check is true
-    inline bool generalCheck(      bool           check,
-                             const std::string  & message,
-                                   bool         & error,
-                                   SeExprVarEnv & env    ) {
-        if(!check) {
-            addError(message);
-            error = true;
-            SeExprNode::prep(false, env);
-        }
-        return check;
-    };
-
-    /// Register type mismatch
-    inline std::string expectedTypeMismatchString(const SeExprType & expected,
-                                                  const SeExprType & received) {
-        return ("Type mismatch. Expected: " + expected.toString() +
-                " Received: "               + received.toString()); };
-
-
-    /// Register type mismatch
-    inline std::string generalTypeMismatchString(const SeExprType & first,
-                                                 const SeExprType & second) {
-        return ("Type mismatch. First: " + first .toString() +
-                " Second: "              + second.toString()); };
-
+    /// Checks if the type is a value (i.e. string or float[d])
     bool checkIsValue(const SeExprType& type,bool& error){
-        return generalCheck(type.isValue(),"Expected value type",error);
+        return checkCondition(type.isValue(),"Expected String or Float[d]",error);
     }
+    /// Checks if the type is a float[d] for any d 
     bool checkIsFP(const SeExprType& type,bool& error){
-        return generalCheck(type.isFP(),"Expected floating point type",error);
+        return checkCondition(type.isFP(),"Expected Float[d]",error);
     }
+    /// Checks if the type is a float[d] for a specific d
     bool checkIsFP(int d,const SeExprType& type,bool& error){
-        return generalCheck(type.isFP(d),"Expected floating point type",error);
+        if(!type.isFP(d)){ // Defer creating expensive string creation unless error
+            std::stringstream s;
+            s<<"Expected Float["<<d<<"]"<<std::endl;
+            return checkCondition(false,s.str(),error);
+        }
+        return false;
     }
-
-    /// types match (true if they do)
-    inline bool isa_with_error(const SeExprType & expected,
-                               const SeExprType & received,
-                               bool & error) {
-        return generalCheck(received.isa(expected),
-                            expectedTypeMismatchString(expected, received),
-                            error); };
-
-    /// types match (true if they do)
-    inline bool isUnder_with_error(const SeExprType & expected,
-                                   const SeExprType & received,
-                                         bool       & error   ) {
-        return generalCheck(received.isUnder(expected),
-                            expectedTypeMismatchString(expected, received),
-                            error); };
-
     /// types match (true if they do)
     inline bool checkTypesCompatible(const SeExprType & first,const SeExprType & second,bool & error) {
-        return generalCheck(SeExprType::valuesCompatible(first,second),generalTypeMismatchString(first, second),error); 
-    };
-
+        if(!SeExprType::valuesCompatible(first,second)){
+            return checkCondition(false,
+                "Type mismatch. First: " + first .toString() +
+                " Second: "              + second.toString(),error);
+        }else return false;
+    }
+    /// @}
 protected: /*protected data members*/
     /// Owning expression (node can't modify)
     const SeExpression* _expr;
@@ -301,7 +287,7 @@ public:
 
     inline bool isReturnTypeSet() const { return _retTypeSet; };
 
-    inline SeExprType returnType() const { return (_retTypeSet ? _retType : SeExprType::ErrorType_varying()); };
+    inline SeExprType returnType() const { return (_retTypeSet ? _retType : SeExprType().Error().Varying()); };
 
     inline       SeExprType     argType(int i) const { return _argTypes[i]; };
     inline const SeExprNode   * arg    (int i) const { return child(i);     };

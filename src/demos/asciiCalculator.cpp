@@ -83,7 +83,7 @@ private:
     struct SimpleVar:public SeExprVarRef
     {
 	SimpleVar()
-	    : SeExprVarRef(SeExprType::FPNType_varying(3)), val(SeVec3d(0.0))
+	    : SeExprVarRef(SeExprType().FP(3).Varying()), val(SeVec3d(0.0))
 	{}
 	
 	SeVec3d val; // independent variable

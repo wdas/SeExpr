@@ -33,35 +33,6 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
-/* Parse tree nodes - this is where the expression evaluation happens.
-
-   Some implementation notes: 
-
-   1) Vector vs scalar - Any node can accept vector or scalar inputs
-   and return a vector or scalar result.  If a node returns a scalar,
-   it is only required to set the [0] component and the other
-   components must be assumed to be invalid.
-
-   2) SeExprNode::prep - This is called for all nodes during parsing
-   once the syntax has been checked.  Anything can be done here, such
-   as function binding, variable lookups, etc., but the only thing
-   that must be done is to determine whether the result is going to be
-   vector or scalar.  This can in some cases depend on whether the
-   children are vector or scalar so the parser calls prep on the root
-   node and each node is expected to call prep on its children and
-   then set its own _isVec variable.  The wantVec param provides
-   context from the parent (and ultimately the owning expression) as
-   to whether a vector is desired, but nodes are not bound by this and
-   may produce a scalar even when a vector is wanted.
-   
-   The base class method implements the default behavior which is to
-   pass down the wantVec flag to all children and set isVec to true if
-   any child is a vec.
-
-   If the prep method fails, an error string should be set and false
-   should be returned.
-*/
-
 #ifndef MAKEDEPEND
 #include <math.h>
 #include <sstream>
@@ -265,10 +236,10 @@ SeExprPrototypeNode::prep(bool wantScalar, SeExprVarEnv & env)
     bool error = false;
 
     if(_retTypeSet)
-        generalCheck(returnType().isValid(), "Function has bad return type", error);
+        checkCondition(returnType().isValid(), "Function has bad return type", error);
 
     for(int c = 0; c < numChildren(); c++)
-        generalCheck(child(c)->type().isValid(), "Function has a parameter with a bad type", error);
+        checkCondition(child(c)->type().isValid(), "Function has a parameter with a bad type", error);
 
     if(error) setType(SeExprType().Error());
     else setType(SeExprType().None().Varying());
@@ -337,7 +308,7 @@ SeExprLocalFunctionNode::prep(bool wantScalar, SeExprVarEnv & env)
 
     if(!error && blockType.isValid()) {
         if(prototype->isReturnTypeSet())
-            generalCheck(blockType.is(prototype->returnType()), "In function result of block does not match given return type", error);
+            checkCondition(blockType==prototype->returnType(), "In function result of block does not match given return type", error);
         else prototype->setReturnType(blockType);
     } else error = true;
 
@@ -395,18 +366,12 @@ SeExprIfThenElseNode::prep(bool wantScalar, SeExprVarEnv & env)
     elseType = child(2)->prep(false, elseEnv);
 
     if(!error && thenType.isValid() && elseType.isValid()
-        && generalCheck(SeExprVarEnv::branchesMatch(thenEnv, elseEnv), "Types of variables do not match after if statement", error))
+        && checkCondition(SeExprVarEnv::branchesMatch(thenEnv, elseEnv), "Types of variables do not match after if statement", error))
         env.add(thenEnv, condType);
     else error = true;
 
-    if(error) 
-        setType(SeExprType().Error());
-    else
-        // TODO: fix this
-        setType(SeExprType().None(),
-                condType,
-                thenType,
-                elseType);
+    if(error) setType(SeExprType().Error());
+    else setType(SeExprType().None().setLifetime(condType,thenType,elseType));
 
     return _type;
 }
@@ -418,7 +383,7 @@ SeExprIfThenElseNode::eval(SeVec3d& result) const
     // eval condition, then choose then/else block
     SeVec3d val;
     child(0)->eval(val);
-    if (val[0])
+    if (val[0]) 
 	child(1)->eval(val);
     else
 	child(2)->eval(val);
@@ -436,7 +401,7 @@ SeExprAssignNode::prep(bool wantScalar, SeExprVarEnv & env)
     bool error=false;
 	// TODO: fix
     //checkIsValue(_assignedType,error);
-	generalCheck(_assignedType.isValid(),"tesT",error);
+	checkCondition(_assignedType.isValid(),"tesT",error);
 
     if(error) setType(SeExprType().Error());
     else setTypeWithChildLife(SeExprType().None());
@@ -512,12 +477,10 @@ SeExprUnaryOpNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
     bool error = false;
 
-    setType(child(0)->prep(wantScalar, env));
-    if(_type.isValid())
-        isUnder_with_error(SeExprType::NumericType_varying(), _type, error);
-
+    SeExprType childType=child(0)->prep(wantScalar, env);
+    checkIsFP(childType,error);
     if(error) setType(SeExprType().Error());
-
+    else setType(childType);
     return _type;
 }
 
@@ -583,14 +546,10 @@ SeExprCondNode::prep(bool wantScalar, SeExprVarEnv & env)
 
     checkIsValue(thenType,error);
     checkIsValue(elseType,error);
-    generalCheck(thenType == elseType, "Types of conditional branches do not match", error);
+    checkCondition(thenType == elseType, "Types of conditional branches do not match", error);
 
     if(error) setType(SeExprType().Error());
-    else
-        setType(thenType,
-                condType,
-                thenType,
-                elseType);
+    else setType(thenType.setLifetime(condType,thenType,elseType));
 
     return _type;
 }
@@ -622,7 +581,7 @@ SeExprLogicalOpNode::prep(bool wantScalar, SeExprVarEnv & env)
     checkIsFP(secondType,error);
 
     if(error) setType(SeExprType().Error());
-    else setType(SeExprType().FP(1),firstType,secondType);
+    else setType(SeExprType().FP(1).setLifetime(firstType,secondType));
 
     return _type;
 }
@@ -673,7 +632,7 @@ SeExprSubscriptNode::prep(bool wantScalar, SeExprVarEnv & env)
     checkIsFP(scriptType,error);
 
     if(error) setType(SeExprType().Error());
-    else setType(SeExprType().FP(1),vecType,scriptType);
+    else setType(SeExprType().FP(1).setLifetime(vecType,scriptType));
 
     return _type;
 }
@@ -724,7 +683,7 @@ SeExprCompareEqNode::prep(bool wantScalar, SeExprVarEnv & env)
         checkTypesCompatible(firstType, secondType, error);
 
     if(error) setType(SeExprType().Error());
-    else setType(SeExprType().FP(1),firstType,secondType);
+    else setType(SeExprType().FP(1).setLifetime(firstType,secondType));
 
     return _type;
 }
@@ -779,7 +738,7 @@ SeExprCompareNode::prep(bool wantScalar, SeExprVarEnv & env)
         checkTypesCompatible(firstType, secondType, error);
 
     if(error) setType(SeExprType().Error());
-    else setType(SeExprType().FP(1),firstType,secondType);
+    else setType(SeExprType().FP(1).setLifetime(firstType,secondType));
 
     return _type;
 }
@@ -856,9 +815,8 @@ SeExprBinaryOpNode::prep(bool wantScalar, SeExprVarEnv & env)
     checkTypesCompatible(firstType, secondType, error);
 
     if(error) setType(SeExprType().Error());
-    else setType((firstType.isFP1() ? secondType : firstType),
-                firstType,
-                secondType);
+    else setType((firstType.isFP(1) ? secondType : firstType)
+        .setLifetime(firstType,secondType));
 
     return _type;
 }
@@ -1011,7 +969,7 @@ SeExprVarNode::prep(bool wantScalar, SeExprVarEnv & env)
         _var = _expr->resolveVar(name());
 
     bool error=false;
-    generalCheck(_var, std::string("No variable named $") + name(),error);
+    checkCondition(_var, std::string("No variable named $") + name(),error);
     // TODO: remove
     //std::cerr<<"we have gah is "<<_var->type().toString();
     return _type=error?SeExprType().Error():_var->type();
@@ -1074,10 +1032,10 @@ SeExprFuncNode::prep(bool wantScalar, SeExprVarEnv & env)
     if (!_func) _func = SeExprFunc::lookup(_name);
 
     //check that function exisits and that the function has the right number of arguments
-    if(generalCheck(_func,                        "Function " + _name + " has no definition", error, env) &&
-       generalCheck(_nargs >= _func->minArgs(),   "Too few args for function "  + _name,     error, env) &&
-       generalCheck(_nargs <= _func->maxArgs() ||
-                         0  > _func->maxArgs(),   "Too many args for function " + _name,     error, env)) {
+    if(checkCondition(_func,                        "Function " + _name + " has no definition", error) &&
+       checkCondition(_nargs >= _func->minArgs(),   "Too few args for function "  + _name,     error) &&
+       checkCondition(_nargs <= _func->maxArgs() ||
+                         0  > _func->maxArgs(),   "Too many args for function " + _name,     error)) {
         //check if the fuction is a FuncX
         if(_func->type() == SeExprFunc::FUNCX) {
             //FuncX function:
@@ -1092,12 +1050,12 @@ SeExprFuncNode::prep(bool wantScalar, SeExprVarEnv & env)
 
             if(!error                   && //no errors
                _func->isScalar()        && //takes scalar arguments only
-               _func->retType().isFP1())   //returns a scalar
+                _func->retType().isFP(1))   //returns a scalar
                 for(int i = 0; i < _nargs; i++) {
                     int cdim = child(i)->type().dim();
 
                     //Note: This assumes that every type (except FPN types) have dim() == 1
-                    if(generalCheck(cdim == 1    ||
+                    if(checkCondition(cdim == 1    ||
                                     _dim == 1    ||
                                     _dim == cdim,   "Arguments to promotable function, " + _name + ", are of different lengths", error))
                         if(cdim  > 1 &&
@@ -1105,6 +1063,8 @@ SeExprFuncNode::prep(bool wantScalar, SeExprVarEnv & env)
                             _dim = cdim;
                 }
         }
+    }else{
+        SeExprNode::prep(false,env);
     }
 
     if(error)
@@ -1112,7 +1072,7 @@ SeExprFuncNode::prep(bool wantScalar, SeExprVarEnv & env)
     else if(_func->type() == SeExprFunc::FUNCX) //FuncX function
         setTypeWithChildLife(_func->retType());
     else  //standard function
-        setTypeWithChildLife(SeExprType::FPNType_varying(_dim));
+        setTypeWithChildLife(SeExprType().FP(_dim).Varying());
 
     return _type;
 }

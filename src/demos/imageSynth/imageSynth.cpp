@@ -56,11 +56,11 @@ public:
     struct Var:public SeExprVarRef
     {
         Var(const double val)
-	    : SeExprVarRef(SeExprType::FP1Type_varying()), val(val)
+	    : SeExprVarRef(SeExprType().FP(1).Varying()), val(val)
 	{}
 
 	Var()
-	    : SeExprVarRef(SeExprType::FP1Type_varying()), val(0.0)
+	    : SeExprVarRef(SeExprType().FP(1).Varying()), val(0.0)
 	{}
 
         double val; // independent variable

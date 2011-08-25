@@ -77,7 +77,7 @@ TypePrintExaminer::examine(const SeExprNode* examinee)
 
 
 SeExpression::SeExpression()
-    : _wantVec(true), _returnType(SeExprType::AnyType_varying()), _parseTree(0), _isValid(0), _parsed(0), _prepped(0)
+    : _wantVec(true), _returnType(SeExprType().FP(3).Varying()), _parseTree(0), _isValid(0), _parsed(0), _prepped(0)
 {
     SeExprFunc::init();
 }
@@ -208,7 +208,7 @@ SeExpression::prep() const
         //_walker.walk(_parseTree);
 
 	//delete _parseTree; _parseTree = 0;
-		_isValid=false;
+        _isValid=false;
     }else _isValid=true;
 }
 

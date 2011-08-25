@@ -1028,7 +1028,7 @@ static const char* vnoise_docstring=
         virtual bool isScalar() const { return _isScalar; }
 
         //TODO: check that this is correct
-        virtual SeExprType retType() const { return SeExprType::FPNType_varying(3); }
+        virtual SeExprType retType() const { return SeExprType().FP(3).Varying(); }
 
 	virtual void eval(const SeExprFuncNode* node, SeVec3d& result) const
 	{
@@ -1316,7 +1316,7 @@ static const char* vnoise_docstring=
             if ((nargs - 1) % 3) {
                 node->addError("Wrong number of arguments, should be multiple of 3 plus 1");
                 //TODO: check that this is correct
-                return SeExprType::ErrorType_varying();
+                return SeExprType().Error().Varying();
                 //return false;
             }
             
@@ -1331,7 +1331,7 @@ static const char* vnoise_docstring=
                 _isScalar = true;
                 int n = node->numChildren();
                 for(int i = 0; _isScalar && i < n; i++)
-                    _isScalar = node->child(i)->type().isFP1();
+                    _isScalar = node->child(i)->type().isFP(1);
             }
 
             CurveData<double>* data = new CurveData<double>;
@@ -1371,7 +1371,7 @@ static const char* vnoise_docstring=
             if(noErrors)
                 return wanted;
             else
-                return SeExprType::ErrorType_varying();
+                return SeExprType().Error().Varying();
             //return noErrors;
         }
 
@@ -1379,7 +1379,7 @@ static const char* vnoise_docstring=
         virtual bool isScalar() const { return _isScalar; }
 
         //TODO: check that this is correct
-        virtual SeExprType retType() const { return SeExprType::FP1Type_varying(); }
+        virtual SeExprType retType() const { return SeExprType().FP(1).Varying(); }
 
         virtual void eval(const SeExprFuncNode* node, SeVec3d& result) const 
         {
@@ -1419,7 +1419,7 @@ static const char* vnoise_docstring=
             if ((nargs - 1) % 3) {
                 node->addError("Wrong number of arguments, should be multiple of 3 plus 1");
                 //TODO: check that this is correct
-                return SeExprType::ErrorType_varying();
+                return SeExprType().Error().Varying();
                 //return false;
             }
             bool noErrors=true;
@@ -1433,7 +1433,7 @@ static const char* vnoise_docstring=
                 _isScalar = true;
                 int n = node->numChildren();
                 for(int i = 0; _isScalar && i < n; i++)
-                    _isScalar = node->child(i)->type().isFP1();
+                    _isScalar = node->child(i)->type().isFP(1);
             }
 
             CurveData<SeVec3d>* data = new CurveData<SeVec3d>;
@@ -1475,7 +1475,7 @@ static const char* vnoise_docstring=
             if(noErrors)
                 return wanted;
             else
-                return SeExprType::ErrorType_varying();
+                return SeExprType().Error().Varying();
             //return noErrors;
         }
         
@@ -1483,7 +1483,7 @@ static const char* vnoise_docstring=
         virtual bool isScalar() const { return _isScalar; }
 
         //TODO: check that this is correct
-        virtual SeExprType retType() const { return SeExprType::FPNType_varying(3); }
+        virtual SeExprType retType() const { return SeExprType().FP(3).Varying(); }
 
         virtual void eval(const SeExprFuncNode* node, SeVec3d& result) const 
         {
@@ -1526,7 +1526,7 @@ static const char* vnoise_docstring=
             if(!node->isStrArg(0)){
                 node->addError("first argument must be format");
                 //TODO: check that this is correct
-                return SeExprType::ErrorType_varying();
+                return SeExprType().Error().Varying();
                 //return false;
             }
 
@@ -1542,11 +1542,11 @@ static const char* vnoise_docstring=
                 _isScalar = true;
                 int n = node->numChildren();
                 for(int i = 0; _isScalar && i < n; i++)
-                    _isScalar = node->child(i)->type().isFP1();
+                    _isScalar = node->child(i)->type().isFP(1);
             }
 
             //TODO: check that this is correct
-            if(!valid) return SeExprType::ErrorType_varying();
+            if(!valid) return SeExprType().Error().Varying();
             //if(!valid) return false;
 
             // parse format string
@@ -1566,7 +1566,7 @@ static const char* vnoise_docstring=
                     node->addError("Unexpected end of format string");
                     delete data;
                     //TODO: check that this is correct
-                    return SeExprType::ErrorType_varying();
+                    return SeExprType().Error().Varying();
                     //return false;
                 }
                 else if(format[percentStart+1]=='%'){
@@ -1586,7 +1586,7 @@ static const char* vnoise_docstring=
                     node->addError("Invalid format string, only %v is allowed");
                     delete data;
                     //TODO: check that this is correct
-                    return SeExprType::ErrorType_varying();
+                    return SeExprType().Error().Varying();
                     //return false;
                 }
             }
@@ -1597,7 +1597,7 @@ static const char* vnoise_docstring=
                 node->addError("Wrong number of arguments for format string");
                 delete data;
                 //TODO: check that this is correct
-                return SeExprType::ErrorType_varying();
+                return SeExprType().Error().Varying();
                 //return false;
             }
 
@@ -1615,7 +1615,7 @@ static const char* vnoise_docstring=
         virtual bool isScalar() const { return true; };
 
         //TODO: check that this is correct
-        virtual SeExprType retType() const { return SeExprType::FP1Type_varying(); };
+        virtual SeExprType retType() const { return SeExprType().FP(1).Varying(); };
 
         virtual void eval(const SeExprFuncNode* node, SeVec3d& result) const 
         {

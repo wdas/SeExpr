@@ -83,6 +83,7 @@ namespace SeExpr
     SeVec3d rgbtohsl(const SeVec3d& rgb);
     SeVec3d hsltorgb(const SeVec3d& hsl);
 
+
     // noise
     double hash(int n, double* args);
     double noise(int n, const SeVec3d* args);

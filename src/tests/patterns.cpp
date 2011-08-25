@@ -67,7 +67,7 @@ public:
         }
 
         virtual bool       isScalar() const { return true;                          };
-        virtual SeExprType retType () const { return SeExprType::FP1Type_varying(); };
+        virtual SeExprType retType () const { return SeExprType().FP(1).Varying(); };
 
         void eval(const SeExprFuncNode* node,SeVec3d& result) const
         {result=SeVec3d();}

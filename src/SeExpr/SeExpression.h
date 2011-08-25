@@ -54,7 +54,7 @@ class SeExpression;
 class SeExprVarRef
 {
     SeExprVarRef()
-        : _type(SeExprType::ErrorType_varying())
+        : _type(SeExprType().Error().Varying())
     {};
 
  public:
@@ -83,7 +83,7 @@ class SeExprVectorVarRef : public SeExprVarRef
 {
  public:
     SeExprVectorVarRef()
-        : SeExprVarRef(SeExprType::FPNType_varying(3))
+        : SeExprVarRef(SeExprType().FP(3).Varying())
     {};
 
     virtual bool isVec() { return 1; }
@@ -95,7 +95,7 @@ class SeExprScalarVarRef : public SeExprVarRef
 {
  public:
     SeExprScalarVarRef()
-        : SeExprVarRef(SeExprType::FP1Type_varying())
+        : SeExprVarRef(SeExprType().FP(1).Varying())
     {};
 
     virtual bool isVec() { return 0; }
@@ -105,7 +105,7 @@ class SeExprScalarVarRef : public SeExprVarRef
 class SeExprLocalVarRef : public SeExprVarRef
 {
     SeExprLocalVarRef()
-        : SeExprVarRef(SeExprType::ErrorType_varying())
+        : SeExprVarRef(SeExprType().Error().Varying())
     {};
 
  public:
@@ -145,7 +145,7 @@ class SeExpression
 
     SeExpression( );
     //SeExpression( const std::string &e, bool wantVec=true );
-    SeExpression( const std::string &e, const SeExprType & type = SeExprType::AnyType_varying());
+    SeExpression( const std::string &e, const SeExprType & type = SeExprType().FP(3));
     virtual ~SeExpression();
 
     /** Sets the expression to desire a vector or a scalar.

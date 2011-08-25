@@ -63,8 +63,8 @@ public:
         : TypeBuilderExpr(),_walker(&_examiner)
     {};
 
-    TypeTesterExpr(const std::string &e, const SeExprType & type = SeExprType::AnyType_varying())
-        :  TypeBuilderExpr(e, type),_walker(&_examiner)
+    TypeTesterExpr(const std::string &e)
+        :  TypeBuilderExpr(e),_walker(&_examiner)
     {};
 
     void test(const std::string & expr,

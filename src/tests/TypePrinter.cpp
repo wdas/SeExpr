@@ -53,8 +53,8 @@ public:
           _walker(&_examiner)
     {};
 
-    TypePrinterExpr(const std::string &e, const SeExprType & type = SeExprType::AnyType_varying())
-        :  TypeBuilderExpr(e, type),
+    TypePrinterExpr(const std::string &e)
+        :  TypeBuilderExpr(e),
           _examiner(),
           _walker(&_examiner)
     {};

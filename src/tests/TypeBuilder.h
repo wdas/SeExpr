@@ -59,7 +59,7 @@ public:
         {};
 
         virtual bool       isScalar() const { return true;                          };
-        virtual SeExprType retType () const { return SeExprType::FP1Type_varying(); };
+        virtual SeExprType retType () const { return SeExprType().FP(1).Varying(); };
 
         void eval(const SeExprFuncNode* node,SeVec3d& result) const
         {result=SeVec3d();}
@@ -99,8 +99,8 @@ public:
          z(SeExprType().FP(1).Varying() )
     {};
 
-    TypeBuilderExpr(const std::string &e, const SeExprType & type = SeExprType::AnyType_varying())
-        : SeExpression::SeExpression(e, type),
+    TypeBuilderExpr(const std::string &e)
+        : SeExpression::SeExpression(e),
          dummyFunc(dummyFuncX,0,16),
          func(dummyFuncX,3,3),
          F1(SeExprType().FP(1).Varying() ),

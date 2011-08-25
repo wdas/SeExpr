@@ -74,7 +74,7 @@ void SeExprVarEnv::add(SeExprVarEnv & env, const SeExprType & modifyingType)
     for(DictType::iterator ienv=env._map.begin(); ienv != env._map.end(); ++ienv) {
         SeExprVarRef* ref=ienv->second;
         SeExprType type=ref->type();
-        type.becomeLifetime(type, modifyingType);
+        type.setLifetime(type, modifyingType);
         ref->setType(type);
         add(ienv->first, ref); // add to this scope
     }

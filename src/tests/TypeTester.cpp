@@ -55,7 +55,7 @@ TypeTesterExpr::test(const std::string & expr,
                      int verbosity_level) {
     bool       error      = false;
     bool       parseError = false;
-    SeExprType returned   = SeExprType::ErrorType_varying();
+    SeExprType returned   = SeExprType().Error().Varying();
 
     setExpr(expr);
     setReturnType(expected_result);
@@ -108,24 +108,26 @@ identity(const SeExprType & type)
 SeExprType
 numeric(const SeExprType & type)
 {
-    if(type.isUnderNumeric()) return type;
-    else                      return SeExprType::ErrorType_varying();
+    return type.isFP() ? type : SeExprType().Error().Varying(); return type;
 };
 
 SeExprType
 numericToScalar(const SeExprType & type)
 {
-    if(type.isUnderNumeric()) { SeExprType t = SeExprType::FP1Type_varying(); t.becomeLifetime(type); return t; }
-    else                      return SeExprType::ErrorType_varying();
+    SeExprType ret=SeExprType().Error().Varying();
+    if(type.isFP()) ret=SeExprType().FP(1);
+    ret.setLifetime(type);
+    return ret;
 };
 
 SeExprType
 numericToScalar(const SeExprType & first,
                 const SeExprType & second)
 {
-    if(first .isUnderNumeric() &&
-       second.isUnderNumeric())   { SeExprType t = SeExprType::FP1Type_varying(); t.becomeLifetime(first, second); return t; }
-    else                          return SeExprType::ErrorType_varying();
+    SeExprType ret=SeExprType().Error();
+    if(first .isFP() && second.isFP())ret = SeExprType().FP(1).Varying(); 
+    ret.setLifetime(first, second); 
+    return ret;
 };
 
 SeExprType
@@ -133,7 +135,7 @@ generalComparison(const SeExprType & first,
                   const SeExprType & second)
 {
     if(SeExprType::valuesCompatible(first,second)){
-        SeExprType t=SeExprType().FP(1);t.becomeLifetime(first,second);
+        SeExprType t=SeExprType().FP(1);t.setLifetime(first,second);
         return t;
     }else return SeExprType().Error();
 };
@@ -143,7 +145,7 @@ numericComparison(const SeExprType & first,
                   const SeExprType & second)
 {
     if(first.isFP() && second.isFP() && SeExprType::valuesCompatible(first,second)){
-        SeExprType t=SeExprType().FP(1);t.becomeLifetime(first,second);
+        SeExprType t=SeExprType().FP(1);t.setLifetime(first,second);
         return t;
     }else return SeExprType().Error();
 };
@@ -158,7 +160,7 @@ numericToNumeric(const SeExprType & first,
         else if(first.isFP(1)) type=second;
         else if(second.isFP(1)) type=first;
     }
-    type.becomeLifetime(first,second);
+    type.setLifetime(first,second);
     //std::cerr<<first.toString()<<"+"<<second.toString()<<"="<<type.toString()<<std::endl;;
     return type;
 };
@@ -167,9 +169,10 @@ SeExprType
 numericTo2Vector(const SeExprType & first,
                  const SeExprType & second)
 {
-    if(first .isUnderNumeric() &&
-       second.isUnderNumeric())   { SeExprType t = SeExprType::FPNType_varying(2); t.becomeLifetime(first, second); return t; }
-    else                          return SeExprType::ErrorType_varying();
+    SeExprType ret=SeExprType().Error();
+    if(first .isFP() & second.isFP()) ret=SeExprType().FP(2); 
+    ret.setLifetime(first, second); 
+    return ret;
 };
 
 SeExprType
@@ -177,10 +180,10 @@ numericTo3Vector(const SeExprType & first,
                  const SeExprType & second,
                  const SeExprType & third)
 {
-    if(first .isUnderNumeric() &&
-       second.isUnderNumeric() &&
-       third .isUnderNumeric())   { SeExprType t = SeExprType::FPNType_varying(3); t.becomeLifetime(first, second, third); return t; }
-    else                          return SeExprType::ErrorType_varying();
+    SeExprType ret=SeExprType().Error();
+    if(first .isFP() & second.isFP() && third.isFP()) ret=SeExprType().FP(3); 
+    ret.setLifetime(first, second,third); 
+    return ret;
 };
 
 SeExprType
@@ -188,11 +191,12 @@ conditional(const SeExprType & first,
             const SeExprType & second,
             const SeExprType & third)
 {
-    if(first .isUnderNumeric() &&
-       second.isUnderValue  () &&
-       third .isUnderValue  () &&
-       second == third)           { SeExprType t = SeExprType(second); t.becomeLifetime(first, second, third); return t; }
-    else                          return SeExprType::ErrorType_varying();
+
+    SeExprType ret=SeExprType().Error().Varying();
+    if(first.isFP() && second.isValue() && third.isValue() && second == third)
+        ret=SeExprType(second);
+    ret.setLifetime(first,second,third);
+    return ret;
 };
 
 void
@@ -332,25 +336,25 @@ int main(int argc,char *argv[])
         if(verbosity_level >= 1)
             std::cout << "Checking function expressions." << std::endl;
         std::string compress = "func(0,0,0)";
-        expr.test(compress, SeExprType::FP1Type_constant(),  SeExprType::FP1Type_constant(),  compress, verbosity_level);
+        expr.test(compress, SeExprType().FP(1).Constant(),  SeExprType().FP(1).Constant(),  compress, verbosity_level);
         compress = "func(0,0)";
-        expr.test(compress, SeExprType::FP1Type_constant(),  SeExprType::ErrorType_varying(), compress, verbosity_level);
+        expr.test(compress, SeExprType().FP(1).Constant(),  SeExprType().Error().Varying(), compress, verbosity_level);
         compress = "func(0,0,0,0)";
-        expr.test(compress, SeExprType::FP1Type_constant(),  SeExprType::ErrorType_varying(), compress, verbosity_level);
+        expr.test(compress, SeExprType().FP(1).Constant(),  SeExprType().Error().Varying(), compress, verbosity_level);
         compress = "compress([1,2],0,0)";
-        expr.test(compress, SeExprType::FPNType_constant(2), SeExprType::FPNType_constant(2), compress, verbosity_level);
+        expr.test(compress, SeExprType().FP(2).Constant(), SeExprType().FP(2).Constant(), compress, verbosity_level);
         compress = "compress(0,[1,2],0)";
-        expr.test(compress, SeExprType::FPNType_constant(2), SeExprType::FPNType_constant(2), compress, verbosity_level);
+        expr.test(compress, SeExprType().FP(2).Constant(), SeExprType().FP(2).Constant(), compress, verbosity_level);
         compress = "compress(0,0,[1,2,3])";
-        expr.test(compress, SeExprType::FPNType_constant(3), SeExprType::FPNType_constant(3), compress, verbosity_level);
+        expr.test(compress, SeExprType().FP(3).Constant(), SeExprType().FP(3).Constant(), compress, verbosity_level);
         compress = "compress(0,[1,2],[3,2,1])";
-        expr.test(compress, SeExprType::FPNType_constant(2), SeExprType::ErrorType_varying(), compress, verbosity_level);
+        expr.test(compress, SeExprType().FP(2).Constant(), SeExprType().Error().Varying(), compress, verbosity_level);
 
         //local function tests:
         if(verbosity_level >= 1)
             std::cout << "Checking local function definitions." << std::endl;
         std::string funcdef = "def foo() { $a = 4; $a } 4";
-        expr.test(funcdef, SeExprType::FP1Type_constant(),  SeExprType::FP1Type_constant(),  funcdef, verbosity_level);
+        expr.test(funcdef, SeExprType().FP(1).Constant(),  SeExprType().FP(1).Constant(),  funcdef, verbosity_level);
 
     };
 
