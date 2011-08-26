@@ -252,8 +252,47 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
     static const char* mix_docstring="mix(float a,float b,float alpha)\nBlend of a and b according to alpha.";
 
 
+    SeVec3d satAdjust(const SeVec3d& rgb, double s, double i)
+    {
+        double x = std::min(std::min(rgb[0],rgb[1]),rgb[2]);
+        double y = std::max(std::max(rgb[0],rgb[1]),rgb[2]);
+
+        if (x==y) // achromatic
+            return rgb*i;
+
+        // compute lightness = avg of min and max rgb vals
+        double L = 0.5 * (x+y);
+
+        // scale saturation, and find new min/max
+        double S, y2;
+        if (L <= .5) {
+            if (x < 0) S = 1-x;
+            else       S = (y-x)/(y+x);
+            S *= s;
+            if (S > 1) y2 = 2*L + S - 1;
+            else       y2 = L + L*S;
+        } else {
+            if (y > 1) S = y;
+            else       S = (y-x)/(2-(y+x));
+            S *= s;
+            if (S > 1) y2 = S;
+            else       y2 = L + S - L*S;
+        }
+        double x2 = 2*L-y2;
+
+        // lerp old rgb to new
+        double t = i/(y-x);
+        return ((y2-x2)*t*rgb + SeVec3d((y*x2 - x*y2)*t));
+    }
+
+
     SeVec3d hsiAdjust(const SeVec3d& rgb, double h, double s, double i)
     {
+        if (h == 0) {
+            if (s == 1) return rgb * i;
+            return satAdjust(rgb, s, i);
+        }
+
 	SeVec3d hsl = rgbtohsl(rgb);
 	hsl[0] += h * (1.0/360);
 	hsl[1] *= s;
@@ -355,7 +394,8 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
 	else if (G == y)  H = (B - R) / diff + 2;
 	else 	          H = (R - G) / diff + 4;
 	H *= 1/6.;
-	H -= floor(H); // make sure hue is in range 0..1
+        if (H < 0 || H > 1)
+            H -= floor(H); // make sure hue is in range 0..1
 
 	return SeVec3d(H,S,L);
     }
@@ -369,9 +409,10 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
         "well-defined and reversible.";
 
 
-    static double hslvalue(double x, double y, double H)
+    static inline double hslvalue(double x, double y, double H)
     {
-	H -= floor(H); // make sure hue is in range 0..1
+        if (H < 0 || H > 1)
+            H -= floor(H); // make sure hue is in range 0..1
 
 	if      (H < 1/6.) return x+(y-x)*H*6;
 	else if (H < 3/6.) return y;
