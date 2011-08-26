@@ -10,6 +10,7 @@ $ cd SeExpr
 $ mkdir build
 $ cd build 
 $ cmake ../
+$ make doc      # optional make documentation
 $ make install
 
 You can try the test application asciiGraph which is a simple
