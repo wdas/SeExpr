@@ -304,7 +304,6 @@ int main(int argc,char *argv[])
                 std::cerr << expr.parseError() << std::endl;
         }
     } else {
-        std::cerr<<"LALA"<<std::endl;
         testOne("$a = $v; $a", expr, identity,        verbosity_level);
         testOne("[$v]",        expr, numericToScalar, verbosity_level);
         testOne("-$v",         expr, numeric,         verbosity_level);

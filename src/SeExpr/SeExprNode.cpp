@@ -46,21 +46,21 @@
 
 
 SeExprNode::SeExprNode(const SeExpression* expr)
-    : _expr(expr), _parent(0), _isVec(0)
+    : _expr(expr), _parent(0), _isVec(0), evaluate(0)
 {
 }
 
 
 SeExprNode::SeExprNode(const SeExpression* expr,
                        const SeExprType & type)
-    : _expr(expr), _parent(0), _isVec(0), _type(type)
+    : _expr(expr), _parent(0), _isVec(0), _type(type), evaluate(0)
 {
 }
 
 
 SeExprNode::SeExprNode(const SeExpression* expr,
                        SeExprNode* a)
-    : _expr(expr), _parent(0), _isVec(0)
+    : _expr(expr), _parent(0), _isVec(0), evaluate(0)
 {
     _children.reserve(1);
     addChild(a);
@@ -70,7 +70,7 @@ SeExprNode::SeExprNode(const SeExpression* expr,
 SeExprNode::SeExprNode(const SeExpression* expr,
                        SeExprNode* a,
                        const SeExprType & type)
-    : _expr(expr), _parent(0), _isVec(0), _type(type)
+    : _expr(expr), _parent(0), _isVec(0), _type(type), evaluate(0)
 {
     _children.reserve(1);
     addChild(a);
@@ -80,7 +80,7 @@ SeExprNode::SeExprNode(const SeExpression* expr,
 SeExprNode::SeExprNode(const SeExpression* expr,
                        SeExprNode* a,
                        SeExprNode* b)
-    : _expr(expr), _parent(0), _isVec(0)
+    : _expr(expr), _parent(0), _isVec(0), evaluate(0)
 {
     _children.reserve(2);
     addChild(a);
@@ -92,7 +92,7 @@ SeExprNode::SeExprNode(const SeExpression* expr,
                        SeExprNode* a,
                        SeExprNode* b,
                        const SeExprType & type)
-    : _expr(expr), _parent(0), _isVec(0), _type(type)
+    : _expr(expr), _parent(0), _isVec(0), _type(type), evaluate(0)
 {
     _children.reserve(2);
     addChild(a);
@@ -104,7 +104,7 @@ SeExprNode::SeExprNode(const SeExpression* expr,
                        SeExprNode* a,
                        SeExprNode* b,
 		       SeExprNode* c)
-    : _expr(expr), _parent(0), _isVec(0)
+    : _expr(expr), _parent(0), _isVec(0), evaluate(0)
 {
     _children.reserve(3);
     addChild(a);
@@ -118,7 +118,7 @@ SeExprNode::SeExprNode(const SeExpression* expr,
                        SeExprNode* b,
 		       SeExprNode* c,
                        const SeExprType & type)
-    : _expr(expr), _parent(0), _isVec(0), _type(type)
+    : _expr(expr), _parent(0), _isVec(0), _type(type), evaluate(0)
 {
     _children.reserve(3);
     addChild(a);
@@ -227,6 +227,16 @@ SeExprModuleNode::eval(SeVec3d& result) const
     SeVec3d val;
     child(0)->eval(val);
     child(1)->eval(result);
+}
+
+void
+SeExprModuleNode::evalImpl(SeExprNode* self,const SeExprEvalResult& result)
+{
+    // eval block, then eval primary expr
+    int last=self->numChildren()-1;
+    for(int c=0;c<last;c++)
+        self->child(c)->evaluate(self->child(0),SeExprEvalResult());
+    if(last>=0) self->child(last)->evaluate(self->child(last),result);
 }
 
 
@@ -429,14 +439,27 @@ SeExprVecNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
     bool error = false;
 
+    int max_child_d=0;
     for(int c=0; c<numChildren(); c++) {
         SeExprType childType = child(c)->prep(true, env);
         //TODO: add way to tell what element of vector has the type mismatch
         checkIsFP(childType,error);
+        max_child_d=std::max(max_child_d,childType.dim());
     }
     
     if(error) setType(SeExprType().Error());
-    else setTypeWithChildLife(SeExprType().FP(numChildren()));
+    else{
+        setTypeWithChildLife(SeExprType().FP(numChildren()));
+        if(max_child_d<=4){
+            switch(numChildren()){
+            case 1: evaluate=evalImplFast<1,4>;break;
+            case 2: evaluate=evalImplFast<2,4>;break;
+            case 3: evaluate=evalImplFast<3,4>;break;
+            case 4: evaluate=evalImplFast<4,4>;break;
+            default: evaluate=evalImpl;
+            }
+        }else evaluate=evalImpl;
+    }
     return _type;
 }
 
@@ -454,6 +477,26 @@ SeExprVecNode::eval(SeVec3d& result) const
     }
 }
 
+void SeExprVecNode::evalImpl(SeExprNode* self,const SeExprEvalResult& result)
+{
+    double fp[16]; // TODO: this is bad
+    for(int c=0; c<self->numChildren(); c++) {
+        SeExprNode* child=self->child(c);
+        child->evaluate(child,SeExprEvalResult(child->type().dim(),fp));
+        result.fp[c]=fp[0];
+    }
+}
+
+template<int my_d,int maxchild_d> void
+SeExprVecNode::evalImplFast(SeExprNode* self,const SeExprEvalResult& result)
+{
+    double res[maxchild_d];
+    for(int k=0;k<my_d;k++){
+        SeExprNode* child=self->child(k);
+        child->evaluate(child,SeExprEvalResult(maxchild_d,res));
+        result.fp[k]=res[0];
+    }
+}
 
 SeVec3d
 SeExprVecNode::value() const {
@@ -991,6 +1034,11 @@ SeExprNumNode::prep(bool wantScalar, SeExprVarEnv & env)
     return _type;
 }
 
+void
+SeExprNumNode::evalImpl(SeExprNode* self,const SeExprEvalResult& result)
+{
+    result.fp[0]=static_cast<SeExprNumNode*>(self)->_val;
+}
 
 SeExprType
 SeExprStrNode::prep(bool wantScalar, SeExprVarEnv & env)

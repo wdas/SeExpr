@@ -50,6 +50,7 @@ class SeExprLocalVarRef;
 class SeExprFunc;
 class SeExpression;
 
+
 //! abstract class for implementing variable references
 class SeExprVarRef
 {
@@ -106,17 +107,17 @@ class SeExprLocalVarRef : public SeExprVarRef
 {
     SeExprLocalVarRef()
         : SeExprVarRef(SeExprType().Error().Varying())
-    {};
+    {}
 
  public:
     SeVec3d val;
 
     SeExprLocalVarRef(const SeExprType & type)
         :SeExprVarRef(type)
-    {};
+    {}
 
-    virtual void eval(const SeExprVarNode*, SeVec3d& result) 
-    { result = val; }
+    virtual void eval(const SeExprVarNode*, SeVec3d& result)
+    {result = val; }
 };
 
 
@@ -228,6 +229,8 @@ class SeExpression
 
     /** Evaluate the expression.  This will parse and bind if needed */
     SeVec3d evaluate() const;
+
+    void evalNew(SeExprEvalResult& result) const;
 
     /** Reset expr - force reparse/rebind */
     void reset();

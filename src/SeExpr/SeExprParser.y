@@ -107,7 +107,7 @@ inline void Forget(SeExprNode* n)
     SeExprType::Lifetime l; // return value for lifetime qualifiers
 }
 
-%token IF ELSE EXTERN DEF FP STRING
+%token IF ELSE EXTERN DEF FLOATPOINT STRING
 %token <s> NAME VAR STR
 %token <d> NUMBER
 %token <l> LIFETIME_CONSTANT LIFETIME_UNIFORM LIFETIME_VARYING LIFETIME_ERROR
@@ -195,10 +195,10 @@ lifetimeOptional:
     ;
 
 typeDeclare:
-      FP lifetimeOptional       { $$.type     = SeExprType::tFP;
+      FLOATPOINT lifetimeOptional{$$.type     = SeExprType::tFP;
                                   $$.dim      = 1;
                                   $$.lifetime = $2; }
-    | FP '[' NUMBER ']' lifetimeOptional
+    | FLOATPOINT '[' NUMBER ']' lifetimeOptional
                                 { $$.type = ($3 > 0 ? SeExprType::tFP : SeExprType::tERROR);
                                   //TODO: This causes an error but does not report it to user. Change this.
                                   $$.dim  = ($3 > 0 ? $3 : 0);

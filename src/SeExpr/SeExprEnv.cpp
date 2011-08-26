@@ -97,7 +97,7 @@ bool SeExprVarEnv::branchesMatch(const SeExprVarEnv & env1, const SeExprVarEnv &
     for(DictType::const_iterator ienv=env2._map.begin(); 
         match && ienv != env2._map.end(); ++ienv) {
         const std::string & name = ienv->first;
-        const SeExprVarRef * var  = ienv->second;
+        //const SeExprVarRef * var  = ienv->second;
         match = env1.lookup(name) != 0;
     }
 

@@ -245,3 +245,12 @@ SeExpression::evaluate() const
     }
     else return SeVec3d(0,0,0);
 }
+
+void SeExpression::evalNew(SeExprEvalResult& result) const
+{
+    prepIfNeeded();
+    if (_isValid) {
+        _parseTree->evaluate(_parseTree,result);
+    }
+
+}

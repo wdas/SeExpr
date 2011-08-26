@@ -79,4 +79,23 @@ class SeExprVarEnv {
     static bool branchesMatch(const SeExprVarEnv & env1, const SeExprVarEnv & env2);
 };
 
+//! Evaluation result.
+struct SeExprEvalResult
+{
+    SeExprEvalResult()
+        :n(0),fp(0)
+        {}
+    SeExprEvalResult(int n,double* fp)
+        :n(n),fp(fp)
+        {}
+    SeExprEvalResult(const char** c)
+        :n(1),str(c)
+        {}
+
+    int n;
+    union{
+        double* fp;
+        const char** str;
+    };
+};
 #endif

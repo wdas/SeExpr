@@ -239,6 +239,11 @@ protected: /*protected data members*/
 
     /// Position line and collumn
     unsigned short int _startPos,_endPos;
+
+    /// Fast evaluation function pointer
+    typedef void(*EvalFunction)(SeExprNode* self,const SeExprEvalResult& result);
+public:
+    EvalFunction evaluate;
 };
 
 
@@ -247,10 +252,12 @@ class SeExprModuleNode : public SeExprNode
 {
 public:
     SeExprModuleNode(const SeExpression* expr) :
-	SeExprNode(expr) {}
+	SeExprNode(expr)
+    {evaluate=evalImpl;}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
+    static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
 };
 
 
@@ -381,6 +388,9 @@ public:
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 
+    template<int my_d,int maxchild_d> static void evalImplFast(SeExprNode* self,const SeExprEvalResult& result);
+    static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
+    
     SeVec3d value() const;
 };
 
@@ -680,11 +690,11 @@ class SeExprNumNode : public SeExprNode
 {
 public:
     SeExprNumNode(const SeExpression* expr, double val) :
-	SeExprNode(expr), _val(val) {}
+	SeExprNode(expr), _val(val) {evaluate=evalImpl;}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const { result[0] = _val; }
-
+    static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
     double value() const { return _val; };
 
 private:
