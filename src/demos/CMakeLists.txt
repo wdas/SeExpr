@@ -42,5 +42,5 @@ install(TARGETS asciiCalc DESTINATION bin)
 
 
 ADD_SUBDIRECTORY (imageSynth)
-ADD_SUBDIRECTORY (segraph)
+#ADD_SUBDIRECTORY (segraph)
 ADD_SUBDIRECTORY (rman)

@@ -520,6 +520,7 @@ SeExprUnaryOpNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
     bool error = false;
 
+    // TODO: aselle may want to implicitly demote to FP[1] if wantScalar is true!
     SeExprType childType=child(0)->prep(wantScalar, env);
     checkIsFP(childType,error);
     if(error) setType(SeExprType().Error());
@@ -527,50 +528,22 @@ SeExprUnaryOpNode::prep(bool wantScalar, SeExprVarEnv & env)
     return _type;
 }
 
-
-void
-SeExprNegNode::eval(SeVec3d& result) const
+template<char op> void
+SeExprUnaryOpNode::evalImpl(SeExprNode* self,const SeExprEvalResult& result)
 {
-    SeVec3d a;
-    const SeExprNode* child0 = child(0);
-    child0->eval(a);
-    result[0] = -a[0];
-    if (_isVec) {
-	result[1] = -a[1];
-	result[2] = -a[2];
-    }
+    SeExprNode* child0 = self->child(0);
+    // TODO: aselle this is only safe as long as we don't demotion for wantScalar case!
+    // otherwise we need to allocate for result.
+    int out_dim=self->type().dim();
+    child0->evaluate(child0,result);
+    if(op=='-') for(int i=0;i<out_dim;i++) result.fp[i]=-result.fp[i];
+    else if(op=='~') for(int i=0;i<out_dim;i++) result.fp[i]=double(1)-result.fp[i];
+    else if(op=='!') for(int i=0;i<out_dim;i++) result.fp[i]=!result.fp[i];
+    //TODO: else static assert
 }
-
-
-void
-SeExprInvertNode::eval(SeVec3d& result) const
-{
-    SeVec3d a;
-    const SeExprNode* child0 = child(0);
-    child0->eval(a);
-    result[0] = 1-a[0];
-    if (_isVec) {
-	result[1] = 1-a[1];
-	result[2] = 1-a[2];
-    }
-}
-
-
-void
-SeExprNotNode::eval(SeVec3d& result) const
-{
-    SeVec3d a;
-    const SeExprNode* child0 = child(0);
-    child0->eval(a);
-    result[0] = !a[0];
-    if (_isVec) {
-	result[1] = !a[1];
-	result[2] = !a[2];
-    }
-}
-
-
-// TODO: start here
+template void SeExprUnaryOpNode::evalImpl<'-'>(SeExprNode*,const SeExprEvalResult&);
+template void SeExprUnaryOpNode::evalImpl<'~'>(SeExprNode*,const SeExprEvalResult&);
+template void SeExprUnaryOpNode::evalImpl<'!'>(SeExprNode*,const SeExprEvalResult&);
 
 SeExprType
 SeExprCondNode::prep(bool wantScalar, SeExprVarEnv & env)
@@ -668,7 +641,7 @@ SeExprSubscriptNode::prep(bool wantScalar, SeExprVarEnv & env)
 
     bool error = false;
 
-    vecType = child(0)->prep(false, env);
+    vecType = child(0)->prep(false, env); // want scalar is false because we aren't just doing foo[0]
     checkIsFP(vecType,error);
 
     scriptType = child(1)->prep(true, env);
@@ -680,34 +653,22 @@ SeExprSubscriptNode::prep(bool wantScalar, SeExprVarEnv & env)
     return _type;
 }
 
-
 void
-SeExprSubscriptNode::eval(SeVec3d& result) const
+SeExprSubscriptNode::evalImpl(SeExprNode* self,const SeExprEvalResult& result)
 {
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    SeVec3d a, b;
-    child0->eval(a);
-    child1->eval(b);
-    int index = int(b[0]);
-
-    if (child0->isVec()) {
-	switch(index) {
-	case 0:  result[0] = a[0]; break;
-	case 1:  result[0] = a[1]; break;
-	case 2:  result[0] = a[2]; break;
-	default: result[0] = 0; break;
-	}
-    } else {
-	switch(index) {
-	case 0:
-	case 1:
-	case 2:  result[0] = a[0]; break;
-	default: result[0] = 0; break;
-	}
-    }
+    SeExprNode* child0 = self->child(0);
+    SeExprNode* child1 = self->child(1);
+    int dim0=child0->type().dim();
+    int resultSize=std::max(dim0,child1->type().dim());
+    double *childResult=static_cast<double*>(alloca(resultSize));
+    child1->evaluate(child1,SeExprEvalResult(resultSize,childResult));
+    int index=int(childResult[0]);
+    child0->evaluate(child0,SeExprEvalResult(resultSize,childResult));
+    // TODO: aselle have some way of reporting this error?
+    // TODO: aselle if index is anything but the child0 type is fp[1], then maybe we should just return that value always... i.e. an implicit promotion to fp[n] and then pull out a component
+    if(index<0 || index>=dim0) result.fp[0]=0;
+    else result.fp[0]=childResult[index];
 }
-
 
 SeExprType
 SeExprCompareEqNode::prep(bool wantScalar, SeExprVarEnv & env)
@@ -846,6 +807,7 @@ SeExprGeNode::eval(SeVec3d& result) const
 SeExprType
 SeExprBinaryOpNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
+    // TODO: aselle this probably should set the type to be FP1 if wantScalar is true!
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
     SeExprType firstType, secondType;
 
@@ -864,142 +826,42 @@ SeExprBinaryOpNode::prep(bool wantScalar, SeExprVarEnv & env)
     return _type;
 }
 
-
-void
-SeExprAddNode::eval(SeVec3d& result) const
-{
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    SeVec3d a, b;
-    child0->eval(a);
-    child1->eval(b);
-
-    if (!_isVec) {
-	result[0] = a[0] + b[0];
-    }
-    else {
-	// at least one child is a vector and the result is too
-	if (!child0->isVec()) a[1] = a[2] = a[0];
-	if (!child1->isVec()) b[1] = b[2] = b[0];
-	result = a + b;
-    }
-}
-
-
-void
-SeExprSubNode::eval(SeVec3d& result) const
-{
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    SeVec3d a, b;
-    child0->eval(a);
-    child1->eval(b);
-
-    if (!_isVec) {
-	result[0] = a[0] - b[0];
-    }
-    else {
-	// at least one child is a vector and the result is too
-	if (!child0->isVec()) a[1] = a[2] = a[0];
-	if (!child1->isVec()) b[1] = b[2] = b[0];
-	result = a - b;
-    }
-}
-
-
-void
-SeExprMulNode::eval(SeVec3d& result) const
-{
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    SeVec3d a, b;
-    child0->eval(a);
-    child1->eval(b);
-
-    if (!_isVec) {
-	result[0] = a[0] * b[0];
-    }
-    else {
-	// at least one child is a vector and the result is too
-	if (!child0->isVec()) a[1] = a[2] = a[0];
-	if (!child1->isVec()) b[1] = b[2] = b[0];
-	result = a * b;
-    }
-}
-
-
-void
-SeExprDivNode::eval(SeVec3d& result) const
-{
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    SeVec3d a, b;
-    child0->eval(a);
-    child1->eval(b);
-
-    if (!_isVec) {
-	result[0] = a[0] / b[0];
-    }
-    else {
-	// at least one child is a vector and the result is too
-	if (!child0->isVec()) a[1] = a[2] = a[0];
-	if (!child1->isVec()) b[1] = b[2] = b[0];
-	result = a / b;
-    }
-}
-
-
 static double niceMod(double a, double b)
 {
     if (b == 0) return 0;
     return a - floor(a/b)*b;
 }
 
-
-void
-SeExprModNode::eval(SeVec3d& result) const
+template<char op>
+void SeExprBinaryOpNode::
+evalImpl(SeExprNode* self,const SeExprEvalResult& result)
 {
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    SeVec3d a, b;
-    child0->eval(a);
-    child1->eval(b);
-
-    if (!_isVec) {
-	result[0] = niceMod(a[0], b[0]);
-    }
-    else {
-	// at least one child is a vector and the result is too
-	if (!child0->isVec()) a[1] = a[2] = a[0];
-	if (!child1->isVec()) b[1] = b[2] = b[0];
-	result[0] = niceMod(a[0], b[0]);
-	result[1] = niceMod(a[1], b[1]);
-	result[2] = niceMod(a[2], b[2]);
-    }
+    // TODO: make sure this does the right thing for out dim
+    int out_dim=self->type().dim();
+    double* val1=static_cast<double*>(alloca(out_dim));
+    SeExprNode* child0=self->child(0),*child1=self->child(1);
+    int dim0=child0->type().dim(),dim1=child1->type().dim();
+    // TODO: aselle assuming dim(result) is equal to dim(chil0) or dim(child1) only safe
+    //   by prep()... if we do the demoted evaluation business then we need a result per child
+    child0->evaluate(child0,SeExprEvalResult(dim0,result.fp));
+    if(dim0==1) for(int k=1;k<out_dim;k++) result.fp[k]=result.fp[0];
+    child1->evaluate(child1,SeExprEvalResult(dim1,val1));
+    if(dim1==1) for(int k=1;k<out_dim;k++) val1[k]=val1[0];
+    // do the actual operation
+    if(op=='+') for(int k=0;k<out_dim;k++) result.fp[k]+=val1[k];
+    else if(op=='-') for(int k=0;k<out_dim;k++) result.fp[k]-=val1[k];
+    else if(op=='*') for(int k=0;k<out_dim;k++) result.fp[k]*=val1[k];
+    else if(op=='/') for(int k=0;k<out_dim;k++) result.fp[k]/=val1[k];
+    else if(op=='%') for(int k=0;k<out_dim;k++) result.fp[k]=niceMod(result.fp[k],val1[k]);
+    else if(op=='^') for(int k=0;k<out_dim;k++) result.fp[k]=pow(result.fp[k],val1[k]);
+    // TODO: else STATIC_ASSERT(false);
 }
-
-
-void
-SeExprExpNode::eval(SeVec3d& result) const
-{
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    SeVec3d a, b;
-    child0->eval(a);
-    child1->eval(b);
-
-    if (!_isVec) {
-	result[0] = pow(a[0], b[0]);
-    }
-    else {
-	// at least one child is a vector and the result is too
-	if (!child0->isVec()) a[1] = a[2] = a[0];
-	if (!child1->isVec()) b[1] = b[2] = b[0];
-	result[0] = pow(a[0], b[0]);
-	result[1] = pow(a[1], b[1]);
-	result[2] = pow(a[2], b[2]);
-    }
-}
+template void SeExprBinaryOpNode::evalImpl<'+'>(SeExprNode*,const SeExprEvalResult&);
+template void SeExprBinaryOpNode::evalImpl<'-'>(SeExprNode*,const SeExprEvalResult&);
+template void SeExprBinaryOpNode::evalImpl<'*'>(SeExprNode*,const SeExprEvalResult&);
+template void SeExprBinaryOpNode::evalImpl<'/'>(SeExprNode*,const SeExprEvalResult&);
+template void SeExprBinaryOpNode::evalImpl<'%'>(SeExprNode*,const SeExprEvalResult&);
+template void SeExprBinaryOpNode::evalImpl<'^'>(SeExprNode*,const SeExprEvalResult&);
 
 
 SeExprType

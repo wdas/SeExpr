@@ -401,8 +401,9 @@ public:
     SeExprUnaryOpNode(const SeExpression* expr, SeExprNode* a)
         : SeExprNode(expr, a)
     {}
-
+    
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
+    template<char op> static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
 };
 
 /// Node that computes a negation (scalar or vector)
@@ -410,9 +411,8 @@ class SeExprNegNode : public SeExprUnaryOpNode
 {
 public:
     SeExprNegNode(const SeExpression* expr, SeExprNode* a) :
-	SeExprUnaryOpNode(expr, a) {}
-
-    virtual void eval(SeVec3d& result) const;
+	SeExprUnaryOpNode(expr, a)
+    {evaluate=SeExprUnaryOpNode::evalImpl<'-'>;}
 };
 
 /// Node that computes an inversion (1-x) (scalar or vector)
@@ -420,9 +420,8 @@ class SeExprInvertNode : public SeExprUnaryOpNode
 {
 public:
     SeExprInvertNode(const SeExpression* expr, SeExprNode* a) :
-	SeExprUnaryOpNode(expr, a) {}
-
-    virtual void eval(SeVec3d& result) const;
+	SeExprUnaryOpNode(expr, a)
+    {evaluate=SeExprUnaryOpNode::evalImpl<'~'>;}
 };
 
 /// Note that computes a logical not
@@ -430,9 +429,8 @@ class SeExprNotNode : public SeExprUnaryOpNode
 {
 public:
     SeExprNotNode(const SeExpression* expr, SeExprNode* a) :
-	SeExprUnaryOpNode(expr, a) {}
-
-    virtual void eval(SeVec3d& result) const;
+	SeExprUnaryOpNode(expr, a)
+    {evaluate=SeExprUnaryOpNode::evalImpl<'!'>;}
 };
 
 
@@ -486,10 +484,11 @@ class SeExprSubscriptNode : public SeExprNode
 {
 public:
     SeExprSubscriptNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprNode(expr, a, b)
+    {evaluate=evalImpl;}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual void eval(SeVec3d& result) const;
+    static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
 };
 
 
@@ -589,6 +588,8 @@ public:
 	SeExprNode(expr, a, b) {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
+    template<char op>
+    static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
 };
 
 
@@ -597,9 +598,8 @@ class SeExprAddNode : public SeExprBinaryOpNode
 {
 public:
     SeExprAddNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprBinaryOpNode(expr, a, b) {}
-
-    virtual void eval(SeVec3d& result) const;
+	SeExprBinaryOpNode(expr, a, b) 
+    {evaluate=SeExprBinaryOpNode::evalImpl<'+'>;}
 };
 
 
@@ -608,9 +608,8 @@ class SeExprSubNode : public SeExprBinaryOpNode
 {
 public:
     SeExprSubNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprBinaryOpNode(expr, a, b) {}
-
-    virtual void eval(SeVec3d& result) const;
+	SeExprBinaryOpNode(expr, a, b)
+    {evaluate=SeExprBinaryOpNode::evalImpl<'-'>;}
 };
 
 
@@ -619,9 +618,8 @@ class SeExprMulNode : public SeExprBinaryOpNode
 {
 public:
     SeExprMulNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprBinaryOpNode(expr, a, b) {}
-
-    virtual void eval(SeVec3d& result) const;
+	SeExprBinaryOpNode(expr, a, b)
+    {evaluate=SeExprBinaryOpNode::evalImpl<'*'>;}
 };
 
 
@@ -630,9 +628,8 @@ class SeExprDivNode : public SeExprBinaryOpNode
 {
 public:
     SeExprDivNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprBinaryOpNode(expr, a, b) {}
-
-    virtual void eval(SeVec3d& result) const;
+	SeExprBinaryOpNode(expr, a, b)
+    {evaluate=SeExprBinaryOpNode::evalImpl<'/'>;}
 };
 
 
@@ -641,9 +638,8 @@ class SeExprModNode : public SeExprBinaryOpNode
 {
 public:
     SeExprModNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprBinaryOpNode(expr, a, b) {}
-
-    virtual void eval(SeVec3d& result) const;
+	SeExprBinaryOpNode(expr, a, b)
+    {evaluate=SeExprBinaryOpNode::evalImpl<'%'>;}
 };
 
 
@@ -652,9 +648,8 @@ class SeExprExpNode : public SeExprBinaryOpNode
 {
 public:
     SeExprExpNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprBinaryOpNode(expr, a, b) {}
-
-    virtual void eval(SeVec3d& result) const;
+	SeExprBinaryOpNode(expr, a, b)
+    {evaluate=SeExprBinaryOpNode::evalImpl<'%'>;}
 };
 
 /// Node that references a variable
