@@ -381,10 +381,6 @@ public:
         addChildren_without_delete(surrogate);
     };
 
-    SeExprVecNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b, SeExprNode* c)
-        : SeExprNode(expr, a, b, c)
-    {};
-
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
 
