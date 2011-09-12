@@ -33,6 +33,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
+
 #define __STDC_LIMIT_MACROS
 #include <cassert>
 #include <math.h>
@@ -49,6 +50,8 @@
 #include "SeNoise.h"
 
 namespace SeExpr {
+
+#if 0
 
 
 namespace {
@@ -1650,7 +1653,7 @@ static const char* vnoise_docstring=
         "printf(string format,[vec0, vec1,  ...])\n"
         "Prints out a string to STDOUT, Format parameter allowed is %v";
 
-    void defineBuiltins(SeExprFunc::Define define,SeExprFunc::Define3 define3)
+    Void defineBuiltins(SeExprFunc::Define define,SeExprFunc::Define3 define3)
     {
 	// functions from math.h (global namespace)
 //#define FUNC(func)	  define(#func, SeExprFunc(::func))
@@ -1774,4 +1777,9 @@ static const char* vnoise_docstring=
         FUNCNDOC(printf,1,-1);
 
     }
+#else
+    void defineBuiltins(SeExprFunc::Define define,SeExprFunc::Define3 define3)
+    {
+    }
+#endif
 }

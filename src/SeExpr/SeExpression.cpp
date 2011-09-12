@@ -104,7 +104,7 @@ void SeExpression::reset()
     _parseError = "";
     _vars.clear();
     _funcs.clear();
-    _localVars.clear();
+    //_localVars.clear();
     _errors.clear();
     _threadUnsafeFunctionCalls.clear();
     _comments.clear();
@@ -230,12 +230,14 @@ SeExpression::returnType() const
 SeVec3d
 SeExpression::evaluate() const
 {
+// TODO: delete
+#if 0
     prepIfNeeded();
     if (_isValid) {
 	// set all local vars to zero
-	for (LocalVarTable::iterator iter = _localVars.begin();
-	     iter != _localVars.end(); iter++)
-	    iter->second.val = 0.0;
+	//for (LocalVarTable::iterator iter = _localVars.begin();
+	//     iter != _localVars.end(); iter++)
+	//    iter->second.val = 0.0;
 
 	SeVec3d vec;
 	_parseTree->eval(vec);
@@ -244,6 +246,8 @@ SeExpression::evaluate() const
 	return vec;
     }
     else return SeVec3d(0,0,0);
+#endif
+    return SeVec3d(0,0,0);
 }
 
 void SeExpression::evalNew(SeExprEvalResult& result) const

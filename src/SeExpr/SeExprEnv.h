@@ -83,19 +83,21 @@ class SeExprVarEnv {
 struct SeExprEvalResult
 {
     SeExprEvalResult()
-        :n(0),fp(0)
+        :n(0),fp(0),str(0)
         {}
     SeExprEvalResult(int n,double* fp)
-        :n(n),fp(fp)
+        :n(n),fp(fp),str(0)
         {}
     SeExprEvalResult(const char** c)
-        :n(1),str(c)
+        :n(1),fp(0),str(c)
         {}
+    SeExprEvalResult(int n,double* fp,const char** c)
+        :n(n),fp(fp),str(c)
+    {}
 
     int n;
-    union{
-        double* fp;
-        const char** str;
-    };
+    double* fp;
+    const char** str;
+
 };
 #endif

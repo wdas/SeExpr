@@ -117,8 +117,10 @@ public:
     /// the start of SeExprNode.cpp for more info.
     virtual SeExprType prep(bool dontNeedScalar, SeExprVarEnv & env);
 
-    /// Evaluation method.  Note: v[1] and v[2] are undefined if !isVec
-    virtual void eval(SeVec3d& v) const;
+    /// Evaluation method.
+    static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
+    // TODO: delete this this is deprecated
+    void eval(SeVec3d& result) const{}
     /// @}
     
 
@@ -236,6 +238,7 @@ protected: /*protected data members*/
 
     // Type of node
     SeExprType _type;
+    int _maxChildDim;
 
     /// Position line and collumn
     unsigned short int _startPos,_endPos;
@@ -256,7 +259,6 @@ public:
     {evaluate=evalImpl;}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual void eval(SeVec3d& result) const;
     static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
 };
 
@@ -300,8 +302,6 @@ public:
     inline const SeExprNode   * arg    (int i) const { return child(i);     };
     inline       SeExprVarEnv & env    ()            { return _env;         };
 
-    virtual void eval(SeVec3d& result) const;
-
  private:
     std::string             _name;
     bool                    _retTypeSet;
@@ -331,10 +331,11 @@ class SeExprBlockNode : public SeExprNode
 {
 public:
     SeExprBlockNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+	SeExprNode(expr, a, b)
+    {evaluate=evalImpl;}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual void eval(SeVec3d& result) const;
+    static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
 };
 
 
@@ -356,17 +357,19 @@ class SeExprAssignNode : public SeExprNode
 {
 public:
     SeExprAssignNode(const SeExpression* expr, const char* name, SeExprNode* e) :
-	SeExprNode(expr, e), _name(name), _var(0) {}
+	SeExprNode(expr, e), _name(name), _var(0)
+    {evaluate=evalImpl;}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual void eval(SeVec3d& result) const;
+    //virtual void eval(SeVec3d& result) const;
+    static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
 
     const std::string& name        () const { return _name;         };
     const SeExprType & assignedType() const { return _assignedType; };
 
 private:
     std::string _name;
-    SeExprLocalVarRef* _var;
+    SeExprVarRef* _var;
     SeExprType _assignedType;
 };
 
@@ -382,7 +385,6 @@ public:
     };
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual void eval(SeVec3d& result) const;
 
     template<int my_d,int maxchild_d> static void evalImplFast(SeExprNode* self,const SeExprEvalResult& result);
     static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
@@ -654,17 +656,19 @@ class SeExprVarNode : public SeExprNode
 public:
     SeExprVarNode(const SeExpression* expr, const char* name) :
 	SeExprNode(expr), _name(name), _var(0), _data(0) 
-    { expr->addVar(name); }
+    { evaluate=evalImpl;}
 
     SeExprVarNode(const SeExpression* expr, const char* name, const SeExprType & type) :
        SeExprNode(expr, type), _name(name), _var(0), _data(0)
-    { expr->addVar(name); }
+    { evaluate=evalImpl;}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual void eval(SeVec3d& result) const;
+    //virtual void eval(SeVec3d& result) const;
+    static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
     const char* name() const { return _name.c_str(); }
     
     /// base class for custom instance data
+    // TODO: aselle what is this used for?
     struct Data { virtual ~Data() {} };
     void setData(Data* data) const { _data = data; }
     Data* getData() const { return _data; }

@@ -183,26 +183,36 @@ SeExprNode::prep(bool wantScalar, SeExprVarEnv & env)
      */
     bool error=false;
 
-    for(int c=0;c<numChildren();c++)
+    _maxChildDim=0;
+    for(int c=0;c<numChildren();c++){
         error |= !child(c)->prep(false, env).isValid();
+        int childDim=child(c)->type().isFP() ? child(c)->type().dim() : 0;
+        if(childDim>_maxChildDim) _maxChildDim=childDim;
+    }
 
     if(error) setType(SeExprType().Error());
     else setTypeWithChildLife(SeExprType().None());
+
+    evaluate=evalImpl;
 
     return _type;
 }
 
 
 void
-SeExprNode::eval(SeVec3d& result) const
+SeExprNode::evalImpl(SeExprNode* self,const SeExprEvalResult& result)
 {
     // the default behavior is to just eval all the children for
     // their side-effects (i.e. setting variables)
     // there is no result value
+    double* vals=static_cast<double*>(alloca(self->_maxChildDim));
+    const char* s=0;
+    SeExprEvalResult tempResult(self->_maxChildDim,vals,&s);
+
     SeVec3d val;
-    for (int i = 0; i < numChildren(); i++)
-	child(i)->eval(val);
-    result = 0.0;
+    for (int i = 0; i < self->numChildren(); i++)
+	self->child(i)->evaluate(self->child(i),tempResult);
+    // TODO: should zero out here!
 }
 
 
@@ -217,16 +227,6 @@ SeExprModuleNode::prep(bool wantScalar, SeExprVarEnv & env)
     else setType(child(numChildren()-1)->type());
 
     return _type;
-}
-
-
-void
-SeExprModuleNode::eval(SeVec3d& result) const
-{
-    // eval block, then eval primary expr
-    SeVec3d val;
-    child(0)->eval(val);
-    child(1)->eval(result);
 }
 
 void
@@ -286,15 +286,6 @@ SeExprPrototypeNode::addArgs(SeExprNode* surrogate)
 }
 
 
-void
-SeExprPrototypeNode::eval(SeVec3d& result) const
-{
-    // eval block, then eval primary expr
-    SeVec3d val;
-    child(0)->eval(val);
-    child(1)->eval(result);
-}
-
 
 SeExprType
 SeExprLocalFunctionNode::prep(bool wantScalar, SeExprVarEnv & env)
@@ -350,12 +341,10 @@ SeExprBlockNode::prep(bool wantScalar, SeExprVarEnv & env)
 
 
 void
-SeExprBlockNode::eval(SeVec3d& result) const
+SeExprBlockNode::evalImpl(SeExprNode* self,const SeExprEvalResult& result)
 {
-    // eval block, then eval primary expr
-    SeVec3d val;
-    child(0)->eval(val);
-    child(1)->eval(result);
+    self->child(0)->evaluate(self->child(0),SeExprEvalResult()); // block
+    self->child(1)->evaluate(self->child(1),result); // primary expr
 }
 
 
@@ -407,7 +396,7 @@ SeExprAssignNode::prep(bool wantScalar, SeExprVarEnv & env)
     _assignedType = child(0)->prep(false, env);
 
     //TODO: This could add errors to the variable environment
-    env.add(_name, new SeExprLocalVarRef(_assignedType));
+    env.add(_name, new SeExprLocalVarRef(child(0)->type()));
     bool error=false;
 	// TODO: fix
     //checkIsValue(_assignedType,error);
@@ -418,21 +407,12 @@ SeExprAssignNode::prep(bool wantScalar, SeExprVarEnv & env)
     return _type;
 }
 
-
-void
-SeExprAssignNode::eval(SeVec3d& result) const
+void SeExprAssignNode::evalImpl(SeExprNode* self,const SeExprEvalResult& result)
 {
-    if (_var) {
-	// eval expression and store in variable
-	const SeExprNode* node = child(0);
-	node->eval(_var->val);
-        //assume that eval made the correct assignment
-	//if (_var->isVec() && !node->isVec())
-        //_var->val[1] = _var->val[2] = _var->val[0];
-    }
-    else result = 0.0;
+    SeExprAssignNode* selfAssignNode=static_cast<SeExprAssignNode*>(self);
+    if(selfAssignNode->_var) self->child(0)->evaluate(self->child(0),result);
+    for(int k=0;k<self->type().dim();k++) result.fp[k]=0;
 }
-
 
 SeExprType
 SeExprVecNode::prep(bool wantScalar, SeExprVarEnv & env)
@@ -461,20 +441,6 @@ SeExprVecNode::prep(bool wantScalar, SeExprVarEnv & env)
         }else evaluate=evalImpl;
     }
     return _type;
-}
-
-
-void
-SeExprVecNode::eval(SeVec3d& result) const
-{
-    if (_isVec) {
-	SeVec3d v;
-	child(0)->eval(v); result[0] = v[0];
-	child(1)->eval(v); result[1] = v[0];
-	child(2)->eval(v); result[2] = v[0];
-    } else {
-	child(0)->eval(result);
-    }
 }
 
 void SeExprVecNode::evalImpl(SeExprNode* self,const SeExprEvalResult& result)
@@ -876,16 +842,15 @@ SeExprVarNode::prep(bool wantScalar, SeExprVarEnv & env)
     bool error=false;
     checkCondition(_var, std::string("No variable named $") + name(),error);
     // TODO: remove
-    //std::cerr<<"we have gah is "<<_var->type().toString();
+    std::cerr<<"we have gah is "<<_var->type().toString();
     return _type=error?SeExprType().Error():_var->type();
 }
 
 
-void
-SeExprVarNode::eval(SeVec3d& result) const
-{
-    if (_var) _var->eval(this, result);
-    else result = 0.0;
+void SeExprVarNode::evalImpl(SeExprNode* selfNode,const SeExprEvalResult& result){
+    SeExprVarNode* selfVar=static_cast<SeExprVarNode*>(selfNode);
+    if (selfVar->_var) selfVar->_var->evaluate(selfVar, result);
+    else for(int k=0;k<selfNode->type().dim();k++) result.fp[k]=0;
 }
 
 
