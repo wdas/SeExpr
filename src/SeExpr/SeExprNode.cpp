@@ -396,7 +396,8 @@ SeExprAssignNode::prep(bool wantScalar, SeExprVarEnv & env)
     _assignedType = child(0)->prep(false, env);
 
     //TODO: This could add errors to the variable environment
-    env.add(_name, new SeExprLocalVarRef(child(0)->type()));
+    _var=new SeExprLocalVarRef(child(0)->type());
+    env.add(_name, _var);
     bool error=false;
 	// TODO: fix
     //checkIsValue(_assignedType,error);

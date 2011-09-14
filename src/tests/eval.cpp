@@ -53,6 +53,9 @@ struct Evaluator
     int allocFP(int n)
     {int ret=d.size();for(int k=0;k<n;k++) d.push_back(0);return ret;}
 
+    int allocPtr()
+    {int ret=s.size();s.push_back(0);return ret;}
+
     void eval(){
         double* fp=&d[0];
         char** str=&s[0];
@@ -210,6 +213,7 @@ struct Subscript{
     }
 };
 
+//! build a vector tuple from a bunch of numbers
 template<int d>
 struct Tuple{
     static int f(int* opData,double* fp,char** c)
@@ -236,18 +240,24 @@ class EvalBuilder:public SeExpr::Examiner<true>
 public:
     typedef std::map<const SeExprNode*,int> NodeToLoc;
     NodeToLoc location;
+    typedef std::map<const SeExprVarRef*,int> VarToLoc;
+    VarToLoc varLocation;
     Evaluator eval;
 
-    int getLocFP(const SeExprNode* node,int n)
+    int getLoc(const SeExprNode* node)
     {
         NodeToLoc::iterator i=location.find(node);
         if(i==location.end()){
-            int loc=eval.allocFP(n);
+            int loc=0;
+            if(node->type().isString()) loc=eval.allocPtr();
+            else if(node->type().isFP()) loc=eval.allocFP(node->type().dim());
+            else assert(false); //  This should not be possible by type check
             location[node]=loc;
             return loc;
         }
         return i->second;
     }
+
 
     bool examine(const SeExprNode*) {return true;}
 
@@ -255,22 +265,22 @@ public:
     {
         if(const SeExprNumNode* num=dynamic_cast<const SeExprNumNode*>(examinee)){
             DEBUG("num");
-            int loc=getLocFP(num,1);
+            int loc=getLoc(num);
             eval.d[loc]=num->value();
             location[num]=loc;
         }else if(const SeExprVecNode* node=dynamic_cast<const SeExprVecNode*>(examinee)){
             eval.ops.push_back(std::make_pair(getTemplatizedOp<Tuple>(node->numChildren()),eval.opData.size()));
             for(int k=0;k<node->numChildren();k++){
                 const SeExprNode* child=node->child(k);
-                eval.opData.push_back(getLocFP(child,child->type().dim()));
+                eval.opData.push_back(getLoc(child));
             }
-            eval.opData.push_back(getLocFP(node,node->type().dim()));
+            eval.opData.push_back(getLoc(node));
         }else if(const SeExprBinaryOpNode* node=dynamic_cast<const SeExprBinaryOpNode*>(examinee)){
             DEBUG("binop");
             const SeExprNode* child0=node->child(0),*child1=node->child(1);
             int dim0=child0->type().dim(),dim1=child1->type().dim(),dimout=node->type().dim(); 
-            int op0=getLocFP(child0,dim0);
-            int op1=getLocFP(child1,dim1);
+            int op0=getLoc(child0);
+            int op1=getLoc(child1);
             if(dimout>1){
                 if(dim0 != dimout){
                     eval.ops.push_back(std::make_pair(getTemplatizedOp<Promote>(dimout),eval.opData.size()));
@@ -297,15 +307,16 @@ public:
                 case '%': eval.ops.push_back(std::make_pair(getTemplatizedOp2<'%',BinaryOp>(dimout),eval.opData.size()));break;
                 default: assert(false);
             }
-            int op2=getLocFP(node,dimout);
+            int op2=getLoc(node);
             eval.opData.push_back(op0);
             eval.opData.push_back(op1);
             eval.opData.push_back(op2);
         }else if(const SeExprUnaryOpNode* node=dynamic_cast<const SeExprUnaryOpNode*>(examinee)){
+            DEBUG("unaryop");
             const SeExprNode* child0=node->child(0);
             int dim0=child0->type().dim(),dimout=node->type().dim(); 
-            int op0=getLocFP(child0,dim0);
-            int op1=getLocFP(node,dimout);
+            int op0=getLoc(child0);
+            int op1=getLoc(node);
             switch(node->_op){
                 case '-': eval.ops.push_back(std::make_pair(getTemplatizedOp2<'-',UnaryOp>(dimout),eval.opData.size()));break;
                 case '~': eval.ops.push_back(std::make_pair(getTemplatizedOp2<'~',UnaryOp>(dimout),eval.opData.size()));break;
@@ -314,6 +325,17 @@ public:
             }
             eval.opData.push_back(op0);
             eval.opData.push_back(op1);
+        }else if(const SeExprAssignNode* node=dynamic_cast<const SeExprAssignNode*>(examinee)){
+            std::cerr<<"storing for var "<<node->var()<<std::endl;
+            varLocation[node->var()]=getLoc(node->child(0)); // just point to other node
+        }else if(const SeExprVarNode* node=dynamic_cast<const SeExprVarNode*>(examinee)){
+            std::cerr<<"looking for "<<node->var()<<std::endl;
+            VarToLoc::const_iterator it=varLocation.find(node->var());
+            if(it==varLocation.end()){
+                assert(false);
+            }else{
+                location[node]=it->second;
+            }
         }
     }
 

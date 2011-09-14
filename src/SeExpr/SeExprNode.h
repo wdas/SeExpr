@@ -366,6 +366,7 @@ public:
 
     const std::string& name        () const { return _name;         };
     const SeExprType & assignedType() const { return _assignedType; };
+    const SeExprVarRef* var() const{return _var;}
 
 private:
     std::string _name;
@@ -574,28 +575,29 @@ class SeExprVarNode : public SeExprNode
 {
 public:
     SeExprVarNode(const SeExpression* expr, const char* name) :
-	SeExprNode(expr), _name(name), _var(0), _data(0) 
+	SeExprNode(expr), _name(name), _var(0)//, _data(0) 
     { evaluate=evalImpl;}
 
     SeExprVarNode(const SeExpression* expr, const char* name, const SeExprType & type) :
-       SeExprNode(expr, type), _name(name), _var(0), _data(0)
+        SeExprNode(expr, type), _name(name), _var(0)//, _data(0)
     { evaluate=evalImpl;}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     //virtual void eval(SeVec3d& result) const;
     static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
     const char* name() const { return _name.c_str(); }
+    const SeExprVarRef* var() const{return _var;}
     
     /// base class for custom instance data
     // TODO: aselle what is this used for?
-    struct Data { virtual ~Data() {} };
-    void setData(Data* data) const { _data = data; }
-    Data* getData() const { return _data; }
+    //struct Data { virtual ~Data() {} };
+    //void setData(Data* data) const { _data = data; }
+    //Data* getData() const { return _data; }
 
 private:
     std::string _name;
     SeExprVarRef* _var;
-    mutable Data* _data;
+    //mutable Data* _data;
 };
 
 
