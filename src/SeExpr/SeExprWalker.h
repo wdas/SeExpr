@@ -51,6 +51,7 @@ public:
     typedef typename ADD_CONST<SeExprNode,constnode>::TYPE T_NODE;
 
     virtual bool examine(T_NODE *examinee) = 0;
+    virtual void post(T_NODE *examinee) {}; // TODO: make this pure virt
     virtual void reset() = 0;
 };
 

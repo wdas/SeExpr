@@ -396,41 +396,16 @@ public:
 class SeExprUnaryOpNode : public SeExprNode
 {
 public:
-    SeExprUnaryOpNode(const SeExpression* expr, SeExprNode* a)
-        : SeExprNode(expr, a)
+    //! Construct with specific op ('!x' is logical negation, '~x' is 1-x, '-x' is -x)
+    SeExprUnaryOpNode(const SeExpression* expr, SeExprNode* a,char op)
+        : SeExprNode(expr, a), _op(op)
     {}
     
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     template<char op> static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
-};
 
-/// Node that computes a negation (scalar or vector)
-class SeExprNegNode : public SeExprUnaryOpNode
-{
-public:
-    SeExprNegNode(const SeExpression* expr, SeExprNode* a) :
-	SeExprUnaryOpNode(expr, a)
-    {evaluate=SeExprUnaryOpNode::evalImpl<'-'>;}
+    char _op;
 };
-
-/// Node that computes an inversion (1-x) (scalar or vector)
-class SeExprInvertNode : public SeExprUnaryOpNode
-{
-public:
-    SeExprInvertNode(const SeExpression* expr, SeExprNode* a) :
-	SeExprUnaryOpNode(expr, a)
-    {evaluate=SeExprUnaryOpNode::evalImpl<'~'>;}
-};
-
-/// Note that computes a logical not
-class SeExprNotNode : public SeExprUnaryOpNode
-{
-public:
-    SeExprNotNode(const SeExpression* expr, SeExprNode* a) :
-	SeExprUnaryOpNode(expr, a)
-    {evaluate=SeExprUnaryOpNode::evalImpl<'!'>;}
-};
-
 
 /// Node that evaluates a conditional (if-then-else) expression
 class SeExprCondNode : public SeExprNode
@@ -582,73 +557,17 @@ public:
 class SeExprBinaryOpNode : public SeExprNode
 {
 public:
-    SeExprBinaryOpNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+    SeExprBinaryOpNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b, char op) :
+	SeExprNode(expr, a, b),
+       _op(op) {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     template<char op>
     static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
+
+    char _op;
 };
 
-
-/// Node that implements an arithmetic operator
-class SeExprAddNode : public SeExprBinaryOpNode
-{
-public:
-    SeExprAddNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprBinaryOpNode(expr, a, b) 
-    {evaluate=SeExprBinaryOpNode::evalImpl<'+'>;}
-};
-
-
-/// Node that implements an arithmetic operator
-class SeExprSubNode : public SeExprBinaryOpNode
-{
-public:
-    SeExprSubNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprBinaryOpNode(expr, a, b)
-    {evaluate=SeExprBinaryOpNode::evalImpl<'-'>;}
-};
-
-
-/// Node that implements an arithmetic operator
-class SeExprMulNode : public SeExprBinaryOpNode
-{
-public:
-    SeExprMulNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprBinaryOpNode(expr, a, b)
-    {evaluate=SeExprBinaryOpNode::evalImpl<'*'>;}
-};
-
-
-/// Node that implements an arithmetic operator
-class SeExprDivNode : public SeExprBinaryOpNode
-{
-public:
-    SeExprDivNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprBinaryOpNode(expr, a, b)
-    {evaluate=SeExprBinaryOpNode::evalImpl<'/'>;}
-};
-
-
-/// Node that implements an arithmetic operator
-class SeExprModNode : public SeExprBinaryOpNode
-{
-public:
-    SeExprModNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprBinaryOpNode(expr, a, b)
-    {evaluate=SeExprBinaryOpNode::evalImpl<'%'>;}
-};
-
-
-/// Node that implements an arithmetic operator
-class SeExprExpNode : public SeExprBinaryOpNode
-{
-public:
-    SeExprExpNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprBinaryOpNode(expr, a, b)
-    {evaluate=SeExprBinaryOpNode::evalImpl<'%'>;}
-};
 
 /// Node that references a variable
 class SeExprVarNode : public SeExprNode

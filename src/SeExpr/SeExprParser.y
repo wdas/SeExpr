@@ -263,41 +263,41 @@ assign:
       ifthenelse		{ $$ = $1; }
     | VAR '=' e ';'		{ $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, $3); free($1); }
     | VAR AddEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,AddNode,varNode,$3);
+                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'+');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
     | VAR SubEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,SubNode,varNode,$3);
+                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'-');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
     | VAR MultEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,MulNode,varNode,$3);
+                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'*');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
     | VAR DivEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,DivNode,varNode,$3);
+                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'/');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
     | VAR ExpEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,ExpNode,varNode,$3);
+                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'^');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
     | VAR ModEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,ModNode,varNode,$3);
+                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'%');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
     | NAME '=' e ';'		{ $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, $3); free($1); }
     | NAME AddEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,AddNode,varNode,$3);
+                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'+');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
     | NAME SubEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,SubNode,varNode,$3);
+                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'-');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
     | NAME MultEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,MulNode,varNode,$3);
+                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'*');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
     | NAME DivEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,DivNode,varNode,$3);
+                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'/');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
     | NAME ExpEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,ExpNode,varNode,$3);
+                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'^');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
     | NAME ModEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,ModNode,varNode,$3);
+                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'%');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
     ;
 
@@ -327,15 +327,15 @@ e:
     | e LE e			{ $$ = NODE2(@$.first_column,@$.last_column,LeNode, $1, $3); }
     | e GE e			{ $$ = NODE2(@$.first_column,@$.last_column,GeNode, $1, $3); }
     | '+' e %prec UNARY		{ $$ = $2; }
-    | '-' e %prec UNARY		{ $$ = NODE1(@$.first_column,@$.last_column,NegNode, $2); }
-    | '!' e			{ $$ = NODE1(@$.first_column,@$.last_column,NotNode, $2); }
-    | '~' e			{ $$ = NODE1(@$.first_column,@$.last_column,InvertNode, $2); }
-    | e '+' e			{ $$ = NODE2(@$.first_column,@$.last_column,AddNode, $1, $3); }
-    | e '-' e			{ $$ = NODE2(@$.first_column,@$.last_column,SubNode, $1, $3); }
-    | e '*' e			{ $$ = NODE2(@$.first_column,@$.last_column,MulNode, $1, $3); }
-    | e '/' e			{ $$ = NODE2(@$.first_column,@$.last_column,DivNode, $1, $3); }
-    | e '%' e			{ $$ = NODE2(@$.first_column,@$.last_column,ModNode, $1, $3); }
-    | e '^' e			{ $$ = NODE2(@$.first_column,@$.last_column,ExpNode, $1, $3); }
+    | '-' e %prec UNARY		{ $$ = NODE2(@$.first_column,@$.last_column,UnaryOpNode, $2, '-'); }
+    | '!' e			{ $$ = NODE2(@$.first_column,@$.last_column,UnaryOpNode, $2, '!'); }
+    | '~' e			{ $$ = NODE2(@$.first_column,@$.last_column,UnaryOpNode, $2, '~'); }
+    | e '+' e			{ $$ = NODE3(@$.first_column,@$.last_column,BinaryOpNode, $1, $3, '+'); }
+    | e '-' e			{ $$ = NODE3(@$.first_column,@$.last_column,BinaryOpNode, $1, $3, '-'); }
+    | e '*' e			{ $$ = NODE3(@$.first_column,@$.last_column,BinaryOpNode, $1, $3, '*'); }
+    | e '/' e			{ $$ = NODE3(@$.first_column,@$.last_column,BinaryOpNode, $1, $3, '/'); }
+    | e '%' e			{ $$ = NODE3(@$.first_column,@$.last_column,BinaryOpNode, $1, $3, '%'); }
+    | e '^' e			{ $$ = NODE3(@$.first_column,@$.last_column,BinaryOpNode, $1, $3, '^'); }
     | NAME '(' optargs ')'	{ $$ = NODE1(@$.first_column,@$.last_column,FuncNode, $1); 
 				  free($1); // free name string
 				  // add args directly and discard arg list node
