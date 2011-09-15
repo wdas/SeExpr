@@ -45,7 +45,7 @@ SeExprVarEnv::~SeExprVarEnv() {
             delete ienv->second;
 }
 
-SeExprVarRef* SeExprVarEnv::find(const std::string & name)
+SeExprLocalVar* SeExprVarEnv::find(const std::string & name)
 {
     DictType::iterator iter=_map.find(name);
     if(iter != _map.end()) return iter->second;
@@ -53,7 +53,7 @@ SeExprVarRef* SeExprVarEnv::find(const std::string & name)
     else return 0;
 }
 
-SeExprVarRef const * SeExprVarEnv::lookup(const std::string & name) const
+SeExprLocalVar const * SeExprVarEnv::lookup(const std::string & name) const
 {
     DictType::const_iterator iter=_map.find(name);
     if(iter != _map.end()) return iter->second;
@@ -61,13 +61,43 @@ SeExprVarRef const * SeExprVarEnv::lookup(const std::string & name) const
     return 0;
 }
 
-void SeExprVarEnv::add(const std::string & name, SeExprVarRef * var)
+void SeExprVarEnv::add(const std::string & name, SeExprLocalVar * var)
 {
     DictType::iterator iter=_map.find(name);
     if(iter != _map.end()) *iter->second=*var;
-    else _map.insert(std::pair<std::string,SeExprVarRef*>(name,var));
+    else _map.insert(std::pair<std::string,SeExprLocalVar*>(name,var));
 }
 
+void SeExprVarEnv::mergeBranches(const SeExprType& type,SeExprVarEnv& env1,SeExprVarEnv& env2)
+{
+    typedef std::map<std::pair<SeExprLocalVar*,SeExprLocalVar*>,std::string> MakeMap;
+    MakeMap phisToMake;
+    for(DictType::iterator ienv=env1._map.begin(); 
+        ienv != env1._map.end(); ++ienv) {
+        const std::string & name = ienv->first;
+        SeExprLocalVar* var  = ienv->second;
+        SeExprLocalVar* env2Var = env2.find(name);
+        if(env2Var){
+            phisToMake[std::make_pair(var,env2Var)]=name;
+        }
+    }
+    for(DictType::iterator ienv=env2._map.begin(); 
+        ienv != env2._map.end(); ++ienv) {
+        const std::string & name = ienv->first;
+        SeExprLocalVar* var  = ienv->second;
+        SeExprLocalVar* env1Var = env1.find(name);
+        if(env1Var){
+            phisToMake[std::make_pair(env1Var,var)]=name;
+        }
+    }
+
+    for(MakeMap::iterator it=phisToMake.begin();it!=phisToMake.end();++it){
+        add(it->second,new SeExprLocalVarPhi(type,it->first.first,it->first.second));
+    }
+}
+
+
+#if 0
 void SeExprVarEnv::add(SeExprVarEnv & env, const SeExprType & modifyingType)
 {
     //! Iterate over all variables in env and copy types into our scope
@@ -104,3 +134,4 @@ bool SeExprVarEnv::branchesMatch(const SeExprVarEnv & env1, const SeExprVarEnv &
     return match;
 }
 
+#endif

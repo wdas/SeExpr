@@ -281,7 +281,7 @@ SeExprPrototypeNode::addArgs(SeExprNode* surrogate)
         type = child->type();
 
         _argTypes.push_back(type);
-        _env.add(((SeExprVarNode*)child)->name(), new SeExprLocalVarRef(type));
+        _env.add(((SeExprVarNode*)child)->name(), new SeExprLocalVar(type));
     }
 }
 
@@ -364,10 +364,10 @@ SeExprIfThenElseNode::prep(bool wantScalar, SeExprVarEnv & env)
     elseEnv = SeExprVarEnv(env);
     elseType = child(2)->prep(false, elseEnv);
 
-    if(!error && thenType.isValid() && elseType.isValid()
-        && checkCondition(SeExprVarEnv::branchesMatch(thenEnv, elseEnv), "Types of variables do not match after if statement", error))
-        env.add(thenEnv, condType);
-    else error = true;
+    if(!error && thenType.isValid() && elseType.isValid()){
+        env.mergeBranches(condType,thenEnv,elseEnv);
+        // TODO: aselle insert the phi nodes!
+    }else error = true;
 
     if(error) setType(SeExprType().Error());
     else setType(SeExprType().None().setLifetime(condType,thenType,elseType));
@@ -396,8 +396,8 @@ SeExprAssignNode::prep(bool wantScalar, SeExprVarEnv & env)
     _assignedType = child(0)->prep(false, env);
 
     //TODO: This could add errors to the variable environment
-    _var=new SeExprLocalVarRef(child(0)->type());
-    env.add(_name, _var);
+    _localVar=new SeExprLocalVar(child(0)->type());
+    env.add(_name, _localVar);
     bool error=false;
 	// TODO: fix
     //checkIsValue(_assignedType,error);
@@ -411,7 +411,7 @@ SeExprAssignNode::prep(bool wantScalar, SeExprVarEnv & env)
 void SeExprAssignNode::evalImpl(SeExprNode* self,const SeExprEvalResult& result)
 {
     SeExprAssignNode* selfAssignNode=static_cast<SeExprAssignNode*>(self);
-    if(selfAssignNode->_var) self->child(0)->evaluate(self->child(0),result);
+    if(selfAssignNode->_localVar) self->child(0)->evaluate(self->child(0),result);
     for(int k=0;k<self->type().dim();k++) result.fp[k]=0;
 }
 
@@ -835,14 +835,16 @@ SeExprType
 SeExprVarNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
     // ask expression to resolve var
-    _var = env.find(name());
-
-    if(!_var)
-        _var = _expr->resolveVar(name());
-
     bool error=false;
-    checkCondition(_var, std::string("No variable named $") + name(),error);
-    return _type=error?SeExprType().Error():_var->type();
+    if(_localVar = env.find(name())){
+        setType(_localVar->type());
+    }else if(_var = _expr->resolveVar(name())){
+        setType(_var->type());
+    }else{
+        checkCondition(_var || _localVar, std::string("No variable named $") + name(),error);
+        setType(SeExprType().Error());
+    }
+    return _type;
 }
 
 

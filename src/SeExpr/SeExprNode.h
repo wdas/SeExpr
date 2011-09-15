@@ -357,7 +357,7 @@ class SeExprAssignNode : public SeExprNode
 {
 public:
     SeExprAssignNode(const SeExpression* expr, const char* name, SeExprNode* e) :
-	SeExprNode(expr, e), _name(name), _var(0)
+	SeExprNode(expr, e), _name(name), _localVar(0)
     {evaluate=evalImpl;}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
@@ -366,11 +366,11 @@ public:
 
     const std::string& name        () const { return _name;         };
     const SeExprType & assignedType() const { return _assignedType; };
-    const SeExprVarRef* var() const{return _var;}
+    //const SeExprVarRef* var() const{return _var;}
 
 private:
     std::string _name;
-    SeExprVarRef* _var;
+    SeExprLocalVar* _localVar;
     SeExprType _assignedType;
 };
 
@@ -575,11 +575,11 @@ class SeExprVarNode : public SeExprNode
 {
 public:
     SeExprVarNode(const SeExpression* expr, const char* name) :
-	SeExprNode(expr), _name(name), _var(0)//, _data(0) 
+	SeExprNode(expr), _name(name), _localVar(0), _var(0)//, _data(0) 
     { evaluate=evalImpl;}
 
     SeExprVarNode(const SeExpression* expr, const char* name, const SeExprType & type) :
-        SeExprNode(expr, type), _name(name), _var(0)//, _data(0)
+        SeExprNode(expr, type), _name(name), _localVar(0), _var(0)//, _data(0)
     { evaluate=evalImpl;}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
@@ -596,6 +596,7 @@ public:
 
 private:
     std::string _name;
+    SeExprLocalVar* _localVar;
     SeExprVarRef* _var;
     //mutable Data* _data;
 };

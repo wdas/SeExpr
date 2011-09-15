@@ -326,10 +326,10 @@ public:
             eval.opData.push_back(op0);
             eval.opData.push_back(op1);
         }else if(const SeExprAssignNode* node=dynamic_cast<const SeExprAssignNode*>(examinee)){
-            std::cerr<<"storing for var "<<node->var()<<std::endl;
-            varLocation[node->var()]=getLoc(node->child(0)); // just point to other node
+            //std::cerr<<"storing for var "<<node->var()<<std::endl;
+            //varLocation[node->var()]=getLoc(node->child(0)); // just point to other node
         }else if(const SeExprVarNode* node=dynamic_cast<const SeExprVarNode*>(examinee)){
-            std::cerr<<"looking for "<<node->var()<<std::endl;
+            //std::cerr<<"looking for "<<node->var()<<std::endl;
             VarToLoc::const_iterator it=varLocation.find(node->var());
             if(it==varLocation.end()){
                 assert(false);
