@@ -168,7 +168,7 @@ SeExpression::parse() const
     SeExprParse(_parseTree,
         _parseError, tempStartPos, tempEndPos, 
         _comments, this, _expression.c_str(), _wantVec);
-    if(!_isValid){
+    if(!_parseTree){
         addError(_parseError,tempStartPos,tempEndPos);
     }
 }
@@ -180,7 +180,10 @@ SeExpression::prep() const
     _prepped = true;
     parseIfNeeded();
     SeExprVarEnv env;
-    if (_parseTree && !_parseTree->prep(_returnType.isFP(1), env).isValid()) {
+
+    if(!_parseTree){
+        _isValid=false;
+    }else if (!_parseTree->prep(_returnType.isFP(1), env).isValid()) {
         // build line lookup table
         std::vector<int> lines;
         const char* start=_expression.c_str();
@@ -209,7 +212,8 @@ SeExpression::prep() const
 
 	//delete _parseTree; _parseTree = 0;
         _isValid=false;
-    }else _isValid=true;
+    }else
+        _isValid=true;
 }
 
 

@@ -343,11 +343,6 @@ public:
     {}
 };
 
-#define OPSTART(x)
-#define OPEND
-
-
-
 
 class Expr:public SeExpression
 {
@@ -356,9 +351,11 @@ public:
     {
         EvalBuilder builder;
         SeExpr::ConstWalker walker(&builder);
-        walker.walk(_parseTree);
-        builder.eval.eval();
-        builder.eval.print();
+        if(isValid() && _parseTree){
+            walker.walk(_parseTree);
+            builder.eval.eval();
+            builder.eval.print();
+        }
     }
 };
 

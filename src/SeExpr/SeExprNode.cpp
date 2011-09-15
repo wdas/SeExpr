@@ -842,8 +842,6 @@ SeExprVarNode::prep(bool wantScalar, SeExprVarEnv & env)
 
     bool error=false;
     checkCondition(_var, std::string("No variable named $") + name(),error);
-    // TODO: remove
-    std::cerr<<"we have gah is "<<_var->type().toString();
     return _type=error?SeExprType().Error():_var->type();
 }
 
