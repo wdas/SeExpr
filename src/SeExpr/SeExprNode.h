@@ -366,7 +366,7 @@ public:
 
     const std::string& name        () const { return _name;         };
     const SeExprType & assignedType() const { return _assignedType; };
-    //const SeExprVarRef* var() const{return _var;}
+    const SeExprLocalVar* localVar() const{return _localVar;}
 
 private:
     std::string _name;
@@ -586,6 +586,7 @@ public:
     //virtual void eval(SeVec3d& result) const;
     static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
     const char* name() const { return _name.c_str(); }
+    const SeExprLocalVar* localVar() const{return _localVar;}
     const SeExprVarRef* var() const{return _var;}
     
     /// base class for custom instance data

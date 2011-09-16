@@ -230,6 +230,21 @@ struct Tuple{
     }
 };
 
+//! build a vector tuple from a bunch of numbers
+template<int d>
+struct AssignOp{
+    static int f(int* opData,double* fp,char** c)
+    {
+        int in=opData[0];
+        int out=opData[1];
+        for(int k=0;k<d;k++){
+            fp[out+k]=fp[in+k];
+        }
+        return 1;
+    }
+};
+
+
 
 #define DEBUG(x) \
     std::cerr<<"Builder: "<<x<<std::endl;
@@ -240,7 +255,7 @@ class EvalBuilder:public SeExpr::Examiner<true>
 public:
     typedef std::map<const SeExprNode*,int> NodeToLoc;
     NodeToLoc location;
-    typedef std::map<const SeExprVarRef*,int> VarToLoc;
+    typedef std::map<const SeExprLocalVar*,int> VarToLoc;
     VarToLoc varLocation;
     Evaluator eval;
 
@@ -253,6 +268,20 @@ public:
             else if(node->type().isFP()) loc=eval.allocFP(node->type().dim());
             else assert(false); //  This should not be possible by type check
             location[node]=loc;
+            return loc;
+        }
+        return i->second;
+    }
+
+    int getLoc(const SeExprLocalVar* var)
+    {
+        VarToLoc::iterator i=varLocation.find(var);
+        if(i==varLocation.end()){
+            int loc=0;
+            if(var->type().isString()) loc=eval.allocPtr();
+            else if(var->type().isFP()) loc=eval.allocFP(var->type().dim());
+            else assert(false); //  This should not be possible by type check
+            varLocation[var]=loc;
             return loc;
         }
         return i->second;
@@ -326,16 +355,22 @@ public:
             eval.opData.push_back(op0);
             eval.opData.push_back(op1);
         }else if(const SeExprAssignNode* node=dynamic_cast<const SeExprAssignNode*>(examinee)){
+            // TODO: optimize to eliminate variable copying!
+            const SeExprLocalVar* var=node->localVar();
+            if(const SeExprLocalVar* phi=var->getPhi()) var=phi;
+            int dimout=var->type().dim();
+            eval.ops.push_back(std::make_pair(getTemplatizedOp<AssignOp>(dimout),eval.opData.size()));
+            int opdest=getLoc(var);
+            int opsrc=getLoc(node->child(0));
+            eval.opData.push_back(opsrc);
+            eval.opData.push_back(opdest);
+
             //std::cerr<<"storing for var "<<node->var()<<std::endl;
             //varLocation[node->var()]=getLoc(node->child(0)); // just point to other node
         }else if(const SeExprVarNode* node=dynamic_cast<const SeExprVarNode*>(examinee)){
-            //std::cerr<<"looking for "<<node->var()<<std::endl;
-            VarToLoc::const_iterator it=varLocation.find(node->var());
-            if(it==varLocation.end()){
-                assert(false);
-            }else{
-                location[node]=it->second;
-            }
+            const SeExprLocalVar* var=node->localVar();
+            if(const SeExprLocalVar* phi=var->getPhi()) var=phi;
+            location[node]=getLoc(var);
         }
     }
 

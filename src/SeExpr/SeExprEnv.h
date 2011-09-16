@@ -48,14 +48,16 @@ class SeExprNode;
 
 class SeExprLocalVar
 {
-public:
+protected:
     SeExprType _type;
     SeExprLocalVar* _phi;
+public:
 
     SeExprLocalVar(const SeExprType& type):_type(type),_phi(0)
     {}
 
-    SeExprType type(){return _type;}
+    const SeExprLocalVar* getPhi() const{return _phi;}
+    SeExprType type() const{return _type;}
     virtual void setPhi(SeExprLocalVar* phi){_phi=phi;}
 };
 
@@ -74,6 +76,7 @@ public:
     }
 
     void setPhi(SeExprLocalVar* phi){
+        _phi=phi;
         _ifVar->setPhi(phi);
         _elseVar->setPhi(phi);
     }
