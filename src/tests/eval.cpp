@@ -71,7 +71,7 @@ struct Evaluator
 
     void print(){
         std::cerr<<"ops "<<std::endl;
-        for(int i=0;i<ops.size();i++){
+        for(size_t i=0;i<ops.size();i++){
             std::cerr<<ops[i].first<<" (";
             int nextGuy=(i==ops.size()-1 ? opData.size() : ops[i+1].second);
                 
@@ -81,11 +81,11 @@ struct Evaluator
             std::cerr<<")"<<std::endl;
         }
         std::cerr<<"opdata "<<std::endl;
-        for(int k=0;k<opData.size();k++){
+        for(size_t k=0;k<opData.size();k++){
             std::cerr<<"opData["<<k<<"]= "<<opData[k]<<std::endl;;
         }
         std::cerr<<"fp "<<std::endl;
-        for(int k=0;k<d.size();k++){
+        for(size_t k=0;k<d.size();k++){
             std::cerr<<"fp["<<k<<"]= "<<d[k]<<std::endl;;
         }
     }
@@ -343,7 +343,7 @@ public:
         }else if(const SeExprUnaryOpNode* node=dynamic_cast<const SeExprUnaryOpNode*>(examinee)){
             DEBUG("unaryop");
             const SeExprNode* child0=node->child(0);
-            int dim0=child0->type().dim(),dimout=node->type().dim(); 
+            int dimout=node->type().dim(); 
             int op0=getLoc(child0);
             int op1=getLoc(node);
             switch(node->_op){
@@ -371,6 +371,8 @@ public:
             const SeExprLocalVar* var=node->localVar();
             if(const SeExprLocalVar* phi=var->getPhi()) var=phi;
             location[node]=getLoc(var);
+        }else if(const SeExprIfThenElseNode* node=dynamic_cast<const SeExprIfThenElseNode*>(examinee)){
+            
         }
     }
 

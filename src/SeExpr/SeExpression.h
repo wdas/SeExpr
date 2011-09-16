@@ -300,6 +300,8 @@ class SeExpression
     std::string _expression;
     
  protected:
+    /** Variable environment */
+    mutable SeExprVarEnv* _varEnv;
     /** Parse tree (null if syntax is bad). */
     mutable SeExprNode *_parseTree;
 

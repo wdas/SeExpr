@@ -59,7 +59,7 @@ public:
           _walker(&_examiner)
     {};
 
-    inline void walk () { if(isValid()) _walker.walk(_parseTree); };
+    inline void walk () { if(_parseTree) _walker.walk(_parseTree); };
 
 private:
     TypePrintExaminer _examiner;

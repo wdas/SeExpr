@@ -77,14 +77,14 @@ TypePrintExaminer::examine(const SeExprNode* examinee)
 
 
 SeExpression::SeExpression()
-    : _wantVec(true), _returnType(SeExprType().FP(3).Varying()), _parseTree(0), _isValid(0), _parsed(0), _prepped(0)
+    : _wantVec(true), _returnType(SeExprType().FP(3).Varying()), _varEnv(0), _parseTree(0), _isValid(0), _parsed(0), _prepped(0)
 {
     SeExprFunc::init();
 }
 
 
 SeExpression::SeExpression( const std::string &e, const SeExprType & type)
-    : _wantVec(true), _returnType(type), _expression(e), _parseTree(0), _isValid(0), _parsed(0), _prepped(0)
+    : _wantVec(true), _returnType(type), _expression(e), _varEnv(0),  _parseTree(0), _isValid(0), _parsed(0), _prepped(0)
 {
     SeExprFunc::init();
 }
@@ -96,9 +96,9 @@ SeExpression::~SeExpression()
 
 void SeExpression::reset()
 {
-    delete _parseTree;
+    delete _parseTree;_parseTree=0;
+    delete _varEnv;_varEnv=0;
     _isValid = 0;
-    _parseTree = 0;
     _parsed = 0;
     _prepped = 0;
     _parseError = "";
@@ -179,11 +179,11 @@ SeExpression::prep() const
     if (_prepped) return;
     _prepped = true;
     parseIfNeeded();
-    SeExprVarEnv env;
+    _varEnv=new SeExprVarEnv;
 
     if(!_parseTree){
         _isValid=false;
-    }else if (!_parseTree->prep(_returnType.isFP(1), env).isValid()) {
+    }else if (!_parseTree->prep(_returnType.isFP(1), *_varEnv).isValid()) {
         // build line lookup table
         std::vector<int> lines;
         const char* start=_expression.c_str();

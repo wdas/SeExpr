@@ -181,10 +181,12 @@ public:
     inline void setTypeWithChildLife(const SeExprType & t)  {
         setType(t);
         int num = numChildren();
-        if(num > 0)
+        if(num > 0){
             _type.setLifetime(child(0)->type());
-        for(int i = 1; i < num; i++)
-            _type.setLifetime(_type, child(i)->type());
+            for(int i = 1; i < num; i++)
+                _type.setLifetime(_type, child(i)->type());
+        }else // no children life is constant!
+            _type.Constant();
     };
 
     /// @{ @name Error Checking Helpers for Type Checking
@@ -349,6 +351,8 @@ public:
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
+
+    SeExprVarEnv thenEnv,elseEnv;
 };
 
 

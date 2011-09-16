@@ -351,7 +351,6 @@ SeExprBlockNode::evalImpl(SeExprNode* self,const SeExprEvalResult& result)
 SeExprType
 SeExprIfThenElseNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
-    SeExprVarEnv           thenEnv,  elseEnv;
     SeExprType   condType, thenType, elseType;
 
     bool error = false;
@@ -359,9 +358,10 @@ SeExprIfThenElseNode::prep(bool wantScalar, SeExprVarEnv & env)
     condType = child(0)->prep(true,env);
     checkIsFP(condType,error);
 
-    thenEnv = SeExprVarEnv(env);
+    thenEnv.resetAndSetParent(&env);
+    elseEnv.resetAndSetParent(&env);
+
     thenType = child(1)->prep(false, thenEnv);
-    elseEnv = SeExprVarEnv(env);
     elseType = child(2)->prep(false, elseEnv);
 
     if(!error && thenType.isValid() && elseType.isValid()){
@@ -836,9 +836,9 @@ SeExprVarNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
     // ask expression to resolve var
     bool error=false;
-    if(_localVar = env.find(name())){
+    if((_localVar = env.find(name()))){
         setType(_localVar->type());
-    }else if(_var = _expr->resolveVar(name())){
+    }else if((_var = _expr->resolveVar(name()))){
         setType(_var->type());
     }else{
         checkCondition(_var || _localVar, std::string("No variable named $") + name(),error);

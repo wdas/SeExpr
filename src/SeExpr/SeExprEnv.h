@@ -40,12 +40,13 @@
 #include <cassert>
 
 #include "SeExprType.h"
-
+#include <iostream>
 class SeExprVarRef;
 class SeExprLocalVar;
 class SeExprNode;
 
 
+//! SeExprLocalVar reference
 class SeExprLocalVar
 {
 protected:
@@ -56,33 +57,39 @@ public:
     SeExprLocalVar(const SeExprType& type):_type(type),_phi(0)
     {}
 
+    virtual ~SeExprLocalVar(){}
+
+    //! get the primary representative phi node (i.e. the global parent of a dependent phi node)
     const SeExprLocalVar* getPhi() const{return _phi;}
+    //! returns type of the variable
     SeExprType type() const{return _type;}
+    //! sets the representative phi node (like a brute force set unioning operation) phi is the set representative
     virtual void setPhi(SeExprLocalVar* phi){_phi=phi;}
 };
 
+//! SeExprLocalVar join reference. This connects to other var references by a condition and
 class SeExprLocalVarPhi:public SeExprLocalVar
 {
 public:
-    SeExprLocalVarPhi(SeExprType condLife,SeExprLocalVar* ifVar,SeExprLocalVar* elseVar)
-        :SeExprLocalVar(SeExprType()),_ifVar(ifVar),_elseVar(elseVar)
+    SeExprLocalVarPhi(SeExprType condLife,SeExprLocalVar* thenVar,SeExprLocalVar* elseVar)
+        :SeExprLocalVar(SeExprType()),_thenVar(thenVar),_elseVar(elseVar)
     {
-        if(_ifVar != _elseVar){
+        if(_thenVar->type() != _elseVar->type()){
             _type=SeExprType().Error();
         }else{
-            _type=SeExprType(_ifVar->type()).setLifetime(condLife);
+            _type=SeExprType(_thenVar->type()).setLifetime(condLife);
             setPhi(this);
         }
     }
 
     void setPhi(SeExprLocalVar* phi){
         _phi=phi;
-        _ifVar->setPhi(phi);
+        _thenVar->setPhi(phi);
         _elseVar->setPhi(phi);
     }
 
     SeExprNode* _condNode;
-    SeExprLocalVar *_ifVar,*_elseVar;
+    SeExprLocalVar *_thenVar,*_elseVar;
 };
 
 //! Variable scope for tracking variable lookup
@@ -91,24 +98,22 @@ class SeExprVarEnv {
     typedef std::map<std::string,SeExprLocalVar*> DictType;
     DictType       _map;
     SeExprVarEnv * _parent;
-    //! False if this env owns, true if some other env has taken ownership
-    //! e.g. see the IfThenElseNode
-    mutable bool   _anotherOwns;
+
+protected:
+    SeExprVarEnv(SeExprVarEnv& other);
+    SeExprVarEnv& operator=(SeExprVarEnv& other);
 
  public:
-    //! Create a scope that inherits from parent
-    SeExprVarEnv(SeExprVarEnv * parent)
-        : _map(), _parent(parent), _anotherOwns(false)
-    {};
-
     // TODO: figure out when anotherOwns is needed
     //! Create a scope with no parent
     SeExprVarEnv()
-        : _map(), _parent(0), _anotherOwns(false)
+        : _map(), _parent(0)
     {};
 
     ~SeExprVarEnv();
-
+    
+    //! Resets the scope (deletes all variables) and sets parent
+    void resetAndSetParent(SeExprVarEnv* parent);
     //! Find a variable name by name (recursive to parents)
     SeExprLocalVar* find(const std::string& name);
     //! Find a const variable reference name by name (recursive to parents)

@@ -40,9 +40,14 @@
 #include <vector>
 
 SeExprVarEnv::~SeExprVarEnv() {
-    if(!_anotherOwns) 
-        for(DictType::const_iterator ienv=_map.begin(); ienv != _map.end(); ++ienv)
-            delete ienv->second;
+    resetAndSetParent(0);
+}
+
+void SeExprVarEnv::resetAndSetParent(SeExprVarEnv* parent)
+{
+    _parent=parent;
+    for(DictType::const_iterator ienv=_map.begin(); ienv != _map.end(); ++ienv)
+        delete ienv->second;
 }
 
 SeExprLocalVar* SeExprVarEnv::find(const std::string & name)
