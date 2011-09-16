@@ -48,6 +48,7 @@
 #include "SeExprType.h"
 #include "SeExprEnv.h"
 #include "SeVec3d.h"
+#include "SeInterpreter.h"
 
 class SeExprFunc;
 
@@ -117,13 +118,13 @@ public:
     /// the start of SeExprNode.cpp for more info.
     virtual SeExprType prep(bool dontNeedScalar, SeExprVarEnv & env);
 
-    /// Evaluation method.
-    static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
     // TODO: delete this this is deprecated
     void eval(SeVec3d& result) const{}
+
+    /// builds an interpreter. Returns the program counter of its first instruction
+    int buildOps(SeInterpreter* interpreter) const{}
     /// @}
     
-
     /// True if node has a vector result.
     bool isVec() const { return _isVec; }
 
@@ -258,10 +259,9 @@ class SeExprModuleNode : public SeExprNode
 public:
     SeExprModuleNode(const SeExpression* expr) :
 	SeExprNode(expr)
-    {evaluate=evalImpl;}
+    {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
 };
 
 
@@ -334,10 +334,9 @@ class SeExprBlockNode : public SeExprNode
 public:
     SeExprBlockNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
 	SeExprNode(expr, a, b)
-    {evaluate=evalImpl;}
+    {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
 };
 
 
@@ -361,12 +360,10 @@ class SeExprAssignNode : public SeExprNode
 {
 public:
     SeExprAssignNode(const SeExpression* expr, const char* name, SeExprNode* e) :
-	SeExprNode(expr, e), _name(name), _localVar(0)
-    {evaluate=evalImpl;}
+	SeExprNode(expr, e), _name(name), _localVar(0) {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     //virtual void eval(SeVec3d& result) const;
-    static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
 
     const std::string& name        () const { return _name;         };
     const SeExprType & assignedType() const { return _assignedType; };
@@ -391,9 +388,6 @@ public:
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
 
-    template<int my_d,int maxchild_d> static void evalImplFast(SeExprNode* self,const SeExprEvalResult& result);
-    static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
-    
     SeVec3d value() const;
 };
 
@@ -407,7 +401,6 @@ public:
     {}
     
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    template<char op> static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
 
     char _op;
 };
@@ -462,11 +455,9 @@ class SeExprSubscriptNode : public SeExprNode
 {
 public:
     SeExprSubscriptNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b)
-    {evaluate=evalImpl;}
+	SeExprNode(expr, a, b){}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
 };
 
 
@@ -567,8 +558,6 @@ public:
        _op(op) {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    template<char op>
-    static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
 
     char _op;
 };
@@ -580,15 +569,14 @@ class SeExprVarNode : public SeExprNode
 public:
     SeExprVarNode(const SeExpression* expr, const char* name) :
 	SeExprNode(expr), _name(name), _localVar(0), _var(0)//, _data(0) 
-    { evaluate=evalImpl;}
+    {}
 
     SeExprVarNode(const SeExpression* expr, const char* name, const SeExprType & type) :
         SeExprNode(expr, type), _name(name), _localVar(0), _var(0)//, _data(0)
-    { evaluate=evalImpl;}
+    {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     //virtual void eval(SeVec3d& result) const;
-    static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
     const char* name() const { return _name.c_str(); }
     const SeExprLocalVar* localVar() const{return _localVar;}
     const SeExprVarRef* var() const{return _var;}
@@ -612,11 +600,10 @@ class SeExprNumNode : public SeExprNode
 {
 public:
     SeExprNumNode(const SeExpression* expr, double val) :
-	SeExprNode(expr), _val(val) {evaluate=evalImpl;}
+	SeExprNode(expr), _val(val) {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const { result[0] = _val; }
-    static void evalImpl(SeExprNode* self,const SeExprEvalResult& result);
     double value() const { return _val; };
 
 private:

@@ -46,21 +46,21 @@
 
 
 SeExprNode::SeExprNode(const SeExpression* expr)
-    : _expr(expr), _parent(0), _isVec(0), evaluate(0)
+    : _expr(expr), _parent(0), _isVec(0)
 {
 }
 
 
 SeExprNode::SeExprNode(const SeExpression* expr,
                        const SeExprType & type)
-    : _expr(expr), _parent(0), _isVec(0), _type(type), evaluate(0)
+    : _expr(expr), _parent(0), _isVec(0), _type(type)
 {
 }
 
 
 SeExprNode::SeExprNode(const SeExpression* expr,
                        SeExprNode* a)
-    : _expr(expr), _parent(0), _isVec(0), evaluate(0)
+    : _expr(expr), _parent(0), _isVec(0)
 {
     _children.reserve(1);
     addChild(a);
@@ -70,7 +70,7 @@ SeExprNode::SeExprNode(const SeExpression* expr,
 SeExprNode::SeExprNode(const SeExpression* expr,
                        SeExprNode* a,
                        const SeExprType & type)
-    : _expr(expr), _parent(0), _isVec(0), _type(type), evaluate(0)
+    : _expr(expr), _parent(0), _isVec(0), _type(type)
 {
     _children.reserve(1);
     addChild(a);
@@ -80,7 +80,7 @@ SeExprNode::SeExprNode(const SeExpression* expr,
 SeExprNode::SeExprNode(const SeExpression* expr,
                        SeExprNode* a,
                        SeExprNode* b)
-    : _expr(expr), _parent(0), _isVec(0), evaluate(0)
+    : _expr(expr), _parent(0), _isVec(0)
 {
     _children.reserve(2);
     addChild(a);
@@ -92,7 +92,7 @@ SeExprNode::SeExprNode(const SeExpression* expr,
                        SeExprNode* a,
                        SeExprNode* b,
                        const SeExprType & type)
-    : _expr(expr), _parent(0), _isVec(0), _type(type), evaluate(0)
+    : _expr(expr), _parent(0), _isVec(0), _type(type)
 {
     _children.reserve(2);
     addChild(a);
@@ -104,7 +104,7 @@ SeExprNode::SeExprNode(const SeExpression* expr,
                        SeExprNode* a,
                        SeExprNode* b,
 		       SeExprNode* c)
-    : _expr(expr), _parent(0), _isVec(0), evaluate(0)
+    : _expr(expr), _parent(0), _isVec(0)
 {
     _children.reserve(3);
     addChild(a);
@@ -118,7 +118,7 @@ SeExprNode::SeExprNode(const SeExpression* expr,
                        SeExprNode* b,
 		       SeExprNode* c,
                        const SeExprType & type)
-    : _expr(expr), _parent(0), _isVec(0), _type(type), evaluate(0)
+    : _expr(expr), _parent(0), _isVec(0), _type(type)
 {
     _children.reserve(3);
     addChild(a);
@@ -193,28 +193,8 @@ SeExprNode::prep(bool wantScalar, SeExprVarEnv & env)
     if(error) setType(SeExprType().Error());
     else setTypeWithChildLife(SeExprType().None());
 
-    evaluate=evalImpl;
-
     return _type;
 }
-
-
-void
-SeExprNode::evalImpl(SeExprNode* self,const SeExprEvalResult& result)
-{
-    // the default behavior is to just eval all the children for
-    // their side-effects (i.e. setting variables)
-    // there is no result value
-    double* vals=static_cast<double*>(alloca(self->_maxChildDim));
-    const char* s=0;
-    SeExprEvalResult tempResult(self->_maxChildDim,vals,&s);
-
-    SeVec3d val;
-    for (int i = 0; i < self->numChildren(); i++)
-	self->child(i)->evaluate(self->child(i),tempResult);
-    // TODO: should zero out here!
-}
-
 
 SeExprType
 SeExprModuleNode::prep(bool wantScalar, SeExprVarEnv & env)
@@ -227,16 +207,6 @@ SeExprModuleNode::prep(bool wantScalar, SeExprVarEnv & env)
     else setType(child(numChildren()-1)->type());
 
     return _type;
-}
-
-void
-SeExprModuleNode::evalImpl(SeExprNode* self,const SeExprEvalResult& result)
-{
-    // eval block, then eval primary expr
-    int last=self->numChildren()-1;
-    for(int c=0;c<last;c++)
-        self->child(c)->evaluate(self->child(0),SeExprEvalResult());
-    if(last>=0) self->child(last)->evaluate(self->child(last),result);
 }
 
 
@@ -340,14 +310,6 @@ SeExprBlockNode::prep(bool wantScalar, SeExprVarEnv & env)
 }
 
 
-void
-SeExprBlockNode::evalImpl(SeExprNode* self,const SeExprEvalResult& result)
-{
-    self->child(0)->evaluate(self->child(0),SeExprEvalResult()); // block
-    self->child(1)->evaluate(self->child(1),result); // primary expr
-}
-
-
 SeExprType
 SeExprIfThenElseNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
@@ -408,13 +370,6 @@ SeExprAssignNode::prep(bool wantScalar, SeExprVarEnv & env)
     return _type;
 }
 
-void SeExprAssignNode::evalImpl(SeExprNode* self,const SeExprEvalResult& result)
-{
-    SeExprAssignNode* selfAssignNode=static_cast<SeExprAssignNode*>(self);
-    if(selfAssignNode->_localVar) self->child(0)->evaluate(self->child(0),result);
-    for(int k=0;k<self->type().dim();k++) result.fp[k]=0;
-}
-
 SeExprType
 SeExprVecNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
@@ -429,40 +384,8 @@ SeExprVecNode::prep(bool wantScalar, SeExprVarEnv & env)
     }
     
     if(error) setType(SeExprType().Error());
-    else{
-        setTypeWithChildLife(SeExprType().FP(numChildren()));
-        if(max_child_d<=4){
-            switch(numChildren()){
-            case 1: evaluate=evalImplFast<1,4>;break;
-            case 2: evaluate=evalImplFast<2,4>;break;
-            case 3: evaluate=evalImplFast<3,4>;break;
-            case 4: evaluate=evalImplFast<4,4>;break;
-            default: evaluate=evalImpl;
-            }
-        }else evaluate=evalImpl;
-    }
+    else setTypeWithChildLife(SeExprType().FP(numChildren()));
     return _type;
-}
-
-void SeExprVecNode::evalImpl(SeExprNode* self,const SeExprEvalResult& result)
-{
-    double fp[16]; // TODO: this is bad
-    for(int c=0; c<self->numChildren(); c++) {
-        SeExprNode* child=self->child(c);
-        child->evaluate(child,SeExprEvalResult(child->type().dim(),fp));
-        result.fp[c]=fp[0];
-    }
-}
-
-template<int my_d,int maxchild_d> void
-SeExprVecNode::evalImplFast(SeExprNode* self,const SeExprEvalResult& result)
-{
-    double res[maxchild_d];
-    for(int k=0;k<my_d;k++){
-        SeExprNode* child=self->child(k);
-        child->evaluate(child,SeExprEvalResult(maxchild_d,res));
-        result.fp[k]=res[0];
-    }
 }
 
 SeVec3d
@@ -494,23 +417,6 @@ SeExprUnaryOpNode::prep(bool wantScalar, SeExprVarEnv & env)
     else setType(childType);
     return _type;
 }
-
-template<char op> void
-SeExprUnaryOpNode::evalImpl(SeExprNode* self,const SeExprEvalResult& result)
-{
-    SeExprNode* child0 = self->child(0);
-    // TODO: aselle this is only safe as long as we don't demotion for wantScalar case!
-    // otherwise we need to allocate for result.
-    int out_dim=self->type().dim();
-    child0->evaluate(child0,result);
-    if(op=='-') for(int i=0;i<out_dim;i++) result.fp[i]=-result.fp[i];
-    else if(op=='~') for(int i=0;i<out_dim;i++) result.fp[i]=double(1)-result.fp[i];
-    else if(op=='!') for(int i=0;i<out_dim;i++) result.fp[i]=!result.fp[i];
-    //TODO: else static assert
-}
-template void SeExprUnaryOpNode::evalImpl<'-'>(SeExprNode*,const SeExprEvalResult&);
-template void SeExprUnaryOpNode::evalImpl<'~'>(SeExprNode*,const SeExprEvalResult&);
-template void SeExprUnaryOpNode::evalImpl<'!'>(SeExprNode*,const SeExprEvalResult&);
 
 SeExprType
 SeExprCondNode::prep(bool wantScalar, SeExprVarEnv & env)
@@ -618,23 +524,6 @@ SeExprSubscriptNode::prep(bool wantScalar, SeExprVarEnv & env)
     else setType(SeExprType().FP(1).setLifetime(vecType,scriptType));
 
     return _type;
-}
-
-void
-SeExprSubscriptNode::evalImpl(SeExprNode* self,const SeExprEvalResult& result)
-{
-    SeExprNode* child0 = self->child(0);
-    SeExprNode* child1 = self->child(1);
-    int dim0=child0->type().dim();
-    int resultSize=std::max(dim0,child1->type().dim());
-    double *childResult=static_cast<double*>(alloca(resultSize));
-    child1->evaluate(child1,SeExprEvalResult(resultSize,childResult));
-    int index=int(childResult[0]);
-    child0->evaluate(child0,SeExprEvalResult(resultSize,childResult));
-    // TODO: aselle have some way of reporting this error?
-    // TODO: aselle if index is anything but the child0 type is fp[1], then maybe we should just return that value always... i.e. an implicit promotion to fp[n] and then pull out a component
-    if(index<0 || index>=dim0) result.fp[0]=0;
-    else result.fp[0]=childResult[index];
 }
 
 SeExprType
@@ -799,38 +688,6 @@ static double niceMod(double a, double b)
     return a - floor(a/b)*b;
 }
 
-template<char op>
-void SeExprBinaryOpNode::
-evalImpl(SeExprNode* self,const SeExprEvalResult& result)
-{
-    // TODO: make sure this does the right thing for out dim
-    int out_dim=self->type().dim();
-    double* val1=static_cast<double*>(alloca(out_dim));
-    SeExprNode* child0=self->child(0),*child1=self->child(1);
-    int dim0=child0->type().dim(),dim1=child1->type().dim();
-    // TODO: aselle assuming dim(result) is equal to dim(chil0) or dim(child1) only safe
-    //   by prep()... if we do the demoted evaluation business then we need a result per child
-    child0->evaluate(child0,SeExprEvalResult(dim0,result.fp));
-    if(dim0==1) for(int k=1;k<out_dim;k++) result.fp[k]=result.fp[0];
-    child1->evaluate(child1,SeExprEvalResult(dim1,val1));
-    if(dim1==1) for(int k=1;k<out_dim;k++) val1[k]=val1[0];
-    // do the actual operation
-    if(op=='+') for(int k=0;k<out_dim;k++) result.fp[k]+=val1[k];
-    else if(op=='-') for(int k=0;k<out_dim;k++) result.fp[k]-=val1[k];
-    else if(op=='*') for(int k=0;k<out_dim;k++) result.fp[k]*=val1[k];
-    else if(op=='/') for(int k=0;k<out_dim;k++) result.fp[k]/=val1[k];
-    else if(op=='%') for(int k=0;k<out_dim;k++) result.fp[k]=niceMod(result.fp[k],val1[k]);
-    else if(op=='^') for(int k=0;k<out_dim;k++) result.fp[k]=pow(result.fp[k],val1[k]);
-    // TODO: else STATIC_ASSERT(false);
-}
-template void SeExprBinaryOpNode::evalImpl<'+'>(SeExprNode*,const SeExprEvalResult&);
-template void SeExprBinaryOpNode::evalImpl<'-'>(SeExprNode*,const SeExprEvalResult&);
-template void SeExprBinaryOpNode::evalImpl<'*'>(SeExprNode*,const SeExprEvalResult&);
-template void SeExprBinaryOpNode::evalImpl<'/'>(SeExprNode*,const SeExprEvalResult&);
-template void SeExprBinaryOpNode::evalImpl<'%'>(SeExprNode*,const SeExprEvalResult&);
-template void SeExprBinaryOpNode::evalImpl<'^'>(SeExprNode*,const SeExprEvalResult&);
-
-
 SeExprType
 SeExprVarNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
@@ -848,24 +705,11 @@ SeExprVarNode::prep(bool wantScalar, SeExprVarEnv & env)
 }
 
 
-void SeExprVarNode::evalImpl(SeExprNode* selfNode,const SeExprEvalResult& result){
-    SeExprVarNode* selfVar=static_cast<SeExprVarNode*>(selfNode);
-    if (selfVar->_var) selfVar->_var->evaluate(selfVar, result);
-    else for(int k=0;k<selfNode->type().dim();k++) result.fp[k]=0;
-}
-
-
 SeExprType
 SeExprNumNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
     _type=SeExprType().FP(1).Constant();
     return _type;
-}
-
-void
-SeExprNumNode::evalImpl(SeExprNode* self,const SeExprEvalResult& result)
-{
-    result.fp[0]=static_cast<SeExprNumNode*>(self)->_val;
 }
 
 SeExprType
