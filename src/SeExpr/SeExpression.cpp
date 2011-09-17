@@ -212,8 +212,13 @@ SeExpression::prep() const
 
 	//delete _parseTree; _parseTree = 0;
         _isValid=false;
-    }else
+    }else{
         _isValid=true;
+        SeInterpreter interpreter;
+        _parseTree->buildInterpreter(&interpreter);
+        interpreter.eval();
+        interpreter.print();
+    }
 }
 
 

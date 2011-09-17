@@ -35,9 +35,61 @@
 #ifndef _SeInterpreter_h_
 #define _SeInterpreter_h_
 
+#include <vector>
+
 class SeInterpreter
 {
+public:
+    /// Double data (constants and evaluated)
+    std::vector<double> d;
+    /// Cosntant and evaluated pointer data
+    std::vector<char*> s;
+    /// Ooperands to op
+    std::vector<int> opData;
 
+    /// Not needed for eval only building
+    typedef std::map<const SeExprLocalVar*,int> VarToLoc;
+    VarToLoc varToLoc;
+    
+    /// Op function pointer arguments are (int* currOpData,double* currD,char** currS)
+    typedef int(*OpF)(int*,double*,char**);
+
+    std::vector<std::pair<OpF,int> > ops;
+
+    int nextPC(){return ops.size();}
+
+    ///! adds an operator to the program (pointing to the data at the current location)
+    int addOp(OpF op){
+        int pc=ops.size();
+        ops.push_back(std::make_pair(op,opData.size()));
+        return pc;
+    }
+
+    ///! Adds an operand. Note this should be done after doing the addOp!
+    int addOperand(int param){
+        int ret=opData.size();
+        opData.push_back(param);
+        return ret;
+    }
+
+    ///! Allocate a floating point set of data of dimension n
+    int allocFP(int n){
+        int ret=d.size();
+        for(int k=0;k<n;k++) d.push_back(0);
+        return ret;
+    }
+
+    /// Allocate a pointer location (can be anything, but typically space for char*)
+    int allocPtr(){
+        int ret=s.size();
+        s.push_back(0);
+        return ret;
+    }
+
+    /// Evaluate program
+    void eval();
+    /// Debug by printing program
+    void print();
 };
 
 #endif

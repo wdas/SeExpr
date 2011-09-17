@@ -121,8 +121,8 @@ public:
     // TODO: delete this this is deprecated
     void eval(SeVec3d& result) const{}
 
-    /// builds an interpreter. Returns the program counter of its first instruction
-    int buildOps(SeInterpreter* interpreter) const{}
+    /// builds an interpreter. Returns the location index for the evaluated data
+    virtual int buildInterpreter(SeInterpreter* interpreter) const;
     /// @}
     
     /// True if node has a vector result.
@@ -363,6 +363,7 @@ public:
 	SeExprNode(expr, e), _name(name), _localVar(0) {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
+    virtual int buildInterpreter(SeInterpreter* interpreter) const;
     //virtual void eval(SeVec3d& result) const;
 
     const std::string& name        () const { return _name;         };
@@ -387,6 +388,7 @@ public:
     };
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
+    virtual int buildInterpreter(SeInterpreter* interpreter) const;
 
     SeVec3d value() const;
 };
@@ -401,6 +403,7 @@ public:
     {}
     
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
+    virtual int buildInterpreter(SeInterpreter* interpreter) const;
 
     char _op;
 };
@@ -458,6 +461,7 @@ public:
 	SeExprNode(expr, a, b){}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
+    virtual int buildInterpreter(SeInterpreter* interpreter) const;
 };
 
 
@@ -558,6 +562,7 @@ public:
        _op(op) {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
+    virtual int buildInterpreter(SeInterpreter* interpreter) const;
 
     char _op;
 };
@@ -576,6 +581,7 @@ public:
     {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
+    virtual int buildInterpreter(SeInterpreter* interpreter) const;
     //virtual void eval(SeVec3d& result) const;
     const char* name() const { return _name.c_str(); }
     const SeExprLocalVar* localVar() const{return _localVar;}
@@ -604,6 +610,7 @@ public:
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const { result[0] = _val; }
+    virtual int buildInterpreter(SeInterpreter* interpreter) const;
     double value() const { return _val; };
 
 private:
