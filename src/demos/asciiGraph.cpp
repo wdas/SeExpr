@@ -61,7 +61,7 @@ private:
 	{}
 
         double val; // independent variable
-        void eval(const SeExprVarNode* node,SeVec3d& result)
+        void eval(double* result)
         {result[0]=val;}
     };
     

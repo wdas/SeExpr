@@ -350,6 +350,7 @@ public:
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
+    virtual int buildInterpreter(SeInterpreter* interpreter) const;
 
     SeExprVarEnv thenEnv,elseEnv;
 };
@@ -417,6 +418,7 @@ public:
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const;
+    virtual int buildInterpreter(SeInterpreter* interpreter) const;
 };
 
 
@@ -469,32 +471,13 @@ public:
 class SeExprCompareEqNode : public SeExprNode
 {
 public:
-    SeExprCompareEqNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+    SeExprCompareEqNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b,char op) :
+	SeExprNode(expr, a, b),_op(op) {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-};
+    virtual int buildInterpreter(SeInterpreter* interpreter) const;
 
-
-/// Node that implements a numeric comparison
-class SeExprEqNode : public SeExprCompareEqNode
-{
-public:
-    SeExprEqNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprCompareEqNode(expr, a, b) {}
-
-    virtual void eval(SeVec3d& result) const;
-};
-
-
-/// Node that implements a numeric comparison
-class SeExprNeNode : public SeExprCompareEqNode
-{
-public:
-    SeExprNeNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprCompareEqNode(expr, a, b) {}
-
-    virtual void eval(SeVec3d& result) const;
+    char _op;
 };
 
 
@@ -502,56 +485,15 @@ public:
 class SeExprCompareNode : public SeExprNode
 {
 public:
-    SeExprCompareNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
+    SeExprCompareNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b,char op) :
+	SeExprNode(expr, a, b), _op(op) {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
+    virtual int buildInterpreter(SeInterpreter* interpreter) const;
+
+    //! _op '<' less-than, 'l' less-than-eq, '>' greater-than, 'g' greater-than-eq
+    char _op;
 };
-
-
-/// Node that implements a numeric comparison
-class SeExprLtNode : public SeExprCompareNode
-{
-public:
-    SeExprLtNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprCompareNode(expr, a, b) {}
-
-    virtual void eval(SeVec3d& result) const;
-};
-
-
-/// Node that implements a numeric comparison
-class SeExprGtNode : public SeExprCompareNode
-{
-public:
-    SeExprGtNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprCompareNode(expr, a, b) {}
-
-    virtual void eval(SeVec3d& result) const;
-};
-
-
-/// Node that implements a numeric comparison
-class SeExprLeNode : public SeExprCompareNode
-{
-public:
-    SeExprLeNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprCompareNode(expr, a, b) {}
-
-    virtual void eval(SeVec3d& result) const;
-};
-
-
-/// Node that implements a numeric comparison
-class SeExprGeNode : public SeExprCompareNode
-{
-public:
-    SeExprGeNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprCompareNode(expr, a, b) {}
-
-    virtual void eval(SeVec3d& result) const;
-};
-
 
 /// Node that implements an binary operator
 class SeExprBinaryOpNode : public SeExprNode
@@ -627,7 +569,7 @@ public:
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual void eval(SeVec3d& result) const { result[0] = 0; }
-
+    virtual int buildInterpreter(SeInterpreter* interpreter) const;
     const char* str() const { return _str.c_str(); }
 
 private:

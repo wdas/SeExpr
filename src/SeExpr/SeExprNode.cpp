@@ -549,38 +549,6 @@ SeExprCompareEqNode::prep(bool wantScalar, SeExprVarEnv & env)
 }
 
 
-//TODO: make sure eval handles both scalars and n-length vectors
-void
-SeExprEqNode::eval(SeVec3d& result) const
-{
-    SeVec3d a, b;
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    child0->eval(a);
-    child1->eval(b);
-
-    if (!child0->isVec()) a[1] = a[2] = a[0];
-    if (!child1->isVec()) b[1] = b[2] = b[0];
-    result[0] = a[0] == b[0] && a[1] == b[1] && a[2] == b[2];
-}
-
-
-//TODO: make sure eval handles both scalars and n-length vectors
-void
-SeExprNeNode::eval(SeVec3d& result) const
-{
-    SeVec3d a, b;
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    child0->eval(a);
-    child1->eval(b);
-
-    if (!child0->isVec()) a[1] = a[2] = a[0];
-    if (!child1->isVec()) b[1] = b[2] = b[0];
-    result[0] = a[0] != b[0] || a[1] != b[1] || a[2] != b[2];
-}
-
-
 SeExprType
 SeExprCompareNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
@@ -604,62 +572,6 @@ SeExprCompareNode::prep(bool wantScalar, SeExprVarEnv & env)
 }
 
 
-//TODO: make sure eval handles both scalars and n-length vectors
-void
-SeExprLtNode::eval(SeVec3d& result) const
-{
-    SeVec3d a, b;
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    child0->eval(a);
-    child1->eval(b);
-
-    result[0] = a[0] < b[0];
-}
-
-
-//TODO: make sure eval handles both scalars and n-length vectors
-void
-SeExprGtNode::eval(SeVec3d& result) const
-{
-    SeVec3d a, b;
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    child0->eval(a);
-    child1->eval(b);
-
-    result[0] = a[0] > b[0];
-}
-
-
-//TODO: make sure eval handles both scalars and n-length vectors
-void
-SeExprLeNode::eval(SeVec3d& result) const
-{
-    SeVec3d a, b;
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    child0->eval(a);
-    child1->eval(b);
-
-    result[0] = a[0] <= b[0];
-}
-
-
-//TODO: make sure eval handles both scalars and n-length vectors
-void
-SeExprGeNode::eval(SeVec3d& result) const
-{
-    SeVec3d a, b;
-    const SeExprNode* child0 = child(0);
-    const SeExprNode* child1 = child(1);
-    child0->eval(a);
-    child1->eval(b);
-
-    result[0] = a[0] >= b[0];
-}
-
-
 SeExprType
 SeExprBinaryOpNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
@@ -680,12 +592,6 @@ SeExprBinaryOpNode::prep(bool wantScalar, SeExprVarEnv & env)
         .setLifetime(firstType,secondType));
 
     return _type;
-}
-
-static double niceMod(double a, double b)
-{
-    if (b == 0) return 0;
-    return a - floor(a/b)*b;
 }
 
 SeExprType

@@ -73,16 +73,9 @@ class SeExprVarRef
     // TODO: this is deprecated!
     //! returns this variable's value by setting result, node refers to 
     //! where in the parse tree the evaluation is occurring
-    virtual void eval(const SeExprVarNode* node, SeVec3d& result){};
+    virtual void eval(double* result,char**)=0;
 
-    virtual void evaluate(const SeExprVarNode* node,const SeExprEvalResult& evalResult)
-    {
-        int dim=_type.dim();assert(dim<=3);
-        SeVec3d vec;
-        eval(node,vec);
-        for(int k=0;k<dim;k++) evalResult.fp[k]=vec[k];
-    }
- private:
+private:
     SeExprType _type;
 };
 
@@ -95,6 +88,12 @@ class SeExprVectorVarRef : public SeExprVarRef
     {};
 
     virtual bool isVec() { return 1; }
+    virtual void eval(const SeExprVarNode* node, SeVec3d& result)=0;
+    virtual void eval(double* result,char* resultStr){
+        SeVec3d ret;
+        eval(0,ret);
+        for(int k=0;k<3;k++) result[k]=ret[k];
+    }
 };
 
 
@@ -107,8 +106,15 @@ class SeExprScalarVarRef : public SeExprVarRef
     {};
 
     virtual bool isVec() { return 0; }
+    virtual void eval(const SeExprVarNode* node, SeVec3d& result)=0;
+    virtual void eval(double* result,char* resultStr){
+        SeVec3d ret;
+        eval(0,ret);
+        for(int k=0;k<1;k++) result[k]=ret[k];
+    }
 };
 
+#if 0
 /// uses internally to represent local variables
 class SeExprLocalVarRef : public SeExprVarRef
 {
@@ -138,7 +144,7 @@ class SeExprLocalVarRef : public SeExprVarRef
         }
     }
 };
-
+#endif
 
 /// main expression class
 class SeExpression

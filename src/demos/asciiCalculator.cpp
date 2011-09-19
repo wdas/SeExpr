@@ -88,9 +88,9 @@ private:
 	
 	SeVec3d val; // independent variable
 	
-	void eval(const SeExprVarNode* node,SeVec3d& result)
+	void eval(double* result)
 	{
-	    result = val;
+	    for(int k=0;k<3;k++) result[k] = val[k];
 	}
     };
     

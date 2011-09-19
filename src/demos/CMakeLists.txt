@@ -30,17 +30,17 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-
-ADD_EXECUTABLE(asciiGraph "asciiGraph.cpp")
-target_link_libraries(asciiGraph ${SEEXPR_LIBRARIES})
-install(TARGETS asciiGraph DESTINATION bin)
-
-ADD_EXECUTABLE(asciiCalc "asciiCalculator.cpp")
-target_link_libraries(asciiCalc ${SEEXPR_LIBRARIES})
-install(TARGETS asciiCalc DESTINATION bin)
-
-
-
-ADD_SUBDIRECTORY (imageSynth)
-#ADD_SUBDIRECTORY (segraph)
-ADD_SUBDIRECTORY (rman)
+# 
+# ADD_EXECUTABLE(asciiGraph "asciiGraph.cpp")
+# target_link_libraries(asciiGraph ${SEEXPR_LIBRARIES})
+# install(TARGETS asciiGraph DESTINATION bin)
+# 
+# ADD_EXECUTABLE(asciiCalc "asciiCalculator.cpp")
+# target_link_libraries(asciiCalc ${SEEXPR_LIBRARIES})
+# install(TARGETS asciiCalc DESTINATION bin)
+# 
+# 
+# 
+# ADD_SUBDIRECTORY (imageSynth)
+# #ADD_SUBDIRECTORY (segraph)
+# ADD_SUBDIRECTORY (rman)

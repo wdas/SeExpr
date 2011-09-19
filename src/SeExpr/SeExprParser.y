@@ -320,12 +320,12 @@ e:
     | e '?' e ':' e		{ $$ = NODE3(@$.first_column,@$.last_column,CondNode, $1, $3, $5); }
     | e OR e			{ $$ = NODE2(@$.first_column,@$.last_column,OrNode, $1, $3); }
     | e AND e			{ $$ = NODE2(@$.first_column,@$.last_column,AndNode, $1, $3); }
-    | e EQ e			{ $$ = NODE2(@$.first_column,@$.last_column,EqNode, $1, $3); }
-    | e NE e			{ $$ = NODE2(@$.first_column,@$.last_column,NeNode, $1, $3); }
-    | e '<' e			{ $$ = NODE2(@$.first_column,@$.last_column,LtNode, $1, $3); }
-    | e '>' e			{ $$ = NODE2(@$.first_column,@$.last_column,GtNode, $1, $3); }
-    | e LE e			{ $$ = NODE2(@$.first_column,@$.last_column,LeNode, $1, $3); }
-    | e GE e			{ $$ = NODE2(@$.first_column,@$.last_column,GeNode, $1, $3); }
+    | e EQ e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareEqNode, $1, $3,'='); }
+    | e NE e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareEqNode, $1, $3,'!'); }
+    | e '<' e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'<'); }
+    | e '>' e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'>'); }
+    | e LE e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'l'); }
+    | e GE e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'g'); }
     | '+' e %prec UNARY		{ $$ = $2; }
     | '-' e %prec UNARY		{ $$ = NODE2(@$.first_column,@$.last_column,UnaryOpNode, $2, '-'); }
     | '!' e			{ $$ = NODE2(@$.first_column,@$.last_column,UnaryOpNode, $2, '!'); }
