@@ -77,14 +77,14 @@ TypePrintExaminer::examine(const SeExprNode* examinee)
 
 
 SeExpression::SeExpression()
-    : _wantVec(true), _returnType(SeExprType().FP(3).Varying()), _varEnv(0), _parseTree(0), _isValid(0), _parsed(0), _prepped(0)
+    : _wantVec(true), _returnType(SeExprType().FP(3).Varying()), _varEnv(0), _parseTree(0), _isValid(0), _parsed(0), _prepped(0),_interpreter(0)
 {
     SeExprFunc::init();
 }
 
 
 SeExpression::SeExpression( const std::string &e, const SeExprType & type)
-    : _wantVec(true), _returnType(type), _expression(e), _varEnv(0),  _parseTree(0), _isValid(0), _parsed(0), _prepped(0)
+    : _wantVec(true), _returnType(type), _expression(e), _varEnv(0),  _parseTree(0), _isValid(0), _parsed(0), _prepped(0),_interpreter(0)
 {
     SeExprFunc::init();
 }
@@ -98,6 +98,7 @@ void SeExpression::reset()
 {
     delete _parseTree;_parseTree=0;
     delete _varEnv;_varEnv=0;
+    delete _interpreter;_interpreter=0;
     _isValid = 0;
     _parsed = 0;
     _prepped = 0;
@@ -206,18 +207,17 @@ SeExpression::prep() const
 
         // TODO: fix this back
 
-        //TypePrintExaminer _examiner;
-        //SeExpr::ConstWalker  _walker(&_examiner);
-        //_walker.walk(_parseTree);
 
 	//delete _parseTree; _parseTree = 0;
         _isValid=false;
     }else{
+        TypePrintExaminer _examiner;
+        SeExpr::ConstWalker  _walker(&_examiner);
+        _walker.walk(_parseTree);
+
         _isValid=true;
-        SeInterpreter interpreter;
-        _parseTree->buildInterpreter(&interpreter);
-        interpreter.eval();
-        interpreter.print();
+        _interpreter=new SeInterpreter;
+        _returnSlot=_parseTree->buildInterpreter(_interpreter);
     }
 }
 
@@ -259,11 +259,12 @@ SeExpression::evaluate() const
     return SeVec3d(0,0,0);
 }
 
-void SeExpression::evalNew(SeExprEvalResult& result) const
+double* SeExpression::evalNew() const
 {
     prepIfNeeded();
     if (_isValid) {
-        _parseTree->evaluate(_parseTree,result);
+        _interpreter->eval();
+        return &_interpreter->d[0];
     }
-
+    return 0;
 }

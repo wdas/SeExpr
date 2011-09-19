@@ -163,11 +163,11 @@ public:
     inline void setPosition(const short int startPos,const short int endPos)
     {_startPos=startPos;_endPos=endPos;}
     /// Access start position in input string
-    inline const short int startPos() const { return _startPos; }
+    inline short int startPos() const { return _startPos; }
     /// Access end position in input string
-    inline const short int endPos() const { return _endPos; }
+    inline short int endPos() const { return _endPos; }
     /// Access length of input string
-    inline const short int length() const { return endPos() - startPos(); };
+    inline short int length() const { return endPos() - startPos(); };
 
     /// @}
 
@@ -524,7 +524,6 @@ public:
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
     virtual int buildInterpreter(SeInterpreter* interpreter) const;
-    //virtual void eval(SeVec3d& result) const;
     const char* name() const { return _name.c_str(); }
     const SeExprLocalVar* localVar() const{return _localVar;}
     const SeExprVarRef* var() const{return _var;}
@@ -551,7 +550,6 @@ public:
 	SeExprNode(expr), _val(val) {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual void eval(SeVec3d& result) const { result[0] = _val; }
     virtual int buildInterpreter(SeInterpreter* interpreter) const;
     double value() const { return _val; };
 
@@ -568,7 +566,6 @@ public:
 	SeExprNode(expr), _str(str) {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual void eval(SeVec3d& result) const { result[0] = 0; }
     virtual int buildInterpreter(SeInterpreter* interpreter) const;
     const char* str() const { return _str.c_str(); }
 

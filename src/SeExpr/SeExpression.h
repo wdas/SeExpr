@@ -48,7 +48,7 @@ class SeExprNode;
 class SeExprVarNode;
 class SeExprFunc;
 class SeExpression;
-
+class SeInterpreter;
 
 //! abstract class for implementing variable references
 class SeExprVarRef
@@ -255,7 +255,7 @@ class SeExpression
     /** Evaluate the expression.  This will parse and bind if needed */
     SeVec3d evaluate() const;
 
-    void evalNew(SeExprEvalResult& result) const;
+    double* evalNew() const;
 
     /** Reset expr - force reparse/rebind */
     void reset();
@@ -337,6 +337,12 @@ class SeExpression
 
     /** Whether or not we have unsafe functions */
     mutable std::vector<std::string> _threadUnsafeFunctionCalls;
+
+    /** Se interpreter */
+public:
+    mutable SeInterpreter* _interpreter;
+private:
+    mutable int _returnSlot;
 
     /* internal */ public:
 

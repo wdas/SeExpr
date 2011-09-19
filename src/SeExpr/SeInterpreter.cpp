@@ -43,7 +43,7 @@ void SeInterpreter::eval()
     int pc=0;
     int end=ops.size();
     while(pc<end){
-        std::cerr<<"Running op at "<<pc<<std::endl;
+//        std::cerr<<"Running op at "<<pc<<std::endl;
         const std::pair<OpF,int>& op=ops[pc];
         int* opCurr=&opData[0]+op.second;
         pc+=op.first(opCurr,fp,str);
@@ -100,6 +100,7 @@ static SeInterpreter::OpF getTemplatizedOp(int i)
         case 16: return T<16>::f;
         default: assert(false && "Invalid dynamic parameter (not supported template)");break;
     }
+    return 0;
 }
 
 //! Return the function f encapsulated in class T for the dynamic i converted to a static d. (partial application of template using c)
@@ -125,6 +126,7 @@ static SeInterpreter::OpF getTemplatizedOp2(int i)
         case 16: return T<c,16>::f;
         default: assert(false && "Invalid dynamic parameter (not supported template)");break;
     }
+    return 0;
 }
 
 //! Computes a binary op of vector dimension d
@@ -294,6 +296,21 @@ struct CompareEqOp{
         return 1;
     }
 };
+
+template<char op>
+struct CompareEqOp<op,3>{
+    static int f(int* opData,double* fp,char** c){
+        bool result=true;
+        bool eq=fp[opData[0]]==fp[opData[1]] && 
+            fp[opData[0]+1]==fp[opData[1]+1] && 
+            fp[opData[0]+2]==fp[opData[1]+2];
+        if(op=='=') fp[opData[2]]=eq;
+        if(op=='!') fp[opData[2]]=!eq;
+        return 1;
+    }
+};
+
+
 
 template<char op,int d>
 struct StrCompareEqOp{

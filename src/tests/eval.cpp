@@ -55,9 +55,10 @@ public:
         Var()
             :SeExprVarRef(SeExprType().Varying().FP(3))
             {}
+        double val;
         void eval(double* result,char** resultStr)
             {
-                for(int k=0;k<3;k++) result[k]=k;
+                for(int k=0;k<3;k++) result[k]=val;
             }
     } ;
     mutable Var X;
@@ -89,6 +90,16 @@ int main(int argc,char* argv[])
     expr.setExpr(argv[1]);
     if(!expr.isValid()){
         std::cerr<<"parse error "<<expr.parseError()<<std::endl;
+    }else{
+        //expr._interpreter->print();
+        double sum=0;
+        for(int i=0;i<200000000;i++){
+            expr.X.val=(double)i;
+            double* d=expr.evalNew();
+            sum+=d[0];
+        }
+        std::cerr<<"sum "<<sum<<std::endl;
+        expr._interpreter->print();
     }
 
     return 0;
