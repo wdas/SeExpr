@@ -318,8 +318,8 @@ e:
     | '[' exprlist ']'          { $$ = NODE1(@$.first_column,@$.last_column,VecNode, $2); }
     | e '[' e ']'               { $$ = NODE2(@$.first_column,@$.last_column,SubscriptNode, $1, $3); }
     | e '?' e ':' e		{ $$ = NODE3(@$.first_column,@$.last_column,CondNode, $1, $3, $5); }
-    | e OR e			{ $$ = NODE2(@$.first_column,@$.last_column,OrNode, $1, $3); }
-    | e AND e			{ $$ = NODE2(@$.first_column,@$.last_column,AndNode, $1, $3); }
+    | e OR e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3, '|'); }
+    | e AND e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3, '&'); }
     | e EQ e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareEqNode, $1, $3,'='); }
     | e NE e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareEqNode, $1, $3,'!'); }
     | e '<' e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'<'); }

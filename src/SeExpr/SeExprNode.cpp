@@ -45,6 +45,16 @@
 #include "SeExprFunc.h"
 
 
+//TODO: add and other binary op demote to scalar if wantScalar
+//TODO: logical operations like foo<bar should they do vector returns... right now no... implicit demote
+//TODO: local function evaluation
+//TODO: buildInterpreter for higher level nodes so the return location can be routed back
+//TODO: SeExprFuncNode interpreter stuff
+//TODO: check each node for possibility of strings
+
+
+
+
 SeExprNode::SeExprNode(const SeExpression* expr)
     : _expr(expr), _parent(0), _isVec(0)
 {
@@ -455,57 +465,6 @@ SeExprCondNode::eval(SeVec3d& result) const
 	result[1] = result[2] = result[0];
 }
 
-
-SeExprType
-SeExprLogicalOpNode::prep(bool wantScalar, SeExprVarEnv & env)
-{
-    //TODO: determine if extra environments are necessary, currently not included
-    SeExprType firstType, secondType;
-
-    bool error = false;
-
-    firstType = child(0)->prep(true, env);
-    checkIsFP(firstType,error);
-    secondType = child(1)->prep(true, env);
-    checkIsFP(secondType,error);
-
-    if(error) setType(SeExprType().Error());
-    else setType(SeExprType().FP(1).setLifetime(firstType,secondType));
-
-    return _type;
-}
-
-
-void
-SeExprAndNode::eval(SeVec3d& result) const
-{
-    // operands and result must be scalar
-    SeVec3d a, b;
-    child(0)->eval(a);
-    if (!a[0]) {
-	result[0] = 0;
-    } else { 
-	child(1)->eval(b);
-	result[0] = (b[0] != 0.0); 
-    }
-}
-
-
-void
-SeExprOrNode::eval(SeVec3d& result) const
-{
-    // operands and result must be scalar
-    SeVec3d a, b;
-    child(0)->eval(a);
-    if (a[0]) {
-	result[0] = 1;
-    } else { 
-	child(1)->eval(b);
-	result[0] = (b[0] != 0.0); 
-    }
-}
-
-
 SeExprType
 SeExprSubscriptNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
@@ -552,14 +511,15 @@ SeExprCompareEqNode::prep(bool wantScalar, SeExprVarEnv & env)
 SeExprType
 SeExprCompareNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
+    // TODO: assume we want scalar
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
     SeExprType firstType, secondType;
 
     bool error = false;
 
-    firstType = child(0)->prep(false, env);
+    firstType = child(0)->prep(true, env);
     checkIsFP(firstType,error);
-    secondType = child(1)->prep(false, env);
+    secondType = child(1)->prep(true, env);
     checkIsFP(secondType,error);
 
     if(firstType.isValid() && secondType.isValid())

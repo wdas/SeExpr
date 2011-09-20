@@ -36,6 +36,8 @@
 #include "SeInterpreter.h"
 #include <iostream>
 
+// TODO: optimize to write to location directly on a CondNode
+
 void SeInterpreter::eval()
 {
     double* fp=&d[0];
@@ -527,6 +529,8 @@ int SeExprCompareNode::buildInterpreter(SeInterpreter *interpreter) const
         case '>': interpreter->addOp(getTemplatizedOp2<'>',BinaryOp>(1));break;
         case 'l': interpreter->addOp(getTemplatizedOp2<'l',BinaryOp>(1));break;
         case 'g': interpreter->addOp(getTemplatizedOp2<'g',BinaryOp>(1));break;
+        case '&': interpreter->addOp(getTemplatizedOp2<'&',BinaryOp>(1));break;
+        case '|': interpreter->addOp(getTemplatizedOp2<'|',BinaryOp>(1));break;
         default: assert(false);
     }
     int op2=interpreter->allocFP(1);

@@ -81,6 +81,7 @@ class SeExprFunc;
    If the prep method fails, an error string should be set and false
    should be returned.
 */
+
 class SeExprNode {
 public:
     SeExprNode(const SeExpression* expr);
@@ -421,40 +422,6 @@ public:
     virtual int buildInterpreter(SeInterpreter* interpreter) const;
 };
 
-
-/// Node that computes a logical operation (two operands)
-class SeExprLogicalOpNode : public SeExprNode
-{
-public:
-    SeExprLogicalOpNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b) {}
-
-    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-};
-
-
-/// Node that evaluates a logical AND
-class SeExprAndNode : public SeExprLogicalOpNode
-{
-public:
-    SeExprAndNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprLogicalOpNode(expr, a, b) {}
-
-    virtual void eval(SeVec3d& result) const;
-};
-
-
-/// Node that evaluates a logical OR
-class SeExprOrNode : public SeExprLogicalOpNode
-{
-public:
-    SeExprOrNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprLogicalOpNode(expr, a, b) {}
-
-    virtual void eval(SeVec3d& result) const;
-};
-
-
 /// Node that evaluates a component of a vector
 class SeExprSubscriptNode : public SeExprNode
 {
@@ -515,11 +482,11 @@ class SeExprVarNode : public SeExprNode
 {
 public:
     SeExprVarNode(const SeExpression* expr, const char* name) :
-	SeExprNode(expr), _name(name), _localVar(0), _var(0)//, _data(0) 
+	SeExprNode(expr), _name(name), _localVar(0), _var(0)
     {}
 
     SeExprVarNode(const SeExpression* expr, const char* name, const SeExprType & type) :
-        SeExprNode(expr, type), _name(name), _localVar(0), _var(0)//, _data(0)
+        SeExprNode(expr, type), _name(name), _localVar(0), _var(0)
     {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
@@ -527,18 +494,11 @@ public:
     const char* name() const { return _name.c_str(); }
     const SeExprLocalVar* localVar() const{return _localVar;}
     const SeExprVarRef* var() const{return _var;}
-    
-    /// base class for custom instance data
-    // TODO: aselle what is this used for?
-    //struct Data { virtual ~Data() {} };
-    //void setData(Data* data) const { _data = data; }
-    //Data* getData() const { return _data; }
 
 private:
     std::string _name;
     SeExprLocalVar* _localVar;
     SeExprVarRef* _var;
-    //mutable Data* _data;
 };
 
 
