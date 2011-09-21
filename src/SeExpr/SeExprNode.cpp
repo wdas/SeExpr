@@ -297,14 +297,8 @@ SeExprLocalFunctionNode::prep(bool wantScalar, SeExprVarEnv & env)
 }
 
 
-void
-SeExprLocalFunctionNode::eval(SeVec3d& result) const
-{
-    // eval block, then eval primary expr
-    SeVec3d val;
-    child(0)->eval(val);
-    child(1)->eval(result);
-}
+// TODO: write buildInterpreter for local function node
+
 
 
 SeExprType
@@ -346,21 +340,6 @@ SeExprIfThenElseNode::prep(bool wantScalar, SeExprVarEnv & env)
 
     return _type;
 }
-
-
-void
-SeExprIfThenElseNode::eval(SeVec3d& result) const
-{
-    // eval condition, then choose then/else block
-    SeVec3d val;
-    child(0)->eval(val);
-    if (val[0]) 
-	child(1)->eval(val);
-    else
-	child(2)->eval(val);
-    result = 0.0;
-}
-
 
 SeExprType
 SeExprAssignNode::prep(bool wantScalar, SeExprVarEnv & env)
@@ -453,17 +432,6 @@ SeExprCondNode::prep(bool wantScalar, SeExprVarEnv & env)
     return _type;
 }
 
-
-void
-SeExprCondNode::eval(SeVec3d& result) const
-{
-    SeVec3d v;
-    child(0)->eval(v);
-    const SeExprNode* node = v[0] ? child(1) : child(2);
-    node->eval(result);
-    if (_isVec && !node->isVec())
-	result[1] = result[2] = result[0];
-}
 
 SeExprType
 SeExprSubscriptNode::prep(bool wantScalar, SeExprVarEnv & env)
@@ -585,194 +553,38 @@ SeExprStrNode::prep(bool wantScalar, SeExprVarEnv & env)
     return _type;
 }
 
-bool
-SeExprFuncNode::prepArgs(std::string const & name, bool wantScalar, SeExprVarEnv & env)
-{
-    bool error = false;
-
-    for(int c=0;c<numChildren();c++){
-        // TODO: this is not necesssarily right
-        SeExprType childType = child(c)->prep(false, env);
-        // TODO: this is not necessarily right, you probably want to type check against signature!!!
-        checkIsValue(childType,error);
-        //TODO: give actual name, not placeholder - or take out name altogether
-    }
-
-    return !error; //return convention is true if no errors
-}
-
 SeExprType
 SeExprFuncNode::prep(bool wantScalar, SeExprVarEnv & env)
 {
     bool error = false;
-    int  _dim  = 1; //used for promotion checking
 
-    _nargs = numChildren();
+    int nargs=numChildren();
 
-    _vecArgs.resize(_nargs);
-    _scalarArgs.resize(_nargs);
-
-    // ask expression to resolve func
-    _func = _expr->resolveFunc(_name);
-    // otherwise, look in global func table
-    if (!_func) _func = SeExprFunc::lookup(_name);
+    // find function using per-expression callback and then global table
+    // TODO: put lookup of local functions here
+    _func=0;
+    if(!_func) _func = _expr->resolveFunc(_name);
+    if(!_func) _func = SeExprFunc::lookup(_name);
 
     //check that function exisits and that the function has the right number of arguments
-    if(checkCondition(_func,                        "Function " + _name + " has no definition", error) &&
-       checkCondition(_nargs >= _func->minArgs(),   "Too few args for function "  + _name,     error) &&
-       checkCondition(_nargs <= _func->maxArgs() ||
-                         0  > _func->maxArgs(),   "Too many args for function " + _name,     error)) {
-        //check if the fuction is a FuncX
-        if(_func->type() == SeExprFunc::FUNCX) {
-            //FuncX function:
-            if(!_func->funcx()->isThreadSafe())                    _expr->setThreadUnsafe(_name);
-            if(!_func->funcx()->prep(this, wantScalar, env).isValid()) error = true;
-            //TODO: Make sure FuncX puts proper return type in retType(), NOT in _type - this may be a change in convention
-        }
-        else {
-            //standard function:
-            //check if arguments have errors
-            error = !prepArgs(_name,false,env);
+    if(checkCondition(_func,"Function " + _name + " has no definition", error) 
+        && checkCondition(nargs >= _func->minArgs(),"Too few args for function"+_name,error)
+        && checkCondition(nargs <= _func->maxArgs() || _func->maxArgs() < 0, "Too many args for function "+_name,error)) {
 
-            if(!error                   && //no errors
-               _func->isScalar()        && //takes scalar arguments only
-                _func->retType().isFP(1))   //returns a scalar
-                for(int i = 0; i < _nargs; i++) {
-                    int cdim = child(i)->type().dim();
-
-                    //Note: This assumes that every type (except FPN types) have dim() == 1
-                    if(checkCondition(cdim == 1    ||
-                                    _dim == 1    ||
-                                    _dim == cdim,   "Arguments to promotable function, " + _name + ", are of different lengths", error))
-                        if(cdim  > 1 &&
-                           _dim == 1)
-                            _dim = cdim;
-                }
-        }
-    }else{
-        SeExprNode::prep(false,env);
+        const SeExprFuncX* funcx=_func->funcx();
+        SeExprType type=funcx->prep(this,wantScalar,env);
+        setTypeWithChildLife(type);
+    }else{ // didn't match num args or function not found
+        SeExprNode::prep(false,env); // prep arguments anyways to catch as many errors as possible!
+        setTypeWithChildLife(SeExprType().Error());
     }
-
-    if(error)
-        setType(SeExprType().Error());
-    else if(_func->type() == SeExprFunc::FUNCX) //FuncX function
-        setTypeWithChildLife(_func->retType());
-    else  //standard function
-        setTypeWithChildLife(SeExprType().FP(_dim).Varying());
 
     return _type;
 }
 
-SeVec3d*
-SeExprFuncNode::evalArgs() const
+
+int SeExprFuncNode::
+buildInterpreter(SeInterpreter* interpreter) const
 {
-    SeVec3d* a = vecArgs();
-    for (int i = 0; i < _nargs; i++) {
-	const SeExprNode* child = SeExprNode::child(i);
-	SeVec3d& A = a[i];
-	child->eval(A);
-	if (!child->isVec()) A[1] = A[2] = A[0];
-    }
-    return a;
-}
-
-SeVec3d
-SeExprFuncNode::evalArg(int n) const
-{
-    SeVec3d arg;
-    const SeExprNode* child = SeExprNode::child(n);
-    child->eval(arg);
-    if (!child->isVec()) arg[1] = arg[2] = arg[0];
-    return arg;
-}
-
-bool
-SeExprFuncNode::isStrArg(int n) const
-{
-    return n < _nargs && dynamic_cast<const SeExprStrNode*>(child(n)) != 0;
-}
-
-std::string
-SeExprFuncNode::getStrArg(int n) const
-{
-    if (n < _nargs)
-	return static_cast<const SeExprStrNode*>(child(n))->str();
-    return "";
-}
-
-
-void
-SeExprFuncNode::eval(SeVec3d& result) const
-{
-    if (!_func) { result = 0.0; return; }
-
-    // funcx is a catchall that does all its own processing
-    if (_func->type() == SeExprFunc::FUNCX) {
-	_func->funcx()->eval(this, result);
-	return;
-    }
-
-    // handle the case of a scalar func applied to a vector
-    bool applyScalarToVec = _isVec && _func->isScalar();
-    //bool applyScalarToVec = _isVec && !_func->isVec();
-    int niter = applyScalarToVec ? 3 : 1;
-
-    // eval args and call the function
-    SeVec3d* a = evalArgs();
-    for (int i = 0; i < niter; i++) {
-	switch (_func->type()) {
-	default: 
-	    result[i] = result[1] = result[2] = 0;
-	    break;
-	case SeExprFunc::FUNC0:
-	    result[i] = _func->func0()(); 
-	    break;
-	case SeExprFunc::FUNC1:
-	    result[i] = _func->func1()(a[0][i]);
-	    break;
-	case SeExprFunc::FUNC2:
-	    result[i] = _func->func2()(a[0][i], a[1][i]);
-	    break;
-	case SeExprFunc::FUNC3:
-	    result[i] = _func->func3()(a[0][i], a[1][i], a[2][i]);
-	    break;
-	case SeExprFunc::FUNC4:
-	    result[i] = _func->func4()(a[0][i], a[1][i], a[2][i], a[3][i]);
-	    break;
-	case SeExprFunc::FUNC5:
-	    result[i] = _func->func5()(a[0][i], a[1][i], a[2][i], a[3][i],
-				       a[4][i]);
-	    break;
-	case SeExprFunc::FUNC6:
-	    result[i] = _func->func6()(a[0][i], a[1][i], a[2][i], a[3][i],
-				       a[4][i], a[5][i]);
-	    break;
-	case SeExprFunc::FUNCN: 
-	    {
-		double* d = scalarArgs();
-		for (int n = 0; n < _nargs; n++) d[n] = a[n][i];
-		result[i] = _func->funcn()(_nargs, d);
-		break;
-	    }
-	case SeExprFunc::FUNC1V:
-	    result[i] = _func->func1v()(a[0]);
-	    break;
-	case SeExprFunc::FUNC2V:
-	    result[i] = _func->func2v()(a[0], a[1]);
-	    break;
-	case SeExprFunc::FUNCNV: 
-	    result[i] = _func->funcnv()(_nargs, a);
-	    break;
-	case SeExprFunc::FUNC1VV:
-	    result = _func->func1vv()(a[0]);
-	    break;
-	case SeExprFunc::FUNC2VV:
-	    result = _func->func2vv()(a[0], a[1]);
-	    break;
-	case SeExprFunc::FUNCNVV: 
-	    result = _func->funcnvv()(_nargs, a);
-	    break;
-	}
-    }
-
+    return _func->funcx()->buildInterpreter(this,interpreter);
 }

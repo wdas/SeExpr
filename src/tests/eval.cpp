@@ -93,7 +93,8 @@ int main(int argc,char* argv[])
     }else{
         //expr._interpreter->print();
         double sum=0;
-        for(int i=0;i<200000000;i++){
+//        for(int i=0;i<200000000;i++){
+        for(int i=0;i<5;i++){
             expr.X.val=(double)i;
             double* d=expr.evalNew();
             sum+=d[0];

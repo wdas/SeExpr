@@ -89,7 +89,7 @@ namespace {
 }
 
 
-SeExprType SeExprFuncX::prep(SeExprFuncNode* node, bool scalarWanted, SeExprVarEnv & env)
+SeExprType SeExprFuncX::prep(SeExprFuncNode* node, bool scalarWanted, SeExprVarEnv & env) const
 {
     /* call base node prep by default:
        this passes wantVec to all the children and sets isVec true if any

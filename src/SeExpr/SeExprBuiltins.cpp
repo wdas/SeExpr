@@ -51,7 +51,6 @@
 
 namespace SeExpr {
 
-#if 0
 
 
 namespace {
@@ -255,6 +254,9 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
     static const char* mix_docstring="mix(float a,float b,float alpha)\nBlend of a and b according to alpha.";
 
 
+#if 0
+
+
     SeVec3d hsiAdjust(const SeVec3d& rgb, double h, double s, double i)
     {
 	SeVec3d hsl = rgbtohsl(rgb);
@@ -418,6 +420,7 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
         "hsl value (except for negative s values), the conversion is\n"
         "well-defined and reversible.";
 
+#endif
 
     double hash(int n, double* args)
     {
@@ -476,6 +479,7 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
         "Like rand, but with no internal seeds. Any number of seeds may be given\n"
         "and the result will be a random function based on all the seeds.";
 
+#if 0
 
     double noise(int n, const SeVec3d* args)
     {
@@ -1058,6 +1062,9 @@ static const char* vnoise_docstring=
         "float dist(vector a, vector b)\n"
         "distance between two points";
 
+
+#endif
+
     double length(const SeVec3d& v)
     {
 	return sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
@@ -1104,7 +1111,7 @@ static const char* vnoise_docstring=
     static const char* cross_docstring=
         "vector cross(vector a,vector b)\n"
         "vector cross product";
-
+#if 0
 
     double angle(const SeVec3d& a, const SeVec3d& b)
     {
@@ -1169,6 +1176,7 @@ static const char* vnoise_docstring=
         "Y axis points in the given up direction";
 
 
+#endif
     double pick(int n, double* params)
     {
 	if (n < 3) return 0;
@@ -1221,6 +1229,7 @@ static const char* vnoise_docstring=
         "automatically hashed).&nbsp; The values will be distributed according\n"
         "to the supplied weights.&nbsp; Any weights not supplied are assumed to\n"
         "be 1.0.";
+
 
     double choose(int n, double* params)
     {
@@ -1302,6 +1311,8 @@ static const char* vnoise_docstring=
         "Interpolates a set of values to the parameter specified where y1, ..., yn are\n"
         "distributed evenly from [0...1]";
 
+
+#if 0
     template<class T> 
     struct CurveData:public SeExprFuncNode::Data
     {
@@ -1780,6 +1791,29 @@ static const char* vnoise_docstring=
 #else
     void defineBuiltins(SeExprFunc::Define define,SeExprFunc::Define3 define3)
     {
+#define FUNCDOC(func)	      define3(#func, SeExprFunc(SeExpr::func),func##_docstring)
+#define FUNCNDOC(func, min, max) define3(#func, SeExprFunc(SeExpr::func, min, max),func##_docstring)
+	// trig
+	FUNCDOC(deg);
+	FUNCDOC(rad);
+	FUNCDOC(cosd);
+	FUNCDOC(sind);
+	FUNCDOC(tand);
+	FUNCDOC(acosd);
+	FUNCDOC(asind);
+	FUNCDOC(atand);
+	FUNCDOC(dot);
+	//FUNCDOC(norm);
+	//FUNCDOC(cross);
+	FUNCDOC(length);
+
+	FUNCNDOC(pick, 3, -1);
+	FUNCNDOC(choose, 3, -1);
+	FUNCNDOC(wchoose, 4, -1);
+	FUNCNDOC(spline, 5, -1);
+
+
+
     }
 #endif
 }

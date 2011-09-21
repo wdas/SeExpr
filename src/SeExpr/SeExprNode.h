@@ -119,9 +119,6 @@ public:
     /// the start of SeExprNode.cpp for more info.
     virtual SeExprType prep(bool dontNeedScalar, SeExprVarEnv & env);
 
-    // TODO: delete this this is deprecated
-    void eval(SeVec3d& result) const{}
-
     /// builds an interpreter. Returns the location index for the evaluated data
     virtual int buildInterpreter(SeInterpreter* interpreter) const;
     /// @}
@@ -193,6 +190,7 @@ public:
 
     /// @{ @name Error Checking Helpers for Type Checking
 
+public:
     /// Checks the boolean value and records an error string with node if it is false 
     inline bool checkCondition(bool check,const std::string & message,bool& error) {
         if(!check) {
@@ -325,7 +323,6 @@ public:
     {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual void eval(SeVec3d& result) const;
 };
 
 
@@ -350,7 +347,6 @@ public:
 	SeExprNode(expr, a, b, c) {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual void eval(SeVec3d& result) const;
     virtual int buildInterpreter(SeInterpreter* interpreter) const;
 
     SeExprVarEnv thenEnv,elseEnv;
@@ -418,7 +414,6 @@ public:
 	SeExprNode(expr, a, b, c) {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual void eval(SeVec3d& result) const;
     virtual int buildInterpreter(SeInterpreter* interpreter) const;
 };
 
@@ -539,23 +534,24 @@ class SeExprFuncNode : public SeExprNode
 {
 public:
     SeExprFuncNode(const SeExpression* expr, const char* name) :
-	SeExprNode(expr), _name(name), _func(0), _nargs(0), _data(0) 
+	SeExprNode(expr), _name(name)//, _func(0), _nargs(0), _data(0) 
     {
 	expr->addFunc(name);
     }
-    virtual ~SeExprFuncNode() { delete _data; }
-
-    //! return true if no errors
-    bool prepArgs(std::string const & name, bool wantScalar, SeExprVarEnv & env);
+    virtual ~SeExprFuncNode() { /* TODO: fix delete _data;*/ }
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
+    virtual int buildInterpreter(SeInterpreter* interpreter) const;
+
+    const char* name() const { return _name.c_str(); }
+#if 0
     virtual void eval(SeVec3d& result) const;
     void setIsVec(bool isVec) { _isVec = isVec; }
-    const char* name() const { return _name.c_str(); }
 
     //! return the number of arguments
     int nargs() const { return _nargs; }
 
+#if 0
     double* scalarArgs() const { return &_scalarArgs[0]; }
     SeVec3d* vecArgs() const { return &_vecArgs[0]; }
 
@@ -570,6 +566,7 @@ public:
 
     //! get nth string argument (use in prep)
     std::string getStrArg(int n) const;
+#endif
 
     //! base class for custom instance data
     struct Data { virtual ~Data() {} };
@@ -591,13 +588,16 @@ public:
     */
     Data* getData() const { return _data; }
 
+#endif
 private:
     std::string _name;
     const SeExprFunc* _func;
-    int _nargs;
-    mutable std::vector<double> _scalarArgs;
-    mutable std::vector<SeVec3d> _vecArgs;
+#if 0
+//    int _nargs;
+//    mutable std::vector<double> _scalarArgs;
+//    mutable std::vector<SeVec3d> _vecArgs;
     mutable Data* _data;
+#endif
 };
 
 #endif

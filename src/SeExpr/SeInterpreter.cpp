@@ -189,18 +189,6 @@ struct UnaryOp{
     }
 };
 
-//! Promotes a FP[1] to FP[d]
-template<int d>
-struct Promote{
-    static int f(int* opData,double* fp,char** c)
-    {
-        int posIn=opData[0];
-        int posOut=opData[1];
-        for(int k=posOut;k<posOut+d;k++) fp[k]=fp[posIn];
-        return 1;
-    }
-};
-
 //! Subscripts 
 template<int d>
 struct Subscript{
