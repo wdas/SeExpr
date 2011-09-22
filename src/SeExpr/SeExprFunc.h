@@ -84,6 +84,16 @@ public:
         :_standardFunc(SeExprFuncStandard::FUNC1V,(void*)f),_func(0),_minargs(1),_maxargs(1) {}
     SeExprFunc(SeExprFuncStandard::Func2v* f)
         :_standardFunc(SeExprFuncStandard::FUNC2V,(void*)f),_func(0),_minargs(2),_maxargs(2) {}
+    SeExprFunc(SeExprFuncStandard::Funcnv* f,int minArgs,int maxArgs)
+        :_standardFunc(SeExprFuncStandard::FUNCNV,(void*)f),_func(0),_minargs(minArgs),_maxargs(maxArgs) {}
+    SeExprFunc(SeExprFuncStandard::Func1vv* f)
+        :_standardFunc(SeExprFuncStandard::FUNC1VV,(void*)f),_func(0),_minargs(1),_maxargs(1) {}
+    SeExprFunc(SeExprFuncStandard::Func2vv* f)
+        :_standardFunc(SeExprFuncStandard::FUNC2VV,(void*)f),_func(0),_minargs(2),_maxargs(2) {}
+    SeExprFunc(SeExprFuncStandard::Funcnvv* f)
+        :_standardFunc(SeExprFuncStandard::FUNC1VV,(void*)f),_func(0),_minargs(1),_maxargs(1) {}
+    SeExprFunc(SeExprFuncStandard::Funcnvv* f,int minArgs,int maxArgs)
+        :_standardFunc(SeExprFuncStandard::FUNCNVV,(void*)f),_func(0),_minargs(minArgs),_maxargs(maxArgs) {}
 
     //! return the minimum number of acceptable arguments
     int minArgs() const { return _minargs; }

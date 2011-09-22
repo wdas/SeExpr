@@ -71,7 +71,7 @@ SeExprType SeExprFuncStandard::prep(SeExprFuncNode* node, bool scalarWanted, SeE
             retType.setLifetime(childType);
         }
         if(error) return retType.Error();
-        else if(scalarWanted) return retType.FP(1);
+        else if(scalarWanted || _funcType<VECVEC) return retType.FP(1);
         else return retType.FP(3);
     }
 }
@@ -120,6 +120,21 @@ int Func2VOp(int* opData,double* fp,char** c){
     fp[opData[3]]=((SeExprFuncStandard::Func2v*)(c[opData[0]]))(SeVec3d(&fp[opData[1]]),SeVec3d(&fp[opData[2]]));
     return 1;
 }
+int Func1VVOp(int* opData,double* fp,char** c){
+    SeVec3d v=((SeExprFuncStandard::Func1vv*)(c[opData[0]]))(SeVec3d(&fp[opData[1]]));
+    double* out=&fp[opData[2]];
+    for(int k=0;k<3;k++) out[k]=v[k];
+    return 1;
+}
+
+// TODO: implement
+int Func2VVOp(int* opData,double* fp,char** c){
+    SeVec3d v=((SeExprFuncStandard::Func2vv*)(c[opData[0]]))(SeVec3d(&fp[opData[1]]),SeVec3d(&fp[opData[2]]));
+    double* out=&fp[opData[3]];
+    for(int k=0;k<3;k++) out[k]=v[k];
+    return 1;
+}
+
 
 int SeExprFuncStandard::buildInterpreter(const SeExprFuncNode* node,SeInterpreter* interpreter) const
 {
@@ -145,6 +160,8 @@ int SeExprFuncStandard::buildInterpreter(const SeExprFuncNode* node,SeInterprete
         case FUNCN: op=FuncNOp;break;
         case FUNC1V: op=Func1VOp;break;
         case FUNC2V: op=Func2VOp;break;
+        case FUNC1VV: op=Func1VVOp;break;
+        case FUNC2VV: op=Func2VVOp;break;
         default:assert(false);
     }
 
@@ -171,7 +188,6 @@ int SeExprFuncStandard::buildInterpreter(const SeExprFuncNode* node,SeInterprete
                 interpreter->addOperand(promotedArgOp);
                 argOps[c]=promotedArgOp;
             }
-
         retOp=interpreter->allocFP(_funcType >= VECVEC ? 3 : 1);
 
         interpreter->addOp(op);

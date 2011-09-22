@@ -254,9 +254,6 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
     static const char* mix_docstring="mix(float a,float b,float alpha)\nBlend of a and b according to alpha.";
 
 
-#if 0
-
-
     SeVec3d hsiAdjust(const SeVec3d& rgb, double h, double s, double i)
     {
 	SeVec3d hsl = rgbtohsl(rgb);
@@ -420,8 +417,6 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
         "hsl value (except for negative s values), the conversion is\n"
         "well-defined and reversible.";
 
-#endif
-
     double hash(int n, double* args)
     {
 	// combine args into a single seed
@@ -478,8 +473,6 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
         "float hash(float seed1,[float seed2, ...])\n"
         "Like rand, but with no internal seeds. Any number of seeds may be given\n"
         "and the result will be a random function based on all the seeds.";
-
-#if 0
 
     double noise(int n, const SeVec3d* args)
     {
@@ -1007,7 +1000,7 @@ static const char* vnoise_docstring=
         "color pvoronoi(vector v, int type=1,float jitter=0.5, float fbmScale=0, int fbmOctaves=4,float fbmLacunarity=2, float fbmGain=.5)\n"
         "returns center of voronoi cell.";
 
-
+#if 0
     class CachedVoronoiFunc : public SeExprFuncX
     {
      public:
@@ -1049,7 +1042,7 @@ static const char* vnoise_docstring=
      private:
 	VoronoiFunc* _vfunc;
     } voronoi(voronoiFn), cvoronoi(cvoronoiFn), pvoronoi(pvoronoiFn);
-    
+#endif    
 
     double dist(double ax, double ay, double az, double bx, double by, double bz)
     {
@@ -1062,8 +1055,6 @@ static const char* vnoise_docstring=
         "float dist(vector a, vector b)\n"
         "distance between two points";
 
-
-#endif
 
     double length(const SeVec3d& v)
     {
@@ -1111,7 +1102,6 @@ static const char* vnoise_docstring=
     static const char* cross_docstring=
         "vector cross(vector a,vector b)\n"
         "vector cross product";
-#if 0
 
     double angle(const SeVec3d& a, const SeVec3d& b)
     {
@@ -1176,7 +1166,6 @@ static const char* vnoise_docstring=
         "Y axis points in the given up direction";
 
 
-#endif
     double pick(int n, double* params)
     {
 	if (n < 3) return 0;
@@ -1312,7 +1301,6 @@ static const char* vnoise_docstring=
         "distributed evenly from [0...1]";
 
 
-#if 0
     template<class T> 
     struct CurveData:public SeExprFuncNode::Data
     {
@@ -1320,7 +1308,7 @@ static const char* vnoise_docstring=
         virtual ~CurveData(){}
     };
 
-
+#if 0
     class CurveFuncX:public SeExprFuncX
     {
         virtual SeExprType prep(SeExprFuncNode* node, SeExprType wanted, SeExprVarEnv & env)
@@ -1663,8 +1651,8 @@ static const char* vnoise_docstring=
     static const char* printf_docstring=
         "printf(string format,[vec0, vec1,  ...])\n"
         "Prints out a string to STDOUT, Format parameter allowed is %v";
-
-    Void defineBuiltins(SeExprFunc::Define define,SeExprFunc::Define3 define3)
+#endif
+    void defineBuiltins(SeExprFunc::Define define,SeExprFunc::Define3 define3)
     {
 	// functions from math.h (global namespace)
 //#define FUNC(func)	  define(#func, SeExprFunc(::func))
@@ -1696,7 +1684,6 @@ static const char* vnoise_docstring=
 	FUNCDOC(atanh);
 	FUNCDOC(trunc);
 #endif
-
 	// local functions (SeExpr namespace)
 //#undef FUNC
 #undef FUNCDOC
@@ -1759,9 +1746,9 @@ static const char* vnoise_docstring=
 	FUNCDOC(cellnoise);
 	FUNCDOC(ccellnoise);
 	FUNCDOC(pnoise);
-	FUNCNDOC(voronoi, 1, 7);
-	FUNCNDOC(cvoronoi, 1, 7);
-	FUNCNDOC(pvoronoi, 1, 6);
+	//FUNCNDOC(voronoi, 1, 7);
+	//FUNCNDOC(cvoronoi, 1, 7);
+	//FUNCNDOC(pvoronoi, 1, 6);
 	FUNCNDOC(fbm4, 2, 5);
 	FUNCNDOC(vfbm4, 2, 5);
 	FUNCNDOC(cfbm4, 2, 5);
@@ -1783,37 +1770,9 @@ static const char* vnoise_docstring=
 	FUNCNDOC(choose, 3, -1);
 	FUNCNDOC(wchoose, 4, -1);
 	FUNCNDOC(spline, 5, -1);
-	FUNCNDOC(curve, 1, -1);
-	FUNCNDOC(ccurve, 1, -1);
-        FUNCNDOC(printf,1,-1);
+	//FUNCNDOC(curve, 1, -1);
+	//FUNCNDOC(ccurve, 1, -1);
+        //FUNCNDOC(printf,1,-1);
 
     }
-#else
-    void defineBuiltins(SeExprFunc::Define define,SeExprFunc::Define3 define3)
-    {
-#define FUNCDOC(func)	      define3(#func, SeExprFunc(SeExpr::func),func##_docstring)
-#define FUNCNDOC(func, min, max) define3(#func, SeExprFunc(SeExpr::func, min, max),func##_docstring)
-	// trig
-	FUNCDOC(deg);
-	FUNCDOC(rad);
-	FUNCDOC(cosd);
-	FUNCDOC(sind);
-	FUNCDOC(tand);
-	FUNCDOC(acosd);
-	FUNCDOC(asind);
-	FUNCDOC(atand);
-	FUNCDOC(dot);
-	//FUNCDOC(norm);
-	//FUNCDOC(cross);
-	FUNCDOC(length);
-
-	FUNCNDOC(pick, 3, -1);
-	FUNCNDOC(choose, 3, -1);
-	FUNCNDOC(wchoose, 4, -1);
-	FUNCNDOC(spline, 5, -1);
-
-
-
-    }
-#endif
 }

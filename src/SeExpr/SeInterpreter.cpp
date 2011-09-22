@@ -262,7 +262,7 @@ struct JmpRelative{
 struct EvalVar{
     static int f(int* opData,double* fp,char** c){
         SeExprVarRef* ref=reinterpret_cast<SeExprVarRef*>(c[opData[0]]);
-        ref->eval(fp+opData[1],c+opData[1]);
+        ref->eval(fp+opData[1]); // ,c+opData[1]);
         return 1;
     }
 };

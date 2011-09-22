@@ -568,6 +568,8 @@ public:
     std::string getStrArg(int n) const;
 #endif
 
+#endif
+
     //! base class for custom instance data
     struct Data { virtual ~Data() {} };
 
@@ -588,16 +590,13 @@ public:
     */
     Data* getData() const { return _data; }
 
-#endif
 private:
     std::string _name;
     const SeExprFunc* _func;
-#if 0
 //    int _nargs;
 //    mutable std::vector<double> _scalarArgs;
 //    mutable std::vector<SeVec3d> _vecArgs;
     mutable Data* _data;
-#endif
 };
 
 #endif

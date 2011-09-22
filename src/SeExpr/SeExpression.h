@@ -73,7 +73,9 @@ class SeExprVarRef
     // TODO: this is deprecated!
     //! returns this variable's value by setting result, node refers to 
     //! where in the parse tree the evaluation is occurring
-    virtual void eval(double* result,char**)=0;
+    //virtual void eval(double* result,char**)=0;
+    virtual void eval(double* result)=0;
+    virtual void eval(char** resultStr)=0;
 
 private:
     SeExprType _type;
@@ -89,11 +91,12 @@ class SeExprVectorVarRef : public SeExprVarRef
 
     virtual bool isVec() { return 1; }
     virtual void eval(const SeExprVarNode* node, SeVec3d& result)=0;
-    virtual void eval(double* result,char* resultStr){
+    virtual void eval(double* result){
         SeVec3d ret;
         eval(0,ret);
         for(int k=0;k<3;k++) result[k]=ret[k];
     }
+    virtual void eval(char** result){assert(false);}
 };
 
 
@@ -107,11 +110,12 @@ class SeExprScalarVarRef : public SeExprVarRef
 
     virtual bool isVec() { return 0; }
     virtual void eval(const SeExprVarNode* node, SeVec3d& result)=0;
-    virtual void eval(double* result,char* resultStr){
+    virtual void eval(double* result){
         SeVec3d ret;
         eval(0,ret);
         for(int k=0;k<1;k++) result[k]=ret[k];
     }
+
 };
 
 #if 0
