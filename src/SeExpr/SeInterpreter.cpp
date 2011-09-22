@@ -79,6 +79,8 @@ void SeInterpreter::print()
 
 }
 
+namespace{
+
 //! Return the function f encapsulated in class T for the dynamic i converted to a static d.
 template<template<int d> class T>
 static SeInterpreter::OpF getTemplatizedOp(int i)
@@ -313,6 +315,8 @@ struct StrCompareEqOp{
         return 1;
     }
 };
+
+}
 
 int SeExprNode::buildInterpreter(SeInterpreter* interpreter) const
 {
@@ -572,8 +576,7 @@ int SeExprCondNode::buildInterpreter(SeInterpreter *interpreter) const
 
     // conditional
     int condOp=child(0)->buildInterpreter(interpreter);
-    int basePC=interpreter->addOperand(interpreter->nextPC())
-;
+    int basePC=interpreter->addOperand(interpreter->nextPC());
     interpreter->addOp(CondJmpRelative::f);
     interpreter->addOperand(condOp);
     int destFalse=interpreter->addOperand(0);
@@ -614,4 +617,19 @@ int SeExprCondNode::buildInterpreter(SeInterpreter *interpreter) const
     interpreter->opData[dataOutFalse]=opOut;
 
     return opOut;
+}
+
+int SeExprBlockNode::buildInterpreter(SeInterpreter *interpreter) const
+{
+    assert(numChildren()==2);
+    child(0)->buildInterpreter(interpreter);
+    return child(1)->buildInterpreter(interpreter);
+}
+
+int SeExprModuleNode::buildInterpreter(SeInterpreter *interpreter) const
+{
+    int lastIdx=0;
+    for(int c=0;c<numChildren();c++)
+        lastIdx=child(c)->buildInterpreter(interpreter);
+    return lastIdx;
 }

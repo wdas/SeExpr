@@ -261,6 +261,7 @@ public:
     {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
+    virtual int buildInterpreter(SeInterpreter* interpreter) const;
 };
 
 
@@ -335,6 +336,7 @@ public:
     {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
+    virtual int buildInterpreter(SeInterpreter* interpreter) const;
 };
 
 

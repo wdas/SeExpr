@@ -264,7 +264,7 @@ double* SeExpression::evalNew() const
     prepIfNeeded();
     if (_isValid) {
         _interpreter->eval();
-        return &_interpreter->d[0];
+        return &_interpreter->d[_returnSlot];
     }
     return 0;
 }

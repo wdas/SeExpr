@@ -40,6 +40,7 @@
 //! Promotes a FP[1] to FP[d]
 template<int d>
 struct Promote{
+    // TODO: this needs a name that is prefixed by Se!
     static int f(int* opData,double* fp,char** c)
     {
         int posIn=opData[0];
@@ -49,13 +50,13 @@ struct Promote{
     }
 };
 
-
+/// Non-LLVM manual interpreter. This is a simple computation machine. There is no stack, just fixed locations, because we have no recursion!
 class SeInterpreter
 {
 public:
     /// Double data (constants and evaluated)
     std::vector<double> d;
-    /// Cosntant and evaluated pointer data
+    /// constant and evaluated pointer data
     std::vector<char*> s;
     /// Ooperands to op
     std::vector<int> opData;
@@ -69,6 +70,7 @@ public:
 
     std::vector<std::pair<OpF,int> > ops;
 
+    /// Return the position that hte next instruction will be placed at
     int nextPC(){return ops.size();}
 
     ///! adds an operator to the program (pointing to the data at the current location)

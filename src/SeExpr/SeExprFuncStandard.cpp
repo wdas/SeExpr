@@ -126,12 +126,27 @@ int Func1VVOp(int* opData,double* fp,char** c){
     for(int k=0;k<3;k++) out[k]=v[k];
     return 1;
 }
-
-// TODO: implement
 int Func2VVOp(int* opData,double* fp,char** c){
     SeVec3d v=((SeExprFuncStandard::Func2vv*)(c[opData[0]]))(SeVec3d(&fp[opData[1]]),SeVec3d(&fp[opData[2]]));
     double* out=&fp[opData[3]];
     for(int k=0;k<3;k++) out[k]=v[k];
+    return 1;
+}
+int FuncNVOp(int* opData,double* fp,char** c){
+    int n=opData[1];
+    SeVec3d *vals=static_cast<SeVec3d*>(alloca(n*sizeof(SeVec3d)));
+    for(int k=0;k<n;k++) new (vals[k]) SeVec3d(&fp[opData[k+2]]); // placement new!
+    double* out=&fp[opData[n+2]];
+    *out=((SeExprFuncStandard::Funcnv*)(c[opData[0]]))(n,vals);
+    return 1;
+}
+int FuncNVVOp(int* opData,double* fp,char** c){
+    int n=opData[1];
+    SeVec3d *vals=static_cast<SeVec3d*>(alloca(n*sizeof(SeVec3d)));
+    for(int k=0;k<n;k++) new (vals[k]) SeVec3d(&fp[opData[k+2]]); // placement new!
+    double* out=&fp[opData[n+2]];
+    SeVec3d val=((SeExprFuncStandard::Funcnvv*)(c[opData[0]]))(n,vals);
+    for(int k=0;k<3;k++) out[k]=val[k];
     return 1;
 }
 
@@ -160,8 +175,10 @@ int SeExprFuncStandard::buildInterpreter(const SeExprFuncNode* node,SeInterprete
         case FUNCN: op=FuncNOp;break;
         case FUNC1V: op=Func1VOp;break;
         case FUNC2V: op=Func2VOp;break;
+        case FUNCNV: op=FuncNVOp;break;
         case FUNC1VV: op=Func1VVOp;break;
         case FUNC2VV: op=Func2VVOp;break;
+        case FUNCNVV: op=FuncNVVOp;break;
         default:assert(false);
     }
 
@@ -173,7 +190,7 @@ int SeExprFuncStandard::buildInterpreter(const SeExprFuncNode* node,SeInterprete
             interpreter->addOperand(funcPtrLoc);
             if(_funcType==FUNCN)
                 interpreter->addOperand(argOps.size());
-            for(int c=0;c<argOps.size();c++){
+            for(size_t c=0;c<argOps.size();c++){
                 if(node->child(c)->type().isFP(1)) interpreter->addOperand(argOps[c]);
                 else interpreter->addOperand(argOps[c]+k);
             }
@@ -181,7 +198,7 @@ int SeExprFuncStandard::buildInterpreter(const SeExprFuncNode* node,SeInterprete
         }
     }else{
         // do any promotions that are necessary
-        for(int c=0;c<argOps.size();c++) if(node->child(c)->type().dim()==1){
+        for(size_t c=0;c<argOps.size();c++) if(node->child(c)->type().dim()==1){
                 int promotedArgOp=interpreter->allocFP(3);
                 interpreter->addOp(Promote<3>::f);
                 interpreter->addOperand(argOps[c]);
@@ -194,7 +211,7 @@ int SeExprFuncStandard::buildInterpreter(const SeExprFuncNode* node,SeInterprete
         interpreter->addOperand(funcPtrLoc);
         if(_funcType==FUNCNV || _funcType==FUNCNVV)
             interpreter->addOperand(argOps.size());
-        for(int c=0;c<argOps.size();c++){
+        for(size_t c=0;c<argOps.size();c++){
             interpreter->addOperand(argOps[c]);
         }
         interpreter->addOperand(retOp);
