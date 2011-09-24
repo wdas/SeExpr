@@ -40,6 +40,7 @@
 #include <cstdio>
 #include <cstring>
 #include <SeExpression.h>
+#include <SeInterpreter.h>
 #include <png.h>
 #include <fstream>
 
@@ -66,6 +67,9 @@ public:
         double val; // independent variable
         void eval(double* result)
         {result[0]=val;}
+
+        void eval(char** result)
+        {assert(false);}
     };
     //! variable map
     mutable std::map<std::string,Var> vars;
@@ -129,7 +133,8 @@ int main(int argc,char *argv[]){
         for(int col=0;col<width;col++){
             u=one_over_width*(col+.5);
             v=one_over_height*(row+.5);
-            SeVec3d result=expr.evaluate();
+            double* result=expr.evalNew();
+//            expr._interpreter->print();
             pixel[0]=clamp(result[0]*256.);
             pixel[1]=clamp(result[1]*256.);
             pixel[2]=clamp(result[2]*256.);

@@ -36,6 +36,7 @@
 #define _SeExprFuncX_h_
 
 #include "SeExprType.h"
+#include "SeVec.h"
 
 class SeExprFuncNode;
 class SeInterpreter;
@@ -76,6 +77,38 @@ public:
     SeExprType _type;
 private:
     bool _threadSafe;
+};
+
+class SeExprFuncSimple:public SeExprFuncX
+{
+public:
+    SeExprFuncSimple(const bool threadSafe)
+        :SeExprFuncX(threadSafe)
+    {}
+    
+    class ArgHandle{
+    public:
+        ArgHandle(int* opData,double* fp,char** c)
+            :outFp(fp[opData[1]]),outStr(c[opData[1]]),opData(opData+2),fp(fp),c(c)
+        {}
+
+        template<int d> SeVec<double,d,true> inFp(int i){return SeVec<double,d,true>(&fp[opData[i]]);}
+        char* inStr(int i){return c[opData[i]];}
+        double& outFp;
+        char*& outStr;
+    private:
+        int* opData;
+        double* fp;
+        char** c;
+    };
+
+    virtual int buildInterpreter(const SeExprFuncNode* node,SeInterpreter* interpreter) const;
+
+    virtual SeExprType prep(SeExprFuncNode* node,bool scalarWanted,SeExprVarEnv& env) const=0;
+    virtual void eval(ArgHandle args)=0;
+
+private:
+    static int EvalOp(int* opData,double* fp,char** c);
 };
 
 #endif

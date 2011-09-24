@@ -37,6 +37,8 @@
 
 #include <vector>
 
+class SeExprLocalVar;
+
 //! Promotes a FP[1] to FP[d]
 template<int d>
 struct Promote{
@@ -106,5 +108,10 @@ public:
     /// Debug by printing program
     void print();
 };
+
+template<template<int d> class T>
+SeInterpreter::OpF getTemplatizedOp(int i);
+
+
 
 #endif

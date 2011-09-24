@@ -1651,7 +1651,30 @@ static const char* vnoise_docstring=
     static const char* printf_docstring=
         "printf(string format,[vec0, vec1,  ...])\n"
         "Prints out a string to STDOUT, Format parameter allowed is %v";
+
+
+
 #endif
+class TestFunc:public SeExprFuncSimple
+{
+public:
+    TestFunc()
+        :SeExprFuncSimple(true)
+    {}
+    virtual SeExprType prep(SeExprFuncNode* node,bool scalarWanted,SeExprVarEnv& env) const
+    {
+        bool err=true;
+        err &= node->checkArg(0,SeExprType().FP(3),env);
+        err &= node->checkArg(1,SeExprType().FP(1),env);
+        return err ? SeExprType().Error() :SeExprType().FP(1).Varying();
+    }
+    virtual void eval(ArgHandle args)
+    {
+        std::cerr<<"evalling "<<args.inFp<3>(0)<< " and "<<args.inFp<1>(1)<<std::endl;
+        args.outFp=args.inFp<3>(0)[1]+args.inFp<1>(1)[0];
+    }
+} testfunc;
+static const char* testfunc_docstring="fdsA";
     void defineBuiltins(SeExprFunc::Define define,SeExprFunc::Define3 define3)
     {
 	// functions from math.h (global namespace)
@@ -1773,6 +1796,6 @@ static const char* vnoise_docstring=
 	//FUNCNDOC(curve, 1, -1);
 	//FUNCNDOC(ccurve, 1, -1);
         //FUNCNDOC(printf,1,-1);
-
+        FUNCNDOC(testfunc,2,2);
     }
 }

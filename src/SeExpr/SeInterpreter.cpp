@@ -35,6 +35,7 @@
 #include "SeExprNode.h"
 #include "SeInterpreter.h"
 #include <iostream>
+#include <cstdio>
 
 // TODO: optimize to write to location directly on a CondNode
 
@@ -56,13 +57,13 @@ void SeInterpreter::print()
 {
     std::cerr<<"---- ops     ----------------------"<<std::endl;
     for(size_t i=0;i<ops.size();i++){
-        std::cerr<<ops[i].first<<" (";
+        fprintf(stderr,"0x%08x (",ops[i].first);
         int nextGuy=(i==ops.size()-1 ? opData.size() : ops[i+1].second);
                 
         for(int k=ops[i].second;k<nextGuy;k++){
-            std::cerr<<" "<<opData[k];
+            fprintf(stderr," %d",opData[k]);
         }
-        std::cerr<<")"<<std::endl;
+        fprintf(stderr,")\n");
     }
     std::cerr<<"---- opdata  ----------------------"<<std::endl;
     for(size_t k=0;k<opData.size();k++){
@@ -79,11 +80,10 @@ void SeInterpreter::print()
 
 }
 
-namespace{
 
 //! Return the function f encapsulated in class T for the dynamic i converted to a static d.
 template<template<int d> class T>
-static SeInterpreter::OpF getTemplatizedOp(int i)
+SeInterpreter::OpF getTemplatizedOp(int i)
 {
     switch(i){
         case 1: return T<1>::f;
@@ -132,6 +132,8 @@ static SeInterpreter::OpF getTemplatizedOp2(int i)
     }
     return 0;
 }
+
+namespace{
 
 //! Computes a binary op of vector dimension d
 template<char op,int d>
@@ -340,12 +342,13 @@ int SeExprStrNode::buildInterpreter(SeInterpreter *interpreter) const
 
 int SeExprVecNode::buildInterpreter(SeInterpreter* interpreter) const
 {
-    interpreter->addOp(getTemplatizedOp<Tuple>(numChildren()));
+    std::vector<int> locs;
     for(int k=0;k<numChildren();k++){
         const SeExprNode* c=child(k);
-        int loc=c->buildInterpreter(interpreter);
-        interpreter->addOperand(loc);
+        locs.push_back(c->buildInterpreter(interpreter));
     }
+    interpreter->addOp(getTemplatizedOp<Tuple>(numChildren()));
+    for(int k=0;k<numChildren();k++) interpreter->addOperand(locs[k]);
     int loc=interpreter->allocFP(numChildren());
     interpreter->addOperand(loc);
     return loc;

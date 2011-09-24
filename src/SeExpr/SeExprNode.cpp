@@ -559,6 +559,7 @@ SeExprFuncNode::prep(bool wantScalar, SeExprVarEnv & env)
     bool error = false;
 
     int nargs=numChildren();
+    _promote.resize(nargs,0);
 
     // find function using per-expression callback and then global table
     // TODO: put lookup of local functions here
@@ -587,4 +588,21 @@ int SeExprFuncNode::
 buildInterpreter(SeInterpreter* interpreter) const
 {
     return _func->funcx()->buildInterpreter(this,interpreter);
+}
+
+bool SeExprFuncNode::
+checkArg(int arg,SeExprType type,SeExprVarEnv& env)
+{
+    SeExprType childType=child(arg)->prep(type.isFP(1),env);
+    std::cerr<<"we have "<<childType.toString()<<" and want "<<type.toString()<<std::endl;
+    _promote[arg]=0;
+    if(SeExprType::valuesCompatible(type,childType)){
+        if(type.isFP() && type.dim() > childType.dim()){
+            std::cerr<<"setting promote "<<std::endl;
+            _promote[arg]=type.dim();
+            return true;
+        }
+    }
+    child(arg)->addError("Expected "+type.toString()+" for argument, got "+childType.toString());
+    return false;
 }

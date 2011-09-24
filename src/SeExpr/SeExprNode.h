@@ -546,6 +546,8 @@ public:
     virtual int buildInterpreter(SeInterpreter* interpreter) const;
 
     const char* name() const { return _name.c_str(); }
+    bool checkArg(int argIndex,SeExprType type,SeExprVarEnv& env);
+
 #if 0
     virtual void eval(SeVec3d& result) const;
     void setIsVec(bool isVec) { _isVec = isVec; }
@@ -591,13 +593,14 @@ public:
         used from SeExprFuncX::eval()
     */
     Data* getData() const { return _data; }
-
+    int promote(int i) const {return _promote[i];}
 private:
     std::string _name;
     const SeExprFunc* _func;
 //    int _nargs;
 //    mutable std::vector<double> _scalarArgs;
 //    mutable std::vector<SeVec3d> _vecArgs;
+    mutable std::vector<int> _promote;
     mutable Data* _data;
 };
 
