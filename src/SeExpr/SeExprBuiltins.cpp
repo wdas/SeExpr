@@ -457,6 +457,27 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
         "well-defined and reversible.";
 
 
+    static inline SeVec3d saturate(const SeVec3d& Cin, double amt)
+    {
+        const SeVec3d lum(.2126,.7152,.0722); // rec709 luminance
+        SeVec3d result = SeVec3d(Cin.dot(lum) * (1-amt)) + Cin * amt;
+        if (result[0] < 0) result[0] = 0;
+        if (result[1] < 0) result[1] = 0;
+        if (result[2] < 0) result[2] = 0;
+        return result;
+    }
+
+    SeVec3d saturate(int n, const SeVec3d* args)
+    {
+        if (n < 2) return 0.0;
+        return saturate(args[0], args[1][0]);
+    }
+    static const char* saturate_docstring=
+        "color saturate(color val, float amt)\n"
+        "Scale saturation of color by amt.\n"
+        "The color is scaled around the rec709 luminance value,\n"
+        "and negative results are clamped at zero.\n";
+
     double hash(int n, double* args)
     {
 	// combine args into a single seed
@@ -1661,6 +1682,7 @@ static const char* vnoise_docstring=
 	FUNCNDOC(midhsi, 5, 7);
 	FUNCDOC(hsltorgb);
 	FUNCDOC(rgbtohsl);
+        FUNCNDOC(saturate, 2, 2);
 
 	// noise
 	FUNCNDOC(hash, 1, -1);
