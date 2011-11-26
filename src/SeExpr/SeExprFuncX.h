@@ -37,6 +37,8 @@
 
 #include "SeExprType.h"
 #include "SeVec.h"
+#include "SeExprNode.h"
+
 
 class SeExprFuncNode;
 class SeInterpreter;
@@ -89,13 +91,18 @@ public:
     class ArgHandle{
     public:
         ArgHandle(int* opData,double* fp,char** c)
-            :outFp(fp[opData[1]]),outStr(c[opData[1]]),opData(opData+2),fp(fp),c(c)
+            :outFp(fp[opData[2]]),outStr(c[opData[2]]),
+            data(reinterpret_cast<SeExprFuncNode::Data*>(c[opData[1]])),
+            opData(opData+3),fp(fp),c(c)
         {}
 
         template<int d> SeVec<double,d,true> inFp(int i){return SeVec<double,d,true>(&fp[opData[i]]);}
         char* inStr(int i){return c[opData[i]];}
+
+
         double& outFp;
         char*& outStr;
+        SeExprFuncNode::Data* data;
     private:
         int* opData;
         double* fp;
@@ -105,6 +112,7 @@ public:
     virtual int buildInterpreter(const SeExprFuncNode* node,SeInterpreter* interpreter) const;
 
     virtual SeExprType prep(SeExprFuncNode* node,bool scalarWanted,SeExprVarEnv& env) const=0;
+    virtual SeExprFuncNode::Data* evalConstant(ArgHandle args) const=0;
     virtual void eval(ArgHandle args)=0;
 
 private:

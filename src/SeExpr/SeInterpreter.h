@@ -72,18 +72,45 @@ public:
 
     std::vector<std::pair<OpF,int> > ops;
 
+private:
+    bool _startedOp;
+public:
+
+    SeInterpreter()
+        :_startedOp(false)
+    {}
+
     /// Return the position that hte next instruction will be placed at
     int nextPC(){return ops.size();}
 
     ///! adds an operator to the program (pointing to the data at the current location)
     int addOp(OpF op){
+        if(_startedOp){
+            assert(false && "addOp called within another addOp");
+        }
+        _startedOp=true;
         int pc=ops.size();
         ops.push_back(std::make_pair(op,opData.size()));
         return pc;
     }
 
+    void endOp(bool execute=true)
+    {
+        _startedOp=false;
+        if(execute){
+            double* fp=&d[0];
+            char** str=&s[0];
+            
+            int pc=ops.size()-1;
+            const std::pair<OpF,int>& op=ops[pc];
+            int* opCurr=&opData[0]+op.second;
+            pc+=op.first(opCurr,fp,str);
+        }
+    }
+
     ///! Adds an operand. Note this should be done after doing the addOp!
     int addOperand(int param){
+        assert(_startedOp);
         int ret=opData.size();
         opData.push_back(param);
         return ret;

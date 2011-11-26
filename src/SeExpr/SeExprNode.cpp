@@ -596,13 +596,14 @@ checkArg(int arg,SeExprType type,SeExprVarEnv& env)
     SeExprType childType=child(arg)->prep(type.isFP(1),env);
     std::cerr<<"we have "<<childType.toString()<<" and want "<<type.toString()<<std::endl;
     _promote[arg]=0;
-    if(SeExprType::valuesCompatible(type,childType)){
+    if(SeExprType::valuesCompatible(type,childType) && type.isLifeCompatible(childType)){
         if(type.isFP() && type.dim() > childType.dim()){
             std::cerr<<"setting promote "<<std::endl;
             _promote[arg]=type.dim();
-            return true;
         }
+        return true;
     }
+    std::cerr<<"FUN"<<std::endl;
     child(arg)->addError("Expected "+type.toString()+" for argument, got "+childType.toString());
     return false;
 }

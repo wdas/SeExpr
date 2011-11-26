@@ -173,6 +173,10 @@ class SeExprType {
     inline bool isLifetimeVarying() const { return lifetime() == ltVARYING; };
     inline bool isLifetimeError() const { return lifetime() == ltERROR; };
 
+    inline bool isLifeCompatible(const SeExprType& o) const{
+        return o.lifetime()>=lifetime();
+    }
+
 
     //! Stringify the type into a printable string
     inline std::string toString() const {

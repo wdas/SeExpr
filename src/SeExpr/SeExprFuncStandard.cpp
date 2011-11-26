@@ -195,6 +195,7 @@ int SeExprFuncStandard::buildInterpreter(const SeExprFuncNode* node,SeInterprete
                 else interpreter->addOperand(argOps[c]+k);
             }
             interpreter->addOperand(retOp+k);
+            interpreter->endOp();
         }
     }else{
         // do any promotions that are necessary
@@ -203,6 +204,7 @@ int SeExprFuncStandard::buildInterpreter(const SeExprFuncNode* node,SeInterprete
                 interpreter->addOp(Promote<3>::f);
                 interpreter->addOperand(argOps[c]);
                 interpreter->addOperand(promotedArgOp);
+                interpreter->endOp();
                 argOps[c]=promotedArgOp;
             }
         retOp=interpreter->allocFP(_funcType >= VECVEC ? 3 : 1);
@@ -215,6 +217,7 @@ int SeExprFuncStandard::buildInterpreter(const SeExprFuncNode* node,SeInterprete
             interpreter->addOperand(argOps[c]);
         }
         interpreter->addOperand(retOp);
+        interpreter->endOp();
     }
     interpreter->print();
     return retOp;

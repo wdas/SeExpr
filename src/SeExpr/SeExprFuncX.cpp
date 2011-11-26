@@ -32,6 +32,7 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
+#include "SeExprFunc.h"
 #include "SeExprFuncX.h"
 #include "SeInterpreter.h"
 #include "SeExprNode.h"
@@ -40,6 +41,7 @@
 int SeExprFuncSimple::EvalOp(int* opData,double* fp,char** c)
 {
     SeExprFuncSimple* simple=reinterpret_cast<SeExprFuncSimple*>(c[opData[0]]);
+//    SeExprFuncNode::Data* simpleData=reinterpret_cast<SeExprFuncNode::Data*>(c[opData[1]]);
     ArgHandle args(opData,fp,c);
     simple->eval(args);
     return 1;
@@ -58,6 +60,7 @@ int SeExprFuncSimple::buildInterpreter(const SeExprFuncNode* node,SeInterpreter*
             interpreter->addOperand(operand);
             interpreter->addOperand(promotedOperand);
             operand=promotedOperand;
+            interpreter->endOp();
         }
         operands.push_back(operand);
     }
@@ -68,13 +71,24 @@ int SeExprFuncSimple::buildInterpreter(const SeExprFuncNode* node,SeInterpreter*
 
     interpreter->addOp(EvalOp);
     int ptrLoc=interpreter->allocPtr();
+    int ptrDataLoc=interpreter->allocPtr();
     interpreter->s[ptrLoc]=(char*)this;
-    interpreter->addOperand(ptrLoc);
+    interpreter->addOperand(ptrLoc); 
+    interpreter->addOperand(ptrDataLoc);
     interpreter->addOperand(outoperand);
     for(size_t c=0;c<operands.size();c++){
         interpreter->addOperand(operands[c]);
     }
-    interpreter->print();
+    interpreter->endOp(false); // do not eval because the function may not be evaluatable!
+
+    // call into interpreter eval
+    int pc=interpreter->nextPC()-1;
+    const std::pair<SeInterpreter::OpF,int>& op=interpreter->ops[pc];
+    int* opCurr=(&interpreter->opData[0])+interpreter->ops[pc].second;
+
+    ArgHandle args(opCurr,&interpreter->d[0],&interpreter->s[0]);
+    interpreter->s[ptrDataLoc]=reinterpret_cast<char*>(evalConstant(args));
+    
 
     return outoperand;
 }

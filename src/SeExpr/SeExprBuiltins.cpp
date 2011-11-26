@@ -531,7 +531,7 @@ static const char* vnoise_docstring=
 
     SeVec3d cnoise(const SeVec3d& p)
     {
-        return .5*vnoise(p)+.5;
+        return .5*vnoise(p)+SeVec3d(.5);
     }
     static const char* cnoise_docstring="color cnoise ( vector v)\n"
         "color noise formed with original perlin noise at location (C2 interpolant)";
@@ -560,7 +560,7 @@ static const char* vnoise_docstring=
 
     SeVec3d cnoise4(int n, const SeVec3d* args)
     {
-        return .5*vnoise4(n,args)+.5;
+        return .5*vnoise4(n,args)+SeVec3d(.5);
     }
     static const char* cnoise4_docstring="color cnoise4 ( vector v,float t)\n"
         "4D color noise formed with original perlin noise at location (C2 interpolant)";
@@ -611,7 +611,7 @@ static const char* vnoise_docstring=
 
     SeVec3d cturbulence(int n, const SeVec3d* args)
     {
-	return vturbulence(n, args) * .5 + .5;
+	return vturbulence(n, args) * .5 + SeVec3d(.5);
     }
 
 
@@ -726,13 +726,13 @@ static const char* vnoise_docstring=
 
     SeVec3d cfbm(int n, const SeVec3d* args)
     {
-	return vfbm(n, args) * .5 + .5;
+	return vfbm(n, args) * .5 + SeVec3d(.5);
     }
     static const char* cfbm_docstring="color cfbm(vector vint octaves=6,float lacunarity=2,float gain=.5)";
 
     SeVec3d cfbm4(int n, const SeVec3d* args)
     {
-	return vfbm4(n, args) * .5 + .5;
+	return vfbm4(n, args) * .5 + SeVec3d(.5);
     }
     static const char* cfbm4_docstring="color cfbm4(vector v,float time,int octaves=6,float lacunarity=2,float gain=.5)";
 
@@ -792,7 +792,7 @@ static const char* vnoise_docstring=
 	    for (double j = -1; j <= 1; j++) {
 		for (double k = -1; k <= 1; k++, n++) {
 		    SeVec3d testcell = cell + SeVec3d(i,j,k);
-		    data.points[n] = testcell + jitter * (ccellnoise(testcell - .5));
+		    data.points[n] = testcell + jitter * (ccellnoise(testcell - SeVec3d(.5)));
 		}
 	    }
 	}
@@ -1204,9 +1204,9 @@ static const char* vnoise_docstring=
 	// skip zero-length intervals
 	if (weights[lo] == 0) {
 	    if (lo > 0 && cutoffs[lo] > 0) // scan backward if possible
-		while (--lo > 0 && weights[lo] == 0);
+		while (--lo > 0 && weights[lo] == 0) ;
 	    else if (lo < range-1)	// else scan forward if possible
-		while (++lo < range-1 && weights[lo] == 0);
+		while (++lo < range-1 && weights[lo] == 0) ;
 	}
 
 	// add offset and return result
@@ -1265,9 +1265,9 @@ static const char* vnoise_docstring=
 	// skip zero-length intervals
 	if (weights[lo] == 0) {
 	    if (lo > 0 && cutoffs[lo] > 0) // scan backward if possible
-		while (--lo > 0 && weights[lo] == 0);
+		while (--lo > 0 && weights[lo] == 0) ;
 	    else if (lo < nvals-1)	// else scan forward if possible
-		while (++lo < nvals-1 && weights[lo] == 0);
+		while (++lo < nvals-1 && weights[lo] == 0) ;
 	}
 
 	// return corresponding value
@@ -1657,21 +1657,34 @@ static const char* vnoise_docstring=
 #endif
 class TestFunc:public SeExprFuncSimple
 {
+    struct MyData:public SeExprFuncNode::Data
+    {
+        float foo;
+        MyData(float foo)
+            :foo(foo)
+        {}
+    };
 public:
     TestFunc()
         :SeExprFuncSimple(true)
     {}
     virtual SeExprType prep(SeExprFuncNode* node,bool scalarWanted,SeExprVarEnv& env) const
     {
-        bool err=true;
-        err &= node->checkArg(0,SeExprType().FP(3),env);
-        err &= node->checkArg(1,SeExprType().FP(1),env);
-        return err ? SeExprType().Error() :SeExprType().FP(1).Varying();
+        bool valid=true;
+        valid &= node->checkArg(0,SeExprType().FP(3).Varying(),env);
+        valid &= node->checkArg(1,SeExprType().FP(1).Constant(),env);
+        return valid ?SeExprType().FP(3).Varying():SeExprType().Error();
+    }
+    virtual SeExprFuncNode::Data* evalConstant(ArgHandle args) const
+    {
+        //std::cerr<<"evalling const "<<args.inFp<1>(1)<<std::endl;
+        return new MyData(args.inFp<1>(1)[0]);
     }
     virtual void eval(ArgHandle args)
     {
-        std::cerr<<"evalling "<<args.inFp<3>(0)<< " and "<<args.inFp<1>(1)<<std::endl;
-        args.outFp=args.inFp<3>(0)[1]+args.inFp<1>(1)[0];
+        MyData* data=static_cast<MyData*>(args.data);
+        
+        SeVec<double,3,true>(&args.outFp)=args.inFp<3>(0)+SeVec<double,3,false>(data->foo);
     }
 } testfunc;
 static const char* testfunc_docstring="fdsA";

@@ -351,6 +351,7 @@ int SeExprVecNode::buildInterpreter(SeInterpreter* interpreter) const
     for(int k=0;k<numChildren();k++) interpreter->addOperand(locs[k]);
     int loc=interpreter->allocFP(numChildren());
     interpreter->addOperand(loc);
+    interpreter->endOp();
     return loc;
 }
 
@@ -367,6 +368,7 @@ int SeExprBinaryOpNode::buildInterpreter(SeInterpreter* interpreter) const
             interpreter->addOperand(op0);
             interpreter->addOperand(promoteOp0);
             op0=promoteOp0;
+            interpreter->endOp();
         }
         if(dim1 != dimout){
             interpreter->addOp(getTemplatizedOp<Promote>(dimout));
@@ -374,6 +376,7 @@ int SeExprBinaryOpNode::buildInterpreter(SeInterpreter* interpreter) const
             interpreter->addOperand(op1);
             interpreter->addOperand(promoteOp1);
             op1=promoteOp1;
+            interpreter->endOp();
         }
     }
 
@@ -390,6 +393,7 @@ int SeExprBinaryOpNode::buildInterpreter(SeInterpreter* interpreter) const
     interpreter->addOperand(op0);
     interpreter->addOperand(op1);
     interpreter->addOperand(op2);
+    interpreter->endOp();
 
     return op2;
 }
@@ -409,6 +413,7 @@ int SeExprUnaryOpNode::buildInterpreter(SeInterpreter* interpreter) const
     int op1=interpreter->allocFP(dimout);
     interpreter->addOperand(op0);
     interpreter->addOperand(op1);
+    interpreter->endOp();
     
     return op1;
 }
@@ -425,6 +430,7 @@ int SeExprSubscriptNode::buildInterpreter(SeInterpreter* interpreter) const
     interpreter->addOperand(op0);
     interpreter->addOperand(op1);
     interpreter->addOperand(op2);
+    interpreter->endOp();
     return op2;
 }
 
@@ -448,6 +454,7 @@ int SeExprVarNode::buildInterpreter(SeInterpreter* interpreter) const
         interpreter->s[varRefLoc]=const_cast<char*>(reinterpret_cast<const char*>(var));
         interpreter->addOperand(varRefLoc);
         interpreter->addOperand(destLoc);
+        interpreter->endOp();
         return destLoc;
 
     }
@@ -471,6 +478,8 @@ int SeExprAssignNode::buildInterpreter(SeInterpreter* interpreter) const
         interpreter->addOp(getTemplatizedOp<AssignOp>(dimout));
         interpreter->addOperand(op0);
         interpreter->addOperand(loc);
+        interpreter->endOp();
+
         return loc;
     }else if(child0Type.isString()){
         int loc=-1;
@@ -481,6 +490,7 @@ int SeExprAssignNode::buildInterpreter(SeInterpreter* interpreter) const
         interpreter->addOp(AssignStrOp::f);
         interpreter->addOperand(op0);
         interpreter->addOperand(loc);
+        interpreter->endOp();
         return loc;
         
     }
@@ -492,16 +502,18 @@ int SeExprAssignNode::buildInterpreter(SeInterpreter* interpreter) const
 int SeExprIfThenElseNode::buildInterpreter(SeInterpreter *interpreter) const
 {
     int condop=child(0)->buildInterpreter(interpreter);
-    int basePC=interpreter->addOperand(interpreter->nextPC());
+    int basePC=interpreter->nextPC();
     
     interpreter->addOp(CondJmpRelative::f);
     interpreter->addOperand(condop);
     int destFalse=interpreter->addOperand(0);
-    
+    interpreter->endOp();
+
     child(1)->buildInterpreter(interpreter);
 
     interpreter->addOp(JmpRelative::f);
     int destEnd=interpreter->addOperand(0);
+    interpreter->endOp();
 
     int child2PC=interpreter->nextPC();
 
@@ -532,6 +544,7 @@ int SeExprCompareNode::buildInterpreter(SeInterpreter *interpreter) const
     interpreter->addOperand(op0);
     interpreter->addOperand(op1);
     interpreter->addOperand(op2);
+    interpreter->endOp();
     return op2;
 }
 
@@ -568,6 +581,7 @@ int SeExprCompareEqNode::buildInterpreter(SeInterpreter* interpreter) const
     interpreter->addOperand(op0);
     interpreter->addOperand(op1);
     interpreter->addOperand(op2);
+    interpreter->endOp();
     return op2;
 }
 
@@ -579,10 +593,11 @@ int SeExprCondNode::buildInterpreter(SeInterpreter *interpreter) const
 
     // conditional
     int condOp=child(0)->buildInterpreter(interpreter);
-    int basePC=interpreter->addOperand(interpreter->nextPC());
+    int basePC=(interpreter->nextPC());
     interpreter->addOp(CondJmpRelative::f);
     interpreter->addOperand(condOp);
     int destFalse=interpreter->addOperand(0);
+    interpreter->endOp();
 
     // true way of working
     int op1=child(1)->buildInterpreter(interpreter);
@@ -594,6 +609,7 @@ int SeExprCondNode::buildInterpreter(SeInterpreter *interpreter) const
     // jump past false way of working
     interpreter->addOp(JmpRelative::f);
     int destEnd=interpreter->addOperand(0);
+    interpreter->endOp();
 
     // record start of false condition
     int child2PC=interpreter->nextPC();
@@ -605,6 +621,7 @@ int SeExprCondNode::buildInterpreter(SeInterpreter *interpreter) const
     else assert(false);
     interpreter->addOperand(op2);
     int dataOutFalse=interpreter->addOperand(-1);
+    interpreter->endOp();
 
     // patch up relative jumps
     interpreter->opData[destFalse]=child2PC-basePC;
