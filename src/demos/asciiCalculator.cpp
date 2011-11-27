@@ -33,6 +33,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 #include <SeExpression.h>
+#include <SeVec.h>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -50,7 +51,7 @@ public:
 	:SeExpression(expr), _count(0)
     {
 	for(int i = 0; i < STACK_DEPTH; i++) {
-	    stack[i].val = SeVec3d(0.0);
+	    stack[i].val = SeVec<double,3,false>(0.0);
 	    fail_stack[i] = false;
 	};
     };
@@ -65,17 +66,38 @@ public:
     
     //! Push current result on stack
     void push() {
-	stack[_count].val = evaluate();
-	_count++;
+        if(returnType().isString()){
+            const char* s=evalStr();
+        }else if(returnType().isFP()){
+            const double* val=evalFP();
+            int dim=returnType().dim();
+            for(int k=0;k<3;k++) std::cerr<<val[k]<<" ";
+            std::cerr<<std::endl;
+            if(dim==1)
+                stack[_count].val = SeVec<double,3,false>(val[0]);
+            else if(dim==2)
+                stack[_count].val = SeVec<double,3,false>(val[0],val[1],0);
+            else if(dim==3)
+                stack[_count].val = SeVec<double,3,true>(const_cast<double*>(&val[0]));
+            else{
+                std::cerr<<"Return type FP("<<dim<<") ignoring"<<std::endl;
+            }
+
+            _count++;
+        }
     };
     
     //! Failed attempt; push 0 on stack
     void fail_push() {
 	fail_stack[_count] = true;
-	stack[_count].val = SeVec3d(0.0);
+	stack[_count].val = SeVec<double,3,false>(0.0);
 	_count++;
     };
     
+    SeVec<double,3,false> peek() {
+        return stack[_count-1].val;
+    }
+
     int count() const { return _count; };
     
 private:
@@ -83,15 +105,19 @@ private:
     struct SimpleVar:public SeExprVarRef
     {
 	SimpleVar()
-	    : SeExprVarRef(SeExprType().FP(3).Varying()), val(SeVec3d(0.0))
+	    : SeExprVarRef(SeExprType().FP(3).Varying()), val(0.0)
 	{}
 	
-	SeVec3d val; // independent variable
+	SeVec<double,3,false> val; // independent variable
 	
 	void eval(double* result)
 	{
 	    for(int k=0;k<3;k++) result[k] = val[k];
 	}
+
+        void eval(char** reuslt)
+        {}
+
     };
     
     //! previous computations
@@ -148,7 +174,7 @@ int main(int argc,char *argv[])
 	    std::cerr << "Expression failed: " << expr.parseError() << std::endl;
 	} else {
 	    expr.push();
-	    std::cout << "   " << expr.evaluate();
+	    std::cout << "   " << expr.peek();
 	};
     };
     

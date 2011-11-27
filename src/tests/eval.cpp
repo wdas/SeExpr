@@ -91,15 +91,23 @@ int main(int argc,char* argv[])
 {
     Expr expr;
     expr.setExpr(argv[1]);
-    if(!expr.isValid()){
+    if(!expr.isValid() && expr.returnType().isFP()){
         std::cerr<<"parse error "<<expr.parseError()<<std::endl;
     }else{
+        // pre eval
+        std::cerr<<"pre eval interp"<<std::endl;
+        expr._interpreter->print();
+        std::cerr<<"starting eval interp"<<std::endl;
+
         //expr._interpreter->print();
         double sum=0;
-        for(int i=0;i<200000000;i++){
-//        for(int i=0;i<5;i++){
+//        for(int i=0;i<200000000;i++){
+        for(int i=0;i<5;i++){
             expr.X.val=(double)i;
-            double* d=expr.evalNew();
+            const double* d=expr.evalFP();
+            for(int k=0;k<expr.returnType().dim();k++) 
+                std::cerr<<d[k]<<" ";
+            std::cerr<<std::endl;
             sum+=d[0];
         }
         std::cerr<<"sum "<<sum<<std::endl;

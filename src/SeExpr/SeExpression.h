@@ -256,10 +256,11 @@ class SeExpression
         variables and functions will be bound if needed. */
     const SeExprType & returnType() const;
 
-    /** Evaluate the expression.  This will parse and bind if needed */
-    SeVec3d evaluate() const;
+    /** Evaluates and returns float (check returnType()!) */
+    const double* evalFP() const;
 
-    double* evalNew() const;
+    /** Evaluates and returns string (check returnType()!) */
+    const char* evalStr() const;
 
     /** Reset expr - force reparse/rebind */
     void reset();

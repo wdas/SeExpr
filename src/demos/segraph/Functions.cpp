@@ -93,8 +93,14 @@ setupFunction(const std::string& s,GrapherExpr** exprDest)
         std::cerr<<expr->parseError()<<std::endl;
         delete expr;
         expr=0;
+    }else if(!expr->returnType().isFP(1)){
+        std::cerr<<"expected floating point 1 type got "<<expr->returnType().toString()<<std::endl;
+        delete expr;
+        expr=0;
+
+    }else{
+        *exprDest=expr; 
     }
-    *exprDest=expr; 
 }
 
 void Functions::
@@ -119,7 +125,7 @@ double Functions::
 eval(int functionId,double x) const
 {
     functions[functionId]->setX(x);
-    SeVec3d val=functions[functionId]->evaluate();
+    const double* val=functions[functionId]->evalFP();
     //std::cerr<<"evaluating x="<<x<<" val is "<<val<<std::endl;
     return val[0];
 }

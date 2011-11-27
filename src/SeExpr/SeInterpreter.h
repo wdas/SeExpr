@@ -39,6 +39,7 @@
 
 class SeExprLocalVar;
 
+
 //! Promotes a FP[1] to FP[d]
 template<int d>
 struct Promote{
@@ -136,8 +137,33 @@ public:
     void print();
 };
 
+
+//! Return the function f encapsulated in class T for the dynamic i converted to a static d.
 template<template<int d> class T>
-SeInterpreter::OpF getTemplatizedOp(int i);
+SeInterpreter::OpF getTemplatizedOp(int i)
+{
+    switch(i){
+        case 1: return T<1>::f;
+        case 2: return T<2>::f;
+        case 3: return T<3>::f;
+        case 4: return T<4>::f;
+        case 5: return T<5>::f;
+        case 6: return T<6>::f;
+        case 7: return T<7>::f;
+        case 8: return T<8>::f;
+        case 9: return T<9>::f;
+        case 10: return T<10>::f;
+        case 11: return T<11>::f;
+        case 12: return T<12>::f;
+        case 13: return T<13>::f;
+        case 14: return T<14>::f;
+        case 15: return T<15>::f;
+        case 16: return T<16>::f;
+        default: assert(false && "Invalid dynamic parameter (not supported template)");break;
+    }
+    return 0;
+}
+
 
 
 

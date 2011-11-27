@@ -236,11 +236,12 @@ SeExpression::returnType() const
     return _parseTree->type();
 }
 
+#if 0
+// TODO: remove
 SeVec3d
 SeExpression::evaluate() const
 {
 // TODO: delete
-#if 0
     prepIfNeeded();
     if (_isValid) {
 	// set all local vars to zero
@@ -255,11 +256,11 @@ SeExpression::evaluate() const
 	return vec;
     }
     else return SeVec3d(0,0,0);
-#endif
     return SeVec3d(0,0,0);
 }
+#endif
 
-double* SeExpression::evalNew() const
+const double* SeExpression::evalFP() const
 {
     prepIfNeeded();
     if (_isValid) {
@@ -268,3 +269,14 @@ double* SeExpression::evalNew() const
     }
     return 0;
 }
+
+const char* SeExpression::evalStr() const
+{
+    prepIfNeeded();
+    if (_isValid) {
+        _interpreter->eval();
+        return _interpreter->s[_returnSlot];
+    }
+    return 0;
+}
+

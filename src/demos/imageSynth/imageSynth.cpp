@@ -120,6 +120,11 @@ int main(int argc,char *argv[]){
     if(!valid){
         std::cerr<<"Invalid expression "<<std::endl;
         std::cerr<<expr.parseError()<<std::endl;
+        return 1;
+    }
+    if(!expr.returnType().isFP(3)){
+        std::cerr<<"Expected color FP[3] got type "<<expr.returnType().toString()<<std::endl;
+        return 1;
     }
 
     // evaluate expression
@@ -133,7 +138,7 @@ int main(int argc,char *argv[]){
         for(int col=0;col<width;col++){
             u=one_over_width*(col+.5);
             v=one_over_height*(row+.5);
-            double* result=expr.evalNew();
+            const double* result=expr.evalFP();
 //            expr._interpreter->print();
             pixel[0]=clamp(result[0]*256.);
             pixel[1]=clamp(result[1]*256.);

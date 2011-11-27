@@ -163,7 +163,7 @@ int SeExprFuncStandard::buildInterpreter(const SeExprFuncNode* node,SeInterprete
     int funcPtrLoc=interpreter->allocPtr();
     interpreter->s[funcPtrLoc]=(char*)_func;
 
-    SeInterpreter::OpF op;
+    SeInterpreter::OpF op=0;
     switch(_funcType){
         case FUNC0: op=Func0Op;break;
         case FUNC1: op=Func1Op;break;
