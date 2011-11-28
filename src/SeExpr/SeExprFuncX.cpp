@@ -65,6 +65,8 @@ int SeExprFuncSimple::buildInterpreter(const SeExprFuncNode* node,SeInterpreter*
         operands.push_back(operand);
     }
     int outoperand=-1;
+    int nargsData=interpreter->allocFP(1);
+    interpreter->d[nargsData]=node->numChildren();
     if(node->type().isFP()) outoperand=interpreter->allocFP(node->type().dim());
     else if(node->type().isString()) outoperand=interpreter->allocPtr();
     else assert(false);
@@ -76,6 +78,7 @@ int SeExprFuncSimple::buildInterpreter(const SeExprFuncNode* node,SeInterpreter*
     interpreter->addOperand(ptrLoc); 
     interpreter->addOperand(ptrDataLoc);
     interpreter->addOperand(outoperand);
+    interpreter->addOperand(nargsData); 
     for(size_t c=0;c<operands.size();c++){
         interpreter->addOperand(operands[c]);
     }

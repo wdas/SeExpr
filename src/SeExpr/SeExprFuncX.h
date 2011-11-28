@@ -93,17 +93,19 @@ public:
         ArgHandle(int* opData,double* fp,char** c)
             :outFp(fp[opData[2]]),outStr(c[opData[2]]),
             data(reinterpret_cast<SeExprFuncNode::Data*>(c[opData[1]])),
-            opData(opData+3),fp(fp),c(c)
+            _nargs((int)fp[opData[3]]), // TODO: would be good not to have to convert to int!
+            opData(opData+4),fp(fp),c(c)
         {}
 
         template<int d> SeVec<double,d,true> inFp(int i){return SeVec<double,d,true>(&fp[opData[i]]);}
         char* inStr(int i){return c[opData[i]];}
-
+        int nargs() const{return _nargs;}
 
         double& outFp;
         char*& outStr;
         SeExprFuncNode::Data* data;
     private:
+        int _nargs;
         int* opData;
         double* fp;
         char** c;
