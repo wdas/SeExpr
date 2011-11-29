@@ -33,7 +33,7 @@
 
 
 #set(TEST basic listVar patterns TypePrinter TypeTester eval)
-set(TEST  eval)
+set(TEST  eval basic)
 
 foreach(item ${TEST})
     ADD_EXECUTABLE(${item} "${item}.cpp")

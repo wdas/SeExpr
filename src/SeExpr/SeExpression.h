@@ -115,6 +115,7 @@ class SeExprScalarVarRef : public SeExprVarRef
         eval(0,ret);
         for(int k=0;k<1;k++) result[k]=ret[k];
     }
+    virtual void eval(char** result){assert(false);}
 
 };
 
@@ -345,9 +346,10 @@ class SeExpression
 
     /** Se interpreter */
 public:
+    // TODO: make this public for debugging during devel
     mutable SeInterpreter* _interpreter;
-private:
     mutable int _returnSlot;
+private:
 
     /* internal */ public:
 

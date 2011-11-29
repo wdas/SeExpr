@@ -89,6 +89,7 @@ public:
 
 int main(int argc,char* argv[])
 {
+    std::cerr<<"fun fun"<<std::endl;
     Expr expr;
     expr.setExpr(argv[1]);
     if(!expr.isValid() && expr.returnType().isFP()){
@@ -103,6 +104,7 @@ int main(int argc,char* argv[])
         double sum=0;
 //        for(int i=0;i<200000000;i++){
         for(int i=0;i<5;i++){
+            std::cerr<<"eval iter "<<i<<" ";
             expr.X.val=(double)i;
             const double* d=expr.evalFP();
             for(int k=0;k<expr.returnType().dim();k++) 
@@ -112,6 +114,7 @@ int main(int argc,char* argv[])
         }
         std::cerr<<"sum "<<sum<<std::endl;
         expr._interpreter->print();
+        std::cerr<<"return slot is "<<expr._returnSlot<<std::endl;
     }
 
     return 0;
