@@ -123,11 +123,9 @@ int main()
     //  Vector assignment test
     {
 	SimpleExpression expr1("$foo=[0,1,2]; $foo=3; $foo");
-	SimpleExpression expr2("3");
-        SeVec<double,3,true> val1(const_cast<double*>(expr1.evalFP()));
-        SeVec<double,3,true> val2(const_cast<double*>(expr2.evalFP()));
+        double val1=expr1.evalFP()[0];
         
-	SE_TEST_ASSERT_VECTOR_EQUAL(val1,val2);
+	SE_TEST_ASSERT_EQUAL(val1,3);
 
 	SimpleExpression expr3("$foo=3; $foo=[0,1,2]; $foo");
 	SimpleExpression expr4("[0,1,2]");

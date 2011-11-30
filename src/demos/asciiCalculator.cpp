@@ -166,7 +166,7 @@ int main(int argc,char *argv[])
 	};
 	
 	quit(str);
-	expr.setWantVec(true);
+	expr.setDesiredReturnType(SeExprType().FP(3));
 	expr.setExpr(str);
 	
 	if(!expr.isValid()) {

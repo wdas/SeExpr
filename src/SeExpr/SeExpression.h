@@ -179,14 +179,9 @@ class SeExpression
     SeExpression( const std::string &e, const SeExprType & type = SeExprType().FP(3));
     virtual ~SeExpression();
 
-    /** Sets the expression to desire a vector or a scalar.
-        This will allow the evaluation to potentially be optimized if 
-        only a scalar is desired. */
-    void setWantVec(bool wantVec);
-
     /** Sets desired return value.
         This will allow the evaluation to potentially be optimized. */
-    void setReturnType(const SeExprType & type);
+    void setDesiredReturnType(const SeExprType & type);
 
     /** Set expression string to e.  
         This invalidates all parsed state. */
@@ -305,8 +300,11 @@ class SeExpression
     /** True if the expression wants a vector */
     bool _wantVec;
 
-    /** Return type desired. */
+    /** Computed return type. */
     mutable SeExprType _returnType;
+
+    /** Computed return type. */
+    mutable SeExprType _desiredReturnType;
 
     /** The expression. */
     std::string _expression;

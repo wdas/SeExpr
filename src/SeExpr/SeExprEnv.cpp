@@ -69,7 +69,9 @@ SeExprLocalVar const * SeExprVarEnv::lookup(const std::string & name) const
 void SeExprVarEnv::add(const std::string & name, SeExprLocalVar * var)
 {
     DictType::iterator iter=_map.find(name);
-    if(iter != _map.end()) *iter->second=*var;
+    if(iter != _map.end()){
+        iter->second=var;
+    }
     else _map.insert(std::pair<std::string,SeExprLocalVar*>(name,var));
 }
 
@@ -100,43 +102,3 @@ void SeExprVarEnv::mergeBranches(const SeExprType& type,SeExprVarEnv& env1,SeExp
         add(it->second,new SeExprLocalVarPhi(type,it->first.first,it->first.second));
     }
 }
-
-
-#if 0
-void SeExprVarEnv::add(SeExprVarEnv & env, const SeExprType & modifyingType)
-{
-    //! Iterate over all variables in env and copy types into our scope
-    for(DictType::iterator ienv=env._map.begin(); ienv != env._map.end(); ++ienv) {
-        SeExprVarRef* ref=ienv->second;
-        SeExprType type=ref->type();
-        type.setLifetime(type, modifyingType);
-        ref->setType(type);
-        add(ienv->first, ref); // add to this scope
-    }
-    // this takes ownership of all members of env, so tell it not to delete them
-    env._anotherOwns=true;
-}
-
-bool SeExprVarEnv::branchesMatch(const SeExprVarEnv & env1, const SeExprVarEnv & env2)
-{
-    bool match = true;
-    // Check each variable in env1 by looking up and checking type against env2
-    for(DictType::const_iterator ienv=env1._map.begin(); 
-        match && ienv != env1._map.end(); ++ienv) {
-        const std::string & name = ienv->first;
-        const SeExprVarRef * var  = ienv->second;
-        const SeExprVarRef* env2Var = env2.lookup(name);
-        match = env2Var && env2Var->type() == var->type();
-    }
-    // Check other map (only need to check for variables in env2 but not in env1
-    for(DictType::const_iterator ienv=env2._map.begin(); 
-        match && ienv != env2._map.end(); ++ienv) {
-        const std::string & name = ienv->first;
-        //const SeExprVarRef * var  = ienv->second;
-        match = env1.lookup(name) != 0;
-    }
-
-    return match;
-}
-
-#endif

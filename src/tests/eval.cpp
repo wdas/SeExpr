@@ -92,7 +92,7 @@ int main(int argc,char* argv[])
     std::cerr<<"fun fun"<<std::endl;
     Expr expr;
     expr.setExpr(argv[1]);
-    if(!expr.isValid() && expr.returnType().isFP()){
+    if(!expr.isValid()){
         std::cerr<<"parse error "<<expr.parseError()<<std::endl;
     }else{
         // pre eval

@@ -77,14 +77,14 @@ TypePrintExaminer::examine(const SeExprNode* examinee)
 
 
 SeExpression::SeExpression()
-    : _wantVec(true), _returnType(SeExprType().FP(3).Varying()), _varEnv(0), _parseTree(0), _isValid(0), _parsed(0), _prepped(0),_interpreter(0)
+    : _wantVec(true), _desiredReturnType(SeExprType().FP(3).Varying()), _varEnv(0), _parseTree(0), _isValid(0), _parsed(0), _prepped(0),_interpreter(0)
 {
     SeExprFunc::init();
 }
 
 
 SeExpression::SeExpression( const std::string &e, const SeExprType & type)
-    : _wantVec(true), _returnType(type), _expression(e), _varEnv(0),  _parseTree(0), _isValid(0), _parsed(0), _prepped(0),_interpreter(0)
+    : _wantVec(true), _desiredReturnType(type), _expression(e), _varEnv(0),  _parseTree(0), _isValid(0), _parsed(0), _prepped(0),_interpreter(0)
 {
     SeExprFunc::init();
 }
@@ -111,17 +111,10 @@ void SeExpression::reset()
     _comments.clear();
 }
 
-void SeExpression::setWantVec(bool wantVec)
+void SeExpression::setDesiredReturnType(const SeExprType & type)
 {
     reset();
-    _wantVec = wantVec;
-    std::cerr << "Use of setWantVec is deprecated. If you are seeing this, you used setWantVec.  Please use setReturnType instead." << std::endl;
-}
-
-void SeExpression::setReturnType(const SeExprType & type)
-{
-    reset();
-    _returnType = type;
+    _desiredReturnType=type;
 }
 
 void SeExpression::setExpr(const std::string& e)
@@ -182,9 +175,56 @@ SeExpression::prep() const
     parseIfNeeded();
     _varEnv=new SeExprVarEnv;
 
+
+    bool error=false;
+
     if(!_parseTree){
+        // parse error
+        error=true;
+    }else if (!_parseTree->prep(_desiredReturnType.isFP(1), *_varEnv).isValid()) {
+        // prep error
+        error=true;
+    }else if(!SeExprType::valuesCompatible(_parseTree->type(),_desiredReturnType)){
+        // incompatible type error
+        error=true;
+        _parseTree->addError("Expression generated type "
+            +_parseTree->type().toString()+" incompatible with desired type "
+            +_desiredReturnType.toString());
+    }else{
+        _isValid=true;
+        _interpreter=new SeInterpreter;
+        _returnSlot=_parseTree->buildInterpreter(_interpreter);
+
+        if(_desiredReturnType.isFP()){
+            int dimWanted=_desiredReturnType.dim();
+            int dimHave=_parseTree->type().dim();
+            if(dimWanted>dimHave){
+                _interpreter->addOp(getTemplatizedOp<Promote>(dimWanted));
+                int finalOp=_interpreter->allocFP(dimWanted);
+                _interpreter->addOperand(_returnSlot);
+                _interpreter->addOperand(finalOp);            
+                _returnSlot=finalOp;
+                _interpreter->endOp();
+            }
+        } 
+
+
+        // TODO: need promote
+        
+        _returnType=_parseTree->type();
+    }
+    
+    if(_parseTree){
+        std::cerr<<"Parse tree desired type "<<_desiredReturnType.toString()<<" actual "<<_parseTree->type().toString()<<std::endl;
+        TypePrintExaminer _examiner;
+        SeExpr::ConstWalker  _walker(&_examiner);
+        _walker.walk(_parseTree);
+    }
+    
+    if(error){
         _isValid=false;
-    }else if (!_parseTree->prep(_returnType.isFP(1), *_varEnv).isValid()) {
+        _returnType=SeExprType().Error();
+
         // build line lookup table
         std::vector<int> lines;
         const char* start=_expression.c_str();
@@ -196,7 +236,6 @@ SeExpression::prep() const
         lines.push_back(p-start);
 
         std::stringstream sstream;
-        sstream<<"Prep errors:"<<std::endl;
         for(unsigned int i=0;i<_errors.size();i++){
             int* bound=lower_bound(&*lines.begin(),&*lines.end(),_errors[i].startPos);
             int line=bound-&*lines.begin()+1;
@@ -204,21 +243,9 @@ SeExpression::prep() const
             sstream<<"  Line "<<line<<": "<<_errors[i].error<<std::endl;
         }
         _parseError=std::string(sstream.str());
-
-        // TODO: fix this back
-
-
-	//delete _parseTree; _parseTree = 0;
-        _isValid=false;
-    }else{
-        TypePrintExaminer _examiner;
-        SeExpr::ConstWalker  _walker(&_examiner);
-        _walker.walk(_parseTree);
-
-        _isValid=true;
-        _interpreter=new SeInterpreter;
-        _returnSlot=_parseTree->buildInterpreter(_interpreter);
     }
+
+    std::cerr<<"ending with isValid "<<_isValid<<std::endl;
 }
 
 
@@ -233,7 +260,7 @@ const SeExprType &
 SeExpression::returnType() const
 {
     prepIfNeeded();
-    return _parseTree->type();
+    return _returnType;
 }
 
 #if 0
