@@ -1,0 +1,96 @@
+Name:           SeExpr
+Epoch:          1
+Version:        __VERSION__
+Release:        __RELEASE__%{?dist}
+Summary:        Shader Expression Libraries
+
+Group:          System Environment/Libraries
+License:        Disney
+URL:            http://gitweb/projects/SeExpr
+Source0:        http://gitweb/projects/SeExpr-%{version}.tar.gz
+
+BuildRequires:  gcc
+BuildRequires:  gcc-c++
+BuildRequires:  bash
+BuildRequires:  make
+BuildRequires:  cmake
+BuildRequires:  pkgconfig-disney
+
+prefix:         %{_prefix}
+
+%description
+Shader Expression Libraries
+
+%package all
+Summary:	Meta-package for all SeExpr components
+Group:		System Environment/Libraries
+Requires:	SeExpr = %{epoch}:%{version}-%{release}
+Requires:	SeExpr-docs = %{epoch}:%{version}-%{release}
+Requires:	SeExpr-devel = %{epoch}:%{version}-%{release}
+%description all
+Meta-package for SeExpr
+
+%package docs
+Summary:	SeExpr documentation
+Group:		System Environment/Libraries
+Requires:       SeExpr = %{epoch}:%{version}-%{release}
+%description docs
+Documentation for SeExpr
+
+%package devel
+Summary:	SeExpr headers
+Requires:       SeExpr = %{epoch}:%{version}-%{release}
+%description devel
+Development headers and static libraries
+
+%prep
+%setup -q
+
+%build
+
+%install
+make SKIP_RELEASE_FILE=YesPlease DESTDIR=%{buildroot} prefix=%{_prefix} install
+
+# Create a SeExpr.pc pkg-config file
+%{__mkdir_p} %{buildroot}%{_libdir}/pkgconfig
+pkgconfig-gen \
+	--name SeExpr \
+	--desc 'SeExpr Library' \
+	--prefix %{_prefix} > %{buildroot}%{_libdir}/pkgconfig/SeExpr.pc
+
+# Move $prefix/demo to $prefix/share/SeExpr/demo
+%{__mkdir_p} %{buildroot}%{_datadir}/SeExpr
+mv %{buildroot}%{_prefix}/demo %{buildroot}%{_prefix}/share/SeExpr
+
+# Move $prefix/test to $prefix/share/test/SeExpr
+%{__mkdir_p} %{buildroot}%{_datadir}/test
+mv %{buildroot}%{_prefix}/test %{buildroot}%{_datadir}/test/SeExpr
+
+%clean
+rm -rf %{buildroot}
+
+%post
+
+%postun
+
+%files
+%defattr(-,root,root,-)
+%{_bindir}/asciiCalc
+%{_bindir}/asciiGraph
+%{_bindir}/imageSynth
+%{_libdir}/*.so
+%{_libdir}/pkgconfig/*.pc
+%{_datadir}/SeExpr
+
+%files docs
+%defattr(-,root,root,-)
+%{_docdir}/SeExpr
+
+%files devel
+%defattr(-,root,root,-)
+%{_prefix}/include/*
+%{_libdir}/*.a
+%{_datadir}/test
+
+%files all
+# no files for you!
