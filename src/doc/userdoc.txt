@@ -103,6 +103,11 @@ constants may be used:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;int <b>gaussian</b> = 2<br>
 </div>
 <br>
+color <b>saturate</b> ( color x, float amt ) <br>
+<div style="margin-left: 40px;">Scales saturation of color by amt.
+The color is scaled around the rec709 luminance vlue, and negative
+results are clamped at zero.<br>
+</div>
 color <b>hsi</b> ( color x, float h, float s, float i, float map=1 ) <br>
 <div style="margin-left: 40px;">The hsi function shifts the hue by h
 (in degrees) and scales the saturation and intensity by s and i
