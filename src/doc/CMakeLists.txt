@@ -42,5 +42,6 @@ IF(DOXYGEN_FOUND)
   
   ADD_CUSTOM_TARGET(${HTML_TARGET} ALL /usr/bin/doxygen ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile)
   INSTALL( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html/ DESTINATION share/doc/SeExpr OPTIONAL )
-  INSTALL( FILES userdoc.txt DESTINATION share/doc/SeExpr/ RENAME SeExpressions.html )
+  INSTALL( FILES userdoc.txt   DESTINATION share/doc/SeExpr/ RENAME SeExpressions.html )
+  INSTALL( FILES Se_voronoi_1.png Se_voronoi_2.png Se_voronoi_3.png Se_voronoi_4.png Se_voronoi_5.png DESTINATION share/doc/SeExpr )
 ENDIF(DOXYGEN_FOUND)
