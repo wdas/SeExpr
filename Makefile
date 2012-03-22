@@ -1,7 +1,14 @@
 FLAVOR ?= optimize
 prefix ?= $(CURDIR)/$(shell uname)-$(shell fa.arch -r)-$(shell uname -m)-$(FLAVOR)
+
+## Temporary staging directory
 # DESTDIR =
+
+## Avoid creating .release.SeExpr
 # SKIP_RELEASE_FILE =
+
+# Specified by `git make-pkg` when building .pkg files
+# mac_pkg =
 
 export prefix DESTDIR
 
@@ -14,7 +21,7 @@ clean:
 
 install: all
 	cd build; make install
-	if test -z "$(SKIP_RELEASE_FILE)"; then \
+	if test -z "$(SKIP_RELEASE_FILE)" && test -z "$(mac_pkg)"; then \
 		echo "lib64" > $(DESTDIR)$(prefix)/.release.SeExpr && \
 		echo "share" >> $(DESTDIR)$(prefix)/.release.SeExpr && \
 		echo "include" >> $(DESTDIR)$(prefix)/.release.SeExpr; \
