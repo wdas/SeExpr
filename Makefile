@@ -1,5 +1,5 @@
 FLAVOR ?= optimize
-prefix ?= $(CURDIR)/$(shell uname)-$(shell fa.arch -r)-$(shell uname -m)-$(FLAVOR)
+prefix ?= $(CURDIR)/$(shell uname)-$(shell uname -r|sed -e 's/-.*//')-$(shell uname -m)-$(FLAVOR)
 
 ## Temporary staging directory
 # DESTDIR =
