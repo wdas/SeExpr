@@ -51,13 +51,6 @@ Development headers and static libraries
 %install
 make SKIP_RELEASE_FILE=YesPlease DESTDIR=%{buildroot} prefix=%{_prefix} install
 
-# Create a SeExpr.pc pkg-config file
-%{__mkdir_p} %{buildroot}%{_libdir}/pkgconfig
-pkgconfig-gen \
-	--name SeExpr \
-	--desc 'SeExpr Library' \
-	--prefix %{_prefix} > %{buildroot}%{_libdir}/pkgconfig/SeExpr.pc
-
 # Move $prefix/demo to $prefix/share/SeExpr/demo
 %{__mkdir_p} %{buildroot}%{_datadir}/SeExpr
 mv %{buildroot}%{_prefix}/demo %{buildroot}%{_prefix}/share/SeExpr
