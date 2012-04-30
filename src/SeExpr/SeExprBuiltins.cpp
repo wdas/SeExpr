@@ -593,7 +593,7 @@ static const char* vnoise_docstring=
 
     SeVec3d cnoise(const SeVec3d& p)
     {
-        return .5*vnoise(p)+.5;
+        return (.5 * vnoise(p)) + SeVec3d(.5);
     }
     static const char* cnoise_docstring="color cnoise ( vector v)\n"
         "color noise formed with original perlin noise at location (C2 interpolant)";
@@ -622,7 +622,7 @@ static const char* vnoise_docstring=
 
     SeVec3d cnoise4(int n, const SeVec3d* args)
     {
-        return .5*vnoise4(n,args)+.5;
+        return (.5 * vnoise4(n,args)) + SeVec3d(.5);
     }
     static const char* cnoise4_docstring="color cnoise4 ( vector v,float t)\n"
         "4D color noise formed with original perlin noise at location (C2 interpolant)";
@@ -673,7 +673,7 @@ static const char* vnoise_docstring=
 
     SeVec3d cturbulence(int n, const SeVec3d* args)
     {
-	return vturbulence(n, args) * .5 + .5;
+	return (vturbulence(n, args) * .5) + SeVec3d(.5);
     }
 
 
@@ -788,13 +788,13 @@ static const char* vnoise_docstring=
 
     SeVec3d cfbm(int n, const SeVec3d* args)
     {
-	return vfbm(n, args) * .5 + .5;
+	return (vfbm(n, args) * .5) + SeVec3d(.5);
     }
     static const char* cfbm_docstring="color cfbm(vector vint octaves=6,float lacunarity=2,float gain=.5)";
 
     SeVec3d cfbm4(int n, const SeVec3d* args)
     {
-	return vfbm4(n, args) * .5 + .5;
+	return (vfbm4(n, args) * .5) + SeVec3d(.5);
     }
     static const char* cfbm4_docstring="color cfbm4(vector v,float time,int octaves=6,float lacunarity=2,float gain=.5)";
 
@@ -854,7 +854,7 @@ static const char* vnoise_docstring=
 	    for (double j = -1; j <= 1; j++) {
 		for (double k = -1; k <= 1; k++, n++) {
 		    SeVec3d testcell = cell + SeVec3d(i,j,k);
-		    data.points[n] = testcell + jitter * (ccellnoise(testcell - .5));
+		    data.points[n] = testcell + jitter * ccellnoise(testcell - SeVec3d(.5));
 		}
 	    }
 	}
