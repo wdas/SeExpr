@@ -28,4 +28,4 @@ install: all
 		echo "include" >> $(DESTDIR)$(prefix)/.release.SeExpr; \
 	fi
 	pkgconfig-gen --name SeExpr --desc 'SeExpr Library' \
-		--generate --destdir $(DESTDIR) --prefix $(prefix) --libdir $(libdir)
+		--generate --destdir '$(DESTDIR)' --prefix $(prefix) --libdir $(libdir)
