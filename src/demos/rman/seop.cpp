@@ -432,7 +432,11 @@ namespace{
             SeVarBinding& binding = *expr->bindVars(varmapHandle);
             int nvars = binding.size();
 	    argv[3]->GetResizer()->Resize(nvars);
+#if RSL_PLUGIN_VERSION >= 6
+            RslFloatArrayIter varIndices(argv[3]);
+#else
             float* varIndices = *RslFloatArrayIter(argv[3]);
+#endif
             for (int i = 0; i < nvars; i++) {
                 varIndices[i] = binding[i];
             }

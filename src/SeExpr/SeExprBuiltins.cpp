@@ -135,7 +135,7 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
     {
 	return (x*(b2-a2) - a1*b2 + b1*a2) / (b1-a1);
     }
-    static const char* fit_docstring="float fit(float x,float a1,float b1,float a2,float b2)\nLinearly remaps x in [a1,b1] to [a2,b2]";
+    static const char* fit_docstring="float fit(float x,float a1,float b1,float a2,float b2)\nLinearly remaps x from the range [a1,b1] to the range [a2,b2]\n\nNote: This extrapolates if x is outside [a1,b1]\nTo clamp the result, use fit(x,a1,b1,a2,b2)->clamp(a2,b2)";
 
 
 
