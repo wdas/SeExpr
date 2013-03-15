@@ -130,6 +130,15 @@ int main()
 	SE_TEST_ASSERT_VECTOR_EQUAL(expr3.evaluate(),expr4.evaluate());
     }
 
+    // Test memory leaks with parse errors
+    {
+        SimpleExpression expr("$foo=3;$bar=10;$foo[$bar");
+        bool valid=expr.isValid();
+        const char* expectedError="Unexpected end of expression':\n    $foo=3;$bar=10;$foo[$bar";
+        SE_TEST_ASSERT_EQUAL(expr.parseError(),std::string(expectedError));
+        SE_TEST_ASSERT_EQUAL(valid,false);
+    }
+
     return 0;
 
 }

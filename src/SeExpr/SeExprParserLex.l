@@ -39,12 +39,11 @@
 %option nounput
 
 %{
-#ifndef MAKEDEPEND
-#    include <ctype.h>
-#    include <string.h>
-#    include <string>
-#    include <math.h>
-#endif
+#include <ctype.h>
+#include <string.h>
+#include <string>
+#include <math.h>
+#include <vector>
 
 #include "SePlatform.h"
 #include "SeExprParser.h"
@@ -61,7 +60,9 @@
 // TODO: make this thread safe
 static int columnNumber=0; // really buffer position
 static int lineNumber=0; // not used
-void resetCounters(){
+static std::vector<char*>* stringTokens=0;
+void resetCounters(std::vector<char*>* stringTokensIn){
+   stringTokens=stringTokensIn;
    columnNumber=lineNumber=0;
 }
 
@@ -107,15 +108,17 @@ box			{ yylval.d = 3; return NUMBER; }
 {REAL}			{ yylval.d = atof(yytext); return NUMBER; }
 \"(\\\"|[^"\n])*\"	{ /* match quoted string, allow embedded quote, \" */
 			  yylval.s = strdup(&yytext[1]); 
+                          stringTokens->push_back(yylval.s); 
 			  yylval.s[strlen(yylval.s)-1] = '\0';
                           return STR; }
 \'(\\\'|[^'\n])*\'	{ /* match quoted string, allow embedded quote, \' */
 			  yylval.s = strdup(&yytext[1]); 
+                          stringTokens->push_back(yylval.s); 
 			  yylval.s[strlen(yylval.s)-1] = '\0';
                           return STR; }
-${IDENT}		{ yylval.s = strdup(&yytext[1]); return VAR; }
-${IDENT}"::"{IDENT}	{ yylval.s = strdup(&yytext[1]); return VAR; }
-{IDENT}			{ yylval.s = strdup(yytext); return NAME; }
+${IDENT}		{ yylval.s = strdup(&yytext[1]); stringTokens->push_back(yylval.s); return VAR; }
+${IDENT}"::"{IDENT}	{ yylval.s = strdup(&yytext[1]); stringTokens->push_back(yylval.s); return VAR; }
+{IDENT}			{ yylval.s = strdup(yytext); stringTokens->push_back(yylval.s); return NAME; }
 
 "\\n"			/* ignore quoted newline */;
 "\\t"			/* ignore quoted tab */;

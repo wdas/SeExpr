@@ -152,44 +152,45 @@ assigns:
 
 assign:
       ifthenelse		{ $$ = $1; }
-    | VAR '=' e ';'		{ $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, $3); free($1); }
+    | VAR '=' e ';'		{ $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, $3);  }
     | VAR AddEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
                                 SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,AddNode,varNode,$3);
-                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);}
     | VAR SubEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
                                 SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,SubNode,varNode,$3);
-                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);}
     | VAR MultEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
                                 SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,MulNode,varNode,$3);
-                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);}
     | VAR DivEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
                                 SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,DivNode,varNode,$3);
-                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);}
     | VAR ExpEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
                                 SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,ExpNode,varNode,$3);
-                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);}
     | VAR ModEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
                                 SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,ModNode,varNode,$3);
-                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | NAME '=' e ';'		{ $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, $3); free($1); }
+                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);}
+    | NAME '=' e ';'		{ $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, $3);  }
     | NAME AddEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
                                 SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,AddNode,varNode,$3);
-                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);}
     | NAME SubEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
                                 SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,SubNode,varNode,$3);
-                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);}
     | NAME MultEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
                                 SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,MulNode,varNode,$3);
-                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);}
     | NAME DivEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
                                 SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,DivNode,varNode,$3);
-                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);}
     | NAME ExpEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
                                 SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,ExpNode,varNode,$3);
-                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);}
     | NAME ModEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
                                 SeExprNode* opNode=NODE2(@3.first_column,@3.first_column,ModNode,varNode,$3);
-                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+                                $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);}
+    | 
     ;
 
 ifthenelse:
@@ -228,17 +229,15 @@ e:
     | e '%' e			{ $$ = NODE2(@$.first_column,@$.last_column,ModNode, $1, $3); }
     | e '^' e			{ $$ = NODE2(@$.first_column,@$.last_column,ExpNode, $1, $3); }
     | NAME '(' optargs ')'	{ $$ = NODE1(@$.first_column,@$.last_column,FuncNode, $1); 
-				  free($1); // free name string
 				  // add args directly and discard arg list node
 				  $$->addChildren($3); Forget($3); }
     | e ARROW NAME '(' optargs ')'
     				{ $$ = NODE1(@$.first_column,@$.last_column,FuncNode, $3); 
-				  free($3); // free name string
 				  $$->addChild($1);
 				  // add args directly and discard arg list node
-				  $$->addChildren($5); Forget($5); }
-    | VAR			{ $$ = NODE1(@$.first_column,@$.last_column,VarNode, $1); free($1); /* free name string */ }
-    | NAME			{ $$ = NODE1(@$.first_column,@$.last_column,VarNode, $1); free($1); /* free name string */ }
+				  $$->addChildren($5); Forget($5); } 
+    | VAR			{ $$ = NODE1(@$.first_column,@$.last_column,VarNode, $1); }
+    | NAME			{ $$ = NODE1(@$.first_column,@$.last_column,VarNode, $1); }
     | NUMBER			{ $$ = NODE1(@$.first_column,@$.last_column,NumNode, $1); /*printf("line %d",@$.last_column);*/}
     ;
 
@@ -256,7 +255,7 @@ args:
 
 arg:
       e				{ $$ = $1; }
-    | STR			{ $$ = NODE1(@$.first_column,@$.last_column,StrNode, $1); free($1); /* free name string */}
+    | STR			{ $$ = NODE1(@$.first_column,@$.last_column,StrNode, $1);}
     ;
 
 %%
@@ -304,24 +303,25 @@ static void yyerror(const char* /*msg*/)
    along.
  */
 
-extern void resetCounters();
+extern void resetCounters(std::vector<char*>* stringTokens);
 
 static SeExprInternal::Mutex mutex;
-
+int SeExprlex_destroy  (void);
 bool SeExprParse(SeExprNode*& parseTree, std::string& error, int& errorStart, int& errorEnd,
-    const SeExpression* expr, const char* str, bool /*wantVec*/)
+    const SeExpression* expr, const char* str, 
+    std::vector<char*>* stringTokens)
 {
     SeExprInternal::AutoMutex locker(mutex);
 
     // glue around crippled C interface - ugh!
     Expr = expr;
     ParseStr = str;
-    resetCounters(); // reset lineNumber and columnNumber in scanner
+    resetCounters(stringTokens); // reset lineNumber and columnNumber in scanner
     yy_buffer_state* buffer = yy_scan_string(str);
     ParseResult = 0;
     int resultCode = yyparse();
     yy_delete_buffer(buffer);
-
+    SeExprlex_destroy ();
     if (resultCode == 0) {
 	// success
 	error = "";

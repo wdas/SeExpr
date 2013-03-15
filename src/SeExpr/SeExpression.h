@@ -250,6 +250,9 @@ class SeExpression
     /** Whether or not we have unsafe functions */
     mutable std::vector<std::string> _threadUnsafeFunctionCalls;
 
+    /** String tokens allocated by lex */
+    mutable std::vector<char*> _stringTokens;
+
     /* internal */ public:
 
     //! add local variable (this is for internal use)
