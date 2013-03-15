@@ -230,7 +230,7 @@ SeExprAssignNode::prep(bool /*wantVec*/)
     _isVec = child(0)->isVec();
 
     // add to var table
-    _var = _expr->getLocalVar(_name.c_str());
+    _var = _expr->getLocalVar(_name);
     if (_isVec) _var->setIsVec();
     return 1;
 }

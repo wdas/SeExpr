@@ -52,6 +52,20 @@ namespace {
     // FuncTable - table of pre-defined functions
     class FuncTable {
     public:
+        FuncTable()
+            :_inited(false)
+        {}
+
+        ~FuncTable(){
+            funcmap.clear();
+#ifdef SEEXPR_WIN32
+#else
+            for(size_t i=0;i<dynamicLibraries.size();i++){
+                dlclose(dynamicLibraries[i]);
+            }
+#endif
+        }
+
 	void define(const char* name, SeExprFunc f,const char* docString=0) {
             if(docString) funcmap[name] = FuncMapItem(std::string(docString),f); 
             else funcmap[name] = FuncMapItem(name,f); 
@@ -64,6 +78,7 @@ namespace {
 		return &iter->second.second;
 	    return 0;
 	}
+        void initIfNeeded();
 	void initBuiltins();
 
         void getFunctionNames(std::vector<std::string>& names)
@@ -78,15 +93,52 @@ namespace {
             if(i==funcmap.end()) return "";
             else return i->second.first;
         }
+
+        void addLibraryReference(void* lib)
+        {
+            dynamicLibraries.push_back(lib);
+        }
 	
     private:
+        bool _inited;
         typedef std::pair<std::string,SeExprFunc> FuncMapItem;
 	typedef std::map<std::string,FuncMapItem> FuncMap;
+        std::vector<void*> dynamicLibraries;
 	FuncMap funcmap;
     };
 
-    FuncTable* Functions = 0;
+    FuncTable Functions;
+
+inline static void 
+defineInternal(const char* name,SeExprFunc f)
+{
+    // THIS FUNCTION IS NOT THREAD SAFE, it assumes you have a mutex from callee
+    // ALSO YOU MUST BE VERY CAREFUL NOT TO CALL ANYTHING THAT TRIES TO REACQUIRE MUTEX!
+    Functions.define(name,f);
 }
+
+inline static void 
+defineInternal3(const char* name,SeExprFunc f,const char* docString)
+{
+    // THIS FUNCTION IS NOT THREAD SAFE, it assumes you have a mutex from callee
+    // ALSO YOU MUST BE VERY CAREFUL NOT TO CALL ANYTHING THAT TRIES TO REACQUIRE MUTEX!
+    Functions.define(name,f,docString);
+}
+
+void FuncTable::initIfNeeded(){
+    // THIS FUNCTION IS NOT THREAD SAFE, it assumes you have a mutex from callee
+    // ALSO YOU MUST BE VERY CAREFUL NOT TO CALL ANYTHING THAT TRIES TO REACQUIRE MUTEX!
+    if(_inited) return;
+    _inited=true;
+    
+    // TODO: make thread safe
+    SeExpr::defineBuiltins(defineInternal,defineInternal3);
+    const char* path = getenv("SE_EXPR_PLUGINS");
+    if (path) SeExprFunc::loadPlugins(path);
+    
+}
+
+} // namespace
 
 
 bool SeExprFuncX::prep(SeExprFuncNode* node, bool wantVec)
@@ -103,53 +155,25 @@ static SeExprInternal::Mutex mutex;
 void SeExprFunc::init()
 {
     SeExprInternal::AutoMutex locker(mutex);
-    initInternal();
+    Functions.initIfNeeded();
 }
 
 const SeExprFunc*
 SeExprFunc::lookup(const std::string& name)
 {
     mutex.lock();
-    if (!Functions) initInternal();
-    const SeExprFunc* ret=Functions->lookup(name);
+    Functions.initIfNeeded();
+    const SeExprFunc* ret=Functions.lookup(name);
     mutex.unlock();
     return ret;
 }
-    
-inline static void 
-defineInternal(const char* name,SeExprFunc f)
-{
-    // THIS FUNCTION IS NOT THREAD SAFE, it assumes you have a mutex from callee
-    // ALSO YOU MUST BE VERY CAREFUL NOT TO CALL ANYTHING THAT TRIES TO REACQUIRE MUTEX!
-    Functions->define(name,f);
-}
 
-inline static void 
-defineInternal3(const char* name,SeExprFunc f,const char* docString)
-{
-    // THIS FUNCTION IS NOT THREAD SAFE, it assumes you have a mutex from callee
-    // ALSO YOU MUST BE VERY CAREFUL NOT TO CALL ANYTHING THAT TRIES TO REACQUIRE MUTEX!
-    Functions->define(name,f,docString);
-}
-
-void SeExprFunc::initInternal()
-{
-    // THIS FUNCTION IS NOT THREAD SAFE, it assumes you have a mutex from callee
-    // ALSO YOU MUST BE VERY CAREFUL NOT TO CALL ANYTHING THAT TRIES TO REACQUIRE MUTEX!
-
-    // TODO: make thread safe
-    if (Functions) return;
-    Functions = new FuncTable;
-    SeExpr::defineBuiltins(defineInternal,defineInternal3);
-    const char* path = getenv("SE_EXPR_PLUGINS");
-    if (path) loadPlugins(path);
-}
 
 void
 SeExprFunc::define(const char* name, SeExprFunc f)
 {
     mutex.lock();
-    if (!Functions) initInternal();
+    Functions.initIfNeeded();
     defineInternal(name,f);
     mutex.unlock();
 }
@@ -158,7 +182,7 @@ void
 SeExprFunc::define(const char* name, SeExprFunc f,const char* docString)
 {
     mutex.lock();
-    if (!Functions) initInternal();
+    Functions.initIfNeeded();
     defineInternal3(name,f,docString);
     mutex.unlock();
 }
@@ -167,8 +191,8 @@ void
 SeExprFunc::getFunctionNames(std::vector<std::string>& names)
 {
     mutex.lock();
-    if(!Functions) initInternal();
-    Functions->getFunctionNames(names);
+    Functions.initIfNeeded();
+    Functions.getFunctionNames(names);
     mutex.unlock();
 }
 
@@ -176,8 +200,8 @@ std::string
 SeExprFunc::getDocString(const char* functionName)
 {
     mutex.lock();
-    if(!Functions) initInternal();
-    std::string ret=Functions->getDocString(functionName);
+    Functions.initIfNeeded();
+    std::string ret=Functions.getDocString(functionName);
     mutex.unlock();
     return ret;
 }
@@ -221,6 +245,7 @@ SeExprFunc::loadPlugins(const char* path)
 		std::string fullpath = entry; fullpath += "/"; 
 		fullpath += matches[i]->d_name;
 		loadPlugin(fullpath.c_str());
+			free(matches[i]);
 	    }
 	    if (matches) free(matches);
 	    else {
@@ -253,9 +278,13 @@ SeExprFunc::loadPlugin(const char* path)
     typedef void (*initfn_v2) (SeExprFunc::Define3);
     initfn_v2 init_v2 = (initfn_v2) dlsym(handle, "SeExprPluginInitV2");
 
-    if(init_v2) init_v2(defineInternal3);
-    else if(init_v1) init_v1(defineInternal);
-    else{
+    if(init_v2){
+        init_v2(defineInternal3);
+        Functions.addLibraryReference(handle);
+    }else if(init_v1){
+        init_v1(defineInternal);
+        Functions.addLibraryReference(handle);
+    }else{
 	std::cerr << "Error reading expression plugin: " << path << std::endl;
 	std::cerr << "No function named SeExprPluginInit or SeExprPluginInitV2 found" << std::endl;
 	dlclose(handle);
@@ -263,3 +292,4 @@ SeExprFunc::loadPlugin(const char* path)
     }
 #endif
 }
+
