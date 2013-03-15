@@ -146,8 +146,8 @@ public:
     virtual void eval(SeVec3d& result) const;
 
 private:
-    std::string _name;
-    SeExprLocalVarRef* _var;
+    const char* _name; // this is owned by the SeExprNode's parent SeExpression
+    SeExprLocalVarRef* _var; // this is owned by the SeExprNode's parent SeExpression
 };
 
 
@@ -406,7 +406,7 @@ public:
 
     virtual bool prep(bool wantVec);
     virtual void eval(SeVec3d& result) const;
-    const char* name() const { return _name.c_str(); }
+    const char* name() const { return _name; }
     
     /// base class for custom instance data
     struct Data { virtual ~Data() {} };
@@ -414,8 +414,8 @@ public:
     Data* getData() const { return _data; }
 
 private:
-    std::string _name;
-    SeExprVarRef* _var;
+    const char* _name; // this is owned by the SeExprNode's parent SeExpression
+    SeExprVarRef* _var; // this is owned by somebody else
     mutable Data* _data;
 };
 

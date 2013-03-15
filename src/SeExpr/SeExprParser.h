@@ -35,13 +35,13 @@
 #ifndef SeExprParser_h
 #define SeExprParser_h
 
-#ifndef MAKEDEPEND
 #include <string>
-#endif
+#include <vector>
+
 
 class SeExprNode;
 class SeExpression;
 bool SeExprParse(SeExprNode*& parseTree, std::string& error, int& errorStart, int& errorEnd,
-		 const SeExpression* expr, const char* str, bool wantVec=true);
+    const SeExpression* expr, const char* str, std::vector<char*>* stringTokens);
 
 #endif

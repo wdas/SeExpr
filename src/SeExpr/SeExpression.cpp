@@ -77,6 +77,8 @@ void SeExpression::reset()
     _funcs.clear();
     _localVars.clear();
     _errors.clear();
+    for(size_t i=0;i<_stringTokens.size();i++) free(_stringTokens[i]);
+    _stringTokens.clear();
     _threadUnsafeFunctionCalls.clear();
 }
 
@@ -129,7 +131,7 @@ SeExpression::parse() const
     _parsed = true;
     int tempStartPos,tempEndPos;
     SeExprParse(_parseTree, _parseError, tempStartPos, tempEndPos, 
-        this, _expression.c_str(), _wantVec);
+        this, _expression.c_str(), &_stringTokens);
     if(!_parseTree){
         addError(_parseError,tempStartPos,tempEndPos);
     }

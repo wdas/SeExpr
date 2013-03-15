@@ -86,7 +86,6 @@ private:
     with false.
 */
 class SeExprFunc {
-    static void initInternal(); // call to define built-in funcs and load standard plugins
 public:
     //! call to define built-in funcs and load standard plugins
     /** In addition to initializing all builtins, this loads all plugins given in a
