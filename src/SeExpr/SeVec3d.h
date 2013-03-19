@@ -214,9 +214,9 @@ class SeVec3d
      * Returns the vector rotated by the angle given in radians about
      * the given axis. (Axis must be normalized)
      */
-    SeVec3d rotateBy( const SeVec3d &axis, double angle ) const
+    SeVec3d rotateBy( const SeVec3d &axis, double angle_ ) const
     {
-	double c = cos(angle), s = sin(angle);
+	double c = cos(angle_), s = sin(angle_);
 	const SeVec3d& v = *this;
 	return c*v + (1-c)*v.dot(axis)*axis - s*v.cross(axis);
     }
