@@ -90,7 +90,7 @@ protected:
     //! Draw y-axis
     void drawY(QPainter& painter,int power,bool label=false);
     //! Draw graph
-    void paintEvent(QPaintEvent */*event*/);
+    void paintEvent(QPaintEvent * /*event*/);
     //! Plot a single function
     void plot(QPainter& painter,int funcId);
 
