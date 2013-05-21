@@ -32,7 +32,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 ## CMake compatibility issues: don't modify this, please!
-CMAKE_MINIMUM_REQUIRED( VERSION 2.4.6 )
+CMAKE_MINIMUM_REQUIRED( VERSION 2.4.6 ) 
 MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
 ## allow more human readable "if then else" constructs
 SET( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE )
@@ -52,6 +52,8 @@ if(COMMAND cmake_policy)
       cmake_policy(SET CMP0003 NEW)
     endif(COMMAND cmake_policy)
 
+# macros
+include(src/build/macros.cmake)
 
 ## Setup platform specific helper defines build variants
 IF(WIN32)
@@ -95,11 +97,19 @@ ENDIF(NOT DEFINED CMAKE_INSTALL_PREFIX)
 ## Make modules able to see partio library
 # Setup environment variable to link partio
 SET( SEEXPR_LIBRARIES SeExpr )
+SET( SEEXPR_EDITOR_LIBRARIES SeExprEditor )
 # make it so partio can be found
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/SeExpr )
+INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/SeExprEditor )
+
+# Allowing to use lib64
+IF (NOT DEFINED CMAKE_INSTALL_LIBDIR)
+    SET(CMAKE_INSTALL_LIBDIR "lib")
+ENDIF()
 
 ## Traverse subdirectories
 ADD_SUBDIRECTORY (src/SeExpr)
+ADD_SUBDIRECTORY (src/SeExprEditor)
 ADD_SUBDIRECTORY (src/doc)
 ADD_SUBDIRECTORY (src/demos)
 ADD_SUBDIRECTORY (src/tests)
