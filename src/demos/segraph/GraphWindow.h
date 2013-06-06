@@ -25,7 +25,7 @@
 
 #include "GrapherExpr.h"
 
-class QdSeShortEdit;
+class SeExprEdShortEdit;
 
 //! Main window that contains graph widget and function list
 class GraphWindow:public QFrame
@@ -48,7 +48,7 @@ private slots:
 private:
     bool animating;
     float time;
-    std::vector<QdSeShortEdit*> _edits;
+    std::vector<SeExprEdShortEdit*> _edits;
     std::vector<GrapherExpr*> _exprs;
     std::map<std::string,SimpleVar> variables;
 };

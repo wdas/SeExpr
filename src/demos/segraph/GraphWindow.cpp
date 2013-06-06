@@ -10,7 +10,7 @@
 #include "GraphWindow.h"
 #include <QtCore/QTimer>
 #include <QtGui/QFormLayout>
-#include <QdSeShortEdit.h>
+#include <SeExprEdShortEdit.h>
 
 GraphWindow::
 GraphWindow(QWidget* parent)
@@ -49,7 +49,7 @@ GraphWindow(QWidget* parent)
 
     rightLayout->setMargin(0);
     for(int i=0;i<5;i++){
-        QdSeShortEdit* shortEdit=new QdSeShortEdit(0);
+        SeExprEdShortEdit* shortEdit=new SeExprEdShortEdit(0);
         shortEdit->setMinimumWidth(512);
         rightLayout->addWidget(shortEdit);
         QObject::connect(shortEdit,SIGNAL(exprChanged()),this,SLOT(exprsEdited()));
@@ -141,7 +141,7 @@ void GraphWindow::
 exprsEdited()
 {
     for(size_t i=0;i<_edits.size();i++){
-        QdSeShortEdit& edit=*_edits[i];
+        SeExprEdShortEdit& edit=*_edits[i];
         _exprs[i]->setExpr(edit.getExpressionString());
         _exprs[i]->isValid();
     }

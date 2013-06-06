@@ -45,7 +45,7 @@
 #include <animlib/AnimKeyframe.h>
 #endif
 #include "SeExprSpecType.h"
-#include "QdSeEditable.h"
+#include "SeExprEdEditable.h"
 /******************
  lexer declarations
  ******************/
@@ -92,7 +92,7 @@ char* specRegisterToken(char* rawString)
 
 // these are pointers to the arguments send into parse API
 // made static here so the parser can see them in yacc actions
-static std::vector<QdSeEditable*>* editables;
+static std::vector<SeExprEdEditable*>* editables;
 static std::vector<std::string>* variables;
 
 static const char* ParseStr;    // string being parsed
@@ -118,15 +118,15 @@ void registerEditable(const char* var,SeExprSpecNode* node)
     if(!node){
         //std::cerr<<"   null ptr "<<var<<std::endl;
     }else if(SeExprSpecScalarNode* n=dynamic_cast<SeExprSpecScalarNode*>(node)){
-        editables->push_back(new QdSeNumberEditable(var,node->startPos,node->endPos,n->v));
+        editables->push_back(new SeExprEdNumberEditable(var,node->startPos,node->endPos,n->v));
     }else if(SeExprSpecVectorNode* n=dynamic_cast<SeExprSpecVectorNode*>(node)){
-        editables->push_back(new QdSeVectorEditable(var,node->startPos,node->endPos,n->v));
+        editables->push_back(new SeExprEdVectorEditable(var,node->startPos,node->endPos,n->v));
     }else if(SeExprSpecStringNode* n=dynamic_cast<SeExprSpecStringNode*>(node)){
-        editables->push_back(new QdSeStringEditable(node->startPos,node->endPos,n->v));
+        editables->push_back(new SeExprEdStringEditable(node->startPos,node->endPos,n->v));
     }else if(SeExprSpecCCurveNode* n=dynamic_cast<SeExprSpecCCurveNode*>(node)){
         if(SeExprSpecListNode* args=dynamic_cast<SeExprSpecListNode*>(n->args)){
             if((args->nodes.size())%3==0){
-                QdSeCCurveEditable* ccurve=new QdSeCCurveEditable(var,node->startPos,node->endPos);
+                SeExprEdColorCurveEditable* ccurve=new SeExprEdColorCurveEditable(var,node->startPos,node->endPos);
                 bool valid=true;
                 for(size_t i=0;i<args->nodes.size();i+=3){
                     SeExprSpecScalarNode* xnode=dynamic_cast<SeExprSpecScalarNode*>(args->nodes[i]);
@@ -147,7 +147,7 @@ void registerEditable(const char* var,SeExprSpecNode* node)
     }else if(SeExprSpecCurveNode* n=dynamic_cast<SeExprSpecCurveNode*>(node)){
         if(SeExprSpecListNode* args=dynamic_cast<SeExprSpecListNode*>(n->args)){
             if((args->nodes.size())%3==0){
-                QdSeCurveEditable* ccurve=new QdSeCurveEditable(var,node->startPos,node->endPos);
+                SeExprEdCurveEditable* ccurve=new SeExprEdCurveEditable(var,node->startPos,node->endPos);
                 bool valid=true;
                 for(size_t i=0;i<args->nodes.size();i+=3){
                     SeExprSpecScalarNode* xnode=dynamic_cast<SeExprSpecScalarNode*>(args->nodes[i]);
@@ -169,7 +169,7 @@ void registerEditable(const char* var,SeExprSpecNode* node)
         if(SeExprSpecListNode* args=dynamic_cast<SeExprSpecListNode*>(n->args)){
             // need 3 items for pre inf and post inf and weighting, plus 9 items per key
             if((args->nodes.size()-4)%9==0){
-                QdSeAnimCurveEditable* animCurve=new QdSeAnimCurveEditable(var,node->startPos,node->endPos);
+                SeExprEdAnimCurveEditable* animCurve=new SeExprEdAnimCurveEditable(var,node->startPos,node->endPos);
                 bool valid=true;
                 
 
@@ -475,7 +475,7 @@ extern void resetCounters(std::vector<std::pair<int,int> >& comments);
 //static Mutex mutex;
 
 /// Main entry point to parser
-bool SeExprParse(std::vector<QdSeEditable*>& outputEditables,
+bool SeExprParse(std::vector<SeExprEdEditable*>& outputEditables,
     std::vector<std::string>& outputVariables,
     std::vector<std::pair<int,int> >& comments,
     const char* str)

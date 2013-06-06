@@ -7,20 +7,20 @@ find_package(Qt4 COMPONENTS QtCore QtGui QtOpenGL) # find and setup Qt4 for this
 if(QT4_FOUND)
 
     BuildParserScanner(SeExprSpecParserLex SeExprSpecParser SeExprSpec editor_parser_cpp)
-    set(SeExprEditor_MOC_HDRS QdSeBrowser.h QdSeCCurve.h QdSeControlCollection.h
-      QdSeControl.h QdSeCurve.h QdSeDialog.h QdSeEditor.h QdSeFileDialog.h QdSeGrapher2d.h
-      QdSePopupDocumentation.h QdSeShortEdit.h)
-    set(SeExprEditor_CPPS QdSeFileDialog.cpp QdSeControl.cpp QdSeEditor.cpp dExprEditor.cpp
-      QdSeShortEdit.cpp QdSeCurve.cpp  QdSeCCurve.cpp QdSeEditableExpression.cpp 
-      QdSePopupDocumentation.cpp QdSeCompletionModel.cpp QdSeDialog.cpp QdSeControlCollection.cpp
-      QdSeGrapher2d.cpp QdSeBrowser.cpp QdSeExpr.cpp)
+    set(SeExprEd_MOC_HDRS SeExprEdBrowser.h SeExprEdColorCurve.h SeExprEdControlCollection.h
+      SeExprEdControl.h SeExprEdCurve.h SeExprEdDialog.h SeExprEditor.h SeExprEdFileDialog.h SeExprEdGrapher2d.h
+      SeExprEdPopupDocumentation.h SeExprEdShortEdit.h)
+    set(SeExprEd_CPPS SeExprEdFileDialog.cpp SeExprEdControl.cpp SeExprEditor.cpp SeExpressionEditor.cpp
+      SeExprEdShortEdit.cpp SeExprEdCurve.cpp  SeExprEdColorCurve.cpp SeExprEdEditableExpression.cpp 
+      SeExprEdPopupDocumentation.cpp SeExprEdCompletionModel.cpp SeExprEdDialog.cpp SeExprEdControlCollection.cpp
+      SeExprEdGrapher2d.cpp SeExprEdBrowser.cpp SeExprEdExpression.cpp)
 
-    qt4_wrap_cpp(SeExprEditor_MOC_SRCS ${SeExprEditor_MOC_HDRS})
+    qt4_wrap_cpp(SeExprEd_MOC_SRCS ${SeExprEd_MOC_HDRS})
     
-    add_library(SeExprEditor SHARED ${SeExprEditor_CPPS} ${SeExprEditor_MOC_SRCS} ${editor_parser_cpp})
+    add_library(SeExprEditor SHARED ${SeExprEd_CPPS} ${SeExprEd_MOC_SRCS} ${editor_parser_cpp})
     
     install(TARGETS SeExprEditor DESTINATION ${CMAKE_INSTALL_LIBDIR})
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${SeExprEditor_MOC_HDRS} DESTINATION include/SeExprEditor)
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${SeExprEd_MOC_HDRS} DESTINATION include/SeExprEditor)
     include_directories(${QT_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(SeExprEditor ${QT_QTCORE_LIBRARY})
     target_link_libraries(SeExprEditor ${QT_QTGUI_LIBRARY})
