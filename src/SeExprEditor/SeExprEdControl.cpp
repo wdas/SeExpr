@@ -178,6 +178,7 @@ void SeExprEdSlider::mouseMoveEvent(QMouseEvent* e)
 
 void SeExprEdSlider::paintEvent(QPaintEvent* e)
 {
+    Q_UNUSED(e);
     QPainter p(this);
     
     float v = value();
@@ -226,6 +227,7 @@ SeExprEdChannelSlider::SeExprEdChannelSlider(int id, QWidget* parent)
 
 void SeExprEdChannelSlider::paintEvent(QPaintEvent* e)
 {
+    Q_UNUSED(e);
     if (_value < 0 || _value > 1) return;
     int x = int(_value * (width()-3) + 0.5);
     QPainter p(this);
@@ -345,6 +347,7 @@ void SeExprEdNumberControl::sliderChanged(int value)
 
 void SeExprEdNumberControl::editChanged(int id,const QString& text)
 {
+    Q_UNUSED(id);
     if (_updating) return;
     bool ok = 0;
     float val = text.toFloat(&ok);
@@ -412,6 +415,7 @@ SeExprEdVectorControl::SeExprEdVectorControl(int id,SeExprEdVectorEditable* edit
 
 void SeExprEdVectorControl::swatchChanged(QColor gah)
 {
+    Q_UNUSED(gah);
     SeVec3d color=_swatch->getValue();
     setValue(0,color[0]);
     setValue(1,color[1]);
@@ -647,7 +651,7 @@ struct SeExprEdGraphPreview:public QWidget
         win_dx=width()/(win_xmax-win_xmin);
         win_dy=height()/(win_ymax-win_ymin);
 
-        int h=height();
+        //int h=height();
         QPainterPath path;
         QRectF fullarea(toScreen(win_xmin,win_ymax),toScreen(win_xmax,win_ymin));
         QBrush darkbrush(QColor(100,100,100),Qt::SolidPattern);
@@ -733,6 +737,7 @@ SeExprEdAnimCurveControl::SeExprEdAnimCurveControl(int id,SeExprEdAnimCurveEdita
     hbox->addWidget(_preview);
     //QPushButton* button=new QPushButton();
     //button->setIcon(QIcon(QPixmap(graphXPM)));
+    Q_UNUSED(graphXPM)
     QPushButton* refreshButton=new QPushButton();
     refreshButton->setMaximumWidth(30);
     refreshButton->setIcon(QIcon(QPixmap(refreshXPM)));

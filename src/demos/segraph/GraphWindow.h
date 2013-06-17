@@ -46,8 +46,8 @@ private slots:
     //! Exprs edits
     void exprsEdited();
 private:
-    bool animating;
     float time;
+    bool animating;
     std::vector<SeExprEdShortEdit*> _edits;
     std::vector<GrapherExpr*> _exprs;
     std::map<std::string,SimpleVar> variables;

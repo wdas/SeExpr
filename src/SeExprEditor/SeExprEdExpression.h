@@ -19,6 +19,7 @@
 #include <SeExpression.h>
 #include <SeExprFunc.h>
 #include <SeExprNode.h>
+#include <SeExprMacros.h>
 
 class SeExprEdExpression : public SeExpression
 {
@@ -28,6 +29,7 @@ class SeExprEdExpression : public SeExpression
             ScalarRef()
                 : value(0.0) {}
             virtual void eval(const SeExprVarNode* node, SeVec3d& result) {
+                UNUSED(node);
                 result = value;
             }
         };
@@ -37,6 +39,7 @@ class SeExprEdExpression : public SeExpression
             VectorRef()
                 : value(0.0) {}
             virtual void eval(const SeExprVarNode* node, SeVec3d& result) {
+                UNUSED(node);
                 result = value;
             }
         };
@@ -56,7 +59,7 @@ class SeExprEdExpression : public SeExpression
                 }
                 return true;}
             void eval(const SeExprFuncNode* node,SeVec3d& result) const
-            {result=SeVec3d();}
+            {UNUSED(node); result=SeVec3d();}
         } dummyFuncX;
         mutable SeExprFunc dummyFunc;
     

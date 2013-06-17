@@ -526,5 +526,6 @@ void SeExprEdShortTextEdit::finishEdit()
 void SeExprEdShortTextEdit::
 setColor(bool editing)
 {
+    Q_UNUSED(editing);
     // todo: decorate when editing
 }

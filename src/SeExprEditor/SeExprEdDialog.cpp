@@ -179,6 +179,7 @@ void SeExprEdDialog::verifiedApply()
         QPushButton* okButton = msgBox.addButton("OK", QMessageBox::RejectRole);
         msgBox.addButton("Cancel", QMessageBox::AcceptRole);
         int ret = msgBox.exec();
+        Q_UNUSED(ret);
         if(msgBox.clickedButton() == okButton)
             emit expressionApplied();
     }
@@ -196,6 +197,7 @@ void SeExprEdDialog::verifiedAccept()
         QPushButton* okButton=msgBox.addButton("OK",QMessageBox::RejectRole);
         msgBox.addButton("Cancel",QMessageBox::AcceptRole);
         int ret = msgBox.exec();
+        Q_UNUSED(ret);
         if(msgBox.clickedButton()==okButton) accept();
     }
 }
@@ -209,7 +211,7 @@ void SeExprEdDialog::setupHelp(QTabWidget* tab)
     // TODO: Janet fix this!
     char *path = pf_find_first("share/doc/SeExpr/SeExpressions.html");
 #else
-    char *path = "/usr/local/share/doc/SeExpr/SeExpressions.html";
+    char *path = (char *)"/usr/local/share/doc/SeExpr/SeExpressions.html";
 #endif
     if (path) {
         QString sheet="body {background-color: #eeeeee; color: #000000;} \na {color: #3333ff; text-decoration: none;}\n";

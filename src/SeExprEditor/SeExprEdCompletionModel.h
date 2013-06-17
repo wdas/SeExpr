@@ -43,11 +43,14 @@ public:
     {return QModelIndex();}
     
     int rowCount(const QModelIndex& parent=QModelIndex()) const
-    {int count= builtins.size()+functions.size()+variables.size()+local_variables.size();
-    return count;}
+    {
+        Q_UNUSED(parent);
+        int count= builtins.size()+functions.size()+variables.size()+local_variables.size();
+        return count;
+    }
 
     int columnCount(const QModelIndex& parent) const
-    {return 2;}
+    {Q_UNUSED(parent); return 2;}
 
     QString getFirstLine(const std::string& all) const
     {
@@ -59,7 +62,9 @@ public:
     QVariant data(const QModelIndex& index,int role=Qt::DisplayRole) const;
 
     QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const 
-    {if(role==Qt::DisplayRole) return QVariant("");
+    {
+        Q_UNUSED(orientation);
+        if(role==Qt::DisplayRole) return QVariant("");
         else if(role==Qt::SizeHintRole){
             if(section==0) return QVariant(QSize(100,1));
             else return QVariant(QSize(200,1));

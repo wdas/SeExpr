@@ -14,6 +14,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <SeExprMacros.h>
 #include "SeVec3d.h"
 
 class SeExprNode;

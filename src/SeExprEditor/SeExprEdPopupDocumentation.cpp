@@ -10,8 +10,10 @@
 #include "SeExprEdPopupDocumentation.h"
 #include <QtGui/QLabel>
 #include <QtGui/QHBoxLayout>
+
 SeExprEdPopupDocumentation::SeExprEdPopupDocumentation(QWidget* parent,const QPoint& placecr,const QString& msg)
 {
+    Q_UNUSED(parent);
     label=new QLabel(msg);
     QHBoxLayout* layout=new QHBoxLayout;
     setLayout(layout);
@@ -27,5 +29,6 @@ SeExprEdPopupDocumentation::SeExprEdPopupDocumentation(QWidget* parent,const QPo
 void SeExprEdPopupDocumentation::
 mousePressEvent ( QMouseEvent * event )
 {
+    Q_UNUSED(event);
     hide();
 }

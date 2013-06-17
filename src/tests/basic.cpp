@@ -20,7 +20,7 @@ struct SimpleExpression:public SeExpression
     {
         double value;
         void eval(const SeExprVarNode* node,SeVec3d& result)
-        {result[0]=value;}
+        {UNUSED(node); result[0]=value;}
     };
     mutable Var x,y;
 
@@ -38,10 +38,12 @@ struct SimpleExpression:public SeExpression
     {return x+y;}
 
     // Custom function resolver
+/*
     SeExprFunc* resolveFunc(const std::string& name) const
     {
         if(name=="custom") return &customFunc;
     }
+*/
 
     // Constructor
     SimpleExpression(const std::string& str)

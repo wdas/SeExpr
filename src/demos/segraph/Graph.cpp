@@ -8,6 +8,7 @@
 * LICENSE.
 */
 #include "Graph.h"
+#include "SeExprMacros.h"
 #ifndef SEEXPR_WIN32
 #  include <fenv.h>
 #endif
@@ -118,7 +119,7 @@ paintEvent(QPaintEvent */*event*/)
     //    plot(painter,i);
     //}
 
-    for(int i=0;i<exprs.size();i++){
+    for(unsigned int i=0;i<exprs.size();i++){
         plotNew(painter,i);
     }
 
@@ -333,6 +334,9 @@ solveRoot(const int function,double xInitial)
     minShow=false;
     rootShow=true;
     repaint();
+#else
+    UNUSED(function);
+    UNUSED(xInitial);
 #endif
 }
 
@@ -357,6 +361,10 @@ golden(const int function,double xmin,double xcenter,double xmax,bool solveMax,d
 
     if(f_xnew<f_xcenter) return golden(function,xcenter,xnew,xmax,solveMax,tolerance);
     else return golden(function,xnew,xcenter,xmin,solveMax,tolerance);
+#else
+    UNUSED(function);
+    UNUSED(solveMax);
+    UNUSED(tolerance);
 #endif
     return 0;
 }
@@ -372,6 +380,11 @@ solveMin(const int function,double xmin,double xmax,bool solveMax)
     rootShow=false;
     minShow=true;
     repaint();
+#else
+    UNUSED(function);
+    UNUSED(xmin);
+    UNUSED(xmax);
+    UNUSED(solveMax);
 #endif
 }
 

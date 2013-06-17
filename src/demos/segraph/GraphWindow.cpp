@@ -102,7 +102,7 @@ sin(frequency*x)*amp-5\
 GraphWindow::
 ~GraphWindow()
 {
-    for(int i=0;i<_exprs.size();i++) delete _exprs[i];
+    for(unsigned int i=0;i<_exprs.size();i++) delete _exprs[i];
 }
 
 void GraphWindow::

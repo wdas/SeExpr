@@ -23,6 +23,7 @@
 SeExprEdGrapherWidget::SeExprEdGrapherWidget(QWidget* parent,int width,int height)
     :view(new SeExprEdGrapherView(*this,this,width,height)),expr("",false)
 {
+    Q_UNUSED(parent);
     setFixedSize(width, height+30);
     QVBoxLayout* vbox=new QVBoxLayout;
     vbox->setMargin(0);

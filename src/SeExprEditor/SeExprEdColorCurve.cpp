@@ -164,6 +164,7 @@ void CCurveScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 void CCurveScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
+    Q_UNUSED(mouseEvent);
     _lmb = false;
 }
 
@@ -306,12 +307,14 @@ void CCurveScene::drawPoints()
 
 void SeExprEdCBoxWidget::paintEvent(QPaintEvent* event)
 {
+    Q_UNUSED(event);
     QPainter p(this);
     p.drawPixmap(0, 0, _curveScene->getPixmap());
 }
 
 void SeExprEdCSwatchFrame::paintEvent(QPaintEvent* event)
 {
+    Q_UNUSED(event);
     QPainter p(this);
     p.fillRect(contentsRect(),_color);
 }
@@ -339,6 +342,7 @@ SeVec3d SeExprEdCSwatchFrame::getValue() const
 
 void SeExprEdCSwatchFrame::mousePressEvent(QMouseEvent* event)
 {
+    Q_UNUSED(event);
 #ifdef SEEXPR_USE_QDGUI
     QColor color = QdColorPickerDialog::chooseColorFromDialog(_color,this);
 #else
@@ -360,6 +364,7 @@ SeExprEdColorCurve::SeExprEdColorCurve(QWidget* parent, QString pLabel, QString 
     bool expandable) :
     QWidget(parent),  _scene(0), _selPosEdit(0), _selValEdit(0), _interpComboBox(0)
 {
+    Q_UNUSED(iLabel);
     QHBoxLayout *mainLayout = new QHBoxLayout();
     mainLayout->setSpacing(2);
     mainLayout->setMargin(5);

@@ -1,7 +1,10 @@
-# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+# (c) Disney Enterprises, Inc.  All rights reserved.
+#
+# This file is licensed under the terms of the Microsoft Public License (MS-PL)
+# as defined at: http://opensource.org/licenses/MS-PL.
+#
+# A complete copy of this license is included in this distribution as the file
+# LICENSE.
 
 find_package(Qt4 COMPONENTS QtCore QtGui QtOpenGL) # find and setup Qt4 for this project
 if(QT4_FOUND)

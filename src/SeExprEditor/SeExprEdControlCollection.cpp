@@ -405,6 +405,7 @@ linkColorInput(QColor color)
 void SeExprEdControlCollection::
 updateText(const int id,QString& text)
 {
+    Q_UNUSED(id);
     if(editableExpression)
         text=QString(editableExpression->getEditedExpr().c_str());
 }

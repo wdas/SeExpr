@@ -17,6 +17,7 @@
 #include <SeCurve.h>
 #include <cstdio>
 #include <cstring>
+#include <SeExprMacros.h>
 #ifdef SEEXPR_USE_ANIMLIB
 #   include <animlib/AnimCurve.h>
 #   include <animlib/AnimKeyframe.h>
@@ -191,7 +192,7 @@ struct SeExprEdGenericCurveEditable:public SeExprEdEditable
         cvs.push_back(CV(x,y,InterpType(interp)));
     }
 
-    bool parseComment(const std::string& comment){return true;}
+    bool parseComment(const std::string& comment){UNUSED(comment); return true;}
     std::string str() const{
         std::stringstream s;
         s<<name<<" ccurve";
@@ -214,6 +215,7 @@ public:
         if(const SeExprEdGenericCurveEditable* o=dynamic_cast<const SeExprEdGenericCurveEditable*>(&other)){
             // TODO: fix  this
 //            return cvs==o->cvs && name==o->name;
+            UNUSED(o);
             return false;
         }else return false;
     }
@@ -269,6 +271,8 @@ struct SeExprEdAnimCurveEditable:public SeExprEdEditable
                       <<"\","<<key.isWeightsLocked();
             }
         }
+#else
+        UNUSED(stream);
 #endif
     }
     virtual bool controlsMatch(const SeExprEdEditable& other) const
@@ -276,6 +280,7 @@ struct SeExprEdAnimCurveEditable:public SeExprEdEditable
         if(const SeExprEdAnimCurveEditable* o=dynamic_cast<const SeExprEdAnimCurveEditable*>(&other)){
             // TODO: fix  this
 //            return cvs==o->cvs && name==o->name;
+            UNUSED(o);
             return false;
         }else return false;
     }

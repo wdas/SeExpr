@@ -60,7 +60,7 @@ public:
     /// Interface for getting the color (used for linked color picking)
     virtual QColor getColor(){return QColor();}
     /// Interface for setting the color (used for linked color picking)
-    virtual void setColor(QColor color){};
+    virtual void setColor(QColor color){Q_UNUSED(color)};
     
 signals:
     // sends that the control has been changed to the control collection
@@ -121,8 +121,8 @@ class SeExprEdSlider : public QSlider
         virtual void mousePressEvent(QMouseEvent* e);
         virtual void mouseMoveEvent(QMouseEvent* e);
         virtual void paintEvent(QPaintEvent* e);
-        virtual void leaveEvent(QEvent* event ) { update(); }
-        virtual void enterEvent(QEvent* event ) { update(); }
+        virtual void leaveEvent(QEvent* event ) { Q_UNUSED(event); update(); }
+        virtual void enterEvent(QEvent* event ) { Q_UNUSED(event); update(); }
         virtual void wheelEvent(QWheelEvent* e) { e->ignore(); }
 };
 

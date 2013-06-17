@@ -180,7 +180,7 @@ public:
     }
 
     int columnCount(const QModelIndex& parent) const
-    {return 1;}
+    {Q_UNUSED(parent); return 1;}
 
     int rowCount(const QModelIndex& parent=QModelIndex()) const
     {
@@ -324,6 +324,7 @@ void SeExprEdBrowser::update()
 
 void SeExprEdBrowser::handleSelection(const QModelIndex& current,const QModelIndex& previous)
 {
+    Q_UNUSED(previous)
     if(current.isValid()){
         QModelIndex realCurrent=proxyModel->mapToSource(current);
         SeExprEdTreeItem* item=(SeExprEdTreeItem*)realCurrent.internalPointer();
@@ -448,7 +449,7 @@ bool SeExprEdBrowser::getExpressionDirs()
 {
     const char *env;
     bool enableLocal = false;
-    bool homeFound = false;
+    /*bool homeFound = false; -- for xgen's config.txt UserRepo section below */
 
     if (_searchPath.length() > 0)
         env = _searchPath.c_str();

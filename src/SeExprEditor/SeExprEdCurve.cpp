@@ -168,6 +168,7 @@ void CurveScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 void CurveScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
+    Q_UNUSED(mouseEvent);
     _lmb = false;
 }
 
@@ -273,6 +274,7 @@ void CurveScene::drawPoints()
 SeExprEdCurve::SeExprEdCurve(QWidget* parent, QString pLabel, QString vLabel, QString iLabel, 
     bool expandable) : QWidget(parent), _scene(0), _selPosEdit(0), _selValEdit(0), _interpComboBox(0)
 {
+    Q_UNUSED(iLabel);
     QHBoxLayout *mainLayout = new QHBoxLayout();
     mainLayout->setSpacing(2);
     mainLayout->setMargin(4);
