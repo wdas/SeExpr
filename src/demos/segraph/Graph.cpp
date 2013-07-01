@@ -33,8 +33,10 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 #include "Graph.h"
-#include <fenv.h>
-
+#ifndef SEEXPR_WIN32
+#  include <fenv.h>
+#endif
+#include <cmath>
 Graph::
 Graph(Functions* functions,QStatusBar* status)
     :funcs(*functions),operationCode(NONE),rootShow(false),minShow(false),dragging(false),scaling(false),
@@ -264,8 +266,8 @@ mouseMoveEvent(QMouseEvent* event)
             float width=(xmax-xmin)/2.,height=(ymax-ymin)/2.;
             float xcenter=(xmax+xmin)/2.,ycenter=(ymax+ymin)/2.;
 
-            width*=pow(10.,-dx/(xmax-xmin));
-            height*=pow(10.,-dy/(ymax-ymin));
+            width*=pow(10.f,-dx/(xmax-xmin));
+            height*=pow(10.f,-dy/(ymax-ymin));
             xmin=xcenter-width;
             ymin=ycenter-height;
             xmax=xcenter+width;
