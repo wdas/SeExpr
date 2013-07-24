@@ -15,6 +15,7 @@
  *  - \subpage plugins -  Custom Function Plugins
  * \section demos Demo Applications
  *     - \subpage mytut (code at asciiGraph.cpp)
+ *     - \subpage uitut (code at imageEditor.cpp)
  *     - Image Synthesizer  (at imageSynth.cpp)
  *     - SeGrapher Qt Grapher (at demos/segraph)
  *     - Renderman Shadeop (at demos/rman)
@@ -40,6 +41,10 @@
 /**
 \page mytut Simple ASCII Grapher Tutorial
 \htmlinclude tutorial.txt
+*/
+/**
+\page uitut Simple Image Editor UI Tutorial
+\htmlinclude uitutorial.txt
 */
 /**
 \page userdoc User Documentation

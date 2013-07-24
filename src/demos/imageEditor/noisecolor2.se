@@ -1,0 +1,15 @@
+# (c) Disney Enterprises, Inc.  All rights reserved.
+#
+# This file is licensed under the terms of the Microsoft Public License (MS-PL)
+# as defined at: http://opensource.org/licenses/MS-PL.
+#
+# A complete copy of this license is included in this distribution as the file
+# LICENSE.
+
+$val=voronoi(5*[$u,$v,.5],4,.6,.2);
+$color=ccurve($val,
+    0.000, [0.141, 0.059, 0.051], 4, 
+    0.185, [0.302, 0.176, 0.122], 4, 
+    0.301, [0.651, 0.447, 0.165], 4,  
+    0.462, [0.976, 0.976, 0.976], 4);
+$color
