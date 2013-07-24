@@ -19,4 +19,6 @@ IF(DOXYGEN_FOUND AND NOT WIN32)
   INSTALL( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html/ DESTINATION share/doc/SeExpr )
   INSTALL( FILES userdoc.txt   DESTINATION share/doc/SeExpr/ RENAME SeExpressions.html )
   INSTALL( FILES Se_voronoi_1.png Se_voronoi_2.png Se_voronoi_3.png Se_voronoi_4.png Se_voronoi_5.png DESTINATION share/doc/SeExpr )
+  INSTALL( FILES ui_addWidget.png ui_browser.png ui_editor1.png ui_emptyLayout.png ui_final.png ui_preview.png DESTINATION share/doc/SeExpr )
+
 ENDIF(DOXYGEN_FOUND AND NOT WIN32)

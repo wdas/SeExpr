@@ -25,5 +25,9 @@ FIND_PACKAGE(PNG)
 IF(PNG_FOUND)
     INCLUDE_DIRECTORIES(${PNG_INCLUDE_DIR})
     TARGET_LINK_LIBRARIES(imageEditor ${PNG_LIBRARIES})
+    install(TARGETS imageEditor DESTINATION bin)
 ENDIF(PNG_FOUND)
+
+INSTALL( FILES config.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
+INSTALL( FILES fbm.se noisecolor1.se noisecolor2.se noise.se raytrace.se sinc.se DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/expressions/ )
 
