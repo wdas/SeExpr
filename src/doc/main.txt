@@ -15,10 +15,10 @@
  *  - \subpage plugins -  Custom Function Plugins
  * \section demos Demo Applications
  *     - \subpage mytut (code at asciiGraph.cpp)
- *     - \subpage uitut (code at imageEditor.cpp)
- *     - Image Synthesizer  (at imageSynth.cpp)
- *     - SeGrapher Qt Grapher (at demos/segraph)
- *     - Renderman Shadeop (at demos/rman)
+ *     - \subpage uitut (code starting at imageEditor.cpp)
+ *     - Image Synthesizer  (code at imageSynth.cpp)
+ *     - SeGrapher Qt Grapher (code starting at segraph.cpp)
+ *     - Renderman Shadeop (code at seop.cpp)
  * \section mainapi Main API pages
  *  - SeExpression - Main class to parse a single expression
  *  - SeExprVarRef - Binding of an external variable to an expression context.

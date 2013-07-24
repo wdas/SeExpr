@@ -9,7 +9,7 @@
 find_package(Qt4 COMPONENTS QtCore QtGui) # find and setup Qt4 for this project
 if(QT4_FOUND)
     set(segraph_MOC_HDRS Graph.h GraphWindow.h)
-    set(segraph_CPPS main.cpp Graph.cpp GraphWindow.cpp)
+    set(segraph_CPPS segraph.cpp Graph.cpp GraphWindow.cpp)
     qt4_wrap_cpp(segraph_MOC_SRCS ${segraph_MOC_HDRS})
     
     add_executable(segraph ${segraph_CPPS} ${segraph_MOC_SRCS})

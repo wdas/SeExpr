@@ -468,11 +468,13 @@ WARN_LOGFILE           =
 # with spaces.
 
 INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/../SeExpr \
-                        @CMAKE_CURRENT_SOURCE_DIR@/../demos/asciiGraph.cpp \
-                        @CMAKE_CURRENT_SOURCE_DIR@/../demos/imageSynth/imageSynth.cpp \
-			@CMAKE_CURRENT_SOURCE_DIR@/../SeExprEditor \
-			@CMAKE_CURRENT_SOURCE_DIR@/../demos/imageEditor \
-                          @CMAKE_CURRENT_SOURCE_DIR@                       
+			 @CMAKE_CURRENT_SOURCE_DIR@/../SeExprEditor \
+			 @CMAKE_CURRENT_SOURCE_DIR@/../demos \
+			 @CMAKE_CURRENT_SOURCE_DIR@/../demos/imageEditor \
+			 @CMAKE_CURRENT_SOURCE_DIR@/../demos/imageSynth \
+			 @CMAKE_CURRENT_SOURCE_DIR@/../demos/rman \
+			 @CMAKE_CURRENT_SOURCE_DIR@/../demos/segraph \
+                         @CMAKE_CURRENT_SOURCE_DIR@                       
                        
 
 # If the value of the INPUT tag contains directories, you can use the 
@@ -494,7 +496,8 @@ RECURSIVE              = NO
 # excluded from the INPUT source files. This way you can easily exclude a 
 # subdirectory from a directory tree whose root is specified with the INPUT tag.
 
-EXCLUDE                = 
+EXCLUDE                = @CMAKE_CURRENT_SOURCE_DIR@/../doc/uitutorial.txt \
+                         @CMAKE_CURRENT_SOURCE_DIR@/../doc/plugins.txt 
 
 # The EXCLUDE_SYMLINKS tag can be used select whether or not files or 
 # directories that are symbolic links (a Unix filesystem feature) are excluded 
@@ -509,6 +512,11 @@ EXCLUDE_SYMLINKS       = NO
 # for example use the pattern */test/*
 
 EXCLUDE_PATTERNS       = 
+
+# Exclude demo classes from official class documentation.  Files are 
+# still listed in the Files tab.
+
+EXCLUDE_SYMBOLS       = ImageEditorDialog ImageSynth* CalculatorExpr GrapherExpr SeRman* AttrVar Graph* immutable_hash_map SimpleVar
 
 # The EXAMPLE_PATH tag can be used to specify one or more files or 
 # directories that contain example code fragments that are included (see 
