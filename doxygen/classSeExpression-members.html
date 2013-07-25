@@ -35,6 +35,7 @@
   <tr class="memlist"><td><a class="el" href="classSeExpression.html#a6aa4be50ca08aea29fc0c16e94f018ea">_parseError</a></td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td><code> [mutable, private]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExpression.html#a42b557a76c677e895f1096fb10ee3332">_parseTree</a></td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td><code> [mutable, private]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExpression.html#a9229cbf0d84ffc58ec3c3d8fe52fd8d9">_prepped</a></td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td><code> [mutable, private]</code></td></tr>
+  <tr class="memlist"><td><a class="el" href="classSeExpression.html#a480af3a4908e135480489ed39f3a55c2">_stringTokens</a></td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td><code> [mutable, private]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExpression.html#af579d23fb9f19e26e47c1ccf7a4931a3">_threadUnsafeFunctionCalls</a></td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td><code> [mutable, private]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExpression.html#a7cfe9cb7d43856ce76be5d148467b1ec">_vars</a></td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td><code> [mutable, private]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExpression.html#a9c705b8a4511ba37bf6ea3ebf62b6c55">_wantVec</a></td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td><code> [private]</code></td></tr>
@@ -59,11 +60,11 @@
   <tr class="memlist"><td><a class="el" href="classSeExpression.html#a35d026d6e48fc5d08993691f4b97de6f">prep</a>() const </td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td><code> [private]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExpression.html#a6ad6d38bef55a0218943941926cc9f7f">prepIfNeeded</a>() const </td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td><code> [inline, private]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExpression.html#a0f7e74d4f0f294656b11cc2ddcc985be">reset</a>()</td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td></td></tr>
-  <tr class="memlist"><td><a class="el" href="classSeExpression.html#a580e8bc44c812a21d3db63c65821986e">resolveFunc</a>(const std::string &amp;name) const </td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td><code> [inline, virtual]</code></td></tr>
+  <tr class="memlist"><td><a class="el" href="classSeExpression.html#a02d05982db5487ae02376a68a45b5b3e">resolveFunc</a>(const std::string &amp;) const </td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td><code> [inline, virtual]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExpression.html#a2f3cf5320a92bb8c6e251d3cde97062b">resolveLocalVar</a>(const char *n) const </td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td><code> [inline]</code></td></tr>
-  <tr class="memlist"><td><a class="el" href="classSeExpression.html#ab55efa5fec32e4068caca4cc066f4dec">resolveVar</a>(const std::string &amp;name) const </td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td><code> [inline, virtual]</code></td></tr>
+  <tr class="memlist"><td><a class="el" href="classSeExpression.html#a0e10c8d733a21d1a84d10470a469d2ca">resolveVar</a>(const std::string &amp;) const </td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td><code> [inline, virtual]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExpression.html#a1fd186a77bf0eef17c8c6fe02b92f8d9">SeExpression</a>()</td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td></td></tr>
-  <tr class="memlist"><td><a class="el" href="classSeExpression.html#a337d3ff9ad36d3a01d9bdd0f398f38f8">SeExpression</a>(const std::string &amp;e, bool wantVec=1)</td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td></td></tr>
+  <tr class="memlist"><td><a class="el" href="classSeExpression.html#a4058ef1b8a69adc48be8d3660d6ca816">SeExpression</a>(const std::string &amp;e, bool wantVec=true)</td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExpression.html#a6f94b1db53de417634f7c18199596806">SeExpression</a>(const SeExpression &amp;e)</td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td><code> [private]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExpression.html#a8accd0bc751d4f74f93313a7ca768647">setExpr</a>(const std::string &amp;e)</td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExpression.html#ae30c2d45a4b8621fea5a9a50e8d3da35">setThreadUnsafe</a>(const std::string &amp;functionName) const </td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td><code> [inline]</code></td></tr>
@@ -74,7 +75,7 @@
   <tr class="memlist"><td><a class="el" href="classSeExpression.html#a74ff9f0227f53031b11c6120fc828c88">wantVec</a>() const </td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td><code> [inline]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExpression.html#abe37530aa43dd4b4ab8455232cdde625">~SeExpression</a>()</td><td><a class="el" href="classSeExpression.html">SeExpression</a></td><td><code> [virtual]</code></td></tr>
 </table></div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 3 May 2011 for SeExpr by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 25 Jul 2013 for SeExpr by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

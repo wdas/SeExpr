@@ -37,12 +37,11 @@ Inheritance diagram for SeExprVarRef:</div>
  <div class="center">
   <img src="classSeExprVarRef.gif" usemap="#SeExprVarRef_map" alt=""/>
   <map id="SeExprVarRef_map" name="SeExprVarRef_map">
-<area href="classSeExprLocalVarRef.html" alt="SeExprLocalVarRef" shape="rect" coords="0,56,149,80"/>
-<area href="classSeExprScalarVarRef.html" alt="SeExprScalarVarRef" shape="rect" coords="159,56,308,80"/>
-<area href="classSeExprVectorVarRef.html" alt="SeExprVectorVarRef" shape="rect" coords="318,56,467,80"/>
-<area href="structGrapherExpr_1_1SimpleVar.html" alt="GrapherExpr::SimpleVar" shape="rect" coords="0,112,149,136"/>
-<area href="structGrapherExpr_1_1SimpleVar.html" alt="GrapherExpr::SimpleVar" shape="rect" coords="159,112,308,136"/>
-<area href="structImageSynthExpr_1_1Var.html" alt="ImageSynthExpr::Var" shape="rect" coords="318,112,467,136"/>
+<area href="classSeExprLocalVarRef.html" alt="SeExprLocalVarRef" shape="rect" coords="0,56,193,80"/>
+<area href="classSeExprScalarVarRef.html" alt="SeExprScalarVarRef" shape="rect" coords="203,56,396,80"/>
+<area href="classSeExprVectorVarRef.html" alt="SeExprVectorVarRef" shape="rect" coords="406,56,599,80"/>
+<area href="structSeExprEdExpression_1_1ScalarRef.html" alt="SeExprEdExpression::ScalarRef" shape="rect" coords="203,112,396,136"/>
+<area href="structSeExprEdExpression_1_1VectorRef.html" alt="SeExprEdExpression::VectorRef" shape="rect" coords="406,112,599,136"/>
 </map>
  </div>
 </div>
@@ -53,12 +52,12 @@ Inheritance diagram for SeExprVarRef:</div>
 <tr><td class="memItemLeft" align="right" valign="top">virtual&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExprVarRef.html#a61e1fbfd0a2cccc42c53acef46167c59">~SeExprVarRef</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">virtual bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExprVarRef.html#ab0990043ffe809ffd0f5b586c1ede19f">isVec</a> ()=0</td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">returns true for a vector type, false for a scalar type  <a href="#ab0990043ffe809ffd0f5b586c1ede19f"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExprVarRef.html#ae1f0f776153076f85f733f7fae2d7220">eval</a> (const <a class="el" href="classSeExprVarNode.html">SeExprVarNode</a> *node, <a class="el" href="classSeVec3d.html">SeVec3d</a> &amp;<a class="el" href="plugins_8txt.html#af6e7c6aed704e156ce95dae980cd4438">result</a>)=0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExprVarRef.html#ae1f0f776153076f85f733f7fae2d7220">eval</a> (const <a class="el" href="classSeExprVarNode.html">SeExprVarNode</a> *node, <a class="el" href="classSeVec3d.html">SeVec3d</a> &amp;result)=0</td></tr>
 </table>
 <hr/><a name="_details"></a><h2>Detailed Description</h2>
 <p>abstract class for implementing variable references </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00051">51</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00027">27</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 <hr/><h2>Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a61e1fbfd0a2cccc42c53acef46167c59"></a><!-- doxytag: member="SeExprVarRef::~SeExprVarRef" ref="a61e1fbfd0a2cccc42c53acef46167c59" args="()" -->
 <div class="memitem">
@@ -75,7 +74,7 @@ Inheritance diagram for SeExprVarRef:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00054">54</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00030">30</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
 </div>
 </div>
@@ -106,9 +105,9 @@ Inheritance diagram for SeExprVarRef:</div>
 <div class="memdoc">
 <p>returns this variable's value by setting result, node refers to where in the parse tree the evaluation is occurring </p>
 
-<p>Implemented in <a class="el" href="classSeExprLocalVarRef.html#adc90de85a0c1b41d926a1c9f35ef8363">SeExprLocalVarRef</a>, <a class="el" href="structGrapherExpr_1_1SimpleVar.html#afc7e03745c42bc0192e56c5662339765">GrapherExpr::SimpleVar</a>, <a class="el" href="structImageSynthExpr_1_1Var.html#af118942fccbe897750879a442c5f9c4a">ImageSynthExpr::Var</a>, and <a class="el" href="structGrapherExpr_1_1SimpleVar.html#afc7e03745c42bc0192e56c5662339765">GrapherExpr::SimpleVar</a>.</p>
+<p>Implemented in <a class="el" href="classSeExprLocalVarRef.html#adc90de85a0c1b41d926a1c9f35ef8363">SeExprLocalVarRef</a>, <a class="el" href="structSeExprEdExpression_1_1ScalarRef.html#a0e2b9d9d98743f6f6028192e3e40cc53">SeExprEdExpression::ScalarRef</a>, and <a class="el" href="structSeExprEdExpression_1_1VectorRef.html#a816e3e54cbfb2bad15632806e3f01fcb">SeExprEdExpression::VectorRef</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExprNode_8cpp_source.html#l00691">SeExprVarNode::eval()</a>.</p>
+<p>Referenced by <a class="el" href="SeExprNode_8cpp_source.html#l00666">SeExprVarNode::eval()</a>.</p>
 
 </div>
 </div>
@@ -131,15 +130,15 @@ Inheritance diagram for SeExprVarRef:</div>
 
 <p>Implemented in <a class="el" href="classSeExprVectorVarRef.html#ae4356040b4422c2dfa6d63a3c37249cf">SeExprVectorVarRef</a>, <a class="el" href="classSeExprScalarVarRef.html#a8b43412cbbd3af2ed8ed2a823178a12e">SeExprScalarVarRef</a>, and <a class="el" href="classSeExprLocalVarRef.html#a4ab1d3e8cdcb4f7182eb0dcd04210fd0">SeExprLocalVarRef</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExprNode_8cpp_source.html#l00676">SeExprVarNode::prep()</a>.</p>
+<p>Referenced by <a class="el" href="SeExprNode_8cpp_source.html#l00651">SeExprVarNode::prep()</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/jobs2/soft/users/aselle/src/seexpr-to-push/src/SeExpr/<a class="el" href="SeExpression_8h_source.html">SeExpression.h</a></li>
+<li>/disk1/scratch/aselle/projects/seexpr/SeExpr/src/SeExpr/<a class="el" href="SeExpression_8h_source.html">SeExpression.h</a></li>
 </ul>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 3 May 2011 for SeExpr by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 25 Jul 2013 for SeExpr by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

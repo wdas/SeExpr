@@ -46,8 +46,8 @@ Inheritance diagram for SeExprStrNode:</div>
 <table border="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="2"><h2>Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExprStrNode.html#a6ada3c3ad01206a0b872b98d9516cf4a">SeExprStrNode</a> (const <a class="el" href="classSeExpression.html">SeExpression</a> *expr, const char *str)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExprStrNode.html#a4e7c86380504d39c43487346d44a25ad">prep</a> (bool wantVec, std::string &amp;error)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExprStrNode.html#a99a5dc26c028218b612ff951da40f469">eval</a> (<a class="el" href="classSeVec3d.html">SeVec3d</a> &amp;<a class="el" href="plugins_8txt.html#af6e7c6aed704e156ce95dae980cd4438">result</a>) const </td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExprStrNode.html#aedf2d907a877ea7ea9866d53596ec19a">prep</a> (bool)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExprStrNode.html#a99a5dc26c028218b612ff951da40f469">eval</a> (<a class="el" href="classSeVec3d.html">SeVec3d</a> &amp;result) const </td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Evaluation method. Note: v[1] and v[2] are undefined if !isVec.  <a href="#a99a5dc26c028218b612ff951da40f469"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">const char *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExprStrNode.html#a65d9dd76e03627ddc88101f4a2cf25fd">str</a> () const </td></tr>
 <tr><td colspan="2"><h2>Private Attributes</h2></td></tr>
@@ -56,7 +56,7 @@ Inheritance diagram for SeExprStrNode:</div>
 <hr/><a name="_details"></a><h2>Detailed Description</h2>
 <p>Node that stores a string. </p>
 
-<p>Definition at line <a class="el" href="SeExprNode_8h_source.html#l00442">442</a> of file <a class="el" href="SeExprNode_8h_source.html">SeExprNode.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExprNode_8h_source.html#l00413">413</a> of file <a class="el" href="SeExprNode_8h_source.html">SeExprNode.h</a>.</p>
 <hr/><h2>Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a6ada3c3ad01206a0b872b98d9516cf4a"></a><!-- doxytag: member="SeExprStrNode::SeExprStrNode" ref="a6ada3c3ad01206a0b872b98d9516cf4a" args="(const SeExpression *expr, const char *str)" -->
 <div class="memitem">
@@ -83,7 +83,7 @@ Inheritance diagram for SeExprStrNode:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeExprNode_8h_source.html#l00445">445</a> of file <a class="el" href="SeExprNode_8h_source.html">SeExprNode.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExprNode_8h_source.html#l00416">416</a> of file <a class="el" href="SeExprNode_8h_source.html">SeExprNode.h</a>.</p>
 
 </div>
 </div>
@@ -108,11 +108,11 @@ Inheritance diagram for SeExprStrNode:</div>
 
 <p>Reimplemented from <a class="el" href="classSeExprNode.html#a8878a551812511085b1947d4f8fbe08c">SeExprNode</a>.</p>
 
-<p>Definition at line <a class="el" href="SeExprNode_8h_source.html#l00451">451</a> of file <a class="el" href="SeExprNode_8h_source.html">SeExprNode.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExprNode_8h_source.html#l00422">422</a> of file <a class="el" href="SeExprNode_8h_source.html">SeExprNode.h</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a4e7c86380504d39c43487346d44a25ad"></a><!-- doxytag: member="SeExprStrNode::prep" ref="a4e7c86380504d39c43487346d44a25ad" args="(bool wantVec, std::string &amp;error)" -->
+<a class="anchor" id="aedf2d907a877ea7ea9866d53596ec19a"></a><!-- doxytag: member="SeExprStrNode::prep" ref="aedf2d907a877ea7ea9866d53596ec19a" args="(bool)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -120,29 +120,20 @@ Inheritance diagram for SeExprStrNode:</div>
           <td class="memname">virtual bool SeExprStrNode::prep </td>
           <td>(</td>
           <td class="paramtype">bool&nbsp;</td>
-          <td class="paramname"> <em>wantVec</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::string &amp;&nbsp;</td>
-          <td class="paramname"> <em>error</em></td><td>&nbsp;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td><td><code> [inline, virtual]</code></td>
+          <td class="paramname"> <em>wantVec</em></td>
+          <td>&nbsp;)&nbsp;</td>
+          <td><code> [inline, virtual]</code></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Prepare the node (for parser use only). See the discussion at the start of <a class="el" href="plugins_8txt.html#aa41a6513ac1f2755fd5671d6f47a0c7d">SeExprNode.cpp</a> for more info. NOTE: error is deprecated, instead use <a class="el" href="classSeExprNode.html#aef5d6237e6ca35c5cd6b5a963b66a98e" title="Register error.">addError()</a> function for better error localization </p>
+<p>Prepare the node (for parser use only). See the discussion at the start of <a class="el" href="SeExprNode_8cpp.html">SeExprNode.cpp</a> for more info. </p>
 
-<p>Reimplemented from <a class="el" href="classSeExprNode.html#ab5730ecb8ab806fd76dee0292115d2ee">SeExprNode</a>.</p>
+<p>Reimplemented from <a class="el" href="classSeExprNode.html#a71e9185e3b6c3f49855964147897aeb0">SeExprNode</a>.</p>
 
-<p>Definition at line <a class="el" href="SeExprNode_8h_source.html#l00448">448</a> of file <a class="el" href="SeExprNode_8h_source.html">SeExprNode.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExprNode_8h_source.html#l00419">419</a> of file <a class="el" href="SeExprNode_8h_source.html">SeExprNode.h</a>.</p>
 
-<p>References <a class="el" href="SeExprNode_8h_source.html#l00455">_str</a>, and <a class="el" href="SeExprNode_8h_source.html#l00096">SeExprNode::addError()</a>.</p>
+<p>References <a class="el" href="SeExprNode_8h_source.html#l00426">_str</a>, and <a class="el" href="SeExprNode_8h_source.html#l00067">SeExprNode::addError()</a>.</p>
 
 </div>
 </div>
@@ -161,9 +152,9 @@ Inheritance diagram for SeExprStrNode:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeExprNode_8h_source.html#l00452">452</a> of file <a class="el" href="SeExprNode_8h_source.html">SeExprNode.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExprNode_8h_source.html#l00423">423</a> of file <a class="el" href="SeExprNode_8h_source.html">SeExprNode.h</a>.</p>
 
-<p>References <a class="el" href="SeExprNode_8h_source.html#l00455">_str</a>.</p>
+<p>References <a class="el" href="SeExprNode_8h_source.html#l00426">_str</a>.</p>
 
 </div>
 </div>
@@ -179,17 +170,17 @@ Inheritance diagram for SeExprStrNode:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeExprNode_8h_source.html#l00455">455</a> of file <a class="el" href="SeExprNode_8h_source.html">SeExprNode.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExprNode_8h_source.html#l00426">426</a> of file <a class="el" href="SeExprNode_8h_source.html">SeExprNode.h</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExprNode_8h_source.html#l00448">prep()</a>, and <a class="el" href="SeExprNode_8h_source.html#l00452">str()</a>.</p>
+<p>Referenced by <a class="el" href="SeExprNode_8h_source.html#l00419">prep()</a>, and <a class="el" href="SeExprNode_8h_source.html#l00423">str()</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/jobs2/soft/users/aselle/src/seexpr-to-push/src/SeExpr/<a class="el" href="SeExprNode_8h_source.html">SeExprNode.h</a></li>
+<li>/disk1/scratch/aselle/projects/seexpr/SeExpr/src/SeExpr/<a class="el" href="SeExprNode_8h_source.html">SeExprNode.h</a></li>
 </ul>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 3 May 2011 for SeExpr by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 25 Jul 2013 for SeExpr by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

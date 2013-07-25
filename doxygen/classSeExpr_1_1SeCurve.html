@@ -93,7 +93,7 @@
 <p>Each segment is interpolated according to the interpolation type specified on the left control point. Interpolation types supported are members of InterpType below.</p>
 <p>Valid instantiation types for this are double, or SeVec3D </p>
 
-<p>Definition at line <a class="el" href="SeCurve_8h_source.html#l00057">57</a> of file <a class="el" href="SeCurve_8h_source.html">SeCurve.h</a>.</p>
+<p>Definition at line <a class="el" href="SeCurve_8h_source.html#l00032">32</a> of file <a class="el" href="SeCurve_8h_source.html">SeCurve.h</a>.</p>
 <hr/><h2>Member Enumeration Documentation</h2>
 <a class="anchor" id="ae5318d67ebdccbb8d961bf121b41c52a"></a><!-- doxytag: member="SeExpr::SeCurve::InterpType" ref="ae5318d67ebdccbb8d961bf121b41c52a" args="" -->
 <div class="memitem">
@@ -124,7 +124,7 @@ template&lt;class T&gt; </div>
 </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="SeCurve_8h_source.html#l00062">62</a> of file <a class="el" href="SeCurve_8h_source.html">SeCurve.h</a>.</p>
+<p>Definition at line <a class="el" href="SeCurve_8h_source.html#l00037">37</a> of file <a class="el" href="SeCurve_8h_source.html">SeCurve.h</a>.</p>
 
 </div>
 </div>
@@ -146,9 +146,9 @@ template&lt;class T &gt; </div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00058">58</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00033">33</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
 
-<p>References <a class="el" href="SeCurve_8h_source.html#l00073">SeExpr::SeCurve&lt; T &gt;::_cvData</a>, and <a class="el" href="SeCurve_8h_source.html#l00062">SeExpr::SeCurve&lt; T &gt;::kNone</a>.</p>
+<p>References <a class="el" href="SeCurve_8h_source.html#l00048">SeExpr::SeCurve&lt; T &gt;::_cvData</a>, and <a class="el" href="SeCurve_8h_source.html#l00037">SeExpr::SeCurve&lt; T &gt;::kNone</a>.</p>
 
 </div>
 </div>
@@ -188,9 +188,11 @@ template&lt;class T &gt; </div>
 
 <p>Adds a point to the curve. </p>
 
-<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00066">66</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00041">41</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
 
-<p>References <a class="el" href="SeCurve_8h_source.html#l00073">SeExpr::SeCurve&lt; T &gt;::_cvData</a>, and <a class="el" href="SeCurve_8h_source.html#l00074">SeExpr::SeCurve&lt; T &gt;::prepared</a>.</p>
+<p>References <a class="el" href="SeCurve_8h_source.html#l00048">SeExpr::SeCurve&lt; T &gt;::_cvData</a>, and <a class="el" href="SeCurve_8h_source.html#l00049">SeExpr::SeCurve&lt; T &gt;::prepared</a>.</p>
+
+<p>Referenced by <a class="el" href="SeExprEdCurve_8cpp_source.html#l00068">CurveScene::rebuildCurve()</a>, and <a class="el" href="SeExprEdColorCurve_8cpp_source.html#l00060">CCurveScene::rebuildCurve()</a>.</p>
 
 </div>
 </div>
@@ -227,9 +229,9 @@ template&lt;&gt; </div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00268">268</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00237">237</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
 
-<p>References <a class="el" href="SeExprBuiltins_8h_source.html#l00060">SeExpr::clamp()</a>.</p>
+<p>References <a class="el" href="SeExprBuiltins_8h_source.html#l00035">SeExpr::clamp()</a>.</p>
 
 </div>
 </div>
@@ -266,9 +268,9 @@ template&lt;&gt; </div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00258">258</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00227">227</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
 
-<p>References <a class="el" href="SeExprBuiltins_8h_source.html#l00060">SeExpr::clamp()</a>.</p>
+<p>References <a class="el" href="SeExprBuiltins_8h_source.html#l00035">SeExpr::clamp()</a>.</p>
 
 </div>
 </div>
@@ -307,7 +309,7 @@ template&lt;class T&gt; </div>
 
 <p>Performs hermite derivative clamping in canonical space. </p>
 
-<p>Referenced by <a class="el" href="SeCurve_8cpp_source.html#l00073">SeExpr::SeCurve&lt; T &gt;::preparePoints()</a>.</p>
+<p>Referenced by <a class="el" href="SeCurve_8cpp_source.html#l00048">SeExpr::SeCurve&lt; T &gt;::preparePoints()</a>.</p>
 
 </div>
 </div>
@@ -338,7 +340,7 @@ template&lt;&gt; </div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00048">48</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00023">23</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
 
 </div>
 </div>
@@ -369,7 +371,7 @@ template&lt;&gt; </div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00045">45</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00020">20</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
 
 </div>
 </div>
@@ -402,7 +404,7 @@ template&lt;class T&gt; </div>
 
 <p>Returns a component of the given value. </p>
 
-<p>Referenced by <a class="el" href="SeCurve_8cpp_source.html#l00184">SeExpr::SeCurve&lt; T &gt;::getChannelValue()</a>.</p>
+<p>Referenced by <a class="el" href="SeCurve_8cpp_source.html#l00153">SeExpr::SeCurve&lt; T &gt;::getChannelValue()</a>.</p>
 
 </div>
 </div>
@@ -435,11 +437,11 @@ template&lt;class T &gt; </div>
 
 <p><a class="el" href="structSeExpr_1_1SeCurve_1_1CV.html">CV</a> Parameter ordering (cv1._pos &lt; cv2._pos). </p>
 
-<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00052">52</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00027">27</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
 
-<p>References <a class="el" href="SeCurve_8h_source.html#l00068">SeExpr::SeCurve&lt; T &gt;::CV::_pos</a>.</p>
+<p>References <a class="el" href="SeCurve_8h_source.html#l00043">SeExpr::SeCurve&lt; T &gt;::CV::_pos</a>.</p>
 
-<p>Referenced by <a class="el" href="SeCurve_8cpp_source.html#l00184">SeExpr::SeCurve&lt; T &gt;::getChannelValue()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00238">SeExpr::SeCurve&lt; T &gt;::getLowerBoundCV()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00130">SeExpr::SeCurve&lt; T &gt;::getValue()</a>, and <a class="el" href="SeCurve_8cpp_source.html#l00073">SeExpr::SeCurve&lt; T &gt;::preparePoints()</a>.</p>
+<p>Referenced by <a class="el" href="SeCurve_8cpp_source.html#l00153">SeExpr::SeCurve&lt; T &gt;::getChannelValue()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00207">SeExpr::SeCurve&lt; T &gt;::getLowerBoundCV()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00099">SeExpr::SeCurve&lt; T &gt;::getValue()</a>, and <a class="el" href="SeCurve_8cpp_source.html#l00048">SeExpr::SeCurve&lt; T &gt;::preparePoints()</a>.</p>
 
 </div>
 </div>
@@ -471,9 +473,9 @@ template&lt;class T &gt; </div>
 <div class="memdoc">
 <p>Evaluates curve for a sub-component of the interpolation values must call <a class="el" href="classSeExpr_1_1SeCurve.html#ad8cd64257aac7dda1ed772c150afc1f8" title="Prepares points for evaluation (sorts and computes boundaries, clamps extrema).">preparePoints()</a> before this is ok to call </p>
 
-<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00184">184</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00153">153</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
 
-<p>References <a class="el" href="SeCurve_8h_source.html#l00073">SeExpr::SeCurve&lt; T &gt;::_cvData</a>, <a class="el" href="classSeExpr_1_1SeCurve.html#a6e0f2ee9280d953b2a436ebc38a8274b">SeExpr::SeCurve&lt; T &gt;::comp()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00052">SeExpr::SeCurve&lt; T &gt;::cvLessThan()</a>, <a class="el" href="userdoc_8txt.html#a547c3013237fcef91180e5c3fb370e14">index()</a>, <a class="el" href="SeCurve_8h_source.html#l00062">SeExpr::SeCurve&lt; T &gt;::kLinear</a>, <a class="el" href="SeCurve_8h_source.html#l00062">SeExpr::SeCurve&lt; T &gt;::kMonotoneSpline</a>, <a class="el" href="SeCurve_8h_source.html#l00062">SeExpr::SeCurve&lt; T &gt;::kNone</a>, <a class="el" href="SeCurve_8h_source.html#l00062">SeExpr::SeCurve&lt; T &gt;::kSmooth</a>, <a class="el" href="SeCurve_8h_source.html#l00062">SeExpr::SeCurve&lt; T &gt;::kSpline</a>, <a class="el" href="SeExprBuiltins_8h_source.html#l00064">SeExpr::max()</a>, <a class="el" href="SeExprBuiltins_8h_source.html#l00065">SeExpr::min()</a>, <a class="el" href="SeCurve_8h_source.html#l00074">SeExpr::SeCurve&lt; T &gt;::prepared</a>, <a class="el" href="tutorial_8txt_source.html#l00091">x</a>, and <a class="el" href="userdoc_8txt_source.html#l00202">y</a>.</p>
+<p>References <a class="el" href="SeCurve_8h_source.html#l00048">SeExpr::SeCurve&lt; T &gt;::_cvData</a>, <a class="el" href="classSeExpr_1_1SeCurve.html#a6e0f2ee9280d953b2a436ebc38a8274b">SeExpr::SeCurve&lt; T &gt;::comp()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00027">SeExpr::SeCurve&lt; T &gt;::cvLessThan()</a>, <a class="el" href="userdoc_8txt.html#a547c3013237fcef91180e5c3fb370e14">index()</a>, <a class="el" href="SeCurve_8h_source.html#l00037">SeExpr::SeCurve&lt; T &gt;::kLinear</a>, <a class="el" href="SeCurve_8h_source.html#l00037">SeExpr::SeCurve&lt; T &gt;::kMonotoneSpline</a>, <a class="el" href="SeCurve_8h_source.html#l00037">SeExpr::SeCurve&lt; T &gt;::kNone</a>, <a class="el" href="SeCurve_8h_source.html#l00037">SeExpr::SeCurve&lt; T &gt;::kSmooth</a>, <a class="el" href="SeCurve_8h_source.html#l00037">SeExpr::SeCurve&lt; T &gt;::kSpline</a>, <a class="el" href="SeExprBuiltins_8h_source.html#l00039">SeExpr::max()</a>, <a class="el" href="SeExprBuiltins_8h_source.html#l00040">SeExpr::min()</a>, <a class="el" href="SeCurve_8h_source.html#l00049">SeExpr::SeCurve&lt; T &gt;::prepared</a>, <a class="el" href="tutorial_8txt_source.html#l00101">x</a>, and <a class="el" href="userdoc_8txt_source.html#l00217">y</a>.</p>
 
 </div>
 </div>
@@ -496,9 +498,11 @@ template&lt;class T &gt; </div>
 <div class="memdoc">
 <p>Returns the control point that is less than the parameter, unless there is no point, in which case it returns the right point or nothing </p>
 
-<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00238">238</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00207">207</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
 
-<p>References <a class="el" href="SeCurve_8h_source.html#l00073">SeExpr::SeCurve&lt; T &gt;::_cvData</a>, <a class="el" href="SeCurve_8cpp_source.html#l00052">SeExpr::SeCurve&lt; T &gt;::cvLessThan()</a>, <a class="el" href="userdoc_8txt.html#a547c3013237fcef91180e5c3fb370e14">index()</a>, <a class="el" href="SeCurve_8h_source.html#l00062">SeExpr::SeCurve&lt; T &gt;::kLinear</a>, <a class="el" href="SeExprBuiltins_8h_source.html#l00064">SeExpr::max()</a>, <a class="el" href="SeExprBuiltins_8h_source.html#l00065">SeExpr::min()</a>, and <a class="el" href="SeCurve_8h_source.html#l00074">SeExpr::SeCurve&lt; T &gt;::prepared</a>.</p>
+<p>References <a class="el" href="SeCurve_8h_source.html#l00048">SeExpr::SeCurve&lt; T &gt;::_cvData</a>, <a class="el" href="SeCurve_8cpp_source.html#l00027">SeExpr::SeCurve&lt; T &gt;::cvLessThan()</a>, <a class="el" href="userdoc_8txt.html#a547c3013237fcef91180e5c3fb370e14">index()</a>, <a class="el" href="SeCurve_8h_source.html#l00037">SeExpr::SeCurve&lt; T &gt;::kLinear</a>, <a class="el" href="SeExprBuiltins_8h_source.html#l00039">SeExpr::max()</a>, <a class="el" href="SeExprBuiltins_8h_source.html#l00040">SeExpr::min()</a>, and <a class="el" href="SeCurve_8h_source.html#l00049">SeExpr::SeCurve&lt; T &gt;::prepared</a>.</p>
+
+<p>Referenced by <a class="el" href="SeExprEdCurve_8cpp_source.html#l00115">CurveScene::mousePressEvent()</a>, and <a class="el" href="SeExprEdColorCurve_8cpp_source.html#l00114">CCurveScene::mousePressEvent()</a>.</p>
 
 </div>
 </div>
@@ -522,9 +526,11 @@ template&lt;class T &gt; </div>
 
 <p>Evaluates curve and returns full value. </p>
 
-<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00130">130</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00099">99</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
 
-<p>References <a class="el" href="SeCurve_8h_source.html#l00073">SeExpr::SeCurve&lt; T &gt;::_cvData</a>, <a class="el" href="SeCurve_8cpp_source.html#l00052">SeExpr::SeCurve&lt; T &gt;::cvLessThan()</a>, <a class="el" href="userdoc_8txt.html#a547c3013237fcef91180e5c3fb370e14">index()</a>, <a class="el" href="SeCurve_8h_source.html#l00062">SeExpr::SeCurve&lt; T &gt;::kLinear</a>, <a class="el" href="SeCurve_8h_source.html#l00062">SeExpr::SeCurve&lt; T &gt;::kMonotoneSpline</a>, <a class="el" href="SeCurve_8h_source.html#l00062">SeExpr::SeCurve&lt; T &gt;::kNone</a>, <a class="el" href="SeCurve_8h_source.html#l00062">SeExpr::SeCurve&lt; T &gt;::kSmooth</a>, <a class="el" href="SeCurve_8h_source.html#l00062">SeExpr::SeCurve&lt; T &gt;::kSpline</a>, <a class="el" href="SeExprBuiltins_8h_source.html#l00064">SeExpr::max()</a>, <a class="el" href="SeExprBuiltins_8h_source.html#l00065">SeExpr::min()</a>, <a class="el" href="SeCurve_8h_source.html#l00074">SeExpr::SeCurve&lt; T &gt;::prepared</a>, <a class="el" href="tutorial_8txt_source.html#l00091">x</a>, and <a class="el" href="userdoc_8txt_source.html#l00202">y</a>.</p>
+<p>References <a class="el" href="SeCurve_8h_source.html#l00048">SeExpr::SeCurve&lt; T &gt;::_cvData</a>, <a class="el" href="SeCurve_8cpp_source.html#l00027">SeExpr::SeCurve&lt; T &gt;::cvLessThan()</a>, <a class="el" href="userdoc_8txt.html#a547c3013237fcef91180e5c3fb370e14">index()</a>, <a class="el" href="SeCurve_8h_source.html#l00037">SeExpr::SeCurve&lt; T &gt;::kLinear</a>, <a class="el" href="SeCurve_8h_source.html#l00037">SeExpr::SeCurve&lt; T &gt;::kMonotoneSpline</a>, <a class="el" href="SeCurve_8h_source.html#l00037">SeExpr::SeCurve&lt; T &gt;::kNone</a>, <a class="el" href="SeCurve_8h_source.html#l00037">SeExpr::SeCurve&lt; T &gt;::kSmooth</a>, <a class="el" href="SeCurve_8h_source.html#l00037">SeExpr::SeCurve&lt; T &gt;::kSpline</a>, <a class="el" href="SeExprBuiltins_8h_source.html#l00039">SeExpr::max()</a>, <a class="el" href="SeExprBuiltins_8h_source.html#l00040">SeExpr::min()</a>, <a class="el" href="SeCurve_8h_source.html#l00049">SeExpr::SeCurve&lt; T &gt;::prepared</a>, <a class="el" href="tutorial_8txt_source.html#l00101">x</a>, and <a class="el" href="userdoc_8txt_source.html#l00217">y</a>.</p>
+
+<p>Referenced by <a class="el" href="SeExprEdCurve_8cpp_source.html#l00232">CurveScene::drawPoly()</a>, and <a class="el" href="SeExprEdColorCurve_8cpp_source.html#l00232">CCurveScene::getCPixmap()</a>.</p>
 
 </div>
 </div>
@@ -548,9 +554,9 @@ template&lt;class T &gt; </div>
 
 <p>Returns whether the given interpolation type is supported. </p>
 
-<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00251">251</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00220">220</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
 
-<p>References <a class="el" href="SeCurve_8h_source.html#l00062">SeExpr::SeCurve&lt; T &gt;::kLinear</a>, <a class="el" href="SeCurve_8h_source.html#l00062">SeExpr::SeCurve&lt; T &gt;::kMonotoneSpline</a>, <a class="el" href="SeCurve_8h_source.html#l00062">SeExpr::SeCurve&lt; T &gt;::kNone</a>, <a class="el" href="SeCurve_8h_source.html#l00062">SeExpr::SeCurve&lt; T &gt;::kSmooth</a>, and <a class="el" href="SeCurve_8h_source.html#l00062">SeExpr::SeCurve&lt; T &gt;::kSpline</a>.</p>
+<p>References <a class="el" href="SeCurve_8h_source.html#l00037">SeExpr::SeCurve&lt; T &gt;::kLinear</a>, <a class="el" href="SeCurve_8h_source.html#l00037">SeExpr::SeCurve&lt; T &gt;::kMonotoneSpline</a>, <a class="el" href="SeCurve_8h_source.html#l00037">SeExpr::SeCurve&lt; T &gt;::kNone</a>, <a class="el" href="SeCurve_8h_source.html#l00037">SeExpr::SeCurve&lt; T &gt;::kSmooth</a>, and <a class="el" href="SeCurve_8h_source.html#l00037">SeExpr::SeCurve&lt; T &gt;::kSpline</a>.</p>
 
 </div>
 </div>
@@ -573,9 +579,11 @@ template&lt;class T &gt; </div>
 
 <p>Prepares points for evaluation (sorts and computes boundaries, clamps extrema). </p>
 
-<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00073">73</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeCurve_8cpp_source.html#l00048">48</a> of file <a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a>.</p>
 
-<p>References <a class="el" href="SeCurve_8h_source.html#l00073">SeExpr::SeCurve&lt; T &gt;::_cvData</a>, <a class="el" href="SeCurve_8h_source.html#l00069">SeExpr::SeCurve&lt; T &gt;::CV::_deriv</a>, <a class="el" href="SeCurve_8h_source.html#l00070">SeExpr::SeCurve&lt; T &gt;::CV::_interp</a>, <a class="el" href="SeCurve_8h_source.html#l00068">SeExpr::SeCurve&lt; T &gt;::CV::_pos</a>, <a class="el" href="SeCurve_8h_source.html#l00069">SeExpr::SeCurve&lt; T &gt;::CV::_val</a>, <a class="el" href="SeCurve_8h_source.html#l00059">SeExpr::SeCurve&lt; T &gt;::cacheCV</a>, <a class="el" href="classSeExpr_1_1SeCurve.html#ac2f8a72997abc49a2188c14d3321df97">SeExpr::SeCurve&lt; T &gt;::clampCurveSegment()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00052">SeExpr::SeCurve&lt; T &gt;::cvLessThan()</a>, <a class="el" href="SeCurve_8h_source.html#l00062">SeExpr::SeCurve&lt; T &gt;::kMonotoneSpline</a>, <a class="el" href="SeCurve_8h_source.html#l00062">SeExpr::SeCurve&lt; T &gt;::kNone</a>, and <a class="el" href="SeCurve_8h_source.html#l00074">SeExpr::SeCurve&lt; T &gt;::prepared</a>.</p>
+<p>References <a class="el" href="SeCurve_8h_source.html#l00048">SeExpr::SeCurve&lt; T &gt;::_cvData</a>, <a class="el" href="SeCurve_8h_source.html#l00044">SeExpr::SeCurve&lt; T &gt;::CV::_deriv</a>, <a class="el" href="SeCurve_8h_source.html#l00045">SeExpr::SeCurve&lt; T &gt;::CV::_interp</a>, <a class="el" href="SeCurve_8h_source.html#l00043">SeExpr::SeCurve&lt; T &gt;::CV::_pos</a>, <a class="el" href="SeCurve_8h_source.html#l00044">SeExpr::SeCurve&lt; T &gt;::CV::_val</a>, <a class="el" href="SeCurve_8h_source.html#l00034">SeExpr::SeCurve&lt; T &gt;::cacheCV</a>, <a class="el" href="classSeExpr_1_1SeCurve.html#ac2f8a72997abc49a2188c14d3321df97">SeExpr::SeCurve&lt; T &gt;::clampCurveSegment()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00027">SeExpr::SeCurve&lt; T &gt;::cvLessThan()</a>, <a class="el" href="SeCurve_8h_source.html#l00037">SeExpr::SeCurve&lt; T &gt;::kMonotoneSpline</a>, <a class="el" href="SeCurve_8h_source.html#l00037">SeExpr::SeCurve&lt; T &gt;::kNone</a>, and <a class="el" href="SeCurve_8h_source.html#l00049">SeExpr::SeCurve&lt; T &gt;::prepared</a>.</p>
+
+<p>Referenced by <a class="el" href="SeExprEdCurve_8cpp_source.html#l00068">CurveScene::rebuildCurve()</a>, and <a class="el" href="SeExprEdColorCurve_8cpp_source.html#l00060">CCurveScene::rebuildCurve()</a>.</p>
 
 </div>
 </div>
@@ -593,9 +601,9 @@ template&lt;class T&gt; </div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeCurve_8h_source.html#l00073">73</a> of file <a class="el" href="SeCurve_8h_source.html">SeCurve.h</a>.</p>
+<p>Definition at line <a class="el" href="SeCurve_8h_source.html#l00048">48</a> of file <a class="el" href="SeCurve_8h_source.html">SeCurve.h</a>.</p>
 
-<p>Referenced by <a class="el" href="SeCurve_8cpp_source.html#l00066">SeExpr::SeCurve&lt; T &gt;::addPoint()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00184">SeExpr::SeCurve&lt; T &gt;::getChannelValue()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00238">SeExpr::SeCurve&lt; T &gt;::getLowerBoundCV()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00130">SeExpr::SeCurve&lt; T &gt;::getValue()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00073">SeExpr::SeCurve&lt; T &gt;::preparePoints()</a>, and <a class="el" href="SeCurve_8cpp_source.html#l00058">SeExpr::SeCurve&lt; T &gt;::SeCurve()</a>.</p>
+<p>Referenced by <a class="el" href="SeCurve_8cpp_source.html#l00041">SeExpr::SeCurve&lt; T &gt;::addPoint()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00153">SeExpr::SeCurve&lt; T &gt;::getChannelValue()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00207">SeExpr::SeCurve&lt; T &gt;::getLowerBoundCV()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00099">SeExpr::SeCurve&lt; T &gt;::getValue()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00048">SeExpr::SeCurve&lt; T &gt;::preparePoints()</a>, and <a class="el" href="SeCurve_8cpp_source.html#l00033">SeExpr::SeCurve&lt; T &gt;::SeCurve()</a>.</p>
 
 </div>
 </div>
@@ -612,9 +620,9 @@ template&lt;class T&gt; </div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeCurve_8h_source.html#l00059">59</a> of file <a class="el" href="SeCurve_8h_source.html">SeCurve.h</a>.</p>
+<p>Definition at line <a class="el" href="SeCurve_8h_source.html#l00034">34</a> of file <a class="el" href="SeCurve_8h_source.html">SeCurve.h</a>.</p>
 
-<p>Referenced by <a class="el" href="SeCurve_8cpp_source.html#l00073">SeExpr::SeCurve&lt; T &gt;::preparePoints()</a>.</p>
+<p>Referenced by <a class="el" href="SeCurve_8cpp_source.html#l00048">SeExpr::SeCurve&lt; T &gt;::preparePoints()</a>.</p>
 
 </div>
 </div>
@@ -631,18 +639,18 @@ template&lt;class T&gt; </div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeCurve_8h_source.html#l00074">74</a> of file <a class="el" href="SeCurve_8h_source.html">SeCurve.h</a>.</p>
+<p>Definition at line <a class="el" href="SeCurve_8h_source.html#l00049">49</a> of file <a class="el" href="SeCurve_8h_source.html">SeCurve.h</a>.</p>
 
-<p>Referenced by <a class="el" href="SeCurve_8cpp_source.html#l00066">SeExpr::SeCurve&lt; T &gt;::addPoint()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00184">SeExpr::SeCurve&lt; T &gt;::getChannelValue()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00238">SeExpr::SeCurve&lt; T &gt;::getLowerBoundCV()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00130">SeExpr::SeCurve&lt; T &gt;::getValue()</a>, and <a class="el" href="SeCurve_8cpp_source.html#l00073">SeExpr::SeCurve&lt; T &gt;::preparePoints()</a>.</p>
+<p>Referenced by <a class="el" href="SeCurve_8cpp_source.html#l00041">SeExpr::SeCurve&lt; T &gt;::addPoint()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00153">SeExpr::SeCurve&lt; T &gt;::getChannelValue()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00207">SeExpr::SeCurve&lt; T &gt;::getLowerBoundCV()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00099">SeExpr::SeCurve&lt; T &gt;::getValue()</a>, and <a class="el" href="SeCurve_8cpp_source.html#l00048">SeExpr::SeCurve&lt; T &gt;::preparePoints()</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
-<li>/jobs2/soft/users/aselle/src/seexpr-to-push/src/SeExpr/<a class="el" href="SeCurve_8h_source.html">SeCurve.h</a></li>
-<li>/jobs2/soft/users/aselle/src/seexpr-to-push/src/SeExpr/<a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a></li>
+<li>/disk1/scratch/aselle/projects/seexpr/SeExpr/src/SeExpr/<a class="el" href="SeCurve_8h_source.html">SeCurve.h</a></li>
+<li>/disk1/scratch/aselle/projects/seexpr/SeExpr/src/SeExpr/<a class="el" href="SeCurve_8cpp_source.html">SeCurve.cpp</a></li>
 </ul>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 3 May 2011 for SeExpr by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 25 Jul 2013 for SeExpr by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

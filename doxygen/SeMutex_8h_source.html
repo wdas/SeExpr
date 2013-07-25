@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<title>SeExpr: /jobs2/soft/users/aselle/src/seexpr-to-push/src/SeExpr/SeMutex.h Source File</title>
+<title>SeExpr: /disk1/scratch/aselle/projects/seexpr/SeExpr/src/SeExpr/SeMutex.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css"/>
 </head>
@@ -23,87 +23,62 @@
       <li><a href="globals.html"><span>File&nbsp;Members</span></a></li>
     </ul>
   </div>
-<h1>/jobs2/soft/users/aselle/src/seexpr-to-push/src/SeExpr/SeMutex.h</h1><a href="SeMutex_8h.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/* </span>
-<a name="l00002"></a>00002 <span class="comment">SEEXPR SOFTWARE</span>
-<a name="l00003"></a>00003 <span class="comment">Copyright 2011 Disney Enterprises, Inc.  All rights reserved</span>
-<a name="l00004"></a>00004 <span class="comment"></span>
-<a name="l00005"></a>00005 <span class="comment">Redistribution and use in source and binary forms, with or without</span>
-<a name="l00006"></a>00006 <span class="comment">modification, are permitted provided that the following conditions are</span>
-<a name="l00007"></a>00007 <span class="comment">met:</span>
-<a name="l00008"></a>00008 <span class="comment"></span>
-<a name="l00009"></a>00009 <span class="comment">  * Redistributions of source code must retain the above copyright</span>
-<a name="l00010"></a>00010 <span class="comment">    notice, this list of conditions and the following disclaimer.</span>
-<a name="l00011"></a>00011 <span class="comment"></span>
-<a name="l00012"></a>00012 <span class="comment">  * Redistributions in binary form must reproduce the above copyright</span>
-<a name="l00013"></a>00013 <span class="comment">    notice, this list of conditions and the following disclaimer in</span>
-<a name="l00014"></a>00014 <span class="comment">    the documentation and/or other materials provided with the</span>
-<a name="l00015"></a>00015 <span class="comment">    distribution.</span>
-<a name="l00016"></a>00016 <span class="comment"></span>
-<a name="l00017"></a>00017 <span class="comment">  * The names &quot;Disney&quot;, &quot;Walt Disney Pictures&quot;, &quot;Walt Disney Animation</span>
-<a name="l00018"></a>00018 <span class="comment">    Studios&quot; or the names of its contributors may NOT be used to</span>
-<a name="l00019"></a>00019 <span class="comment">    endorse or promote products derived from this software without</span>
-<a name="l00020"></a>00020 <span class="comment">    specific prior written permission from Walt Disney Pictures.</span>
-<a name="l00021"></a>00021 <span class="comment"></span>
-<a name="l00022"></a>00022 <span class="comment">Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND</span>
-<a name="l00023"></a>00023 <span class="comment">CONTRIBUTORS &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,</span>
-<a name="l00024"></a>00024 <span class="comment">BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS</span>
-<a name="l00025"></a>00025 <span class="comment">FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.</span>
-<a name="l00026"></a>00026 <span class="comment">IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR</span>
-<a name="l00027"></a>00027 <span class="comment">CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,</span>
-<a name="l00028"></a>00028 <span class="comment">EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,</span>
-<a name="l00029"></a>00029 <span class="comment">PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR</span>
-<a name="l00030"></a>00030 <span class="comment">PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY</span>
-<a name="l00031"></a>00031 <span class="comment">THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
-<a name="l00032"></a>00032 <span class="comment">(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
-<a name="l00033"></a>00033 <span class="comment">OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</span>
-<a name="l00034"></a>00034 <span class="comment">*/</span>
-<a name="l00035"></a>00035 <span class="preprocessor">#ifndef SeMutex_h</span>
-<a name="l00036"></a>00036 <span class="preprocessor"></span><span class="preprocessor">#define SeMutex_h</span>
-<a name="l00037"></a>00037 <span class="preprocessor"></span>
-<a name="l00038"></a>00038 
-<a name="l00039"></a>00039 <span class="comment">// #define DEBUG_THREADING</span>
-<a name="l00040"></a>00040 
-<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;<a class="code" href="SePlatform_8h.html" title="Platform-specific classes, functions, and includes.">SePlatform.h</a>&quot;</span>
+<h1>/disk1/scratch/aselle/projects/seexpr/SeExpr/src/SeExpr/SeMutex.h</h1><a href="SeMutex_8h.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/* </span>
+<a name="l00002"></a>00002 <span class="comment">* (c) Disney Enterprises, Inc.  All rights reserved.</span>
+<a name="l00003"></a>00003 <span class="comment">*</span>
+<a name="l00004"></a>00004 <span class="comment">* This file is licensed under the terms of the Microsoft Public License (MS-PL)</span>
+<a name="l00005"></a>00005 <span class="comment">* as defined at: http://opensource.org/licenses/MS-PL.</span>
+<a name="l00006"></a>00006 <span class="comment">*</span>
+<a name="l00007"></a>00007 <span class="comment">* A complete copy of this license is included in this distribution as the file</span>
+<a name="l00008"></a>00008 <span class="comment">* LICENSE.</span>
+<a name="l00009"></a>00009 <span class="comment">*/</span>
+<a name="l00010"></a>00010 <span class="preprocessor">#ifndef SeMutex_h</span>
+<a name="l00011"></a>00011 <span class="preprocessor"></span><span class="preprocessor">#define SeMutex_h</span>
+<a name="l00012"></a>00012 <span class="preprocessor"></span>
+<a name="l00013"></a>00013 
+<a name="l00014"></a>00014 <span class="comment">// #define DEBUG_THREADING</span>
+<a name="l00015"></a>00015 
+<a name="l00016"></a>00016 <span class="preprocessor">#include &quot;<a class="code" href="SePlatform_8h.html" title="Platform-specific classes, functions, and includes.">SePlatform.h</a>&quot;</span>
+<a name="l00017"></a>00017 
+<a name="l00019"></a><a class="code" href="namespaceSeExprInternal.html">00019</a> <span class="keyword">namespace </span>SeExprInternal {
+<a name="l00020"></a>00020 <span class="preprocessor">#ifndef NDEBUG</span>
+<a name="l00021"></a>00021 <span class="preprocessor"></span>    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00022"></a><a class="code" href="classSeExprInternal_1_1DebugLock.html">00022</a>     <span class="keyword">class </span><a class="code" href="classSeExprInternal_1_1DebugLock.html">DebugLock</a> : <span class="keyword">public</span> T {
+<a name="l00023"></a>00023      <span class="keyword">public</span>:
+<a name="l00024"></a><a class="code" href="classSeExprInternal_1_1DebugLock.html#a8ba7d354203698f5906706c32e6db5ca">00024</a>         <a class="code" href="classSeExprInternal_1_1DebugLock.html#a8ba7d354203698f5906706c32e6db5ca">DebugLock</a>() : <a class="code" href="classSeExprInternal_1_1DebugLock.html#a95c3ff8aa651031cb3ec255da1fdb48a">_locked</a>(0) {}
+<a name="l00025"></a><a class="code" href="classSeExprInternal_1_1DebugLock.html#a3dc38fe4f7baa7b1e790bb10a4489a52">00025</a>         <span class="keywordtype">void</span> <a class="code" href="classSeExprInternal_1_1DebugLock.html#a3dc38fe4f7baa7b1e790bb10a4489a52">lock</a>()   { <a class="code" href="classSeExprInternal_1_1DebugLock.html#a3dc38fe4f7baa7b1e790bb10a4489a52">T::lock</a>(); <a class="code" href="classSeExprInternal_1_1DebugLock.html#a95c3ff8aa651031cb3ec255da1fdb48a">_locked</a> = 1; }
+<a name="l00026"></a><a class="code" href="classSeExprInternal_1_1DebugLock.html#a01f06ab7eaa388c016c1e3e7fb1eafba">00026</a>         <span class="keywordtype">void</span> <a class="code" href="classSeExprInternal_1_1DebugLock.html#a01f06ab7eaa388c016c1e3e7fb1eafba">unlock</a>() { assert(<a class="code" href="classSeExprInternal_1_1DebugLock.html#a95c3ff8aa651031cb3ec255da1fdb48a">_locked</a>); <a class="code" href="classSeExprInternal_1_1DebugLock.html#a95c3ff8aa651031cb3ec255da1fdb48a">_locked</a> = 0; <a class="code" href="classSeExprInternal_1_1DebugLock.html#a01f06ab7eaa388c016c1e3e7fb1eafba">T::unlock</a>(); }
+<a name="l00027"></a><a class="code" href="classSeExprInternal_1_1DebugLock.html#a482209069ea890fafc75850bbf26b1ba">00027</a>         <span class="keywordtype">bool</span> <a class="code" href="classSeExprInternal_1_1DebugLock.html#a482209069ea890fafc75850bbf26b1ba">locked</a>() { <span class="keywordflow">return</span> <a class="code" href="classSeExprInternal_1_1DebugLock.html#a95c3ff8aa651031cb3ec255da1fdb48a">_locked</a> != 0; }
+<a name="l00028"></a>00028      <span class="keyword">private</span>:
+<a name="l00029"></a><a class="code" href="classSeExprInternal_1_1DebugLock.html#a95c3ff8aa651031cb3ec255da1fdb48a">00029</a>         <span class="keywordtype">int</span> <a class="code" href="classSeExprInternal_1_1DebugLock.html#a95c3ff8aa651031cb3ec255da1fdb48a">_locked</a>;
+<a name="l00030"></a>00030     };
+<a name="l00031"></a>00031 <span class="preprocessor">#endif</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span>
+<a name="l00034"></a>00034     <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00035"></a><a class="code" href="classSeExprInternal_1_1AutoLock.html">00035</a>     <span class="keyword">class </span><a class="code" href="classSeExprInternal_1_1AutoLock.html">AutoLock</a> {
+<a name="l00036"></a>00036     <span class="keyword">public</span>:
+<a name="l00037"></a><a class="code" href="classSeExprInternal_1_1AutoLock.html#aed4c3f82a40f987a82e55abf321ba9f6">00037</a>         <a class="code" href="classSeExprInternal_1_1AutoLock.html#aed4c3f82a40f987a82e55abf321ba9f6">AutoLock</a>(T&amp; m) : <a class="code" href="classSeExprInternal_1_1AutoLock.html#ad4e0150b99958b85f5be504499981de9">_m</a>(m) { <a class="code" href="classSeExprInternal_1_1AutoLock.html#ad4e0150b99958b85f5be504499981de9">_m</a>.lock(); }
+<a name="l00038"></a><a class="code" href="classSeExprInternal_1_1AutoLock.html#a1e19f3b98e148a5bb13aa984649fb4ce">00038</a>         <a class="code" href="classSeExprInternal_1_1AutoLock.html#a1e19f3b98e148a5bb13aa984649fb4ce">~AutoLock</a>()            { <a class="code" href="classSeExprInternal_1_1AutoLock.html#ad4e0150b99958b85f5be504499981de9">_m</a>.unlock(); }
+<a name="l00039"></a>00039     <span class="keyword">private</span>:
+<a name="l00040"></a><a class="code" href="classSeExprInternal_1_1AutoLock.html#ad4e0150b99958b85f5be504499981de9">00040</a>         T&amp; <a class="code" href="classSeExprInternal_1_1AutoLock.html#ad4e0150b99958b85f5be504499981de9">_m</a>;
+<a name="l00041"></a>00041     };
 <a name="l00042"></a>00042 
-<a name="l00044"></a><a class="code" href="namespaceSeExprInternal.html">00044</a> <span class="keyword">namespace </span>SeExprInternal {
-<a name="l00045"></a>00045 <span class="preprocessor">#ifndef NDEBUG</span>
-<a name="l00046"></a>00046 <span class="preprocessor"></span>    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
-<a name="l00047"></a><a class="code" href="classSeExprInternal_1_1DebugLock.html">00047</a>     <span class="keyword">class </span><a class="code" href="classSeExprInternal_1_1DebugLock.html">DebugLock</a> : <span class="keyword">public</span> T {
-<a name="l00048"></a>00048      <span class="keyword">public</span>:
-<a name="l00049"></a><a class="code" href="classSeExprInternal_1_1DebugLock.html#a8ba7d354203698f5906706c32e6db5ca">00049</a>         <a class="code" href="classSeExprInternal_1_1DebugLock.html#a8ba7d354203698f5906706c32e6db5ca">DebugLock</a>() : <a class="code" href="classSeExprInternal_1_1DebugLock.html#a95c3ff8aa651031cb3ec255da1fdb48a">_locked</a>(0) {}
-<a name="l00050"></a><a class="code" href="classSeExprInternal_1_1DebugLock.html#a3dc38fe4f7baa7b1e790bb10a4489a52">00050</a>         <span class="keywordtype">void</span> <a class="code" href="classSeExprInternal_1_1DebugLock.html#a3dc38fe4f7baa7b1e790bb10a4489a52">lock</a>()   { <a class="code" href="classSeExprInternal_1_1DebugLock.html#a3dc38fe4f7baa7b1e790bb10a4489a52">T::lock</a>(); <a class="code" href="classSeExprInternal_1_1DebugLock.html#a95c3ff8aa651031cb3ec255da1fdb48a">_locked</a> = 1; }
-<a name="l00051"></a><a class="code" href="classSeExprInternal_1_1DebugLock.html#a01f06ab7eaa388c016c1e3e7fb1eafba">00051</a>         <span class="keywordtype">void</span> <a class="code" href="classSeExprInternal_1_1DebugLock.html#a01f06ab7eaa388c016c1e3e7fb1eafba">unlock</a>() { assert(<a class="code" href="classSeExprInternal_1_1DebugLock.html#a95c3ff8aa651031cb3ec255da1fdb48a">_locked</a>); <a class="code" href="classSeExprInternal_1_1DebugLock.html#a95c3ff8aa651031cb3ec255da1fdb48a">_locked</a> = 0; <a class="code" href="classSeExprInternal_1_1DebugLock.html#a01f06ab7eaa388c016c1e3e7fb1eafba">T::unlock</a>(); }
-<a name="l00052"></a><a class="code" href="classSeExprInternal_1_1DebugLock.html#a482209069ea890fafc75850bbf26b1ba">00052</a>         <span class="keywordtype">bool</span> <a class="code" href="classSeExprInternal_1_1DebugLock.html#a482209069ea890fafc75850bbf26b1ba">locked</a>() { <span class="keywordflow">return</span> <a class="code" href="classSeExprInternal_1_1DebugLock.html#a95c3ff8aa651031cb3ec255da1fdb48a">_locked</a> != 0; }
-<a name="l00053"></a>00053      <span class="keyword">private</span>:
-<a name="l00054"></a><a class="code" href="classSeExprInternal_1_1DebugLock.html#a95c3ff8aa651031cb3ec255da1fdb48a">00054</a>         <span class="keywordtype">int</span> <a class="code" href="classSeExprInternal_1_1DebugLock.html#a95c3ff8aa651031cb3ec255da1fdb48a">_locked</a>;
-<a name="l00055"></a>00055     };
+<a name="l00043"></a>00043 <span class="preprocessor">#ifndef NDEBUG</span>
+<a name="l00044"></a>00044 <span class="preprocessor"></span>    <span class="comment">// add debug wrappers to mutex and spinlock</span>
+<a name="l00045"></a><a class="code" href="namespaceSeExprInternal.html#a09fcfd5c3eba62dd018b85f802697aa6">00045</a>     <span class="keyword">typedef</span> <a class="code" href="classSeExprInternal_1_1DebugLock.html">DebugLock&lt;_Mutex&gt;</a> <a class="code" href="classSeExprInternal_1_1DebugLock.html">Mutex</a>;
+<a name="l00046"></a><a class="code" href="namespaceSeExprInternal.html#af756017467e5af7db85677a1d8650df9">00046</a>     <span class="keyword">typedef</span> <a class="code" href="classSeExprInternal_1_1DebugLock.html">DebugLock&lt;_SpinLock&gt;</a> <a class="code" href="classSeExprInternal_1_1DebugLock.html">SpinLock</a>;
+<a name="l00047"></a>00047 <span class="preprocessor">#else</span>
+<a name="l00048"></a>00048 <span class="preprocessor"></span>    <span class="keyword">typedef</span> <a class="code" href="classSeExprInternal_1_1__Mutex.html">_Mutex</a> <a class="code" href="classSeExprInternal_1_1DebugLock.html">Mutex</a>;
+<a name="l00049"></a>00049     <span class="keyword">typedef</span> <a class="code" href="classSeExprInternal_1_1__SpinLock.html">_SpinLock</a> <a class="code" href="classSeExprInternal_1_1DebugLock.html">SpinLock</a>;
+<a name="l00050"></a>00050 <span class="preprocessor">#endif</span>
+<a name="l00051"></a>00051 <span class="preprocessor"></span>
+<a name="l00052"></a><a class="code" href="namespaceSeExprInternal.html#a5beaeed079d5a925a940197294ad95dc">00052</a>     <span class="keyword">typedef</span> <a class="code" href="classSeExprInternal_1_1AutoLock.html">AutoLock&lt;Mutex&gt;</a> <a class="code" href="classSeExprInternal_1_1AutoLock.html">AutoMutex</a>;
+<a name="l00053"></a><a class="code" href="namespaceSeExprInternal.html#a6f30d83f1b1fc6e08849f9c26cb82684">00053</a>     <span class="keyword">typedef</span> <a class="code" href="classSeExprInternal_1_1AutoLock.html">AutoLock&lt;SpinLock&gt;</a> <a class="code" href="classSeExprInternal_1_1AutoLock.html">AutoSpin</a>;
+<a name="l00054"></a>00054 }
+<a name="l00055"></a>00055 
 <a name="l00056"></a>00056 <span class="preprocessor">#endif</span>
-<a name="l00057"></a>00057 <span class="preprocessor"></span>
-<a name="l00059"></a>00059     <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
-<a name="l00060"></a><a class="code" href="classSeExprInternal_1_1AutoLock.html">00060</a>     <span class="keyword">class </span><a class="code" href="classSeExprInternal_1_1AutoLock.html">AutoLock</a> {
-<a name="l00061"></a>00061     <span class="keyword">public</span>:
-<a name="l00062"></a><a class="code" href="classSeExprInternal_1_1AutoLock.html#aed4c3f82a40f987a82e55abf321ba9f6">00062</a>         <a class="code" href="classSeExprInternal_1_1AutoLock.html#aed4c3f82a40f987a82e55abf321ba9f6">AutoLock</a>(T&amp; m) : <a class="code" href="classSeExprInternal_1_1AutoLock.html#ad4e0150b99958b85f5be504499981de9">_m</a>(m) { <a class="code" href="classSeExprInternal_1_1AutoLock.html#ad4e0150b99958b85f5be504499981de9">_m</a>.lock(); }
-<a name="l00063"></a><a class="code" href="classSeExprInternal_1_1AutoLock.html#a1e19f3b98e148a5bb13aa984649fb4ce">00063</a>         <a class="code" href="classSeExprInternal_1_1AutoLock.html#a1e19f3b98e148a5bb13aa984649fb4ce">~AutoLock</a>()            { <a class="code" href="classSeExprInternal_1_1AutoLock.html#ad4e0150b99958b85f5be504499981de9">_m</a>.unlock(); }
-<a name="l00064"></a>00064     <span class="keyword">private</span>:
-<a name="l00065"></a><a class="code" href="classSeExprInternal_1_1AutoLock.html#ad4e0150b99958b85f5be504499981de9">00065</a>         T&amp; <a class="code" href="classSeExprInternal_1_1AutoLock.html#ad4e0150b99958b85f5be504499981de9">_m</a>;
-<a name="l00066"></a>00066     };
-<a name="l00067"></a>00067 
-<a name="l00068"></a>00068 <span class="preprocessor">#ifndef NDEBUG</span>
-<a name="l00069"></a>00069 <span class="preprocessor"></span>    <span class="comment">// add debug wrappers to mutex and spinlock</span>
-<a name="l00070"></a><a class="code" href="namespaceSeExprInternal.html#a09fcfd5c3eba62dd018b85f802697aa6">00070</a>     <span class="keyword">typedef</span> <a class="code" href="classSeExprInternal_1_1DebugLock.html">DebugLock&lt;_Mutex&gt;</a> <a class="code" href="classSeExprInternal_1_1DebugLock.html">Mutex</a>;
-<a name="l00071"></a><a class="code" href="namespaceSeExprInternal.html#af756017467e5af7db85677a1d8650df9">00071</a>     <span class="keyword">typedef</span> <a class="code" href="classSeExprInternal_1_1DebugLock.html">DebugLock&lt;_SpinLock&gt;</a> <a class="code" href="classSeExprInternal_1_1DebugLock.html">SpinLock</a>;
-<a name="l00072"></a>00072 <span class="preprocessor">#else</span>
-<a name="l00073"></a>00073 <span class="preprocessor"></span>    <span class="keyword">typedef</span> <a class="code" href="classSeExprInternal_1_1__Mutex.html">_Mutex</a> <a class="code" href="classSeExprInternal_1_1DebugLock.html">Mutex</a>;
-<a name="l00074"></a>00074     <span class="keyword">typedef</span> <a class="code" href="classSeExprInternal_1_1__SpinLock.html">_SpinLock</a> <a class="code" href="classSeExprInternal_1_1DebugLock.html">SpinLock</a>;
-<a name="l00075"></a>00075 <span class="preprocessor">#endif</span>
-<a name="l00076"></a>00076 <span class="preprocessor"></span>
-<a name="l00077"></a><a class="code" href="namespaceSeExprInternal.html#a5beaeed079d5a925a940197294ad95dc">00077</a>     <span class="keyword">typedef</span> <a class="code" href="classSeExprInternal_1_1AutoLock.html">AutoLock&lt;Mutex&gt;</a> <a class="code" href="classSeExprInternal_1_1AutoLock.html">AutoMutex</a>;
-<a name="l00078"></a><a class="code" href="namespaceSeExprInternal.html#a6f30d83f1b1fc6e08849f9c26cb82684">00078</a>     <span class="keyword">typedef</span> <a class="code" href="classSeExprInternal_1_1AutoLock.html">AutoLock&lt;SpinLock&gt;</a> <a class="code" href="classSeExprInternal_1_1AutoLock.html">AutoSpin</a>;
-<a name="l00079"></a>00079 }
-<a name="l00080"></a>00080 
-<a name="l00081"></a>00081 <span class="preprocessor">#endif</span>
 </pre></div></div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 3 May 2011 for SeExpr by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 25 Jul 2013 for SeExpr by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

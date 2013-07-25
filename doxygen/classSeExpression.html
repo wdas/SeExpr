@@ -37,11 +37,7 @@ Inheritance diagram for SeExpression:</div>
  <div class="center">
   <img src="classSeExpression.gif" usemap="#SeExpression_map" alt=""/>
   <map id="SeExpression_map" name="SeExpression_map">
-<area href="classGrapherExpr.html" alt="GrapherExpr" shape="rect" coords="0,56,103,80"/>
-<area href="classGrapherExpr.html" alt="GrapherExpr" shape="rect" coords="113,56,216,80"/>
-<area href="classGrapherExpr.html" alt="GrapherExpr" shape="rect" coords="226,56,329,80"/>
-<area href="classGrapherExpr.html" alt="GrapherExpr" shape="rect" coords="339,56,442,80"/>
-<area href="classImageSynthExpr.html" alt="ImageSynthExpr" shape="rect" coords="452,56,555,80"/>
+<area href="classSeExprEdExpression.html" alt="SeExprEdExpression" shape="rect" coords="0,56,130,80"/>
 </map>
  </div>
 </div>
@@ -56,7 +52,7 @@ Inheritance diagram for SeExpression:</div>
 <a class="el" href="classSeExprLocalVarRef.html">SeExprLocalVarRef</a> &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpression.html#a77c9a5d8ce27679b7c5b4c081b251a0c">LocalVarTable</a></td></tr>
 <tr><td colspan="2"><h2>Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpression.html#a1fd186a77bf0eef17c8c6fe02b92f8d9">SeExpression</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpression.html#a337d3ff9ad36d3a01d9bdd0f398f38f8">SeExpression</a> (const std::string &amp;e, bool wantVec=1)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpression.html#a4058ef1b8a69adc48be8d3660d6ca816">SeExpression</a> (const std::string &amp;e, bool wantVec=true)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">virtual&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpression.html#abe37530aa43dd4b4ab8455232cdde625">~SeExpression</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpression.html#a00570baeff92699a0f2433da7cbe0beb">setWantVec</a> (bool wantVec)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpression.html#a8accd0bc751d4f74f93313a7ca768647">setExpr</a> (const std::string &amp;e)</td></tr>
@@ -76,8 +72,8 @@ Inheritance diagram for SeExpression:</div>
 <tr><td class="memItemLeft" align="right" valign="top">bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpression.html#a326fed830ba90dab0b3860531e6c4999">isVec</a> () const </td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="classSeVec3d.html">SeVec3d</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpression.html#aff6b471712214dd50feec63cefbaa2af">evaluate</a> () const </td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpression.html#a0f7e74d4f0f294656b11cc2ddcc985be">reset</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classSeExprVarRef.html">SeExprVarRef</a> *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpression.html#ab55efa5fec32e4068caca4cc066f4dec">resolveVar</a> (const std::string &amp;name) const </td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classSeExprFunc.html">SeExprFunc</a> *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpression.html#a580e8bc44c812a21d3db63c65821986e">resolveFunc</a> (const std::string &amp;name) const </td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classSeExprVarRef.html">SeExprVarRef</a> *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpression.html#a0e10c8d733a21d1a84d10470a469d2ca">resolveVar</a> (const std::string &amp;) const </td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classSeExprFunc.html">SeExprFunc</a> *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpression.html#a02d05982db5487ae02376a68a45b5b3e">resolveFunc</a> (const std::string &amp;) const </td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpression.html#ae3b50a42fc19e25e78ae0e9743f44297">addError</a> (const std::string &amp;error, const int startPos, const int endPos) const </td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classSeExpression.html#a77c9a5d8ce27679b7c5b4c081b251a0c">LocalVarTable</a> &amp;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpression.html#a7ee0d2eaf1bb31165d1d66483f93b619">getLocalVars</a> () const </td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpression.html#a9f837ff7cdf75aebf0c936fe5771ed8f">addVar</a> (const char *n) const </td></tr>
@@ -106,11 +102,12 @@ Inheritance diagram for SeExpression:</div>
 <tr><td class="memItemLeft" align="right" valign="top">std::set&lt; std::string &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpression.html#a7cd61e0182e29fea97568cc5a852f048">_funcs</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="classSeExpression.html#a77c9a5d8ce27679b7c5b4c081b251a0c">LocalVarTable</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpression.html#a6e8ebf79e30dc138463aa524d5c4f2b4">_localVars</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::string &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpression.html#af579d23fb9f19e26e47c1ccf7a4931a3">_threadUnsafeFunctionCalls</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">std::vector&lt; char * &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpression.html#a480af3a4908e135480489ed39f3a55c2">_stringTokens</a></td></tr>
 </table>
 <hr/><a name="_details"></a><h2>Detailed Description</h2>
 <p>main expression class </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00095">95</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00071">71</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 <hr/><h2>Member Typedef Documentation</h2>
 <a class="anchor" id="a77c9a5d8ce27679b7c5b4c081b251a0c"></a><!-- doxytag: member="SeExpression::LocalVarTable" ref="a77c9a5d8ce27679b7c5b4c081b251a0c" args="" -->
 <div class="memitem">
@@ -123,7 +120,7 @@ Inheritance diagram for SeExpression:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00098">98</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00074">74</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
 </div>
 </div>
@@ -143,13 +140,13 @@ Inheritance diagram for SeExpression:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00050">50</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00025">25</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
 
-<p>References <a class="el" href="SeExprFunc_8cpp_source.html#l00103">SeExprFunc::init()</a>.</p>
+<p>References <a class="el" href="SeExprFunc_8cpp_source.html#l00130">SeExprFunc::init()</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a337d3ff9ad36d3a01d9bdd0f398f38f8"></a><!-- doxytag: member="SeExpression::SeExpression" ref="a337d3ff9ad36d3a01d9bdd0f398f38f8" args="(const std::string &amp;e, bool wantVec=1)" -->
+<a class="anchor" id="a4058ef1b8a69adc48be8d3660d6ca816"></a><!-- doxytag: member="SeExpression::SeExpression" ref="a4058ef1b8a69adc48be8d3660d6ca816" args="(const std::string &amp;e, bool wantVec=true)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -163,7 +160,7 @@ Inheritance diagram for SeExpression:</div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">bool&nbsp;</td>
-          <td class="paramname"> <em>wantVec</em> = <code>1</code></td><td>&nbsp;</td>
+          <td class="paramname"> <em>wantVec</em> = <code>true</code></td><td>&nbsp;</td>
         </tr>
         <tr>
           <td></td>
@@ -174,9 +171,9 @@ Inheritance diagram for SeExpression:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00057">57</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00032">32</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
 
-<p>References <a class="el" href="SeExprFunc_8cpp_source.html#l00103">SeExprFunc::init()</a>.</p>
+<p>References <a class="el" href="SeExprFunc_8cpp_source.html#l00130">SeExprFunc::init()</a>.</p>
 
 </div>
 </div>
@@ -195,9 +192,9 @@ Inheritance diagram for SeExpression:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00064">64</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00039">39</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8cpp_source.html#l00069">reset()</a>.</p>
+<p>References <a class="el" href="SeExpression_8cpp_source.html#l00044">reset()</a>.</p>
 
 </div>
 </div>
@@ -253,11 +250,11 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>records an error in prep or parse stage </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00199">199</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00175">175</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00239">_errors</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00215">_errors</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExprNode_8h_source.html#l00096">SeExprNode::addError()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00126">parse()</a>.</p>
+<p>Referenced by <a class="el" href="SeExprNode_8h_source.html#l00067">SeExprNode::addError()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00103">parse()</a>.</p>
 
 </div>
 </div>
@@ -279,11 +276,11 @@ Inheritance diagram for SeExpression:</div>
 
 <p>add local function (this is for internal use) </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00259">259</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00238">238</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00245">_funcs</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00221">_funcs</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExprNode_8h_source.html#l00463">SeExprFuncNode::SeExprFuncNode()</a>.</p>
+<p>Referenced by <a class="el" href="SeExprNode_8h_source.html#l00434">SeExprFuncNode::SeExprFuncNode()</a>.</p>
 
 </div>
 </div>
@@ -305,11 +302,11 @@ Inheritance diagram for SeExpression:</div>
 
 <p>add local variable (this is for internal use) </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00256">256</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00235">235</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00242">_vars</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00218">_vars</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExprNode_8h_source.html#l00407">SeExprVarNode::SeExprVarNode()</a>.</p>
+<p>Referenced by <a class="el" href="SeExprNode_8h_source.html#l00378">SeExprVarNode::SeExprVarNode()</a>.</p>
 
 </div>
 </div>
@@ -329,11 +326,11 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Evaluate the expression. This will parse and bind if needed </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00183">183</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00155">155</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00248">_localVars</a>, <a class="el" href="SeExpression_8h_source.html#l00230">_parseTree</a>, <a class="el" href="SeExpression_8h_source.html#l00224">_wantVec</a>, <a class="el" href="SeExprNode_8cpp_source.html#l00158">SeExprNode::eval()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00176">isVec()</a>, and <a class="el" href="SeExpression_8h_source.html#l00221">prepIfNeeded()</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00224">_localVars</a>, <a class="el" href="SeExpression_8h_source.html#l00206">_parseTree</a>, <a class="el" href="SeExpression_8h_source.html#l00200">_wantVec</a>, <a class="el" href="SeExprNode_8cpp_source.html#l00133">SeExprNode::eval()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00148">isVec()</a>, and <a class="el" href="SeExpression_8h_source.html#l00197">prepIfNeeded()</a>.</p>
 
-<p>Referenced by <a class="el" href="asciiGraph_8cpp_source.html#l00077">main()</a>.</p>
+<p>Referenced by <a class="el" href="SeExprEdGrapher2d_8cpp_source.html#l00194">SeExprEdGrapherView::update()</a>.</p>
 
 </div>
 </div>
@@ -353,9 +350,11 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Get a reference to a list of parse errors in the expression. The error structure gives location information as well as the errors itself. </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00150">150</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00126">126</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00239">_errors</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00215">_errors</a>.</p>
+
+<p>Referenced by <a class="el" href="SeExprEdDialog_8cpp_source.html#l00281">SeExprEdDialog::applyExpression()</a>.</p>
 
 </div>
 </div>
@@ -376,9 +375,9 @@ Inheritance diagram for SeExpression:</div>
 
 <p>Get the string that this expression is currently set to evaluate. </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00131">131</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00107">107</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00227">_expression</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00203">_expression</a>.</p>
 
 </div>
 </div>
@@ -399,11 +398,11 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>get local variable reference. This is potentially useful for expression debuggers and/or uses of expressions where mutable variables are desired </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00270">270</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00249">249</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00248">_localVars</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00224">_localVars</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExprNode_8cpp_source.html#l00226">SeExprAssignNode::prep()</a>.</p>
+<p>Referenced by <a class="el" href="SeExprNode_8cpp_source.html#l00201">SeExprAssignNode::prep()</a>.</p>
 
 </div>
 </div>
@@ -423,9 +422,9 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Returns a read only map of local variables that were set </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00203">203</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00179">179</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00248">_localVars</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00224">_localVars</a>.</p>
 
 </div>
 </div>
@@ -445,9 +444,9 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Returns a list of functions that are not threadSafe </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00175">175</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00151">151</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00251">_threadUnsafeFunctionCalls</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00227">_threadUnsafeFunctionCalls</a>.</p>
 
 </div>
 </div>
@@ -467,9 +466,9 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Check if expression is constant. Expr will be parsed if needed. No binding is required. </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00107">107</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00084">84</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00245">_funcs</a>, <a class="el" href="SeExpression_8h_source.html#l00242">_vars</a>, and <a class="el" href="SeExpression_8h_source.html#l00218">parseIfNeeded()</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00221">_funcs</a>, <a class="el" href="SeExpression_8h_source.html#l00218">_vars</a>, and <a class="el" href="SeExpression_8h_source.html#l00194">parseIfNeeded()</a>.</p>
 
 </div>
 </div>
@@ -489,9 +488,9 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Returns whether the expression contains and calls to non-threadsafe </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00166">166</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00142">142</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00251">_threadUnsafeFunctionCalls</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00227">_threadUnsafeFunctionCalls</a>.</p>
 
 </div>
 </div>
@@ -511,11 +510,11 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Check if expression is valid. Expr will be parsed if needed. Variables and functions will also be bound. If this returns false, the error message can be accessed via <a class="el" href="classSeExpression.html#abb86eb12a695da1f1139707db0036b64">parseError()</a> </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00101">101</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00078">78</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00230">_parseTree</a>, and <a class="el" href="SeExpression_8h_source.html#l00221">prepIfNeeded()</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00206">_parseTree</a>, and <a class="el" href="SeExpression_8h_source.html#l00197">prepIfNeeded()</a>.</p>
 
-<p>Referenced by <a class="el" href="asciiGraph_8cpp_source.html#l00077">main()</a>.</p>
+<p>Referenced by <a class="el" href="SeExprEdDialog_8cpp_source.html#l00281">SeExprEdDialog::applyExpression()</a>, <a class="el" href="SeExprEdShortEdit_8cpp_source.html#l00277">SeExprEdShortEdit::checkErrors()</a>, <a class="el" href="SeExprEdGrapher2d_8cpp_source.html#l00194">SeExprEdGrapherView::update()</a>, <a class="el" href="SeExprEdDialog_8cpp_source.html#l00188">SeExprEdDialog::verifiedAccept()</a>, and <a class="el" href="SeExprEdDialog_8cpp_source.html#l00167">SeExprEdDialog::verifiedApply()</a>.</p>
 
 </div>
 </div>
@@ -535,11 +534,11 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Determine if expression computes a vector (may be false even if wantVec is true). Expr will be parsed and variables and functions will be bound if needed. </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00176">176</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00148">148</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00230">_parseTree</a>, <a class="el" href="SeExpression_8h_source.html#l00224">_wantVec</a>, <a class="el" href="SeExprNode_8h_source.html#l00061">SeExprNode::isVec()</a>, and <a class="el" href="SeExpression_8h_source.html#l00221">prepIfNeeded()</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00206">_parseTree</a>, <a class="el" href="SeExpression_8h_source.html#l00200">_wantVec</a>, <a class="el" href="SeExprNode_8h_source.html#l00036">SeExprNode::isVec()</a>, and <a class="el" href="SeExpression_8h_source.html#l00197">prepIfNeeded()</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00183">evaluate()</a>.</p>
+<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00155">evaluate()</a>.</p>
 
 </div>
 </div>
@@ -577,11 +576,11 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Parse, and remember parse error if any </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00126">126</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00103">103</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00227">_expression</a>, <a class="el" href="SeExpression_8h_source.html#l00233">_parsed</a>, <a class="el" href="SeExpression_8h_source.html#l00236">_parseError</a>, <a class="el" href="SeExpression_8h_source.html#l00230">_parseTree</a>, <a class="el" href="SeExpression_8h_source.html#l00224">_wantVec</a>, <a class="el" href="SeExpression_8h_source.html#l00199">addError()</a>, and <a class="el" href="SeExprParser_8h.html#a6f084703375cfdf159c96b8e005e9e87">SeExprParse()</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00203">_expression</a>, <a class="el" href="SeExpression_8h_source.html#l00209">_parsed</a>, <a class="el" href="SeExpression_8h_source.html#l00212">_parseError</a>, <a class="el" href="SeExpression_8h_source.html#l00206">_parseTree</a>, <a class="el" href="SeExpression_8h_source.html#l00230">_stringTokens</a>, <a class="el" href="SeExpression_8h_source.html#l00175">addError()</a>, and <a class="el" href="SeExprParser_8h.html#ab5fc1db0712581adfd18ecd367b546b4">SeExprParse()</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExpression_8h_source.html#l00218">parseIfNeeded()</a>.</p>
+<p>Referenced by <a class="el" href="SeExpression_8h_source.html#l00194">parseIfNeeded()</a>.</p>
 
 </div>
 </div>
@@ -601,11 +600,11 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Get parse error (if any). First call syntaxOK or isValid to parse (and optionally bind) the expression. </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00146">146</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00122">122</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00236">_parseError</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00212">_parseError</a>.</p>
 
-<p>Referenced by <a class="el" href="asciiGraph_8cpp_source.html#l00077">main()</a>.</p>
+<p>Referenced by <a class="el" href="SeExprEdShortEdit_8cpp_source.html#l00277">SeExprEdShortEdit::checkErrors()</a>.</p>
 
 </div>
 </div>
@@ -625,11 +624,11 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Parse, but only if not yet parsed </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00218">218</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00194">194</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00233">_parsed</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00126">parse()</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00209">_parsed</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00103">parse()</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00107">isConstant()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00139">prep()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00095">syntaxOK()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00119">usesFunc()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00113">usesVar()</a>.</p>
+<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00084">isConstant()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00116">prep()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00072">syntaxOK()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00096">usesFunc()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00090">usesVar()</a>.</p>
 
 </div>
 </div>
@@ -649,11 +648,11 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Prepare expression (bind vars/functions, etc.) and remember error if any </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00139">139</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00116">116</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00239">_errors</a>, <a class="el" href="SeExpression_8h_source.html#l00227">_expression</a>, <a class="el" href="SeExpression_8h_source.html#l00236">_parseError</a>, <a class="el" href="SeExpression_8h_source.html#l00230">_parseTree</a>, <a class="el" href="SeExpression_8h_source.html#l00233">_prepped</a>, <a class="el" href="SeExprNode_8h_source.html#l00096">SeExprNode::addError()</a>, <a class="el" href="SeNoiseTables_8h_source.html#l00038">p</a>, <a class="el" href="SeExpression_8h_source.html#l00218">parseIfNeeded()</a>, <a class="el" href="SeExprNode_8cpp_source.html#l00141">SeExprNode::prep()</a>, and <a class="el" href="SeExpression_8h_source.html#l00179">wantVec()</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00215">_errors</a>, <a class="el" href="SeExpression_8h_source.html#l00203">_expression</a>, <a class="el" href="SeExpression_8h_source.html#l00212">_parseError</a>, <a class="el" href="SeExpression_8h_source.html#l00206">_parseTree</a>, <a class="el" href="SeExpression_8h_source.html#l00209">_prepped</a>, <a class="el" href="SeNoiseTables_8h_source.html#l00013">p</a>, <a class="el" href="SeExpression_8h_source.html#l00194">parseIfNeeded()</a>, <a class="el" href="SeExprNode_8cpp_source.html#l00116">SeExprNode::prep()</a>, and <a class="el" href="SeExpression_8h_source.html#l00155">wantVec()</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExpression_8h_source.html#l00221">prepIfNeeded()</a>.</p>
+<p>Referenced by <a class="el" href="SeExpression_8h_source.html#l00197">prepIfNeeded()</a>.</p>
 
 </div>
 </div>
@@ -673,11 +672,11 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Prepare, but only if not yet prepped </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00221">221</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00197">197</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00233">_prepped</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00139">prep()</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00209">_prepped</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00116">prep()</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00183">evaluate()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00101">isValid()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00176">isVec()</a>.</p>
+<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00155">evaluate()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00078">isValid()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00148">isVec()</a>.</p>
 
 </div>
 </div>
@@ -697,15 +696,15 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Reset expr - force reparse/rebind </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00069">69</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00044">44</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00239">_errors</a>, <a class="el" href="SeExpression_8h_source.html#l00245">_funcs</a>, <a class="el" href="SeExpression_8h_source.html#l00248">_localVars</a>, <a class="el" href="SeExpression_8h_source.html#l00233">_parsed</a>, <a class="el" href="SeExpression_8h_source.html#l00236">_parseError</a>, <a class="el" href="SeExpression_8h_source.html#l00230">_parseTree</a>, <a class="el" href="SeExpression_8h_source.html#l00233">_prepped</a>, <a class="el" href="SeExpression_8h_source.html#l00251">_threadUnsafeFunctionCalls</a>, and <a class="el" href="SeExpression_8h_source.html#l00242">_vars</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00215">_errors</a>, <a class="el" href="SeExpression_8h_source.html#l00221">_funcs</a>, <a class="el" href="SeExpression_8h_source.html#l00224">_localVars</a>, <a class="el" href="SeExpression_8h_source.html#l00209">_parsed</a>, <a class="el" href="SeExpression_8h_source.html#l00212">_parseError</a>, <a class="el" href="SeExpression_8h_source.html#l00206">_parseTree</a>, <a class="el" href="SeExpression_8h_source.html#l00209">_prepped</a>, <a class="el" href="SeExpression_8h_source.html#l00230">_stringTokens</a>, <a class="el" href="SeExpression_8h_source.html#l00227">_threadUnsafeFunctionCalls</a>, and <a class="el" href="SeExpression_8h_source.html#l00218">_vars</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00089">setExpr()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00083">setWantVec()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00064">~SeExpression()</a>.</p>
+<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00066">setExpr()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00060">setWantVec()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00039">~SeExpression()</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a580e8bc44c812a21d3db63c65821986e"></a><!-- doxytag: member="SeExpression::resolveFunc" ref="a580e8bc44c812a21d3db63c65821986e" args="(const std::string &amp;name) const " -->
+<a class="anchor" id="a02d05982db5487ae02376a68a45b5b3e"></a><!-- doxytag: member="SeExpression::resolveFunc" ref="a02d05982db5487ae02376a68a45b5b3e" args="(const std::string &amp;) const " -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -713,7 +712,7 @@ Inheritance diagram for SeExpression:</div>
           <td class="memname">virtual <a class="el" href="classSeExprFunc.html">SeExprFunc</a>* SeExpression::resolveFunc </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&nbsp;</td>
-          <td class="paramname"> <em>name</em></td>
+          <td class="paramname"></td>
           <td>&nbsp;)&nbsp;</td>
           <td> const<code> [inline, virtual]</code></td>
         </tr>
@@ -722,9 +721,11 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>override resolveFunc to add external functions </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00196">196</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Reimplemented in <a class="el" href="classSeExprEdExpression.html#acb466f2807f513dcd344cf68a9ebb467">SeExprEdExpression</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExprNode_8cpp_source.html#l00699">SeExprFuncNode::prep()</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00172">172</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+
+<p>Referenced by <a class="el" href="SeExprNode_8cpp_source.html#l00674">SeExprFuncNode::prep()</a>.</p>
 
 </div>
 </div>
@@ -746,15 +747,15 @@ Inheritance diagram for SeExpression:</div>
 
 <p>get local variable reference (this is for internal use) </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00262">262</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00241">241</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00248">_localVars</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00224">_localVars</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExprNode_8cpp_source.html#l00676">SeExprVarNode::prep()</a>.</p>
+<p>Referenced by <a class="el" href="SeExprNode_8cpp_source.html#l00651">SeExprVarNode::prep()</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="ab55efa5fec32e4068caca4cc066f4dec"></a><!-- doxytag: member="SeExpression::resolveVar" ref="ab55efa5fec32e4068caca4cc066f4dec" args="(const std::string &amp;name) const " -->
+<a class="anchor" id="a0e10c8d733a21d1a84d10470a469d2ca"></a><!-- doxytag: member="SeExpression::resolveVar" ref="a0e10c8d733a21d1a84d10470a469d2ca" args="(const std::string &amp;) const " -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -762,7 +763,7 @@ Inheritance diagram for SeExpression:</div>
           <td class="memname">virtual <a class="el" href="classSeExprVarRef.html">SeExprVarRef</a>* SeExpression::resolveVar </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&nbsp;</td>
-          <td class="paramname"> <em>name</em></td>
+          <td class="paramname"></td>
           <td>&nbsp;)&nbsp;</td>
           <td> const<code> [inline, virtual]</code></td>
         </tr>
@@ -771,11 +772,11 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>override resolveVar to add external variables </p>
 
-<p>Reimplemented in <a class="el" href="classGrapherExpr.html#a90fb05ebb5f39f7d54dd2ee98c47d50e">GrapherExpr</a>, and <a class="el" href="classImageSynthExpr.html#a84696e5ea7a2c9c9d40ad1f7d442d16e">ImageSynthExpr</a>.</p>
+<p>Reimplemented in <a class="el" href="classSeExprEdExpression.html#ada62840b68954c65a01e8af810b587cd">SeExprEdExpression</a>.</p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00193">193</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00169">169</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExprNode_8cpp_source.html#l00676">SeExprVarNode::prep()</a>.</p>
+<p>Referenced by <a class="el" href="SeExprNode_8cpp_source.html#l00651">SeExprVarNode::prep()</a>.</p>
 
 </div>
 </div>
@@ -796,9 +797,11 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Set expression string to e. This invalidates all parsed state. </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00089">89</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
+<p>Reimplemented in <a class="el" href="classSeExprEdExpression.html#a581dd91982f8f6f6771e1a79e78eefbf">SeExprEdExpression</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00227">_expression</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00069">reset()</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00066">66</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
+
+<p>References <a class="el" href="SeExpression_8h_source.html#l00203">_expression</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00044">reset()</a>.</p>
 
 </div>
 </div>
@@ -819,11 +822,11 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Internal function where parse tree nodes can register violations in thread safety with the main class. </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00171">171</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00147">147</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00251">_threadUnsafeFunctionCalls</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00227">_threadUnsafeFunctionCalls</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExprNode_8cpp_source.html#l00699">SeExprFuncNode::prep()</a>.</p>
+<p>Referenced by <a class="el" href="SeExprNode_8cpp_source.html#l00674">SeExprFuncNode::prep()</a>.</p>
 
 </div>
 </div>
@@ -844,9 +847,11 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Sets the expression to desire a vector or a scalar. This will allow the evaluation to potentially be optimized if only a scalar is desired. </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00083">83</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00060">60</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00224">_wantVec</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00069">reset()</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00200">_wantVec</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00044">reset()</a>.</p>
+
+<p>Referenced by <a class="el" href="SeExprEdGrapher2d_8cpp_source.html#l00077">SeExprEdGrapherWidget::update()</a>.</p>
 
 </div>
 </div>
@@ -866,9 +871,9 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Check expression syntax. Expr will be parsed if needed. If this returns false, the error message can be accessed via <a class="el" href="classSeExpression.html#abb86eb12a695da1f1139707db0036b64">parseError()</a> </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00095">95</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00072">72</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00230">_parseTree</a>, and <a class="el" href="SeExpression_8h_source.html#l00218">parseIfNeeded()</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00206">_parseTree</a>, and <a class="el" href="SeExpression_8h_source.html#l00194">parseIfNeeded()</a>.</p>
 
 </div>
 </div>
@@ -889,9 +894,9 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Determine whether expression uses a particular function. Expr will be parsed if needed. No binding is required. </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00119">119</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00096">96</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00245">_funcs</a>, and <a class="el" href="SeExpression_8h_source.html#l00218">parseIfNeeded()</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00221">_funcs</a>, and <a class="el" href="SeExpression_8h_source.html#l00194">parseIfNeeded()</a>.</p>
 
 </div>
 </div>
@@ -912,9 +917,9 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Determine whether expression uses a particular external variable. Expr will be parsed if needed. No binding is required. </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00113">113</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8cpp_source.html#l00090">90</a> of file <a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00242">_vars</a>, and <a class="el" href="SeExpression_8h_source.html#l00218">parseIfNeeded()</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00218">_vars</a>, and <a class="el" href="SeExpression_8h_source.html#l00194">parseIfNeeded()</a>.</p>
 
 </div>
 </div>
@@ -934,11 +939,11 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Get wantVec setting </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00179">179</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00155">155</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>References <a class="el" href="SeExpression_8h_source.html#l00224">_wantVec</a>.</p>
+<p>References <a class="el" href="SeExpression_8h_source.html#l00200">_wantVec</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00139">prep()</a>.</p>
+<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00116">prep()</a>.</p>
 
 </div>
 </div>
@@ -955,9 +960,9 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Cached parse error location {startline,startcolumn,endline,endcolumn} </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00239">239</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00215">215</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExpression_8h_source.html#l00199">addError()</a>, <a class="el" href="SeExpression_8h_source.html#l00150">getErrors()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00139">prep()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00069">reset()</a>.</p>
+<p>Referenced by <a class="el" href="SeExpression_8h_source.html#l00175">addError()</a>, <a class="el" href="SeExpression_8h_source.html#l00126">getErrors()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00116">prep()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00044">reset()</a>.</p>
 
 </div>
 </div>
@@ -973,9 +978,9 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>The expression. </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00227">227</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00203">203</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExpression_8h_source.html#l00131">getExpr()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00126">parse()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00139">prep()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00089">setExpr()</a>.</p>
+<p>Referenced by <a class="el" href="SeExpression_8h_source.html#l00107">getExpr()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00103">parse()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00116">prep()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00066">setExpr()</a>.</p>
 
 </div>
 </div>
@@ -991,9 +996,9 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Functions used in this expr </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00245">245</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00221">221</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExpression_8h_source.html#l00259">addFunc()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00107">isConstant()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00069">reset()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00119">usesFunc()</a>.</p>
+<p>Referenced by <a class="el" href="SeExpression_8h_source.html#l00238">addFunc()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00084">isConstant()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00044">reset()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00096">usesFunc()</a>.</p>
 
 </div>
 </div>
@@ -1009,9 +1014,9 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Local variable table </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00248">248</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00224">224</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00183">evaluate()</a>, <a class="el" href="SeExpression_8h_source.html#l00270">getLocalVar()</a>, <a class="el" href="SeExpression_8h_source.html#l00203">getLocalVars()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00069">reset()</a>, and <a class="el" href="SeExpression_8h_source.html#l00262">resolveLocalVar()</a>.</p>
+<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00155">evaluate()</a>, <a class="el" href="SeExpression_8h_source.html#l00249">getLocalVar()</a>, <a class="el" href="SeExpression_8h_source.html#l00179">getLocalVars()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00044">reset()</a>, and <a class="el" href="SeExpression_8h_source.html#l00241">resolveLocalVar()</a>.</p>
 
 </div>
 </div>
@@ -1027,9 +1032,9 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Flag set once expr is parsed/prepped (parsing is automatic and lazy) </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00233">233</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00209">209</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00126">parse()</a>, <a class="el" href="SeExpression_8h_source.html#l00218">parseIfNeeded()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00069">reset()</a>.</p>
+<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00103">parse()</a>, <a class="el" href="SeExpression_8h_source.html#l00194">parseIfNeeded()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00044">reset()</a>.</p>
 
 </div>
 </div>
@@ -1045,9 +1050,9 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Cached parse error (returned by isValid) </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00236">236</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00212">212</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00126">parse()</a>, <a class="el" href="SeExpression_8h_source.html#l00146">parseError()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00139">prep()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00069">reset()</a>.</p>
+<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00103">parse()</a>, <a class="el" href="SeExpression_8h_source.html#l00122">parseError()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00116">prep()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00044">reset()</a>.</p>
 
 </div>
 </div>
@@ -1063,9 +1068,9 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Parse tree (null if syntax is bad). </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00230">230</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00206">206</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00183">evaluate()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00101">isValid()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00176">isVec()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00126">parse()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00139">prep()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00069">reset()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00095">syntaxOK()</a>.</p>
+<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00155">evaluate()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00078">isValid()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00148">isVec()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00103">parse()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00116">prep()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00044">reset()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00072">syntaxOK()</a>.</p>
 
 </div>
 </div>
@@ -1080,9 +1085,27 @@ Inheritance diagram for SeExpression:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00233">233</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00209">209</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00139">prep()</a>, <a class="el" href="SeExpression_8h_source.html#l00221">prepIfNeeded()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00069">reset()</a>.</p>
+<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00116">prep()</a>, <a class="el" href="SeExpression_8h_source.html#l00197">prepIfNeeded()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00044">reset()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a480af3a4908e135480489ed39f3a55c2"></a><!-- doxytag: member="SeExpression::_stringTokens" ref="a480af3a4908e135480489ed39f3a55c2" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;char*&gt; <a class="el" href="classSeExpression.html#a480af3a4908e135480489ed39f3a55c2">SeExpression::_stringTokens</a><code> [mutable, private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>String tokens allocated by lex </p>
+
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00230">230</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+
+<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00103">parse()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00044">reset()</a>.</p>
 
 </div>
 </div>
@@ -1098,9 +1121,9 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Whether or not we have unsafe functions </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00251">251</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00227">227</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExpression_8h_source.html#l00175">getThreadUnsafeFunctionCalls()</a>, <a class="el" href="SeExpression_8h_source.html#l00166">isThreadSafe()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00069">reset()</a>, and <a class="el" href="SeExpression_8h_source.html#l00171">setThreadUnsafe()</a>.</p>
+<p>Referenced by <a class="el" href="SeExpression_8h_source.html#l00151">getThreadUnsafeFunctionCalls()</a>, <a class="el" href="SeExpression_8h_source.html#l00142">isThreadSafe()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00044">reset()</a>, and <a class="el" href="SeExpression_8h_source.html#l00147">setThreadUnsafe()</a>.</p>
 
 </div>
 </div>
@@ -1116,9 +1139,9 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>Variables used in this expr </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00242">242</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00218">218</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExpression_8h_source.html#l00256">addVar()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00107">isConstant()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00069">reset()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00113">usesVar()</a>.</p>
+<p>Referenced by <a class="el" href="SeExpression_8h_source.html#l00235">addVar()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00084">isConstant()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00044">reset()</a>, and <a class="el" href="SeExpression_8cpp_source.html#l00090">usesVar()</a>.</p>
 
 </div>
 </div>
@@ -1134,18 +1157,18 @@ Inheritance diagram for SeExpression:</div>
 <div class="memdoc">
 <p>True if the expression wants a vector </p>
 
-<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00224">224</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExpression_8h_source.html#l00200">200</a> of file <a class="el" href="SeExpression_8h_source.html">SeExpression.h</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00183">evaluate()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00176">isVec()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00126">parse()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00083">setWantVec()</a>, and <a class="el" href="SeExpression_8h_source.html#l00179">wantVec()</a>.</p>
+<p>Referenced by <a class="el" href="SeExpression_8cpp_source.html#l00155">evaluate()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00148">isVec()</a>, <a class="el" href="SeExpression_8cpp_source.html#l00060">setWantVec()</a>, and <a class="el" href="SeExpression_8h_source.html#l00155">wantVec()</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
-<li>/jobs2/soft/users/aselle/src/seexpr-to-push/src/SeExpr/<a class="el" href="SeExpression_8h_source.html">SeExpression.h</a></li>
-<li>/jobs2/soft/users/aselle/src/seexpr-to-push/src/SeExpr/<a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a></li>
+<li>/disk1/scratch/aselle/projects/seexpr/SeExpr/src/SeExpr/<a class="el" href="SeExpression_8h_source.html">SeExpression.h</a></li>
+<li>/disk1/scratch/aselle/projects/seexpr/SeExpr/src/SeExpr/<a class="el" href="SeExpression_8cpp_source.html">SeExpression.cpp</a></li>
 </ul>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 3 May 2011 for SeExpr by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 25 Jul 2013 for SeExpr by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

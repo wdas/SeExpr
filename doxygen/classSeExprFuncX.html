@@ -37,10 +37,11 @@ Inheritance diagram for SeExprFuncX:</div>
  <div class="center">
   <img src="classSeExprFuncX.gif" usemap="#SeExprFuncX_map" alt=""/>
   <map id="SeExprFuncX_map" name="SeExprFuncX_map">
-<area href="classSeExpr_1_1CachedVoronoiFunc.html" alt="SeExpr::CachedVoronoiFunc" shape="rect" coords="0,56,177,80"/>
-<area href="classSeExpr_1_1CCurveFuncX.html" alt="SeExpr::CCurveFuncX" shape="rect" coords="187,56,364,80"/>
-<area href="classSeExpr_1_1CurveFuncX.html" alt="SeExpr::CurveFuncX" shape="rect" coords="374,56,551,80"/>
-<area href="classSeExpr_1_1PrintFuncX.html" alt="SeExpr::PrintFuncX" shape="rect" coords="561,56,738,80"/>
+<area href="classSeExpr_1_1CachedVoronoiFunc.html" alt="SeExpr::CachedVoronoiFunc" shape="rect" coords="0,56,215,80"/>
+<area href="classSeExpr_1_1CCurveFuncX.html" alt="SeExpr::CCurveFuncX" shape="rect" coords="225,56,440,80"/>
+<area href="classSeExpr_1_1CurveFuncX.html" alt="SeExpr::CurveFuncX" shape="rect" coords="450,56,665,80"/>
+<area href="classSeExpr_1_1PrintFuncX.html" alt="SeExpr::PrintFuncX" shape="rect" coords="675,56,890,80"/>
+<area href="structSeExprEdExpression_1_1DummyFuncX.html" alt="SeExprEdExpression::DummyFuncX" shape="rect" coords="900,56,1115,80"/>
 </map>
  </div>
 </div>
@@ -49,8 +50,8 @@ Inheritance diagram for SeExprFuncX:</div>
 <table border="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="2"><h2>Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExprFuncX.html#af634a2f443ad16d3be1c8e8fb63c749c">SeExprFuncX</a> (const bool threadSafe)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExprFuncX.html#afb138f1258d3f26c6fe431cdc7c5087e">prep</a> (<a class="el" href="classSeExprFuncNode.html">SeExprFuncNode</a> *node, bool wantVec, std::string &amp;error)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExprFuncX.html#aa47e57c2cccf6c2dc570d6b148c54ab3">eval</a> (const <a class="el" href="classSeExprFuncNode.html">SeExprFuncNode</a> *node, <a class="el" href="classSeVec3d.html">SeVec3d</a> &amp;<a class="el" href="plugins_8txt.html#af6e7c6aed704e156ce95dae980cd4438">result</a>) const =0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExprFuncX.html#a43db03d28e6032d556a149bce38d55ae">prep</a> (<a class="el" href="classSeExprFuncNode.html">SeExprFuncNode</a> *node, bool wantVec)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExprFuncX.html#aa47e57c2cccf6c2dc570d6b148c54ab3">eval</a> (const <a class="el" href="classSeExprFuncNode.html">SeExprFuncNode</a> *node, <a class="el" href="classSeVec3d.html">SeVec3d</a> &amp;result) const =0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">virtual&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExprFuncX.html#aecff43247a69f6de7761ee67b93e5af2">~SeExprFuncX</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExprFuncX.html#a72c67bbacc07d8598d0427528b3fb717">isThreadSafe</a> () const </td></tr>
 <tr><td colspan="2"><h2>Private Attributes</h2></td></tr>
@@ -60,7 +61,7 @@ Inheritance diagram for SeExprFuncX:</div>
 <p>Extension function spec, used for complicated argument custom functions. </p>
 <p>Provides the ability to handle all argument type checking and processing manually. Derive from this class and then make your own <a class="el" href="classSeExprFunc.html" title="Function Definition, used in parse tree and func table.">SeExprFunc</a> that takes this object. This is necessary if you need string arguments or you have variable numbers of arguments. See <a class="el" href="SeExprBuiltins_8h.html">SeExprBuiltins.h</a> for some examples </p>
 
-<p>Definition at line <a class="el" href="SeExprFunc_8h_source.html#l00049">49</a> of file <a class="el" href="SeExprFunc_8h_source.html">SeExprFunc.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExprFunc_8h_source.html#l00024">24</a> of file <a class="el" href="SeExprFunc_8h_source.html">SeExprFunc.h</a>.</p>
 <hr/><h2>Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="af634a2f443ad16d3be1c8e8fb63c749c"></a><!-- doxytag: member="SeExprFuncX::SeExprFuncX" ref="af634a2f443ad16d3be1c8e8fb63c749c" args="(const bool threadSafe)" -->
 <div class="memitem">
@@ -79,7 +80,7 @@ Inheritance diagram for SeExprFuncX:</div>
 <div class="memdoc">
 <p>Create an <a class="el" href="classSeExprFuncX.html" title="Extension function spec, used for complicated argument custom functions.">SeExprFuncX</a>. If the functions and type checking you implement is thread safe your derived class should call this with true. If not, then false. If you mark a function as thread unsafe, and it is used in an expression then bool <a class="el" href="classSeExpression.html#ab996a87baa48f3097cdb23132f2771e5">SeExpression::isThreadSafe()</a> will return false and the controlling software should not attempt to run multiple threads of an expression. </p>
 
-<p>Definition at line <a class="el" href="SeExprFunc_8h_source.html#l00057">57</a> of file <a class="el" href="SeExprFunc_8h_source.html">SeExprFunc.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExprFunc_8h_source.html#l00032">32</a> of file <a class="el" href="SeExprFunc_8h_source.html">SeExprFunc.h</a>.</p>
 
 </div>
 </div>
@@ -98,7 +99,7 @@ Inheritance diagram for SeExprFuncX:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeExprFunc_8h_source.html#l00069">69</a> of file <a class="el" href="SeExprFunc_8h_source.html">SeExprFunc.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExprFunc_8h_source.html#l00042">42</a> of file <a class="el" href="SeExprFunc_8h_source.html">SeExprFunc.h</a>.</p>
 
 </div>
 </div>
@@ -129,9 +130,9 @@ Inheritance diagram for SeExprFuncX:</div>
 <div class="memdoc">
 <p>evaluate the expression. the given node is where in the parse tree the evaluation is for </p>
 
-<p>Implemented in <a class="el" href="classSeExpr_1_1CachedVoronoiFunc.html#a33a72959f80844ee40a410be505472e9">SeExpr::CachedVoronoiFunc</a>, <a class="el" href="classSeExpr_1_1CurveFuncX.html#ad30d942bc7fd60936f7bb60243cf8f14">SeExpr::CurveFuncX</a>, <a class="el" href="classSeExpr_1_1CCurveFuncX.html#a6e2beabc81a698616faeffa5dc49fce8">SeExpr::CCurveFuncX</a>, and <a class="el" href="classSeExpr_1_1PrintFuncX.html#a4fe8691c054adc2c85a2ee0e8360477b">SeExpr::PrintFuncX</a>.</p>
+<p>Implemented in <a class="el" href="classSeExpr_1_1CachedVoronoiFunc.html#a33a72959f80844ee40a410be505472e9">SeExpr::CachedVoronoiFunc</a>, <a class="el" href="classSeExpr_1_1CurveFuncX.html#ad30d942bc7fd60936f7bb60243cf8f14">SeExpr::CurveFuncX</a>, <a class="el" href="classSeExpr_1_1CCurveFuncX.html#a6e2beabc81a698616faeffa5dc49fce8">SeExpr::CCurveFuncX</a>, <a class="el" href="classSeExpr_1_1PrintFuncX.html#a4fe8691c054adc2c85a2ee0e8360477b">SeExpr::PrintFuncX</a>, and <a class="el" href="structSeExprEdExpression_1_1DummyFuncX.html#a0f88e27dbe098b452bcb1247ae11e653">SeExprEdExpression::DummyFuncX</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExprNode_8cpp_source.html#l00793">SeExprFuncNode::eval()</a>.</p>
+<p>Referenced by <a class="el" href="SeExprNode_8cpp_source.html#l00763">SeExprFuncNode::eval()</a>.</p>
 
 </div>
 </div>
@@ -150,15 +151,15 @@ Inheritance diagram for SeExprFuncX:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeExprFunc_8h_source.html#l00071">71</a> of file <a class="el" href="SeExprFunc_8h_source.html">SeExprFunc.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExprFunc_8h_source.html#l00044">44</a> of file <a class="el" href="SeExprFunc_8h_source.html">SeExprFunc.h</a>.</p>
 
-<p>References <a class="el" href="SeExprFunc_8h_source.html#l00073">_threadSafe</a>.</p>
+<p>References <a class="el" href="SeExprFunc_8h_source.html#l00046">_threadSafe</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExprNode_8cpp_source.html#l00699">SeExprFuncNode::prep()</a>.</p>
+<p>Referenced by <a class="el" href="SeExprNode_8cpp_source.html#l00674">SeExprFuncNode::prep()</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="afb138f1258d3f26c6fe431cdc7c5087e"></a><!-- doxytag: member="SeExprFuncX::prep" ref="afb138f1258d3f26c6fe431cdc7c5087e" args="(SeExprFuncNode *node, bool wantVec, std::string &amp;error)" -->
+<a class="anchor" id="a43db03d28e6032d556a149bce38d55ae"></a><!-- doxytag: member="SeExprFuncX::prep" ref="a43db03d28e6032d556a149bce38d55ae" args="(SeExprFuncNode *node, bool wantVec)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -172,13 +173,7 @@ Inheritance diagram for SeExprFuncX:</div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">bool&nbsp;</td>
-          <td class="paramname"> <em>wantVec</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::string &amp;&nbsp;</td>
-          <td class="paramname"> <em>error</em></td><td>&nbsp;</td>
+          <td class="paramname"> <em>wantVec</em></td><td>&nbsp;</td>
         </tr>
         <tr>
           <td></td>
@@ -188,13 +183,13 @@ Inheritance diagram for SeExprFuncX:</div>
       </table>
 </div>
 <div class="memdoc">
-<p>prep the expression by doing all type checking argument checking, etc. NOTE: error is deprecated, instead use addError() function for better error localization </p>
+<p>prep the expression by doing all type checking argument checking, etc. </p>
 
-<p>Reimplemented in <a class="el" href="classSeExpr_1_1CachedVoronoiFunc.html#a0e3fce9575ce86a7bb4c0057ab50b11f">SeExpr::CachedVoronoiFunc</a>, <a class="el" href="classSeExpr_1_1CurveFuncX.html#a36a009bb3755e905cbcda3964a4847bf">SeExpr::CurveFuncX</a>, <a class="el" href="classSeExpr_1_1CCurveFuncX.html#a801c05d5ffd459af093a9af3f301045b">SeExpr::CCurveFuncX</a>, and <a class="el" href="classSeExpr_1_1PrintFuncX.html#ab95232ec326cc435dc5465eddecb1e20">SeExpr::PrintFuncX</a>.</p>
+<p>Reimplemented in <a class="el" href="classSeExpr_1_1CachedVoronoiFunc.html#a4b0e41d87d62cbc34798999b251c93b8">SeExpr::CachedVoronoiFunc</a>, <a class="el" href="classSeExpr_1_1CurveFuncX.html#a07420d040c08fb6bfbbd188d6ca320e1">SeExpr::CurveFuncX</a>, <a class="el" href="classSeExpr_1_1CCurveFuncX.html#ae9bb174ce9109b030f05e8df732b043a">SeExpr::CCurveFuncX</a>, <a class="el" href="classSeExpr_1_1PrintFuncX.html#a9e375394dd1eb3888a6f2af725781dd7">SeExpr::PrintFuncX</a>, and <a class="el" href="structSeExprEdExpression_1_1DummyFuncX.html#ab8934e38357291920ba27f6c33ec7aaf">SeExprEdExpression::DummyFuncX</a>.</p>
 
-<p>Definition at line <a class="el" href="SeExprFunc_8cpp_source.html#l00092">92</a> of file <a class="el" href="SeExprFunc_8cpp_source.html">SeExprFunc.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExprFunc_8cpp_source.html#l00119">119</a> of file <a class="el" href="SeExprFunc_8cpp_source.html">SeExprFunc.cpp</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExprNode_8cpp_source.html#l00699">SeExprFuncNode::prep()</a>.</p>
+<p>Referenced by <a class="el" href="SeExprNode_8cpp_source.html#l00674">SeExprFuncNode::prep()</a>.</p>
 
 </div>
 </div>
@@ -210,18 +205,18 @@ Inheritance diagram for SeExprFuncX:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeExprFunc_8h_source.html#l00073">73</a> of file <a class="el" href="SeExprFunc_8h_source.html">SeExprFunc.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExprFunc_8h_source.html#l00046">46</a> of file <a class="el" href="SeExprFunc_8h_source.html">SeExprFunc.h</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExprFunc_8h_source.html#l00071">isThreadSafe()</a>.</p>
+<p>Referenced by <a class="el" href="SeExprFunc_8h_source.html#l00044">isThreadSafe()</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
-<li>/jobs2/soft/users/aselle/src/seexpr-to-push/src/SeExpr/<a class="el" href="SeExprFunc_8h_source.html">SeExprFunc.h</a></li>
-<li>/jobs2/soft/users/aselle/src/seexpr-to-push/src/SeExpr/<a class="el" href="SeExprFunc_8cpp_source.html">SeExprFunc.cpp</a></li>
+<li>/disk1/scratch/aselle/projects/seexpr/SeExpr/src/SeExpr/<a class="el" href="SeExprFunc_8h_source.html">SeExprFunc.h</a></li>
+<li>/disk1/scratch/aselle/projects/seexpr/SeExpr/src/SeExpr/<a class="el" href="SeExprFunc_8cpp_source.html">SeExprFunc.cpp</a></li>
 </ul>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 3 May 2011 for SeExpr by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 25 Jul 2013 for SeExpr by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

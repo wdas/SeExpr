@@ -42,30 +42,30 @@ Inheritance diagram for SeExpr::CachedVoronoiFunc:</div>
 <p><a href="classSeExpr_1_1CachedVoronoiFunc-members.html">List of all members.</a></p>
 <table border="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="2"><h2>Public Types</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classSeVec3d.html">SeVec3d</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpr_1_1CachedVoronoiFunc.html#a9543502293f59e92623bec43c3a3f991">VoronoiFunc</a> (<a class="el" href="structSeExpr_1_1VoronoiPointData.html">VoronoiPointData</a> &amp;<a class="el" href="plugins_8txt.html#a6890ba7e9441ad7f1801de4e6c8ea0a0">data</a>, int n, const <a class="el" href="classSeVec3d.html">SeVec3d</a> *args)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classSeVec3d.html">SeVec3d</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpr_1_1CachedVoronoiFunc.html#a9543502293f59e92623bec43c3a3f991">VoronoiFunc</a> (<a class="el" href="structSeExpr_1_1VoronoiPointData.html">VoronoiPointData</a> &amp;data, int n, const <a class="el" href="classSeVec3d.html">SeVec3d</a> *args)</td></tr>
 <tr><td colspan="2"><h2>Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpr_1_1CachedVoronoiFunc.html#aedcfb4cb148a79625bbb7ce7f602843d">CachedVoronoiFunc</a> (<a class="el" href="classSeExpr_1_1CachedVoronoiFunc.html#a9543502293f59e92623bec43c3a3f991">VoronoiFunc</a> *vfunc)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpr_1_1CachedVoronoiFunc.html#a0e3fce9575ce86a7bb4c0057ab50b11f">prep</a> (<a class="el" href="classSeExprFuncNode.html">SeExprFuncNode</a> *node, bool wantVec, std::string &amp;error)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpr_1_1CachedVoronoiFunc.html#a33a72959f80844ee40a410be505472e9">eval</a> (const <a class="el" href="classSeExprFuncNode.html">SeExprFuncNode</a> *node, <a class="el" href="classSeVec3d.html">SeVec3d</a> &amp;<a class="el" href="plugins_8txt.html#af6e7c6aed704e156ce95dae980cd4438">result</a>) const </td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpr_1_1CachedVoronoiFunc.html#a4b0e41d87d62cbc34798999b251c93b8">prep</a> (<a class="el" href="classSeExprFuncNode.html">SeExprFuncNode</a> *node, bool)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpr_1_1CachedVoronoiFunc.html#a33a72959f80844ee40a410be505472e9">eval</a> (const <a class="el" href="classSeExprFuncNode.html">SeExprFuncNode</a> *node, <a class="el" href="classSeVec3d.html">SeVec3d</a> &amp;result) const </td></tr>
 <tr><td colspan="2"><h2>Private Attributes</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="classSeExpr_1_1CachedVoronoiFunc.html#a9543502293f59e92623bec43c3a3f991">VoronoiFunc</a> *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExpr_1_1CachedVoronoiFunc.html#a7f1cf7e2f378ecbf17ebf5a7f9b5f465">_vfunc</a></td></tr>
 </table>
 <hr/><a name="_details"></a><h2>Detailed Description</h2>
 
-<p>Definition at line <a class="el" href="SeExprBuiltins_8cpp_source.html#l01004">1004</a> of file <a class="el" href="SeExprBuiltins_8cpp_source.html">SeExprBuiltins.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExprBuiltins_8cpp_source.html#l01041">1041</a> of file <a class="el" href="SeExprBuiltins_8cpp_source.html">SeExprBuiltins.cpp</a>.</p>
 <hr/><h2>Member Typedef Documentation</h2>
 <a class="anchor" id="a9543502293f59e92623bec43c3a3f991"></a><!-- doxytag: member="SeExpr::CachedVoronoiFunc::VoronoiFunc" ref="a9543502293f59e92623bec43c3a3f991" args="(VoronoiPointData &amp;data, int n, const SeVec3d *args)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef <a class="el" href="classSeVec3d.html">SeVec3d</a> <a class="el" href="classSeExpr_1_1CachedVoronoiFunc.html#a9543502293f59e92623bec43c3a3f991">SeExpr::CachedVoronoiFunc::VoronoiFunc</a>(<a class="el" href="structSeExpr_1_1VoronoiPointData.html">VoronoiPointData</a> &amp;<a class="el" href="plugins_8txt.html#a6890ba7e9441ad7f1801de4e6c8ea0a0">data</a>, int n, const <a class="el" href="classSeVec3d.html">SeVec3d</a> *args)</td>
+          <td class="memname">typedef <a class="el" href="classSeVec3d.html">SeVec3d</a> <a class="el" href="classSeExpr_1_1CachedVoronoiFunc.html#a9543502293f59e92623bec43c3a3f991">SeExpr::CachedVoronoiFunc::VoronoiFunc</a>(<a class="el" href="structSeExpr_1_1VoronoiPointData.html">VoronoiPointData</a> &amp;data, int n, const <a class="el" href="classSeVec3d.html">SeVec3d</a> *args)</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeExprBuiltins_8cpp_source.html#l01007">1007</a> of file <a class="el" href="SeExprBuiltins_8cpp_source.html">SeExprBuiltins.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExprBuiltins_8cpp_source.html#l01044">1044</a> of file <a class="el" href="SeExprBuiltins_8cpp_source.html">SeExprBuiltins.cpp</a>.</p>
 
 </div>
 </div>
@@ -86,7 +86,7 @@ Inheritance diagram for SeExpr::CachedVoronoiFunc:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeExprBuiltins_8cpp_source.html#l01008">1008</a> of file <a class="el" href="SeExprBuiltins_8cpp_source.html">SeExprBuiltins.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExprBuiltins_8cpp_source.html#l01045">1045</a> of file <a class="el" href="SeExprBuiltins_8cpp_source.html">SeExprBuiltins.cpp</a>.</p>
 
 </div>
 </div>
@@ -119,13 +119,13 @@ Inheritance diagram for SeExpr::CachedVoronoiFunc:</div>
 
 <p>Implements <a class="el" href="classSeExprFuncX.html#aa47e57c2cccf6c2dc570d6b148c54ab3">SeExprFuncX</a>.</p>
 
-<p>Definition at line <a class="el" href="SeExprBuiltins_8cpp_source.html#l01017">1017</a> of file <a class="el" href="SeExprBuiltins_8cpp_source.html">SeExprBuiltins.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExprBuiltins_8cpp_source.html#l01054">1054</a> of file <a class="el" href="SeExprBuiltins_8cpp_source.html">SeExprBuiltins.cpp</a>.</p>
 
-<p>References <a class="el" href="SeExprBuiltins_8cpp_source.html#l01027">_vfunc</a>, <a class="el" href="SeExprNode_8h_source.html#l00073">SeExprNode::child()</a>, <a class="el" href="plugins_8txt_source.html#l00199">data</a>, <a class="el" href="SeExprNode_8cpp_source.html#l00158">SeExprNode::eval()</a>, <a class="el" href="SeExprNode_8h_source.html#l00512">SeExprFuncNode::getData()</a>, and <a class="el" href="SeExprNode_8h_source.html#l00072">SeExprNode::numChildren()</a>.</p>
+<p>References <a class="el" href="SeExprBuiltins_8cpp_source.html#l01064">_vfunc</a>, <a class="el" href="SeExprNode_8h_source.html#l00048">SeExprNode::child()</a>, <a class="el" href="SeExprNode_8cpp_source.html#l00133">SeExprNode::eval()</a>, <a class="el" href="SeExprNode_8h_source.html#l00483">SeExprFuncNode::getData()</a>, and <a class="el" href="SeExprNode_8h_source.html#l00047">SeExprNode::numChildren()</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a0e3fce9575ce86a7bb4c0057ab50b11f"></a><!-- doxytag: member="SeExpr::CachedVoronoiFunc::prep" ref="a0e3fce9575ce86a7bb4c0057ab50b11f" args="(SeExprFuncNode *node, bool wantVec, std::string &amp;error)" -->
+<a class="anchor" id="a4b0e41d87d62cbc34798999b251c93b8"></a><!-- doxytag: member="SeExpr::CachedVoronoiFunc::prep" ref="a4b0e41d87d62cbc34798999b251c93b8" args="(SeExprFuncNode *node, bool)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -139,13 +139,7 @@ Inheritance diagram for SeExpr::CachedVoronoiFunc:</div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">bool&nbsp;</td>
-          <td class="paramname"> <em>wantVec</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::string &amp;&nbsp;</td>
-          <td class="paramname"> <em>error</em></td><td>&nbsp;</td>
+          <td class="paramname"> <em>wantVec</em></td><td>&nbsp;</td>
         </tr>
         <tr>
           <td></td>
@@ -155,13 +149,13 @@ Inheritance diagram for SeExpr::CachedVoronoiFunc:</div>
       </table>
 </div>
 <div class="memdoc">
-<p>prep the expression by doing all type checking argument checking, etc. NOTE: error is deprecated, instead use addError() function for better error localization </p>
+<p>prep the expression by doing all type checking argument checking, etc. </p>
 
-<p>Reimplemented from <a class="el" href="classSeExprFuncX.html#afb138f1258d3f26c6fe431cdc7c5087e">SeExprFuncX</a>.</p>
+<p>Reimplemented from <a class="el" href="classSeExprFuncX.html#a43db03d28e6032d556a149bce38d55ae">SeExprFuncX</a>.</p>
 
-<p>Definition at line <a class="el" href="SeExprBuiltins_8cpp_source.html#l01010">1010</a> of file <a class="el" href="SeExprBuiltins_8cpp_source.html">SeExprBuiltins.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExprBuiltins_8cpp_source.html#l01047">1047</a> of file <a class="el" href="SeExprBuiltins_8cpp_source.html">SeExprBuiltins.cpp</a>.</p>
 
-<p>References <a class="el" href="SeExprNode_8h_source.html#l00505">SeExprFuncNode::setData()</a>.</p>
+<p>References <a class="el" href="SeExprNode_8h_source.html#l00476">SeExprFuncNode::setData()</a>.</p>
 
 </div>
 </div>
@@ -177,17 +171,17 @@ Inheritance diagram for SeExpr::CachedVoronoiFunc:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeExprBuiltins_8cpp_source.html#l01027">1027</a> of file <a class="el" href="SeExprBuiltins_8cpp_source.html">SeExprBuiltins.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExprBuiltins_8cpp_source.html#l01064">1064</a> of file <a class="el" href="SeExprBuiltins_8cpp_source.html">SeExprBuiltins.cpp</a>.</p>
 
-<p>Referenced by <a class="el" href="SeExprBuiltins_8cpp_source.html#l01017">eval()</a>.</p>
+<p>Referenced by <a class="el" href="SeExprBuiltins_8cpp_source.html#l01054">eval()</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/jobs2/soft/users/aselle/src/seexpr-to-push/src/SeExpr/<a class="el" href="SeExprBuiltins_8cpp_source.html">SeExprBuiltins.cpp</a></li>
+<li>/disk1/scratch/aselle/projects/seexpr/SeExpr/src/SeExpr/<a class="el" href="SeExprBuiltins_8cpp_source.html">SeExprBuiltins.cpp</a></li>
 </ul>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 3 May 2011 for SeExpr by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 25 Jul 2013 for SeExpr by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

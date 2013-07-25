@@ -23,7 +23,17 @@
 <div class="contents">
 
 
-<h1><a class="anchor" id="userdoc">User Documentation </a></h1><h3>Shader/XGen/Paint3d Expressions</h3>
+<h1><a class="anchor" id="userdoc">User Documentation </a></h1><!--
+* (c) Disney Enterprises, Inc.  All rights reserved.
+*
+* This file is licensed under the terms of the Microsoft Public License (MS-PL)
+* as defined at: http://opensource.org/licenses/MS-PL.
+*
+* A complete copy of this license is included in this distribution as the file
+* LICENSE.
+-->
+
+<h3>Shader/XGen/Paint3d Expressions</h3>
 <ul>
   <li><a href="#Variables">Variables</a></li>
   <li><a href="#Color_Masking_and_Remapping_Functions">Color, Masking,
@@ -128,6 +138,11 @@ constants may be used:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;int <b>gaussian</b> = 2<br>
 </div>
 <br>
+color <b>saturate</b> ( color x, float amt ) <br>
+<div style="margin-left: 40px;">Scales saturation of color by amt.
+The color is scaled around the rec709 luminance vlue, and negative
+results are clamped at zero.<br>
+</div>
 color <b>hsi</b> ( color x, float h, float s, float i, float map=1 ) <br>
 <div style="margin-left: 40px;">The hsi function shifts the hue by h
 (in degrees) and scales the saturation and intensity by s and i
@@ -599,7 +614,7 @@ plugins.&nbsp; See <a href="SeExpressionPlugins.html">Writing Custom
 Expression Plugins</a> for more details.<br>
 <br>
  </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 3 May 2011 for SeExpr by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 25 Jul 2013 for SeExpr by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

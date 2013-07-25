@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<title>SeExpr: /jobs2/soft/users/aselle/src/seexpr-to-push/src/SeExpr/SeCurve.h Source File</title>
+<title>SeExpr: /disk1/scratch/aselle/projects/seexpr/SeExpr/src/SeExpr/SeCurve.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css"/>
 </head>
@@ -23,96 +23,71 @@
       <li><a href="globals.html"><span>File&nbsp;Members</span></a></li>
     </ul>
   </div>
-<h1>/jobs2/soft/users/aselle/src/seexpr-to-push/src/SeExpr/SeCurve.h</h1><a href="SeCurve_8h.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
-<a name="l00002"></a>00002 <span class="comment"> SEEXPR SOFTWARE</span>
-<a name="l00003"></a>00003 <span class="comment"> Copyright 2011 Disney Enterprises, Inc. All rights reserved</span>
-<a name="l00004"></a>00004 <span class="comment"> </span>
-<a name="l00005"></a>00005 <span class="comment"> Redistribution and use in source and binary forms, with or without</span>
-<a name="l00006"></a>00006 <span class="comment"> modification, are permitted provided that the following conditions are</span>
-<a name="l00007"></a>00007 <span class="comment"> met:</span>
-<a name="l00008"></a>00008 <span class="comment"> </span>
-<a name="l00009"></a>00009 <span class="comment"> * Redistributions of source code must retain the above copyright</span>
-<a name="l00010"></a>00010 <span class="comment"> notice, this list of conditions and the following disclaimer.</span>
-<a name="l00011"></a>00011 <span class="comment"> </span>
-<a name="l00012"></a>00012 <span class="comment"> * Redistributions in binary form must reproduce the above copyright</span>
-<a name="l00013"></a>00013 <span class="comment"> notice, this list of conditions and the following disclaimer in</span>
-<a name="l00014"></a>00014 <span class="comment"> the documentation and/or other materials provided with the</span>
-<a name="l00015"></a>00015 <span class="comment"> distribution.</span>
-<a name="l00016"></a>00016 <span class="comment"> </span>
-<a name="l00017"></a>00017 <span class="comment"> * The names &quot;Disney&quot;, &quot;Walt Disney Pictures&quot;, &quot;Walt Disney Animation</span>
-<a name="l00018"></a>00018 <span class="comment"> Studios&quot; or the names of its contributors may NOT be used to</span>
-<a name="l00019"></a>00019 <span class="comment"> endorse or promote products derived from this software without</span>
-<a name="l00020"></a>00020 <span class="comment"> specific prior written permission from Walt Disney Pictures.</span>
-<a name="l00021"></a>00021 <span class="comment"> </span>
-<a name="l00022"></a>00022 <span class="comment"> Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND</span>
-<a name="l00023"></a>00023 <span class="comment"> CONTRIBUTORS &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,</span>
-<a name="l00024"></a>00024 <span class="comment"> BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS</span>
-<a name="l00025"></a>00025 <span class="comment"> FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.</span>
-<a name="l00026"></a>00026 <span class="comment"> IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR</span>
-<a name="l00027"></a>00027 <span class="comment"> CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,</span>
-<a name="l00028"></a>00028 <span class="comment"> EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,</span>
-<a name="l00029"></a>00029 <span class="comment"> PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR</span>
-<a name="l00030"></a>00030 <span class="comment"> PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY</span>
-<a name="l00031"></a>00031 <span class="comment"> THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
-<a name="l00032"></a>00032 <span class="comment"> (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
-<a name="l00033"></a>00033 <span class="comment"> OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</span>
-<a name="l00034"></a>00034 <span class="comment">*/</span>
-<a name="l00035"></a>00035 <span class="preprocessor">#ifndef _CurveData_h_</span>
-<a name="l00036"></a>00036 <span class="preprocessor"></span><span class="preprocessor">#define _CurveData_h_</span>
-<a name="l00037"></a>00037 <span class="preprocessor"></span>
-<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;<a class="code" href="SeVec3d_8h.html">SeVec3d.h</a>&quot;</span>
-<a name="l00039"></a>00039 <span class="preprocessor">#include &lt;vector&gt;</span>
-<a name="l00040"></a>00040 
-<a name="l00041"></a>00041 <span class="preprocessor">#include &lt;cfloat&gt;</span>
-<a name="l00042"></a>00042 <span class="preprocessor">#include &lt;cassert&gt;</span>
-<a name="l00043"></a>00043 
-<a name="l00044"></a>00044 <span class="keyword">namespace </span>SeExpr{
-<a name="l00045"></a>00045 
-<a name="l00047"></a>00047 
-<a name="l00056"></a>00056 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
-<a name="l00057"></a><a class="code" href="classSeExpr_1_1SeCurve.html">00057</a> <span class="keyword">class </span><a class="code" href="classSeExpr_1_1SeCurve.html" title="Interpolation curve class for double-&amp;gt;double and double-&amp;gt;SeVec3D.">SeCurve</a>
-<a name="l00058"></a>00058 {
-<a name="l00059"></a><a class="code" href="classSeExpr_1_1SeCurve.html#a51fd6e0c4a2f324651138944ba4176cd">00059</a>     <span class="keyword">mutable</span> <span class="keywordtype">int</span> <a class="code" href="classSeExpr_1_1SeCurve.html#a51fd6e0c4a2f324651138944ba4176cd">cacheCV</a>;
-<a name="l00060"></a>00060 <span class="keyword">public</span>:
-<a name="l00062"></a><a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52aafe73357cd293c104aeea2600b769e35b">00062</a>     <span class="keyword">enum</span> <a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52a" title="Supported interpolation types.">InterpType</a> { <a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52aa0bcc6ac38772ddb27299c080deba06b2">kNone</a>=0, <a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52aaf0ef33661935f4ce1c956f0fca7d6bdc">kLinear</a>, <a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52aa0b2f759023a8847785f995d1245bbdca">kSmooth</a>, <a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52aafe73357cd293c104aeea2600b769e35b">kSpline</a>, <a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52aaced87c9ee8dff8f726720e04c80140b9">kMonotoneSpline</a> };
-<a name="l00063"></a><a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html">00063</a>     <span class="keyword">struct </span><a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html">CV</a>{
-<a name="l00064"></a><a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#ae817c088c807f5bf2d2682b5aa14486f">00064</a>         <a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#ae817c088c807f5bf2d2682b5aa14486f">CV</a>(<span class="keywordtype">double</span> pos,<span class="keyword">const</span> T&amp; val,<a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52a" title="Supported interpolation types.">InterpType</a> type)
-<a name="l00065"></a>00065             :<a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#a8d3da749c93417f4f6ffb79e40735ee2">_pos</a>(pos),<a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#a27b7dbc0c9783bc69dbc6784f273b538">_val</a>(val),<a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#a0f7757de2ad0849e6438b5424bd98344">_interp</a>(type)
-<a name="l00066"></a>00066         {}
-<a name="l00067"></a>00067 
-<a name="l00068"></a><a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#a8d3da749c93417f4f6ffb79e40735ee2">00068</a>         <span class="keywordtype">double</span> <a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#a8d3da749c93417f4f6ffb79e40735ee2">_pos</a>;
-<a name="l00069"></a><a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#a27b7dbc0c9783bc69dbc6784f273b538">00069</a>         T <a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#a27b7dbc0c9783bc69dbc6784f273b538">_val</a>,<a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#a2274f355f35cc49ed7f0ce683e3c5d11">_deriv</a>;
-<a name="l00070"></a><a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#a0f7757de2ad0849e6438b5424bd98344">00070</a>         <a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52a" title="Supported interpolation types.">InterpType</a> <a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#a0f7757de2ad0849e6438b5424bd98344">_interp</a>;
-<a name="l00071"></a>00071     };
-<a name="l00072"></a>00072 <span class="keyword">private</span>:
-<a name="l00073"></a><a class="code" href="classSeExpr_1_1SeCurve.html#ac1f6f4cac8f12618411b8c1091591faf">00073</a>     std::vector&lt;CV&gt; <a class="code" href="classSeExpr_1_1SeCurve.html#ac1f6f4cac8f12618411b8c1091591faf">_cvData</a>;
-<a name="l00074"></a><a class="code" href="classSeExpr_1_1SeCurve.html#a2cc229ce687201bd6e715c93c2b74567">00074</a>     <span class="keywordtype">bool</span> <a class="code" href="classSeExpr_1_1SeCurve.html#a2cc229ce687201bd6e715c93c2b74567">prepared</a>;
-<a name="l00075"></a>00075 <span class="keyword">public</span>:
-<a name="l00076"></a>00076     <a class="code" href="classSeExpr_1_1SeCurve.html#a052a746849b732ee3e74a1d3dc4af3e6">SeCurve</a>();
-<a name="l00077"></a>00077 
-<a name="l00079"></a>00079     <span class="keywordtype">void</span> <a class="code" href="classSeExpr_1_1SeCurve.html#a318278069d3a9b903299f4bebe422a93" title="Adds a point to the curve.">addPoint</a>(<span class="keywordtype">double</span> position,<span class="keyword">const</span> T&amp; val,<a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52a" title="Supported interpolation types.">InterpType</a> type);
-<a name="l00080"></a>00080 
-<a name="l00082"></a>00082     <span class="keywordtype">void</span> <a class="code" href="classSeExpr_1_1SeCurve.html#ad8cd64257aac7dda1ed772c150afc1f8" title="Prepares points for evaluation (sorts and computes boundaries, clamps extrema).">preparePoints</a>();
-<a name="l00083"></a>00083 
-<a name="l00085"></a>00085     T <a class="code" href="classSeExpr_1_1SeCurve.html#a4d0106d9453a844b4d8992283fccbc93" title="Evaluates curve and returns full value.">getValue</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> param) <span class="keyword">const</span>;
-<a name="l00086"></a>00086 
-<a name="l00089"></a>00089     <span class="keywordtype">double</span> <a class="code" href="classSeExpr_1_1SeCurve.html#a36744f7956f888e6676b9a763bfc4e8f">getChannelValue</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> param,<span class="keywordtype">int</span> channel) <span class="keyword">const</span>;
-<a name="l00090"></a>00090 
-<a name="l00093"></a>00093     <a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html">CV</a> <a class="code" href="classSeExpr_1_1SeCurve.html#a7f31330cf452f1d3b0ac132fefe46a54">getLowerBoundCV</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> param) <span class="keyword">const</span>;
-<a name="l00094"></a>00094 
-<a name="l00096"></a>00096     <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code" href="classSeExpr_1_1SeCurve.html#a084742a5a22574804022f83a8edb64fa" title="Returns whether the given interpolation type is supported.">interpTypeValid</a>(<a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52a" title="Supported interpolation types.">InterpType</a> interp);
-<a name="l00097"></a>00097 
-<a name="l00099"></a>00099     <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code" href="classSeExpr_1_1SeCurve.html#acd8eb9cc5e23231a612ce2078749b71f" title="CV Parameter ordering (cv1._pos &amp;lt; cv2._pos).">cvLessThan</a>(<span class="keyword">const</span> <a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html">CV</a> &amp;cv1, <span class="keyword">const</span> <a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html">CV</a> &amp;cv2);
-<a name="l00100"></a>00100 <span class="keyword">private</span>:
-<a name="l00102"></a>00102     <span class="keywordtype">void</span> <a class="code" href="classSeExpr_1_1SeCurve.html#ac2f8a72997abc49a2188c14d3321df97" title="Performs hermite derivative clamping in canonical space.">clampCurveSegment</a>(<span class="keyword">const</span> T&amp; delta,T&amp; d1,T&amp; d2);
-<a name="l00103"></a>00103 
-<a name="l00105"></a>00105     <span class="keyword">static</span> <span class="keywordtype">double</span> <a class="code" href="classSeExpr_1_1SeCurve.html#a6e0f2ee9280d953b2a436ebc38a8274b" title="Returns a component of the given value.">comp</a>(<span class="keyword">const</span> T&amp; val,<span class="keyword">const</span> <span class="keywordtype">int</span> i);
-<a name="l00106"></a>00106 };
-<a name="l00107"></a>00107 
-<a name="l00108"></a>00108 }
-<a name="l00109"></a>00109 <span class="preprocessor">#endif</span>
+<h1>/disk1/scratch/aselle/projects/seexpr/SeExpr/src/SeExpr/SeCurve.h</h1><a href="SeCurve_8h.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment">* (c) Disney Enterprises, Inc.  All rights reserved.</span>
+<a name="l00003"></a>00003 <span class="comment">*</span>
+<a name="l00004"></a>00004 <span class="comment">* This file is licensed under the terms of the Microsoft Public License (MS-PL)</span>
+<a name="l00005"></a>00005 <span class="comment">* as defined at: http://opensource.org/licenses/MS-PL.</span>
+<a name="l00006"></a>00006 <span class="comment">*</span>
+<a name="l00007"></a>00007 <span class="comment">* A complete copy of this license is included in this distribution as the file</span>
+<a name="l00008"></a>00008 <span class="comment">* LICENSE.</span>
+<a name="l00009"></a>00009 <span class="comment">*/</span>
+<a name="l00010"></a>00010 <span class="preprocessor">#ifndef _CurveData_h_</span>
+<a name="l00011"></a>00011 <span class="preprocessor"></span><span class="preprocessor">#define _CurveData_h_</span>
+<a name="l00012"></a>00012 <span class="preprocessor"></span>
+<a name="l00013"></a>00013 <span class="preprocessor">#include &quot;<a class="code" href="SeVec3d_8h.html">SeVec3d.h</a>&quot;</span>
+<a name="l00014"></a>00014 <span class="preprocessor">#include &lt;vector&gt;</span>
+<a name="l00015"></a>00015 
+<a name="l00016"></a>00016 <span class="preprocessor">#include &lt;cfloat&gt;</span>
+<a name="l00017"></a>00017 <span class="preprocessor">#include &lt;cassert&gt;</span>
+<a name="l00018"></a>00018 
+<a name="l00019"></a>00019 <span class="keyword">namespace </span>SeExpr{
+<a name="l00020"></a>00020 
+<a name="l00022"></a>00022 
+<a name="l00031"></a>00031 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00032"></a><a class="code" href="classSeExpr_1_1SeCurve.html">00032</a> <span class="keyword">class </span><a class="code" href="classSeExpr_1_1SeCurve.html" title="Interpolation curve class for double-&amp;gt;double and double-&amp;gt;SeVec3D.">SeCurve</a>
+<a name="l00033"></a>00033 {
+<a name="l00034"></a><a class="code" href="classSeExpr_1_1SeCurve.html#a51fd6e0c4a2f324651138944ba4176cd">00034</a>     <span class="keyword">mutable</span> <span class="keywordtype">int</span> <a class="code" href="classSeExpr_1_1SeCurve.html#a51fd6e0c4a2f324651138944ba4176cd">cacheCV</a>;
+<a name="l00035"></a>00035 <span class="keyword">public</span>:
+<a name="l00037"></a><a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52aafe73357cd293c104aeea2600b769e35b">00037</a>     <span class="keyword">enum</span> <a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52a" title="Supported interpolation types.">InterpType</a> { <a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52aa0bcc6ac38772ddb27299c080deba06b2">kNone</a>=0, <a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52aaf0ef33661935f4ce1c956f0fca7d6bdc">kLinear</a>, <a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52aa0b2f759023a8847785f995d1245bbdca">kSmooth</a>, <a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52aafe73357cd293c104aeea2600b769e35b">kSpline</a>, <a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52aaced87c9ee8dff8f726720e04c80140b9">kMonotoneSpline</a> };
+<a name="l00038"></a><a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html">00038</a>     <span class="keyword">struct </span><a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html">CV</a>{
+<a name="l00039"></a><a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#ae817c088c807f5bf2d2682b5aa14486f">00039</a>         <a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#ae817c088c807f5bf2d2682b5aa14486f">CV</a>(<span class="keywordtype">double</span> pos,<span class="keyword">const</span> T&amp; val,<a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52a" title="Supported interpolation types.">InterpType</a> type)
+<a name="l00040"></a>00040             :<a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#a8d3da749c93417f4f6ffb79e40735ee2">_pos</a>(pos),<a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#a27b7dbc0c9783bc69dbc6784f273b538">_val</a>(val),<a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#a0f7757de2ad0849e6438b5424bd98344">_interp</a>(type)
+<a name="l00041"></a>00041         {}
+<a name="l00042"></a>00042 
+<a name="l00043"></a><a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#a8d3da749c93417f4f6ffb79e40735ee2">00043</a>         <span class="keywordtype">double</span> <a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#a8d3da749c93417f4f6ffb79e40735ee2">_pos</a>;
+<a name="l00044"></a><a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#a27b7dbc0c9783bc69dbc6784f273b538">00044</a>         T <a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#a27b7dbc0c9783bc69dbc6784f273b538">_val</a>,<a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#a2274f355f35cc49ed7f0ce683e3c5d11">_deriv</a>;
+<a name="l00045"></a><a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#a0f7757de2ad0849e6438b5424bd98344">00045</a>         <a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52a" title="Supported interpolation types.">InterpType</a> <a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html#a0f7757de2ad0849e6438b5424bd98344">_interp</a>;
+<a name="l00046"></a>00046     };
+<a name="l00047"></a>00047 <span class="keyword">private</span>:
+<a name="l00048"></a><a class="code" href="classSeExpr_1_1SeCurve.html#ac1f6f4cac8f12618411b8c1091591faf">00048</a>     std::vector&lt;CV&gt; <a class="code" href="classSeExpr_1_1SeCurve.html#ac1f6f4cac8f12618411b8c1091591faf">_cvData</a>;
+<a name="l00049"></a><a class="code" href="classSeExpr_1_1SeCurve.html#a2cc229ce687201bd6e715c93c2b74567">00049</a>     <span class="keywordtype">bool</span> <a class="code" href="classSeExpr_1_1SeCurve.html#a2cc229ce687201bd6e715c93c2b74567">prepared</a>;
+<a name="l00050"></a>00050 <span class="keyword">public</span>:
+<a name="l00051"></a>00051     <a class="code" href="classSeExpr_1_1SeCurve.html#a052a746849b732ee3e74a1d3dc4af3e6">SeCurve</a>();
+<a name="l00052"></a>00052 
+<a name="l00054"></a>00054     <span class="keywordtype">void</span> <a class="code" href="classSeExpr_1_1SeCurve.html#a318278069d3a9b903299f4bebe422a93" title="Adds a point to the curve.">addPoint</a>(<span class="keywordtype">double</span> position,<span class="keyword">const</span> T&amp; val,<a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52a" title="Supported interpolation types.">InterpType</a> type);
+<a name="l00055"></a>00055 
+<a name="l00057"></a>00057     <span class="keywordtype">void</span> <a class="code" href="classSeExpr_1_1SeCurve.html#ad8cd64257aac7dda1ed772c150afc1f8" title="Prepares points for evaluation (sorts and computes boundaries, clamps extrema).">preparePoints</a>();
+<a name="l00058"></a>00058 
+<a name="l00060"></a>00060     T <a class="code" href="classSeExpr_1_1SeCurve.html#a4d0106d9453a844b4d8992283fccbc93" title="Evaluates curve and returns full value.">getValue</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> param) <span class="keyword">const</span>;
+<a name="l00061"></a>00061 
+<a name="l00064"></a>00064     <span class="keywordtype">double</span> <a class="code" href="classSeExpr_1_1SeCurve.html#a36744f7956f888e6676b9a763bfc4e8f">getChannelValue</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> param,<span class="keywordtype">int</span> channel) <span class="keyword">const</span>;
+<a name="l00065"></a>00065 
+<a name="l00068"></a>00068     <a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html">CV</a> <a class="code" href="classSeExpr_1_1SeCurve.html#a7f31330cf452f1d3b0ac132fefe46a54">getLowerBoundCV</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> param) <span class="keyword">const</span>;
+<a name="l00069"></a>00069 
+<a name="l00071"></a>00071     <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code" href="classSeExpr_1_1SeCurve.html#a084742a5a22574804022f83a8edb64fa" title="Returns whether the given interpolation type is supported.">interpTypeValid</a>(<a class="code" href="classSeExpr_1_1SeCurve.html#ae5318d67ebdccbb8d961bf121b41c52a" title="Supported interpolation types.">InterpType</a> interp);
+<a name="l00072"></a>00072 
+<a name="l00074"></a>00074     <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code" href="classSeExpr_1_1SeCurve.html#acd8eb9cc5e23231a612ce2078749b71f" title="CV Parameter ordering (cv1._pos &amp;lt; cv2._pos).">cvLessThan</a>(<span class="keyword">const</span> <a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html">CV</a> &amp;cv1, <span class="keyword">const</span> <a class="code" href="structSeExpr_1_1SeCurve_1_1CV.html">CV</a> &amp;cv2);
+<a name="l00075"></a>00075 <span class="keyword">private</span>:
+<a name="l00077"></a>00077     <span class="keywordtype">void</span> <a class="code" href="classSeExpr_1_1SeCurve.html#ac2f8a72997abc49a2188c14d3321df97" title="Performs hermite derivative clamping in canonical space.">clampCurveSegment</a>(<span class="keyword">const</span> T&amp; delta,T&amp; d1,T&amp; d2);
+<a name="l00078"></a>00078 
+<a name="l00080"></a>00080     <span class="keyword">static</span> <span class="keywordtype">double</span> <a class="code" href="classSeExpr_1_1SeCurve.html#a6e0f2ee9280d953b2a436ebc38a8274b" title="Returns a component of the given value.">comp</a>(<span class="keyword">const</span> T&amp; val,<span class="keyword">const</span> <span class="keywordtype">int</span> i);
+<a name="l00081"></a>00081 };
+<a name="l00082"></a>00082 
+<a name="l00083"></a>00083 }
+<a name="l00084"></a>00084 <span class="preprocessor">#endif</span>
 </pre></div></div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 3 May 2011 for SeExpr by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 25 Jul 2013 for SeExpr by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

@@ -31,7 +31,7 @@
   <tr class="memlist"><td><a class="el" href="classSeExprNode.html#abd8cb53fae6280df39ab7fa1c635ba4c">_endPos</a></td><td><a class="el" href="classSeExprNode.html">SeExprNode</a></td><td><code> [protected]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExprNode.html#ad1ea4674ac9030cae8f7c31ab4b0e678">_expr</a></td><td><a class="el" href="classSeExprNode.html">SeExprNode</a></td><td><code> [protected]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExprNode.html#af5f0bb9d5203a07d604864a1eb636b8e">_isVec</a></td><td><a class="el" href="classSeExprNode.html">SeExprNode</a></td><td><code> [protected]</code></td></tr>
-  <tr class="memlist"><td><a class="el" href="classSeExprAssignNode.html#a748adb5ea3326ef74c5f3c10a1300bf9">_name</a></td><td><a class="el" href="classSeExprAssignNode.html">SeExprAssignNode</a></td><td><code> [private]</code></td></tr>
+  <tr class="memlist"><td><a class="el" href="classSeExprAssignNode.html#a67febb4b72a662b3a4ee2e36c9131c26">_name</a></td><td><a class="el" href="classSeExprAssignNode.html">SeExprAssignNode</a></td><td><code> [private]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExprNode.html#a05e575ebb6dfba892e9f9a5c41666465">_parent</a></td><td><a class="el" href="classSeExprNode.html">SeExprNode</a></td><td><code> [protected]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExprNode.html#a66c652dd082af9b18552ec8d8136ceb1">_startPos</a></td><td><a class="el" href="classSeExprNode.html">SeExprNode</a></td><td><code> [protected]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExprAssignNode.html#a5377696d119e6fa44524354c2063da06">_var</a></td><td><a class="el" href="classSeExprAssignNode.html">SeExprAssignNode</a></td><td><code> [private]</code></td></tr>
@@ -45,17 +45,16 @@
   <tr class="memlist"><td><a class="el" href="classSeExprNode.html#a75076d80f237e6ad4260427c052cbba3">isVec</a>() const </td><td><a class="el" href="classSeExprNode.html">SeExprNode</a></td><td><code> [inline]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExprNode.html#aa995212baf79e6c2625678b9e249d7ee">numChildren</a>() const </td><td><a class="el" href="classSeExprNode.html">SeExprNode</a></td><td><code> [inline]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExprNode.html#a319ce5c20473c10ba683a0a524b4cbca">parent</a>() const </td><td><a class="el" href="classSeExprNode.html">SeExprNode</a></td><td><code> [inline]</code></td></tr>
-  <tr class="memlist"><td><a class="el" href="classSeExprAssignNode.html#aa05d5c2be9a3b752b8a171c657effdd7">prep</a>(bool wantVec, std::string &amp;error)</td><td><a class="el" href="classSeExprAssignNode.html">SeExprAssignNode</a></td><td><code> [virtual]</code></td></tr>
+  <tr class="memlist"><td><a class="el" href="classSeExprAssignNode.html#a0230f6a65190eb390df4944f0d6dc541">prep</a>(bool wantVec)</td><td><a class="el" href="classSeExprAssignNode.html">SeExprAssignNode</a></td><td><code> [virtual]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExprAssignNode.html#a123cc1d59bdd604589ce14fb4496808e">SeExprAssignNode</a>(const SeExpression *expr, const char *name, SeExprNode *e)</td><td><a class="el" href="classSeExprAssignNode.html">SeExprAssignNode</a></td><td><code> [inline]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExprNode.html#ac5c22645f5a4557cdae4d41075468fb9">SeExprNode</a>(const SeExpression *expr)</td><td><a class="el" href="classSeExprNode.html">SeExprNode</a></td><td></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExprNode.html#aefeaade7e2526153e984cad987400cd4">SeExprNode</a>(const SeExpression *expr, SeExprNode *a)</td><td><a class="el" href="classSeExprNode.html">SeExprNode</a></td><td></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExprNode.html#a906fc54206f6f003ff3936a70288be3f">SeExprNode</a>(const SeExpression *expr, SeExprNode *a, SeExprNode *b)</td><td><a class="el" href="classSeExprNode.html">SeExprNode</a></td><td></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExprNode.html#a238d9c1e3750d373e8cb9a2d0afc2588">SeExprNode</a>(const SeExpression *expr, SeExprNode *a, SeExprNode *b, SeExprNode *c)</td><td><a class="el" href="classSeExprNode.html">SeExprNode</a></td><td></td></tr>
-  <tr class="memlist"><td><a class="el" href="classSeExprNode.html#a336c903f34fdc6961b9203cdeb33c567">setErrorResult</a>(SeVec3d &amp;v) const </td><td><a class="el" href="classSeExprNode.html">SeExprNode</a></td><td><code> [inline]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExprNode.html#ab83cd7170f373fd6ece2d75b661acf13">setPosition</a>(const short int startPos, const short int endPos)</td><td><a class="el" href="classSeExprNode.html">SeExprNode</a></td><td><code> [inline]</code></td></tr>
   <tr class="memlist"><td><a class="el" href="classSeExprNode.html#a8220d6e5ac0f497bd8bb90eaefbf0986">~SeExprNode</a>()</td><td><a class="el" href="classSeExprNode.html">SeExprNode</a></td><td><code> [virtual]</code></td></tr>
 </table></div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 3 May 2011 for SeExpr by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 25 Jul 2013 for SeExpr by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

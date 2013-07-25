@@ -48,12 +48,12 @@ Inheritance diagram for SeExprCompareEqNode:</div>
 <table border="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="2"><h2>Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExprCompareEqNode.html#a9112ea0be7503de74a8ada778f441bbc">SeExprCompareEqNode</a> (const <a class="el" href="classSeExpression.html">SeExpression</a> *expr, <a class="el" href="classSeExprNode.html">SeExprNode</a> *<a class="el" href="userdoc_8txt.html#a6e7beb7fd49890b40d53777ee8f839af">a</a>, <a class="el" href="classSeExprNode.html">SeExprNode</a> *b)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExprCompareEqNode.html#a23971ede166e3645f69811cb893c441c">prep</a> (bool wantVec, std::string &amp;error)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSeExprCompareEqNode.html#a46a032d69404865f2346c9e40eff082f">prep</a> (bool wantVec)</td></tr>
 </table>
 <hr/><a name="_details"></a><h2>Detailed Description</h2>
 <p>Node that implements a numeric comparison. </p>
 
-<p>Definition at line <a class="el" href="SeExprNode_8h_source.html#l00251">251</a> of file <a class="el" href="SeExprNode_8h_source.html">SeExprNode.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExprNode_8h_source.html#l00222">222</a> of file <a class="el" href="SeExprNode_8h_source.html">SeExprNode.h</a>.</p>
 <hr/><h2>Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a9112ea0be7503de74a8ada778f441bbc"></a><!-- doxytag: member="SeExprCompareEqNode::SeExprCompareEqNode" ref="a9112ea0be7503de74a8ada778f441bbc" args="(const SeExpression *expr, SeExprNode *a, SeExprNode *b)" -->
 <div class="memitem">
@@ -86,12 +86,12 @@ Inheritance diagram for SeExprCompareEqNode:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SeExprNode_8h_source.html#l00254">254</a> of file <a class="el" href="SeExprNode_8h_source.html">SeExprNode.h</a>.</p>
+<p>Definition at line <a class="el" href="SeExprNode_8h_source.html#l00225">225</a> of file <a class="el" href="SeExprNode_8h_source.html">SeExprNode.h</a>.</p>
 
 </div>
 </div>
 <hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="a23971ede166e3645f69811cb893c441c"></a><!-- doxytag: member="SeExprCompareEqNode::prep" ref="a23971ede166e3645f69811cb893c441c" args="(bool wantVec, std::string &amp;error)" -->
+<a class="anchor" id="a46a032d69404865f2346c9e40eff082f"></a><!-- doxytag: member="SeExprCompareEqNode::prep" ref="a46a032d69404865f2346c9e40eff082f" args="(bool wantVec)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -99,38 +99,29 @@ Inheritance diagram for SeExprCompareEqNode:</div>
           <td class="memname">bool SeExprCompareEqNode::prep </td>
           <td>(</td>
           <td class="paramtype">bool&nbsp;</td>
-          <td class="paramname"> <em>wantVec</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::string &amp;&nbsp;</td>
-          <td class="paramname"> <em>error</em></td><td>&nbsp;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td><td><code> [virtual]</code></td>
+          <td class="paramname"> <em>wantVec</em></td>
+          <td>&nbsp;)&nbsp;</td>
+          <td><code> [virtual]</code></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Prepare the node (for parser use only). See the discussion at the start of <a class="el" href="plugins_8txt.html#aa41a6513ac1f2755fd5671d6f47a0c7d">SeExprNode.cpp</a> for more info. NOTE: error is deprecated, instead use <a class="el" href="classSeExprNode.html#aef5d6237e6ca35c5cd6b5a963b66a98e" title="Register error.">addError()</a> function for better error localization </p>
+<p>Prepare the node (for parser use only). See the discussion at the start of <a class="el" href="SeExprNode_8cpp.html">SeExprNode.cpp</a> for more info. </p>
 
-<p>Reimplemented from <a class="el" href="classSeExprNode.html#ab5730ecb8ab806fd76dee0292115d2ee">SeExprNode</a>.</p>
+<p>Reimplemented from <a class="el" href="classSeExprNode.html#a71e9185e3b6c3f49855964147897aeb0">SeExprNode</a>.</p>
 
-<p>Definition at line <a class="el" href="SeExprNode_8cpp_source.html#l00436">436</a> of file <a class="el" href="SeExprNode_8cpp_source.html">SeExprNode.cpp</a>.</p>
+<p>Definition at line <a class="el" href="SeExprNode_8cpp_source.html#l00411">411</a> of file <a class="el" href="SeExprNode_8cpp_source.html">SeExprNode.cpp</a>.</p>
 
-<p>References <a class="el" href="SeExprNode_8h_source.html#l00110">SeExprNode::_isVec</a>, and <a class="el" href="SeExprNode_8cpp_source.html#l00141">SeExprNode::prep()</a>.</p>
+<p>References <a class="el" href="SeExprNode_8h_source.html#l00081">SeExprNode::_isVec</a>, and <a class="el" href="SeExprNode_8cpp_source.html#l00116">SeExprNode::prep()</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
-<li>/jobs2/soft/users/aselle/src/seexpr-to-push/src/SeExpr/<a class="el" href="SeExprNode_8h_source.html">SeExprNode.h</a></li>
-<li>/jobs2/soft/users/aselle/src/seexpr-to-push/src/SeExpr/<a class="el" href="SeExprNode_8cpp_source.html">SeExprNode.cpp</a></li>
+<li>/disk1/scratch/aselle/projects/seexpr/SeExpr/src/SeExpr/<a class="el" href="SeExprNode_8h_source.html">SeExprNode.h</a></li>
+<li>/disk1/scratch/aselle/projects/seexpr/SeExpr/src/SeExpr/<a class="el" href="SeExprNode_8cpp_source.html">SeExprNode.cpp</a></li>
 </ul>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 3 May 2011 for SeExpr by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 25 Jul 2013 for SeExpr by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

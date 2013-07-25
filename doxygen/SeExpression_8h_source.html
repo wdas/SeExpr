@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<title>SeExpr: /jobs2/soft/users/aselle/src/seexpr-to-push/src/SeExpr/SeExpression.h Source File</title>
+<title>SeExpr: /disk1/scratch/aselle/projects/seexpr/SeExpr/src/SeExpr/SeExpression.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css"/>
 </head>
@@ -23,213 +23,191 @@
       <li><a href="globals.html"><span>File&nbsp;Members</span></a></li>
     </ul>
   </div>
-<h1>/jobs2/soft/users/aselle/src/seexpr-to-push/src/SeExpr/SeExpression.h</h1><a href="SeExpression_8h.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
-<a name="l00002"></a>00002 <span class="comment"> SEEXPR SOFTWARE</span>
-<a name="l00003"></a>00003 <span class="comment"> Copyright 2011 Disney Enterprises, Inc. All rights reserved</span>
-<a name="l00004"></a>00004 <span class="comment"> </span>
-<a name="l00005"></a>00005 <span class="comment"> Redistribution and use in source and binary forms, with or without</span>
-<a name="l00006"></a>00006 <span class="comment"> modification, are permitted provided that the following conditions are</span>
-<a name="l00007"></a>00007 <span class="comment"> met:</span>
-<a name="l00008"></a>00008 <span class="comment"> </span>
-<a name="l00009"></a>00009 <span class="comment"> * Redistributions of source code must retain the above copyright</span>
-<a name="l00010"></a>00010 <span class="comment"> notice, this list of conditions and the following disclaimer.</span>
-<a name="l00011"></a>00011 <span class="comment"> </span>
-<a name="l00012"></a>00012 <span class="comment"> * Redistributions in binary form must reproduce the above copyright</span>
-<a name="l00013"></a>00013 <span class="comment"> notice, this list of conditions and the following disclaimer in</span>
-<a name="l00014"></a>00014 <span class="comment"> the documentation and/or other materials provided with the</span>
-<a name="l00015"></a>00015 <span class="comment"> distribution.</span>
-<a name="l00016"></a>00016 <span class="comment"> </span>
-<a name="l00017"></a>00017 <span class="comment"> * The names &quot;Disney&quot;, &quot;Walt Disney Pictures&quot;, &quot;Walt Disney Animation</span>
-<a name="l00018"></a>00018 <span class="comment"> Studios&quot; or the names of its contributors may NOT be used to</span>
-<a name="l00019"></a>00019 <span class="comment"> endorse or promote products derived from this software without</span>
-<a name="l00020"></a>00020 <span class="comment"> specific prior written permission from Walt Disney Pictures.</span>
-<a name="l00021"></a>00021 <span class="comment"> </span>
-<a name="l00022"></a>00022 <span class="comment"> Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND</span>
-<a name="l00023"></a>00023 <span class="comment"> CONTRIBUTORS &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,</span>
-<a name="l00024"></a>00024 <span class="comment"> BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS</span>
-<a name="l00025"></a>00025 <span class="comment"> FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.</span>
-<a name="l00026"></a>00026 <span class="comment"> IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR</span>
-<a name="l00027"></a>00027 <span class="comment"> CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,</span>
-<a name="l00028"></a>00028 <span class="comment"> EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,</span>
-<a name="l00029"></a>00029 <span class="comment"> PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR</span>
-<a name="l00030"></a>00030 <span class="comment"> PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY</span>
-<a name="l00031"></a>00031 <span class="comment"> THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
-<a name="l00032"></a>00032 <span class="comment"> (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
-<a name="l00033"></a>00033 <span class="comment"> OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</span>
-<a name="l00034"></a>00034 <span class="comment">*/</span>
-<a name="l00035"></a>00035 <span class="preprocessor">#ifndef SeExpression_h</span>
-<a name="l00036"></a>00036 <span class="preprocessor"></span><span class="preprocessor">#define SeExpression_h</span>
-<a name="l00037"></a>00037 <span class="preprocessor"></span>
-<a name="l00038"></a>00038 <span class="preprocessor">#include &lt;string&gt;</span>
-<a name="l00039"></a>00039 <span class="preprocessor">#include &lt;map&gt;</span>
-<a name="l00040"></a>00040 <span class="preprocessor">#include &lt;set&gt;</span>
-<a name="l00041"></a>00041 <span class="preprocessor">#include &lt;vector&gt;</span>
-<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;<a class="code" href="SeVec3d_8h.html">SeVec3d.h</a>&quot;</span>
-<a name="l00043"></a>00043 
-<a name="l00044"></a>00044 <span class="keyword">class </span><a class="code" href="classSeExprNode.html" title="Expression node base class. Always constructed by parser in SeExprParser.y.">SeExprNode</a>;
-<a name="l00045"></a>00045 <span class="keyword">class </span><a class="code" href="classSeExprVarNode.html" title="Node that references a variable.">SeExprVarNode</a>;
-<a name="l00046"></a>00046 <span class="keyword">class </span><a class="code" href="classSeExprLocalVarRef.html" title="uses internally to represent local variables">SeExprLocalVarRef</a>;
-<a name="l00047"></a>00047 <span class="keyword">class </span><a class="code" href="classSeExprFunc.html" title="Function Definition, used in parse tree and func table.">SeExprFunc</a>;
-<a name="l00048"></a>00048 <span class="keyword">class </span><a class="code" href="classSeExpression.html" title="main expression class">SeExpression</a>;
-<a name="l00049"></a>00049 
-<a name="l00051"></a><a class="code" href="classSeExprVarRef.html">00051</a> <span class="keyword">class </span><a class="code" href="classSeExprVarRef.html" title="abstract class for implementing variable references">SeExprVarRef</a>
-<a name="l00052"></a>00052 {
-<a name="l00053"></a>00053  <span class="keyword">public</span>:
-<a name="l00054"></a><a class="code" href="classSeExprVarRef.html#a61e1fbfd0a2cccc42c53acef46167c59">00054</a>     <span class="keyword">virtual</span> <a class="code" href="classSeExprVarRef.html#a61e1fbfd0a2cccc42c53acef46167c59">~SeExprVarRef</a>() {}
-<a name="l00055"></a>00055 
-<a name="l00057"></a>00057     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classSeExprVarRef.html#ab0990043ffe809ffd0f5b586c1ede19f" title="returns true for a vector type, false for a scalar type">isVec</a>() = 0;
-<a name="l00058"></a>00058 
-<a name="l00061"></a>00061     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classSeExprVarRef.html#ae1f0f776153076f85f733f7fae2d7220">eval</a>(<span class="keyword">const</span> <a class="code" href="classSeExprVarNode.html" title="Node that references a variable.">SeExprVarNode</a>* node, <a class="code" href="classSeVec3d.html" title="A 3d point/vector class.">SeVec3d</a>&amp; <a class="code" href="plugins_8txt.html#af6e7c6aed704e156ce95dae980cd4438">result</a>) = 0;
-<a name="l00062"></a>00062 };
-<a name="l00063"></a>00063 
-<a name="l00065"></a><a class="code" href="classSeExprVectorVarRef.html">00065</a> <span class="keyword">class </span><a class="code" href="classSeExprVectorVarRef.html" title="simple vector variable reference reference base class">SeExprVectorVarRef</a> : <span class="keyword">public</span> <a class="code" href="classSeExprVarRef.html" title="abstract class for implementing variable references">SeExprVarRef</a>
-<a name="l00066"></a>00066 {
-<a name="l00067"></a>00067  <span class="keyword">public</span>:
-<a name="l00068"></a><a class="code" href="classSeExprVectorVarRef.html#ae4356040b4422c2dfa6d63a3c37249cf">00068</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classSeExprVectorVarRef.html#ae4356040b4422c2dfa6d63a3c37249cf" title="returns true for a vector type, false for a scalar type">isVec</a>() { <span class="keywordflow">return</span> 1; }
-<a name="l00069"></a>00069 };
-<a name="l00070"></a>00070 
-<a name="l00071"></a>00071 
-<a name="l00073"></a><a class="code" href="classSeExprScalarVarRef.html">00073</a> <span class="keyword">class </span><a class="code" href="classSeExprScalarVarRef.html" title="simple scalar variable reference reference base class">SeExprScalarVarRef</a> : <span class="keyword">public</span> <a class="code" href="classSeExprVarRef.html" title="abstract class for implementing variable references">SeExprVarRef</a>
-<a name="l00074"></a>00074 {
-<a name="l00075"></a>00075  <span class="keyword">public</span>:
-<a name="l00076"></a><a class="code" href="classSeExprScalarVarRef.html#a8b43412cbbd3af2ed8ed2a823178a12e">00076</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classSeExprScalarVarRef.html#a8b43412cbbd3af2ed8ed2a823178a12e" title="returns true for a vector type, false for a scalar type">isVec</a>() { <span class="keywordflow">return</span> 0; }
-<a name="l00077"></a>00077 };
-<a name="l00078"></a>00078 
-<a name="l00080"></a><a class="code" href="classSeExprLocalVarRef.html">00080</a> <span class="keyword">class </span><a class="code" href="classSeExprLocalVarRef.html" title="uses internally to represent local variables">SeExprLocalVarRef</a> : <span class="keyword">public</span> <a class="code" href="classSeExprVarRef.html" title="abstract class for implementing variable references">SeExprVarRef</a>
-<a name="l00081"></a>00081 {
-<a name="l00082"></a>00082  <span class="keyword">public</span>:
-<a name="l00083"></a><a class="code" href="classSeExprLocalVarRef.html#a779ea2d68dba81758396b61f4aa352d6">00083</a>     <a class="code" href="classSeVec3d.html" title="A 3d point/vector class.">SeVec3d</a> <a class="code" href="classSeExprLocalVarRef.html#a779ea2d68dba81758396b61f4aa352d6">val</a>;
-<a name="l00084"></a><a class="code" href="classSeExprLocalVarRef.html#adbb79ac77dbdbfd6cf25c714681037ab">00084</a>     <a class="code" href="classSeExprLocalVarRef.html#adbb79ac77dbdbfd6cf25c714681037ab">SeExprLocalVarRef</a>() : <a class="code" href="classSeExprLocalVarRef.html#a02739f54dc3f5103ef973606cdf7507a">_isVec</a>(false) {}
-<a name="l00085"></a><a class="code" href="classSeExprLocalVarRef.html#a6060b1d47db343234b6f276684df1099">00085</a>     <span class="keywordtype">void</span> <a class="code" href="classSeExprLocalVarRef.html#a6060b1d47db343234b6f276684df1099">setIsVec</a>() { <a class="code" href="classSeExprLocalVarRef.html#a02739f54dc3f5103ef973606cdf7507a">_isVec</a> = <span class="keyword">true</span>; }
-<a name="l00086"></a><a class="code" href="classSeExprLocalVarRef.html#adc90de85a0c1b41d926a1c9f35ef8363">00086</a>     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classSeExprLocalVarRef.html#adc90de85a0c1b41d926a1c9f35ef8363">eval</a>(<span class="keyword">const</span> <a class="code" href="classSeExprVarNode.html" title="Node that references a variable.">SeExprVarNode</a>*, <a class="code" href="classSeVec3d.html" title="A 3d point/vector class.">SeVec3d</a>&amp; <a class="code" href="plugins_8txt.html#af6e7c6aed704e156ce95dae980cd4438">result</a>) 
-<a name="l00087"></a>00087     { result = <a class="code" href="classSeExprLocalVarRef.html#a779ea2d68dba81758396b61f4aa352d6">val</a>; }
-<a name="l00088"></a><a class="code" href="classSeExprLocalVarRef.html#a4ab1d3e8cdcb4f7182eb0dcd04210fd0">00088</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classSeExprLocalVarRef.html#a4ab1d3e8cdcb4f7182eb0dcd04210fd0" title="returns true for a vector type, false for a scalar type">isVec</a>() { <span class="keywordflow">return</span> <a class="code" href="classSeExprLocalVarRef.html#a02739f54dc3f5103ef973606cdf7507a">_isVec</a>; }
-<a name="l00089"></a>00089  <span class="keyword">private</span>:
-<a name="l00090"></a><a class="code" href="classSeExprLocalVarRef.html#a02739f54dc3f5103ef973606cdf7507a">00090</a>     <span class="keywordtype">bool</span> <a class="code" href="classSeExprLocalVarRef.html#a02739f54dc3f5103ef973606cdf7507a">_isVec</a>;
-<a name="l00091"></a>00091 };
+<h1>/disk1/scratch/aselle/projects/seexpr/SeExpr/src/SeExpr/SeExpression.h</h1><a href="SeExpression_8h.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment">* (c) Disney Enterprises, Inc.  All rights reserved.</span>
+<a name="l00003"></a>00003 <span class="comment">*</span>
+<a name="l00004"></a>00004 <span class="comment">* This file is licensed under the terms of the Microsoft Public License (MS-PL)</span>
+<a name="l00005"></a>00005 <span class="comment">* as defined at: http://opensource.org/licenses/MS-PL.</span>
+<a name="l00006"></a>00006 <span class="comment">*</span>
+<a name="l00007"></a>00007 <span class="comment">* A complete copy of this license is included in this distribution as the file</span>
+<a name="l00008"></a>00008 <span class="comment">* LICENSE.</span>
+<a name="l00009"></a>00009 <span class="comment">*/</span>
+<a name="l00010"></a>00010 <span class="preprocessor">#ifndef SeExpression_h</span>
+<a name="l00011"></a>00011 <span class="preprocessor"></span><span class="preprocessor">#define SeExpression_h</span>
+<a name="l00012"></a>00012 <span class="preprocessor"></span>
+<a name="l00013"></a>00013 <span class="preprocessor">#include &lt;string&gt;</span>
+<a name="l00014"></a>00014 <span class="preprocessor">#include &lt;map&gt;</span>
+<a name="l00015"></a>00015 <span class="preprocessor">#include &lt;set&gt;</span>
+<a name="l00016"></a>00016 <span class="preprocessor">#include &lt;vector&gt;</span>
+<a name="l00017"></a>00017 <span class="preprocessor">#include &lt;<a class="code" href="SeExprMacros_8h.html">SeExprMacros.h</a>&gt;</span>
+<a name="l00018"></a>00018 <span class="preprocessor">#include &quot;<a class="code" href="SeVec3d_8h.html">SeVec3d.h</a>&quot;</span>
+<a name="l00019"></a>00019 
+<a name="l00020"></a>00020 <span class="keyword">class </span><a class="code" href="classSeExprNode.html" title="Expression node base class. Always constructed by parser in SeExprParser.y.">SeExprNode</a>;
+<a name="l00021"></a>00021 <span class="keyword">class </span><a class="code" href="classSeExprVarNode.html" title="Node that references a variable.">SeExprVarNode</a>;
+<a name="l00022"></a>00022 <span class="keyword">class </span><a class="code" href="classSeExprLocalVarRef.html" title="uses internally to represent local variables">SeExprLocalVarRef</a>;
+<a name="l00023"></a>00023 <span class="keyword">class </span><a class="code" href="classSeExprFunc.html" title="Function Definition, used in parse tree and func table.">SeExprFunc</a>;
+<a name="l00024"></a>00024 <span class="keyword">class </span><a class="code" href="classSeExpression.html" title="main expression class">SeExpression</a>;
+<a name="l00025"></a>00025 
+<a name="l00027"></a><a class="code" href="classSeExprVarRef.html">00027</a> <span class="keyword">class </span><a class="code" href="classSeExprVarRef.html" title="abstract class for implementing variable references">SeExprVarRef</a>
+<a name="l00028"></a>00028 {
+<a name="l00029"></a>00029  <span class="keyword">public</span>:
+<a name="l00030"></a><a class="code" href="classSeExprVarRef.html#a61e1fbfd0a2cccc42c53acef46167c59">00030</a>     <span class="keyword">virtual</span> <a class="code" href="classSeExprVarRef.html#a61e1fbfd0a2cccc42c53acef46167c59">~SeExprVarRef</a>() {}
+<a name="l00031"></a>00031 
+<a name="l00033"></a>00033     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classSeExprVarRef.html#ab0990043ffe809ffd0f5b586c1ede19f" title="returns true for a vector type, false for a scalar type">isVec</a>() = 0;
+<a name="l00034"></a>00034 
+<a name="l00037"></a>00037     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classSeExprVarRef.html#ae1f0f776153076f85f733f7fae2d7220">eval</a>(<span class="keyword">const</span> <a class="code" href="classSeExprVarNode.html" title="Node that references a variable.">SeExprVarNode</a>* node, <a class="code" href="classSeVec3d.html" title="A 3d point/vector class.">SeVec3d</a>&amp; result) = 0;
+<a name="l00038"></a>00038 };
+<a name="l00039"></a>00039 
+<a name="l00041"></a><a class="code" href="classSeExprVectorVarRef.html">00041</a> <span class="keyword">class </span><a class="code" href="classSeExprVectorVarRef.html" title="simple vector variable reference reference base class">SeExprVectorVarRef</a> : <span class="keyword">public</span> <a class="code" href="classSeExprVarRef.html" title="abstract class for implementing variable references">SeExprVarRef</a>
+<a name="l00042"></a>00042 {
+<a name="l00043"></a>00043  <span class="keyword">public</span>:
+<a name="l00044"></a><a class="code" href="classSeExprVectorVarRef.html#ae4356040b4422c2dfa6d63a3c37249cf">00044</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classSeExprVectorVarRef.html#ae4356040b4422c2dfa6d63a3c37249cf" title="returns true for a vector type, false for a scalar type">isVec</a>() { <span class="keywordflow">return</span> 1; }
+<a name="l00045"></a>00045 };
+<a name="l00046"></a>00046 
+<a name="l00047"></a>00047 
+<a name="l00049"></a><a class="code" href="classSeExprScalarVarRef.html">00049</a> <span class="keyword">class </span><a class="code" href="classSeExprScalarVarRef.html" title="simple scalar variable reference reference base class">SeExprScalarVarRef</a> : <span class="keyword">public</span> <a class="code" href="classSeExprVarRef.html" title="abstract class for implementing variable references">SeExprVarRef</a>
+<a name="l00050"></a>00050 {
+<a name="l00051"></a>00051  <span class="keyword">public</span>:
+<a name="l00052"></a><a class="code" href="classSeExprScalarVarRef.html#a8b43412cbbd3af2ed8ed2a823178a12e">00052</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classSeExprScalarVarRef.html#a8b43412cbbd3af2ed8ed2a823178a12e" title="returns true for a vector type, false for a scalar type">isVec</a>() { <span class="keywordflow">return</span> 0; }
+<a name="l00053"></a>00053 };
+<a name="l00054"></a>00054 
+<a name="l00056"></a><a class="code" href="classSeExprLocalVarRef.html">00056</a> <span class="keyword">class </span><a class="code" href="classSeExprLocalVarRef.html" title="uses internally to represent local variables">SeExprLocalVarRef</a> : <span class="keyword">public</span> <a class="code" href="classSeExprVarRef.html" title="abstract class for implementing variable references">SeExprVarRef</a>
+<a name="l00057"></a>00057 {
+<a name="l00058"></a>00058  <span class="keyword">public</span>:
+<a name="l00059"></a><a class="code" href="classSeExprLocalVarRef.html#a779ea2d68dba81758396b61f4aa352d6">00059</a>     <a class="code" href="classSeVec3d.html" title="A 3d point/vector class.">SeVec3d</a> <a class="code" href="classSeExprLocalVarRef.html#a779ea2d68dba81758396b61f4aa352d6">val</a>;
+<a name="l00060"></a><a class="code" href="classSeExprLocalVarRef.html#adbb79ac77dbdbfd6cf25c714681037ab">00060</a>     <a class="code" href="classSeExprLocalVarRef.html#adbb79ac77dbdbfd6cf25c714681037ab">SeExprLocalVarRef</a>() : <a class="code" href="classSeExprLocalVarRef.html#a02739f54dc3f5103ef973606cdf7507a">_isVec</a>(false) {}
+<a name="l00061"></a><a class="code" href="classSeExprLocalVarRef.html#a6060b1d47db343234b6f276684df1099">00061</a>     <span class="keywordtype">void</span> <a class="code" href="classSeExprLocalVarRef.html#a6060b1d47db343234b6f276684df1099">setIsVec</a>() { <a class="code" href="classSeExprLocalVarRef.html#a02739f54dc3f5103ef973606cdf7507a">_isVec</a> = <span class="keyword">true</span>; }
+<a name="l00062"></a><a class="code" href="classSeExprLocalVarRef.html#adc90de85a0c1b41d926a1c9f35ef8363">00062</a>     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classSeExprLocalVarRef.html#adc90de85a0c1b41d926a1c9f35ef8363">eval</a>(<span class="keyword">const</span> <a class="code" href="classSeExprVarNode.html" title="Node that references a variable.">SeExprVarNode</a>*, <a class="code" href="classSeVec3d.html" title="A 3d point/vector class.">SeVec3d</a>&amp; result) 
+<a name="l00063"></a>00063     { result = <a class="code" href="classSeExprLocalVarRef.html#a779ea2d68dba81758396b61f4aa352d6">val</a>; }
+<a name="l00064"></a><a class="code" href="classSeExprLocalVarRef.html#a4ab1d3e8cdcb4f7182eb0dcd04210fd0">00064</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classSeExprLocalVarRef.html#a4ab1d3e8cdcb4f7182eb0dcd04210fd0" title="returns true for a vector type, false for a scalar type">isVec</a>() { <span class="keywordflow">return</span> <a class="code" href="classSeExprLocalVarRef.html#a02739f54dc3f5103ef973606cdf7507a">_isVec</a>; }
+<a name="l00065"></a>00065  <span class="keyword">private</span>:
+<a name="l00066"></a><a class="code" href="classSeExprLocalVarRef.html#a02739f54dc3f5103ef973606cdf7507a">00066</a>     <span class="keywordtype">bool</span> <a class="code" href="classSeExprLocalVarRef.html#a02739f54dc3f5103ef973606cdf7507a">_isVec</a>;
+<a name="l00067"></a>00067 };
+<a name="l00068"></a>00068 
+<a name="l00069"></a>00069 
+<a name="l00071"></a><a class="code" href="classSeExpression.html">00071</a> <span class="keyword">class </span><a class="code" href="classSeExpression.html" title="main expression class">SeExpression</a>
+<a name="l00072"></a>00072 {
+<a name="l00073"></a>00073  <span class="keyword">public</span>:
+<a name="l00074"></a><a class="code" href="classSeExpression.html#a77c9a5d8ce27679b7c5b4c081b251a0c">00074</a>     <span class="keyword">typedef</span> std::map&lt;std::string, SeExprLocalVarRef&gt; <a class="code" href="classSeExpression.html#a77c9a5d8ce27679b7c5b4c081b251a0c">LocalVarTable</a>;
+<a name="l00075"></a>00075 
+<a name="l00077"></a><a class="code" href="structSeExpression_1_1Error.html">00077</a>     <span class="keyword">struct </span><a class="code" href="structSeExpression_1_1Error.html" title="Represents a parse or type checking error in an expression.">Error</a>
+<a name="l00078"></a>00078     {
+<a name="l00080"></a><a class="code" href="structSeExpression_1_1Error.html#a152e2b2791e7f3ca414ba56d2bf173f0">00080</a>         std::string <a class="code" href="structSeExpression_1_1Error.html#a152e2b2791e7f3ca414ba56d2bf173f0" title="Text of error.">error</a>;
+<a name="l00081"></a>00081 
+<a name="l00083"></a><a class="code" href="structSeExpression_1_1Error.html#a9b1702231d61497c41fd39252fe7894e">00083</a>         <span class="keywordtype">int</span> <a class="code" href="structSeExpression_1_1Error.html#a9b1702231d61497c41fd39252fe7894e" title="Error start offset in expression string.">startPos</a>;
+<a name="l00084"></a>00084 
+<a name="l00086"></a><a class="code" href="structSeExpression_1_1Error.html#ab1880f7ac8e45170a81f2f0ac2d6a976">00086</a>         <span class="keywordtype">int</span> <a class="code" href="structSeExpression_1_1Error.html#ab1880f7ac8e45170a81f2f0ac2d6a976" title="Error end offset in expression string.">endPos</a>;
+<a name="l00087"></a>00087 
+<a name="l00088"></a><a class="code" href="structSeExpression_1_1Error.html#a75c6ae849d6518a4c79576db30889996">00088</a>         <a class="code" href="structSeExpression_1_1Error.html#a75c6ae849d6518a4c79576db30889996">Error</a>(<span class="keyword">const</span> std::string&amp; errorIn,<span class="keyword">const</span> <span class="keywordtype">int</span> startPosIn,<span class="keyword">const</span> <span class="keywordtype">int</span> endPosIn)
+<a name="l00089"></a>00089             :<a class="code" href="structSeExpression_1_1Error.html#a152e2b2791e7f3ca414ba56d2bf173f0" title="Text of error.">error</a>(errorIn),<a class="code" href="structSeExpression_1_1Error.html#a9b1702231d61497c41fd39252fe7894e" title="Error start offset in expression string.">startPos</a>(startPosIn),<a class="code" href="structSeExpression_1_1Error.html#ab1880f7ac8e45170a81f2f0ac2d6a976" title="Error end offset in expression string.">endPos</a>(endPosIn)
+<a name="l00090"></a>00090         {}
+<a name="l00091"></a>00091     };
 <a name="l00092"></a>00092 
-<a name="l00093"></a>00093 
-<a name="l00095"></a><a class="code" href="classSeExpression.html">00095</a> <span class="keyword">class </span><a class="code" href="classSeExpression.html" title="main expression class">SeExpression</a>
-<a name="l00096"></a>00096 {
-<a name="l00097"></a>00097  <span class="keyword">public</span>:
-<a name="l00098"></a><a class="code" href="classSeExpression.html#a77c9a5d8ce27679b7c5b4c081b251a0c">00098</a>     <span class="keyword">typedef</span> std::map&lt;std::string, SeExprLocalVarRef&gt; <a class="code" href="classSeExpression.html#a77c9a5d8ce27679b7c5b4c081b251a0c">LocalVarTable</a>;
-<a name="l00099"></a>00099 
-<a name="l00101"></a><a class="code" href="structSeExpression_1_1Error.html">00101</a>     <span class="keyword">struct </span><a class="code" href="structSeExpression_1_1Error.html" title="Represents a parse or type checking error in an expression.">Error</a>
-<a name="l00102"></a>00102     {
-<a name="l00104"></a><a class="code" href="structSeExpression_1_1Error.html#a152e2b2791e7f3ca414ba56d2bf173f0">00104</a>         std::string <a class="code" href="structSeExpression_1_1Error.html#a152e2b2791e7f3ca414ba56d2bf173f0" title="Text of error.">error</a>;
+<a name="l00093"></a>00093     <a class="code" href="classSeExpression.html#a1fd186a77bf0eef17c8c6fe02b92f8d9">SeExpression</a>( );
+<a name="l00094"></a>00094     <a class="code" href="classSeExpression.html#a1fd186a77bf0eef17c8c6fe02b92f8d9">SeExpression</a>( <span class="keyword">const</span> std::string &amp;e, <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#a74ff9f0227f53031b11c6120fc828c88">wantVec</a>=<span class="keyword">true</span> );
+<a name="l00095"></a>00095     <span class="keyword">virtual</span> <a class="code" href="classSeExpression.html#abe37530aa43dd4b4ab8455232cdde625">~SeExpression</a>();
+<a name="l00096"></a>00096 
+<a name="l00100"></a>00100     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#a00570baeff92699a0f2433da7cbe0beb">setWantVec</a>(<span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#a74ff9f0227f53031b11c6120fc828c88">wantVec</a>);
+<a name="l00101"></a>00101 
+<a name="l00104"></a>00104     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#a8accd0bc751d4f74f93313a7ca768647">setExpr</a>(<span class="keyword">const</span> std::string&amp; e);
 <a name="l00105"></a>00105 
-<a name="l00107"></a><a class="code" href="structSeExpression_1_1Error.html#a9b1702231d61497c41fd39252fe7894e">00107</a>         <span class="keywordtype">int</span> <a class="code" href="structSeExpression_1_1Error.html#a9b1702231d61497c41fd39252fe7894e" title="Error start offset in expression string.">startPos</a>;
+<a name="l00107"></a><a class="code" href="classSeExpression.html#ab968e909b2355f0167976daad2940c91">00107</a>     <span class="keyword">const</span> std::string&amp; <a class="code" href="classSeExpression.html#ab968e909b2355f0167976daad2940c91" title="Get the string that this expression is currently set to evaluate.">getExpr</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classSeExpression.html#a4a920f52e0f2c19e8cdbcd088eedaf96">_expression</a>; }
 <a name="l00108"></a>00108 
-<a name="l00110"></a><a class="code" href="structSeExpression_1_1Error.html#ab1880f7ac8e45170a81f2f0ac2d6a976">00110</a>         <span class="keywordtype">int</span> <a class="code" href="structSeExpression_1_1Error.html#ab1880f7ac8e45170a81f2f0ac2d6a976" title="Error end offset in expression string.">endPos</a>;
-<a name="l00111"></a>00111 
-<a name="l00112"></a><a class="code" href="structSeExpression_1_1Error.html#a75c6ae849d6518a4c79576db30889996">00112</a>         <a class="code" href="structSeExpression_1_1Error.html#a75c6ae849d6518a4c79576db30889996">Error</a>(<span class="keyword">const</span> std::string&amp; errorIn,<span class="keyword">const</span> <span class="keywordtype">int</span> startPosIn,<span class="keyword">const</span> <span class="keywordtype">int</span> endPosIn)
-<a name="l00113"></a>00113             :<a class="code" href="structSeExpression_1_1Error.html#a152e2b2791e7f3ca414ba56d2bf173f0" title="Text of error.">error</a>(errorIn),<a class="code" href="structSeExpression_1_1Error.html#a9b1702231d61497c41fd39252fe7894e" title="Error start offset in expression string.">startPos</a>(startPosIn),<a class="code" href="structSeExpression_1_1Error.html#ab1880f7ac8e45170a81f2f0ac2d6a976" title="Error end offset in expression string.">endPos</a>(endPosIn)
-<a name="l00114"></a>00114         {}
-<a name="l00115"></a>00115     };
-<a name="l00116"></a>00116 
-<a name="l00117"></a>00117     <a class="code" href="classSeExpression.html#a1fd186a77bf0eef17c8c6fe02b92f8d9">SeExpression</a>( );
-<a name="l00118"></a>00118     <a class="code" href="classSeExpression.html#a1fd186a77bf0eef17c8c6fe02b92f8d9">SeExpression</a>( <span class="keyword">const</span> std::string &amp;e, <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#a74ff9f0227f53031b11c6120fc828c88">wantVec</a>=1 );
-<a name="l00119"></a>00119     <span class="keyword">virtual</span> <a class="code" href="classSeExpression.html#abe37530aa43dd4b4ab8455232cdde625">~SeExpression</a>();
-<a name="l00120"></a>00120 
-<a name="l00124"></a>00124     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#a00570baeff92699a0f2433da7cbe0beb">setWantVec</a>(<span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#a74ff9f0227f53031b11c6120fc828c88">wantVec</a>);
-<a name="l00125"></a>00125 
-<a name="l00128"></a>00128     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#a8accd0bc751d4f74f93313a7ca768647">setExpr</a>(<span class="keyword">const</span> std::string&amp; e);
-<a name="l00129"></a>00129 
-<a name="l00131"></a><a class="code" href="classSeExpression.html#ab968e909b2355f0167976daad2940c91">00131</a>     <span class="keyword">const</span> std::string&amp; <a class="code" href="classSeExpression.html#ab968e909b2355f0167976daad2940c91" title="Get the string that this expression is currently set to evaluate.">getExpr</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classSeExpression.html#a4a920f52e0f2c19e8cdbcd088eedaf96">_expression</a>; }
+<a name="l00112"></a>00112     <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#a5f0a7e77a6a1db28a36f8327da3b5e70">syntaxOK</a>() <span class="keyword">const</span>;
+<a name="l00113"></a>00113 
+<a name="l00118"></a>00118     <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#a48fd7c0d78ed333620d1b3cd1af266ef">isValid</a>() <span class="keyword">const</span>;
+<a name="l00119"></a>00119 
+<a name="l00122"></a><a class="code" href="classSeExpression.html#abb86eb12a695da1f1139707db0036b64">00122</a>     <span class="keyword">const</span> std::string&amp; <a class="code" href="classSeExpression.html#abb86eb12a695da1f1139707db0036b64">parseError</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classSeExpression.html#a6aa4be50ca08aea29fc0c16e94f018ea">_parseError</a>; }
+<a name="l00123"></a>00123 
+<a name="l00126"></a><a class="code" href="classSeExpression.html#a3ff372439ea2287ea752c386cc89137c">00126</a>     <span class="keyword">const</span> std::vector&lt;Error&gt;&amp; <a class="code" href="classSeExpression.html#a3ff372439ea2287ea752c386cc89137c">getErrors</a>()<span class="keyword"> const</span>
+<a name="l00127"></a>00127 <span class="keyword">    </span>{<span class="keywordflow">return</span> <a class="code" href="classSeExpression.html#a4a00d6077f695b9eaa59fa4d03f3d108">_errors</a>;}
+<a name="l00128"></a>00128 
+<a name="l00131"></a>00131     <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#aede34c58effcc622e492e580522a5b18">isConstant</a>() <span class="keyword">const</span>;
 <a name="l00132"></a>00132 
-<a name="l00136"></a>00136     <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#a5f0a7e77a6a1db28a36f8327da3b5e70">syntaxOK</a>() <span class="keyword">const</span>;
-<a name="l00137"></a>00137 
-<a name="l00142"></a>00142     <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#a48fd7c0d78ed333620d1b3cd1af266ef">isValid</a>() <span class="keyword">const</span>;
-<a name="l00143"></a>00143 
-<a name="l00146"></a><a class="code" href="classSeExpression.html#abb86eb12a695da1f1139707db0036b64">00146</a>     <span class="keyword">const</span> std::string&amp; <a class="code" href="classSeExpression.html#abb86eb12a695da1f1139707db0036b64">parseError</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classSeExpression.html#a6aa4be50ca08aea29fc0c16e94f018ea">_parseError</a>; }
-<a name="l00147"></a>00147 
-<a name="l00150"></a><a class="code" href="classSeExpression.html#a3ff372439ea2287ea752c386cc89137c">00150</a>     <span class="keyword">const</span> std::vector&lt;Error&gt;&amp; <a class="code" href="classSeExpression.html#a3ff372439ea2287ea752c386cc89137c">getErrors</a>()<span class="keyword"> const</span>
-<a name="l00151"></a>00151 <span class="keyword">    </span>{<span class="keywordflow">return</span> <a class="code" href="classSeExpression.html#a4a00d6077f695b9eaa59fa4d03f3d108">_errors</a>;}
-<a name="l00152"></a>00152 
-<a name="l00155"></a>00155     <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#aede34c58effcc622e492e580522a5b18">isConstant</a>() <span class="keyword">const</span>;
+<a name="l00135"></a>00135     <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#a5904edf689bcef1a3f3abe17e570c18d">usesVar</a>(<span class="keyword">const</span> std::string&amp; name) <span class="keyword">const</span>;
+<a name="l00136"></a>00136 
+<a name="l00139"></a>00139     <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#a35d1ae324062d68db85b0c5dc07ff1d0">usesFunc</a>(<span class="keyword">const</span> std::string&amp; name) <span class="keyword">const</span>;
+<a name="l00140"></a>00140 
+<a name="l00142"></a><a class="code" href="classSeExpression.html#ab996a87baa48f3097cdb23132f2771e5">00142</a>     <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#ab996a87baa48f3097cdb23132f2771e5">isThreadSafe</a>()<span class="keyword"> const</span>
+<a name="l00143"></a>00143 <span class="keyword">    </span>{<span class="keywordflow">return</span> <a class="code" href="classSeExpression.html#af579d23fb9f19e26e47c1ccf7a4931a3">_threadUnsafeFunctionCalls</a>.size()==0;}
+<a name="l00144"></a>00144 
+<a name="l00147"></a><a class="code" href="classSeExpression.html#ae30c2d45a4b8621fea5a9a50e8d3da35">00147</a>     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#ae30c2d45a4b8621fea5a9a50e8d3da35">setThreadUnsafe</a>(<span class="keyword">const</span> std::string&amp; functionName)<span class="keyword"> const</span>
+<a name="l00148"></a>00148 <span class="keyword">    </span>{<a class="code" href="classSeExpression.html#af579d23fb9f19e26e47c1ccf7a4931a3">_threadUnsafeFunctionCalls</a>.push_back(functionName);}
+<a name="l00149"></a>00149 
+<a name="l00151"></a><a class="code" href="classSeExpression.html#a9bf9a94204634417d443729840005e6d">00151</a>     <span class="keyword">const</span> std::vector&lt;std::string&gt;&amp; <a class="code" href="classSeExpression.html#a9bf9a94204634417d443729840005e6d">getThreadUnsafeFunctionCalls</a>()<span class="keyword"> const</span>
+<a name="l00152"></a>00152 <span class="keyword">    </span>{<span class="keywordflow">return</span> <a class="code" href="classSeExpression.html#af579d23fb9f19e26e47c1ccf7a4931a3">_threadUnsafeFunctionCalls</a>;}
+<a name="l00153"></a>00153     
+<a name="l00155"></a><a class="code" href="classSeExpression.html#a74ff9f0227f53031b11c6120fc828c88">00155</a>     <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#a74ff9f0227f53031b11c6120fc828c88">wantVec</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classSeExpression.html#a9c705b8a4511ba37bf6ea3ebf62b6c55">_wantVec</a>; }
 <a name="l00156"></a>00156 
-<a name="l00159"></a>00159     <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#a5904edf689bcef1a3f3abe17e570c18d">usesVar</a>(<span class="keyword">const</span> std::string&amp; name) <span class="keyword">const</span>;
-<a name="l00160"></a>00160 
-<a name="l00163"></a>00163     <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#a35d1ae324062d68db85b0c5dc07ff1d0">usesFunc</a>(<span class="keyword">const</span> std::string&amp; name) <span class="keyword">const</span>;
+<a name="l00160"></a>00160     <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#a326fed830ba90dab0b3860531e6c4999">isVec</a>() <span class="keyword">const</span>;
+<a name="l00161"></a>00161 
+<a name="l00163"></a>00163     <a class="code" href="classSeVec3d.html" title="A 3d point/vector class.">SeVec3d</a> <a class="code" href="classSeExpression.html#aff6b471712214dd50feec63cefbaa2af">evaluate</a>() <span class="keyword">const</span>;
 <a name="l00164"></a>00164 
-<a name="l00166"></a><a class="code" href="classSeExpression.html#ab996a87baa48f3097cdb23132f2771e5">00166</a>     <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#ab996a87baa48f3097cdb23132f2771e5">isThreadSafe</a>()<span class="keyword"> const</span>
-<a name="l00167"></a>00167 <span class="keyword">    </span>{<span class="keywordflow">return</span> <a class="code" href="classSeExpression.html#af579d23fb9f19e26e47c1ccf7a4931a3">_threadUnsafeFunctionCalls</a>.size()==0;}
-<a name="l00168"></a>00168 
-<a name="l00171"></a><a class="code" href="classSeExpression.html#ae30c2d45a4b8621fea5a9a50e8d3da35">00171</a>     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#ae30c2d45a4b8621fea5a9a50e8d3da35">setThreadUnsafe</a>(<span class="keyword">const</span> std::string&amp; functionName)<span class="keyword"> const</span>
-<a name="l00172"></a>00172 <span class="keyword">    </span>{<a class="code" href="classSeExpression.html#af579d23fb9f19e26e47c1ccf7a4931a3">_threadUnsafeFunctionCalls</a>.push_back(functionName);}
+<a name="l00166"></a>00166     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#a0f7e74d4f0f294656b11cc2ddcc985be">reset</a>();
+<a name="l00167"></a>00167 
+<a name="l00169"></a><a class="code" href="classSeExpression.html#a0e10c8d733a21d1a84d10470a469d2ca">00169</a>     <span class="keyword">virtual</span> <a class="code" href="classSeExprVarRef.html" title="abstract class for implementing variable references">SeExprVarRef</a>* <a class="code" href="classSeExpression.html#a0e10c8d733a21d1a84d10470a469d2ca">resolveVar</a>(<span class="keyword">const</span> std::string&amp; <span class="comment">/*name*/</span>)<span class="keyword"> const </span>{<span class="keywordflow">return</span> 0;}
+<a name="l00170"></a>00170 
+<a name="l00172"></a><a class="code" href="classSeExpression.html#a02d05982db5487ae02376a68a45b5b3e">00172</a>     <span class="keyword">virtual</span> <a class="code" href="classSeExprFunc.html" title="Function Definition, used in parse tree and func table.">SeExprFunc</a>* <a class="code" href="classSeExpression.html#a02d05982db5487ae02376a68a45b5b3e">resolveFunc</a>(<span class="keyword">const</span> std::string&amp; <span class="comment">/*name*/</span>)<span class="keyword"> const </span>{<span class="keywordflow">return</span> 0;}
 <a name="l00173"></a>00173 
-<a name="l00175"></a><a class="code" href="classSeExpression.html#a9bf9a94204634417d443729840005e6d">00175</a>     <span class="keyword">const</span> std::vector&lt;std::string&gt;&amp; <a class="code" href="classSeExpression.html#a9bf9a94204634417d443729840005e6d">getThreadUnsafeFunctionCalls</a>()<span class="keyword"> const</span>
-<a name="l00176"></a>00176 <span class="keyword">    </span>{<span class="keywordflow">return</span> <a class="code" href="classSeExpression.html#af579d23fb9f19e26e47c1ccf7a4931a3">_threadUnsafeFunctionCalls</a>;}
-<a name="l00177"></a>00177     
-<a name="l00179"></a><a class="code" href="classSeExpression.html#a74ff9f0227f53031b11c6120fc828c88">00179</a>     <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#a74ff9f0227f53031b11c6120fc828c88">wantVec</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classSeExpression.html#a9c705b8a4511ba37bf6ea3ebf62b6c55">_wantVec</a>; }
+<a name="l00175"></a><a class="code" href="classSeExpression.html#ae3b50a42fc19e25e78ae0e9743f44297">00175</a>     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#ae3b50a42fc19e25e78ae0e9743f44297">addError</a>(<span class="keyword">const</span> std::string&amp; error,<span class="keyword">const</span> <span class="keywordtype">int</span> startPos,<span class="keyword">const</span> <span class="keywordtype">int</span> endPos)<span class="keyword"> const</span>
+<a name="l00176"></a>00176 <span class="keyword">    </span>{<a class="code" href="classSeExpression.html#a4a00d6077f695b9eaa59fa4d03f3d108">_errors</a>.push_back(<a class="code" href="structSeExpression_1_1Error.html" title="Represents a parse or type checking error in an expression.">Error</a>(error,startPos,endPos));}
+<a name="l00177"></a>00177 
+<a name="l00179"></a><a class="code" href="classSeExpression.html#a7ee0d2eaf1bb31165d1d66483f93b619">00179</a>     <span class="keyword">const</span> <a class="code" href="classSeExpression.html#a77c9a5d8ce27679b7c5b4c081b251a0c">LocalVarTable</a>&amp; <a class="code" href="classSeExpression.html#a7ee0d2eaf1bb31165d1d66483f93b619">getLocalVars</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <a class="code" href="classSeExpression.html#a6e8ebf79e30dc138463aa524d5c4f2b4">_localVars</a>;}
 <a name="l00180"></a>00180 
-<a name="l00184"></a>00184     <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#a326fed830ba90dab0b3860531e6c4999">isVec</a>() <span class="keyword">const</span>;
+<a name="l00181"></a>00181  <span class="keyword">private</span>:
+<a name="l00183"></a>00183     <a class="code" href="classSeExpression.html#a1fd186a77bf0eef17c8c6fe02b92f8d9">SeExpression</a>( <span class="keyword">const</span> <a class="code" href="classSeExpression.html" title="main expression class">SeExpression</a> &amp;e );
+<a name="l00184"></a>00184     <a class="code" href="classSeExpression.html" title="main expression class">SeExpression</a> &amp;<a class="code" href="classSeExpression.html#a84dd52644ec92ae41b4a100ba1efc8d6">operator=</a>( <span class="keyword">const</span> <a class="code" href="classSeExpression.html" title="main expression class">SeExpression</a> &amp;e );
 <a name="l00185"></a>00185 
-<a name="l00187"></a>00187     <a class="code" href="classSeVec3d.html" title="A 3d point/vector class.">SeVec3d</a> <a class="code" href="classSeExpression.html#aff6b471712214dd50feec63cefbaa2af">evaluate</a>() <span class="keyword">const</span>;
+<a name="l00187"></a>00187     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#a54bab3544ad2d54a8bf484a6dc383dd3">parse</a>() <span class="keyword">const</span>;
 <a name="l00188"></a>00188 
-<a name="l00190"></a>00190     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#a0f7e74d4f0f294656b11cc2ddcc985be">reset</a>();
-<a name="l00191"></a>00191 
-<a name="l00193"></a><a class="code" href="classSeExpression.html#ab55efa5fec32e4068caca4cc066f4dec">00193</a>     <span class="keyword">virtual</span> <a class="code" href="classSeExprVarRef.html" title="abstract class for implementing variable references">SeExprVarRef</a>* <a class="code" href="classSeExpression.html#ab55efa5fec32e4068caca4cc066f4dec">resolveVar</a>(<span class="keyword">const</span> std::string&amp; name)<span class="keyword"> const </span>{<span class="keywordflow">return</span> 0;}
-<a name="l00194"></a>00194 
-<a name="l00196"></a><a class="code" href="classSeExpression.html#a580e8bc44c812a21d3db63c65821986e">00196</a>     <span class="keyword">virtual</span> <a class="code" href="classSeExprFunc.html" title="Function Definition, used in parse tree and func table.">SeExprFunc</a>* <a class="code" href="classSeExpression.html#a580e8bc44c812a21d3db63c65821986e">resolveFunc</a>(<span class="keyword">const</span> std::string&amp; name)<span class="keyword"> const </span>{<span class="keywordflow">return</span> 0;}
-<a name="l00197"></a>00197 
-<a name="l00199"></a><a class="code" href="classSeExpression.html#ae3b50a42fc19e25e78ae0e9743f44297">00199</a>     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#ae3b50a42fc19e25e78ae0e9743f44297">addError</a>(<span class="keyword">const</span> std::string&amp; error,<span class="keyword">const</span> <span class="keywordtype">int</span> startPos,<span class="keyword">const</span> <span class="keywordtype">int</span> endPos)<span class="keyword"> const</span>
-<a name="l00200"></a>00200 <span class="keyword">    </span>{<a class="code" href="classSeExpression.html#a4a00d6077f695b9eaa59fa4d03f3d108">_errors</a>.push_back(<a class="code" href="structSeExpression_1_1Error.html" title="Represents a parse or type checking error in an expression.">Error</a>(error,startPos,endPos));}
+<a name="l00191"></a>00191     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#a35d026d6e48fc5d08993691f4b97de6f">prep</a>() <span class="keyword">const</span>;
+<a name="l00192"></a>00192 
+<a name="l00194"></a><a class="code" href="classSeExpression.html#ab88035160195a3aede092b30dd28e7d4">00194</a>     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#ab88035160195a3aede092b30dd28e7d4">parseIfNeeded</a>()<span class="keyword"> const </span>{ <span class="keywordflow">if</span> (!<a class="code" href="classSeExpression.html#a58f4618b8fa06ad32c4eb65d78b61f7b">_parsed</a>) <a class="code" href="classSeExpression.html#a54bab3544ad2d54a8bf484a6dc383dd3">parse</a>(); }
+<a name="l00195"></a>00195 
+<a name="l00197"></a><a class="code" href="classSeExpression.html#a6ad6d38bef55a0218943941926cc9f7f">00197</a>     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#a6ad6d38bef55a0218943941926cc9f7f">prepIfNeeded</a>()<span class="keyword"> const </span>{ <span class="keywordflow">if</span> (!<a class="code" href="classSeExpression.html#a9229cbf0d84ffc58ec3c3d8fe52fd8d9">_prepped</a>) <a class="code" href="classSeExpression.html#a35d026d6e48fc5d08993691f4b97de6f">prep</a>(); }
+<a name="l00198"></a>00198 
+<a name="l00200"></a><a class="code" href="classSeExpression.html#a9c705b8a4511ba37bf6ea3ebf62b6c55">00200</a>     <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#a9c705b8a4511ba37bf6ea3ebf62b6c55">_wantVec</a>;
 <a name="l00201"></a>00201 
-<a name="l00203"></a><a class="code" href="classSeExpression.html#a7ee0d2eaf1bb31165d1d66483f93b619">00203</a>     <span class="keyword">const</span> <a class="code" href="classSeExpression.html#a77c9a5d8ce27679b7c5b4c081b251a0c">LocalVarTable</a>&amp; <a class="code" href="classSeExpression.html#a7ee0d2eaf1bb31165d1d66483f93b619">getLocalVars</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <a class="code" href="classSeExpression.html#a6e8ebf79e30dc138463aa524d5c4f2b4">_localVars</a>;}
-<a name="l00204"></a>00204 
-<a name="l00205"></a>00205  <span class="keyword">private</span>:
-<a name="l00207"></a>00207     <a class="code" href="classSeExpression.html#a1fd186a77bf0eef17c8c6fe02b92f8d9">SeExpression</a>( <span class="keyword">const</span> <a class="code" href="classSeExpression.html" title="main expression class">SeExpression</a> &amp;e );
-<a name="l00208"></a>00208     <a class="code" href="classSeExpression.html" title="main expression class">SeExpression</a> &amp;<a class="code" href="classSeExpression.html#a84dd52644ec92ae41b4a100ba1efc8d6">operator=</a>( <span class="keyword">const</span> <a class="code" href="classSeExpression.html" title="main expression class">SeExpression</a> &amp;e );
-<a name="l00209"></a>00209 
-<a name="l00211"></a>00211     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#a54bab3544ad2d54a8bf484a6dc383dd3">parse</a>() <span class="keyword">const</span>;
-<a name="l00212"></a>00212 
-<a name="l00215"></a>00215     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#a35d026d6e48fc5d08993691f4b97de6f">prep</a>() <span class="keyword">const</span>;
+<a name="l00203"></a><a class="code" href="classSeExpression.html#a4a920f52e0f2c19e8cdbcd088eedaf96">00203</a>     std::string <a class="code" href="classSeExpression.html#a4a920f52e0f2c19e8cdbcd088eedaf96">_expression</a>;
+<a name="l00204"></a>00204     
+<a name="l00206"></a><a class="code" href="classSeExpression.html#a42b557a76c677e895f1096fb10ee3332">00206</a>     <span class="keyword">mutable</span> <a class="code" href="classSeExprNode.html" title="Expression node base class. Always constructed by parser in SeExprParser.y.">SeExprNode</a> *<a class="code" href="classSeExpression.html#a42b557a76c677e895f1096fb10ee3332">_parseTree</a>;
+<a name="l00207"></a>00207 
+<a name="l00209"></a><a class="code" href="classSeExpression.html#a9229cbf0d84ffc58ec3c3d8fe52fd8d9">00209</a>     <span class="keyword">mutable</span> <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#a58f4618b8fa06ad32c4eb65d78b61f7b">_parsed</a>, <a class="code" href="classSeExpression.html#a9229cbf0d84ffc58ec3c3d8fe52fd8d9">_prepped</a>;
+<a name="l00210"></a>00210     
+<a name="l00212"></a><a class="code" href="classSeExpression.html#a6aa4be50ca08aea29fc0c16e94f018ea">00212</a>     <span class="keyword">mutable</span> std::string <a class="code" href="classSeExpression.html#a6aa4be50ca08aea29fc0c16e94f018ea">_parseError</a>;
+<a name="l00213"></a>00213 
+<a name="l00215"></a><a class="code" href="classSeExpression.html#a4a00d6077f695b9eaa59fa4d03f3d108">00215</a>     <span class="keyword">mutable</span> std::vector&lt;Error&gt; <a class="code" href="classSeExpression.html#a4a00d6077f695b9eaa59fa4d03f3d108">_errors</a>;
 <a name="l00216"></a>00216 
-<a name="l00218"></a><a class="code" href="classSeExpression.html#ab88035160195a3aede092b30dd28e7d4">00218</a>     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#ab88035160195a3aede092b30dd28e7d4">parseIfNeeded</a>()<span class="keyword"> const </span>{ <span class="keywordflow">if</span> (!<a class="code" href="classSeExpression.html#a58f4618b8fa06ad32c4eb65d78b61f7b">_parsed</a>) <a class="code" href="classSeExpression.html#a54bab3544ad2d54a8bf484a6dc383dd3">parse</a>(); }
+<a name="l00218"></a><a class="code" href="classSeExpression.html#a7cfe9cb7d43856ce76be5d148467b1ec">00218</a>     <span class="keyword">mutable</span> std::set&lt;std::string&gt; <a class="code" href="classSeExpression.html#a7cfe9cb7d43856ce76be5d148467b1ec">_vars</a>;
 <a name="l00219"></a>00219 
-<a name="l00221"></a><a class="code" href="classSeExpression.html#a6ad6d38bef55a0218943941926cc9f7f">00221</a>     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#a6ad6d38bef55a0218943941926cc9f7f">prepIfNeeded</a>()<span class="keyword"> const </span>{ <span class="keywordflow">if</span> (!<a class="code" href="classSeExpression.html#a9229cbf0d84ffc58ec3c3d8fe52fd8d9">_prepped</a>) <a class="code" href="classSeExpression.html#a35d026d6e48fc5d08993691f4b97de6f">prep</a>(); }
+<a name="l00221"></a><a class="code" href="classSeExpression.html#a7cd61e0182e29fea97568cc5a852f048">00221</a>     <span class="keyword">mutable</span> std::set&lt;std::string&gt; <a class="code" href="classSeExpression.html#a7cd61e0182e29fea97568cc5a852f048">_funcs</a>;
 <a name="l00222"></a>00222 
-<a name="l00224"></a><a class="code" href="classSeExpression.html#a9c705b8a4511ba37bf6ea3ebf62b6c55">00224</a>     <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#a9c705b8a4511ba37bf6ea3ebf62b6c55">_wantVec</a>;
+<a name="l00224"></a><a class="code" href="classSeExpression.html#a6e8ebf79e30dc138463aa524d5c4f2b4">00224</a>     <span class="keyword">mutable</span> <a class="code" href="classSeExpression.html#a77c9a5d8ce27679b7c5b4c081b251a0c">LocalVarTable</a> <a class="code" href="classSeExpression.html#a6e8ebf79e30dc138463aa524d5c4f2b4">_localVars</a>;
 <a name="l00225"></a>00225 
-<a name="l00227"></a><a class="code" href="classSeExpression.html#a4a920f52e0f2c19e8cdbcd088eedaf96">00227</a>     std::string <a class="code" href="classSeExpression.html#a4a920f52e0f2c19e8cdbcd088eedaf96">_expression</a>;
-<a name="l00228"></a>00228     
-<a name="l00230"></a><a class="code" href="classSeExpression.html#a42b557a76c677e895f1096fb10ee3332">00230</a>     <span class="keyword">mutable</span> <a class="code" href="classSeExprNode.html" title="Expression node base class. Always constructed by parser in SeExprParser.y.">SeExprNode</a> *<a class="code" href="classSeExpression.html#a42b557a76c677e895f1096fb10ee3332">_parseTree</a>;
+<a name="l00227"></a><a class="code" href="classSeExpression.html#af579d23fb9f19e26e47c1ccf7a4931a3">00227</a>     <span class="keyword">mutable</span> std::vector&lt;std::string&gt; <a class="code" href="classSeExpression.html#af579d23fb9f19e26e47c1ccf7a4931a3">_threadUnsafeFunctionCalls</a>;
+<a name="l00228"></a>00228 
+<a name="l00230"></a><a class="code" href="classSeExpression.html#a480af3a4908e135480489ed39f3a55c2">00230</a>     <span class="keyword">mutable</span> std::vector&lt;char*&gt; <a class="code" href="classSeExpression.html#a480af3a4908e135480489ed39f3a55c2">_stringTokens</a>;
 <a name="l00231"></a>00231 
-<a name="l00233"></a><a class="code" href="classSeExpression.html#a9229cbf0d84ffc58ec3c3d8fe52fd8d9">00233</a>     <span class="keyword">mutable</span> <span class="keywordtype">bool</span> <a class="code" href="classSeExpression.html#a58f4618b8fa06ad32c4eb65d78b61f7b">_parsed</a>, <a class="code" href="classSeExpression.html#a9229cbf0d84ffc58ec3c3d8fe52fd8d9">_prepped</a>;
-<a name="l00234"></a>00234     
-<a name="l00236"></a><a class="code" href="classSeExpression.html#a6aa4be50ca08aea29fc0c16e94f018ea">00236</a>     <span class="keyword">mutable</span> std::string <a class="code" href="classSeExpression.html#a6aa4be50ca08aea29fc0c16e94f018ea">_parseError</a>;
-<a name="l00237"></a>00237 
-<a name="l00239"></a><a class="code" href="classSeExpression.html#a4a00d6077f695b9eaa59fa4d03f3d108">00239</a>     <span class="keyword">mutable</span> std::vector&lt;Error&gt; <a class="code" href="classSeExpression.html#a4a00d6077f695b9eaa59fa4d03f3d108">_errors</a>;
-<a name="l00240"></a>00240 
-<a name="l00242"></a><a class="code" href="classSeExpression.html#a7cfe9cb7d43856ce76be5d148467b1ec">00242</a>     <span class="keyword">mutable</span> std::set&lt;std::string&gt; <a class="code" href="classSeExpression.html#a7cfe9cb7d43856ce76be5d148467b1ec">_vars</a>;
-<a name="l00243"></a>00243 
-<a name="l00245"></a><a class="code" href="classSeExpression.html#a7cd61e0182e29fea97568cc5a852f048">00245</a>     <span class="keyword">mutable</span> std::set&lt;std::string&gt; <a class="code" href="classSeExpression.html#a7cd61e0182e29fea97568cc5a852f048">_funcs</a>;
+<a name="l00232"></a>00232     <span class="comment">/* internal */</span> <span class="keyword">public</span>:
+<a name="l00233"></a>00233 
+<a name="l00235"></a><a class="code" href="classSeExpression.html#a9f837ff7cdf75aebf0c936fe5771ed8f">00235</a>     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#a9f837ff7cdf75aebf0c936fe5771ed8f" title="add local variable (this is for internal use)">addVar</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* n)<span class="keyword"> const </span>{ <a class="code" href="classSeExpression.html#a7cfe9cb7d43856ce76be5d148467b1ec">_vars</a>.insert(n); }
+<a name="l00236"></a>00236 
+<a name="l00238"></a><a class="code" href="classSeExpression.html#a9a99ffb519eb2eba3fae84155990e50f">00238</a>     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#a9a99ffb519eb2eba3fae84155990e50f" title="add local function (this is for internal use)">addFunc</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* n)<span class="keyword"> const </span>{ <a class="code" href="classSeExpression.html#a7cd61e0182e29fea97568cc5a852f048">_funcs</a>.insert(n); }
+<a name="l00239"></a>00239 
+<a name="l00241"></a><a class="code" href="classSeExpression.html#a2f3cf5320a92bb8c6e251d3cde97062b">00241</a>     <a class="code" href="classSeExprVarRef.html" title="abstract class for implementing variable references">SeExprVarRef</a>* <a class="code" href="classSeExpression.html#a2f3cf5320a92bb8c6e251d3cde97062b" title="get local variable reference (this is for internal use)">resolveLocalVar</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* n)<span class="keyword"> const </span>{
+<a name="l00242"></a>00242         LocalVarTable::iterator iter = <a class="code" href="classSeExpression.html#a6e8ebf79e30dc138463aa524d5c4f2b4">_localVars</a>.find(n);
+<a name="l00243"></a>00243         <span class="keywordflow">if</span> (iter != <a class="code" href="classSeExpression.html#a6e8ebf79e30dc138463aa524d5c4f2b4">_localVars</a>.end()) <span class="keywordflow">return</span> &amp;iter-&gt;second;
+<a name="l00244"></a>00244         <span class="keywordflow">return</span> 0;
+<a name="l00245"></a>00245     }
 <a name="l00246"></a>00246 
-<a name="l00248"></a><a class="code" href="classSeExpression.html#a6e8ebf79e30dc138463aa524d5c4f2b4">00248</a>     <span class="keyword">mutable</span> <a class="code" href="classSeExpression.html#a77c9a5d8ce27679b7c5b4c081b251a0c">LocalVarTable</a> <a class="code" href="classSeExpression.html#a6e8ebf79e30dc138463aa524d5c4f2b4">_localVars</a>;
-<a name="l00249"></a>00249 
-<a name="l00251"></a><a class="code" href="classSeExpression.html#af579d23fb9f19e26e47c1ccf7a4931a3">00251</a>     <span class="keyword">mutable</span> std::vector&lt;std::string&gt; <a class="code" href="classSeExpression.html#af579d23fb9f19e26e47c1ccf7a4931a3">_threadUnsafeFunctionCalls</a>;
-<a name="l00252"></a>00252 
-<a name="l00253"></a>00253     <span class="comment">/* internal */</span> <span class="keyword">public</span>:
-<a name="l00254"></a>00254 
-<a name="l00256"></a><a class="code" href="classSeExpression.html#a9f837ff7cdf75aebf0c936fe5771ed8f">00256</a>     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#a9f837ff7cdf75aebf0c936fe5771ed8f" title="add local variable (this is for internal use)">addVar</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* n)<span class="keyword"> const </span>{ <a class="code" href="classSeExpression.html#a7cfe9cb7d43856ce76be5d148467b1ec">_vars</a>.insert(n); }
-<a name="l00257"></a>00257 
-<a name="l00259"></a><a class="code" href="classSeExpression.html#a9a99ffb519eb2eba3fae84155990e50f">00259</a>     <span class="keywordtype">void</span> <a class="code" href="classSeExpression.html#a9a99ffb519eb2eba3fae84155990e50f" title="add local function (this is for internal use)">addFunc</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* n)<span class="keyword"> const </span>{ <a class="code" href="classSeExpression.html#a7cd61e0182e29fea97568cc5a852f048">_funcs</a>.insert(n); }
-<a name="l00260"></a>00260 
-<a name="l00262"></a><a class="code" href="classSeExpression.html#a2f3cf5320a92bb8c6e251d3cde97062b">00262</a>     <a class="code" href="classSeExprVarRef.html" title="abstract class for implementing variable references">SeExprVarRef</a>* <a class="code" href="classSeExpression.html#a2f3cf5320a92bb8c6e251d3cde97062b" title="get local variable reference (this is for internal use)">resolveLocalVar</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* n)<span class="keyword"> const </span>{
-<a name="l00263"></a>00263         LocalVarTable::iterator iter = <a class="code" href="classSeExpression.html#a6e8ebf79e30dc138463aa524d5c4f2b4">_localVars</a>.find(n);
-<a name="l00264"></a>00264         <span class="keywordflow">if</span> (iter != <a class="code" href="classSeExpression.html#a6e8ebf79e30dc138463aa524d5c4f2b4">_localVars</a>.end()) <span class="keywordflow">return</span> &amp;iter-&gt;second;
-<a name="l00265"></a>00265         <span class="keywordflow">return</span> 0;
-<a name="l00266"></a>00266     }
-<a name="l00267"></a>00267 
-<a name="l00270"></a><a class="code" href="classSeExpression.html#a7405ce04c1e2ab06992bde46d506cef7">00270</a>     <a class="code" href="classSeExprLocalVarRef.html" title="uses internally to represent local variables">SeExprLocalVarRef</a>* <a class="code" href="classSeExpression.html#a7405ce04c1e2ab06992bde46d506cef7">getLocalVar</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* n)<span class="keyword"> const </span>{
-<a name="l00271"></a>00271         <span class="keywordflow">return</span> &amp;<a class="code" href="classSeExpression.html#a6e8ebf79e30dc138463aa524d5c4f2b4">_localVars</a>[n]; 
-<a name="l00272"></a>00272     }
-<a name="l00273"></a>00273 };
-<a name="l00274"></a>00274 
-<a name="l00275"></a>00275 <span class="preprocessor">#endif</span>
+<a name="l00249"></a><a class="code" href="classSeExpression.html#a7405ce04c1e2ab06992bde46d506cef7">00249</a>     <a class="code" href="classSeExprLocalVarRef.html" title="uses internally to represent local variables">SeExprLocalVarRef</a>* <a class="code" href="classSeExpression.html#a7405ce04c1e2ab06992bde46d506cef7">getLocalVar</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* n)<span class="keyword"> const </span>{
+<a name="l00250"></a>00250         <span class="keywordflow">return</span> &amp;<a class="code" href="classSeExpression.html#a6e8ebf79e30dc138463aa524d5c4f2b4">_localVars</a>[n]; 
+<a name="l00251"></a>00251     }
+<a name="l00252"></a>00252 };
+<a name="l00253"></a>00253 
+<a name="l00254"></a>00254 <span class="preprocessor">#endif</span>
 </pre></div></div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 3 May 2011 for SeExpr by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 25 Jul 2013 for SeExpr by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

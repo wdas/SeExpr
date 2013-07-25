@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<title>SeExpr: /jobs2/soft/users/aselle/src/seexpr-to-push/src/demos/asciiGraph.cpp Source File</title>
+<title>SeExpr: /disk1/scratch/aselle/projects/seexpr/SeExpr/src/demos/asciiGraph.cpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css"/>
 </head>
@@ -23,142 +23,117 @@
       <li><a href="globals.html"><span>File&nbsp;Members</span></a></li>
     </ul>
   </div>
-<h1>/jobs2/soft/users/aselle/src/seexpr-to-push/src/demos/asciiGraph.cpp</h1><a href="asciiGraph_8cpp.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
-<a name="l00002"></a>00002 <span class="comment"> SEEXPR SOFTWARE</span>
-<a name="l00003"></a>00003 <span class="comment"> Copyright 2011 Disney Enterprises, Inc. All rights reserved</span>
-<a name="l00004"></a>00004 <span class="comment"> </span>
-<a name="l00005"></a>00005 <span class="comment"> Redistribution and use in source and binary forms, with or without</span>
-<a name="l00006"></a>00006 <span class="comment"> modification, are permitted provided that the following conditions are</span>
-<a name="l00007"></a>00007 <span class="comment"> met:</span>
-<a name="l00008"></a>00008 <span class="comment"> </span>
-<a name="l00009"></a>00009 <span class="comment"> * Redistributions of source code must retain the above copyright</span>
-<a name="l00010"></a>00010 <span class="comment"> notice, this list of conditions and the following disclaimer.</span>
-<a name="l00011"></a>00011 <span class="comment"> </span>
-<a name="l00012"></a>00012 <span class="comment"> * Redistributions in binary form must reproduce the above copyright</span>
-<a name="l00013"></a>00013 <span class="comment"> notice, this list of conditions and the following disclaimer in</span>
-<a name="l00014"></a>00014 <span class="comment"> the documentation and/or other materials provided with the</span>
-<a name="l00015"></a>00015 <span class="comment"> distribution.</span>
-<a name="l00016"></a>00016 <span class="comment"> </span>
-<a name="l00017"></a>00017 <span class="comment"> * The names &quot;Disney&quot;, &quot;Walt Disney Pictures&quot;, &quot;Walt Disney Animation</span>
-<a name="l00018"></a>00018 <span class="comment"> Studios&quot; or the names of its contributors may NOT be used to</span>
-<a name="l00019"></a>00019 <span class="comment"> endorse or promote products derived from this software without</span>
-<a name="l00020"></a>00020 <span class="comment"> specific prior written permission from Walt Disney Pictures.</span>
-<a name="l00021"></a>00021 <span class="comment"> </span>
-<a name="l00022"></a>00022 <span class="comment"> Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND</span>
-<a name="l00023"></a>00023 <span class="comment"> CONTRIBUTORS &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,</span>
-<a name="l00024"></a>00024 <span class="comment"> BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS</span>
-<a name="l00025"></a>00025 <span class="comment"> FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.</span>
-<a name="l00026"></a>00026 <span class="comment"> IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR</span>
-<a name="l00027"></a>00027 <span class="comment"> CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,</span>
-<a name="l00028"></a>00028 <span class="comment"> EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,</span>
-<a name="l00029"></a>00029 <span class="comment"> PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR</span>
-<a name="l00030"></a>00030 <span class="comment"> PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY</span>
-<a name="l00031"></a>00031 <span class="comment"> THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
-<a name="l00032"></a>00032 <span class="comment"> (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
-<a name="l00033"></a>00033 <span class="comment"> OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</span>
-<a name="l00034"></a>00034 <span class="comment">*/</span>
-<a name="l00035"></a>00035 <span class="preprocessor">#include &lt;<a class="code" href="SeExpression_8h.html">SeExpression.h</a>&gt;</span>
-<a name="l00036"></a>00036 <span class="preprocessor">#include &lt;cstdlib&gt;</span>
-<a name="l00037"></a>00037 <span class="preprocessor">#include &lt;cstdio&gt;</span>
-<a name="l00038"></a>00038 <span class="preprocessor">#include &lt;cstring&gt;</span>
-<a name="l00042"></a>00042 
-<a name="l00043"></a><a class="code" href="classGrapherExpr.html">00043</a> <span class="keyword">class </span><a class="code" href="classGrapherExpr.html" title="Simple expression class to support our function grapher.">GrapherExpr</a>:<span class="keyword">public</span> <a class="code" href="classSeExpression.html" title="main expression class">SeExpression</a>
-<a name="l00044"></a>00044 {
-<a name="l00045"></a>00045 <span class="keyword">public</span>:
-<a name="l00047"></a><a class="code" href="classGrapherExpr.html#a8de178c1d7b5a94fe1aae8ffb3e204a1">00047</a>     <a class="code" href="classGrapherExpr.html#a8de178c1d7b5a94fe1aae8ffb3e204a1" title="Constructor that takes the expression to parse.">GrapherExpr</a>(<span class="keyword">const</span> std::string&amp; <a class="code" href="tutorial_8txt.html#a799c09a9e9ac583c734b3ebf19b2fa58">expr</a>)
-<a name="l00048"></a>00048         :<a class="code" href="classSeExpression.html" title="main expression class">SeExpression</a>(expr)
-<a name="l00049"></a>00049     {}
+<h1>/disk1/scratch/aselle/projects/seexpr/SeExpr/src/demos/asciiGraph.cpp</h1><a href="asciiGraph_8cpp.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment">* (c) Disney Enterprises, Inc.  All rights reserved.</span>
+<a name="l00003"></a>00003 <span class="comment">*</span>
+<a name="l00004"></a>00004 <span class="comment">* This file is licensed under the terms of the Microsoft Public License (MS-PL)</span>
+<a name="l00005"></a>00005 <span class="comment">* as defined at: http://opensource.org/licenses/MS-PL.</span>
+<a name="l00006"></a>00006 <span class="comment">*</span>
+<a name="l00007"></a>00007 <span class="comment">* A complete copy of this license is included in this distribution as the file</span>
+<a name="l00008"></a>00008 <span class="comment">* LICENSE.</span>
+<a name="l00009"></a>00009 <span class="comment">*/</span>
+<a name="l00010"></a>00010 <span class="preprocessor">#include &lt;<a class="code" href="SeExpression_8h.html">SeExpression.h</a>&gt;</span>
+<a name="l00011"></a>00011 <span class="preprocessor">#include &lt;cstdlib&gt;</span>
+<a name="l00012"></a>00012 <span class="preprocessor">#include &lt;cstdio&gt;</span>
+<a name="l00013"></a>00013 <span class="preprocessor">#include &lt;cstring&gt;</span>
+<a name="l00017"></a>00017 
+<a name="l00018"></a>00018 <span class="keyword">class </span>GrapherExpr:<span class="keyword">public</span> <a class="code" href="classSeExpression.html" title="main expression class">SeExpression</a>
+<a name="l00019"></a>00019 {
+<a name="l00020"></a>00020 <span class="keyword">public</span>:
+<a name="l00022"></a>00022     GrapherExpr(<span class="keyword">const</span> std::string&amp; <a class="code" href="tutorial_8txt.html#a799c09a9e9ac583c734b3ebf19b2fa58">expr</a>)
+<a name="l00023"></a>00023         :<a class="code" href="classSeExpression.html" title="main expression class">SeExpression</a>(expr)
+<a name="l00024"></a>00024     {}
+<a name="l00025"></a>00025 
+<a name="l00027"></a>00027     <span class="keywordtype">void</span> setX(<span class="keywordtype">double</span> x_input)
+<a name="l00028"></a>00028     {<a class="code" href="tutorial_8txt.html#afd9f706951a7ad3a62bdf31ef35789ea">x</a>.val=x_input;}
+<a name="l00029"></a>00029 
+<a name="l00030"></a>00030 <span class="keyword">private</span>:
+<a name="l00032"></a>00032     <span class="keyword">struct </span>SimpleVar:<span class="keyword">public</span> <a class="code" href="classSeExprScalarVarRef.html" title="simple scalar variable reference reference base class">SeExprScalarVarRef</a>
+<a name="l00033"></a>00033     {
+<a name="l00034"></a>00034         <span class="keywordtype">double</span> val; <span class="comment">// independent variable</span>
+<a name="l00035"></a>00035         <span class="keywordtype">void</span> <a class="code" href="classSeExprVarRef.html#ae1f0f776153076f85f733f7fae2d7220">eval</a>(<span class="keyword">const</span> <a class="code" href="classSeExprVarNode.html" title="Node that references a variable.">SeExprVarNode</a>* <span class="comment">/*node*/</span>,<a class="code" href="classSeVec3d.html" title="A 3d point/vector class.">SeVec3d</a>&amp; result)
+<a name="l00036"></a>00036         {result[0]=val;}
+<a name="l00037"></a>00037     };
+<a name="l00038"></a>00038     
+<a name="l00040"></a>00040     <span class="keyword">mutable</span> SimpleVar <a class="code" href="tutorial_8txt.html#afd9f706951a7ad3a62bdf31ef35789ea">x</a>;
+<a name="l00041"></a>00041 
+<a name="l00043"></a>00043     <a class="code" href="classSeExprVarRef.html" title="abstract class for implementing variable references">SeExprVarRef</a>* <a class="code" href="classSeExpression.html#a0e10c8d733a21d1a84d10470a469d2ca">resolveVar</a>(<span class="keyword">const</span> std::string&amp; name)<span class="keyword"> const</span>
+<a name="l00044"></a>00044 <span class="keyword">    </span>{
+<a name="l00045"></a>00045         <span class="keywordflow">if</span>(name == <span class="stringliteral">&quot;x&quot;</span>) <span class="keywordflow">return</span> &amp;<a class="code" href="tutorial_8txt.html#afd9f706951a7ad3a62bdf31ef35789ea">x</a>;
+<a name="l00046"></a>00046         <span class="keywordflow">return</span> 0;
+<a name="l00047"></a>00047     }
+<a name="l00048"></a>00048 };
+<a name="l00049"></a>00049 
 <a name="l00050"></a>00050 
-<a name="l00052"></a><a class="code" href="classGrapherExpr.html#aa2fb8574c07c7d4806038dd0bbba003a">00052</a>     <span class="keywordtype">void</span> <a class="code" href="classGrapherExpr.html#aa2fb8574c07c7d4806038dd0bbba003a" title="set the independent variable">setX</a>(<span class="keywordtype">double</span> x_input)
-<a name="l00053"></a>00053     {<a class="code" href="classGrapherExpr.html#ad18b1f52e87dfffbd1e904a547051803" title="independent variable">x</a>.<a class="code" href="structGrapherExpr_1_1SimpleVar.html#a4c66559d8aa8915963cd6c86a2e9f1c0">val</a>=x_input;}
-<a name="l00054"></a>00054 
-<a name="l00055"></a>00055 <span class="keyword">private</span>:
-<a name="l00057"></a><a class="code" href="structGrapherExpr_1_1SimpleVar.html">00057</a>     <span class="keyword">struct </span><a class="code" href="structGrapherExpr_1_1SimpleVar.html" title="Simple variable that just returns its internal value.">SimpleVar</a>:<span class="keyword">public</span> <a class="code" href="classSeExprScalarVarRef.html" title="simple scalar variable reference reference base class">SeExprScalarVarRef</a>
-<a name="l00058"></a>00058     {
-<a name="l00059"></a><a class="code" href="structGrapherExpr_1_1SimpleVar.html#a4c66559d8aa8915963cd6c86a2e9f1c0">00059</a>         <span class="keywordtype">double</span> <a class="code" href="structGrapherExpr_1_1SimpleVar.html#a4c66559d8aa8915963cd6c86a2e9f1c0">val</a>; <span class="comment">// independent variable</span>
-<a name="l00060"></a><a class="code" href="structGrapherExpr_1_1SimpleVar.html#afc7e03745c42bc0192e56c5662339765">00060</a>         <span class="keywordtype">void</span> <a class="code" href="structGrapherExpr_1_1SimpleVar.html#afc7e03745c42bc0192e56c5662339765">eval</a>(<span class="keyword">const</span> <a class="code" href="classSeExprVarNode.html" title="Node that references a variable.">SeExprVarNode</a>* node,<a class="code" href="classSeVec3d.html" title="A 3d point/vector class.">SeVec3d</a>&amp; <a class="code" href="plugins_8txt.html#af6e7c6aed704e156ce95dae980cd4438">result</a>)
-<a name="l00061"></a>00061         {result[0]=<a class="code" href="structGrapherExpr_1_1SimpleVar.html#a4c66559d8aa8915963cd6c86a2e9f1c0">val</a>;}
-<a name="l00062"></a>00062     };
-<a name="l00063"></a>00063     
-<a name="l00065"></a><a class="code" href="classGrapherExpr.html#ad18b1f52e87dfffbd1e904a547051803">00065</a>     <span class="keyword">mutable</span> <a class="code" href="structGrapherExpr_1_1SimpleVar.html" title="Simple variable that just returns its internal value.">SimpleVar</a> <a class="code" href="classGrapherExpr.html#ad18b1f52e87dfffbd1e904a547051803" title="independent variable">x</a>;
-<a name="l00066"></a>00066 
-<a name="l00068"></a><a class="code" href="classGrapherExpr.html#a90fb05ebb5f39f7d54dd2ee98c47d50e">00068</a>     <a class="code" href="classSeExprVarRef.html" title="abstract class for implementing variable references">SeExprVarRef</a>* <a class="code" href="classGrapherExpr.html#a90fb05ebb5f39f7d54dd2ee98c47d50e" title="resolve function that only supports one external variable &amp;#39;x&amp;#39;">resolveVar</a>(<span class="keyword">const</span> std::string&amp; name)<span class="keyword"> const</span>
-<a name="l00069"></a>00069 <span class="keyword">    </span>{
-<a name="l00070"></a>00070         <span class="keywordflow">if</span>(name == <span class="stringliteral">&quot;x&quot;</span>) <span class="keywordflow">return</span> &amp;<a class="code" href="classGrapherExpr.html#ad18b1f52e87dfffbd1e904a547051803" title="independent variable">x</a>;
-<a name="l00071"></a>00071         <span class="keywordflow">return</span> 0;
-<a name="l00072"></a>00072     }
-<a name="l00073"></a>00073 };
-<a name="l00074"></a>00074 
-<a name="l00075"></a>00075 
-<a name="l00076"></a>00076 
-<a name="l00077"></a><a class="code" href="asciiGraph_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">00077</a> <span class="keywordtype">int</span> <a class="code" href="asciiGraph_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>(<span class="keywordtype">int</span> argc,<span class="keywordtype">char</span> *argv[])
-<a name="l00078"></a>00078 {
-<a name="l00079"></a>00079     std::string exprStr=<span class="stringliteral">&quot;\</span>
-<a name="l00080"></a>00080 <span class="stringliteral">                         $val=.5*PI*x;\</span>
-<a name="l00081"></a>00081 <span class="stringliteral">                         7*sin(val)/val \</span>
-<a name="l00082"></a>00082 <span class="stringliteral">                         &quot;</span>;
-<a name="l00083"></a>00083     <span class="keywordflow">if</span>(argc == 2){
-<a name="l00084"></a>00084         exprStr=argv[1];
+<a name="l00051"></a>00051 
+<a name="l00052"></a><a class="code" href="asciiGraph_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">00052</a> <span class="keywordtype">int</span> <a class="code" href="SeExpressionEditor_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>(<span class="keywordtype">int</span> argc,<span class="keywordtype">char</span> *argv[])
+<a name="l00053"></a>00053 {
+<a name="l00054"></a>00054     std::string exprStr=<span class="stringliteral">&quot;\</span>
+<a name="l00055"></a>00055 <span class="stringliteral">                         $val=.5*PI*x;\</span>
+<a name="l00056"></a>00056 <span class="stringliteral">                         7*sin(val)/val \</span>
+<a name="l00057"></a>00057 <span class="stringliteral">                         &quot;</span>;
+<a name="l00058"></a>00058     <span class="keywordflow">if</span>(argc == 2){
+<a name="l00059"></a>00059         exprStr=argv[1];
+<a name="l00060"></a>00060     }
+<a name="l00061"></a>00061     GrapherExpr <a class="code" href="tutorial_8txt.html#a799c09a9e9ac583c734b3ebf19b2fa58">expr</a>(exprStr);
+<a name="l00062"></a>00062 
+<a name="l00063"></a>00063     <span class="keywordflow">if</span>(!expr.isValid()){
+<a name="l00064"></a>00064         std::cerr&lt;&lt;<span class="stringliteral">&quot;expression failed &quot;</span>&lt;&lt;expr.parseError()&lt;&lt;std::endl;
+<a name="l00065"></a>00065         exit(1);
+<a name="l00066"></a>00066     }
+<a name="l00067"></a>00067     <span class="keywordtype">double</span> xmin=-10,xmax=10,ymin=-10,ymax=10;
+<a name="l00068"></a>00068     <span class="keywordtype">int</span> w=60,h=30;
+<a name="l00069"></a>00069     <span class="keywordtype">char</span> *buffer=<span class="keyword">new</span> <span class="keywordtype">char</span>[w*h];
+<a name="l00070"></a>00070     memset(buffer,(<span class="keywordtype">int</span>)<span class="charliteral">&apos; &apos;</span>,w*h);
+<a name="l00071"></a>00071 
+<a name="l00072"></a>00072     <span class="comment">// draw x axis</span>
+<a name="l00073"></a>00073     <span class="keywordtype">int</span> j_zero=(-ymin)/(ymax-ymin)*h;
+<a name="l00074"></a>00074     <span class="keywordflow">if</span>(j_zero&gt;=0 &amp;&amp; j_zero&lt;h){
+<a name="l00075"></a>00075         <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i=0;i&lt;w;i++){
+<a name="l00076"></a>00076             buffer[i+j_zero*w]=<span class="charliteral">&apos;-&apos;</span>;
+<a name="l00077"></a>00077         }
+<a name="l00078"></a>00078     }
+<a name="l00079"></a>00079     <span class="comment">// draw y axis</span>
+<a name="l00080"></a>00080     <span class="keywordtype">int</span> i_zero=(-xmin)/(xmax-xmin)*w;
+<a name="l00081"></a>00081     <span class="keywordflow">if</span>(i_zero&gt;=0 &amp;&amp; i_zero&lt;w){
+<a name="l00082"></a>00082         <span class="keywordflow">for</span>(<span class="keywordtype">int</span> j=0;j&lt;h;j++){
+<a name="l00083"></a>00083             buffer[i_zero+j*w]=<span class="charliteral">&apos;|&apos;</span>;
+<a name="l00084"></a>00084         }
 <a name="l00085"></a>00085     }
-<a name="l00086"></a>00086     <a class="code" href="classGrapherExpr.html" title="Simple expression class to support our function grapher.">GrapherExpr</a> <a class="code" href="tutorial_8txt.html#a799c09a9e9ac583c734b3ebf19b2fa58">expr</a>(exprStr);
-<a name="l00087"></a>00087 
-<a name="l00088"></a>00088     <span class="keywordflow">if</span>(!expr.<a class="code" href="classSeExpression.html#a48fd7c0d78ed333620d1b3cd1af266ef">isValid</a>()){
-<a name="l00089"></a>00089         std::cerr&lt;&lt;<span class="stringliteral">&quot;expression faield &quot;</span>&lt;&lt;expr.<a class="code" href="classSeExpression.html#abb86eb12a695da1f1139707db0036b64">parseError</a>()&lt;&lt;std::endl;
-<a name="l00090"></a>00090         exit(1);
-<a name="l00091"></a>00091     }
-<a name="l00092"></a>00092     <span class="keywordtype">double</span> xmin=-10,xmax=10,ymin=-10,ymax=10;
-<a name="l00093"></a>00093     <span class="keywordtype">int</span> w=60,h=30;
-<a name="l00094"></a>00094     <span class="keywordtype">char</span> *buffer=<span class="keyword">new</span> <span class="keywordtype">char</span>[w*h];
-<a name="l00095"></a>00095     memset(buffer,(<span class="keywordtype">int</span>)<span class="charliteral">&apos; &apos;</span>,w*h);
-<a name="l00096"></a>00096 
-<a name="l00097"></a>00097     <span class="comment">// draw x axis</span>
-<a name="l00098"></a>00098     <span class="keywordtype">int</span> j_zero=(-ymin)/(ymax-ymin)*h;
-<a name="l00099"></a>00099     <span class="keywordflow">if</span>(j_zero&gt;=0 &amp;&amp; j_zero&lt;h){
-<a name="l00100"></a>00100         <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i=0;i&lt;w;i++){
-<a name="l00101"></a>00101             buffer[i+j_zero*w]=<span class="charliteral">&apos;-&apos;</span>;
-<a name="l00102"></a>00102         }
-<a name="l00103"></a>00103     }
-<a name="l00104"></a>00104     <span class="comment">// draw y axis</span>
-<a name="l00105"></a>00105     <span class="keywordtype">int</span> i_zero=(-xmin)/(xmax-xmin)*w;
-<a name="l00106"></a>00106     <span class="keywordflow">if</span>(i_zero&gt;=0 &amp;&amp; i_zero&lt;w){
-<a name="l00107"></a>00107         <span class="keywordflow">for</span>(<span class="keywordtype">int</span> j=0;j&lt;h;j++){
-<a name="l00108"></a>00108             buffer[i_zero+j*w]=<span class="charliteral">&apos;|&apos;</span>;
-<a name="l00109"></a>00109         }
-<a name="l00110"></a>00110     }
-<a name="l00111"></a>00111 
-<a name="l00112"></a>00112     <span class="comment">// evaluate the graph</span>
-<a name="l00113"></a>00113     <span class="keyword">const</span> <span class="keywordtype">int</span> samplesPerPixel=10;
-<a name="l00114"></a>00114     <span class="keyword">const</span> <span class="keywordtype">double</span> <a class="code" href="tutorial_8txt.html#a78e099e32ba42c384a60976d02876640">one_over_samples_per_pixel</a>=1./samplesPerPixel;
-<a name="l00115"></a>00115     <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i=0;i&lt;w;i++){
-<a name="l00116"></a>00116         <span class="keywordflow">for</span>(<span class="keywordtype">int</span> sample=0;sample&lt;samplesPerPixel;sample++){
-<a name="l00117"></a>00117             <span class="comment">// transform from device to logical coordinatex</span>
-<a name="l00118"></a>00118             <span class="keywordtype">double</span> dx=double(sample)*one_over_samples_per_pixel;
-<a name="l00119"></a>00119             <span class="keywordtype">double</span> <a class="code" href="tutorial_8txt.html#afd9f706951a7ad3a62bdf31ef35789ea">x</a>=double(dx+i)/double(w)*(xmax-xmin)+xmin;
-<a name="l00120"></a>00120             <span class="comment">// prep the expression engine for evaluation</span>
-<a name="l00121"></a>00121             expr.<a class="code" href="classGrapherExpr.html#aa2fb8574c07c7d4806038dd0bbba003a" title="set the independent variable">setX</a>(x);
-<a name="l00122"></a>00122             <span class="comment">// evaluate and pull scalar value</span>
-<a name="l00123"></a>00123             <a class="code" href="classSeVec3d.html" title="A 3d point/vector class.">SeVec3d</a> val=expr.<a class="code" href="classSeExpression.html#aff6b471712214dd50feec63cefbaa2af">evaluate</a>();
-<a name="l00124"></a>00124             <span class="keywordtype">double</span> <a class="code" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f723d55fff">y</a>=val[0];
-<a name="l00125"></a>00125             <span class="comment">// transform from logical to device coordinate</span>
-<a name="l00126"></a>00126             <span class="keywordtype">int</span> j=(y-ymin)/(ymax-ymin)*h;
-<a name="l00127"></a>00127             <span class="comment">// store to the buffer</span>
-<a name="l00128"></a>00128             <span class="keywordflow">if</span>(j&gt;=0 &amp;&amp; j&lt;h)
-<a name="l00129"></a>00129                 buffer[i+j*w]=<span class="charliteral">&apos;#&apos;</span>;
-<a name="l00130"></a>00130         }
-<a name="l00131"></a>00131     }
-<a name="l00132"></a>00132 
-<a name="l00133"></a>00133     <span class="comment">// draw the graph from the buffer</span>
-<a name="l00134"></a>00134     <span class="keywordflow">for</span>(<span class="keywordtype">int</span> j=h-1;j&gt;=0;j--){
-<a name="l00135"></a>00135         <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i=0;i&lt;w;i++){
-<a name="l00136"></a>00136             std::cout&lt;&lt;buffer[i+j*w];
-<a name="l00137"></a>00137         }
-<a name="l00138"></a>00138         std::cout&lt;&lt;std::endl;
-<a name="l00139"></a>00139     }
-<a name="l00140"></a>00140 
-<a name="l00141"></a>00141     <span class="keywordflow">return</span> 0;
-<a name="l00142"></a>00142 }
+<a name="l00086"></a>00086 
+<a name="l00087"></a>00087     <span class="comment">// evaluate the graph</span>
+<a name="l00088"></a>00088     <span class="keyword">const</span> <span class="keywordtype">int</span> samplesPerPixel=10;
+<a name="l00089"></a>00089     <span class="keyword">const</span> <span class="keywordtype">double</span> <a class="code" href="tutorial_8txt.html#a78e099e32ba42c384a60976d02876640">one_over_samples_per_pixel</a>=1./samplesPerPixel;
+<a name="l00090"></a>00090     <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i=0;i&lt;w;i++){
+<a name="l00091"></a>00091         <span class="keywordflow">for</span>(<span class="keywordtype">int</span> sample=0;sample&lt;samplesPerPixel;sample++){
+<a name="l00092"></a>00092             <span class="comment">// transform from device to logical coordinatex</span>
+<a name="l00093"></a>00093             <span class="keywordtype">double</span> dx=double(sample)*one_over_samples_per_pixel;
+<a name="l00094"></a>00094             <span class="keywordtype">double</span> <a class="code" href="tutorial_8txt.html#afd9f706951a7ad3a62bdf31ef35789ea">x</a>=double(dx+i)/double(w)*(xmax-xmin)+xmin;
+<a name="l00095"></a>00095             <span class="comment">// prep the expression engine for evaluation</span>
+<a name="l00096"></a>00096             expr.setX(x);
+<a name="l00097"></a>00097             <span class="comment">// evaluate and pull scalar value</span>
+<a name="l00098"></a>00098             <a class="code" href="classSeVec3d.html" title="A 3d point/vector class.">SeVec3d</a> val=expr.evaluate();
+<a name="l00099"></a>00099             <span class="keywordtype">double</span> <a class="code" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f723d55fff">y</a>=val[0];
+<a name="l00100"></a>00100             <span class="comment">// transform from logical to device coordinate</span>
+<a name="l00101"></a>00101             <span class="keywordtype">int</span> j=(y-ymin)/(ymax-ymin)*h;
+<a name="l00102"></a>00102             <span class="comment">// store to the buffer</span>
+<a name="l00103"></a>00103             <span class="keywordflow">if</span>(j&gt;=0 &amp;&amp; j&lt;h)
+<a name="l00104"></a>00104                 buffer[i+j*w]=<span class="charliteral">&apos;#&apos;</span>;
+<a name="l00105"></a>00105         }
+<a name="l00106"></a>00106     }
+<a name="l00107"></a>00107 
+<a name="l00108"></a>00108     <span class="comment">// draw the graph from the buffer</span>
+<a name="l00109"></a>00109     <span class="keywordflow">for</span>(<span class="keywordtype">int</span> j=h-1;j&gt;=0;j--){
+<a name="l00110"></a>00110         <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i=0;i&lt;w;i++){
+<a name="l00111"></a>00111             std::cout&lt;&lt;buffer[i+j*w];
+<a name="l00112"></a>00112         }
+<a name="l00113"></a>00113         std::cout&lt;&lt;std::endl;
+<a name="l00114"></a>00114     }
+<a name="l00115"></a>00115 
+<a name="l00116"></a>00116     <span class="keywordflow">return</span> 0;
+<a name="l00117"></a>00117 }
 </pre></div></div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 3 May 2011 for SeExpr by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 25 Jul 2013 for SeExpr by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

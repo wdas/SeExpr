@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<title>SeExpr: /jobs2/soft/users/aselle/src/seexpr-to-push/src/doc/tutorial.txt File Reference</title>
+<title>SeExpr: /disk1/scratch/aselle/projects/seexpr/SeExpr/src/doc/tutorial.txt File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css"/>
 </head>
@@ -25,27 +25,20 @@
   </div>
 </div>
 <div class="contents">
-<h1>/jobs2/soft/users/aselle/src/seexpr-to-push/src/doc/tutorial.txt File Reference</h1><table border="0" cellpadding="0" cellspacing="0">
-<tr><td colspan="2"><h2>Classes</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">class &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGrapherExpr.html">GrapherExpr</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Simple expression class to support our function grapher.  <a href="classGrapherExpr.html#_details">More...</a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">class &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGrapherExpr.html">GrapherExpr</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Simple expression class to support our function grapher.  <a href="classGrapherExpr.html#_details">More...</a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">struct &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="structGrapherExpr_1_1SimpleVar.html">GrapherExpr::SimpleVar</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Simple variable that just returns its internal value.  <a href="structGrapherExpr_1_1SimpleVar.html#_details">More...</a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">class &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGrapherExpr.html">GrapherExpr</a></td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Simple expression class to support our function grapher.  <a href="classGrapherExpr.html#_details">More...</a><br/></td></tr>
+<h1>/disk1/scratch/aselle/projects/seexpr/SeExpr/src/doc/tutorial.txt File Reference</h1><table border="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="2"><h2>Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&lt; h2 &gt; Programmer Tutorial&lt;/h2 &gt;<br class="typebreak"/>
-&lt; <a class="el" href="SeNoiseTables_8h.html#aefbb2f7167a298e4d0197dfbea9e1a54">p</a> &gt; Getting started with <br class="typebreak"/>
-SeExpr is relatively easy <br class="typebreak"/>
-SeExpr gives you <a class="el" href="userdoc_8txt.html#a6e7beb7fd49890b40d53777ee8f839af">a</a> way <a class="el" href="userdoc_8txt.html#abf3f4249287debf6c1e91b366c0a3fa9">to</a> <br class="typebreak"/>
-evaluate one or many <br class="typebreak"/>
-evaluations of an <a class="el" href="userdoc_8txt.html#a2f7cfbd1dc9649bef17c60edda6d6155">expression</a> <br class="typebreak"/>
-What changes between different <br class="typebreak"/>
-applications of <a class="el" href="tutorial_8txt.html#ab591fb87b5e12eb6085aec410d249958">expressions</a> is <br class="typebreak"/>
-mainly the particular <br class="typebreak"/>
-<a class="el" href="tutorial_8txt.html#ac9afdbd0cd6c47bb03d8dd62a4911573">variables</a> that <a class="el" href="plugins_8txt.html#a7964cba8a9f28dbb55d2e442e59ca224">are</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="tutorial_8txt.html#a8faff1cb74e4e061c7fea57f06cda794">accessible</a> (sometimes also the set of functions).Each application of <a class="el" href="tutorial_8txt.html#ab591fb87b5e12eb6085aec410d249958">expressions</a> generally has it's own subclass of <a class="el" href="classSeExpression.html">SeExpression</a> that gets instantiated.To get started we're going <a class="el" href="userdoc_8txt.html#abf3f4249287debf6c1e91b366c0a3fa9">to</a> go <a class="el" href="userdoc_8txt.html#a728291eed2516b8631fd9fce37ae59f8">through</a> <a class="el" href="userdoc_8txt.html#a6e7beb7fd49890b40d53777ee8f839af">a</a> simple application that is an ascii graphing calculator.This is located in the src/demos/<a class="el" href="plugins_8txt.html#aa41a6513ac1f2755fd5671d6f47a0c7d">asciiGraph.cpp</a> part of the <a class="el" href="userdoc_8txt.html#a25444354d5d93d2459e00785a36b4971">source</a> tree.&lt; <a class="el" href="SeNoiseTables_8h.html#aefbb2f7167a298e4d0197dfbea9e1a54">p</a> &gt;&lt; h2 &gt;Problem Overview&lt;/h2 &gt; We <a class="el" href="plugins_8txt.html#a7964cba8a9f28dbb55d2e442e59ca224">are</a> going <a class="el" href="userdoc_8txt.html#abf3f4249287debf6c1e91b366c0a3fa9">to</a> write <a class="el" href="userdoc_8txt.html#a6e7beb7fd49890b40d53777ee8f839af">a</a> function grapher that displays in ASCII.In particular for <a class="el" href="userdoc_8txt.html#a6e7beb7fd49890b40d53777ee8f839af">a</a> given f(<a class="el" href="tutorial_8txt.html#afd9f706951a7ad3a62bdf31ef35789ea">x</a>) we can evaluate it <a class="el" href="userdoc_8txt.html#a71383a6b1e69ea4b3c4adb9e20274465">at</a> all the <a class="el" href="tutorial_8txt.html#afd9f706951a7ad3a62bdf31ef35789ea">x</a>'s in <a class="el" href="userdoc_8txt.html#a6e7beb7fd49890b40d53777ee8f839af">a</a> window and draw the resulting <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f723d55fff">y</a>'s.For <a class="el" href="userdoc_8txt.html#ab2b35a752fec70a29ca2e2b54488417d">example</a> if the user ran our program&lt; pre &gt;./asciiGraph&quot;val</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&lt;!--*(c) DisneyEnterprises, <br class="typebreak"/>
+Inc.Allrightsreserved.**ThisfileislicensedunderthetermsoftheMicrosoftPublicLicense(MS-PL)*asdefinedat:http:**Acompletecopyofthislicenseisincludedinthisdistributionasthefile <br class="typebreak"/>
+*LICENSE.--&gt;&lt; h2 &gt; Programmer <br class="typebreak"/>
+Tutorial&lt;/h2 &gt;&lt; <a class="el" href="SeNoiseTables_8h.html#aefbb2f7167a298e4d0197dfbea9e1a54">p</a> &gt; Getting <br class="typebreak"/>
+started with SeExpr is <br class="typebreak"/>
+relatively easy SeExpr gives <br class="typebreak"/>
+you <a class="el" href="userdoc_8txt.html#a6e7beb7fd49890b40d53777ee8f839af">a</a> way <a class="el" href="userdoc_8txt.html#abf3f4249287debf6c1e91b366c0a3fa9">to</a> evaluate one or <br class="typebreak"/>
+many evaluations of an <br class="typebreak"/>
+<a class="el" href="userdoc_8txt.html#a2f7cfbd1dc9649bef17c60edda6d6155">expression</a> What changes <br class="typebreak"/>
+between different applications <br class="typebreak"/>
+of <a class="el" href="tutorial_8txt.html#ab591fb87b5e12eb6085aec410d249958">expressions</a> is mainly the <br class="typebreak"/>
+particular <a class="el" href="tutorial_8txt.html#ac9afdbd0cd6c47bb03d8dd62a4911573">variables</a> that are&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="tutorial_8txt.html#a301975034e8472baaa6a92f270cc967e">accessible</a> (sometimes also the set of functions).Each application of <a class="el" href="tutorial_8txt.html#ab591fb87b5e12eb6085aec410d249958">expressions</a> generally has it's own subclass of <a class="el" href="classSeExpression.html">SeExpression</a> that gets instantiated.To get started we're going <a class="el" href="userdoc_8txt.html#abf3f4249287debf6c1e91b366c0a3fa9">to</a> go <a class="el" href="userdoc_8txt.html#a728291eed2516b8631fd9fce37ae59f8">through</a> <a class="el" href="userdoc_8txt.html#a6e7beb7fd49890b40d53777ee8f839af">a</a> simple application that is an ascii graphing calculator.This is located in the src/demos/asciiGraph.cpp part of the <a class="el" href="userdoc_8txt.html#a25444354d5d93d2459e00785a36b4971">source</a> tree.&lt; <a class="el" href="SeNoiseTables_8h.html#aefbb2f7167a298e4d0197dfbea9e1a54">p</a> &gt;&lt; h2 &gt;Problem Overview&lt;/h2 &gt; We are going <a class="el" href="userdoc_8txt.html#abf3f4249287debf6c1e91b366c0a3fa9">to</a> write <a class="el" href="userdoc_8txt.html#a6e7beb7fd49890b40d53777ee8f839af">a</a> function grapher that displays in ASCII.In particular for <a class="el" href="userdoc_8txt.html#a6e7beb7fd49890b40d53777ee8f839af">a</a> given f(<a class="el" href="tutorial_8txt.html#afd9f706951a7ad3a62bdf31ef35789ea">x</a>) we can evaluate it <a class="el" href="userdoc_8txt.html#a71383a6b1e69ea4b3c4adb9e20274465">at</a> all the <a class="el" href="tutorial_8txt.html#afd9f706951a7ad3a62bdf31ef35789ea">x</a>'s in <a class="el" href="userdoc_8txt.html#a6e7beb7fd49890b40d53777ee8f839af">a</a> window and draw the resulting <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f723d55fff">y</a>'s.For <a class="el" href="userdoc_8txt.html#ab2b35a752fec70a29ca2e2b54488417d">example</a> if the user ran our program&lt; pre &gt;./asciiGraph&quot;val</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">*&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="tutorial_8txt.html#a515b400e8ffacc584bb564d23ce8e6bd">sin</a> (val)/val&quot; &lt;/pre&gt; we would get &lt;pre&gt; | | | | | &lt;/pre&gt; or if we did &lt;pre&gt; ./asciiGraph &quot;x-3&quot; &lt;/pre&gt; we'd get &lt;pre&gt; |  | ------------------------------|----------------- |  |  |  |  | &lt;/pre&gt; &lt;h2&gt;Implement the subclass&lt;/h2&gt; First we subclass <a class="el" href="classSeExpression.html">SeExpression</a> and give it <a class="el" href="userdoc_8txt.html#a6e7beb7fd49890b40d53777ee8f839af">a</a> const ructor</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&lt;/pre &gt; Once we have this we <br class="typebreak"/>
 need an <a class="el" href="userdoc_8txt.html#a2e94796893680fbb8b060a0e483a1d7c">instance</a> <a class="el" href="userdoc_8txt.html#abf3f4249287debf6c1e91b366c0a3fa9">to</a> store our <br class="typebreak"/>
@@ -59,14 +52,14 @@ the controlling code will use <br class="typebreak"/>
 the <a class="el" href="userdoc_8txt.html#a2f7cfbd1dc9649bef17c60edda6d6155">expression</a> it will <br class="typebreak"/>
 repeatedly alternate between <br class="typebreak"/>
 setting the independent <br class="typebreak"/>
-<a class="el" href="tutorial_8txt.html#ac9afdbd0cd6c47bb03d8dd62a4911573">variables</a> that <a class="el" href="plugins_8txt.html#a7964cba8a9f28dbb55d2e442e59ca224">are</a> <a class="el" href="userdoc_8txt.html#a4bc2992298132335b89dd34482bde99f">used</a> and <br class="typebreak"/>
+<a class="el" href="tutorial_8txt.html#ac9afdbd0cd6c47bb03d8dd62a4911573">variables</a> that are <a class="el" href="userdoc_8txt.html#a4bc2992298132335b89dd34482bde99f">used</a> and <br class="typebreak"/>
 calling&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="tutorial_8txt.html#a3aa16fd2929850f47a7d8f879dd361fe">evaluate</a> ().What it has <a class="el" href="userdoc_8txt.html#abf3f4249287debf6c1e91b366c0a3fa9">to</a> do depends very much on the application.In this <a class="el" href="tutorial_8txt.html#ab1f71e3fde3cb889a2742c018c327469">case</a> we only need <a class="el" href="userdoc_8txt.html#abf3f4249287debf6c1e91b366c0a3fa9">to</a> set the independent variable <a class="el" href="tutorial_8txt.html#afd9f706951a7ad3a62bdf31ef35789ea">x</a> as</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&lt;/pre &gt;&lt; h2 &gt; Evaluating <br class="typebreak"/>
 <a class="el" href="tutorial_8txt.html#ab591fb87b5e12eb6085aec410d249958">expressions</a>&lt;/h2 &gt; Evaluating <br class="typebreak"/>
 an <a class="el" href="userdoc_8txt.html#a2f7cfbd1dc9649bef17c60edda6d6155">expression</a> is pretty easy <br class="typebreak"/>
 But before we can do that we <br class="typebreak"/>
 need <a class="el" href="userdoc_8txt.html#abf3f4249287debf6c1e91b366c0a3fa9">to</a> make an <a class="el" href="userdoc_8txt.html#a2e94796893680fbb8b060a0e483a1d7c">instance</a>&lt; pre &gt;<br class="typebreak"/>
- <a class="el" href="classGrapherExpr.html">GrapherExpr</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="tutorial_8txt.html#a799c09a9e9ac583c734b3ebf19b2fa58">expr</a> (&quot;x+<a class="el" href="tutorial_8txt.html#afd9f706951a7ad3a62bdf31ef35789ea">x</a>^2&quot;)</td></tr>
+ GrapherExpr&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="tutorial_8txt.html#a799c09a9e9ac583c734b3ebf19b2fa58">expr</a> (&quot;x+<a class="el" href="tutorial_8txt.html#afd9f706951a7ad3a62bdf31ef35789ea">x</a>^2&quot;)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&lt;/pre &gt; there might <a class="el" href="userdoc_8txt.html#aa28ec5da43353b6f95e6fd6e4f066f43">be</a> errors <br class="typebreak"/>
 in the <a class="el" href="userdoc_8txt.html#a2f7cfbd1dc9649bef17c60edda6d6155">expression</a> you must <br class="typebreak"/>
 check with&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="tutorial_8txt.html#a86b00e0d228d0715406a2c771b8ef27d">isValid</a> () before you can evaluate.Then you can print <a class="el" href="userdoc_8txt.html#a6e7beb7fd49890b40d53777ee8f839af">a</a> parse error as well&lt; pre &gt; if(!expr.isValid())</td></tr>
@@ -132,12 +125,12 @@ and find out the <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f7
 <tr><td class="memItemLeft" align="right" valign="top">const double&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="tutorial_8txt.html#a78e099e32ba42c384a60976d02876640">one_over_samples_per_pixel</a> = 1./samplesPerPixel</td></tr>
 </table>
 <hr/><h2>Function Documentation</h2>
-<a class="anchor" id="a8faff1cb74e4e061c7fea57f06cda794"></a><!-- doxytag: member="tutorial.txt::accessible" ref="a8faff1cb74e4e061c7fea57f06cda794" args="(sometimes also the set of functions).Each application of expressions generally has it's own subclass of SeExpression that gets instantiated.To get started we're going to go through a simple application that is an ascii graphing calculator.This is located in the src/demos/asciiGraph.cpp part of the source tree.&lt; p &gt;&lt; h2 &gt;Problem Overview&lt;/h2 &gt; We are going to write a function grapher that displays in ASCII.In particular for a given f(x) we can evaluate it at all the x's in a window and draw the resulting y's.For example if the user ran our program&lt; pre &gt;./asciiGraph&quot;val" -->
+<a class="anchor" id="a301975034e8472baaa6a92f270cc967e"></a><!-- doxytag: member="tutorial.txt::accessible" ref="a301975034e8472baaa6a92f270cc967e" args="(sometimes also the set of functions).Each application of expressions generally has it's own subclass of SeExpression that gets instantiated.To get started we're going to go through a simple application that is an ascii graphing calculator.This is located in the src/demos/asciiGraph.cpp part of the source tree.&lt; p &gt;&lt; h2 &gt;Problem Overview&lt;/h2 &gt; We are going to write a function grapher that displays in ASCII.In particular for a given f(x) we can evaluate it at all the x's in a window and draw the resulting y's.For example if the user ran our program&lt; pre &gt;./asciiGraph&quot;val" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">&lt;h2&gt; Programmer Tutorial&lt;/h2&gt;&lt;<a class="el" href="SeNoiseTables_8h.html#aefbb2f7167a298e4d0197dfbea9e1a54">p</a>&gt; Getting started with SeExpr is relatively easy SeExpr gives you <a class="el" href="userdoc_8txt.html#a6e7beb7fd49890b40d53777ee8f839af">a</a> way <a class="el" href="userdoc_8txt.html#abf3f4249287debf6c1e91b366c0a3fa9">to</a> evaluate one or many evaluations of an <a class="el" href="userdoc_8txt.html#a2f7cfbd1dc9649bef17c60edda6d6155">expression</a> What changes between different applications of <a class="el" href="tutorial_8txt.html#ab591fb87b5e12eb6085aec410d249958">expressions</a> is mainly the particular <a class="el" href="tutorial_8txt.html#ac9afdbd0cd6c47bb03d8dd62a4911573">variables</a> that <a class="el" href="plugins_8txt.html#a7964cba8a9f28dbb55d2e442e59ca224">are</a> accessible </td>
+          <td class="memname">&lt;!--*(c)DisneyEnterprises,Inc.Allrightsreserved.**ThisfileislicensedunderthetermsoftheMicrosoftPublicLicense(MS-PL)*asdefinedat:http:**Acompletecopyofthislicenseisincludedinthisdistributionasthefile*LICENSE.--&gt;&lt;h2&gt; Programmer Tutorial&lt;/h2&gt;&lt;<a class="el" href="SeNoiseTables_8h.html#aefbb2f7167a298e4d0197dfbea9e1a54">p</a>&gt; Getting started with SeExpr is relatively easy SeExpr gives you <a class="el" href="userdoc_8txt.html#a6e7beb7fd49890b40d53777ee8f839af">a</a> way <a class="el" href="userdoc_8txt.html#abf3f4249287debf6c1e91b366c0a3fa9">to</a> evaluate one or many evaluations of an <a class="el" href="userdoc_8txt.html#a2f7cfbd1dc9649bef17c60edda6d6155">expression</a> What changes between different applications of <a class="el" href="tutorial_8txt.html#ab591fb87b5e12eb6085aec410d249958">expressions</a> is mainly the particular <a class="el" href="tutorial_8txt.html#ac9afdbd0cd6c47bb03d8dd62a4911573">variables</a> that are accessible </td>
           <td>(</td>
           <td class="paramtype">sometimes also the set of&nbsp;</td>
           <td class="paramname"> <em>functions</em></td>
@@ -155,7 +148,7 @@ and find out the <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f7
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">&lt;/pre&gt;&lt;h3&gt; Variable setting&lt;/h3&gt; Next we need <a class="el" href="userdoc_8txt.html#abf3f4249287debf6c1e91b366c0a3fa9">to</a> make <a class="el" href="userdoc_8txt.html#a6e7beb7fd49890b40d53777ee8f839af">a</a> way of setting the variable As the controlling code will use the <a class="el" href="userdoc_8txt.html#a2f7cfbd1dc9649bef17c60edda6d6155">expression</a> it will repeatedly alternate between setting the independent <a class="el" href="tutorial_8txt.html#ac9afdbd0cd6c47bb03d8dd62a4911573">variables</a> that <a class="el" href="plugins_8txt.html#a7964cba8a9f28dbb55d2e442e59ca224">are</a> <a class="el" href="userdoc_8txt.html#a4bc2992298132335b89dd34482bde99f">used</a> and calling evaluate </td>
+          <td class="memname">&lt;/pre&gt;&lt;h3&gt; Variable setting&lt;/h3&gt; Next we need <a class="el" href="userdoc_8txt.html#abf3f4249287debf6c1e91b366c0a3fa9">to</a> make <a class="el" href="userdoc_8txt.html#a6e7beb7fd49890b40d53777ee8f839af">a</a> way of setting the variable As the controlling code will use the <a class="el" href="userdoc_8txt.html#a2f7cfbd1dc9649bef17c60edda6d6155">expression</a> it will repeatedly alternate between setting the independent <a class="el" href="tutorial_8txt.html#ac9afdbd0cd6c47bb03d8dd62a4911573">variables</a> that are <a class="el" href="userdoc_8txt.html#a4bc2992298132335b89dd34482bde99f">used</a> and calling evaluate </td>
           <td>(</td>
           <td class="paramname"></td>
           <td>&nbsp;)&nbsp;</td>
@@ -171,7 +164,7 @@ and find out the <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f7
 </dl>
 </div>
 
-<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00139">139</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
+<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00149">149</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
 
 </div>
 </div>
@@ -180,7 +173,7 @@ and find out the <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f7
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">&lt;/pre&gt;&lt;h2&gt; Evaluating <a class="el" href="tutorial_8txt.html#ab591fb87b5e12eb6085aec410d249958">expressions</a>&lt;/h2&gt; Evaluating an <a class="el" href="userdoc_8txt.html#a2f7cfbd1dc9649bef17c60edda6d6155">expression</a> is pretty easy But before we can do that we need <a class="el" href="userdoc_8txt.html#abf3f4249287debf6c1e91b366c0a3fa9">to</a> make an <a class="el" href="userdoc_8txt.html#a2e94796893680fbb8b060a0e483a1d7c">instance</a>&lt;pre&gt; <a class="el" href="classGrapherExpr.html">GrapherExpr</a> expr </td>
+          <td class="memname">&lt;/pre&gt;&lt;h2&gt; Evaluating <a class="el" href="tutorial_8txt.html#ab591fb87b5e12eb6085aec410d249958">expressions</a>&lt;/h2&gt; Evaluating an <a class="el" href="userdoc_8txt.html#a2f7cfbd1dc9649bef17c60edda6d6155">expression</a> is pretty easy But before we can do that we need <a class="el" href="userdoc_8txt.html#abf3f4249287debf6c1e91b366c0a3fa9">to</a> make an <a class="el" href="userdoc_8txt.html#a2e94796893680fbb8b060a0e483a1d7c">instance</a>&lt;pre&gt; GrapherExpr expr </td>
           <td>(</td>
           <td class="paramtype">&quot;x+<a class="el" href="tutorial_8txt.html#afd9f706951a7ad3a62bdf31ef35789ea">x</a>^2&quot;&nbsp;</td>
           <td class="paramname"></td>
@@ -191,7 +184,7 @@ and find out the <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f7
 </div>
 <div class="memdoc">
 
-<p>Referenced by <a class="el" href="asciiGraph_8cpp_source.html#l00077">main()</a>.</p>
+<p>Referenced by <a class="el" href="SeExprEdShortEdit_8cpp_source.html#l00277">SeExprEdShortEdit::checkErrors()</a>, and <a class="el" href="asciiCalculator_8cpp_source.html#l00099">main()</a>.</p>
 
 </div>
 </div>
@@ -211,7 +204,7 @@ and find out the <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f7
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00191">191</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
+<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00201">201</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
 
 </div>
 </div>
@@ -236,7 +229,7 @@ and find out the <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f7
 </dl>
 </div>
 
-<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00159">159</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
+<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00169">169</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
 
 </div>
 </div>
@@ -261,7 +254,7 @@ and find out the <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f7
 </dl>
 </div>
 
-<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00123">123</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
+<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00133">133</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
 
 </div>
 </div>
@@ -281,7 +274,7 @@ and find out the <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f7
 </div>
 <div class="memdoc">
 
-<p>Referenced by <a class="el" href="SeVec3d_8h_source.html#l00217">SeVec3d::rotateBy()</a>, and <a class="el" href="SeExprBuiltins_8h_source.html#l00052">SeExpr::sind()</a>.</p>
+<p>Referenced by <a class="el" href="SeVec3d_8h_source.html#l00192">SeVec3d::rotateBy()</a>, and <a class="el" href="SeExprBuiltins_8h_source.html#l00027">SeExpr::sind()</a>.</p>
 
 </div>
 </div>
@@ -297,7 +290,7 @@ and find out the <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f7
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00091">91</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
+<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00101">101</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
 
 </div>
 </div>
@@ -312,7 +305,7 @@ and find out the <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f7
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00133">133</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
+<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00143">143</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
 
 </div>
 </div>
@@ -327,7 +320,7 @@ and find out the <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f7
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00110">110</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
+<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00120">120</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
 
 </div>
 </div>
@@ -342,7 +335,7 @@ and find out the <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f7
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00122">122</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
+<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00132">132</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
 
 </div>
 </div>
@@ -357,7 +350,7 @@ and find out the <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f7
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00167">167</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
+<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00177">177</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
 
 </div>
 </div>
@@ -372,7 +365,7 @@ and find out the <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f7
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00167">167</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
+<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00177">177</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
 
 </div>
 </div>
@@ -387,7 +380,7 @@ and find out the <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f7
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00159">159</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
+<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00169">169</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
 
 </div>
 </div>
@@ -402,7 +395,7 @@ and find out the <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f7
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00091">91</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
+<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00101">101</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
 
 </div>
 </div>
@@ -417,7 +410,7 @@ and find out the <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f7
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00108">108</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
+<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00118">118</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
 
 </div>
 </div>
@@ -432,9 +425,9 @@ and find out the <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f7
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00174">174</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
+<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00184">184</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
 
-<p>Referenced by <a class="el" href="asciiGraph_8cpp_source.html#l00077">main()</a>.</p>
+<p>Referenced by <a class="el" href="asciiGraph_8cpp_source.html#l00052">main()</a>.</p>
 
 </div>
 </div>
@@ -449,7 +442,7 @@ and find out the <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f7
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00110">110</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
+<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00120">120</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
 
 </div>
 </div>
@@ -464,14 +457,14 @@ and find out the <a class="el" href="userdoc_8txt.html#ac2ae9ce22cb3da03dc31d9f7
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00091">91</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
+<p>Definition at line <a class="el" href="tutorial_8txt_source.html#l00101">101</a> of file <a class="el" href="tutorial_8txt_source.html">tutorial.txt</a>.</p>
 
-<p>Referenced by <a class="el" href="SeCurve_8cpp_source.html#l00184">SeExpr::SeCurve&lt; T &gt;::getChannelValue()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00130">SeExpr::SeCurve&lt; T &gt;::getValue()</a>, and <a class="el" href="asciiGraph_8cpp_source.html#l00077">main()</a>.</p>
+<p>Referenced by <a class="el" href="SeExprEdCurve_8cpp_source.html#l00232">CurveScene::drawPoly()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00153">SeExpr::SeCurve&lt; T &gt;::getChannelValue()</a>, <a class="el" href="SeCurve_8cpp_source.html#l00099">SeExpr::SeCurve&lt; T &gt;::getValue()</a>, <a class="el" href="asciiGraph_8cpp_source.html#l00052">main()</a>, <a class="el" href="SeExprEdGrapher2d_8cpp_source.html#l00163">SeExprEdGrapherView::mouseMoveEvent()</a>, <a class="el" href="SeExprEdControl_8cpp_source.html#l00228">SeExprEdChannelSlider::paintEvent()</a>, <a class="el" href="SeExprEdControlCollection_8cpp_source.html#l00293">SeExprEdControlCollection::rebuildControls()</a>, <a class="el" href="SeExprBuiltins_8cpp_source.html#l00230">SeExpr::satAdjust()</a>, and <a class="el" href="SeExprEdGrapher2d_8cpp_source.html#l00194">SeExprEdGrapherView::update()</a>.</p>
 
 </div>
 </div>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 3 May 2011 for SeExpr by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 25 Jul 2013 for SeExpr by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>
