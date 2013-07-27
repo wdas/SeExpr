@@ -23,6 +23,8 @@ if(QT4_FOUND)
     add_library(SeExprEditor SHARED ${SeExprEd_CPPS} ${SeExprEd_MOC_SRCS} ${editor_parser_cpp})
     
     install(TARGETS SeExprEditor DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    file(GLOB public_includes "*.h")
+    install (FILES ${public_includes} DESTINATION include)
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${SeExprEd_MOC_HDRS} DESTINATION include/SeExprEditor)
     include_directories(${QT_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(SeExprEditor ${QT_QTCORE_LIBRARY})
