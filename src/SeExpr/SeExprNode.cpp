@@ -63,7 +63,7 @@
 */
 
 #ifndef MAKEDEPEND
-#include <math.h>
+#include <cmath>
 #endif
 #include "SeVec3d.h"
 #include "SeExpression.h"
@@ -659,15 +659,15 @@ SeExprExpNode::eval(SeVec3d& result) const
     child1->eval(b);
 
     if (!_isVec) {
-	result[0] = pow(a[0], b[0]);
+	result[0] = std::pow(std::max(a[0], 0.0), b[0]);
     }
     else {
 	// at least one child is a vector and the result is too
 	if (!child0->isVec()) a[1] = a[2] = a[0];
 	if (!child1->isVec()) b[1] = b[2] = b[0];
-	result[0] = pow(a[0], b[0]);
-	result[1] = pow(a[1], b[1]);
-	result[2] = pow(a[2], b[2]);
+	result[0] = std::pow(std::max(a[0], 0.0), b[0]);
+	result[1] = std::pow(std::max(a[1], 0.0), b[1]);
+	result[2] = std::pow(std::max(a[2], 0.0), b[2]);
     }
 }
 

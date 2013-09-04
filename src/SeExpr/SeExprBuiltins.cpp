@@ -35,7 +35,7 @@
 
 #define __STDC_LIMIT_MACROS
 #include <cassert>
-#include <math.h>
+#include <cmath>
 #include <stdlib.h>
 #include <limits.h>
 #include <algorithm>
@@ -141,7 +141,7 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
 
     double gamma(double x, double g)
     {
-	return pow(max(x, 0.0), 1.0/g);
+	return std::pow(std::max(x, 0.0), 1.0/g);
     }
     static const char* gamma_docstring="float gamma(float x, float g)\nGamma correction of x with gamma factor g";
 
@@ -149,7 +149,7 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
     double bias(double x, double b)
     {
 	static double C = 1.0/log(0.5);
-	return pow(x, log(b) * C);
+	return std::pow(std::max(x, 0.0), log(b) * C);
     }
     static const char* bias_docstring="float bias(float x, float g)\nVariation of gamma where values less than 0.5 pull the curve down\nand values greater than 0.5 pull the curve up\npow(x,log(b)/log(0.5))";
 
