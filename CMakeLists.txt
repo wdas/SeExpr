@@ -60,7 +60,7 @@ ELSE(WIN32)
   ADD_DEFINITIONS (-Wall  -Wextra)
   ADD_DEFINITIONS (-pthread)
 
-  SET( CMAKE_CXX_FLAGS "-fPIC")
+  SET( CMAKE_CXX_FLAGS "-fPIC -msse4.1")
 ENDIF(WIN32)
 
 ## Choose build options

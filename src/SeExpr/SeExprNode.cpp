@@ -70,6 +70,9 @@
 #include "SeExprNode.h"
 #include "SeExprFunc.h"
 
+#ifdef __SSE4__
+#include <smmintrin.h> //SSE4.1
+#endif
 
 SeExprNode::SeExprNode(const SeExpression* expr)
     : _expr(expr), _parent(0), _isVec(0)
@@ -648,7 +651,6 @@ SeExprModNode::eval(SeVec3d& result) const
     }
 }
 
-
 void
 SeExprExpNode::eval(SeVec3d& result) const
 {
@@ -659,15 +661,29 @@ SeExprExpNode::eval(SeVec3d& result) const
     child1->eval(b);
 
     if (!_isVec) {
-	result[0] = std::pow(std::max(a[0], 0.0), b[0]);
+        if(std::floor(b[0])!=b[0] && a[0]<0) a[0]=0.;
+	result[0] = std::pow(a[0], b[0]);
     }
     else {
 	// at least one child is a vector and the result is too
 	if (!child0->isVec()) a[1] = a[2] = a[0];
 	if (!child1->isVec()) b[1] = b[2] = b[0];
-	result[0] = std::pow(std::max(a[0], 0.0), b[0]);
-	result[1] = std::pow(std::max(a[1], 0.0), b[1]);
-	result[2] = std::pow(std::max(a[2], 0.0), b[2]);
+
+#if 0
+        // TODO: think about using this
+        _v2df xy = _mm_load_pd(&b[0]);
+        _v2df z0 = _mm_load_pd(&b[2]);
+        int hitmask_xy= _mm_movemask_pd(_mm_cmpneq(_mm_floor_pd(xy),xy));
+        int hitmask_z = _mm_movemask_pd(_mm_cmpneq(_mm_floor_pd(z0),z0));
+        if((hitmask_xy & 1) && a[0]<0) a[0]=0.;
+        if((hitmask_xy & 2) && a[1]<0) a[1]=0.;
+        if((hitmask_z0 & 1) && a[2]<0) a[2]=0.;
+#else
+        for(int k=0;k<3;k++) if(std::floor(b[k])!=b[k] && a[k]<0) a[k]=0.;
+#endif
+	result[0] = std::pow(a[0], b[0]);
+	result[1] = std::pow(a[1], b[1]);
+	result[2] = std::pow(a[2], b[2]);
     }
 }
 
