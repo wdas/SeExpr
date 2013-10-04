@@ -661,7 +661,7 @@ SeExprExpNode::eval(SeVec3d& result) const
     child1->eval(b);
 
     if (!_isVec) {
-        if(std::floor(b[0])!=b[0] && a[0]<0) a[0]=0.;
+        if(a[0]<0 && std::floor(b[0])!=b[0]) a[0]=0.;
 	result[0] = std::pow(a[0], b[0]);
     }
     else {
@@ -679,7 +679,7 @@ SeExprExpNode::eval(SeVec3d& result) const
         if((hitmask_xy & 2) && a[1]<0) a[1]=0.;
         if((hitmask_z0 & 1) && a[2]<0) a[2]=0.;
 #else
-        for(int k=0;k<3;k++) if(std::floor(b[k])!=b[k] && a[k]<0) a[k]=0.;
+        for(int k=0;k<3;k++) if(a[k]<0 && std::floor(b[k])!=b[k]) a[k]=0.;
 #endif
 	result[0] = std::pow(a[0], b[0]);
 	result[1] = std::pow(a[1], b[1]);

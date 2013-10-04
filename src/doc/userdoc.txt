@@ -83,7 +83,7 @@ float <b>contrast</b> ( float x,
 float c ) <br>
 <div style="margin-left: 40px;">Adjust the contrast.&nbsp; For c from
 0 to 0.5, the contrast is decreased.&nbsp; For c &gt; 0.5, the contrast
-is increased.<br>
+is increased. NOTE: internally contrast will clamp to [0,1] range.<br>
 </div>
 float <b>invert</b> ( float x ) -
 Invert the value.&nbsp; Defined as 1-x.<br>
@@ -297,6 +297,8 @@ Voronoi types 1 through 5:<br>
 <img src="Se_voronoi_3.png">&nbsp;
 <img src="Se_voronoi_4.png">&nbsp;
 <img src="Se_voronoi_5.png">&nbsp;
+Note: There is no guarantee that values will be 0,1, so you may need to clamp if
+using a function like gamma() or contrast() which expect [0,1] input.
 </div>
 <br>
 <h4><a name="Texture_Lookup_Functions"></a>
