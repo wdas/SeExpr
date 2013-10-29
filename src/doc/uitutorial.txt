@@ -1,18 +1,25 @@
 <!--
-* (c) Disney Enterprises, Inc.  All rights reserved.
-*
-* This file is licensed under the terms of the Microsoft Public License (MS-PL)
-* as defined at: http://opensource.org/licenses/MS-PL.
-*
-* A complete copy of this license is included in this distribution as the file
-* LICENSE.
+Copyright Disney Enterprises, Inc.  All rights reserved.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License
+ and the following modification to it: Section 6 Trademarks.
+ deleted and replaced with:
+
+ 6. Trademarks. This License does not grant permission to use the
+ trade names, trademarks, service marks, or product names of the
+ Licensor and its affiliates, except as required for reproducing
+ the content of the NOTICE file.
+
+ You may obtain a copy of the License at
+ http://www.apache.org/licenses/LICENSE-2.0
 -->
 
 <h2>User Interface Tutorial</h2>
 The user interface components included in the SeExpr distribution provide a useful way to visualize the results of your expression evaluations and speed up the process of building expressions.  This tutorial uses some of the main UI components to build a simple app for editing and previewing expressions for image synthesis.
 
 <p>
-The finished example code can be found in <a href="./imageEditor_8cpp_source.html">imageEditor.cpp</a> and <a href="./ImageEditorDialog_8h_source.html">ImageEditorDialog.h</a>.
+The finished example code can be found in <a href="./classImageEditorDialog.html">ImageEditorDialog Class Reference</a>.
 
 <p>
 See <a href="./mytut.html">Simple ASCII Grapher Tutorial</a> for getting started using SeExpr.
@@ -70,6 +77,7 @@ A simple main application will show the dialog:
 
 <pre style="padding-left: 5em;">
 #include &lt;QtGui/QApplication&gt;
+#include "ImageEditorDialog.h"
 
 int main(int argc, char *argv[]){
     QApplication app(argc, argv);
@@ -155,8 +163,7 @@ The browser reads from a config.txt file to locate expression files.  An example
 and adjust the layout to make room for it:
 
 <pre style="padding-left: 5em;">
-    // Layout widgets: Top section contains left side with previewer and
-    // controls, right side with browser.  Bottom section contains editor.
+    // Layout widgets: top section containing left and right, and bottom section
     QVBoxLayout *rootLayout = new QVBoxLayout();
     this->setLayout(rootLayout);
 
@@ -186,8 +193,6 @@ and adjust the layout to make room for it:
 </pre>
 
 We now have the ability to browse expression files.  Selecting a file from the browser list will load its contents into the editor and create any associated widgets:<br><br><img src="./ui_browser.png">
-
-<p><b>NOTE</b>:  If you don't see any example *.se files listed in the browser, you will need to run your app from the seexpr build directory.  An exercise left to the reader is to define a more standard path for storing your expression library.
 
 <h2>Image Previewer</h2>
 
@@ -230,22 +235,15 @@ We'll create the image label in the constructor and add it to the top left of th
     leftLayout->addWidget(scrollArea,1);
 </pre>
 
-The layout should now look something like this:<br><br><img src="./ui_emptyLayout.png">
+The layout should nowlook something like this:<br><br><img src="./ui_emptyLayout.png">
 
 <p>
 To generate an image preview, we will want to evaluate the contents of the editor.  We'll need to add an apply button that will evaluate the expression.
 
 <p>
-First, let's create some classes to handle the image synthesis.  This code is a subset of the imageSynth demo code mentioned earlier.  
-<p>
-<b>NOTE</b>: Two important differences from the original imageSynth code:
-<ul>
-<li>the pixel[] order of results is slightly different for generating a <a href="http://doc.qt.digia.com/4.7/qimage.html">QImage</a> than for generating a PNG file, and </li>
-<li>the evaluateExpression() method returns a pointer to the image rather than writing the image to file.</li>
-</ul>
+First, let's create some classes to handle the image synthesis.  This code is a subset of the imageSynth demo code mentioned earlier.  The differences are that the pixel order is slightly different for generating a <a href="http://doc.qt.digia.com/4.7/qimage.html">QImage</a> than for generating a PNG file, and the evaluateExpression() method returns a pointer to the image rather than writing the image to file.
 
 <pre style="padding-left: 5em;">
-#include &lt;iostream&gt;
 #include &lt;png.h&gt;
 #include &lt;SeExpression.h&gt;
 
@@ -275,7 +273,7 @@ public:
     // resolve function that only supports one external variable 'x'
     SeExprVarRef* resolveVar(const std::string& name) const
     {
-        std::map&lt;std::string,Var&gt;::iterator i=vars.find(name);
+        std::map&lt;std::string,Var&gt;:iterator i=vars.find(name);
         if(i != vars.end()) return &i->second;
         return 0;
     }
@@ -327,9 +325,9 @@ unsigned char *ImageSynthesizer::evaluateExpression(const std::string &exprStr)
             u=one_over_width*(col+.5);
             v=one_over_height*(row+.5);
             SeVec3d result=expr.evaluate();
-            pixel[0]=clamp(result[2]*256.);
+            pixel[0]=clamp(result[0]*256.);
             pixel[1]=clamp(result[1]*256.);
-            pixel[2]=clamp(result[0]*256.);
+            pixel[2]=clamp(result[2]*256.);
             pixel[3]=255;
             pixel+=4;
         }
@@ -339,7 +337,7 @@ unsigned char *ImageSynthesizer::evaluateExpression(const std::string &exprStr)
 }
 </pre>
 
-Now we're ready to create an apply button in the ImageEditorDialog constructor and add it to the bottom of the layout:
+Now we're ready to create an apply button and add it to the bottom of the layout:
 
 <pre style="padding-left: 5em;">
 #include &lt;QtGui/QPushButton&gt;
@@ -367,7 +365,7 @@ class ImageEditorDialog: public QDialog
     ...
 </pre>
 
-Next, we'll modify the ImageEditorDialog class to add a pointer to an ImageSynthesizer instance, as well as the applyExpression() slot:
+Next, we'll add a new data member for the ImageSynthesizer instance as well as the applyExpression() function to the ImageEditorDialog class definition:
 
 <pre style="padding-left: 5em;">
 private:
@@ -435,13 +433,7 @@ private slots:
 };
 </pre>
 
-and include the new header in the main imageEditor.cpp file:
-
-<pre style="padding-left: 5em;">
-#include "ImageEditorDialog.h"
-</pre>
-
 Now we can load expressions from a library, create new expressions manually as well as by creating new controls, and see all our changes in an image preview as we go:<br><br><img src="./ui_final.png">
 
 <p>
-A next simple step would be to add a <b>Save</b> button to save expressions from the editor to your own ~/imageEditor/expressions directory.  The library browser will pick these up automatically, based on the context (imageEditor) and the hard-coded directory name (expressions).  This exercise is left to the reader to implement.  
+A next simple step would be to add a <b>Save</b> button to save expressions from the editor to your own ~/imageEditor/expressions directory.  The library browser will pick these up automatically, based on the context (imageEditor) and the hard-coded directory (expressions).  This exercise is left to the reader to implement.  

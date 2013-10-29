@@ -1,16 +1,24 @@
 /*
-* (c) Disney Enterprises, Inc.  All rights reserved.
+* Copyright Disney Enterprises, Inc.  All rights reserved.
 *
-* This file is licensed under the terms of the Microsoft Public License (MS-PL)
-* as defined at: http://opensource.org/licenses/MS-PL.
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
 *
-* A complete copy of this license is included in this distribution as the file
-* LICENSE.
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
 */
 /**
    @file imageSynth.cpp
 */
 #include <map>
+#include <vector>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -121,12 +129,16 @@ int main(int argc,char *argv[]){
     png_init_io(png_ptr,fp);
     int color_type=PNG_COLOR_TYPE_RGBA;
     png_set_IHDR(png_ptr,info_ptr,width,height,8,color_type,PNG_INTERLACE_NONE,PNG_COMPRESSION_TYPE_DEFAULT,PNG_FILTER_TYPE_DEFAULT);
-    const unsigned char *ptrs[height];
+    // Use vector instead of const array to fix Windows compile error -jb
+    std::vector<unsigned char*> ptrs; 
     for(int i=0;i<height;i++){
-        ptrs[i]=&image[width*i*4];
+        ptrs.push_back(&image[width*i*4]);
     }
-    png_set_rows(png_ptr,info_ptr,(png_byte**)ptrs);
+    png_set_rows(png_ptr,info_ptr,(png_byte**)ptrs.data());
     png_write_png(png_ptr,info_ptr,PNG_TRANSFORM_IDENTITY,0);
     
+    for(size_t i=0;i<ptrs.size();i++) free(ptrs[i]);
+    ptrs.clear();
+
     fclose(fp);
 }

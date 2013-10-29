@@ -1,11 +1,18 @@
 /*
-* (c) Disney Enterprises, Inc.  All rights reserved.
+* Copyright Disney Enterprises, Inc.  All rights reserved.
 *
-* This file is licensed under the terms of the Microsoft Public License (MS-PL)
-* as defined at: http://opensource.org/licenses/MS-PL.
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
 *
-* A complete copy of this license is included in this distribution as the file
-* LICENSE.
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
 */
 #ifndef MAKEDEPEND
 #include <iostream>
@@ -132,7 +139,8 @@ SeExpression::prep() const
         std::stringstream sstream;
         sstream<<"Prep errors:"<<std::endl;
         for(unsigned int i=0;i<_errors.size();i++){
-            int* bound=lower_bound(&*lines.begin(),&*lines.end(),_errors[i].startPos);
+            // Can't dereference vector end(), so use rbegin() for last item -jb
+            int* bound=lower_bound(&*lines.begin(),&*lines.rbegin(),_errors[i].startPos);
             int line=bound-&*lines.begin()+1;
             //int column=_errors[i].startPos-lines[line-1];
             sstream<<"  Line "<<line<<": "<<_errors[i].error<<std::endl;
