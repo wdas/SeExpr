@@ -7,7 +7,7 @@ macro(BuildParserScanner FLEX_L_PREFIX BISON_Y_PREFIX PARSER_PREFIX GENERATED_CP
 
   if((BISON_EXE STREQUAL "BISON_EXE-NOTFOUND") OR (FLEX_EXE STREQUAL "FLEX_EXE-NOTFOUND")  OR (SED_EXE STREQUAL "SED_EXE-NOTFOUND"))
     # don't have flex/bison/sed, use pregenerated versions
-    set (${GENERATED_CPPS} generated/SeExprParser.cpp generated/SeExprParserLex.cpp )
+    set (${GENERATED_CPPS} generated/${BISON_Y_PREFIX}.cpp generated/${FLEX_L_PREFIX}.cpp )
   else ((BISON_EXE STREQUAL "BISON_EXE-NOTFOUND") OR (FLEX_EXE STREQUAL "FLEX_EXE-NOTFOUND")  OR (SED_EXE STREQUAL "SED_EXE-NOTFOUND"))
     ## build the parser from the flex/yacc sources
     
