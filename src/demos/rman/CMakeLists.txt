@@ -41,7 +41,7 @@ link_directories($ENV{RMANTREE}/lib)
 add_library(SeExprOp SHARED seop.cpp)
 target_link_libraries(SeExprOp prman ${SEEXPR_LIBRARIES})
 FILE(GLOB ribs "*.rib")
-install (TARGETS SeExprOp DESTINATION prman)
+install (TARGETS SeExprOp DESTINATION ${CMAKE_INSTALL_LIBDIR}/prman)
 
 foreach (SHADERSOURCE testdisp testse)
     ADD_CUSTOM_COMMAND(
@@ -52,7 +52,7 @@ foreach (SHADERSOURCE testdisp testse)
       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${SHADERSOURCE}.sl SeExprOp
     )
     add_custom_target(shader-${SHADERSOURCE} ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${SHADERSOURCE}.slo)
-    INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/${SHADERSOURCE}.slo DESTINATION prman)
+    INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/${SHADERSOURCE}.slo DESTINATION ${CMAKE_INSTALL_LIBDIR}/prman)
 endforeach(SHADERSOURCE)
-install (FILES ${ribs} DESTINATION prman)
+install (FILES ${ribs} DESTINATION ${CMAKE_INSTALL_LIBDIR}/prman)
 endif(NOT ${RMAN_SET})
