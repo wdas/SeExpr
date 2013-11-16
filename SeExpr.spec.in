@@ -74,7 +74,11 @@ rm -rf %{buildroot}
 %files devel
 %defattr(-,root,root,-)
 %{_prefix}/include/*
-%{_libdir}/*.a
+%{_libdir}/libSeExpr.*
+%{_libdir}/pkgconfig/SeExpr.pc
+%{_libdir}/prman/*.rib
+%{_libdir}/prman/*.slo
+%{_libdir}/prman/*.so
 %{_datadir}/test
 
 %files all
