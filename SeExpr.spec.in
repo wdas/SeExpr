@@ -49,15 +49,7 @@ Development headers and static libraries
 %build
 
 %install
-make SKIP_RELEASE_FILE=YesPlease DESTDIR=%{buildroot} prefix=%{_prefix} install
-
-# Move $prefix/demo to $prefix/share/SeExpr/demo
-%{__mkdir_p} %{buildroot}%{_datadir}/SeExpr
-mv %{buildroot}%{_prefix}/demo %{buildroot}%{_prefix}/share/SeExpr
-
-# Move $prefix/test to $prefix/share/test/SeExpr
-%{__mkdir_p} %{buildroot}%{_datadir}/test
-mv %{buildroot}%{_prefix}/test %{buildroot}%{_datadir}/test/SeExpr
+make DESTDIR=%{buildroot} prefix=%{_prefix} install
 
 %clean
 rm -rf %{buildroot}

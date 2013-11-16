@@ -5,9 +5,6 @@ libdir ?= $(shell pf-makevar lib)
 ## Temporary staging directory
 # DESTDIR =
 
-## Avoid creating .release.SeExpr
-# SKIP_RELEASE_FILE =
-
 # Specified by `git make-pkg` when building .pkg files
 # mac_pkg =
 
@@ -22,10 +19,5 @@ clean:
 
 install: all
 	cd build; make install
-	if test -z "$(SKIP_RELEASE_FILE)" && test -z "$(mac_pkg)"; then \
-		echo "lib64" > $(DESTDIR)$(prefix)/.release.SeExpr && \
-		echo "share" >> $(DESTDIR)$(prefix)/.release.SeExpr && \
-		echo "include" >> $(DESTDIR)$(prefix)/.release.SeExpr; \
-	fi
 	pkgconfig-gen --name SeExpr --desc 'SeExpr Library' \
 		--generate --destdir '$(DESTDIR)' --prefix $(prefix) --libdir $(libdir)
