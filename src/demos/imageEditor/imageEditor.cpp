@@ -162,9 +162,15 @@ ImageEditorDialog::ImageEditorDialog(QWidget *parent)
     // Expression browser
     SeExprEdBrowser *browser = new SeExprEdBrowser(0, _editor);
 
-    // Set path of config.txt file containing example expressions 
-    browser->setSearchPath("imageEditor", "./src/demos/imageEditor");
-    browser->getExpressionDirs();
+    // Add user expressions, example expressions to browser list.
+    browser->addUserExpressionPath("imageEditor");
+#ifdef IMAGE_EDITOR_ROOT
+    std::string exPathStr = IMAGE_EDITOR_ROOT;
+    exPathStr += "/expressions";
+    browser->addPath("Examples", exPathStr);
+#else
+    browser->addPath("Examples", "./src/demos/imageEditor");
+#endif
     browser->update();
 
     // Create apply button and connect to image preview.

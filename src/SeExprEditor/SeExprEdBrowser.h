@@ -63,6 +63,7 @@ public:
     void addPath(const std::string& name,const std::string& path);
     std::string getSelectedPath();
     void selectPath(const char * path);
+    void addUserExpressionPath(const std::string &context);
     bool getExpressionDirs();
     bool getExpressionDirs(const std::string& context);
     void setSearchPath(const QString& context, const QString& path);
