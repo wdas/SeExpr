@@ -28,12 +28,10 @@
 #else
 #define UNUSED(x) (void)(x)
 #endif
+#include "SePlatform.h"
 #include "SeExprSpecType.h"
 #include "SeExprEdEditable.h"
 
-#ifdef _MSC_VER
-#define snprintf _snprintf
-#endif
 
 /******************
  lexer declarations

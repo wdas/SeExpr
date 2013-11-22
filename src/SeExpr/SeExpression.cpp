@@ -127,6 +127,7 @@ SeExpression::prep() const
     parseIfNeeded();
     if (_parseTree && !_parseTree->prep(wantVec())) {
         // build line lookup table
+        // contains position of last char in line, from the very beginning
         std::vector<int> lines;
         const char* start=_expression.c_str();
         const char* p=_expression.c_str();
@@ -139,9 +140,13 @@ SeExpression::prep() const
         std::stringstream sstream;
         sstream<<"Prep errors:"<<std::endl;
         for(unsigned int i=0;i<_errors.size();i++){
-            // Can't dereference vector end(), so use rbegin() for last item -jb
-            int* bound=lower_bound(&*lines.begin(),&*lines.rbegin(),_errors[i].startPos);
-            int line=bound-&*lines.begin()+1;
+            // Use the char position in _errors to find which line has the
+            // start of the error.  Line number is found using address
+            // arithmetic.
+            std::vector<int>::iterator bound=lower_bound(lines.begin(),
+                                                         lines.end(),
+                                                         _errors[i].startPos);
+            int line=&*bound-&*lines.begin()+1;
             //int column=_errors[i].startPos-lines[line-1];
             sstream<<"  Line "<<line<<": "<<_errors[i].error<<std::endl;
         }

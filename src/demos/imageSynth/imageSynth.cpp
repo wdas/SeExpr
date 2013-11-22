@@ -137,7 +137,7 @@ int main(int argc,char *argv[]){
     png_set_rows(png_ptr,info_ptr,(png_byte**)ptrs.data());
     png_write_png(png_ptr,info_ptr,PNG_TRANSFORM_IDENTITY,0);
     
-    for(size_t i=0;i<ptrs.size();i++) free(ptrs[i]);
+    delete [] image;
     ptrs.clear();
 
     fclose(fp);
