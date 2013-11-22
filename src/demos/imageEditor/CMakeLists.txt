@@ -14,6 +14,10 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
+# Set application root dir for use inside the source code.
+cmake_policy(SET CMP0005 NEW)
+add_definitions(-DIMAGE_EDITOR_ROOT="${CMAKE_INSTALL_PREFIX}")
+
 find_package(Qt4 COMPONENTS QtCore QtGui) # find and setup Qt4 for this project
 if(QT4_FOUND)
     set(imageEditor_MOC_HDRS ImageEditorDialog.h)
@@ -36,6 +40,5 @@ IF(PNG_FOUND)
     install(TARGETS imageEditor DESTINATION bin)
 ENDIF(PNG_FOUND)
 
-INSTALL( FILES config.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
-INSTALL( FILES fbm.se noisecolor1.se noisecolor2.se noise.se raytrace.se sinc.se DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/expressions/ )
+INSTALL( FILES fbm.se noisecolor1.se noisecolor2.se noise.se raytrace.se sinc.se DESTINATION ${CMAKE_INSTALL_PREFIX}/expressions/ )
 

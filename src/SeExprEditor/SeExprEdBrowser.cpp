@@ -446,6 +446,18 @@ void SeExprEdBrowser::expandAll()
     treeNew->expandAll();
 }
 
+// Location for storing user's expression files
+void SeExprEdBrowser::addUserExpressionPath(const std::string &context)
+{
+    char* homepath = getenv("HOME");
+    if(homepath){
+        std::string path= std::string(homepath) + "/" + context + "/expressions/";
+        if(QDir(QString(path.c_str())).exists()){
+            _userExprDir=path;
+            addPath("My Expressions",path);
+        }
+    }
+}
 
 /*
  * NOTE: The hard-coded paint3d assumptions can be removed once
@@ -554,15 +566,7 @@ bool SeExprEdBrowser::getExpressionDirs()
             }
         }
     }
-    /* TODO refactor! */
-    char* homepath = getenv("HOME");
-    if(homepath){
-        std::string path= std::string(homepath) + "/" + context + "/expressions/";
-        if(QDir(QString(path.c_str())).exists()){
-            _userExprDir=path;
-            addPath("My Expressions",path);
-        }
-    }
+    addUserExpressionPath(context);
     update();
     return enableLocal;
 }
