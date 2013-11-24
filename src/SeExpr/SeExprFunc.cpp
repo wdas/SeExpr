@@ -41,6 +41,8 @@
 #include <dirent.h>
 #endif
 
+
+
 #include "SeExpression.h"
 #include "SeExprFunc.h"
 #include "SeExprNode.h"
@@ -185,7 +187,7 @@ SeExprFunc::getDocString(const char* functionName)
 
 #ifndef SEEXPR_WIN32
 
-#ifdef __APPLE__
+#if defined(__APPLE__) && !defined(__MAC_10_9)
 static int MatchPluginName(struct dirent* dir)
 #else
 static int MatchPluginName(const struct dirent* dir)
