@@ -19,7 +19,9 @@ cmake_policy(SET CMP0005 NEW)
 add_definitions(-DIMAGE_EDITOR_ROOT="${CMAKE_INSTALL_PREFIX}")
 
 find_package(Qt4 COMPONENTS QtCore QtGui) # find and setup Qt4 for this project
-if(QT4_FOUND)
+find_package(PNG)
+
+if(QT4_FOUND AND PNG_FOUND)
     set(imageEditor_MOC_HDRS ImageEditorDialog.h)
     set(imageEditor_CPPS imageEditor.cpp)
     qt4_wrap_cpp(imageEditor_MOC_SRCS ${imageEditor_MOC_HDRS})
@@ -31,14 +33,14 @@ if(QT4_FOUND)
     target_link_libraries(imageEditor ${QT_QTGUI_LIBRARY})
     target_link_libraries(imageEditor ${SEEXPR_LIBRARIES})
     target_link_libraries(imageEditor ${SEEXPR_EDITOR_LIBRARIES})
-endif(QT4_FOUND)
 
-FIND_PACKAGE(PNG)
-IF(PNG_FOUND)
     INCLUDE_DIRECTORIES(${PNG_INCLUDE_DIR})
     TARGET_LINK_LIBRARIES(imageEditor ${PNG_LIBRARIES})
     install(TARGETS imageEditor DESTINATION bin)
-ENDIF(PNG_FOUND)
+
+
+endif(QT4_FOUND)
+
 
 INSTALL( FILES fbm.se noisecolor1.se noisecolor2.se noise.se raytrace.se sinc.se DESTINATION ${CMAKE_INSTALL_PREFIX}/expressions/ )
 

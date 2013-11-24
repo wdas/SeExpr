@@ -14,6 +14,7 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
+find_package(OpenGL)
 find_package(Qt4 COMPONENTS QtCore QtGui QtOpenGL) # find and setup Qt4 for this project
 if(QT4_FOUND)
 
@@ -47,6 +48,8 @@ ENDIF(WIN32)
     target_link_libraries(SeExprEditor ${QT_QTGUI_LIBRARY})
     target_link_libraries(SeExprEditor ${QT_QTOPENGL_LIBRARY})
     target_link_libraries(SeExprEditor ${QT_QTOPENGL_LIBRARY})
+    target_link_libraries(SeExprEditor ${GLUT_LIBRARY} ${OPENGL_LIBRARY})
+
 IF(WIN32)
     target_link_libraries(SeExprEditor opengl32)
 ENDIF(WIN32)
