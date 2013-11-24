@@ -26,7 +26,8 @@ SeExprEdPopupDocumentation::SeExprEdPopupDocumentation(QWidget* parent,const QPo
     setLayout(layout);
     layout->addWidget(label);
 
-    setWindowFlags(Qt::Window |  Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::CustomizeWindowHint |Qt::X11BypassWindowManagerHint );
+    setWindowFlags(Qt::Window |  Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::CustomizeWindowHint |Qt::X11BypassWindowManagerHint);
+    setAttribute(Qt::WA_ShowWithoutActivating);
     setFocusPolicy(Qt::NoFocus);
     move(placecr);
     raise();
