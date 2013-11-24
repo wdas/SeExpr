@@ -1,13 +1,31 @@
-/*! \mainpage SeExpr
+/*! 
+ * \cond
+ * Copyright Disney Enterprises, Inc.  All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License
+ * and the following modification to it: Section 6 Trademarks.
+ * deleted and replaced with:
+ *
+ * 6. Trademarks. This License does not grant permission to use the
+ * trade names, trademarks, service marks, or product names of the
+ * Licensor and its affiliates, except as required for reproducing
+ * the content of the NOTICE file.
+ *
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * \endcond
+ * \mainpage SeExpr
  * \image html seexprlogo.png
  * \section maindoc User and Programmer Tutorials
  *  - \subpage userdoc -  User Documentation
  *  - \subpage plugins -  Custom Function Plugins
- * \section demos Demo Appliactions
+ * \section demos Demo Applications
  *     - \subpage mytut (code at asciiGraph.cpp)
- *     - Image Synthesizer  (at imageSynth.cpp)
- *     - SeGrapher Qt Grapher (at demos/segraph)
- *     - Renderman Shadeop (at demos/rman)
+ *     - \subpage uitut (code starting at imageEditor.cpp)
+ *     - Image Synthesizer  (code at imageSynth.cpp)
+ *     - SeGrapher Qt Grapher (code starting at segraph.cpp)
+ *     - Renderman Shadeop (code at seop.cpp)
  * \section mainapi Main API pages
  *  - SeExpression - Main class to parse a single expression
  *  - SeExprVarRef - Binding of an external variable to an expression context.
@@ -30,6 +48,10 @@
 /**
 \page mytut Simple ASCII Grapher Tutorial
 \htmlinclude tutorial.txt
+*/
+/**
+\page uitut Simple Image Editor UI Tutorial
+\htmlinclude uitutorial.txt
 */
 /**
 \page userdoc User Documentation

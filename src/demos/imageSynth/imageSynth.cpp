@@ -1,41 +1,24 @@
 /*
- SEEXPR SOFTWARE
- Copyright 2011 Disney Enterprises, Inc. All rights reserved
- 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are
- met:
- 
- * Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- 
- * Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in
- the documentation and/or other materials provided with the
- distribution.
- 
- * The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
- Studios" or the names of its contributors may NOT be used to
- endorse or promote products derived from this software without
- specific prior written permission from Walt Disney Pictures.
- 
- Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
- CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
- BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
- FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
- IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Copyright Disney Enterprises, Inc.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
+*
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
 */
 /**
    @file imageSynth.cpp
 */
 #include <map>
+#include <vector>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -146,12 +129,16 @@ int main(int argc,char *argv[]){
     png_init_io(png_ptr,fp);
     int color_type=PNG_COLOR_TYPE_RGBA;
     png_set_IHDR(png_ptr,info_ptr,width,height,8,color_type,PNG_INTERLACE_NONE,PNG_COMPRESSION_TYPE_DEFAULT,PNG_FILTER_TYPE_DEFAULT);
-    const unsigned char *ptrs[height];
+    // Use vector instead of const array to fix Windows compile error -jb
+    std::vector<unsigned char*> ptrs; 
     for(int i=0;i<height;i++){
-        ptrs[i]=&image[width*i*4];
+        ptrs.push_back(&image[width*i*4]);
     }
-    png_set_rows(png_ptr,info_ptr,(png_byte**)ptrs);
+    png_set_rows(png_ptr,info_ptr,(png_byte**)ptrs.data());
     png_write_png(png_ptr,info_ptr,PNG_TRANSFORM_IDENTITY,0);
     
+    delete [] image;
+    ptrs.clear();
+
     fclose(fp);
 }

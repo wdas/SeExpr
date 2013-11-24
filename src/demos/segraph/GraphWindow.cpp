@@ -1,45 +1,30 @@
 /*
- SEEXPR SOFTWARE
- Copyright 2011 Disney Enterprises, Inc. All rights reserved
- 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are
- met:
- 
- * Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- 
- * Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in
- the documentation and/or other materials provided with the
- distribution.
- 
- * The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
- Studios" or the names of its contributors may NOT be used to
- endorse or promote products derived from this software without
- specific prior written permission from Walt Disney Pictures.
- 
- Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
- CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
- BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
- FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
- IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Copyright Disney Enterprises, Inc.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
+*
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
 */
 #include "GraphWindow.h"
 #include <QtCore/QTimer>
 #include <QtGui/QFormLayout>
+#include <SeExprEdShortEdit.h>
 
 GraphWindow::
 GraphWindow(QWidget* parent)
-    :QFrame(parent),time(0)
+    :QFrame(parent),time(0),animating(false)
 {
+    variables["t"].val=0.;
+
     //#########################################
     // Layout framework
     //#########################################
@@ -51,33 +36,51 @@ GraphWindow(QWidget* parent)
     status=new QStatusBar();
     mainvbox->addWidget(status);
 
-    // Function model
-    functions=new Functions();
 
     //#########################################
     // Make our graph
     //#########################################
-    graph=new Graph(functions,status);
-    graph->setMinimumWidth(320);
-    graph->setMinimumHeight(320);
+    graph=new Graph(status,_exprs);
+    graph->setMinimumWidth(640);
+    graph->setMinimumHeight(480);
     layout->addWidget(graph,2);
 
     //#########################################
     // Make button bar and function list
     //#########################################
     QVBoxLayout* rightLayout=new QVBoxLayout();
+
     layout->addLayout(rightLayout,1);
     
     // Make an entry for new functions
-    edit=new QLineEdit();
-    rightLayout->addWidget(new QLabel("f(x)="),0);
-    rightLayout->addWidget(edit,0);
+
+    rightLayout->setMargin(0);
+    for(int i=0;i<5;i++){
+        SeExprEdShortEdit* shortEdit=new SeExprEdShortEdit(0);
+        shortEdit->setMinimumWidth(512);
+        rightLayout->addWidget(shortEdit);
+        QObject::connect(shortEdit,SIGNAL(exprChanged()),this,SLOT(exprsEdited()));
+        _edits.push_back(shortEdit);
+        _exprs.push_back(new GrapherExpr("",variables));
+    }
+
+    // set default exprs
+
+    _edits[0]->setExpressionString("a=0.34483; #-10.0,10.0\nb=0.41379; #-10.0,10.0\nc=-0.34482; #-10.0,10.0\na*x^2+b*x+c");
+
+    _exprs[1]->setExpr("frequency=8.32724; # 0.1, 10.0\
+amp = -4; # 0.0, 10.0\
+fbm(frequency*x)*amp\
+");
+
+    _exprs[2]->setExpr("""frequency=8.32724; # 0.1, 10.0\
+amp = 1; # 0.0, 10.0\
+sin(frequency*x)*amp-5\
+");
+
+    rightLayout->addStretch(1);
 
     // make a table view that is driven by functions
-    table=new QTableView;
-    table->setModel(functions);
-    table->resizeColumnToContents(0);
-    rightLayout->addWidget(table,2);
 
     // Make buttons for computing roots
     rootbutton=new QPushButton("Find Root");
@@ -98,13 +101,7 @@ GraphWindow(QWidget* parent)
     connect(maxbutton,SIGNAL(clicked()),SLOT(findRootOrExtrema()));
 
     // Connect edit box to add new function
-    connect(edit,SIGNAL(editingFinished()),SLOT(addNewFunction()));
     // If data,selection,or layout changes in model then redraw graph
-    connect(functions,SIGNAL(dataChanged(const QModelIndex&,const QModelIndex&)),graph,SLOT(redraw()));
-    connect(functions,SIGNAL(layoutChanged()),graph,SLOT(redraw()));
-    connect(table->selectionModel(),SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),
-        SLOT(selectionChanged(const QItemSelection&,const QItemSelection&)));
-
     QTimer::singleShot(1,this,SLOT(updateTime()));
 
 }
@@ -112,18 +109,7 @@ GraphWindow(QWidget* parent)
 GraphWindow::
 ~GraphWindow()
 {
-    delete functions;
-}
-
-void GraphWindow::
-addNewFunction()
-{
-    QString text=edit->text();
-    if(text!=QString(""))
-        functions->addFunction(text);
-    edit->setText("");
-    status->showMessage("");
-    table->repaint();
+    for(unsigned int i=0;i<_exprs.size();i++) delete _exprs[i];
 }
 
 void GraphWindow::
@@ -136,7 +122,6 @@ findRootOrExtrema()
     else if(sender==maxbutton) code=Graph::FIND_MAX;
 
     std::vector<int> selected;
-    functions->getSelected(selected);
     if(selected.size() != 1){
         status->showMessage("You need to select exactly 1 function");
     }else{
@@ -147,28 +132,25 @@ findRootOrExtrema()
 }
 
 void GraphWindow::
-selectionChanged(const QItemSelection& selected,const QItemSelection& unselected)
+updateTime()
 {
-    status->showMessage("");
-    QModelIndexList removeList=unselected.indexes();
-    for(int i=0;i<removeList.size();i++){
-        functions->setSelected(removeList[i].row(),false);
+    if(animating){
+        time+=1./24;
+        if(time>1) time=0;
+        timeSlider->setValue(time*24);
+        variables["t"].val=time;
+        graph->repaint();
     }
-    QModelIndexList addList=selected.indexes();
-    for(int i=0;i<addList.size();i++){
-        functions->setSelected(addList[i].row(),true);
-    }
-
-    graph->repaint();
+    QTimer::singleShot(50.,this,SLOT(updateTime()));
 }
 
 void GraphWindow::
-updateTime()
+exprsEdited()
 {
-    time+=1./24;
-    if(time>1) time=0;
-    functions->setVar("t",time);
-    timeSlider->setValue(time*24);
+    for(size_t i=0;i<_edits.size();i++){
+        SeExprEdShortEdit& edit=*_edits[i];
+        _exprs[i]->setExpr(edit.getExpressionString());
+        _exprs[i]->isValid();
+    }
     graph->repaint();
-    QTimer::singleShot(50.,this,SLOT(updateTime()));
 }
