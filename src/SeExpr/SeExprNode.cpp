@@ -45,7 +45,7 @@
 */
 
 #ifndef MAKEDEPEND
-#include <math.h>
+#include <cmath>
 #endif
 #include "SeVec3d.h"
 #include "SeExpression.h"
@@ -630,7 +630,6 @@ SeExprModNode::eval(SeVec3d& result) const
     }
 }
 
-
 void
 SeExprExpNode::eval(SeVec3d& result) const
 {
@@ -641,15 +640,17 @@ SeExprExpNode::eval(SeVec3d& result) const
     child1->eval(b);
 
     if (!_isVec) {
-	result[0] = pow(a[0], b[0]);
+        if(a[0]<0 && std::floor(b[0])!=b[0]) a[0]=0.;
+	result[0] = std::pow(a[0], b[0]);
     }
     else {
 	// at least one child is a vector and the result is too
 	if (!child0->isVec()) a[1] = a[2] = a[0];
 	if (!child1->isVec()) b[1] = b[2] = b[0];
-	result[0] = pow(a[0], b[0]);
-	result[1] = pow(a[1], b[1]);
-	result[2] = pow(a[2], b[2]);
+        for(int k=0;k<3;k++) if(a[k]<0 && std::floor(b[k])!=b[k]) a[k]=0.;
+        result[0] = std::pow(a[0], b[0]);
+        result[1] = std::pow(a[1], b[1]);
+        result[2] = std::pow(a[2], b[2]);
     }
 }
 

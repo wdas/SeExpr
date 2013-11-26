@@ -17,9 +17,9 @@
 
 #define __STDC_LIMIT_MACROS
 #include <cassert>
-#include <math.h>
+#include <cmath>
 #include <stdlib.h>
-#include <limits.h>
+#include <limits>
 #include <algorithm>
 #include <cfloat>
 #include "SeExprFunc.h"
@@ -109,25 +109,27 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
 
     double gamma(double x, double g)
     {
-	return pow(x, 1/g);
+	return std::pow(std::max(x, 0.0), 1.0/g);
     }
     static const char* gamma_docstring="float gamma(float x, float g)\nGamma correction of x with gamma factor g";
 
 
     double bias(double x, double b)
     {
-	static double C = 1/log(0.5);
-	return pow(x, log(b) * C);
+	const double C = 1.0/std::log(0.5);
+	return std::pow(std::max(x, 0.0), std::log(b) * C);
     }
     static const char* bias_docstring="float bias(float x, float g)\nVariation of gamma where values less than 0.5 pull the curve down\nand values greater than 0.5 pull the curve up\npow(x,log(b)/log(0.5))";
 
 
     double contrast(double x, double c)
     {
+        if(c <= 0) return .5; // avoid log(0)
+        x = clamp(x, 0.0, 1.0);
 	if (x < 0.5) return     0.5 * bias(1-c,     2*x);
 	else	 return 1 - 0.5 * bias(1-c, 2 - 2*x);
     }
-    static const char* contrast_docstring="float contrast(float x,float x)\nAdjust the contrast.&nbsp; For c from 0 to 0.5, the contrast is decreased.&nbsp; For c &gt; 0.5, the contrast is increased.";
+    static const char* contrast_docstring="float contrast(float x,float x)\nAdjust the contrast.&nbsp; For c from 0 to 0.5, the contrast is decreased.&nbsp; For c &gt; 0.5, the contrast is increased.\nNOTE: x values outside the range [0,1] are clamped.";
 
 
     double boxstep(double x, double a)
@@ -836,7 +838,7 @@ static const char* vnoise_docstring=
 	SeVec3d thiscell(floor(p[0])+0.5, floor(p[1])+0.5,
 			 floor(p[2])+0.5);
 
-	f1 = 1000;
+	f1 = std::numeric_limits<double>::max();
 	SeVec3d* pos = voronoi_points(data, thiscell, jitter);
 	SeVec3d* end = pos + 27;
 
@@ -858,7 +860,8 @@ static const char* vnoise_docstring=
 	// from Advanced Renderman, page 258
 	SeVec3d thiscell(floor(p[0])+0.5, floor(p[1])+0.5,
 			 floor(p[2])+0.5);
-	f1 = f2 = 1000;
+	f1 = f2 = std::numeric_limits<double>::max();
+
 	SeVec3d* pos = voronoi_points(data, thiscell, jitter);
 	SeVec3d* end = pos + 27;
 
@@ -931,7 +934,8 @@ static const char* vnoise_docstring=
     }
     const static char* voronoi_docstring=
         "float voronoi(vector v, int type=1,float jitter=0.5, float fbmScale=0, int fbmOctaves=4,float fbmLacunarity=2, float fbmGain=.5)\n"
-        "voronoi is a cellular noise pattern. It is a jittered variant of cellnoise.";
+        "voronoi is a cellular noise pattern. It is a jittered variant of cellnoise.\n"
+        "NOTE: This does not necessarily return [0,1] value, because it can return arbitrary distance.";
 
 
     SeVec3d cvoronoiFn(VoronoiPointData& data, int n, const SeVec3d* args)
