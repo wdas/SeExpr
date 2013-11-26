@@ -1,54 +1,34 @@
 /*
-  SEEXPR SOFTWARE
-  Copyright 2011 Disney Enterprises, Inc. All rights reserved
- 
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions are
-  met:
- 
-  * Redistributions of source code must retain the above copyright
-  notice, this list of conditions and the following disclaimer.
- 
-  * Redistributions in binary form must reproduce the above copyright
-  notice, this list of conditions and the following disclaimer in
-  the documentation and/or other materials provided with the
-  distribution.
- 
-  * The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
-  Studios" or the names of its contributors may NOT be used to
-  endorse or promote products derived from this software without
-  specific prior written permission from Walt Disney Pictures.
- 
-  Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
-  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
-  BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
-  FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
-  IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
-  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
-  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Copyright Disney Enterprises, Inc.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
+*
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
 */
 #include "Graph.h"
+#include "SeExprMacros.h"
 #ifndef SEEXPR_WIN32
 #  include <fenv.h>
 #endif
 #include <cmath>
-Graph::
-Graph(Functions* functions,QStatusBar* status)
-    :funcs(*functions),operationCode(NONE),rootShow(false),minShow(false),dragging(false),scaling(false),
-    status(status)
+Graph::Graph(QStatusBar* status,std::vector<GrapherExpr*>& exprs)
+    :exprs(exprs),operationCode(NONE),rootShow(false),minShow(false),
+    dragging(false),scaling(false),status(status)
 {
     // use standard window...
     xmin=-10;xmax=10;
     ymin=-10;ymax=10;
     // use base 2 log for hash marks and grid
     logBase=2.;
-    funcs.addFunction("xmod=x-2*PI*t;sin(xmod)");
-    funcs.addFunction("xmod=x-2*PI*t;xmod-xmod*xmod*xmod/6");
 }
 
 float Graph::
@@ -108,7 +88,7 @@ paintEvent(QPaintEvent */*event*/)
     float powerx=(int)floor(log(xmax-xmin)/log(logBase));
     float powery=(int)floor(log(ymax-ymin)/log(logBase));
 
-    int powerOffsetSmall=5;
+    int powerOffsetSmall=4;
     int powerOffsetBig=1;
     drawX(painter,powerx-powerOffsetSmall);
     drawY(painter,powery-powerOffsetSmall);
@@ -142,8 +122,12 @@ paintEvent(QPaintEvent */*event*/)
 
 
     painter.setRenderHints(QPainter::Antialiasing);
-    for(int i=0;i<funcs.rowCount(QModelIndex());i++){
-        plot(painter,i);
+    //for(int i=0;i<funcs.rowCount(QModelIndex());i++){
+    //    plot(painter,i);
+    //}
+
+    for(unsigned int i=0;i<exprs.size();i++){
+        plotNew(painter,i);
     }
 
     if(rootShow || minShow){
@@ -175,25 +159,29 @@ paintEvent(QPaintEvent */*event*/)
 
 }
 
+
 void Graph::
-plot(QPainter& painter,int funcId)
+plotNew(QPainter& painter,int funcId)
 {
-    if(!funcs.isValid(funcId)) return;
+    GrapherExpr& expr=*exprs[funcId];
+    if(!expr.isValid()) return;
 
     QPen curvepen;
-    QColor color=funcs.getColor(funcId);
+    QColor color=QColor(255,0,0); // funcs.getColor(funcId);
     curvepen.setColor(color);
+#if 0
     if(funcs.isSelected(funcId))
         curvepen.setWidth(4);
     else
+#endif
         curvepen.setWidth(2);
-
     
     float xold=xmin;
     QPainterPath path;
     bool first=false;
 
-    float yold=funcs.eval(funcId,xold);
+    expr.setX(xold);
+    float yold=expr.evaluate()[0];
     float xd,yd;
 
     const bool error=false;//isnan(yold);
@@ -211,7 +199,8 @@ plot(QPainter& painter,int funcId)
     while(xold<xmax){
         bool disjoint=false;
         float x=xold+xrate;
-        float y=funcs.eval(funcId,x);
+        expr.setX(x);
+        float y=expr.evaluate()[0];
         if(!error){
             if(fabs(y-yold)>y_per_pixel*100 && xrate>.1*x_per_pixel){xrate/=2;continue;}
             if(fabs(y-yold)<y_per_pixel*5 && xrate<x_per_pixel){xrate*=2;}
@@ -335,6 +324,7 @@ scheduleRoot(const OperationCode operationCode_in,const int functionIndex_in)
 void Graph::
 solveRoot(const int function,double xInitial)
 {
+#if 0
     double x0=xInitial;
     double y_x0=funcs.eval(function,x0);
     double x1=xInitial+1e-5;
@@ -351,6 +341,10 @@ solveRoot(const int function,double xInitial)
     minShow=false;
     rootShow=true;
     repaint();
+#else
+    UNUSED(function);
+    UNUSED(xInitial);
+#endif
 }
 
 
@@ -364,6 +358,7 @@ golden(const int function,double xmin,double xcenter,double xmax,bool solveMax,d
         
     if(fabs(xmax-xmin)<1e-5*(fabs(xnew)+fabs(xcenter))) return (xmax+xmin)/2;
 
+#if 0
     double f_xcenter=funcs.eval(function,xcenter);
     double f_xnew=funcs.eval(function,xnew);
     if(solveMax){
@@ -373,12 +368,18 @@ golden(const int function,double xmin,double xcenter,double xmax,bool solveMax,d
 
     if(f_xnew<f_xcenter) return golden(function,xcenter,xnew,xmax,solveMax,tolerance);
     else return golden(function,xnew,xcenter,xmin,solveMax,tolerance);
-
+#else
+    UNUSED(function);
+    UNUSED(solveMax);
+    UNUSED(tolerance);
+#endif
+    return 0;
 }
 
 void Graph::
 solveMin(const int function,double xmin,double xmax,bool solveMax)
 {
+#if 0
     if(xmax<xmin) std::swap(xmin,xmax);
     double xsolve=golden(function,xmin,.5*(xmin+xmax),xmax,solveMax,1e-5);
     rootX=xsolve;
@@ -386,6 +387,12 @@ solveMin(const int function,double xmin,double xmax,bool solveMax)
     rootShow=false;
     minShow=true;
     repaint();
+#else
+    UNUSED(function);
+    UNUSED(xmin);
+    UNUSED(xmax);
+    UNUSED(solveMax);
+#endif
 }
 
 void Graph::
