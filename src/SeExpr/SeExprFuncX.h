@@ -62,7 +62,7 @@ public:
     {}
 
     /** prep the expression by doing all type checking argument checking, etc. */
-    virtual SeExprType prep(SeExprFuncNode* node, bool scalarWanted, SeExprVarEnv & env) const;
+    virtual SeExprType prep(SeExprFuncNode* node, bool scalarWanted, SeExprVarEnv & env) const=0;
     virtual SeExprType type() const {return _type;}
 
     /** evaluate the expression. the given node is where in the parse tree
@@ -119,6 +119,18 @@ public:
 
 private:
     static int EvalOp(int* opData,double* fp,char** c);
+};
+
+class SeExprFuncLocal:public SeExprFuncX{
+    SeExprFuncLocal()
+    :SeExprFuncX(true)
+    {}
+    
+        /** prep the expression by doing all type checking argument checking, etc. */
+    virtual SeExprType prep(SeExprFuncNode* node, bool scalarWanted, SeExprVarEnv & env) const;
+    //! Build an interpreter to evaluate the expression
+    virtual int buildInterpreter(const SeExprFuncNode* node,SeInterpreter* interpreter) const;
+
 };
 
 #endif

@@ -230,12 +230,12 @@ formalTypeListOptional:
     ;
 
 formalTypeList:
-      typeDeclare VAR           { $$ = NODE(@$.first_column, @$.last_column, Node);
+      typeDeclare NAME           { $$ = NODE(@$.first_column, @$.last_column, Node);
                                   SeExprType type = SeExprType($1.type, $1.dim, $1.lifetime);
                                   SeExprNode* varNode = NODE2(@$.first_column, @$.last_column, VarNode, $2, type);
                                   $$->addChild(varNode);
                                   free($2); }
-    | formalTypeList ',' typeDeclare VAR
+    | formalTypeList ',' typeDeclare NAME
                                 { $$ = $1;
                                   SeExprType type = SeExprType($3.type, $3.dim, $3.lifetime);
                                   SeExprNode* varNode = NODE2(@3.first_column, @4.last_column, VarNode, $4, type);

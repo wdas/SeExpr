@@ -273,7 +273,6 @@ struct CompareEqOp{
 template<char op>
 struct CompareEqOp<op,3>{
     static int f(int* opData,double* fp,char** c){
-        bool result=true;
         bool eq=fp[opData[0]]==fp[opData[1]] && 
             fp[opData[0]+1]==fp[opData[1]+1] && 
             fp[opData[0]+2]==fp[opData[1]+2];

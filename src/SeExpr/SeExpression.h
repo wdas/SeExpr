@@ -351,7 +351,7 @@ private:
 
     /* internal */ public:
 
-    //! add local function (this is for internal use)
+    //! add function evaluation (this is for internal use)
     void addFunc(const char* n) const { _funcs.insert(n); }
 
     ////! get local variable reference (this is for internal use)

@@ -51,6 +51,7 @@
 #include "SeInterpreter.h"
 
 class SeExprFunc;
+class SeExprFuncX;
 
 /** Expression node base class.  Always constructed by parser in SeExprParser.y
    Parse tree nodes - this is where the expression evaluation happens.
@@ -276,17 +277,15 @@ public:
         _name(name),
         _retTypeSet(true),
         _retType(retType),
-        _argTypes(),
-        _env()
-    {};
+        _argTypes()
+    {}
 
     SeExprPrototypeNode(const SeExpression * expr,
                         const std::string  & name)
         : SeExprNode(expr),
         _name(name),
         _retTypeSet(false),
-        _argTypes(),
-        _env()
+        _argTypes()
     {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
@@ -302,14 +301,13 @@ public:
 
     inline       SeExprType     argType(int i) const { return _argTypes[i]; };
     inline const SeExprNode   * arg    (int i) const { return child(i);     };
-    inline       SeExprVarEnv & env    ()            { return _env;         };
 
+    const std::string& name() const{return _name;}
  private:
     std::string             _name;
     bool                    _retTypeSet;
     SeExprType              _retType;
     std::vector<SeExprType> _argTypes;
-    SeExprVarEnv            _env;
 };
 
 

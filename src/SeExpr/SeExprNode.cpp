@@ -228,8 +228,13 @@ SeExprPrototypeNode::prep(bool wantScalar, SeExprVarEnv & env)
     if(_retTypeSet)
         checkCondition(returnType().isValid(), "Function has bad return type", error);
 
-    for(int c = 0; c < numChildren(); c++)
-        checkCondition(child(c)->type().isValid(), "Function has a parameter with a bad type", error);
+    _argTypes.clear();
+    for(int c = 0; c < numChildren(); c++){
+        SeExprType type=child(c)->type();
+        checkCondition(type.isValid(), "Function has a parameter with a bad type", error);
+        _argTypes.push_back(type);
+        env.add(((SeExprVarNode*)child(c))->name(), new SeExprLocalVar(type));
+    }
 
     if(error) setType(SeExprType().Error());
     else setType(SeExprType().None().Varying());
@@ -253,7 +258,7 @@ void
 SeExprPrototypeNode::addArgs(SeExprNode* surrogate)
 {
     SeExprNode::addChildren(surrogate);
-
+#if 0
     SeExprNode * child;
     SeExprType type;
     for(int i = 0; i < numChildren(); i++) {
@@ -263,6 +268,7 @@ SeExprPrototypeNode::addArgs(SeExprNode* surrogate)
         _argTypes.push_back(type);
         _env.add(((SeExprVarNode*)child)->name(), new SeExprLocalVar(type));
     }
+#endif
 }
 
 
@@ -274,8 +280,9 @@ SeExprLocalFunctionNode::prep(bool wantScalar, SeExprVarEnv & env)
 
     //prep prototype and check for errors 
     SeExprPrototypeNode* prototype=(SeExprPrototypeNode*)child(0);
-    SeExprVarEnv ignoredEnv;
-    if(!prototype->prep(false, ignoredEnv).isValid())
+    SeExprVarEnv functionEnv;
+    functionEnv.resetAndSetParent(&env);
+    if(!prototype->prep(false, functionEnv).isValid())
         error = true;
 
     // decide what return type we want
@@ -285,12 +292,14 @@ SeExprLocalFunctionNode::prep(bool wantScalar, SeExprVarEnv & env)
 
     //prep block and check for errors
     SeExprNode* block = child(1);
-    SeExprType blockType = block->prep(returnWantsScalar, prototype->env());
+    SeExprType blockType = block->prep(returnWantsScalar, functionEnv);
 
     if(!error && blockType.isValid()) {
         if(prototype->isReturnTypeSet())
             checkCondition(blockType==prototype->returnType(), "In function result of block does not match given return type", error);
         else prototype->setReturnType(blockType);
+        // register the function in the symbol table
+        env.addFunction(prototype->name(), this);
     } else error = true;
 
     return _type = error ? SeExprType().Error() : SeExprType().None().Varying();
@@ -564,6 +573,9 @@ SeExprFuncNode::prep(bool wantScalar, SeExprVarEnv & env)
     // find function using per-expression callback and then global table
     // TODO: put lookup of local functions here
     _func=0;
+    if(env.findFunction(_name)){
+        std::cerr<<"found local func"<<std::endl;
+    }
     if(!_func) _func = _expr->resolveFunc(_name);
     if(!_func) _func = SeExprFunc::lookup(_name);
 
@@ -582,7 +594,6 @@ SeExprFuncNode::prep(bool wantScalar, SeExprVarEnv & env)
 
     return _type;
 }
-
 
 int SeExprFuncNode::
 buildInterpreter(SeInterpreter* interpreter) const
@@ -603,7 +614,6 @@ checkArg(int arg,SeExprType type,SeExprVarEnv& env)
         }
         return true;
     }
-    std::cerr<<"FUN"<<std::endl;
     child(arg)->addError("Expected "+type.toString()+" for argument, got "+childType.toString());
     return false;
 }

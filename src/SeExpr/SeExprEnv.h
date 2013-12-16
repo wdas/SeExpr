@@ -44,6 +44,7 @@
 class SeExprVarRef;
 class SeExprLocalVar;
 class SeExprNode;
+class SeExprLocalFunctionNode;
 
 
 //! SeExprLocalVar reference
@@ -95,8 +96,11 @@ public:
 //! Variable scope for tracking variable lookup
 class SeExprVarEnv {
  private:
-    typedef std::map<std::string,SeExprLocalVar*> DictType;
-    DictType       _map;
+    typedef std::map<std::string,SeExprLocalVar*> VarDictType;
+    VarDictType _map;
+    typedef std::map<std::string,SeExprLocalFunctionNode*> FuncDictType;
+    FuncDictType _functions;
+
     SeExprVarEnv * _parent;
 
 protected:
@@ -107,17 +111,21 @@ protected:
     // TODO: figure out when anotherOwns is needed
     //! Create a scope with no parent
     SeExprVarEnv()
-        : _map(), _parent(0)
+        : _parent(0)
     {};
 
     ~SeExprVarEnv();
     
     //! Resets the scope (deletes all variables) and sets parent
     void resetAndSetParent(SeExprVarEnv* parent);
+    //! Find a function by name (recursive to parents)
+    SeExprLocalFunctionNode* findFunction(const std::string& name);
     //! Find a variable name by name (recursive to parents)
     SeExprLocalVar* find(const std::string& name);
     //! Find a const variable reference name by name (recursive to parents)
     SeExprLocalVar const* lookup(const std::string& name) const;
+    //! Add a function
+    void addFunction(const std::string& name,SeExprLocalFunctionNode* prototype);
     //! Add a variable refernece
     void add(const std::string& name,SeExprLocalVar* var);
     //! Add all variables into scope by name, but modify their lifetimes to the given type's lifetime

@@ -46,40 +46,58 @@ SeExprVarEnv::~SeExprVarEnv() {
 void SeExprVarEnv::resetAndSetParent(SeExprVarEnv* parent)
 {
     _parent=parent;
-    for(DictType::const_iterator ienv=_map.begin(); ienv != _map.end(); ++ienv)
+    for(VarDictType::const_iterator ienv=_map.begin(); ienv != _map.end(); ++ienv)
         delete ienv->second;
 }
 
 SeExprLocalVar* SeExprVarEnv::find(const std::string & name)
 {
-    DictType::iterator iter=_map.find(name);
+    VarDictType::iterator iter=_map.find(name);
     if(iter != _map.end()) return iter->second;
     else if(_parent) return _parent->find(name);
     else return 0;
 }
 
+SeExprLocalFunctionNode* SeExprVarEnv::findFunction(const std::string& name){
+    FuncDictType::iterator iter=_functions.find(name);
+    if(iter != _functions.end()) return iter->second;
+    else if(_parent) return _parent->findFunction(name);
+    else return 0;
+}
+
+
 SeExprLocalVar const * SeExprVarEnv::lookup(const std::string & name) const
 {
-    DictType::const_iterator iter=_map.find(name);
+    VarDictType::const_iterator iter=_map.find(name);
     if(iter != _map.end()) return iter->second;
     else if(_parent) return _parent->lookup(name);
     return 0;
 }
 
-void SeExprVarEnv::add(const std::string & name, SeExprLocalVar * var)
+void SeExprVarEnv::addFunction(const std::string& name,SeExprLocalFunctionNode* prototype)
 {
-    DictType::iterator iter=_map.find(name);
-    if(iter != _map.end()){
-        iter->second=var;
+    // go to parent until we are at root (all functions globally declared)
+    if(_parent) _parent->addFunction(name, prototype);
+    else{
+        FuncDictType::iterator iter=_functions.find(name);
+        if(iter != _functions.end()) iter->second=prototype;
+        else _functions.insert(std::make_pair(name,prototype));
     }
-    else _map.insert(std::pair<std::string,SeExprLocalVar*>(name,var));
+}
+    
+
+void SeExprVarEnv::add(const std::string& name, SeExprLocalVar* var)
+{
+    VarDictType::iterator iter=_map.find(name);
+    if(iter != _map.end()) iter->second=var;
+    else _map.insert(std::make_pair(name,var));
 }
 
 void SeExprVarEnv::mergeBranches(const SeExprType& type,SeExprVarEnv& env1,SeExprVarEnv& env2)
 {
     typedef std::map<std::pair<SeExprLocalVar*,SeExprLocalVar*>,std::string> MakeMap;
     MakeMap phisToMake;
-    for(DictType::iterator ienv=env1._map.begin(); 
+    for(VarDictType::iterator ienv=env1._map.begin(); 
         ienv != env1._map.end(); ++ienv) {
         const std::string & name = ienv->first;
         SeExprLocalVar* var  = ienv->second;
@@ -88,7 +106,7 @@ void SeExprVarEnv::mergeBranches(const SeExprType& type,SeExprVarEnv& env1,SeExp
             phisToMake[std::make_pair(var,env2Var)]=name;
         }
     }
-    for(DictType::iterator ienv=env2._map.begin(); 
+    for(VarDictType::iterator ienv=env2._map.begin(); 
         ienv != env2._map.end(); ++ienv) {
         const std::string & name = ienv->first;
         SeExprLocalVar* var  = ienv->second;
