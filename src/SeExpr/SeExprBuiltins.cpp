@@ -1317,6 +1317,34 @@ static const char* vnoise_docstring=
         "Interpolates a set of values to the parameter specified where y1, ..., yn are\n"
         "distributed evenly from [0...1]";
 
+    double bezier_spline(int n, double* params)
+    {
+        if (n < 5) return 0;
+	double u = clamp(params[0], 0, 1);
+	if (u == 0) return params[1];
+	if (u == 1) return params[n-1];
+	int nsegs = n - 4;
+	double seg;
+	u = modf(u * nsegs, &seg);
+	double* p = &params[int(seg) + 1];
+
+	// lerp pass-1
+	double lerp1_1 = mix(p[0], p[1], u);
+	double lerp1_2 = mix(p[1], p[2], u);
+	double lerp1_3 = mix(p[2], p[3], u);
+
+	// lerp pass-2
+	double lerp2_1 = mix(lerp1_1, lerp1_2, u);
+	double lerp2_2 = mix(lerp1_2, lerp1_3, u);
+
+	// lerp pass-3
+	return mix(lerp2_1, lerp2_2, u);
+    }
+    static const char* bezier_spline_docstring=
+        "float bezier_spline(float param,float y1,float y2,float y3,float y4,[...]\n\n"
+        "Interpolates a set of values to the parameter specified using De Casteljau's\n"
+	"algorithm, where y1, ..., yn are distributed evenly from [0...1]";
+
     template<class T> 
     struct CurveData:public SeExprFuncNode::Data
     {
@@ -1698,6 +1726,7 @@ static const char* vnoise_docstring=
 	FUNCNDOC(choose, 3, -1);
 	FUNCNDOC(wchoose, 4, -1);
 	FUNCNDOC(spline, 5, -1);
+	FUNCNDOC(bezier_spline, 5, -1);
 	FUNCNDOC(curve, 1, -1);
 	FUNCNDOC(ccurve, 1, -1);
         FUNCNDOC(printf,1,-1);

@@ -98,6 +98,7 @@ namespace SeExpr
     double choose(int n, double* params);
     double wchoose(int n, double* params);
     double spline(int n, double* params);
+    double bezier_spline(int n, double* params);
 
     // add builtins to expression function table
     void defineBuiltins(SeExprFunc::Define define,SeExprFunc::Define3 define3);
