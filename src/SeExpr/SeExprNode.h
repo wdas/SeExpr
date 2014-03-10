@@ -322,6 +322,7 @@ public:
     {}
 
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
+    const SeExprPrototypeNode* prototype(){return static_cast<SeExprPrototypeNode*>(child(0));}
 };
 
 
@@ -595,6 +596,7 @@ public:
 private:
     std::string _name;
     const SeExprFunc* _func;
+    const SeExprLocalFunctionNode* _localFunc; // TODO: it is dirty to have to have both.
 //    int _nargs;
 //    mutable std::vector<double> _scalarArgs;
 //    mutable std::vector<SeVec3d> _vecArgs;

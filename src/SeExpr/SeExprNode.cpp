@@ -295,13 +295,20 @@ SeExprLocalFunctionNode::prep(bool wantScalar, SeExprVarEnv & env)
     SeExprType blockType = block->prep(returnWantsScalar, functionEnv);
 
     if(!error && blockType.isValid()) {
-        if(prototype->isReturnTypeSet())
-            checkCondition(blockType==prototype->returnType(), "In function result of block does not match given return type", error);
+        if(prototype->isReturnTypeSet()){
+            if(blockType != prototype->returnType()){
+                checkCondition(false, "In function result of block '"+blockType.toString()+"' does not match given return type "+prototype->returnType().toString(),error);
+            }
+            
+        }
         else prototype->setReturnType(blockType);
         // register the function in the symbol table
-        env.addFunction(prototype->name(), this);
-    } else error = true;
 
+        env.addFunction(prototype->name(), this);
+    } else{
+        checkCondition(false, "Invalid type for blockType is "+blockType.toString(),error);
+        error = true;
+    }
     return _type = error ? SeExprType().Error() : SeExprType().None().Varying();
 }
 
@@ -573,25 +580,27 @@ SeExprFuncNode::prep(bool wantScalar, SeExprVarEnv & env)
     // find function using per-expression callback and then global table
     // TODO: put lookup of local functions here
     _func=0;
-    if(env.findFunction(_name)){
-        std::cerr<<"found local func"<<std::endl;
-    }
-    if(!_func) _func = _expr->resolveFunc(_name);
-    if(!_func) _func = SeExprFunc::lookup(_name);
+    if(SeExprLocalFunctionNode* localFunction=env.findFunction(_name)){
+        std::cerr<<"we have local type function "<<localFunction->prototype()->returnType().toString()<<std::endl;
+        setTypeWithChildLife(localFunction->prototype()->returnType());
+        // TODO: prep and other stuff
+    }else{
+        if(!_func) _func = _expr->resolveFunc(_name);
+        if(!_func) _func = SeExprFunc::lookup(_name);
 
     //check that function exisits and that the function has the right number of arguments
-    if(checkCondition(_func,"Function " + _name + " has no definition", error) 
-        && checkCondition(nargs >= _func->minArgs(),"Too few args for function"+_name,error)
-        && checkCondition(nargs <= _func->maxArgs() || _func->maxArgs() < 0, "Too many args for function "+_name,error)) {
+        if(checkCondition(_func,"Function " + _name + " has no definition", error) 
+            && checkCondition(nargs >= _func->minArgs(),"Too few args for function"+_name,error)
+            && checkCondition(nargs <= _func->maxArgs() || _func->maxArgs() < 0, "Too many args for function "+_name,error)) {
 
-        const SeExprFuncX* funcx=_func->funcx();
-        SeExprType type=funcx->prep(this,wantScalar,env);
-        setTypeWithChildLife(type);
-    }else{ // didn't match num args or function not found
-        SeExprNode::prep(false,env); // prep arguments anyways to catch as many errors as possible!
-        setTypeWithChildLife(SeExprType().Error());
+            const SeExprFuncX* funcx=_func->funcx();
+            SeExprType type=funcx->prep(this,wantScalar,env);
+            setTypeWithChildLife(type);
+        }else{ // didn't match num args or function not found
+            SeExprNode::prep(false,env); // prep arguments anyways to catch as many errors as possible!
+            setTypeWithChildLife(SeExprType().Error());
+        }
     }
-
     return _type;
 }
 
