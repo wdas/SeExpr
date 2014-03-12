@@ -314,7 +314,19 @@ SeExprLocalFunctionNode::prep(bool wantScalar, SeExprVarEnv & env)
 
 
 // TODO: write buildInterpreter for local function node
-
+SeExprType SeExprLocalFunctionNode::prep(SeExprFuncNode* callerNode,bool scalarWanted,SeExprVarEnv& env) const
+{
+    bool error=false;
+    callerNode->checkCondition(callerNode->numChildren() == prototype()->numChildren(),"Incorrect number of arguments to function call",error);
+    for(int i=0;i<callerNode->numChildren();i++){
+        // TODO: is this right?
+        //bool compatible=SeExprType::valuesCompatible(callerNode->child(i)->prep(false,env), prototype()->argType(i));
+        if(!callerNode->checkArg(i, prototype()->argType(i),env))
+            error=true;
+        //callerNode->child(i)->checkCondition(compatible,"Incorrect type for argument",error);
+    }
+    return error ? SeExprType().Error() : prototype()->returnType();
+}
 
 
 SeExprType
@@ -581,9 +593,8 @@ SeExprFuncNode::prep(bool wantScalar, SeExprVarEnv & env)
     // TODO: put lookup of local functions here
     _func=0;
     if(SeExprLocalFunctionNode* localFunction=env.findFunction(_name)){
-        std::cerr<<"we have local type function "<<localFunction->prototype()->returnType().toString()<<std::endl;
-        setTypeWithChildLife(localFunction->prototype()->returnType());
-        // TODO: prep and other stuff
+        setTypeWithChildLife(localFunction->prep(this, wantScalar, env));
+        // TODO: we need to type check arguments here
     }else{
         if(!_func) _func = _expr->resolveFunc(_name);
         if(!_func) _func = SeExprFunc::lookup(_name);
@@ -601,13 +612,21 @@ SeExprFuncNode::prep(bool wantScalar, SeExprVarEnv & env)
             setTypeWithChildLife(SeExprType().Error());
         }
     }
+
     return _type;
+}
+
+int SeExprLocalFunctionNode::
+buildInterpreter(const SeExprFuncNode* callerNode, SeInterpreter* interpreter) const
+{
+    return 0;
 }
 
 int SeExprFuncNode::
 buildInterpreter(SeInterpreter* interpreter) const
 {
-    return _func->funcx()->buildInterpreter(this,interpreter);
+    if(_localFunc) return _localFunc->buildInterpreter(this,interpreter);
+    else if(_func) return _func->funcx()->buildInterpreter(this,interpreter);
 }
 
 bool SeExprFuncNode::

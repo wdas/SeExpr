@@ -311,6 +311,7 @@ public:
 };
 
 
+class SeExprFuncNode;
 /// Node that contains local function
 class SeExprLocalFunctionNode : public SeExprNode
 {
@@ -321,8 +322,14 @@ public:
         : SeExprNode(expr, prototype, block)
     {}
 
+    /// Preps the definition of this site
     virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    const SeExprPrototypeNode* prototype(){return static_cast<SeExprPrototypeNode*>(child(0));}
+    /// Preps a caller (i.e. we use callerNode to check arguments)
+    virtual SeExprType prep(SeExprFuncNode* callerNode,bool scalarWanted,SeExprVarEnv& env) const;
+    /// TODO: Accessor for prototype (probably not needed when we use prep right)
+    const SeExprPrototypeNode* prototype() const{return static_cast<const SeExprPrototypeNode*>(child(0));}
+    /// Build the interpreter
+    int buildInterpreter(const SeExprFuncNode* callerNode, SeInterpreter* interpreter) const;
 };
 
 
