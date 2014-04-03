@@ -1,0 +1,24 @@
+Because there are some known problems with building bison/flex files 
+on Windows, this directory contains needed files built on Linux that 
+work with a Windows 7 / Visual Studio 2010 build.  
+
+Copy the files in SeExpr/generated/* and SeExprEditor/generated/* to 
+their respective src sub-directories.
+
+Here is a tree listing of what's in this sub-directory:
+
+windows7/
+├── README
+├── SeExpr
+│   └── generated
+│       ├── SeExprParser.cpp
+│       ├── SeExprParserLex.cpp
+│       └── SeExprParser.tab.h
+└── SeExprEditor
+    └── generated
+        ├── SeExprSpecParser.cpp
+        ├── SeExprSpecParserLex.cpp
+        └── SeExprSpecParser.tab.h
+
+See: https://groups.google.com/forum/#!topic/seexpr-discuss/TAsGkXIjiH4
+
