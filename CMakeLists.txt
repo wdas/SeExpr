@@ -60,7 +60,7 @@ ELSE(WIN32)
   ADD_DEFINITIONS (-Wall -Wextra -Wno-unused-parameter)
   ADD_DEFINITIONS (-pthread)
 
-  SET( CMAKE_CXX_FLAGS "-fPIC -g")
+  SET( CMAKE_CXX_FLAGS "-fPIC -g -rdynamic")
 ENDIF(WIN32)
 
 ## Choose build options

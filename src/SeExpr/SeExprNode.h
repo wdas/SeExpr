@@ -328,8 +328,11 @@ public:
     virtual SeExprType prep(SeExprFuncNode* callerNode,bool scalarWanted,SeExprVarEnv& env) const;
     /// TODO: Accessor for prototype (probably not needed when we use prep right)
     const SeExprPrototypeNode* prototype() const{return static_cast<const SeExprPrototypeNode*>(child(0));}
+    
     /// Build the interpreter
-    int buildInterpreter(const SeExprFuncNode* callerNode, SeInterpreter* interpreter) const;
+    int buildInterpreter(SeInterpreter* interpreter) const;
+    /// Build interpreter if we are called
+    int buildInterpreterForCall(const SeExprFuncNode* callerNode, SeInterpreter* interpreter) const;
 };
 
 

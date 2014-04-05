@@ -76,35 +76,35 @@ SeExprType SeExprFuncStandard::prep(SeExprFuncNode* node, bool scalarWanted, SeE
     }
 }
 
-int Func0Op(int* opData,double* fp,char** c){
+int Func0Op(int* opData,double* fp,char** c,std::stack<int>& callStack){
     fp[opData[1]]=((SeExprFuncStandard::Func0*)(c[opData[0]]))();
     return 1;
 }
-int Func1Op(int* opData,double* fp,char** c){
+int Func1Op(int* opData,double* fp,char** c,std::stack<int>& callStack){
     fp[opData[2]]=((SeExprFuncStandard::Func1*)(c[opData[0]]))(fp[opData[1]]);
     return 1;
 }
-int Func2Op(int* opData,double* fp,char** c){
+int Func2Op(int* opData,double* fp,char** c,std::stack<int>& callStack){
     fp[opData[3]]=((SeExprFuncStandard::Func2*)(c[opData[0]]))(fp[opData[1]],fp[opData[2]]);
     return 1;
 }
-int Func3Op(int* opData,double* fp,char** c){
+int Func3Op(int* opData,double* fp,char** c,std::stack<int>& callStack){
     fp[opData[4]]=((SeExprFuncStandard::Func3*)(c[opData[0]]))(fp[opData[1]],fp[opData[2]],fp[opData[3]]);
     return 1;
 }
-int Func4Op(int* opData,double* fp,char** c){
+int Func4Op(int* opData,double* fp,char** c,std::stack<int>& callStack){
     fp[opData[5]]=((SeExprFuncStandard::Func4*)(c[opData[0]]))(fp[opData[1]],fp[opData[2]],fp[opData[3]],fp[opData[4]]);
     return 1;
 }
-int Func5Op(int* opData,double* fp,char** c){
+int Func5Op(int* opData,double* fp,char** c,std::stack<int>& callStack){
     fp[opData[6]]=((SeExprFuncStandard::Func5*)(c[opData[0]]))(fp[opData[1]],fp[opData[2]],fp[opData[3]],fp[opData[4]],fp[opData[5]]);
     return 1;
 }
-int Func6Op(int* opData,double* fp,char** c){
+int Func6Op(int* opData,double* fp,char** c,std::stack<int>& callStack){
     fp[opData[7]]=((SeExprFuncStandard::Func6*)(c[opData[0]]))(fp[opData[1]],fp[opData[2]],fp[opData[3]],fp[opData[4]],fp[opData[5]],fp[opData[6]]);
     return 1;
 }
-int FuncNOp(int* opData,double* fp,char** c){
+int FuncNOp(int* opData,double* fp,char** c,std::stack<int>& callStack){
     int n=opData[1];
     double *vals=static_cast<double*>(alloca(n));
     for(int k=0;k<n;k++) vals[k]=fp[opData[k+2]];
@@ -112,27 +112,27 @@ int FuncNOp(int* opData,double* fp,char** c){
     *out=((SeExprFuncStandard::Funcn*)(c[opData[0]]))(n,vals);
     return 1;
 }
-int Func1VOp(int* opData,double* fp,char** c){
+int Func1VOp(int* opData,double* fp,char** c,std::stack<int>& callStack){
     fp[opData[2]]=((SeExprFuncStandard::Func1v*)(c[opData[0]]))(SeVec3d(&fp[opData[1]]));
     return 1;
 }
-int Func2VOp(int* opData,double* fp,char** c){
+int Func2VOp(int* opData,double* fp,char** c,std::stack<int>& callStack){
     fp[opData[3]]=((SeExprFuncStandard::Func2v*)(c[opData[0]]))(SeVec3d(&fp[opData[1]]),SeVec3d(&fp[opData[2]]));
     return 1;
 }
-int Func1VVOp(int* opData,double* fp,char** c){
+int Func1VVOp(int* opData,double* fp,char** c,std::stack<int>& callStack){
     SeVec3d v=((SeExprFuncStandard::Func1vv*)(c[opData[0]]))(SeVec3d(&fp[opData[1]]));
     double* out=&fp[opData[2]];
     for(int k=0;k<3;k++) out[k]=v[k];
     return 1;
 }
-int Func2VVOp(int* opData,double* fp,char** c){
+int Func2VVOp(int* opData,double* fp,char** c,std::stack<int>& callStack){
     SeVec3d v=((SeExprFuncStandard::Func2vv*)(c[opData[0]]))(SeVec3d(&fp[opData[1]]),SeVec3d(&fp[opData[2]]));
     double* out=&fp[opData[3]];
     for(int k=0;k<3;k++) out[k]=v[k];
     return 1;
 }
-int FuncNVOp(int* opData,double* fp,char** c){
+int FuncNVOp(int* opData,double* fp,char** c,std::stack<int>& callStack){
     int n=opData[1];
     SeVec3d *vals=static_cast<SeVec3d*>(alloca(n*sizeof(SeVec3d)));
     for(int k=0;k<n;k++) new (vals[k]) SeVec3d(&fp[opData[k+2]]); // placement new!
@@ -140,7 +140,7 @@ int FuncNVOp(int* opData,double* fp,char** c){
     *out=((SeExprFuncStandard::Funcnv*)(c[opData[0]]))(n,vals);
     return 1;
 }
-int FuncNVVOp(int* opData,double* fp,char** c){
+int FuncNVVOp(int* opData,double* fp,char** c,std::stack<int>& callStack){
     int n=opData[1];
     SeVec3d *vals=static_cast<SeVec3d*>(alloca(n*sizeof(SeVec3d)));
     for(int k=0;k<n;k++) new (vals[k]) SeVec3d(&fp[opData[k+2]]); // placement new!

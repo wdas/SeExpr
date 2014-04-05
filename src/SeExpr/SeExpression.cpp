@@ -194,7 +194,7 @@ SeExpression::prep() const
         _isValid=true;
         _interpreter=new SeInterpreter;
         _returnSlot=_parseTree->buildInterpreter(_interpreter);
-
+        _interpreter->print();
         if(_desiredReturnType.isFP()){
             int dimWanted=_desiredReturnType.dim();
             int dimHave=_parseTree->type().dim();

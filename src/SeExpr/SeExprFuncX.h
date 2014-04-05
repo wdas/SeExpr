@@ -90,7 +90,7 @@ public:
     
     class ArgHandle{
     public:
-        ArgHandle(int* opData,double* fp,char** c)
+        ArgHandle(int* opData,double* fp,char** c,std::stack<int>& callStack)
             :outFp(fp[opData[2]]),outStr(c[opData[2]]),
             data(reinterpret_cast<SeExprFuncNode::Data*>(c[opData[1]])),
             _nargs((int)fp[opData[3]]), // TODO: would be good not to have to convert to int!
@@ -109,6 +109,7 @@ public:
         int* opData;
         double* fp;
         char** c;
+        //std::stack<int>& callStack;
     };
 
     virtual int buildInterpreter(const SeExprFuncNode* node,SeInterpreter* interpreter) const;
@@ -118,7 +119,7 @@ public:
     virtual void eval(ArgHandle args)=0;
 
 private:
-    static int EvalOp(int* opData,double* fp,char** c);
+    static int EvalOp(int* opData,double* fp,char** c,std::stack<int>& callStack);
 };
 
 class SeExprFuncLocal:public SeExprFuncX{

@@ -38,11 +38,11 @@
 #include "SeExprNode.h"
 #include <cstdio>
 
-int SeExprFuncSimple::EvalOp(int* opData,double* fp,char** c)
+int SeExprFuncSimple::EvalOp(int* opData,double* fp,char** c,std::stack<int>& callStack)
 {
     SeExprFuncSimple* simple=reinterpret_cast<SeExprFuncSimple*>(c[opData[0]]);
 //    SeExprFuncNode::Data* simpleData=reinterpret_cast<SeExprFuncNode::Data*>(c[opData[1]]);
-    ArgHandle args(opData,fp,c);
+    ArgHandle args(opData,fp,c,callStack);
     simple->eval(args);
     return 1;
 }
@@ -89,7 +89,7 @@ int SeExprFuncSimple::buildInterpreter(const SeExprFuncNode* node,SeInterpreter*
     const std::pair<SeInterpreter::OpF,int>& op=interpreter->ops[pc];
     int* opCurr=(&interpreter->opData[0])+interpreter->ops[pc].second;
 
-    ArgHandle args(opCurr,&interpreter->d[0],&interpreter->s[0]);
+    ArgHandle args(opCurr,&interpreter->d[0],&interpreter->s[0],interpreter->callStack);
     interpreter->s[ptrDataLoc]=reinterpret_cast<char*>(evalConstant(args));
     
 

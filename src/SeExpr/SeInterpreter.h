@@ -36,6 +36,7 @@
 #define _SeInterpreter_h_
 
 #include <vector>
+#include <stack>
 
 class SeExprLocalVar;
 
@@ -44,7 +45,7 @@ class SeExprLocalVar;
 template<int d>
 struct Promote{
     // TODO: this needs a name that is prefixed by Se!
-    static int f(int* opData,double* fp,char** c)
+    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack)
     {
         int posIn=opData[0];
         int posOut=opData[1];
@@ -53,7 +54,8 @@ struct Promote{
     }
 };
 
-/// Non-LLVM manual interpreter. This is a simple computation machine. There is no stack, just fixed locations, because we have no recursion!
+/// Non-LLVM manual interpreter. This is a simple computation machine. There are no dynamic activation records
+/// just fixed locations, because we have no recursion!
 class SeInterpreter
 {
 public:
@@ -68,10 +70,11 @@ public:
     typedef std::map<const SeExprLocalVar*,int> VarToLoc;
     VarToLoc varToLoc;
     
-    /// Op function pointer arguments are (int* currOpData,double* currD,char** currS)
-    typedef int(*OpF)(int*,double*,char**);
+    /// Op function pointer arguments are (int* currOpData,double* currD,char** c,std::stack<int>& callStackurrS)
+    typedef int(*OpF)(int*,double*,char**,std::stack<int>&);
 
     std::vector<std::pair<OpF,int> > ops;
+    std::stack<int> callStack;
 
 private:
     bool _startedOp;
@@ -105,7 +108,7 @@ public:
             int pc=ops.size()-1;
             const std::pair<OpF,int>& op=ops[pc];
             int* opCurr=&opData[0]+op.second;
-            pc+=op.first(opCurr,fp,str);
+            pc+=op.first(opCurr,fp,str,callStack);
         }
     }
 

@@ -616,16 +616,79 @@ SeExprFuncNode::prep(bool wantScalar, SeExprVarEnv & env)
     return _type;
 }
 
+#if 0
+int SeExprFuncSimple::EvalOp(int* opData,double* fp,char** c,std::stack<int>& callStack)
+{
+    SeExprFuncSimple* simple=reinterpret_cast<SeExprFuncSimple*>(c[opData[0]]);
+//    SeExprFuncNode::Data* simpleData=reinterpret_cast<SeExprFuncNode::Data*>(c[opData[1]]);
+    ArgHandle args(opData,fp,c);
+    simple->eval(args);
+    return 1;
+}
+#endif
+
+
+#if 0
 int SeExprLocalFunctionNode::
-buildInterpreter(const SeExprFuncNode* callerNode, SeInterpreter* interpreter) const
+buildInterpreterForCall(const SeExprFuncNode* callerNode, SeInterpreter* interpreter) const
 {
     return 0;
+#if 0
+    std::vector<int> operands;
+    for(int c=0;c<node->numChildren();c++){
+        const SeExprNode* child=node->child(c);
+        // evaluate the argument
+        int operand=node->child(c)->buildInterpreter(interpreter);
+        if(node->promote(c) != 0) {
+            // promote the argument to the needed type
+            interpreter->addOp(getTemplatizedOp<Promote>(node->promote(c)));
+            int promotedOperand=interpreter->allocFP(node->promote(c));
+            interpreter->addOperand(operand);
+            interpreter->addOperand(promotedOperand);
+            operand=promotedOperand; // we wan the promoted arg
+            interpreter->endOp();
+        }
+        operands.push_back(operand);
+    }
+    int outoperand=-1;
+    int nargsData=interpreter->allocFP(1);
+    interpreter->d[nargsData]=callerNode->numChildren();
+    if(callerNode->type().isFP()) outoperand=interpreter->allocFP(callerNode->type().dim());
+    else if(callerNode->type().isString()) outoperand=interpreter->allocPtr();
+    else assert(false);
+
+    interpreter->addOp(EvalOp);
+    int ptrLoc=interpreter->allocPtr();
+    int ptrDataLoc=interpreter->allocPtr();
+    interpreter->s[ptrLoc]=(char*)this;
+    interpreter->addOperand(ptrLoc); 
+    interpreter->addOperand(ptrDataLoc);
+    interpreter->addOperand(outoperand);
+    interpreter->addOperand(nargsData); 
+    for(size_t c=0;c<operands.size();c++){
+        interpreter->addOperand(operands[c]);
+    }
+    interpreter->endOp(false); // do not eval because the function may not be evaluatable!
+
+    // call into interpreter eval
+    int pc=interpreter->nextPC()-1;
+    const std::pair<SeInterpreter::OpF,int>& op=interpreter->ops[pc];
+    int* opCurr=(&interpreter->opData[0])+interpreter->ops[pc].second;
+
+    ArgHandle args(opCurr,&interpreter->d[0],&interpreter->s[0]);
+    interpreter->s[ptrDataLoc]=reinterpret_cast<char*>(evalConstant(args));
+    
+
+    return outoperand;
+#endif
+    return 0;
 }
+#endif
 
 int SeExprFuncNode::
 buildInterpreter(SeInterpreter* interpreter) const
 {
-    if(_localFunc) return _localFunc->buildInterpreter(this,interpreter);
+    if(_localFunc) return _localFunc->buildInterpreterForCall(this,interpreter);
     else if(_func) return _func->funcx()->buildInterpreter(this,interpreter);
 }
 

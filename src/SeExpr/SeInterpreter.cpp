@@ -36,6 +36,7 @@
 #include "SeInterpreter.h"
 #include <iostream>
 #include <cstdio>
+#include <dlfcn.h>
 
 // TODO: optimize to write to location directly on a CondNode
 
@@ -46,10 +47,10 @@ void SeInterpreter::eval()
     int pc=0;
     int end=ops.size();
     while(pc<end){
-//        std::cerr<<"Running op at "<<pc<<std::endl;
+        std::cerr<<"Running op at "<<pc<<std::endl;
         const std::pair<OpF,int>& op=ops[pc];
         int* opCurr=&opData[0]+op.second;
-        pc+=op.first(opCurr,fp,str);
+        pc+=op.first(opCurr,fp,str,callStack);
     }
 }
 
@@ -57,9 +58,11 @@ void SeInterpreter::print()
 {
     std::cerr<<"---- ops     ----------------------"<<std::endl;
     for(size_t i=0;i<ops.size();i++){
-        fprintf(stderr,"0x%08x (",ops[i].first);
+        Dl_info info;
+        const char* name="";
+        if(dladdr((void*)ops[i].first, &info)) name=info.dli_sname;
+        fprintf(stderr,"%s 0x%08x (",name,ops[i].first);
         int nextGuy=(i==ops.size()-1 ? opData.size() : ops[i+1].second);
-                
         for(int k=ops[i].second;k<nextGuy;k++){
             fprintf(stderr," %d",opData[k]);
         }
@@ -123,7 +126,7 @@ struct BinaryOp
         return a - floor(a/b)*b;
     }
     
-    static int f(int* opData,double* fp,char** c){
+    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack){
         double* in1=fp+opData[0];
         double* in2=fp+opData[1];
         double* out=fp+opData[2];
@@ -154,7 +157,7 @@ struct BinaryOp
 /// Computes a unary op on a FP[d]
 template<char op,int d>
 struct UnaryOp{
-    static int f(int* opData,double* fp,char** c)
+    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack)
     {
         double* in=fp+opData[0];
         double* out=fp+opData[1];
@@ -175,7 +178,7 @@ struct UnaryOp{
 //! Subscripts 
 template<int d>
 struct Subscript{
-    static int f(int* opData,double* fp,char** c)
+    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack)
     {
         int tuple=opData[0];
         int subscript=int(fp[opData[1]]);
@@ -189,7 +192,7 @@ struct Subscript{
 //! build a vector tuple from a bunch of numbers
 template<int d>
 struct Tuple{
-    static int f(int* opData,double* fp,char** c)
+    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack)
     {
         int out=opData[d];
         for(int k=0;k<d;k++){
@@ -202,7 +205,7 @@ struct Tuple{
 //! build a vector tuple from a bunch of numbers
 template<int d>
 struct AssignOp{
-    static int f(int* opData,double* fp,char** c)
+    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack)
     {
         int in=opData[0];
         int out=opData[1];
@@ -215,7 +218,7 @@ struct AssignOp{
 
 //! Assigns a string from one position to another
 struct AssignStrOp{
-    static int f(int* opData,double* fp,char** c)
+    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack)
     {
         int in=opData[0];
         int out=opData[1];
@@ -226,7 +229,7 @@ struct AssignStrOp{
 
 //! Jumps relative to current executing pc if cond is true
 struct CondJmpRelative{
-    static int f(int* opData,double* fp,char** c){
+    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack){
         bool cond=(bool)fp[opData[0]];
         if(!cond) return opData[1];
         else return 1;
@@ -236,14 +239,14 @@ struct CondJmpRelative{
 
 //! Jumps relative to current executing pc unconditionally
 struct JmpRelative{
-    static int f(int* opData,double* fp,char** c){
+    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack){
         return opData[0];
     }
 };
 
 //! Evaluates an external variable
 struct EvalVar{
-    static int f(int* opData,double* fp,char** c){
+    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack){
         SeExprVarRef* ref=reinterpret_cast<SeExprVarRef*>(c[opData[0]]);
         ref->eval(fp+opData[1]); // ,c+opData[1]);
         return 1;
@@ -252,7 +255,7 @@ struct EvalVar{
 
 template<char op,int d>
 struct CompareEqOp{
-    static int f(int* opData,double* fp,char** c){
+    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack){
         bool result=true;
         double* in0=fp+opData[0];
         double* in1=fp+opData[1];
@@ -272,7 +275,7 @@ struct CompareEqOp{
 
 template<char op>
 struct CompareEqOp<op,3>{
-    static int f(int* opData,double* fp,char** c){
+    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack){
         bool eq=fp[opData[0]]==fp[opData[1]] && 
             fp[opData[0]+1]==fp[opData[1]+1] && 
             fp[opData[0]+2]==fp[opData[1]+2];
@@ -287,7 +290,7 @@ struct CompareEqOp<op,3>{
 template<char op,int d>
 struct StrCompareEqOp{
     // TODO: this should rely on tokenization and not use strcmp
-    static int f(int* opData,double* fp,char** c){
+    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack){
         switch(op){
             case '=': fp[opData[2]] = strcmp(c[opData[0]],c[opData[1]])==0;break;
             case '!': fp[opData[2]] = strcmp(c[opData[0]],c[opData[1]])==0;break;
@@ -296,6 +299,27 @@ struct StrCompareEqOp{
     }
 };
 
+}
+
+namespace{
+    int ProcedureReturn(int* opData,double* fp,char** c,std::stack<int>& callStack){
+
+    }
+}
+
+int SeExprLocalFunctionNode::
+buildInterpreter(SeInterpreter* interpreter) const
+{
+    for(int c=0;c<numChildren();c++) child(c)->buildInterpreter(interpreter);
+    interpreter->addOp(ProcedureReturn);
+    return 0;
+}
+
+int SeExprLocalFunctionNode::
+buildInterpreterForCall(const SeExprFuncNode* callerNode, SeInterpreter* interpreter) const
+{
+    //interpreter->addOp(ProcedureReturn);
+    return 0;
 }
 
 int SeExprNode::buildInterpreter(SeInterpreter* interpreter) const
