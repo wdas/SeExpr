@@ -78,6 +78,7 @@ public:
 
 private:
     bool _startedOp;
+    int _pcStart;
 public:
 
     SeInterpreter()
@@ -135,9 +136,11 @@ public:
     }
 
     /// Evaluate program
-    void eval();
+    void eval(bool debug=false);
     /// Debug by printing program
-    void print();
+    void print(int  pc=-1) const;
+
+    void setPCStart(int pcStart){_pcStart = pcStart;}
 };
 
 

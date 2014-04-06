@@ -191,6 +191,13 @@ SeExpression::prep() const
             +_parseTree->type().toString()+" incompatible with desired type "
             +_desiredReturnType.toString());
     }else{
+        if(_parseTree){
+            std::cerr<<"Parse tree desired type "<<_desiredReturnType.toString()<<" actual "<<_parseTree->type().toString()<<std::endl;
+            TypePrintExaminer _examiner;
+            SeExpr::ConstWalker  _walker(&_examiner);
+            _walker.walk(_parseTree);
+        }
+
         _isValid=true;
         _interpreter=new SeInterpreter;
         _returnSlot=_parseTree->buildInterpreter(_interpreter);
@@ -214,12 +221,7 @@ SeExpression::prep() const
         _returnType=_parseTree->type();
     }
     
-    if(_parseTree){
-        std::cerr<<"Parse tree desired type "<<_desiredReturnType.toString()<<" actual "<<_parseTree->type().toString()<<std::endl;
-        TypePrintExaminer _examiner;
-        SeExpr::ConstWalker  _walker(&_examiner);
-        _walker.walk(_parseTree);
-    }
+
     
     if(error){
         _isValid=false;

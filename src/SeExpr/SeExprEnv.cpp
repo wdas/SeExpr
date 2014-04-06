@@ -46,8 +46,9 @@ SeExprVarEnv::~SeExprVarEnv() {
 void SeExprVarEnv::resetAndSetParent(SeExprVarEnv* parent)
 {
     _parent=parent;
-    for(VarDictType::const_iterator ienv=_map.begin(); ienv != _map.end(); ++ienv)
-        delete ienv->second;
+    // TODO: can't delete these, because they need to live longer than prep()
+    //for(VarDictType::const_iterator ienv=_map.begin(); ienv != _map.end(); ++ienv)
+    //    delete ienv->second;
 }
 
 SeExprLocalVar* SeExprVarEnv::find(const std::string & name)

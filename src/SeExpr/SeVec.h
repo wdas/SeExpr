@@ -3,14 +3,15 @@
 #include <iosfwd>
 #include <cstdlib>
 #include <cmath>
+#include <iostream>
 
 //#############################################################################
 // Template Metaprogramming Helpers
 
 //! Static assert error case (false)
-template <bool b,class T> struct static_assert{};
+template <bool b,class T> struct seexpr_static_assert{};
 //! Static assert success case
-template <class T> struct static_assert<true,T> {typedef T TYPE;};
+template <class T> struct seexpr_static_assert<true,T> {typedef T TYPE;};
 
 //! Enable_if success case (can find the type TYPE)
 template<bool c,class T=void> struct my_enable_if{typedef T TYPE;};
@@ -76,19 +77,19 @@ public:
     //! Convenience 2 vector initialization (only for d==2)
     SeVec(T v1,T v2,
         INVALID_WITH_VECTOR_REFERENCE u=(typename my_enable_if<!ref,INVALID_WITH_VECTOR_REFERENCE>::TYPE())){
-        typename static_assert<d==2,INVALID_WITH_DIMENSION>::TYPE();
+        typename seexpr_static_assert<d==2,INVALID_WITH_DIMENSION>::TYPE();
         x[0]=v1;x[1]=v2;}
 
     //! Convenience 3 vector initialization (only for d==3)
     SeVec(T v1,T v2,T v3,
         INVALID_WITH_VECTOR_REFERENCE u=(typename my_enable_if<!ref,INVALID_WITH_VECTOR_REFERENCE>::TYPE())){
-        typename static_assert<d==3,INVALID_WITH_DIMENSION>::TYPE();
+        typename seexpr_static_assert<d==3,INVALID_WITH_DIMENSION>::TYPE();
         x[0]=v1;x[1]=v2;x[2]=v3;}
 
     //! Convenience 4 vector initialization (only for d==4)
     SeVec(T v1,T v2,T v3,T v4,
         INVALID_WITH_VECTOR_REFERENCE u=(typename my_enable_if<!ref,INVALID_WITH_VECTOR_REFERENCE>::TYPE())){
-        typename static_assert<d==4,INVALID_WITH_DIMENSION>::TYPE();
+        typename seexpr_static_assert<d==4,INVALID_WITH_DIMENSION>::TYPE();
         x[0]=v1;x[1]=v2;x[2]=v3;x[3]=v4;}
     // Changed this to default. This is safe! for reference case it makes another reference
     // for value it copies
@@ -226,7 +227,7 @@ public:
     /** Cross product. */
     template<bool refother>
     T_VEC_VALUE cross(const SeVec<T,3,refother>& o) const{
-        typename static_assert<d==3,INVALID_WITH_DIMENSION>::TYPE();
+        typename seexpr_static_assert<d==3,INVALID_WITH_DIMENSION>::TYPE();
         return T_VEC_VALUE(x[1]*o[2] - x[2]*o[1],
             x[2]*o[0] - x[0]*o[2],
             x[0]*o[1] - x[1]*o[0]); 
@@ -234,7 +235,7 @@ public:
 
     /** Return a vector orthogonal to the current vector. */
     T_VEC_VALUE orthogonal() const{
-        typename static_assert<d==3,INVALID_WITH_DIMENSION>::TYPE();
+        typename seexpr_static_assert<d==3,INVALID_WITH_DIMENSION>::TYPE();
         return T_VEC_VALUE(x[1]+x[2],x[2]-x[0],-x[0]-x[1]);
     }
 
@@ -244,7 +245,7 @@ public:
      */
     template<bool refother>
     T angle(const SeVec<T,3,refother>& o) const{
-        typename static_assert<d==3,INVALID_WITH_DIMENSION>::TYPE();
+        typename seexpr_static_assert<d==3,INVALID_WITH_DIMENSION>::TYPE();
         T l=length()*o.length();
         if(l==0) return 0;
         return acos(dot(o) / l);
@@ -256,7 +257,7 @@ public:
      */
     template<bool refother>
     T_VEC_VALUE rotateBy(const SeVec<T,3,refother>& axis,T angle) const{
-        typename static_assert<d==3,INVALID_WITH_DIMENSION>::TYPE();
+        typename seexpr_static_assert<d==3,INVALID_WITH_DIMENSION>::TYPE();
         double c=cos(angle),s=sin(angle);
         return c*(*this)+(1-c)*dot(axis)*axis-s*cross(axis);
     }

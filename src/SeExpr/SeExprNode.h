@@ -303,11 +303,17 @@ public:
     inline const SeExprNode   * arg    (int i) const { return child(i);     };
 
     const std::string& name() const{return _name;}
+
+    /// Build the interpreter
+    int buildInterpreter(SeInterpreter* interpreter) const;
+    /// Return op for interpreter
+    int interpreterOps(int c) const{return _interpreterOps.at(c);}
  private:
     std::string             _name;
     bool                    _retTypeSet;
     SeExprType              _retType;
     std::vector<SeExprType> _argTypes;
+    mutable std::vector<int> _interpreterOps; // operands for interpreter // TODO: this sucks... maybe a better place for this.
 };
 
 
@@ -333,6 +339,10 @@ public:
     int buildInterpreter(SeInterpreter* interpreter) const;
     /// Build interpreter if we are called
     int buildInterpreterForCall(const SeExprFuncNode* callerNode, SeInterpreter* interpreter) const;
+
+private:
+    mutable int _procedurePC;
+    mutable int _returnedDataOp;
 };
 
 
@@ -545,7 +555,7 @@ class SeExprFuncNode : public SeExprNode
 {
 public:
     SeExprFuncNode(const SeExpression* expr, const char* name) :
-	SeExprNode(expr), _name(name)//, _func(0), _nargs(0), _data(0) 
+	SeExprNode(expr), _name(name), _func(0), _localFunc(0)//, _func(0), _nargs(0), _data(0) 
     {
 	expr->addFunc(name);
     }

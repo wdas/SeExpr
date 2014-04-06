@@ -40,28 +40,31 @@
 
 // TODO: optimize to write to location directly on a CondNode
 
-void SeInterpreter::eval()
+void SeInterpreter::eval(bool debug)
 {
     double* fp=&d[0];
     char** str=&s[0];
-    int pc=0;
+    int pc=_pcStart;
     int end=ops.size();
     while(pc<end){
-        std::cerr<<"Running op at "<<pc<<std::endl;
+        if(debug){
+            std::cerr<<"Running op at "<<pc<<std::endl;
+            print(pc);
+        }
         const std::pair<OpF,int>& op=ops[pc];
         int* opCurr=&opData[0]+op.second;
         pc+=op.first(opCurr,fp,str,callStack);
     }
 }
 
-void SeInterpreter::print()
+void SeInterpreter::print(int pc) const
 {
     std::cerr<<"---- ops     ----------------------"<<std::endl;
     for(size_t i=0;i<ops.size();i++){
         Dl_info info;
         const char* name="";
         if(dladdr((void*)ops[i].first, &info)) name=info.dli_sname;
-        fprintf(stderr,"%s 0x%08x (",name,ops[i].first);
+        fprintf(stderr,"%s %s 0x%08x (",pc==i?"-->":"   ",name,ops[i].first);
         int nextGuy=(i==ops.size()-1 ? opData.size() : ops[i+1].second);
         for(int k=ops[i].second;k<nextGuy;k++){
             fprintf(stderr," %d",opData[k]);
@@ -303,23 +306,83 @@ struct StrCompareEqOp{
 
 namespace{
     int ProcedureReturn(int* opData,double* fp,char** c,std::stack<int>& callStack){
+        int newPC = callStack.top();
+        callStack.pop();
+        return newPC - opData[0];
+    }
+}
 
+namespace{
+    int ProcedureCall(int* opData,double* fp,char** c,std::stack<int>& callStack){
+        callStack.push(opData[0]);
+        return opData[1];
     }
 }
 
 int SeExprLocalFunctionNode::
 buildInterpreter(SeInterpreter* interpreter) const
 {
-    for(int c=0;c<numChildren();c++) child(c)->buildInterpreter(interpreter);
+    _procedurePC = interpreter->nextPC();
+    int lastOperand=0;
+    for(int c=0;c<numChildren();c++) lastOperand=child(c)->buildInterpreter(interpreter);
+    int basePC = interpreter->nextPC();;
     interpreter->addOp(ProcedureReturn);
+    int endPC = interpreter->addOperand(basePC);
+    interpreter->endOp(false);
+    _returnedDataOp = lastOperand;
+
     return 0;
 }
 
 int SeExprLocalFunctionNode::
 buildInterpreterForCall(const SeExprFuncNode* callerNode, SeInterpreter* interpreter) const
 {
-    //interpreter->addOp(ProcedureReturn);
-    return 0;
+    std::vector<int> operands;
+    for(int c=0;c<callerNode->numChildren();c++){
+        const SeExprNode* child=callerNode->child(c);
+        // evaluate the argument
+        int operand=callerNode->child(c)->buildInterpreter(interpreter);
+        if(child->type().isFP()){
+            if(callerNode->promote(c) != 0) {
+            // promote the argument to the needed type
+                interpreter->addOp(getTemplatizedOp<Promote>(callerNode->promote(c)));
+            //int promotedOperand=interpreter->allocFP(callerNode->promote(c));
+                interpreter->addOperand(operand);
+                interpreter->addOperand(prototype()->interpreterOps(c));
+                interpreter->endOp();
+            }else{
+                interpreter->addOp(getTemplatizedOp<AssignOp>(child->type().dim()));
+                interpreter->addOperand(operand);
+                interpreter->addOperand(prototype()->interpreterOps(c));
+                interpreter->endOp();
+            }
+        }else{
+            // TODO: string
+            assert(false);
+        }
+        operands.push_back(operand);
+    }
+    int outoperand=-1;
+    if(callerNode->type().isFP()) outoperand=interpreter->allocFP(callerNode->type().dim());
+    else if(callerNode->type().isString()) outoperand=interpreter->allocPtr();
+    else assert(false);
+
+    int basePC = interpreter->nextPC();
+    interpreter->addOp(ProcedureCall);
+    int returnAddress=interpreter->addOperand(0);
+    interpreter->addOperand(_procedurePC - basePC);
+    interpreter->endOp(false);
+    // set return address
+    interpreter->opData[returnAddress]=interpreter->nextPC();
+
+    // TODO: copy result back and string
+    interpreter->addOp(getTemplatizedOp<AssignOp>(callerNode->type().dim()));
+    interpreter->addOperand(_returnedDataOp);
+    interpreter->addOperand(outoperand);
+    interpreter->endOp();
+
+    return outoperand;
+
 }
 
 int SeExprNode::buildInterpreter(SeInterpreter* interpreter) const
@@ -438,8 +501,12 @@ int SeExprSubscriptNode::buildInterpreter(SeInterpreter* interpreter) const
 
 int SeExprVarNode::buildInterpreter(SeInterpreter* interpreter) const
 {
+                    std::cerr<<"localvar of varnode "<<localVar()<<std::endl;
+
     if(const SeExprLocalVar* var=_localVar){
+        std::cerr<<"before phi we are "<<var<<std::endl;
         if(const SeExprLocalVar* phi=var->getPhi()) var=phi;
+        std::cerr<<"after phi we are "<<var<<std::endl;
         SeInterpreter::VarToLoc::iterator i=interpreter->varToLoc.find(var);
         if(i!=interpreter->varToLoc.end()) return i->second;
         assert(false);
@@ -550,6 +617,32 @@ int SeExprCompareNode::buildInterpreter(SeInterpreter *interpreter) const
     return op2;
 }
 
+
+int
+SeExprPrototypeNode::buildInterpreter(SeInterpreter* interpreter) const
+{
+    // set up parents
+    _interpreterOps.clear();
+    for(int c=0;c<numChildren();c++){
+        if(const SeExprVarNode* childVarNode=dynamic_cast<const SeExprVarNode*>(child(c))){
+            SeExprType childType = childVarNode->type();
+            if(childType.isFP()){
+                std::cerr<<"localvar of prototype "<<childVarNode->localVar()<<std::endl;
+                std::cerr<<"phi "<<childVarNode->localVar()->getPhi()<<std::endl;
+                int operand = interpreter->allocFP(childType.dim());
+                _interpreterOps.push_back(operand);
+                interpreter->varToLoc[childVarNode->localVar()]=operand;
+            }
+        }else{
+            assert(false);
+        }
+        child(c)->buildInterpreter(interpreter);
+
+        // make sure we have a slot in our global activation record for the variables!
+
+    }
+}
+
 int SeExprCompareEqNode::buildInterpreter(SeInterpreter* interpreter) const
 {
     const SeExprNode* child0=child(0),*child1=child(1);
@@ -651,7 +744,10 @@ int SeExprBlockNode::buildInterpreter(SeInterpreter *interpreter) const
 int SeExprModuleNode::buildInterpreter(SeInterpreter *interpreter) const
 {
     int lastIdx=0;
-    for(int c=0;c<numChildren();c++)
+    int basePC=0;
+    for(int c=0;c<numChildren();c++){
+        if(c==numChildren()-1) interpreter->setPCStart(interpreter->nextPC());
         lastIdx=child(c)->buildInterpreter(interpreter);
+    }
     return lastIdx;
 }

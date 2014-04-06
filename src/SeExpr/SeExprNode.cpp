@@ -233,7 +233,10 @@ SeExprPrototypeNode::prep(bool wantScalar, SeExprVarEnv & env)
         SeExprType type=child(c)->type();
         checkCondition(type.isValid(), "Function has a parameter with a bad type", error);
         _argTypes.push_back(type);
-        env.add(((SeExprVarNode*)child(c))->name(), new SeExprLocalVar(type));
+        SeExprLocalVar* localVar = new SeExprLocalVar(type);
+        env.add(((SeExprVarNode*)child(c))->name(), localVar);
+        std::cerr<<"after create localvar phi "<<localVar->getPhi()<<std::endl;
+        child(c)->prep(wantScalar,env);
     }
 
     if(error) setType(SeExprType().Error());
@@ -593,6 +596,7 @@ SeExprFuncNode::prep(bool wantScalar, SeExprVarEnv & env)
     // TODO: put lookup of local functions here
     _func=0;
     if(SeExprLocalFunctionNode* localFunction=env.findFunction(_name)){
+        _localFunc = localFunction;
         setTypeWithChildLife(localFunction->prep(this, wantScalar, env));
         // TODO: we need to type check arguments here
     }else{
