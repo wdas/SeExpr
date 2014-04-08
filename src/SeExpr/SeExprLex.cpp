@@ -46,6 +46,10 @@ static const char* tokenNames[]={
     "SEMICOLON"
 };
 
+std::string Lexer::getTokenName(Token tok){
+	return tokenNames[tok];
+}
+
 	
 std::map<std::string,Lexer::Token> Lexer::reservedWords;
 void Lexer::populateReservedWords(){
@@ -53,7 +57,7 @@ void Lexer::populateReservedWords(){
 	if(!initialized){
 		// TODO: acquire mutex
 		initialized=true;
-
+		std::cerr<<"rewriting and initializing reserved words"<<std::endl;
 		reservedWords["extern"]=EXTERN;
 		reservedWords["def"]=DEF;
 		reservedWords["FLOAT"]=FLOAT;
@@ -68,6 +72,7 @@ void Lexer::populateReservedWords(){
 	}
 }
 
+#if 0
 
 
 int main(int argc,char*argv[])
@@ -83,4 +88,6 @@ int main(int argc,char*argv[])
 	}while(token != Lexer::END_OF_BUFFER);
 
 }
+
+#endif
 

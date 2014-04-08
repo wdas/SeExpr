@@ -98,8 +98,17 @@ public:
 
 		std::string markToCurr() const{
 			std::string stringOut(start,curr);
-			std::copy(start,curr,stringOut.begin());
+			//std::copy(start,curr,stringOut.begin());
 			return stringOut;
+		}
+
+		std::string underlineToken() const{
+			const char *startLine, *endLine;
+			int offset=0;
+			for(startLine = start; start > buf && *startLine != '\n'; startLine--, offset++);
+			for(endLine = curr;  *endLine != '\0' && *endLine != '\n'; endLine++);
+            std::string newString(startLine,endLine-startLine+1);
+            return "Line "+std::to_string(line)+ ": "+newString + "\n" + std::string(offset, ' ') + std::string(curr-start+1, '-');
 		}
 
 	private:
@@ -117,8 +126,14 @@ public:
 		populateReservedWords();
 	}
 
+	static std::string getTokenName(Token tok);
+
 	std::string getTokenText() const{
 		return buffer.markToCurr();
+	}
+
+	std::string underlineToken() const {
+		return buffer.underlineToken();
 	}
 
 	Token getToken(){
@@ -140,7 +155,7 @@ public:
 		// Look for idents and reserved words
 		if(buffer()=='$' || isalpha(buffer())){
 			std::string ident;
-			ident.push_back(buffer());
+			//ident.push_back(buffer());
 			for(;isalpha(buffer()) || buffer() == '_';++buffer) ident.push_back(buffer());
 			auto it=reservedWords.find(ident);
 			return it==reservedWords.end() ? IDENT : it->second;
