@@ -7,6 +7,8 @@
 #include <cstdio>
 #include <fstream>
 
+#include <sstream>
+
 
 struct ParseError{
     ParseError(const std::string& errorStr)
@@ -111,7 +113,9 @@ public:
             for(startLine = start; start > buf && *startLine != '\n'; startLine--, offset++);
             for(endLine = curr;  *endLine != '\0' && *endLine != '\n'; endLine++);
             std::string newString(startLine,endLine-startLine+1);
-            return "Line "+std::to_string(line)+ ": "+newString + "\n" + std::string(offset, ' ') + std::string(curr-start+1, '-');
+            std::stringstream ss;
+            ss<<"Line "<<line<<": "<<newString<<"\n"<<std::string(offset,' ')<<std::string(curr-start+1,'-');
+            return ss.str();
         }
 
     private:
