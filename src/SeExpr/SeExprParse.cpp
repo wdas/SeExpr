@@ -5,20 +5,18 @@
 
 class ASTNode{
 public:
-    ASTNode(const std::string& name, std::initializer_list<std::unique_ptr<ASTNode>> nodes) //, int startOffset, int endOffset) 
-    :_name(name)//, _children(std::move(nodes))//, _startOffset(startOffset),_endOffset(endOffset)
-    {
-        for(auto it=nodes.begin(),itEnd=nodes.end(); it!=itEnd;++it){
-            _children.emplace_back(std::move(*it));
-        }
-    }
 
-#if 1
+    struct sequence{
+        template<typename... T> sequence(T&&...){}
+    };
+
     template<typename... Args>
     ASTNode(const std::string& name, Args&&... args)
-    :_name(name),_children(std::forward<Args>(args)...)
-    {}
-#endif
+    :_name(name)
+    {
+        //sequence{(_children.emplace_back(std::forward<Args>(args)),1)...);
+    }
+
     void addChild(std::unique_ptr<ASTNode> node){_children.push_back(std::move(node));}
 
     void print(std::ostream& out, int indent){
@@ -166,7 +164,7 @@ public:
             std::string text=tokenText;
             getToken();
             ASTPtr newChild=expr7();
-            ASTPtr(new ASTNode{text,{std::move(curr)    }}); //, std::move(curr), std::move(newChild)});
+            ASTPtr(new ASTNode{text,std::move(curr)    }); //, std::move(curr), std::move(newChild)});
         }
         return curr;
     }
