@@ -242,7 +242,7 @@ public:
     }
 
     void recognizeNumber(){
-        double number;
+        //double number;
         std::string numBuf;
         numBuf.reserve(32);
         readDigits(numBuf);

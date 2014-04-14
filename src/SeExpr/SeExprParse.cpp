@@ -6,18 +6,33 @@
 class ASTNode{
 public:
 
-    struct sequence{
-        template<typename... T> sequence(T&&...){}
+    struct Adder{
+        void sequence(){}
+        template<typename T,typename... Targs> void sequence(T&& guy,Targs&&... args){
+            stuff.emplace_back(std::move(guy));
+            sequence(args...);
+        }
+        Adder(std::vector<std::unique_ptr<ASTNode>>& stuffIn)
+            :stuff(stuffIn)
+            {}
+        private:
+        std::vector<std::unique_ptr<ASTNode>>& stuff;
     };
 
     template<typename... Args>
     ASTNode(const std::string& name, Args&&... args)
     :_name(name)
     {
-        //sequence{(_children.emplace_back(std::forward<Args>(args)),1)...);
+        Adder a(_children);
+        a.sequence(std::forward<Args&&>(args)...);
     }
 
-    void addChild(std::unique_ptr<ASTNode> node){_children.push_back(std::move(node));}
+    ASTNode* addChild(std::unique_ptr<ASTNode> node){_children.push_back(std::move(node));return _children.back().get();}
+    std::unique_ptr<ASTNode> removeChild(){
+        std::unique_ptr<ASTNode> ret(std::move(_children.back()));
+        _children.pop_back();
+        return ret;
+    }
 
     void print(std::ostream& out, int indent){
         out<<std::string(indent,' ')<<_name<<"\n";
@@ -111,16 +126,19 @@ public:
                 || t == Lexer::MOD_EQUAL || t == Lexer::POWER_EQUAL;
     }
 
-    void block(){
+    ASTPtr block(){
+        ASTPtr ret(new ASTNode("block"));
         while(1){
             if(token == Lexer::IF) ifthenelse();
             else if(token == Lexer::IDENT && isAssignOrMutator(lookAheadToken)){
-                assign();
+                ret->addChild(assign());
             }else{
                 break; // done with the top part
             }
         }
-        expr();
+        ret->addChild(expr());
+        ret->print(std::cout,0);
+        return ret;
     }
 
 /*
@@ -141,96 +159,158 @@ public:
 
     // expr:  expr1 { -> IDENT (args) }*
     ASTPtr expr(){
-        ASTPtr curr=expr1();
-        curr->print(std::cout,0);
+        ASTPtr parent=expr1();
         while(token==Lexer::ARROW){
             getToken();
             ensureAndGetToken(token==Lexer::IDENT, "Expected identifier");
-            ensureAndGetToken(token==Lexer::PAREN_OPEN, "Expected open parentheses");
-            functionArgs();
-            ensureAndGetToken(token==Lexer::PAREN_CLOSE, "Expected closing parentheses");
+            ensureAndGetToken(token==Lexer::PAREN_OPEN, "Expected open parentheses in -> call");
+            parent=std::move(functionArgs(std::move(parent)));
+            ensureAndGetToken(token==Lexer::PAREN_CLOSE, "Expected closing parentheses in -> call");
         }
-        return ASTPtr();
+        return parent;
     }
 
     // expr1: expr2 { ? expr2 : expr2 }*
     ASTPtr expr1(){
-        return expr6(); // TODO: put in other crap
+        return expr2(); // TODO: put in other crap
     }
 
+    // expr2: expr3 { OR expr3 }*
+    ASTPtr expr2(){
+        ASTPtr curr=expr3();
+        while(token==Lexer::OR){
+            std::string text=tokenText;
+            getToken();
+            curr=ASTPtr(new ASTNode(text,std::move(curr),expr3())) ;
+        }
+        return curr;
+    }
+
+    // expr3: expr4 { AND expr4 }*
+    ASTPtr expr3(){
+        ASTPtr curr=expr4();
+        while(token==Lexer::AND){
+            std::string text=tokenText;
+            getToken();
+            curr=ASTPtr(new ASTNode(text,std::move(curr),expr4())) ;
+        }
+        return curr;
+    }
+
+    // expr4: expr5 { EQ|NE expr5 }*
+    ASTPtr expr4(){
+        ASTPtr curr=expr5();
+        while(token==Lexer::EQUALS || token==Lexer::NOT_EQUALS){
+            std::string text=tokenText;
+            getToken();
+            curr=ASTPtr(new ASTNode(text,std::move(curr),expr5())) ;
+        }
+        return curr;
+    }
+
+    // expr5: expr6 { <|<=|>|>= expr6 }*
+    ASTPtr expr5(){
+        ASTPtr curr=expr6();
+        while(token==Lexer::LESS || token==Lexer::LESS_EQUAL || token==Lexer::GREATER || token==Lexer::GREATER_EQUAL){
+            std::string text=tokenText;
+            getToken();
+            curr=ASTPtr(new ASTNode(text,std::move(curr),expr6())) ;
+        }
+        return curr;
+    }
+
+    // expr6: expr7 { +|- expr7}*
     ASTPtr expr6(){
         ASTPtr curr=expr7();
         while(token==Lexer::PLUS || token==Lexer::MINUS){
             std::string text=tokenText;
             getToken();
             ASTPtr newChild=expr7();
-            ASTPtr(new ASTNode{text,std::move(curr)    }); //, std::move(curr), std::move(newChild)});
+            curr=ASTPtr(new ASTNode(text,std::move(curr),std::move(newChild))) ;
         }
         return curr;
     }
 
+    // expr7: expr8 { *|/|% expr8}*
     ASTPtr expr7(){
-        return expr8();
-        #if 0 //TODO: fix
+        ASTPtr curr=expr8();
         while(token==Lexer::TIMES || token==Lexer::DIVIDE || token==Lexer::MOD){
+            std::string text=tokenText;
             getToken();
-            expr8();
+            ASTPtr newChild=expr8();
+            curr=ASTPtr(new ASTNode(text,std::move(curr),std::move(newChild))) ;
         }
-        #endif
+        return curr;
     }
 
+    // expr8: {!|~|-|+}* expr9
     ASTPtr expr8(){
-        #if 0 //TODO: fix
-        while(token==Lexer::TWIDLE || token==Lexer::NOT){
+        ASTPtr parent;
+        ASTNode* curr=0;
+        while(token==Lexer::TWIDLE || token==Lexer::NOT || token==Lexer::MINUS || token==Lexer::PLUS){
+            ASTPtr op(new ASTNode(tokenText));
+            if(!parent){
+                parent=std::move(op);
+                curr=parent.get();
+            }else{
+                curr=curr->addChild(std::move(op));
+            }
             getToken();
         }
-        #endif
-        return expr9();
+        if(parent){
+            curr->addChild(expr9());
+            return parent;
+        }else return expr9();
     }
 
+    //expr9: {expr10 ^}* expr10
     ASTPtr expr9(){
-        return expr10();
-        #if 0 //TODO: fix
+        ASTPtr parent=expr10();
+        ASTNode* curr=0;
         while(token==Lexer::POWER){
             getToken();
-            expr10();
+            ASTPtr newNode=expr10();
+            if(!curr){
+                parent=ASTPtr(new ASTNode("^",parent,newNode));
+                curr=parent.get();
+            }else{
+                ASTPtr oldNode = curr->removeChild();
+                curr=curr->addChild(ASTPtr(new ASTNode("^",oldNode,newNode)));
+            }
         }
-        #endif
+        return parent;
     }
 
+    // expr10: expr11 { [ expr ] }*
     ASTPtr expr10(){
         ASTPtr curr=expr11();
         while(token==Lexer::BRACKET_OPEN){
-            #if 0
             getToken();
-            ASTPtr result=expr();
-            ASTPtr combined(new ASTNode("bracket"));
-            combined->addChild(combined);
-            combined->addChild(result);
-            curr=combined;
+            ASTPtr combined=ASTPtr(new ASTNode("bracket",std::move(curr),expr()));
+            curr=std::move(combined);
             ensureAndGetToken(token==Lexer::BRACKET_CLOSE, "Did not get closing bracket to subscripting operator");
-            #endif
-            // TODO: fix
         }
         return curr;
     }
 
-    // expr11: (expr) | NUM | IDENT | IDENT (args) | STR
+    // expr11: (expr) | NUM | IDENT | IDENT (args) | STR | '[' expr {, expr}* ']'
     ASTPtr expr11(){
         if(token==Lexer::PAREN_OPEN){
             getToken();
-            expr();
+            ASTPtr ret=expr();
             ensureAndGetToken(token==Lexer::PAREN_CLOSE,"Expect closing parentheses after sub-expression");
+            return ret;
         }else if(token==Lexer::NUM){
+            std::string numStr=tokenText;
             getToken();
-            return ASTPtr(new ASTNode("NUM"));
+            return ASTPtr(new ASTNode("NUM = "+numStr));
         }else if(token==Lexer::IDENT){
             ASTPtr callNode(new ASTNode("CALL"));
             getToken();
             if(token==Lexer::PAREN_OPEN){
                 getToken();
-                callNode->addChild(functionArgs());
-                ensureAndGetToken(token==Lexer::PAREN_CLOSE, "Expected ending parentheses after function call");
+                callNode->addChild(functionArgs(nullptr));
+                ensureAndGetToken(token==Lexer::PAREN_CLOSE, "Expected ending parentheses after function call arguments");
             }else{
                 return ASTPtr(new ASTNode("IDENT"));
             }
@@ -238,20 +318,38 @@ public:
         }else if(token==Lexer::STRING){
             // TODO: do something with string
             return ASTPtr(new ASTNode("STRING"));
+        }else if(token==Lexer::BRACKET_OPEN){
+            getToken();
+            ASTPtr vec(new ASTNode("vector"));
+            vec->addChild(expr());
+            while(token==Lexer::COMMA){
+                getToken    ();
+                vec->addChild(expr());
+            }
+            ensureAndGetToken(token==Lexer::BRACKET_CLOSE,"Expected bracket close at end of vector");
+            return vec;
         }else{
-            ensure(false, "Unexpected type of token.");
+            ensure(false, "At this point I expected, an identifier, function call, literal, or sub-expression.");
         }
+        return 0;
     }
 
-    ASTPtr functionArgs(){
+    ASTPtr functionArgs(ASTPtr firstArgumentForCurry){
         // TODO: fix
-        return ASTPtr(new ASTNode("args"));
+        ASTPtr args(new ASTNode("args"));
+        if(firstArgumentForCurry) args->addChild(std::move(firstArgumentForCurry));
+        while(token != Lexer::PAREN_CLOSE){
+            args->addChild(expr());
+            if(token != Lexer::COMMA) break;
+            getToken();
+        }
+        return args;
     }
 
     void assign(){
         ensure(token == Lexer::IDENT, "Expected identifier at begin of assignment");
         getToken();
-        ensure(isAssignOrMutator(token), "Expected mutator on assignment");
+        ensure(isAssignOrMutator(token), "Expected mutator on assignment (got '')"+tokenText);
         getToken();
         expr();
         ensure(token == Lexer::SEMICOLON, "Expected semi-colon at end of assignment");
