@@ -8,6 +8,8 @@
 #include <fstream>
 
 #include <sstream>
+#include <cassert>
+#include <array>
 
 
 struct ParseError{
@@ -103,16 +105,29 @@ public:
 
         std::string markToCurr() const{
             std::string stringOut(start,curr);
+            std::cerr<<"buf is len "<<strlen(buf)<<std::endl;
             //std::copy(start,curr,stringOut.begin());
             return stringOut;
         }
 
-        std::string underlineToken() const{
-            const char *startLine, *endLine;
+        std::array<int,2> getTokenPosition() const{
+            std::array<int,2> ret;
+            ret[0]=start-buf;
+            ret[1]=curr-buf;
+            return ret;
+        }
+
+        std::string underlineToken(const std::array<int,2>& position) const{
+            std::cerr<<"--buf is "<<std::endl;
+            int bufLen=strlen(buf);
+            assert(position[0] > 0 && position[0] < bufLen);
+            assert(position[1] > 0 && position[1] < bufLen);
+            const char *startLine = buf+position[0], *endLine = buf+position[1];
             int offset=0;
-            for(startLine = start; start > buf && *startLine != '\n'; startLine--, offset++);
-            for(endLine = curr;  *endLine != '\0' && *endLine != '\n'; endLine++);
-            std::string newString(startLine,endLine-startLine+1);
+            for(; start > buf && *startLine != '\n'; startLine--, offset++);
+            for(;  *endLine != '\0' && *endLine != '\n'; endLine++);
+            std::cerr<<"startLine "<<start<<std::endl;
+            std::string newString(startLine,endLine); //-startLine+1);
             std::stringstream ss;
             ss<<"Line "<<line<<": "<<newString<<"\n"<<std::string(offset,' ')<<std::string(curr-start+1,'-');
             return ss.str();
@@ -139,8 +154,12 @@ public:
         return buffer.markToCurr();
     }
 
-    std::string underlineToken() const {
-        return buffer.underlineToken();
+    std::array<int,2> getTokenPosition() const{
+        return buffer.getTokenPosition();
+    }
+
+    std::string underlineToken(const std::array<int,2>& position) const {
+        return buffer.underlineToken(position);
     }
 
     Token getToken(){

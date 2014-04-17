@@ -5,18 +5,16 @@
 
 class ASTNode{
 public:
-
+    /// Allows adding arbitary number of items to a container holding unique_ptrs
     struct Adder{
         void sequence(){}
         template<typename T,typename... Targs> void sequence(T&& guy,Targs&&... args){
-            stuff.emplace_back(std::move(guy));
+            adder.emplace_back(std::move(guy));
             sequence(args...);
         }
-        Adder(std::vector<std::unique_ptr<ASTNode>>& stuffIn)
-            :stuff(stuffIn)
-            {}
-        private:
-        std::vector<std::unique_ptr<ASTNode>>& stuff;
+        Adder(std::vector<std::unique_ptr<ASTNode>>& container):container(container){}
+    private:
+        std::vector<std::unique_ptr<ASTNode>>& container;
     };
 
     template<typename... Args>
@@ -42,7 +40,7 @@ public:
     }
 private:
     std::string _name;
-    int _startOffset, _endOffset;
+    //int _startOffset, _endOffset;
     std::vector<std::unique_ptr<ASTNode>> _children;
 };
 
@@ -59,8 +57,11 @@ public:
     void getToken(){
         token=lookAheadToken;
         tokenText=lookAheadTokenText;
+        tokenPosition=lookAheadTokenPosition;
+        std::cerr<<"Token is '"<<tokenText<<"' at "<<tokenPosition[0]<<std::endl;
         lookAheadToken=lexer.getToken();
         lookAheadTokenText=lexer.getTokenText();
+        lookAheadTokenPosition=lexer.getTokenPosition();
     }
 
     void parse(){
@@ -85,7 +86,7 @@ public:
 #endif
     void ensure(bool value, const std::string& msg){
         if(!value){
-            throw ParseError(msg+"\n"+lexer.underlineToken());
+            throw ParseError(msg+"\n"+lexer.underlineToken(tokenPosition));
         }
     }
     void ensureAndGetToken(bool value, const std::string& msg){
@@ -129,12 +130,12 @@ public:
     ASTPtr block(){
         ASTPtr ret(new ASTNode("block"));
         while(1){
-            if(token == Lexer::IF) ifthenelse();
-            else if(token == Lexer::IDENT && isAssignOrMutator(lookAheadToken)){
+            if(token == Lexer::IF) 
+                ret->addChild(ifthenelse());
+            else if(token == Lexer::IDENT && isAssignOrMutator(lookAheadToken)) 
                 ret->addChild(assign());
-            }else{
+            else
                 break; // done with the top part
-            }
         }
         ret->addChild(expr());
         ret->print(std::cout,0);
@@ -346,24 +347,46 @@ public:
         return args;
     }
 
-    void assign(){
+    ASTPtr assign(){
         ensure(token == Lexer::IDENT, "Expected identifier at begin of assignment");
         getToken();
         ensure(isAssignOrMutator(token), "Expected mutator on assignment (got '')"+tokenText);
         getToken();
-        expr();
+        ASTPtr e=expr();
+        ASTPtr assignNode(new ASTNode("assign",e));
         ensure(token == Lexer::SEMICOLON, "Expected semi-colon at end of assignment");
         getToken();
+        return assignNode;
     }
 
-    void ifthenelse(){
-        assert(false);
+    ASTPtr ifthenelse(){
+        ensureAndGetToken(token == Lexer::IF, "Expected if at begin of if then else");
+        ensureAndGetToken(token == Lexer::PAREN_OPEN, "Expected open parentheses after if");
+        ASTPtr condition=expr();
+        ensureAndGetToken(token == Lexer::PAREN_CLOSE, "Expected closing parentheses after if condition");
+        ensureAndGetToken(token == Lexer::BRACE_OPEN, "Expected opening braces after if condition");
+        // optionally handle assignments
+        ASTPtr assignBlock(new ASTNode("assignBlock",condition));
+        while(token == Lexer::IDENT){
+            assignBlock->addChild(assign());
+        }
+        ensureAndGetToken(token == Lexer::BRACE_CLOSE, "Expected opening braces after statements");
+
+        if(token == Lexer::ELSE){
+            assignBlock->addChild(ifthenelse());
+        }else{
+            ASTPtr emptyNode(new ASTNode("empty"));
+            assignBlock->addChild(std::move(emptyNode));
+        } 
+        return assignBlock;
     }
 
 private:
     Lexer lexer;
     Lexer::Token token; // current token
     Lexer::Token lookAheadToken; // next token
+    std::array<int,2> tokenPosition;
+    std::array<int,2> lookAheadTokenPosition;
     std::string tokenText;
     std::string lookAheadTokenText;
 };
