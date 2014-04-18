@@ -10,6 +10,7 @@
 #include <sstream>
 #include <cassert>
 #include <array>
+#include <cstring>
 
 
 struct ParseError{
@@ -105,7 +106,6 @@ public:
 
         std::string markToCurr() const{
             std::string stringOut(start,curr);
-            std::cerr<<"buf is len "<<strlen(buf)<<std::endl;
             //std::copy(start,curr,stringOut.begin());
             return stringOut;
         }
@@ -118,18 +118,25 @@ public:
         }
 
         std::string underlineToken(const std::array<int,2>& position) const{
-            std::cerr<<"--buf is "<<std::endl;
             int bufLen=strlen(buf);
             assert(position[0] > 0 && position[0] < bufLen);
             assert(position[1] > 0 && position[1] < bufLen);
             const char *startLine = buf+position[0], *endLine = buf+position[1];
             int offset=0;
-            for(; start > buf && *startLine != '\n'; startLine--, offset++);
+            for(; start > buf && *startLine!='\n'; startLine--, offset++){
+                if(*startLine=='\n'){
+                    offset--;
+                    startLine++;
+                    break;
+                }
+            }
             for(;  *endLine != '\0' && *endLine != '\n'; endLine++);
             std::cerr<<"startLine "<<start<<std::endl;
-            std::string newString(startLine,endLine); //-startLine+1);
+            std::string newString(startLine+1,endLine); //-startLine+1);
             std::stringstream ss;
-            ss<<"Line "<<line<<": "<<newString<<"\n"<<std::string(offset,' ')<<std::string(curr-start+1,'-');
+            ss<<"Line "<<line<<": \n\n"<<newString<<"\n";
+            ss<<std::string(offset-1,' ')<<std::string(std::max(1,position[1]-position[0]),'^')<<"\n";
+            ss<<std::string(offset-1,'_')<<std::string(std::max(1,position[1]-position[0]),'|')<<"\n";
             return ss.str();
         }
 

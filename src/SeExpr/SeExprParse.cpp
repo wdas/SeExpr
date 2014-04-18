@@ -9,7 +9,7 @@ public:
     struct Adder{
         void sequence(){}
         template<typename T,typename... Targs> void sequence(T&& guy,Targs&&... args){
-            adder.emplace_back(std::move(guy));
+            container.emplace_back(std::move(guy));
             sequence(args...);
         }
         Adder(std::vector<std::unique_ptr<ASTNode>>& container):container(container){}
@@ -32,10 +32,29 @@ public:
         return ret;
     }
 
-    void print(std::ostream& out, int indent){
-        out<<std::string(indent,' ')<<_name<<"\n";
+    void print(std::ostream& out, int indent=1, unsigned int mask=0){
+        if(indent != 1){
+             out<<"   ";
+            for(int i=1;i<indent-1;i++){
+                if((mask&(1<<i))!=0) out<<"   ";
+                else out<<"  "<<"\xe2\x94\x82";;
+            }
+            out<<"  ";
+            if((mask & (1<<(indent-1))) != 0){
+                out<<"\xe2\x94\x94";
+            }else{
+                out<<"\xe2\x94\x9c";
+            }
+            out<<"\xe2\x94\x80 ";
+        }else{
+            out<<"   ";
+        }
+        //out<<std::string(indent*4,' ')<<"|- "<<_name<<"\n";
+        out<<_name<<std::endl;
         for(auto it=_children.begin(); it!=_children.end(); ++it){
-            (*it)->print(out,indent+1);
+            int isEnd=it+1==_children.end() ? 1 : 0;
+            unsigned int newMask = mask | (int(isEnd) << (indent));
+            (*it)->print(out,indent+1,newMask);
         }
     }
 private:
@@ -49,7 +68,7 @@ typedef std::unique_ptr<ASTNode> ASTPtr;
 class SeParser{
 public:
     SeParser(const std::string& inputString)
-    :lexer(inputString.c_str())
+    :lexer(inputString.c_str()), lookAheadToken(Lexer::END_OF_BUFFER), lookAheadTokenText(""), lookAheadTokenPosition(std::array<int,2>{0,0})
     {
 
     }
@@ -58,7 +77,6 @@ public:
         token=lookAheadToken;
         tokenText=lookAheadTokenText;
         tokenPosition=lookAheadTokenPosition;
-        std::cerr<<"Token is '"<<tokenText<<"' at "<<tokenPosition[0]<<std::endl;
         lookAheadToken=lexer.getToken();
         lookAheadTokenText=lexer.getTokenText();
         lookAheadTokenPosition=lexer.getTokenPosition();
@@ -68,14 +86,19 @@ public:
         std::cerr<<"we!"<<std::endl;
         getToken(); 
         getToken();
-        module();
-    }
+        ASTPtr tree = module();
+        tree->print(std::cout);
+    }  
 
-    void module(){
+    ASTPtr module(){
         //std::cerr<<"we!"<<std::endl;
         //std::cerr<<"tok is "<<Lexer::getTokenName(token)<<" '"<<lexer.getTokenText()<<"'"<<std::endl;;
-        while(token==Lexer::DEF) declaration();
-        block();
+        ASTPtr moduleTree(new ASTNode("module"));
+        while(token==Lexer::DEF){
+            moduleTree->addChild(declaration());
+        }
+        moduleTree->addChild(block());
+        return moduleTree;
     }
 
 #if 0
@@ -93,13 +116,15 @@ public:
         ensure(value, msg);
         getToken();
     }
-    void declaration(){
+    ASTPtr declaration(){
         ensureAndGetToken(token==Lexer::DEF, "Expected the word 'def' in declaration");
         if(token!=Lexer::IDENT) typeDeclare();
         ensureAndGetToken(token==Lexer::IDENT, "Expected identifier");
         ensure(token==Lexer::PAREN_OPEN, "Expected open parentheses for function declaration");
         typeList();
         ensureAndGetToken(token==Lexer::PAREN_CLOSE, "Expected close parentheses for function declaration");
+        // TODO: fix
+        return ASTPtr(new ASTNode("blah"));
     }
 
     void typeDeclare(){
@@ -138,7 +163,7 @@ public:
                 break; // done with the top part
         }
         ret->addChild(expr());
-        ret->print(std::cout,0);
+        //ret->print(std::cout);
         return ret;
     }
 
@@ -359,26 +384,33 @@ public:
         return assignNode;
     }
 
+    ASTPtr assignBlock(){
+        ASTPtr assigns(new ASTNode("assigns"));
+        ensureAndGetToken(token == Lexer::BRACE_OPEN, "Expected opening braces after if condition");
+        while(token == Lexer::IDENT){
+            assigns->addChild(assign());
+        }
+        ensureAndGetToken(token == Lexer::BRACE_CLOSE, "Expected opening braces after statements");
+        return assigns;
+    }
+
     ASTPtr ifthenelse(){
         ensureAndGetToken(token == Lexer::IF, "Expected if at begin of if then else");
         ensureAndGetToken(token == Lexer::PAREN_OPEN, "Expected open parentheses after if");
         ASTPtr condition=expr();
         ensureAndGetToken(token == Lexer::PAREN_CLOSE, "Expected closing parentheses after if condition");
-        ensureAndGetToken(token == Lexer::BRACE_OPEN, "Expected opening braces after if condition");
         // optionally handle assignments
-        ASTPtr assignBlock(new ASTNode("assignBlock",condition));
-        while(token == Lexer::IDENT){
-            assignBlock->addChild(assign());
-        }
-        ensureAndGetToken(token == Lexer::BRACE_CLOSE, "Expected opening braces after statements");
-
+        ASTPtr ifthenelseNode(new ASTNode("ifthenelse",condition));
+        ifthenelseNode->addChild(assignBlock());
         if(token == Lexer::ELSE){
-            assignBlock->addChild(ifthenelse());
+            getToken();
+            if(token == Lexer::IF) ifthenelseNode->addChild(ifthenelse());
+            else ifthenelseNode->addChild(assignBlock());
         }else{
             ASTPtr emptyNode(new ASTNode("empty"));
-            assignBlock->addChild(std::move(emptyNode));
+            ifthenelseNode->addChild(std::move(emptyNode));
         } 
-        return assignBlock;
+        return ifthenelseNode;
     }
 
 private:
@@ -399,7 +431,7 @@ int main(int argc,char*argv[])
     std::string content((std::istreambuf_iterator<char>(ifs)),
         std::istreambuf_iterator<char>());
     std::cerr<<"PARSING! '"<<content<<"'"<<std::endl;;
-    SeParser parser(content.c_str());
+    SeParser parser(content);
     try{
         parser.parse();
     }catch(const ParseError& e){
