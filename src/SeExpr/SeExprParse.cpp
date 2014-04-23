@@ -69,33 +69,34 @@ struct ASTPolicy{
     typedef ASTNode Base;
     typedef std::unique_ptr<ASTNode> Ptr;
 
-/// Policy which provides all the AST Types for the parser.
-class SeExprNodePolicy{
-    typedef SeExprNode Base;
-    typedef std::unique_ptr<Base*> Ptr;
-
-    typedef SeExprModuleNode Module;
-    typedef SeExprPrototypeNode Prototype;
-    typedef SeExprLocalFunctionNode LocalFunction;
-    typedef SeExprBlockNode Block;
-    typedef SeExprIfThenElseNode IfThenElse;
-    typedef SeExprAssignNode Assign;
-    typedef SeExprVecNode Vec;
-    typedef SeExprUnaryOpNode UnaryOp;
-    typedef SeExprCondNode Cond;    
-    typedef SeExprCompareEqNode CompareEq;
-    typedef SeExprCompareNode Compare;
-    typedef SeExprBinaryOpNode BinaryOp;
-    typedef SeExprVarNode Var;
-    typedef SeExprNumNode Num;
-    typedef SeExprStrNode Str;
-    typedef SeExprFuncNode Func;
-};
-
-
-    struct Module : public Base {
-        template<typename...Args> Module(Targs&&...args):Base("module",args...) {}
+#define SEEXPR_AST_SUBCLASS(name) \
+    struct name : public Base { \
+        template<typename...Args> name(Args&&...args):Base(#name,args...) {} \
     };
+#define SEEXPR_AST_SUBCLASS_OP(name) \
+    struct name : public Base { \
+        template<typename...Args> name(char op,Args&&...args):Base(std::string(#name)+op ,args...) {} \
+    };
+    SEEXPR_AST_SUBCLASS(Module);
+    SEEXPR_AST_SUBCLASS(Prototype);
+    SEEXPR_AST_SUBCLASS(LocalFunction);
+    SEEXPR_AST_SUBCLASS(Block);
+    //SEEXPR_AST_SUBCLASS(Node);
+    SEEXPR_AST_SUBCLASS(IfThenElse);
+    SEEXPR_AST_SUBCLASS(Assign);
+    SEEXPR_AST_SUBCLASS(Vec);
+    //SEEXPR_AST_SUBCLASS(UnaryOp);
+    SEEXPR_AST_SUBCLASS(Cond);
+    //SEEXPR_AST_SUBCLASS(CompareEq);
+    SEEXPR_AST_SUBCLASS(Compare);
+    //SEEXPR_AST_SUBCLASS(BinaryOp);
+    SEEXPR_AST_SUBCLASS_OP(UnaryOp);
+    SEEXPR_AST_SUBCLASS_OP(BinaryOp);
+    SEEXPR_AST_SUBCLASS_OP(CompareEq);
+    SEEXPR_AST_SUBCLASS(Var);
+    SEEXPR_AST_SUBCLASS(Num);
+    SEEXPR_AST_SUBCLASS(Str);
+    SEEXPR_AST_SUBCLASS(Func);
 };
 
 
@@ -103,6 +104,7 @@ typedef std::unique_ptr<ASTNode> ASTPtr;
 
 template<class Policy>
 class SeParser{
+    typedef typename Policy::Ptr NodePtr;
 public:
     SeParser(const std::string& inputString)
     :lexer(inputString.c_str()), lookAheadToken(Lexer::END_OF_BUFFER), lookAheadTokenText(""), lookAheadTokenPosition(std::array<int,2>{0,0})
@@ -119,18 +121,19 @@ public:
         lookAheadTokenPosition=lexer.getTokenPosition();
     }
 
-    void parse(){
+    NodePtr parse(){
         std::cerr<<"we!"<<std::endl;
         getToken(); 
         getToken();
-        ASTPtr tree = module();
+        NodePtr tree = module();
         tree->print(std::cout);
+        return tree;
     }  
 
-    ASTPtr module(){
+    NodePtr module(){
         //std::cerr<<"we!"<<std::endl;
         //std::cerr<<"tok is "<<Lexer::getTokenName(token)<<" '"<<lexer.getTokenText()<<"'"<<std::endl;;
-        ASTPtr moduleTree(new ASTNode("module"));
+        NodePtr moduleTree(new typename Policy::Module());
         while(token==Lexer::DEF){
             moduleTree->addChild(declaration());
         }
@@ -153,7 +156,7 @@ public:
         ensure(value, msg);
         getToken();
     }
-    ASTPtr declaration(){
+    NodePtr declaration(){
         ensureAndGetToken(token==Lexer::DEF, "Expected the word 'def' in declaration");
         if(token!=Lexer::IDENT) typeDeclare();
         ensureAndGetToken(token==Lexer::IDENT, "Expected identifier");
@@ -161,7 +164,7 @@ public:
         typeList();
         ensureAndGetToken(token==Lexer::PAREN_CLOSE, "Expected close parentheses for function declaration");
         // TODO: fix
-        return ASTPtr(new ASTNode("blah"));
+        return NodePtr(new ASTNode("blah"));
     }
 
     void typeDeclare(){
@@ -189,8 +192,8 @@ public:
                 || t == Lexer::MOD_EQUAL || t == Lexer::POWER_EQUAL;
     }
 
-    ASTPtr block(){
-        ASTPtr ret(new ASTNode("block"));
+    NodePtr block(){
+        NodePtr ret(new typename Policy::Block());
         while(1){
             if(token == Lexer::IF) 
                 ret->addChild(ifthenelse());
@@ -221,8 +224,8 @@ public:
 */
 
     // expr:  expr1 { -> IDENT (args) }*
-    ASTPtr expr(){
-        ASTPtr parent=expr1();
+    NodePtr expr(){
+        NodePtr parent=expr1();
         while(token==Lexer::ARROW){
             getToken();
             ensureAndGetToken(token==Lexer::IDENT, "Expected identifier");
@@ -234,17 +237,17 @@ public:
     }
 
     // expr1: expr2 { ? expr2 : expr2 }*
-    ASTPtr expr1(){
+    NodePtr expr1(){
         return expr2(); // TODO: put in other crap
     }
 
     // expr2: expr3 { OR expr3 }*
-    ASTPtr expr2(){
-        ASTPtr curr=expr3();
+    NodePtr expr2(){
+        NodePtr curr=expr3();
         while(token==Lexer::OR){
             std::string text=tokenText;
             getToken();
-            curr=ASTPtr(new ASTNode(text,std::move(curr),expr3())) ;
+            curr=NodePtr(new ASTNode(text,std::move(curr),expr3())) ;
         }
         return curr;
     }
@@ -283,25 +286,27 @@ public:
     }
 
     // expr6: expr7 { +|- expr7}*
-    ASTPtr expr6(){
-        ASTPtr curr=expr7();
+    NodePtr expr6(){
+        NodePtr curr=expr7();
         while(token==Lexer::PLUS || token==Lexer::MINUS){
+            char code=token==Lexer::PLUS ? '+' : '-';
             std::string text=tokenText;
             getToken();
-            ASTPtr newChild=expr7();
-            curr=ASTPtr(new ASTNode(text,std::move(curr),std::move(newChild))) ;
+            NodePtr newChild=expr7();
+            curr=NodePtr(new typename Policy::BinaryOp(code,std::move(curr),std::move(newChild))) ;
         }
         return curr;
     }
 
     // expr7: expr8 { *|/|% expr8}*
-    ASTPtr expr7(){
-        ASTPtr curr=expr8();
+    NodePtr expr7(){
+        NodePtr curr=expr8();
         while(token==Lexer::TIMES || token==Lexer::DIVIDE || token==Lexer::MOD){
+            char code=token==Lexer::TIMES ? '*' : (token == Lexer::DIVIDE ? '/' : '%');
             std::string text=tokenText;
             getToken();
-            ASTPtr newChild=expr8();
-            curr=ASTPtr(new ASTNode(text,std::move(curr),std::move(newChild))) ;
+            NodePtr newChild=expr8();
+            curr=NodePtr(new typename Policy::BinaryOp(code,std::move(curr),std::move(newChild))) ;
         }
         return curr;
     }
@@ -468,7 +473,7 @@ int main(int argc,char*argv[])
     std::string content((std::istreambuf_iterator<char>(ifs)),
         std::istreambuf_iterator<char>());
     std::cerr<<"PARSING! '"<<content<<"'"<<std::endl;;
-    SeParser parser(content);
+    SeParser<ASTPolicy> parser(content);
     try{
         parser.parse();
     }catch(const ParseError& e){
