@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 
+
 class ASTNode{
 public:
     /// Allows adding arbitary number of items to a container holding unique_ptrs
@@ -63,8 +64,44 @@ private:
     std::vector<std::unique_ptr<ASTNode>> _children;
 };
 
+
+struct ASTPolicy{
+    typedef ASTNode Base;
+    typedef std::unique_ptr<ASTNode> Ptr;
+
+/// Policy which provides all the AST Types for the parser.
+class SeExprNodePolicy{
+    typedef SeExprNode Base;
+    typedef std::unique_ptr<Base*> Ptr;
+
+    typedef SeExprModuleNode Module;
+    typedef SeExprPrototypeNode Prototype;
+    typedef SeExprLocalFunctionNode LocalFunction;
+    typedef SeExprBlockNode Block;
+    typedef SeExprIfThenElseNode IfThenElse;
+    typedef SeExprAssignNode Assign;
+    typedef SeExprVecNode Vec;
+    typedef SeExprUnaryOpNode UnaryOp;
+    typedef SeExprCondNode Cond;    
+    typedef SeExprCompareEqNode CompareEq;
+    typedef SeExprCompareNode Compare;
+    typedef SeExprBinaryOpNode BinaryOp;
+    typedef SeExprVarNode Var;
+    typedef SeExprNumNode Num;
+    typedef SeExprStrNode Str;
+    typedef SeExprFuncNode Func;
+};
+
+
+    struct Module : public Base {
+        template<typename...Args> Module(Targs&&...args):Base("module",args...) {}
+    };
+};
+
+
 typedef std::unique_ptr<ASTNode> ASTPtr;
 
+template<class Policy>
 class SeParser{
 public:
     SeParser(const std::string& inputString)

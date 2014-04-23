@@ -624,4 +624,27 @@ private:
     mutable Data* _data;
 };
 
+/// Policy which provides all the AST Types for the parser.
+class SeExprNodePolicy{
+    typedef SeExprNode Base;
+    typedef std::unique_ptr<Base*> Ptr;
+
+    typedef SeExprModuleNode Module;
+    typedef SeExprPrototypeNode Prototype;
+    typedef SeExprLocalFunctionNode LocalFunction;
+    typedef SeExprBlockNode Block;
+    typedef SeExprIfThenElseNode IfThenElse;
+    typedef SeExprAssignNode Assign;
+    typedef SeExprVecNode Vec;
+    typedef SeExprUnaryOpNode UnaryOp;
+    typedef SeExprCondNode Cond;    
+    typedef SeExprCompareEqNode CompareEq;
+    typedef SeExprCompareNode Compare;
+    typedef SeExprBinaryOpNode BinaryOp;
+    typedef SeExprVarNode Var;
+    typedef SeExprNumNode Num;
+    typedef SeExprStrNode Str;
+    typedef SeExprFuncNode Func;
+};
+
 #endif
