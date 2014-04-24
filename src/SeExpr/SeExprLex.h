@@ -76,8 +76,8 @@ public:
 
     struct Buffer{
 
-        Buffer(const char* bufIn)
-        :buf(bufIn),curr(buf)
+        Buffer(const std::string& bufIn)
+        :text(bufIn),buf(text.c_str()),curr(buf)
         {}
         // read current character
         char operator()() const{return *curr;}
@@ -123,7 +123,7 @@ public:
             assert(position[1] > 0 && position[1] < bufLen);
             const char *startLine = buf+position[0], *endLine = buf+position[1];
             int offset=0;
-            for(; start > buf && *startLine!='\n'; startLine--, offset++){
+            for(; startLine > buf && *startLine!='\n'; startLine--, offset++){
                 if(*startLine=='\n'){
                     offset--;
                     startLine++;
@@ -141,6 +141,7 @@ public:
         }
 
     private:
+        std::string text;
         const char* buf;
         const char* curr;
         const char* start;
@@ -149,7 +150,7 @@ public:
     };
 
 
-    Lexer(const char* bufIn)
+    Lexer(const std::string& bufIn)
     :buffer(bufIn)
     {
         populateReservedWords();

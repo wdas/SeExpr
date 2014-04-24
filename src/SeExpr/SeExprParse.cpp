@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 
-
+/// A Simple AST class for representing SeExpr, useful for editors
 class ASTNode{
 public:
     /// Allows adding arbitary number of items to a container holding unique_ptrs
@@ -51,12 +51,15 @@ public:
             out<<"   ";
         }
         //out<<std::string(indent*4,' ')<<"|- "<<_name<<"\n";
-        out<<_name<<std::endl;
+        out<<display()<<std::endl;
         for(auto it=_children.begin(); it!=_children.end(); ++it){
             int isEnd=it+1==_children.end() ? 1 : 0;
             unsigned int newMask = mask | (int(isEnd) << (indent));
             (*it)->print(out,indent+1,newMask);
         }
+    }
+    virtual std::string display() const{
+        return _name;
     }
 private:
     std::string _name;
@@ -81,22 +84,43 @@ struct ASTPolicy{
     SEEXPR_AST_SUBCLASS(Prototype);
     SEEXPR_AST_SUBCLASS(LocalFunction);
     SEEXPR_AST_SUBCLASS(Block);
-    //SEEXPR_AST_SUBCLASS(Node);
+    SEEXPR_AST_SUBCLASS(Node);
     SEEXPR_AST_SUBCLASS(IfThenElse);
-    SEEXPR_AST_SUBCLASS(Assign);
     SEEXPR_AST_SUBCLASS(Vec);
-    //SEEXPR_AST_SUBCLASS(UnaryOp);
     SEEXPR_AST_SUBCLASS(Cond);
-    //SEEXPR_AST_SUBCLASS(CompareEq);
     SEEXPR_AST_SUBCLASS(Compare);
-    //SEEXPR_AST_SUBCLASS(BinaryOp);
     SEEXPR_AST_SUBCLASS_OP(UnaryOp);
     SEEXPR_AST_SUBCLASS_OP(BinaryOp);
     SEEXPR_AST_SUBCLASS_OP(CompareEq);
-    SEEXPR_AST_SUBCLASS(Var);
-    SEEXPR_AST_SUBCLASS(Num);
-    SEEXPR_AST_SUBCLASS(Str);
     SEEXPR_AST_SUBCLASS(Func);
+    SEEXPR_AST_SUBCLASS(Subscript);
+
+    struct Str : public Base {
+        Str(const std::string& s): Base("string"),s(s){}
+        std::string s;
+    };
+
+    struct Num : public Base {
+        Num(double num) :Base("num"),num(num) {}
+        double num;
+        std::string display() const{return std::string("num")+" "+std::to_string(num);}
+    };
+
+    struct Var : public  Base {
+        Var(const std::string& var):Base("var"),var(var)
+        {}
+        std::string var;
+        std::string display() const{return std::string("var")+" '"+var+"'";}
+    };
+
+    struct Assign : public Base {
+        Assign(const std::string& var, Ptr node)
+            :Base("assign",std::move(node)),var(var)
+        {}
+        std::string display() const{return std::string("assign ")+" '"+var+"'";}
+        std::string var;
+    };
+
 };
 
 
@@ -107,7 +131,7 @@ class SeParser{
     typedef typename Policy::Ptr NodePtr;
 public:
     SeParser(const std::string& inputString)
-    :lexer(inputString.c_str()), lookAheadToken(Lexer::END_OF_BUFFER), lookAheadTokenText(""), lookAheadTokenPosition(std::array<int,2>{0,0})
+    :lexer(inputString), lookAheadToken(Lexer::END_OF_BUFFER), lookAheadTokenText(""), lookAheadTokenPosition(std::array<int,2>{{0,0}})
     {
 
     }
@@ -253,34 +277,40 @@ public:
     }
 
     // expr3: expr4 { AND expr4 }*
-    ASTPtr expr3(){
-        ASTPtr curr=expr4();
+    NodePtr expr3(){
+        NodePtr curr=expr4();
         while(token==Lexer::AND){
             std::string text=tokenText;
             getToken();
-            curr=ASTPtr(new ASTNode(text,std::move(curr),expr4())) ;
+            curr=NodePtr(new typename Policy::BinaryOp('&',std::move(curr),expr4())) ;
         }
         return curr;
     }
 
     // expr4: expr5 { EQ|NE expr5 }*
-    ASTPtr expr4(){
-        ASTPtr curr=expr5();
+    NodePtr expr4(){
+        NodePtr curr=expr5();
         while(token==Lexer::EQUALS || token==Lexer::NOT_EQUALS){
             std::string text=tokenText;
             getToken();
-            curr=ASTPtr(new ASTNode(text,std::move(curr),expr5())) ;
+            curr=NodePtr(new typename Policy::BinaryOp('|',std::move(curr),expr5())) ;
         }
         return curr;
     }
 
     // expr5: expr6 { <|<=|>|>= expr6 }*
-    ASTPtr expr5(){
-        ASTPtr curr=expr6();
-        while(token==Lexer::LESS || token==Lexer::LESS_EQUAL || token==Lexer::GREATER || token==Lexer::GREATER_EQUAL){
+    NodePtr expr5(){
+        NodePtr curr=expr6();
+        while(1){
+            char op=' ';
+            if(token == Lexer::LESS) op='<';
+            else if(token == Lexer::LESS_EQUAL) op='l';
+            else if(token == Lexer::GREATER) op='>';
+            else if(token == Lexer::GREATER_EQUAL) op='g';
+            else break;
             std::string text=tokenText;
             getToken();
-            curr=ASTPtr(new ASTNode(text,std::move(curr),expr6())) ;
+            curr=NodePtr(new typename Policy::BinaryOp(op,std::move(curr),expr6())) ;
         }
         return curr;
     }
@@ -312,16 +342,22 @@ public:
     }
 
     // expr8: {!|~|-|+}* expr9
-    ASTPtr expr8(){
-        ASTPtr parent;
-        ASTNode* curr=0;
-        while(token==Lexer::TWIDLE || token==Lexer::NOT || token==Lexer::MINUS || token==Lexer::PLUS){
-            ASTPtr op(new ASTNode(tokenText));
+    NodePtr expr8(){
+        NodePtr parent;
+        typename Policy::Base* curr=0;
+        while(1){
+            char op=' ';
+            if(token==Lexer::TWIDLE) op='~';
+            else if(token==Lexer::NOT) op='!';
+            else if(token==Lexer::MINUS) op='-';
+            else if(token==Lexer::PLUS) op='+';
+            else break;
+            NodePtr unaryOp(new typename Policy::UnaryOp(op));
             if(!parent){
-                parent=std::move(op);
+                parent=std::move(unaryOp);
                 curr=parent.get();
             }else{
-                curr=curr->addChild(std::move(op));
+                curr=curr->addChild(std::move(unaryOp));
             }
             getToken();
         }
@@ -332,29 +368,29 @@ public:
     }
 
     //expr9: {expr10 ^}* expr10
-    ASTPtr expr9(){
-        ASTPtr parent=expr10();
-        ASTNode* curr=0;
+    NodePtr expr9(){
+        NodePtr parent=expr10();
+        typename Policy::Base* curr=0;
         while(token==Lexer::POWER){
             getToken();
-            ASTPtr newNode=expr10();
+            NodePtr newNode=expr10();
             if(!curr){
-                parent=ASTPtr(new ASTNode("^",parent,newNode));
+                parent=NodePtr(new typename Policy::BinaryOp('^',parent,newNode));
                 curr=parent.get();
             }else{
-                ASTPtr oldNode = curr->removeChild();
-                curr=curr->addChild(ASTPtr(new ASTNode("^",oldNode,newNode)));
+                NodePtr oldNode = curr->removeChild();
+                curr=curr->addChild(NodePtr(new typename Policy::BinaryOp('^',oldNode,newNode)));
             }
         }
         return parent;
     }
 
     // expr10: expr11 { [ expr ] }*
-    ASTPtr expr10(){
-        ASTPtr curr=expr11();
+    NodePtr expr10(){
+        NodePtr curr=expr11();
         while(token==Lexer::BRACKET_OPEN){
             getToken();
-            ASTPtr combined=ASTPtr(new ASTNode("bracket",std::move(curr),expr()));
+            NodePtr combined=NodePtr(new typename Policy::Subscript(std::move(curr),expr()));
             curr=std::move(combined);
             ensureAndGetToken(token==Lexer::BRACKET_CLOSE, "Did not get closing bracket to subscripting operator");
         }
@@ -362,33 +398,34 @@ public:
     }
 
     // expr11: (expr) | NUM | IDENT | IDENT (args) | STR | '[' expr {, expr}* ']'
-    ASTPtr expr11(){
+    NodePtr expr11(){
         if(token==Lexer::PAREN_OPEN){
             getToken();
-            ASTPtr ret=expr();
+            NodePtr ret=expr();
             ensureAndGetToken(token==Lexer::PAREN_CLOSE,"Expect closing parentheses after sub-expression");
             return ret;
         }else if(token==Lexer::NUM){
             std::string numStr=tokenText;
             getToken();
-            return ASTPtr(new ASTNode("NUM = "+numStr));
+            return NodePtr(new typename Policy::Num(atof(numStr.c_str())));
         }else if(token==Lexer::IDENT){
-            ASTPtr callNode(new ASTNode("CALL"));
+            NodePtr callNode(new ASTNode("CALL"));
+            std::string identName = tokenText;
             getToken();
             if(token==Lexer::PAREN_OPEN){
                 getToken();
                 callNode->addChild(functionArgs(nullptr));
                 ensureAndGetToken(token==Lexer::PAREN_CLOSE, "Expected ending parentheses after function call arguments");
             }else{
-                return ASTPtr(new ASTNode("IDENT"));
+                return NodePtr(new typename Policy::Var(identName));
             }
             return callNode;
         }else if(token==Lexer::STRING){
             // TODO: do something with string
-            return ASTPtr(new ASTNode("STRING"));
+            return NodePtr(new typename Policy::Str(tokenText));
         }else if(token==Lexer::BRACKET_OPEN){
             getToken();
-            ASTPtr vec(new ASTNode("vector"));
+            NodePtr vec(new typename Policy::Vec());
             vec->addChild(expr());
             while(token==Lexer::COMMA){
                 getToken    ();
@@ -402,9 +439,9 @@ public:
         return 0;
     }
 
-    ASTPtr functionArgs(ASTPtr firstArgumentForCurry){
+    NodePtr functionArgs(NodePtr firstArgumentForCurry){
         // TODO: fix
-        ASTPtr args(new ASTNode("args"));
+        NodePtr args(new typename Policy::Node());
         if(firstArgumentForCurry) args->addChild(std::move(firstArgumentForCurry));
         while(token != Lexer::PAREN_CLOSE){
             args->addChild(expr());
@@ -414,20 +451,22 @@ public:
         return args;
     }
 
-    ASTPtr assign(){
+    NodePtr assign(){
         ensure(token == Lexer::IDENT, "Expected identifier at begin of assignment");
+        std::string varName=tokenText;
         getToken();
         ensure(isAssignOrMutator(token), "Expected mutator on assignment (got '')"+tokenText);
         getToken();
-        ASTPtr e=expr();
-        ASTPtr assignNode(new ASTNode("assign",e));
+        NodePtr e=expr();
+
+        NodePtr assignNode(new typename Policy::Assign(varName,std::move(e)))   ;
         ensure(token == Lexer::SEMICOLON, "Expected semi-colon at end of assignment");
         getToken();
         return assignNode;
     }
 
     ASTPtr assignBlock(){
-        ASTPtr assigns(new ASTNode("assigns"));
+        ASTPtr assigns(new typename Policy::Node());
         ensureAndGetToken(token == Lexer::BRACE_OPEN, "Expected opening braces after if condition");
         while(token == Lexer::IDENT){
             assigns->addChild(assign());
@@ -465,7 +504,7 @@ private:
     std::string lookAheadTokenText;
 };
 
-#ifdef TEST_PARSER
+//#ifdef TEST_PARSER
 
 int main(int argc,char*argv[])
 {
@@ -481,4 +520,4 @@ int main(int argc,char*argv[])
     }
     return 0;
 }
-#endif
+//#endif
