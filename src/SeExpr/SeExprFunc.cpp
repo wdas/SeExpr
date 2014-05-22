@@ -208,11 +208,7 @@ SeExprFunc::getDocString(const char* functionName)
 
 #ifndef SEEXPR_WIN32
 
-#ifdef __APPLE__
-static int MatchPluginName(struct dirent* dir)
-#else
 static int MatchPluginName(const struct dirent* dir)
-#endif
 {
     const char* name = dir->d_name;
     // return true if name matches SeExpr*.so
