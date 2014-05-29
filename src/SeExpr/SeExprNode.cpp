@@ -1,36 +1,18 @@
 /*
- SEEXPR SOFTWARE
- Copyright 2011 Disney Enterprises, Inc. All rights reserved
- 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are
- met:
- 
- * Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- 
- * Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in
- the documentation and/or other materials provided with the
- distribution.
- 
- * The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
- Studios" or the names of its contributors may NOT be used to
- endorse or promote products derived from this software without
- specific prior written permission from Walt Disney Pictures.
- 
- Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
- CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
- BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
- FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
- IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Copyright Disney Enterprises, Inc.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
+*
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
 */
 
 #ifndef MAKEDEPEND
@@ -49,27 +31,27 @@
 //TODO: logical operations like foo<bar should they do vector returns... right now no... implicit demote
 //TODO: local function evaluation
 //TODO: buildInterpreter for higher level nodes so the return location can be routed back
-//TODO: SeExprFuncNode interpreter stuff
+//TODO: ExprFuncNode interpreter stuff
 //TODO: check each node for possibility of strings
 
 
+namespace SeExpr2 {
 
-
-SeExprNode::SeExprNode(const SeExpression* expr)
+ExprNode::ExprNode(const Expression* expr)
     : _expr(expr), _parent(0), _isVec(0)
 {
 }
 
 
-SeExprNode::SeExprNode(const SeExpression* expr,
-                       const SeExprType & type)
+ExprNode::ExprNode(const Expression* expr,
+                       const ExprType & type)
     : _expr(expr), _parent(0), _isVec(0), _type(type)
 {
 }
 
 
-SeExprNode::SeExprNode(const SeExpression* expr,
-                       SeExprNode* a)
+ExprNode::ExprNode(const Expression* expr,
+                       ExprNode* a)
     : _expr(expr), _parent(0), _isVec(0)
 {
     _children.reserve(1);
@@ -77,9 +59,9 @@ SeExprNode::SeExprNode(const SeExpression* expr,
 }
 
 
-SeExprNode::SeExprNode(const SeExpression* expr,
-                       SeExprNode* a,
-                       const SeExprType & type)
+ExprNode::ExprNode(const Expression* expr,
+                       ExprNode* a,
+                       const ExprType & type)
     : _expr(expr), _parent(0), _isVec(0), _type(type)
 {
     _children.reserve(1);
@@ -87,9 +69,9 @@ SeExprNode::SeExprNode(const SeExpression* expr,
 }
 
 
-SeExprNode::SeExprNode(const SeExpression* expr,
-                       SeExprNode* a,
-                       SeExprNode* b)
+ExprNode::ExprNode(const Expression* expr,
+                       ExprNode* a,
+                       ExprNode* b)
     : _expr(expr), _parent(0), _isVec(0)
 {
     _children.reserve(2);
@@ -98,10 +80,10 @@ SeExprNode::SeExprNode(const SeExpression* expr,
 }
 
 
-SeExprNode::SeExprNode(const SeExpression* expr,
-                       SeExprNode* a,
-                       SeExprNode* b,
-                       const SeExprType & type)
+ExprNode::ExprNode(const Expression* expr,
+                       ExprNode* a,
+                       ExprNode* b,
+                       const ExprType & type)
     : _expr(expr), _parent(0), _isVec(0), _type(type)
 {
     _children.reserve(2);
@@ -110,10 +92,10 @@ SeExprNode::SeExprNode(const SeExpression* expr,
 }
 
 
-SeExprNode::SeExprNode(const SeExpression* expr,
-                       SeExprNode* a,
-                       SeExprNode* b,
-		       SeExprNode* c)
+ExprNode::ExprNode(const Expression* expr,
+                       ExprNode* a,
+                       ExprNode* b,
+		       ExprNode* c)
     : _expr(expr), _parent(0), _isVec(0)
 {
     _children.reserve(3);
@@ -123,11 +105,11 @@ SeExprNode::SeExprNode(const SeExpression* expr,
 }
 
 
-SeExprNode::SeExprNode(const SeExpression* expr,
-                       SeExprNode* a,
-                       SeExprNode* b,
-		       SeExprNode* c,
-                       const SeExprType & type)
+ExprNode::ExprNode(const Expression* expr,
+                       ExprNode* a,
+                       ExprNode* b,
+		       ExprNode* c,
+                       const ExprType & type)
     : _expr(expr), _parent(0), _isVec(0), _type(type)
 {
     _children.reserve(3);
@@ -137,17 +119,17 @@ SeExprNode::SeExprNode(const SeExpression* expr,
 }
 
 
-SeExprNode::~SeExprNode()
+ExprNode::~ExprNode()
 {
     // delete children
-    std::vector<SeExprNode*>::iterator iter;
+    std::vector<ExprNode*>::iterator iter;
     for (iter = _children.begin(); iter != _children.end(); iter++)
 	delete *iter;
 }
 
 
 void
-SeExprNode::addChild(SeExprNode* child)
+ExprNode::addChild(ExprNode* child)
 {
     _children.push_back(child);
     child->_parent = this;
@@ -155,9 +137,9 @@ SeExprNode::addChild(SeExprNode* child)
 
 
 void
-SeExprNode::addChildren(SeExprNode* surrogate)
+ExprNode::addChildren(ExprNode* surrogate)
 {
-    std::vector<SeExprNode*>::iterator iter;
+    std::vector<ExprNode*>::iterator iter;
     for (iter = surrogate->_children.begin();
 	 iter != surrogate->_children.end();
 	 iter++)
@@ -170,9 +152,9 @@ SeExprNode::addChildren(SeExprNode* surrogate)
 
 
 void
-SeExprNode::addChildren_without_delete(SeExprNode* surrogate)
+ExprNode::addChildren_without_delete(ExprNode* surrogate)
 {
-    std::vector<SeExprNode*>::iterator iter;
+    std::vector<ExprNode*>::iterator iter;
     for (iter = surrogate->_children.begin();
 	 iter != surrogate->_children.end();
 	 iter++)
@@ -183,8 +165,8 @@ SeExprNode::addChildren_without_delete(SeExprNode* surrogate)
 }
 
 
-SeExprType
-SeExprNode::prep(bool wantScalar, SeExprVarEnv & env)
+ExprType
+ExprNode::prep(bool wantScalar, ExprVarEnv & env)
 {
     /** The default behavior is to call prep on children (giving AnyType as desired type).
      *  If all children return valid types, returns NoneType.
@@ -200,28 +182,28 @@ SeExprNode::prep(bool wantScalar, SeExprVarEnv & env)
         if(childDim>_maxChildDim) _maxChildDim=childDim;
     }
 
-    if(error) setType(SeExprType().Error());
-    else setTypeWithChildLife(SeExprType().None());
+    if(error) setType(ExprType().Error());
+    else setTypeWithChildLife(ExprType().None());
 
     return _type;
 }
 
-SeExprType
-SeExprModuleNode::prep(bool wantScalar, SeExprVarEnv & env)
+ExprType
+ExprModuleNode::prep(bool wantScalar, ExprVarEnv & env)
 {
     bool error = false;
 
     for(int c=0;c<numChildren();c++)
         error |= !child(c)->prep(false, env).isValid();
-    if(error) setType(SeExprType().Error());
+    if(error) setType(ExprType().Error());
     else setType(child(numChildren()-1)->type());
 
     return _type;
 }
 
 
-SeExprType
-SeExprPrototypeNode::prep(bool wantScalar, SeExprVarEnv & env)
+ExprType
+ExprPrototypeNode::prep(bool wantScalar, ExprVarEnv & env)
 {
     bool error = false;
 
@@ -230,60 +212,60 @@ SeExprPrototypeNode::prep(bool wantScalar, SeExprVarEnv & env)
 
     _argTypes.clear();
     for(int c = 0; c < numChildren(); c++){
-        SeExprType type=child(c)->type();
+        ExprType type=child(c)->type();
         checkCondition(type.isValid(), "Function has a parameter with a bad type", error);
         _argTypes.push_back(type);
-        SeExprLocalVar* localVar = new SeExprLocalVar(type);
-        env.add(((SeExprVarNode*)child(c))->name(), localVar);
+        ExprLocalVar* localVar = new ExprLocalVar(type);
+        env.add(((ExprVarNode*)child(c))->name(), localVar);
         std::cerr<<"after create localvar phi "<<localVar->getPhi()<<std::endl;
         child(c)->prep(wantScalar,env);
     }
 
-    if(error) setType(SeExprType().Error());
-    else setType(SeExprType().None().Varying());
+    if(error) setType(ExprType().Error());
+    else setType(ExprType().None().Varying());
 
     return _type;
 }
 
 
 void
-SeExprPrototypeNode::addArgTypes(SeExprNode* surrogate)
+ExprPrototypeNode::addArgTypes(ExprNode* surrogate)
 {
-    SeExprNode::addChildren(surrogate);
+    ExprNode::addChildren(surrogate);
 
-    SeExprType type;
+    ExprType type;
     for(int i = 0; i < numChildren(); i++)
         _argTypes.push_back(child(i)->type());
 }
 
 
 void
-SeExprPrototypeNode::addArgs(SeExprNode* surrogate)
+ExprPrototypeNode::addArgs(ExprNode* surrogate)
 {
-    SeExprNode::addChildren(surrogate);
+    ExprNode::addChildren(surrogate);
 #if 0
-    SeExprNode * child;
-    SeExprType type;
+    ExprNode * child;
+    ExprType type;
     for(int i = 0; i < numChildren(); i++) {
         child = this->child(i);
         type = child->type();
 
         _argTypes.push_back(type);
-        _env.add(((SeExprVarNode*)child)->name(), new SeExprLocalVar(type));
+        _env.add(((ExprVarNode*)child)->name(), new ExprLocalVar(type));
     }
 #endif
 }
 
 
 
-SeExprType
-SeExprLocalFunctionNode::prep(bool wantScalar, SeExprVarEnv & env)
+ExprType
+ExprLocalFunctionNode::prep(bool wantScalar, ExprVarEnv & env)
 {
     bool error = false;
 
     //prep prototype and check for errors 
-    SeExprPrototypeNode* prototype=(SeExprPrototypeNode*)child(0);
-    SeExprVarEnv functionEnv;
+    ExprPrototypeNode* prototype=(ExprPrototypeNode*)child(0);
+    ExprVarEnv functionEnv;
     functionEnv.resetAndSetParent(&env);
     if(!prototype->prep(false, functionEnv).isValid())
         error = true;
@@ -294,8 +276,8 @@ SeExprLocalFunctionNode::prep(bool wantScalar, SeExprVarEnv & env)
         returnWantsScalar = prototype->returnType().isFP(1);
 
     //prep block and check for errors
-    SeExprNode* block = child(1);
-    SeExprType blockType = block->prep(returnWantsScalar, functionEnv);
+    ExprNode* block = child(1);
+    ExprType blockType = block->prep(returnWantsScalar, functionEnv);
 
     if(!error && blockType.isValid()) {
         if(prototype->isReturnTypeSet()){
@@ -312,43 +294,43 @@ SeExprLocalFunctionNode::prep(bool wantScalar, SeExprVarEnv & env)
         checkCondition(false, "Invalid type for blockType is "+blockType.toString(),error);
         error = true;
     }
-    return _type = error ? SeExprType().Error() : SeExprType().None().Varying();
+    return _type = error ? ExprType().Error() : ExprType().None().Varying();
 }
 
 
 // TODO: write buildInterpreter for local function node
-SeExprType SeExprLocalFunctionNode::prep(SeExprFuncNode* callerNode,bool scalarWanted,SeExprVarEnv& env) const
+ExprType ExprLocalFunctionNode::prep(ExprFuncNode* callerNode,bool scalarWanted,ExprVarEnv& env) const
 {
     bool error=false;
     callerNode->checkCondition(callerNode->numChildren() == prototype()->numChildren(),"Incorrect number of arguments to function call",error);
     for(int i=0;i<callerNode->numChildren();i++){
         // TODO: is this right?
-        //bool compatible=SeExprType::valuesCompatible(callerNode->child(i)->prep(false,env), prototype()->argType(i));
+        //bool compatible=ExprType::valuesCompatible(callerNode->child(i)->prep(false,env), prototype()->argType(i));
         if(!callerNode->checkArg(i, prototype()->argType(i),env))
             error=true;
         //callerNode->child(i)->checkCondition(compatible,"Incorrect type for argument",error);
     }
-    return error ? SeExprType().Error() : prototype()->returnType();
+    return error ? ExprType().Error() : prototype()->returnType();
 }
 
 
-SeExprType
-SeExprBlockNode::prep(bool wantScalar, SeExprVarEnv & env)
+ExprType
+ExprBlockNode::prep(bool wantScalar, ExprVarEnv & env)
 {
-    SeExprType assignType = child(0)->prep(false, env);
-    SeExprType resultType = child(1)->prep(wantScalar, env);
+    ExprType assignType = child(0)->prep(false, env);
+    ExprType resultType = child(1)->prep(wantScalar, env);
 
-    if(!assignType.isValid()) setType(SeExprType().Error());
+    if(!assignType.isValid()) setType(ExprType().Error());
     else setType(resultType);
 
     return _type;
 }
 
 
-SeExprType
-SeExprIfThenElseNode::prep(bool wantScalar, SeExprVarEnv & env)
+ExprType
+ExprIfThenElseNode::prep(bool wantScalar, ExprVarEnv & env)
 {
-    SeExprType   condType, thenType, elseType;
+    ExprType   condType, thenType, elseType;
 
     bool error = false;
 
@@ -366,83 +348,83 @@ SeExprIfThenElseNode::prep(bool wantScalar, SeExprVarEnv & env)
         // TODO: aselle insert the phi nodes!
     }else error = true;
 
-    if(error) setType(SeExprType().Error());
-    else setType(SeExprType().None().setLifetime(condType,thenType,elseType));
+    if(error) setType(ExprType().Error());
+    else setType(ExprType().None().setLifetime(condType,thenType,elseType));
 
     return _type;
 }
 
-SeExprType
-SeExprAssignNode::prep(bool wantScalar, SeExprVarEnv & env)
+ExprType
+ExprAssignNode::prep(bool wantScalar, ExprVarEnv & env)
 {
     _assignedType = child(0)->prep(false, env);
 
     //TODO: This could add errors to the variable environment
-    _localVar=new SeExprLocalVar(child(0)->type());
+    _localVar=new ExprLocalVar(child(0)->type());
     env.add(_name, _localVar);
     bool error=false;
 	// TODO: fix
     //checkIsValue(_assignedType,error);
 	checkCondition(_assignedType.isValid(),"tesT",error);
 
-    if(error) setType(SeExprType().Error());
-    else setTypeWithChildLife(SeExprType().None());
+    if(error) setType(ExprType().Error());
+    else setTypeWithChildLife(ExprType().None());
     return _type;
 }
 
-SeExprType
-SeExprVecNode::prep(bool wantScalar, SeExprVarEnv & env)
+ExprType
+ExprVecNode::prep(bool wantScalar, ExprVarEnv & env)
 {
     bool error = false;
 
     int max_child_d=0;
     for(int c=0; c<numChildren(); c++) {
-        SeExprType childType = child(c)->prep(true, env);
+        ExprType childType = child(c)->prep(true, env);
         //TODO: add way to tell what element of vector has the type mismatch
         checkIsFP(childType,error);
         max_child_d=std::max(max_child_d,childType.dim());
     }
     
-    if(error) setType(SeExprType().Error());
-    else setTypeWithChildLife(SeExprType().FP(numChildren()));
+    if(error) setType(ExprType().Error());
+    else setTypeWithChildLife(ExprType().FP(numChildren()));
     return _type;
 }
 
-SeVec3d
-SeExprVecNode::value() const {
-    if(const SeExprNumNode* f = dynamic_cast<const SeExprNumNode*>(child(0))) {
+Vec3d
+ExprVecNode::value() const {
+    if(const ExprNumNode* f = dynamic_cast<const ExprNumNode*>(child(0))) {
         double first = f->value();
-        if(const SeExprNumNode* s = dynamic_cast<const SeExprNumNode*>(child(1))) {
+        if(const ExprNumNode* s = dynamic_cast<const ExprNumNode*>(child(1))) {
             double second = s->value();
-            if(const SeExprNumNode* t = dynamic_cast<const SeExprNumNode*>(child(2))) {
+            if(const ExprNumNode* t = dynamic_cast<const ExprNumNode*>(child(2))) {
                 double third = t->value();
-                return SeVec3d(first, second, third);
+                return Vec3d(first, second, third);
             };
         };
     };
 
-    return SeVec3d(0.0);
+    return Vec3d(0.0);
 };
 
 
-SeExprType
-SeExprUnaryOpNode::prep(bool wantScalar, SeExprVarEnv & env)
+ExprType
+ExprUnaryOpNode::prep(bool wantScalar, ExprVarEnv & env)
 {
     bool error = false;
 
     // TODO: aselle may want to implicitly demote to FP[1] if wantScalar is true!
-    SeExprType childType=child(0)->prep(wantScalar, env);
+    ExprType childType=child(0)->prep(wantScalar, env);
     checkIsFP(childType,error);
-    if(error) setType(SeExprType().Error());
+    if(error) setType(ExprType().Error());
     else setType(childType);
     return _type;
 }
 
-SeExprType
-SeExprCondNode::prep(bool wantScalar, SeExprVarEnv & env)
+ExprType
+ExprCondNode::prep(bool wantScalar, ExprVarEnv & env)
 {
     //TODO: determine if extra environments are necessary, currently not included
-    SeExprType condType, thenType, elseType;
+    ExprType condType, thenType, elseType;
 
     bool error = false;
 
@@ -455,20 +437,24 @@ SeExprCondNode::prep(bool wantScalar, SeExprVarEnv & env)
 
     checkIsValue(thenType,error);
     checkIsValue(elseType,error);
-    checkCondition(thenType == elseType, "Types of conditional branches do not match", error);
+    checkCondition(ExprType::valuesCompatible(thenType, elseType), "Types of conditional are not compatible", error);
 
-    if(error) setType(SeExprType().Error());
-    else setType(thenType.setLifetime(condType,thenType,elseType));
+    if(error) setType(ExprType().Error());
+    else{
+        if(thenType.isString()) setType(thenType);
+        else setType(thenType.isFP(1) ? elseType : thenType);
+        _type.setLifetime(condType,thenType,elseType);
+    }
 
     return _type;
 }
 
 
-SeExprType
-SeExprSubscriptNode::prep(bool wantScalar, SeExprVarEnv & env)
+ExprType
+ExprSubscriptNode::prep(bool wantScalar, ExprVarEnv & env)
 {
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
-    SeExprType vecType, scriptType;
+    ExprType vecType, scriptType;
 
     bool error = false;
 
@@ -478,17 +464,17 @@ SeExprSubscriptNode::prep(bool wantScalar, SeExprVarEnv & env)
     scriptType = child(1)->prep(true, env);
     checkIsFP(scriptType,error);
 
-    if(error) setType(SeExprType().Error());
-    else setType(SeExprType().FP(1).setLifetime(vecType,scriptType));
+    if(error) setType(ExprType().Error());
+    else setType(ExprType().FP(1).setLifetime(vecType,scriptType));
 
     return _type;
 }
 
-SeExprType
-SeExprCompareEqNode::prep(bool wantScalar, SeExprVarEnv & env)
+ExprType
+ExprCompareEqNode::prep(bool wantScalar, ExprVarEnv & env)
 {
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
-    SeExprType firstType, secondType;
+    ExprType firstType, secondType;
 
     bool error = false;
 
@@ -500,19 +486,19 @@ SeExprCompareEqNode::prep(bool wantScalar, SeExprVarEnv & env)
     if(firstType.isValid() && secondType.isValid())
         checkTypesCompatible(firstType, secondType, error);
 
-    if(error) setType(SeExprType().Error());
-    else setType(SeExprType().FP(1).setLifetime(firstType,secondType));
+    if(error) setType(ExprType().Error());
+    else setType(ExprType().FP(1).setLifetime(firstType,secondType));
 
     return _type;
 }
 
 
-SeExprType
-SeExprCompareNode::prep(bool wantScalar, SeExprVarEnv & env)
+ExprType
+ExprCompareNode::prep(bool wantScalar, ExprVarEnv & env)
 {
     // TODO: assume we want scalar
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
-    SeExprType firstType, secondType;
+    ExprType firstType, secondType;
 
     bool error = false;
 
@@ -524,19 +510,19 @@ SeExprCompareNode::prep(bool wantScalar, SeExprVarEnv & env)
     if(firstType.isValid() && secondType.isValid())
         checkTypesCompatible(firstType, secondType, error);
 
-    if(error) setType(SeExprType().Error());
-    else setType(SeExprType().FP(1).setLifetime(firstType,secondType));
+    if(error) setType(ExprType().Error());
+    else setType(ExprType().FP(1).setLifetime(firstType,secondType));
 
     return _type;
 }
 
 
-SeExprType
-SeExprBinaryOpNode::prep(bool wantScalar, SeExprVarEnv & env)
+ExprType
+ExprBinaryOpNode::prep(bool wantScalar, ExprVarEnv & env)
 {
     // TODO: aselle this probably should set the type to be FP1 if wantScalar is true!
     //TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
-    SeExprType firstType, secondType;
+    ExprType firstType, secondType;
 
     bool error = false;
 
@@ -546,15 +532,15 @@ SeExprBinaryOpNode::prep(bool wantScalar, SeExprVarEnv & env)
     checkIsFP(secondType,error);
     checkTypesCompatible(firstType, secondType, error);
 
-    if(error) setType(SeExprType().Error());
+    if(error) setType(ExprType().Error());
     else setType((firstType.isFP(1) ? secondType : firstType)
         .setLifetime(firstType,secondType));
 
     return _type;
 }
 
-SeExprType
-SeExprVarNode::prep(bool wantScalar, SeExprVarEnv & env)
+ExprType
+ExprVarNode::prep(bool wantScalar, ExprVarEnv & env)
 {
     // ask expression to resolve var
     bool error=false;
@@ -564,28 +550,28 @@ SeExprVarNode::prep(bool wantScalar, SeExprVarEnv & env)
         setType(_var->type());
     }else{
         checkCondition(_var || _localVar, std::string("No variable named $") + name(),error);
-        setType(SeExprType().Error());
+        setType(ExprType().Error());
     }
     return _type;
 }
 
 
-SeExprType
-SeExprNumNode::prep(bool wantScalar, SeExprVarEnv & env)
+ExprType
+ExprNumNode::prep(bool wantScalar, ExprVarEnv & env)
 {
-    _type=SeExprType().FP(1).Constant();
+    _type=ExprType().FP(1).Constant();
     return _type;
 }
 
-SeExprType
-SeExprStrNode::prep(bool wantScalar, SeExprVarEnv & env)
+ExprType
+ExprStrNode::prep(bool wantScalar, ExprVarEnv & env)
 {
-    _type=SeExprType().String().Constant();
+    _type=ExprType().String().Constant();
     return _type;
 }
 
-SeExprType
-SeExprFuncNode::prep(bool wantScalar, SeExprVarEnv & env)
+ExprType
+ExprFuncNode::prep(bool wantScalar, ExprVarEnv & env)
 {
     bool error = false;
 
@@ -595,25 +581,25 @@ SeExprFuncNode::prep(bool wantScalar, SeExprVarEnv & env)
     // find function using per-expression callback and then global table
     // TODO: put lookup of local functions here
     _func=0;
-    if(SeExprLocalFunctionNode* localFunction=env.findFunction(_name)){
+    if(ExprLocalFunctionNode* localFunction=env.findFunction(_name)){
         _localFunc = localFunction;
         setTypeWithChildLife(localFunction->prep(this, wantScalar, env));
         // TODO: we need to type check arguments here
     }else{
         if(!_func) _func = _expr->resolveFunc(_name);
-        if(!_func) _func = SeExprFunc::lookup(_name);
+        if(!_func) _func = ExprFunc::lookup(_name);
 
     //check that function exisits and that the function has the right number of arguments
         if(checkCondition(_func,"Function " + _name + " has no definition", error) 
             && checkCondition(nargs >= _func->minArgs(),"Too few args for function"+_name,error)
             && checkCondition(nargs <= _func->maxArgs() || _func->maxArgs() < 0, "Too many args for function "+_name,error)) {
 
-            const SeExprFuncX* funcx=_func->funcx();
-            SeExprType type=funcx->prep(this,wantScalar,env);
+            const ExprFuncX* funcx=_func->funcx();
+            ExprType type=funcx->prep(this,wantScalar,env);
             setTypeWithChildLife(type);
         }else{ // didn't match num args or function not found
-            SeExprNode::prep(false,env); // prep arguments anyways to catch as many errors as possible!
-            setTypeWithChildLife(SeExprType().Error());
+            ExprNode::prep(false,env); // prep arguments anyways to catch as many errors as possible!
+            setTypeWithChildLife(ExprType().Error());
         }
     }
 
@@ -621,10 +607,10 @@ SeExprFuncNode::prep(bool wantScalar, SeExprVarEnv & env)
 }
 
 #if 0
-int SeExprFuncSimple::EvalOp(int* opData,double* fp,char** c,std::stack<int>& callStack)
+int ExprFuncSimple::EvalOp(int* opData,double* fp,char** c,std::stack<int>& callStack)
 {
-    SeExprFuncSimple* simple=reinterpret_cast<SeExprFuncSimple*>(c[opData[0]]);
-//    SeExprFuncNode::Data* simpleData=reinterpret_cast<SeExprFuncNode::Data*>(c[opData[1]]);
+    ExprFuncSimple* simple=reinterpret_cast<ExprFuncSimple*>(c[opData[0]]);
+//    ExprFuncNode::Data* simpleData=reinterpret_cast<ExprFuncNode::Data*>(c[opData[1]]);
     ArgHandle args(opData,fp,c);
     simple->eval(args);
     return 1;
@@ -633,14 +619,14 @@ int SeExprFuncSimple::EvalOp(int* opData,double* fp,char** c,std::stack<int>& ca
 
 
 #if 0
-int SeExprLocalFunctionNode::
-buildInterpreterForCall(const SeExprFuncNode* callerNode, SeInterpreter* interpreter) const
+int ExprLocalFunctionNode::
+buildInterpreterForCall(const ExprFuncNode* callerNode, Interpreter* interpreter) const
 {
     return 0;
 #if 0
     std::vector<int> operands;
     for(int c=0;c<node->numChildren();c++){
-        const SeExprNode* child=node->child(c);
+        const ExprNode* child=node->child(c);
         // evaluate the argument
         int operand=node->child(c)->buildInterpreter(interpreter);
         if(node->promote(c) != 0) {
@@ -676,7 +662,7 @@ buildInterpreterForCall(const SeExprFuncNode* callerNode, SeInterpreter* interpr
 
     // call into interpreter eval
     int pc=interpreter->nextPC()-1;
-    const std::pair<SeInterpreter::OpF,int>& op=interpreter->ops[pc];
+    const std::pair<Interpreter::OpF,int>& op=interpreter->ops[pc];
     int* opCurr=(&interpreter->opData[0])+interpreter->ops[pc].second;
 
     ArgHandle args(opCurr,&interpreter->d[0],&interpreter->s[0]);
@@ -689,20 +675,23 @@ buildInterpreterForCall(const SeExprFuncNode* callerNode, SeInterpreter* interpr
 }
 #endif
 
-int SeExprFuncNode::
-buildInterpreter(SeInterpreter* interpreter) const
+int ExprFuncNode::
+buildInterpreter(Interpreter* interpreter) const
 {
     if(_localFunc) return _localFunc->buildInterpreterForCall(this,interpreter);
     else if(_func) return _func->funcx()->buildInterpreter(this,interpreter);
+
+    assert(false);
+    return 0;
 }
 
-bool SeExprFuncNode::
-checkArg(int arg,SeExprType type,SeExprVarEnv& env)
+bool ExprFuncNode::
+checkArg(int arg,ExprType type,ExprVarEnv& env)
 {
-    SeExprType childType=child(arg)->prep(type.isFP(1),env);
+    ExprType childType=child(arg)->prep(type.isFP(1),env);
     std::cerr<<"we have "<<childType.toString()<<" and want "<<type.toString()<<std::endl;
     _promote[arg]=0;
-    if(SeExprType::valuesCompatible(type,childType) && type.isLifeCompatible(childType)){
+    if(ExprType::valuesCompatible(type,childType) && type.isLifeCompatible(childType)){
         if(type.isFP() && type.dim() > childType.dim()){
             std::cerr<<"setting promote "<<std::endl;
             _promote[arg]=type.dim();
@@ -711,4 +700,6 @@ checkArg(int arg,SeExprType type,SeExprVarEnv& env)
     }
     child(arg)->addError("Expected "+type.toString()+" for argument, got "+childType.toString());
     return false;
+}
+
 }

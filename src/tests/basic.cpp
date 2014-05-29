@@ -1,56 +1,38 @@
 /*
- SEEXPR SOFTWARE
- Copyright 2011 Disney Enterprises, Inc. All rights reserved
- 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are
- met:
- 
- * Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- 
- * Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in
- the documentation and/or other materials provided with the
- distribution.
- 
- * The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
- Studios" or the names of its contributors may NOT be used to
- endorse or promote products derived from this software without
- specific prior written permission from Walt Disney Pictures.
- 
- Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
- CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
- BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
- FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
- IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Copyright Disney Enterprises, Inc.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
+*
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
 */
 #include <SeExpression.h>
 #include <SeExprFunc.h>
 #include <SeVec3d.h>
-
 #include "SeTests.h"
+using namespace SeExpr2;
 
-struct SimpleExpression:public SeExpression
+struct SimpleExpression:public Expression
 {
     // Define a simple scalar variable type that just stores the value it will return
-    struct Var:public SeExprScalarVarRef
+    struct Var:public ExprScalarVarRef
     {
         double value;
-        void eval(const SeExprVarNode* node,SeVec3d& result)
+        void eval(const ExprVarNode* node,Vec3d& result)
         {result[0]=value;}
     };
     mutable Var x,y;
 
     // Custom variable resolver, only allow ones we specify
-    SeExprVarRef* resolveVar(const std::string& name) const
+    ExprVarRef* resolveVar(const std::string& name) const
     {
         if(name=="x") return &x;
         if(name=="y") return &y;
@@ -58,19 +40,20 @@ struct SimpleExpression:public SeExpression
     }
 
     // Make a custom sum function
-    mutable SeExprFunc customFunc;
+    mutable ExprFunc customFunc;
     static double customFuncHelper(double x,double y)
     {return x+y;}
 
     // Custom function resolver
-    SeExprFunc* resolveFunc(const std::string& name) const
+    ExprFunc* resolveFunc(const std::string& name) const
     {
         if(name=="custom") return &customFunc;
+        return 0;
     }
 
     // Constructor
     SimpleExpression(const std::string& str)
-        :SeExpression(str),customFunc(customFuncHelper)
+        :Expression(str),customFunc(customFuncHelper)
     {}
 
 };
@@ -79,7 +62,7 @@ int main()
 {
     // Basic constant expression
     {
-        SeExpression expr("3+4");
+        Expression expr("3+4");
         SE_TEST_ASSERT(expr.isValid());
         SE_TEST_ASSERT(!expr.isVec());
         const double* val=expr.evalFP();
@@ -129,8 +112,8 @@ int main()
 
 	SimpleExpression expr3("$foo=3; $foo=[0,1,2]; $foo");
 	SimpleExpression expr4("[0,1,2]");
-        SeVec<double,3,true> val3(const_cast<double*>(expr3.evalFP()));
-        SeVec<double,3,true> val4(const_cast<double*>(expr4.evalFP()));
+        Vec<double,3,true> val3(const_cast<double*>(expr3.evalFP()));
+        Vec<double,3,true> val4(const_cast<double*>(expr4.evalFP()));
 	SE_TEST_ASSERT_VECTOR_EQUAL(val3,val4);
     }
 

@@ -1,3 +1,19 @@
+/*
+* Copyright Disney Enterprises, Inc.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
+*
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
+*/
 #ifndef _vectest2_h_
 #define _vectest2_h_
 #include <iosfwd>
@@ -7,7 +23,7 @@
 
 //#############################################################################
 // Template Metaprogramming Helpers
-
+namespace SeExpr2 {
 //! Static assert error case (false)
 template <bool b,class T> struct seexpr_static_assert{};
 //! Static assert success case
@@ -42,10 +58,10 @@ template<class T> struct Reducer<T,4>{
     static T sum(T* data){return (data[0]+data[1])+(data[2]+data[3]);}
 };
 
-//! SeVec class, generic dimension vector class
+//! Vec class, generic dimension vector class
 //! can also point to data if the template argument ref is true
 template<class T,int d,bool ref=false>
-class SeVec
+class Vec
 {
     // static error types
     struct INVALID_WITH_VECTOR_VALUE{};
@@ -55,56 +71,56 @@ class SeVec
     //! internal data (either an explicit arary or a pointer to raw data)
     typename static_if<ref,T*,T[d]>::TYPE x;
 public:
-    typedef SeVec<T,d,false> T_VEC_VALUE;
-    typedef SeVec<T,d,true> T_VEC_REF;
+    typedef Vec<T,d,false> T_VEC_VALUE;
+    typedef Vec<T,d,true> T_VEC_REF;
 
     //! Initialize vector to be reference to plain raw data
-    SeVec(T* raw,
+    Vec(T* raw,
         INVALID_WITH_VECTOR_VALUE u=(typename my_enable_if<ref,INVALID_WITH_VECTOR_VALUE>::TYPE()))
         :x(raw)
     {}
 
     //! Empty constructor (this is invalid for a reference type)
-    SeVec(INVALID_WITH_VECTOR_REFERENCE u=(typename my_enable_if<!ref,INVALID_WITH_VECTOR_REFERENCE>::TYPE()))
+    Vec(INVALID_WITH_VECTOR_REFERENCE u=(typename my_enable_if<!ref,INVALID_WITH_VECTOR_REFERENCE>::TYPE()))
     {}
 
     //! Convenience constant vector initialization (valid for any d)
-    SeVec(T v0,
+    Vec(T v0,
         INVALID_WITH_VECTOR_REFERENCE u=(typename my_enable_if<!ref,INVALID_WITH_VECTOR_REFERENCE>::TYPE())){
         for(int k=0;k<d;k++) x[k]=v0;
     }
 
     //! Convenience 2 vector initialization (only for d==2)
-    SeVec(T v1,T v2,
+    Vec(T v1,T v2,
         INVALID_WITH_VECTOR_REFERENCE u=(typename my_enable_if<!ref,INVALID_WITH_VECTOR_REFERENCE>::TYPE())){
         typename seexpr_static_assert<d==2,INVALID_WITH_DIMENSION>::TYPE();
         x[0]=v1;x[1]=v2;}
 
     //! Convenience 3 vector initialization (only for d==3)
-    SeVec(T v1,T v2,T v3,
+    Vec(T v1,T v2,T v3,
         INVALID_WITH_VECTOR_REFERENCE u=(typename my_enable_if<!ref,INVALID_WITH_VECTOR_REFERENCE>::TYPE())){
         typename seexpr_static_assert<d==3,INVALID_WITH_DIMENSION>::TYPE();
         x[0]=v1;x[1]=v2;x[2]=v3;}
 
     //! Convenience 4 vector initialization (only for d==4)
-    SeVec(T v1,T v2,T v3,T v4,
+    Vec(T v1,T v2,T v3,T v4,
         INVALID_WITH_VECTOR_REFERENCE u=(typename my_enable_if<!ref,INVALID_WITH_VECTOR_REFERENCE>::TYPE())){
         typename seexpr_static_assert<d==4,INVALID_WITH_DIMENSION>::TYPE();
         x[0]=v1;x[1]=v2;x[2]=v3;x[3]=v4;}
     // Changed this to default. This is safe! for reference case it makes another reference
     // for value it copies
     //! Copy construct. Only valid if we are not going to be a reference data!
-    //SeVec(const SeVec&)
+    //Vec(const Vec&)
     //{typename static_assert<!ref,INVALID_WITH_VECTOR_REFERENCE>::TYPE();}
 
     //! Copy construct. Only valid if we are not going to be reference data!
     template<bool refother>
-    SeVec(const SeVec<T,d,refother>&  other,
+    Vec(const Vec<T,d,refother>&  other,
         INVALID_WITH_VECTOR_REFERENCE u=(typename my_enable_if<!ref && refother!=ref,INVALID_WITH_VECTOR_REFERENCE>::TYPE()))
     {*this=other;}
 
     template<bool refother>
-    SeVec& operator=(const SeVec<T,d,refother>& other) 
+    Vec& operator=(const Vec<T,d,refother>& other)
     {for(int k=0;k<d;k++) x[k]=other[k];return *this;}
 
     // non-const element access
@@ -140,40 +156,40 @@ public:
     }
 
     //! Return a copy of the vector that is normalized
-    SeVec<T,d,false> normalized() const
-    {SeVec<T,d,false> other(*this);other.normalize();return other;}
+    Vec<T,d,false> normalized() const
+    {Vec<T,d,false> other(*this);other.normalize();return other;}
 
-    SeVec& operator/=(const T val){
+    Vec& operator/=(const T val){
         T one_over_val=T(1)/val;
         for(int k=0;k<d;k++) x[k]*=one_over_val;
         return *this;
     }
 
-    SeVec& operator*=(const T val){
+    Vec& operator*=(const T val){
         for(int k=0;k<d;k++) x[k]*=val;
         return *this;
     }
 
     template<bool refother>
-    SeVec& operator+=(const SeVec<T,d,refother>& other){
+    Vec& operator+=(const Vec<T,d,refother>& other){
         for(int k=0;k<d;k++) x[k]+=other[k];
         return *this;
     }
 
     template<bool refother>
-    SeVec& operator-=(const SeVec<T,d,refother>& other){
+    Vec& operator-=(const Vec<T,d,refother>& other){
         for(int k=0;k<d;k++) x[k]-=other[k];
         return *this;
     }
 
     template<bool refother>
-    SeVec& operator*=(const SeVec<T,d,refother>& other){
+    Vec& operator*=(const Vec<T,d,refother>& other){
         for(int k=0;k<d;k++) x[k]*=other[k];
         return *this;
     }
 
     template<bool refother>
-    SeVec& operator/=(const SeVec<T,d,refother>& other){
+    Vec& operator/=(const Vec<T,d,refother>& other){
         for(int k=0;k<d;k++) x[k]/=other[k];
         return *this;
     }
@@ -182,11 +198,11 @@ public:
     {T_VEC_VALUE val(*this);for(int k=0;k<d;k++) val[k]=-val[k];return val;}
 
     template<bool refother>
-    bool operator==(const SeVec<T,d,refother>& other) const
+    bool operator==(const Vec<T,d,refother>& other) const
     {bool equal=true;for(int k=0;k<d;k++) equal&=(x[k]==other[k]);return equal;}
 
     template<bool refother>
-    bool operator!=(const SeVec<T,d,refother>& other) const
+    bool operator!=(const Vec<T,d,refother>& other) const
     {return !(*this == other);}
 
     T_VEC_VALUE operator*(T s) const
@@ -196,28 +212,28 @@ public:
     {T_VEC_VALUE val(*this);val/=s;return val;}
 
     template<bool refother>
-    T_VEC_VALUE operator+(const SeVec<T,d,refother>& other) const
+    T_VEC_VALUE operator+(const Vec<T,d,refother>& other) const
     {T_VEC_VALUE val(*this);val+=other;return val;}
 
     template<bool refother>
-    T_VEC_VALUE operator-(const SeVec<T,d,refother>& other) const
+    T_VEC_VALUE operator-(const Vec<T,d,refother>& other) const
     {T_VEC_VALUE val(*this);val-=other;return val;}
 
     template<bool refother>
-    T_VEC_VALUE operator*(const SeVec<T,d,refother>& other) const
+    T_VEC_VALUE operator*(const Vec<T,d,refother>& other) const
     {T_VEC_VALUE val(*this);val*=other;return val;}
 
     template<bool refother>
-    T_VEC_VALUE operator/(const SeVec<T,d,refother>& other) const
+    T_VEC_VALUE operator/(const Vec<T,d,refother>& other) const
     {T_VEC_VALUE val(*this);val/=other;return val;}
 
-    friend T_VEC_VALUE operator*(T s,const SeVec& v)
+    friend T_VEC_VALUE operator*(T s,const Vec& v)
     {return v*s;}
 
 
     /** Inner product. */
     template<bool refother>
-    T dot(const SeVec<T,d,refother>& o) const{
+    T dot(const Vec<T,d,refother>& o) const{
         T vals[d];
         for(int k=0;k<d;k++) vals[d]+=x[k]*o[k];
         T val=0;
@@ -226,7 +242,7 @@ public:
 
     /** Cross product. */
     template<bool refother>
-    T_VEC_VALUE cross(const SeVec<T,3,refother>& o) const{
+    T_VEC_VALUE cross(const Vec<T,3,refother>& o) const{
         typename seexpr_static_assert<d==3,INVALID_WITH_DIMENSION>::TYPE();
         return T_VEC_VALUE(x[1]*o[2] - x[2]*o[1],
             x[2]*o[0] - x[0]*o[2],
@@ -244,7 +260,7 @@ public:
      * passed in vector.
      */
     template<bool refother>
-    T angle(const SeVec<T,3,refother>& o) const{
+    T angle(const Vec<T,3,refother>& o) const{
         typename seexpr_static_assert<d==3,INVALID_WITH_DIMENSION>::TYPE();
         T l=length()*o.length();
         if(l==0) return 0;
@@ -256,7 +272,7 @@ public:
      * the given axis. (Axis must be normalized)
      */
     template<bool refother>
-    T_VEC_VALUE rotateBy(const SeVec<T,3,refother>& axis,T angle) const{
+    T_VEC_VALUE rotateBy(const Vec<T,3,refother>& axis,T angle) const{
         typename seexpr_static_assert<d==3,INVALID_WITH_DIMENSION>::TYPE();
         double c=cos(angle),s=sin(angle);
         return c*(*this)+(1-c)*dot(axis)*axis-s*cross(axis);
@@ -267,7 +283,7 @@ public:
 
 //! Output stream
 template<class T,int d,bool r>
-std::ostream& operator<<(std::ostream& out,const SeVec<T,d,r>& val)
+std::ostream& operator<<(std::ostream& out,const Vec<T,d,r>& val)
 {
     if(d>0) out<<"("<<val[0];
     for(int k=1;k<d;k++) out<<","<<val[k];
@@ -275,5 +291,5 @@ std::ostream& operator<<(std::ostream& out,const SeVec<T,d,r>& val)
     return out;
 }
 
-
+}
 #endif

@@ -1,43 +1,28 @@
 /*
- SEEXPR SOFTWARE
- Copyright 2011 Disney Enterprises, Inc. All rights reserved
- 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are
- met:
- 
- * Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- 
- * Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in
- the documentation and/or other materials provided with the
- distribution.
- 
- * The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
- Studios" or the names of its contributors may NOT be used to
- endorse or promote products derived from this software without
- specific prior written permission from Walt Disney Pictures.
- 
- Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
- CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
- BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
- FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
- IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Copyright Disney Enterprises, Inc.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
+*
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
 */
 #ifndef _SeExprFuncStandard_h_
 #define _SeExprFuncStandard_h_
 
 #include <SeVec3d.h>
 #include "SeExprFuncX.h"
-class SeExprFuncStandard:public SeExprFuncX
+
+namespace SeExpr2 {
+
+class ExprFuncStandard:public ExprFuncX
 {
 public:
     enum FuncType {
@@ -47,7 +32,7 @@ public:
 	// vector args, scalar result
 	VEC, FUNC1V=VEC, FUNC2V, FUNCNV,
 	// vector args and result
-	VECVEC, FUNC1VV=VECVEC, FUNC2VV, FUNCNVV,
+	VECVEC, FUNC1VV=VECVEC, FUNC2VV, FUNCNVV
     };
 
     typedef double Func0();
@@ -57,13 +42,13 @@ public:
     typedef double Func4(double, double, double, double);
     typedef double Func5(double, double, double, double, double);
     typedef double Func6(double, double, double, double, double, double);
-    typedef double Func1v(const SeVec3d&);
-    typedef double Func2v(const SeVec3d&, const SeVec3d&);
-    typedef SeVec3d Func1vv(const SeVec3d&);
-    typedef SeVec3d Func2vv(const SeVec3d&, const SeVec3d&);
+    typedef double Func1v(const Vec3d&);
+    typedef double Func2v(const Vec3d&, const Vec3d&);
+    typedef Vec3d Func1vv(const Vec3d&);
+    typedef Vec3d Func2vv(const Vec3d&, const Vec3d&);
     typedef double Funcn(int n, double* params);
-    typedef double Funcnv(int n, const SeVec3d* params);
-    typedef SeVec3d Funcnvv(int n, const SeVec3d* params);
+    typedef double Funcnv(int n, const Vec3d* params);
+    typedef Vec3d Funcnvv(int n, const Vec3d* params);
 
 
 #if 0
@@ -85,73 +70,74 @@ public:
 
 
     //! No argument function
-    SeExprFuncStandard(FuncType funcType,void* f)
-        : SeExprFuncX(true), _funcType(funcType), _func(f)
+    ExprFuncStandard(FuncType funcType,void* f)
+        : ExprFuncX(true), _funcType(funcType), _func(f)
     {}
 #if 0
     //! User defined function with prototype double f(double)
-    SeExprFunc(Func1* f)
-        : _type(FUNC1), _retType(SeExprType().FP(1).Varying()), _scalar(true), _func((void*)f), _minargs(1), _maxargs(1)
+    ExprFunc(Func1* f)
+        : _type(FUNC1), _retType(ExprType().FP(1).Varying()), _scalar(true), _func((void*)f), _minargs(1), _maxargs(1)
     {};
     //! User defined function with prototype double f(double,double)
-    SeExprFunc(Func2* f)
-        : _type(FUNC2), _retType(SeExprType().FP(1).Varying()), _scalar(true), _func((void*)f), _minargs(2), _maxargs(2)
+    ExprFunc(Func2* f)
+        : _type(FUNC2), _retType(ExprType().FP(1).Varying()), _scalar(true), _func((void*)f), _minargs(2), _maxargs(2)
     {};
     //! User defined function with prototype double f(double,double,double)
-    SeExprFunc(Func3* f)
-        : _type(FUNC3), _retType(SeExprType().FP(1).Varying()), _scalar(true), _func((void*)f), _minargs(3), _maxargs(3)
+    ExprFunc(Func3* f)
+        : _type(FUNC3), _retType(ExprType().FP(1).Varying()), _scalar(true), _func((void*)f), _minargs(3), _maxargs(3)
     {};
     //! User defined function with prototype double f(double,double,double,double)
-    SeExprFunc(Func4* f)
-        : _type(FUNC4), _retType(SeExprType().FP(1).Varying()), _scalar(true), _func((void*)f), _minargs(4), _maxargs(4)
+    ExprFunc(Func4* f)
+        : _type(FUNC4), _retType(ExprType().FP(1).Varying()), _scalar(true), _func((void*)f), _minargs(4), _maxargs(4)
     {};
     //! User defined function with prototype double f(double,double,double,double,double)
-    SeExprFunc(Func5* f)
-        : _type(FUNC5), _retType(SeExprType().FP(1).Varying()), _scalar(true), _func((void*)f), _minargs(5), _maxargs(5)
+    ExprFunc(Func5* f)
+        : _type(FUNC5), _retType(ExprType().FP(1).Varying()), _scalar(true), _func((void*)f), _minargs(5), _maxargs(5)
     {};
     //! User defined function with prototype double f(double,double,double,double,double,double)
-    SeExprFunc(Func6* f)
-        : _type(FUNC6), _retType(SeExprType().FP(1).Varying()), _scalar(true), _func((void*)f), _minargs(6), _maxargs(6)
+    ExprFunc(Func6* f)
+        : _type(FUNC6), _retType(ExprType().FP(1).Varying()), _scalar(true), _func((void*)f), _minargs(6), _maxargs(6)
     {};
     //! User defined function with prototype double f(vector)
-    SeExprFunc(Func1v* f)
-        : _type(FUNC1V), _retType(SeExprType().FP(1).Varying()), _scalar(true), _func((void*)f), _minargs(1), _maxargs(1)
+    ExprFunc(Func1v* f)
+        : _type(FUNC1V), _retType(ExprType().FP(1).Varying()), _scalar(true), _func((void*)f), _minargs(1), _maxargs(1)
     {};
     //! User defined function with prototype double f(vector,vector)
-    SeExprFunc(Func2v* f)
-        : _type(FUNC2V), _retType(SeExprType().FP(1).Varying()), _scalar(true), _func((void*)f), _minargs(2), _maxargs(2)
+    ExprFunc(Func2v* f)
+        : _type(FUNC2V), _retType(ExprType().FP(1).Varying()), _scalar(true), _func((void*)f), _minargs(2), _maxargs(2)
     {};
     //! User defined function with prototype vector f(vector)
-    SeExprFunc(Func1vv* f)
-        : _type(FUNC1VV), _retType(SeExprType().FP(3).Varying()), _scalar(false), _func((void*)f), _minargs(1), _maxargs(1)
+    ExprFunc(Func1vv* f)
+        : _type(FUNC1VV), _retType(ExprType().FP(3).Varying()), _scalar(false), _func((void*)f), _minargs(1), _maxargs(1)
     {};
     //! User defined function with prototype vector f(vector,vector)
-    SeExprFunc(Func2vv* f)
-        : _type(FUNC2VV), _retType(SeExprType().FP(3).Varying()), _scalar(false), _func((void*)f), _minargs(2), _maxargs(2)
+    ExprFunc(Func2vv* f)
+        : _type(FUNC2VV), _retType(ExprType().FP(3).Varying()), _scalar(false), _func((void*)f), _minargs(2), _maxargs(2)
     {};
     //! User defined function with arbitrary number of arguments double f(double,...)
-    SeExprFunc(Funcn* f, int min, int max)
-	: _type(FUNCN), _retType(SeExprType().FP(1).Varying()), _scalar(true), _func((void*)f), _minargs(min), _maxargs(max)
+    ExprFunc(Funcn* f, int min, int max)
+	: _type(FUNCN), _retType(ExprType().FP(1).Varying()), _scalar(true), _func((void*)f), _minargs(min), _maxargs(max)
     {};
     //! User defined function with arbitrary number of arguments double f(vector,...)
-    SeExprFunc(Funcnv* f, int min, int max)
-	: _type(FUNCNV), _retType(SeExprType().FP(1).Varying()), _scalar(true), _func((void*)f), _minargs(min), _maxargs(max)
+    ExprFunc(Funcnv* f, int min, int max)
+	: _type(FUNCNV), _retType(ExprType().FP(1).Varying()), _scalar(true), _func((void*)f), _minargs(min), _maxargs(max)
     {};
     //! User defined function with arbitrary number of arguments vector f(vector,...)
-    SeExprFunc(Funcnvv* f, int min, int max)
-	: _type(FUNCNVV), _retType(SeExprType().FP(3).Varying()), _scalar(false), _func((void*)f), _minargs(min), _maxargs(max)
+    ExprFunc(Funcnvv* f, int min, int max)
+	: _type(FUNCNVV), _retType(ExprType().FP(3).Varying()), _scalar(false), _func((void*)f), _minargs(min), _maxargs(max)
     {};
 #endif
 
 public:
-    SeExprFuncStandard()
-        :SeExprFuncX(true)
+    ExprFuncStandard()
+        :ExprFuncX(true)
     {}
 
 
-    virtual SeExprType prep(SeExprFuncNode* node, bool scalarWanted, SeExprVarEnv & env) const;
-    virtual int buildInterpreter(const SeExprFuncNode* node,SeInterpreter* interpreter) const;
-
+    virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnv & env) const;
+    virtual int buildInterpreter(const ExprFuncNode* node,Interpreter* interpreter) const;
+    void *getFuncPointer() const {return _func;}
+    FuncType getFuncType() const {return _funcType;}
 
 private:
     FuncType   _funcType;
@@ -159,5 +145,7 @@ private:
 
 
 };
+
+}
 
 #endif

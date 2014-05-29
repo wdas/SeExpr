@@ -1,36 +1,18 @@
 /*
- SEEXPR SOFTWARE
- Copyright 2011 Disney Enterprises, Inc. All rights reserved
- 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are
- met:
- 
- * Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- 
- * Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in
- the documentation and/or other materials provided with the
- distribution.
- 
- * The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
- Studios" or the names of its contributors may NOT be used to
- endorse or promote products derived from this software without
- specific prior written permission from Walt Disney Pictures.
- 
- Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
- CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
- BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
- FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
- IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Copyright Disney Enterprises, Inc.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
+*
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
 */
 
 #ifndef SeExprNode_h
@@ -50,8 +32,26 @@
 #include "SeVec3d.h"
 #include "SeInterpreter.h"
 
-class SeExprFunc;
-class SeExprFuncX;
+#ifdef SEEXPR_ENABLE_LLVM
+#include <llvm/IR/IRBuilder.h>
+namespace llvm {
+  class Value;
+  class Type;
+  class Module;
+  class Function;
+}
+typedef llvm::Value* LLVM_VALUE;
+typedef llvm::IRBuilder<> & LLVM_BUILDER;
+#define LLVM_BODY const
+#else
+typedef double LLVM_VALUE;
+typedef double LLVM_BUILDER;
+#define LLVM_BODY {return 0;}
+#endif
+
+namespace SeExpr2 {
+class ExprFunc;
+class ExprFuncX;
 
 /** Expression node base class.  Always constructed by parser in SeExprParser.y
    Parse tree nodes - this is where the expression evaluation happens.
@@ -63,7 +63,7 @@ class SeExprFuncX;
    it is only required to set the [0] component and the other
    components must be assumed to be invalid.
 
-   2) SeExprNode::prep - This is called for all nodes during parsing
+   2) ExprNode::prep - This is called for all nodes during parsing
    once the syntax has been checked.  Anything can be done here, such
    as function binding, variable lookups, etc., but the only thing
    that must be done is to determine whether the result is going to be
@@ -83,52 +83,54 @@ class SeExprFuncX;
    should be returned.
 */
 
-class SeExprNode {
+class ExprNode {
 public:
-    SeExprNode(const SeExpression* expr);
-    SeExprNode(const SeExpression* expr,
-               const SeExprType & type);
+    ExprNode(const Expression* expr);
+    ExprNode(const Expression* expr,
+               const ExprType & type);
     /// @{ @name These constructors supply one or more children.
-    SeExprNode(const SeExpression* expr,
-               SeExprNode* a);
-    SeExprNode(const SeExpression* expr,
-               SeExprNode* a,
-               const SeExprType & type);
-    SeExprNode(const SeExpression* expr,
-               SeExprNode* a,
-               SeExprNode* b);
-    SeExprNode(const SeExpression* expr,
-               SeExprNode* a,
-               SeExprNode* b,
-               const SeExprType & type);
-    SeExprNode(const SeExpression* expr,
-               SeExprNode* a,
-               SeExprNode* b,
-               SeExprNode* c);
-    SeExprNode(const SeExpression* expr,
-               SeExprNode* a,
-               SeExprNode* b,
-               SeExprNode* c,
-               const SeExprType & type);
+    ExprNode(const Expression* expr,
+               ExprNode* a);
+    ExprNode(const Expression* expr,
+               ExprNode* a,
+               const ExprType & type);
+    ExprNode(const Expression* expr,
+               ExprNode* a,
+               ExprNode* b);
+    ExprNode(const Expression* expr,
+               ExprNode* a,
+               ExprNode* b,
+               const ExprType & type);
+    ExprNode(const Expression* expr,
+               ExprNode* a,
+               ExprNode* b,
+               ExprNode* c);
+    ExprNode(const Expression* expr,
+               ExprNode* a,
+               ExprNode* b,
+               ExprNode* c,
+               const ExprType & type);
     /// @}
-    virtual ~SeExprNode();
+    virtual ~ExprNode();
 
 
     /// @{ @name Interface to implement for subclasses
 
     /// Prepare the node (for parser use only).  See the discussion at
     /// the start of SeExprNode.cpp for more info.
-    virtual SeExprType prep(bool dontNeedScalar, SeExprVarEnv & env);
+    virtual ExprType prep(bool dontNeedScalar, ExprVarEnv & env);
 
     /// builds an interpreter. Returns the location index for the evaluated data
-    virtual int buildInterpreter(SeInterpreter* interpreter) const;
+    virtual int buildInterpreter(Interpreter* interpreter) const;
     /// @}
-    
+
+    virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
+
     /// True if node has a vector result.
     bool isVec() const { return _isVec; }
 
     /// Access expression
-    const SeExpression* expr() const { return _expr; }
+    const Expression* expr() const { return _expr; }
 
     /// Access to original string representation of current expression
     std::string toString() const { return expr()->getExpr().substr(startPos(), length()); };
@@ -136,25 +138,25 @@ public:
     /// @{ @name Relationship Queries and Manipulation
 
     /// Access parent node - root node has no parent
-    const SeExprNode* parent() const { return _parent; }
+    const ExprNode* parent() const { return _parent; }
     /// Access children
     int numChildren() const { return _children.size(); }
-    const SeExprNode* child(int i) const { return _children[i]; }
-    SeExprNode* child(int i) { return _children[i]; }
+    const ExprNode* child(int i) const { return _children[i]; }
+    ExprNode* child(int i) { return _children[i]; }
 
     /// Add a child to the child list (for parser use only)
-    void addChild(SeExprNode* child);
+    void addChild(ExprNode* child);
 
     /// Transfer children from surrogate parent (for parser use only)
-    void addChildren(SeExprNode* surrogate);
+    void addChildren(ExprNode* surrogate);
 
     /// Transfer children from surrogate parent (does not delete surrogate)
-    void addChildren_without_delete(SeExprNode* surrogate);
+    void addChildren_without_delete(ExprNode* surrogate);
 
     /// @}
 
     /// The type of the node
-    const SeExprType & type() const { return _type; };
+    const ExprType & type() const { return _type; };
 
     /// @{ @name Access position in the input buffer that created this node 
 
@@ -176,9 +178,9 @@ public:
  protected: /*protected functions*/
 
     //! Set type of parameter
-    inline void setType         (const SeExprType & t)  { _type = t;                                    };
+    inline void setType         (const ExprType & t)  { _type = t;                                    };
     //! Set's the type to the argument but uses the children to determine lifetime
-    inline void setTypeWithChildLife(const SeExprType & t)  {
+    inline void setTypeWithChildLife(const ExprType & t)  {
         setType(t);
         int num = numChildren();
         if(num > 0){
@@ -201,15 +203,15 @@ public:
         return check;
     };
     /// Checks if the type is a value (i.e. string or float[d])
-    bool checkIsValue(const SeExprType& type,bool& error){
+    bool checkIsValue(const ExprType& type,bool& error){
         return checkCondition(type.isValue(),"Expected String or Float[d]",error);
     }
     /// Checks if the type is a float[d] for any d 
-    bool checkIsFP(const SeExprType& type,bool& error){
+    bool checkIsFP(const ExprType& type,bool& error){
         return checkCondition(type.isFP(),"Expected Float[d]",error);
     }
     /// Checks if the type is a float[d] for a specific d
-    bool checkIsFP(int d,const SeExprType& type,bool& error){
+    bool checkIsFP(int d,const ExprType& type,bool& error){
         if(!type.isFP(d)){ // Defer creating expensive string creation unless error
             std::stringstream s;
             s<<"Expected Float["<<d<<"]"<<std::endl;
@@ -218,8 +220,8 @@ public:
         return false;
     }
     /// types match (true if they do)
-    inline bool checkTypesCompatible(const SeExprType & first,const SeExprType & second,bool & error) {
-        if(!SeExprType::valuesCompatible(first,second)){
+    inline bool checkTypesCompatible(const ExprType & first,const ExprType & second,bool & error) {
+        if(!ExprType::valuesCompatible(first,second)){
             return checkCondition(false,
                 "Type mismatch. First: " + first .toString() +
                 " Second: "              + second.toString(),error);
@@ -228,117 +230,120 @@ public:
     /// @}
 protected: /*protected data members*/
     /// Owning expression (node can't modify)
-    const SeExpression* _expr;
+    const Expression* _expr;
 
     /// Parent node (null if this the the root)
-    SeExprNode* _parent;
+    ExprNode* _parent;
 
     /// List of children
-    std::vector<SeExprNode*> _children;
+    std::vector<ExprNode*> _children;
 
     /// True if node has a vector result
     bool _isVec;
 
     // Type of node
-    SeExprType _type;
+    ExprType _type;
     int _maxChildDim;
 
     /// Position line and collumn
     unsigned short int _startPos,_endPos;
 
     /// Fast evaluation function pointer
-    typedef void(*EvalFunction)(SeExprNode* self,const SeExprEvalResult& result);
+    typedef void(*EvalFunction)(ExprNode* self,const ExprEvalResult& result);
 public:
     EvalFunction evaluate;
 };
 
 
 /// Node that contains entire program
-class SeExprModuleNode : public SeExprNode
+class ExprModuleNode : public ExprNode
 {
 public:
-    SeExprModuleNode(const SeExpression* expr) :
-	SeExprNode(expr)
+    ExprModuleNode(const Expression* expr) :
+	ExprNode(expr)
     {}
 
-    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual int buildInterpreter(SeInterpreter* interpreter) const;
+    virtual ExprType prep(bool wantScalar, ExprVarEnv & env);
+    virtual int buildInterpreter(Interpreter* interpreter) const;
+    virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 };
 
 
 /// Node that contains prototype of function
-class SeExprPrototypeNode : public SeExprNode
+class ExprPrototypeNode : public ExprNode
 {
 public:
-    SeExprPrototypeNode(const SeExpression * expr,
+    ExprPrototypeNode(const Expression * expr,
                         const std::string  & name,
-                        const SeExprType   & retType)
-        : SeExprNode(expr),
+                        const ExprType   & retType)
+        : ExprNode(expr),
         _name(name),
         _retTypeSet(true),
         _retType(retType),
         _argTypes()
     {}
 
-    SeExprPrototypeNode(const SeExpression * expr,
+    ExprPrototypeNode(const Expression * expr,
                         const std::string  & name)
-        : SeExprNode(expr),
+        : ExprNode(expr),
         _name(name),
         _retTypeSet(false),
         _argTypes()
     {}
 
-    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
+    virtual ExprType prep(bool wantScalar, ExprVarEnv & env);
 
-    void addArgTypes(SeExprNode * surrogate);
-    void addArgs    (SeExprNode * surrogate);
+    void addArgTypes(ExprNode * surrogate);
+    void addArgs    (ExprNode * surrogate);
 
-    inline void setReturnType(const SeExprType & type) { _retType = type; _retTypeSet = true; };
+    inline void setReturnType(const ExprType & type) { _retType = type; _retTypeSet = true; };
 
     inline bool isReturnTypeSet() const { return _retTypeSet; };
 
-    inline SeExprType returnType() const { return (_retTypeSet ? _retType : SeExprType().Error().Varying()); };
+    inline ExprType returnType() const { return (_retTypeSet ? _retType : ExprType().Error().Varying()); };
 
-    inline       SeExprType     argType(int i) const { return _argTypes[i]; };
-    inline const SeExprNode   * arg    (int i) const { return child(i);     };
+    inline       ExprType     argType(int i) const { return _argTypes[i]; };
+    inline const ExprNode   * arg    (int i) const { return child(i);     };
 
     const std::string& name() const{return _name;}
 
     /// Build the interpreter
-    int buildInterpreter(SeInterpreter* interpreter) const;
+    int buildInterpreter(Interpreter* interpreter) const;
+    virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
     /// Return op for interpreter
     int interpreterOps(int c) const{return _interpreterOps.at(c);}
  private:
     std::string             _name;
     bool                    _retTypeSet;
-    SeExprType              _retType;
-    std::vector<SeExprType> _argTypes;
+    ExprType              _retType;
+    std::vector<ExprType> _argTypes;
     mutable std::vector<int> _interpreterOps; // operands for interpreter // TODO: this sucks... maybe a better place for this.
 };
 
 
-class SeExprFuncNode;
+class ExprFuncNode;
 /// Node that contains local function
-class SeExprLocalFunctionNode : public SeExprNode
+class ExprLocalFunctionNode : public ExprNode
 {
 public:
-    SeExprLocalFunctionNode(const SeExpression        * expr,
-                                  SeExprPrototypeNode * prototype,
-                                  SeExprNode          * block)
-        : SeExprNode(expr, prototype, block)
+    ExprLocalFunctionNode(const Expression        * expr,
+                                  ExprPrototypeNode * prototype,
+                                  ExprNode          * block)
+        : ExprNode(expr, prototype, block)
     {}
 
     /// Preps the definition of this site
-    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
+    virtual ExprType prep(bool wantScalar, ExprVarEnv & env);
     /// Preps a caller (i.e. we use callerNode to check arguments)
-    virtual SeExprType prep(SeExprFuncNode* callerNode,bool scalarWanted,SeExprVarEnv& env) const;
+    virtual ExprType prep(ExprFuncNode* callerNode,bool scalarWanted,ExprVarEnv& env) const;
     /// TODO: Accessor for prototype (probably not needed when we use prep right)
-    const SeExprPrototypeNode* prototype() const{return static_cast<const SeExprPrototypeNode*>(child(0));}
+    const ExprPrototypeNode* prototype() const{return static_cast<const ExprPrototypeNode*>(child(0));}
     
     /// Build the interpreter
-    int buildInterpreter(SeInterpreter* interpreter) const;
+    int buildInterpreter(Interpreter* interpreter) const;
     /// Build interpreter if we are called
-    int buildInterpreterForCall(const SeExprFuncNode* callerNode, SeInterpreter* interpreter) const;
+    int buildInterpreterForCall(const ExprFuncNode* callerNode, Interpreter* interpreter) const;
+    virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 
 private:
     mutable int _procedurePC;
@@ -347,186 +352,198 @@ private:
 
 
 /// Node that computes local variables before evaluating expression
-class SeExprBlockNode : public SeExprNode
+class ExprBlockNode : public ExprNode
 {
 public:
-    SeExprBlockNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b)
+    ExprBlockNode(const Expression* expr, ExprNode* a, ExprNode* b) :
+	ExprNode(expr, a, b)
     {}
 
-    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual int buildInterpreter(SeInterpreter* interpreter) const;
+    virtual ExprType prep(bool wantScalar, ExprVarEnv & env);
+    virtual int buildInterpreter(Interpreter* interpreter) const;
+    virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 };
 
 
 /// Node that computes local variables before evaluating expression
-class SeExprIfThenElseNode : public SeExprNode
+class ExprIfThenElseNode : public ExprNode
 {
 public:
-    SeExprIfThenElseNode(const SeExpression* expr,
-			 SeExprNode* a, SeExprNode* b, SeExprNode* c) :
-	SeExprNode(expr, a, b, c) {}
+    ExprIfThenElseNode(const Expression* expr,
+			 ExprNode* a, ExprNode* b, ExprNode* c) :
+	ExprNode(expr, a, b, c) {}
 
-    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual int buildInterpreter(SeInterpreter* interpreter) const;
+    virtual ExprType prep(bool wantScalar, ExprVarEnv & env);
+    virtual int buildInterpreter(Interpreter* interpreter) const;
+    virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 
-    SeExprVarEnv thenEnv,elseEnv;
+    ExprVarEnv thenEnv,elseEnv;
 };
 
 
 /// Node that compute a local variable assignment
-class SeExprAssignNode : public SeExprNode
+class ExprAssignNode : public ExprNode
 {
 public:
-    SeExprAssignNode(const SeExpression* expr, const char* name, SeExprNode* e) :
-	SeExprNode(expr, e), _name(name), _localVar(0) {}
+    ExprAssignNode(const Expression* expr, const char* name, ExprNode* e) :
+	ExprNode(expr, e), _name(name), _localVar(0) {}
 
-    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual int buildInterpreter(SeInterpreter* interpreter) const;
-    //virtual void eval(SeVec3d& result) const;
+    virtual ExprType prep(bool wantScalar, ExprVarEnv & env);
+    virtual int buildInterpreter(Interpreter* interpreter) const;
+    //virtual void eval(Vec3d& result) const;
+    virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 
     const std::string& name        () const { return _name;         };
-    const SeExprType & assignedType() const { return _assignedType; };
-    const SeExprLocalVar* localVar() const{return _localVar;}
+    const ExprType & assignedType() const { return _assignedType; };
+    const ExprLocalVar* localVar() const{return _localVar;}
 
 private:
     std::string _name;
-    SeExprLocalVar* _localVar;
-    SeExprType _assignedType;
+    ExprLocalVar* _localVar;
+    ExprType _assignedType;
 };
 
-
+// TODO three scalars?  Or 2 to 16 scalars??
 /// Node that constructs a vector from three scalars
-class SeExprVecNode : public SeExprNode
+class ExprVecNode : public ExprNode
 {
 public:
-    SeExprVecNode(const SeExpression* expr, SeExprNode* surrogate)
-        : SeExprNode(expr)
+    ExprVecNode(const Expression* expr, ExprNode* surrogate)
+        : ExprNode(expr)
     {
         addChildren_without_delete(surrogate);
     };
 
-    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual int buildInterpreter(SeInterpreter* interpreter) const;
+    virtual ExprType prep(bool wantScalar, ExprVarEnv & env);
+    virtual int buildInterpreter(Interpreter* interpreter) const;
+    virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 
-    SeVec3d value() const;
+    Vec3d value() const;
 };
 
 /// NOde that computes with a single operand
-class SeExprUnaryOpNode : public SeExprNode
+class ExprUnaryOpNode : public ExprNode
 {
 public:
     //! Construct with specific op ('!x' is logical negation, '~x' is 1-x, '-x' is -x)
-    SeExprUnaryOpNode(const SeExpression* expr, SeExprNode* a,char op)
-        : SeExprNode(expr, a), _op(op)
+    ExprUnaryOpNode(const Expression* expr, ExprNode* a,char op)
+        : ExprNode(expr, a), _op(op)
     {}
     
-    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual int buildInterpreter(SeInterpreter* interpreter) const;
+    virtual ExprType prep(bool wantScalar, ExprVarEnv & env);
+    virtual int buildInterpreter(Interpreter* interpreter) const;
+    virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 
     char _op;
 };
 
 /// Node that evaluates a conditional (if-then-else) expression
-class SeExprCondNode : public SeExprNode
+class ExprCondNode : public ExprNode
 {
 public:
-    SeExprCondNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b, SeExprNode* c) :
-	SeExprNode(expr, a, b, c) {}
+    ExprCondNode(const Expression* expr, ExprNode* a, ExprNode* b, ExprNode* c) :
+	ExprNode(expr, a, b, c) {}
 
-    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual int buildInterpreter(SeInterpreter* interpreter) const;
+    virtual ExprType prep(bool wantScalar, ExprVarEnv & env);
+    virtual int buildInterpreter(Interpreter* interpreter) const;
+    virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 };
 
 /// Node that evaluates a component of a vector
-class SeExprSubscriptNode : public SeExprNode
+class ExprSubscriptNode : public ExprNode
 {
 public:
-    SeExprSubscriptNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b) :
-	SeExprNode(expr, a, b){}
+    ExprSubscriptNode(const Expression* expr, ExprNode* a, ExprNode* b) :
+	ExprNode(expr, a, b){}
 
-    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual int buildInterpreter(SeInterpreter* interpreter) const;
+    virtual ExprType prep(bool wantScalar, ExprVarEnv & env);
+    virtual int buildInterpreter(Interpreter* interpreter) const;
+    virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 };
 
 
 /// Node that implements a numeric/string comparison
-class SeExprCompareEqNode : public SeExprNode
+class ExprCompareEqNode : public ExprNode
 {
 public:
-    SeExprCompareEqNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b,char op) :
-	SeExprNode(expr, a, b),_op(op) {}
+    ExprCompareEqNode(const Expression* expr, ExprNode* a, ExprNode* b,char op) :
+	ExprNode(expr, a, b),_op(op) {}
 
-    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual int buildInterpreter(SeInterpreter* interpreter) const;
+    virtual ExprType prep(bool wantScalar, ExprVarEnv & env);
+    virtual int buildInterpreter(Interpreter* interpreter) const;
+    virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 
     char _op;
 };
 
 
 /// Node that implements a numeric comparison
-class SeExprCompareNode : public SeExprNode
+class ExprCompareNode : public ExprNode
 {
 public:
-    SeExprCompareNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b,char op) :
-	SeExprNode(expr, a, b), _op(op) {}
+    ExprCompareNode(const Expression* expr, ExprNode* a, ExprNode* b,char op) :
+	ExprNode(expr, a, b), _op(op) {}
 
-    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual int buildInterpreter(SeInterpreter* interpreter) const;
+    virtual ExprType prep(bool wantScalar, ExprVarEnv & env);
+    virtual int buildInterpreter(Interpreter* interpreter) const;
+    virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 
     //! _op '<' less-than, 'l' less-than-eq, '>' greater-than, 'g' greater-than-eq
     char _op;
 };
 
 /// Node that implements an binary operator
-class SeExprBinaryOpNode : public SeExprNode
+class ExprBinaryOpNode : public ExprNode
 {
 public:
-    SeExprBinaryOpNode(const SeExpression* expr, SeExprNode* a, SeExprNode* b, char op) :
-	SeExprNode(expr, a, b),
+    ExprBinaryOpNode(const Expression* expr, ExprNode* a, ExprNode* b, char op) :
+	ExprNode(expr, a, b),
        _op(op) {}
 
-    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual int buildInterpreter(SeInterpreter* interpreter) const;
+    virtual ExprType prep(bool wantScalar, ExprVarEnv & env);
+    virtual int buildInterpreter(Interpreter* interpreter) const;
+    virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 
     char _op;
 };
 
 
 /// Node that references a variable
-class SeExprVarNode : public SeExprNode
+class ExprVarNode : public ExprNode
 {
 public:
-    SeExprVarNode(const SeExpression* expr, const char* name) :
-	SeExprNode(expr), _name(name), _localVar(0), _var(0)
+    ExprVarNode(const Expression* expr, const char* name) :
+	ExprNode(expr), _name(name), _localVar(0), _var(0)
     {}
 
-    SeExprVarNode(const SeExpression* expr, const char* name, const SeExprType & type) :
-        SeExprNode(expr, type), _name(name), _localVar(0), _var(0)
+    ExprVarNode(const Expression* expr, const char* name, const ExprType & type) :
+        ExprNode(expr, type), _name(name), _localVar(0), _var(0)
     {}
 
-    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual int buildInterpreter(SeInterpreter* interpreter) const;
+    virtual ExprType prep(bool wantScalar, ExprVarEnv & env);
+    virtual int buildInterpreter(Interpreter* interpreter) const;
+    virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
     const char* name() const { return _name.c_str(); }
-    const SeExprLocalVar* localVar() const{return _localVar;}
-    const SeExprVarRef* var() const{return _var;}
+    const ExprLocalVar* localVar() const{return _localVar;}
+    const ExprVarRef* var() const{return _var;}
 
 private:
     std::string _name;
-    SeExprLocalVar* _localVar;
-    SeExprVarRef* _var;
+    ExprLocalVar* _localVar;
+    ExprVarRef* _var;
 };
 
 
 /// Node that stores a numeric constant
-class SeExprNumNode : public SeExprNode
+class ExprNumNode : public ExprNode
 {
 public:
-    SeExprNumNode(const SeExpression* expr, double val) :
-	SeExprNode(expr), _val(val) {}
+    ExprNumNode(const Expression* expr, double val) :
+	ExprNode(expr), _val(val) {}
 
-    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual int buildInterpreter(SeInterpreter* interpreter) const;
+    virtual ExprType prep(bool wantScalar, ExprVarEnv & env);
+    virtual int buildInterpreter(Interpreter* interpreter) const;
+    virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
     double value() const { return _val; };
 
 private:
@@ -535,14 +552,15 @@ private:
 
 
 /// Node that stores a string
-class SeExprStrNode : public SeExprNode
+class ExprStrNode : public ExprNode
 {
 public:
-    SeExprStrNode(const SeExpression* expr, const char* str) :
-	SeExprNode(expr), _str(str) {}
+    ExprStrNode(const Expression* expr, const char* str) :
+	ExprNode(expr), _str(str) {}
 
-    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual int buildInterpreter(SeInterpreter* interpreter) const;
+    virtual ExprType prep(bool wantScalar, ExprVarEnv & env);
+    virtual int buildInterpreter(Interpreter* interpreter) const;
+    virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
     const char* str() const { return _str.c_str(); }
 
 private:
@@ -551,24 +569,25 @@ private:
 
 
 /// Node that calls a function
-class SeExprFuncNode : public SeExprNode
+class ExprFuncNode : public ExprNode
 {
 public:
-    SeExprFuncNode(const SeExpression* expr, const char* name) :
-	SeExprNode(expr), _name(name), _func(0), _localFunc(0)//, _func(0), _nargs(0), _data(0) 
+    ExprFuncNode(const Expression* expr, const char* name) :
+	ExprNode(expr), _name(name), _func(0), _localFunc(0), _data(0)
     {
 	expr->addFunc(name);
     }
-    virtual ~SeExprFuncNode() { /* TODO: fix delete _data;*/ }
+    virtual ~ExprFuncNode() { /* TODO: fix delete _data;*/ }
 
-    virtual SeExprType prep(bool wantScalar, SeExprVarEnv & env);
-    virtual int buildInterpreter(SeInterpreter* interpreter) const;
+    virtual ExprType prep(bool wantScalar, ExprVarEnv & env);
+    virtual int buildInterpreter(Interpreter* interpreter) const;
+    virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 
     const char* name() const { return _name.c_str(); }
-    bool checkArg(int argIndex,SeExprType type,SeExprVarEnv& env);
+    bool checkArg(int argIndex,ExprType type,ExprVarEnv& env);
 
 #if 0
-    virtual void eval(SeVec3d& result) const;
+    virtual void eval(Vec3d& result) const;
     void setIsVec(bool isVec) { _isVec = isVec; }
 
     //! return the number of arguments
@@ -576,13 +595,13 @@ public:
 
 #if 0
     double* scalarArgs() const { return &_scalarArgs[0]; }
-    SeVec3d* vecArgs() const { return &_vecArgs[0]; }
+    Vec3d* vecArgs() const { return &_vecArgs[0]; }
 
     //! eval all arguments (use in eval())
-    SeVec3d* evalArgs() const;
+    Vec3d* evalArgs() const;
 
     //! eval an argument (use in eval())
-    SeVec3d evalArg(int n) const;
+    Vec3d evalArg(int n) const;
 
     //! returns whether the nth argument is a string (use in prep)
     bool isStrArg(int n) const;
@@ -593,6 +612,16 @@ public:
 
 #endif
 
+    // TODO: Remove those two methods.
+    bool isStrArg(int n) const {
+        return n < numChildren() && dynamic_cast<const ExprStrNode*>(child(n)) != 0;
+    }
+    std::string getStrArg(int n) const {
+        if (n < numChildren())
+            return static_cast<const ExprStrNode*>(child(n))->str();
+        return "";
+    }
+
     //! base class for custom instance data
     struct Data { virtual ~Data() {} };
 
@@ -602,49 +631,52 @@ public:
         associated with a specific evaluation point of a function.
         Examples would be tokenized values, 
         sorted lists for binary searches in curve evaluation, etc. This should be done
-        in SeExprFuncX::prep().
+        in ExprFuncX::prep().
     */
     void setData(Data* data) const { _data = data; }
 
     //! get associated blind data (returns 0 if none)
     /***
         Use this to get data associated in the prep() routine. This is typically
-        used from SeExprFuncX::eval()
+        used from ExprFuncX::eval()
     */
     Data* getData() const { return _data; }
     int promote(int i) const {return _promote[i];}
 private:
     std::string _name;
-    const SeExprFunc* _func;
-    const SeExprLocalFunctionNode* _localFunc; // TODO: it is dirty to have to have both.
+    const ExprFunc* _func;
+    const ExprLocalFunctionNode* _localFunc; // TODO: it is dirty to have to have both.
 //    int _nargs;
 //    mutable std::vector<double> _scalarArgs;
-//    mutable std::vector<SeVec3d> _vecArgs;
+//    mutable std::vector<Vec3d> _vecArgs;
     mutable std::vector<int> _promote;
     mutable Data* _data;
 };
 
 /// Policy which provides all the AST Types for the parser.
-class SeExprNodePolicy{
-    typedef SeExprNode Base;
-    typedef std::unique_ptr<Base*> Ptr;
+class ExprNodePolicy{
+    typedef ExprNode Base;
+    // TODO: fix this once we switch to a c++11 compiler
+    //typedef std::unique_ptr<Base*> Ptr;
 
-    typedef SeExprModuleNode Module;
-    typedef SeExprPrototypeNode Prototype;
-    typedef SeExprLocalFunctionNode LocalFunction;
-    typedef SeExprBlockNode Block;
-    typedef SeExprIfThenElseNode IfThenElse;
-    typedef SeExprAssignNode Assign;
-    typedef SeExprVecNode Vec;
-    typedef SeExprUnaryOpNode UnaryOp;
-    typedef SeExprCondNode Cond;    
-    typedef SeExprCompareEqNode CompareEq;
-    typedef SeExprCompareNode Compare;
-    typedef SeExprBinaryOpNode BinaryOp;
-    typedef SeExprVarNode Var;
-    typedef SeExprNumNode Num;
-    typedef SeExprStrNode Str;
-    typedef SeExprFuncNode Func;
+    typedef ExprModuleNode Module;
+    typedef ExprPrototypeNode Prototype;
+    typedef ExprLocalFunctionNode LocalFunction;
+    typedef ExprBlockNode Block;
+    typedef ExprIfThenElseNode IfThenElse;
+    typedef ExprAssignNode Assign;
+    typedef ExprVecNode Vec;
+    typedef ExprUnaryOpNode UnaryOp;
+    typedef ExprCondNode Cond;
+    typedef ExprCompareEqNode CompareEq;
+    typedef ExprCompareNode Compare;
+    typedef ExprBinaryOpNode BinaryOp;
+    typedef ExprVarNode Var;
+    typedef ExprNumNode Num;
+    typedef ExprStrNode Str;
+    typedef ExprFuncNode Func;
 };
+
+}
 
 #endif

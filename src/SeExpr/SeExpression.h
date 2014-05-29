@@ -1,36 +1,18 @@
 /*
- SEEXPR SOFTWARE
- Copyright 2011 Disney Enterprises, Inc. All rights reserved
- 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are
- met:
- 
- * Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- 
- * Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in
- the documentation and/or other materials provided with the
- distribution.
- 
- * The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
- Studios" or the names of its contributors may NOT be used to
- endorse or promote products derived from this software without
- specific prior written permission from Walt Disney Pictures.
- 
- Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
- CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
- BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
- FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
- IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Copyright Disney Enterprises, Inc.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
+*
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
 */
 #ifndef SeExpression_h
 #define SeExpression_h
@@ -39,123 +21,105 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <iomanip>
+#include <stdint.h>
 #include "SeVec3d.h"
-
-#include "SeExprType.h"
 #include "SeExprEnv.h"
 
-class SeExprNode;
-class SeExprVarNode;
-class SeExprFunc;
-class SeExpression;
-class SeInterpreter;
+namespace llvm {
+    class ExecutionEngine;
+    class LLVMContext;
+}
+
+namespace SeExpr2 {
+
+class ExprNode;
+class ExprVarNode;
+class ExprFunc;
+class Expression;
+class Interpreter;
 
 //! abstract class for implementing variable references
-class SeExprVarRef
+class ExprVarRef
 {
-    SeExprVarRef()
-        : _type(SeExprType().Error().Varying())
+    ExprVarRef()
+        : _type(ExprType().Error().Varying())
     {};
 
  public:
-    SeExprVarRef(const SeExprType & type)
+    ExprVarRef(const ExprType & type)
         : _type(type)
     {};
 
-    virtual ~SeExprVarRef() {}
+    virtual ~ExprVarRef() {}
 
     //! sets (current) type to given type
-    virtual void setType(const SeExprType & type) { _type = type; };
+    virtual void setType(const ExprType & type) { _type = type; };
 
     //! returns (current) type
-    virtual SeExprType type() const { return _type; };
+    virtual ExprType type() const { return _type; };
 
     // TODO: this is deprecated!
     //! returns this variable's value by setting result, node refers to 
     //! where in the parse tree the evaluation is occurring
     //virtual void eval(double* result,char**)=0;
     virtual void eval(double* result)=0;
-    virtual void eval(char** resultStr)=0;
+    virtual void eval(const char** resultStr)=0;
 
 private:
-    SeExprType _type;
+    ExprType _type;
 };
 
 /// simple vector variable reference reference base class
-class SeExprVectorVarRef : public SeExprVarRef
+// NOTE: this is a backwards compatible way of specifying 3 vector and should be considered deprecated.
+class ExprVectorVarRef : public ExprVarRef
 {
  public:
-    SeExprVectorVarRef()
-        : SeExprVarRef(SeExprType().FP(3).Varying())
+    ExprVectorVarRef()
+        : ExprVarRef(ExprType().FP(3).Varying())
     {};
 
     virtual bool isVec() { return 1; }
-    virtual void eval(const SeExprVarNode* node, SeVec3d& result)=0;
+    virtual void eval(const ExprVarNode* node, Vec3d& result)=0;
     virtual void eval(double* result){
-        SeVec3d ret;
+        Vec3d ret;
         eval(0,ret);
         for(int k=0;k<3;k++) result[k]=ret[k];
     }
-    virtual void eval(char** result){assert(false);}
+    virtual void eval(const char** result){assert(false);}
 };
 
 
 /// simple scalar variable reference reference base class
-class SeExprScalarVarRef : public SeExprVarRef
+class ExprScalarVarRef : public ExprVarRef
 {
  public:
-    SeExprScalarVarRef()
-        : SeExprVarRef(SeExprType().FP(1).Varying())
+    ExprScalarVarRef()
+        : ExprVarRef(ExprType().FP(1).Varying())
     {};
 
     virtual bool isVec() { return 0; }
-    virtual void eval(const SeExprVarNode* node, SeVec3d& result)=0;
+    virtual void eval(const ExprVarNode* node, Vec3d& result)=0;
     virtual void eval(double* result){
-        SeVec3d ret;
+        Vec3d ret;
         eval(0,ret);
         for(int k=0;k<1;k++) result[k]=ret[k];
     }
-    virtual void eval(char** result){assert(false);}
-
+    virtual void eval(const char** result){assert(false);}
 };
 
-#if 0
-/// uses internally to represent local variables
-class SeExprLocalVarRef : public SeExprVarRef
-{
-    SeExprLocalVarRef()
-        : SeExprVarRef(SeExprType().Error().Varying()), val(0)
-    {}
-
- public:
-    union{
-        double *val;
-        const char* s;
-    };
-    SeExprLocalVarRef(const SeExprType & intype)
-        :SeExprVarRef(intype),val(0)
-    {
-        if(type().isFP()) val=new double[type().dim()];
-    }
-
-    virtual ~SeExprLocalVarRef()
-    {delete [] val;}
-
-    virtual void evaluate(const SeExprVarNode* node,const SeExprEvalResult& evalResult){
-        if(type().isString()) *evalResult.str=s;
-        else{
-            int d=type().dim();
-            for(int k=0;k<d;k++) evalResult.fp[k]=val[k];
-        }
-    }
-};
+enum EvaluationStrategy {UseInterpreter, UseLLVM};
+#ifdef SEEXPR_ENABLE_LLVM
+    static EvaluationStrategy defaultEvaluationStrategy = UseLLVM;
+#else
+    static EvaluationStrategy defaultEvaluationStrategy = UseInterpreter;
 #endif
 
 /// main expression class
-class SeExpression
+class Expression
 {
  public:
-    //typedef std::map<std::string, SeExprLocalVarRef> LocalVarTable;
+    //typedef std::map<std::string, ExprLocalVarRef> LocalVarTable;
 
     //! Represents a parse or type checking error in an expression
     struct Error
@@ -174,14 +138,13 @@ class SeExpression
         {}
     };
 
-    SeExpression( );
-    //SeExpression( const std::string &e, bool wantVec=true );
-    SeExpression( const std::string &e, const SeExprType & type = SeExprType().FP(3));
-    virtual ~SeExpression();
+    Expression(EvaluationStrategy be = defaultEvaluationStrategy);
+    Expression( const std::string &e, const ExprType & type = ExprType().FP(3), EvaluationStrategy be = defaultEvaluationStrategy);
+    virtual ~Expression();
 
     /** Sets desired return value.
         This will allow the evaluation to potentially be optimized. */
-    void setDesiredReturnType(const SeExprType & type);
+    void setDesiredReturnType(const ExprType & type);
 
     /** Set expression string to e.  
         This invalidates all parsed state. */
@@ -196,10 +159,10 @@ class SeExpression
     bool syntaxOK() const;
 
     /** Check if expression is valid.  Expr will be parsed if
-	needed. Variables and functions will also be bound.  If this
-	returns false, the error message can be accessed via
-	parseError() */
-    bool isValid() const;
+    needed. Variables and functions will also be bound.  If this
+    returns false, the error message can be accessed via
+    parseError() */
+    bool isValid() const { prepIfNeeded(); return _isValid; }
 
     /** Get parse error (if any).  First call syntaxOK or isValid
 	to parse (and optionally bind) the expression. */
@@ -250,11 +213,13 @@ class SeExpression
     /** Return the return type of the expression.  Currently may not
         match the type set in setReturnType.  Expr will be parsed and
         variables and functions will be bound if needed. */
-    const SeExprType & returnType() const;
+    const ExprType & returnType() const;
 
+    // TODO: make this deprecated
     /** Evaluates and returns float (check returnType()!) */
     const double* evalFP() const;
 
+    // TODO: make this deprecated
     /** Evaluates and returns string (check returnType()!) */
     const char* evalStr() const;
 
@@ -262,10 +227,10 @@ class SeExpression
     void reset();
 
     /** override resolveVar to add external variables */
-    virtual SeExprVarRef* resolveVar(const std::string& name) const {return 0;}
+    virtual ExprVarRef* resolveVar(const std::string& name) const {return 0;}
 
     /** override resolveFunc to add external functions */
-    virtual SeExprFunc* resolveFunc(const std::string& name) const {return 0;}
+    virtual ExprFunc* resolveFunc(const std::string& name) const {return 0;}
 
     /** records an error in prep or parse stage */
     void addError(const std::string& error,const int startPos,const int endPos) const
@@ -281,39 +246,41 @@ class SeExpression
 
  private:
     /** No definition by design. */
-    SeExpression( const SeExpression &e );
-    SeExpression &operator=( const SeExpression &e );
+    Expression( const Expression &e );
+    Expression &operator=( const Expression &e );
 
     /** Parse, and remember parse error if any */
     void parse() const;
 
-    /** Prepare expression (bind vars/functions, etc.) 
-	and remember error if any */
-    void prep() const;
-
     /** Parse, but only if not yet parsed */
     void parseIfNeeded() const { if (!_parsed) parse(); }
 
-    /** Prepare, but only if not yet prepped */
-    void prepIfNeeded() const { if (!_prepped) prep(); }
+    /** Prepare expression (bind vars/functions, etc.)
+    and remember error if any */
+    void prep() const;
 
     /** True if the expression wants a vector */
     bool _wantVec;
 
     /** Computed return type. */
-    mutable SeExprType _returnType;
-
-    /** Computed return type. */
-    mutable SeExprType _desiredReturnType;
+    mutable ExprType _returnType;
 
     /** The expression. */
     std::string _expression;
     
+    EvaluationStrategy _evaluationStrategy;
  protected:
+
+    /** Computed return type. */
+    mutable ExprType _desiredReturnType;
+
     /** Variable environment */
-    mutable SeExprVarEnv* _varEnv;
+    mutable ExprVarEnv* _varEnv;
     /** Parse tree (null if syntax is bad). */
-    mutable SeExprNode *_parseTree;
+    mutable ExprNode *_parseTree;
+
+    /** Prepare, but only if not yet prepped */
+    void prepIfNeeded() const { if (!_prepped) prep(); }
 
  private:
     /** Flag if we are valid or not */
@@ -342,10 +309,52 @@ class SeExpression
     /** Whether or not we have unsafe functions */
     mutable std::vector<std::string> _threadUnsafeFunctionCalls;
 
+#ifdef SEEXPR_ENABLE_LLVM
+    // TODO: let the dev code allocate memory?
+    // FP is the native function for this expression.
+    template<class T>
+    class LLVMEvaluationContext{
+        typedef void (*FunctionPtr)(T*);
+        FunctionPtr functionPtr;
+        T* resultData;
+    public:
+        LLVMEvaluationContext()
+            :functionPtr(0), resultData(0)
+        {}
+        void init(void* fp,int dim){
+            reset();
+            functionPtr=reinterpret_cast<FunctionPtr>(fp);
+            resultData=new T[dim];
+        }
+        void reset(){
+            delete resultData; resultData=0;
+            functionPtr=0;
+            resultData=0;
+        }
+        const T* operator()()
+        {
+            assert(functionPtr && resultData);
+            functionPtr(resultData);
+            return resultData;
+        }
+    };
+    mutable LLVMEvaluationContext<double> _llvmEvalFP;
+    mutable LLVMEvaluationContext<char*> _llvmEvalStr;
+
+    mutable llvm::LLVMContext *Context;
+    mutable llvm::ExecutionEngine *TheExecutionEngine;
+    void prepLLVM() const;
+    std::string getUniqueName() const {
+        std::ostringstream o;
+        o << std::setbase(16) << (uint64_t)(this);
+        return ("_" + o.str());
+    }
+#endif
+
     /** Se interpreter */
 public:
     // TODO: make this public for debugging during devel
-    mutable SeInterpreter* _interpreter;
+    mutable Interpreter* _interpreter;
     mutable int _returnSlot;
 private:
 
@@ -355,7 +364,7 @@ private:
     void addFunc(const char* n) const { _funcs.insert(n); }
 
     ////! get local variable reference (this is for internal use)
-    //SeExprVarRef* resolveLocalVar(const char* n) const {
+    //ExprVarRef* resolveLocalVar(const char* n) const {
     //    LocalVarTable::iterator iter = _localVars.find(n);
     //    if (iter != _localVars.end()) return &iter->second;
     //    return 0;
@@ -363,9 +372,11 @@ private:
 
     /** get local variable reference. This is potentially useful for expression debuggers
         and/or uses of expressions where mutable variables are desired */
-    /* SeExprLocalVarRef* getLocalVar(const char* n) const { */
+    /* ExprLocalVarRef* getLocalVar(const char* n) const { */
     /*     return &_localVars[n];  */
     /* } */
 };
+
+}
 
 #endif

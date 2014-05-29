@@ -1,36 +1,18 @@
 /*
- SEEXPR SOFTWARE
- Copyright 2011 Disney Enterprises, Inc. All rights reserved
- 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are
- met:
- 
- * Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- 
- * Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in
- the documentation and/or other materials provided with the
- distribution.
- 
- * The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
- Studios" or the names of its contributors may NOT be used to
- endorse or promote products derived from this software without
- specific prior written permission from Walt Disney Pictures.
- 
- Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
- CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
- BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
- FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
- IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Copyright Disney Enterprises, Inc.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
+*
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
 */
 
 %{
@@ -70,8 +52,8 @@ static void yyerror(const char* msg);
 // local data
 static const char* ParseStr;    // string being parsed
 static std::string ParseError;  // error (set from yyerror)
-static SeExprNode* ParseResult; // must set result here since yyparse can't return it
-static const SeExpression* Expr;// used for parenting created SeExprOp's
+static SeExpr2::ExprNode* ParseResult; // must set result here since yyparse can't return it
+static const SeExpr2::Expression* Expr;// used for parenting created SeExprOp's
 
 /* The list of nodes being built is remembered locally here.
    Eventually (if there are no syntax errors) ownership of the nodes
@@ -79,32 +61,32 @@ static const SeExpression* Expr;// used for parenting created SeExprOp's
    However, if there is a syntax error, we must loop through this list
    and free any nodes that were allocated before the error to avoid a
    memory leak. */
-static std::vector<SeExprNode*> ParseNodes;
-inline SeExprNode* Remember(SeExprNode* n,const int startPos,const int endPos) 
+static std::vector<SeExpr2::ExprNode*> ParseNodes;
+inline SeExpr2::ExprNode* Remember(SeExpr2::ExprNode* n,const int startPos,const int endPos) 
     { ParseNodes.push_back(n); n->setPosition(startPos,endPos); return n; }
-inline void Forget(SeExprNode* n) 
+inline void Forget(SeExpr2::ExprNode* n) 
     { ParseNodes.erase(std::find(ParseNodes.begin(), ParseNodes.end(), n)); }
 /* These are handy node constructors for 0-3 arguments */
-#define NODE(startPos,endPos,name) Remember(new SeExpr##name(Expr),startPos,endPos)
-#define NODE1(startPos,endPos,name,a) Remember(new SeExpr##name(Expr,a),startPos,endPos)
-#define NODE2(startPos,endPos,name,a,b) Remember(new SeExpr##name(Expr,a,b),startPos,endPos)
-#define NODE3(startPos,endPos,name,a,b,c) Remember(new SeExpr##name(Expr,a,b,c),startPos,endPos)
-#define NODE4(startPos,endPos,name,a,b,c,t) Remember(new SeExpr##name(Expr,a,b,c,t),startPos,endPos)
+#define NODE(startPos,endPos,name) Remember(new SeExpr2::Expr##name(Expr),startPos,endPos)
+#define NODE1(startPos,endPos,name,a) Remember(new SeExpr2::Expr##name(Expr,a),startPos,endPos)
+#define NODE2(startPos,endPos,name,a,b) Remember(new SeExpr2::Expr##name(Expr,a,b),startPos,endPos)
+#define NODE3(startPos,endPos,name,a,b,c) Remember(new SeExpr2::Expr##name(Expr,a,b,c),startPos,endPos)
+#define NODE4(startPos,endPos,name,a,b,c,t) Remember(new SeExpr2::Expr##name(Expr,a,b,c,t),startPos,endPos)
 %}
 
 %union {
-    SeExprNode* n; /* a node is returned for all non-terminals to
+    SeExpr2::ExprNode* n; /* a node is returned for all non-terminals to
 		      build the parse tree from the leaves up. */
     double d;      // return value for number tokens
     char* s;       /* return value for name tokens.  Note: the string
 		      is allocated with strdup() in the lexer and must
 		      be freed with free() */
     struct {
-        SeExprType::Type     type;
+        SeExpr2::ExprType::Type     type;
         int                  dim;
-        SeExprType::Lifetime lifetime;
+        SeExpr2::ExprType::Lifetime lifetime;
     } t;  // return value for types
-    SeExprType::Lifetime l; // return value for lifetime qualifiers
+    SeExpr2::ExprType::Lifetime l; // return value for lifetime qualifiers
 }
 
 %token IF ELSE EXTERN DEF FLOATPOINT STRING
@@ -162,24 +144,24 @@ declarationList:
 
 declaration:
       EXTERN typeDeclare NAME '(' typeListOptional       ')'
-                                { SeExprType type = SeExprType($2.type, $2.dim, $2.lifetime);
-                                    SeExprPrototypeNode * prototype =
-                                        (SeExprPrototypeNode*)NODE2(@$.first_column, @$.last_column, PrototypeNode, $3, type);
+                                { SeExpr2::ExprType type = SeExpr2::ExprType($2.type, $2.dim, $2.lifetime);
+                                    SeExpr2::ExprPrototypeNode * prototype =
+                                        (SeExpr2::ExprPrototypeNode*)NODE2(@$.first_column, @$.last_column, PrototypeNode, $3, type);
                                   prototype->addArgTypes($5);
                                   Forget($5);
                                   $$ = prototype;
                                   free($3); }
     | DEF    typeDeclare NAME '(' formalTypeListOptional ')' '{' block '}'
-                                { SeExprType type = SeExprType($2.type, $2.dim, $2.lifetime);
-                                  SeExprPrototypeNode * prototype =
-                                      (SeExprPrototypeNode*)NODE2(@$.first_column, @6.last_column, PrototypeNode, $3, type);
+                                { SeExpr2::ExprType type = SeExpr2::ExprType($2.type, $2.dim, $2.lifetime);
+                                  SeExpr2::ExprPrototypeNode * prototype =
+                                      (SeExpr2::ExprPrototypeNode*)NODE2(@$.first_column, @6.last_column, PrototypeNode, $3, type);
                                   prototype->addArgs($5);
                                   Forget($5);
                                   $$ = NODE2(@$.first_column, @$.last_column, LocalFunctionNode, prototype, $8);
                                   free($3); }
     | DEF                NAME '(' formalTypeListOptional ')' '{' block '}'
-                                { SeExprPrototypeNode * prototype =
-                                        (SeExprPrototypeNode*)NODE1(@$.first_column, @5.last_column, PrototypeNode, $2);
+                                { SeExpr2::ExprPrototypeNode * prototype =
+                                        (SeExpr2::ExprPrototypeNode*)NODE1(@$.first_column, @5.last_column, PrototypeNode, $2);
                                   prototype->addArgs($4);
                                   Forget($4);
                                   $$ = NODE2(@$.first_column, @$.last_column, LocalFunctionNode, prototype, $7);
@@ -187,23 +169,23 @@ declaration:
     ;
 
 lifetimeOptional:
-      /* empty */               { $$ = SeExprType::ltVARYING; }
-    | LIFETIME_CONSTANT         { $$ = SeExprType::ltCONSTANT; }
-    | LIFETIME_UNIFORM          { $$ = SeExprType::ltUNIFORM; }
-    | LIFETIME_VARYING          { $$ = SeExprType::ltVARYING; }
-    | LIFETIME_ERROR            { $$ = SeExprType::ltERROR; } //For testing purposes only
+      /* empty */               { $$ = SeExpr2::ExprType::ltVARYING; }
+    | LIFETIME_CONSTANT         { $$ = SeExpr2::ExprType::ltCONSTANT; }
+    | LIFETIME_UNIFORM          { $$ = SeExpr2::ExprType::ltUNIFORM; }
+    | LIFETIME_VARYING          { $$ = SeExpr2::ExprType::ltVARYING; }
+    | LIFETIME_ERROR            { $$ = SeExpr2::ExprType::ltERROR; } //For testing purposes only
     ;
 
 typeDeclare:
-      FLOATPOINT lifetimeOptional{$$.type     = SeExprType::tFP;
+      FLOATPOINT lifetimeOptional{$$.type     = SeExpr2::ExprType::tFP;
                                   $$.dim      = 1;
                                   $$.lifetime = $2; }
     | FLOATPOINT '[' NUMBER ']' lifetimeOptional
-                                { $$.type = ($3 > 0 ? SeExprType::tFP : SeExprType::tERROR);
+                                { $$.type = ($3 > 0 ? SeExpr2::ExprType::tFP : SeExpr2::ExprType::tERROR);
                                   //TODO: This causes an error but does not report it to user. Change this.
                                   $$.dim  = ($3 > 0 ? $3 : 0);
                                   $$.lifetime = $5; }
-    | STRING lifetimeOptional   { $$.type = SeExprType::tSTRING;
+    | STRING lifetimeOptional   { $$.type = SeExpr2::ExprType::tSTRING;
                                   $$.dim  = 1;
                                   $$.lifetime = $2; }
     ;
@@ -215,12 +197,12 @@ typeListOptional:
 
 typeList:
       typeDeclare               { $$ = NODE(@$.first_column, @$.last_column, Node);
-                                  SeExprType type = SeExprType($1.type, $1.dim, $1.lifetime);
-                                  SeExprNode* varNode = NODE2(@$.first_column, @$.last_column, VarNode, 0, type);
+                                  SeExpr2::ExprType type = SeExpr2::ExprType($1.type, $1.dim, $1.lifetime);
+                                  SeExpr2::ExprNode* varNode = NODE2(@$.first_column, @$.last_column, VarNode, 0, type);
                                   $$->addChild(varNode); }
     | typeList ',' typeDeclare  { $$ = $1;
-                                  SeExprType type = SeExprType($3.type, $3.dim, $3.lifetime);
-                                  SeExprNode* varNode = NODE2(@3.first_column, @3.last_column, VarNode, 0, type);
+                                  SeExpr2::ExprType type = SeExpr2::ExprType($3.type, $3.dim, $3.lifetime);
+                                  SeExpr2::ExprNode* varNode = NODE2(@3.first_column, @3.last_column, VarNode, 0, type);
                                   $$->addChild(varNode); }
     ;
 
@@ -231,14 +213,14 @@ formalTypeListOptional:
 
 formalTypeList:
       typeDeclare NAME           { $$ = NODE(@$.first_column, @$.last_column, Node);
-                                  SeExprType type = SeExprType($1.type, $1.dim, $1.lifetime);
-                                  SeExprNode* varNode = NODE2(@$.first_column, @$.last_column, VarNode, $2, type);
+                                  SeExpr2::ExprType type = SeExpr2::ExprType($1.type, $1.dim, $1.lifetime);
+                                  SeExpr2::ExprNode* varNode = NODE2(@$.first_column, @$.last_column, VarNode, $2, type);
                                   $$->addChild(varNode);
                                   free($2); }
     | formalTypeList ',' typeDeclare NAME
                                 { $$ = $1;
-                                  SeExprType type = SeExprType($3.type, $3.dim, $3.lifetime);
-                                  SeExprNode* varNode = NODE2(@3.first_column, @4.last_column, VarNode, $4, type);
+                                  SeExpr2::ExprType type = SeExpr2::ExprType($3.type, $3.dim, $3.lifetime);
+                                  SeExpr2::ExprNode* varNode = NODE2(@3.first_column, @4.last_column, VarNode, $4, type);
                                   $$->addChild(varNode);
                                   free($4); }
     ;
@@ -262,42 +244,42 @@ assigns:
 assign:
       ifthenelse		{ $$ = $1; }
     | VAR '=' e ';'		{ $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, $3); free($1); }
-    | VAR AddEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'+');
+    | VAR AddEq e ';'              {SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                               SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'+');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | VAR SubEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'-');
+    | VAR SubEq e ';'              {SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                               SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'-');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | VAR MultEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'*');
+    | VAR MultEq e ';'              {SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                               SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'*');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | VAR DivEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'/');
+    | VAR DivEq e ';'              {SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                               SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'/');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | VAR ExpEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'^');
+    | VAR ExpEq e ';'              {SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                               SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'^');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | VAR ModEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'%');
+    | VAR ModEq e ';'              {SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                               SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'%');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
     | NAME '=' e ';'		{ $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, $3); free($1); }
-    | NAME AddEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'+');
+    | NAME AddEq e ';'              {SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                               SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'+');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | NAME SubEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'-');
+    | NAME SubEq e ';'              {SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                               SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'-');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | NAME MultEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'*');
+    | NAME MultEq e ';'              {SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                               SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'*');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | NAME DivEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'/');
+    | NAME DivEq e ';'              {SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                               SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'/');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | NAME ExpEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'^');
+    | NAME ExpEq e ';'              {SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                               SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'^');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | NAME ModEq e ';'              {SeExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                               SeExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'%');
+    | NAME ModEq e ';'              {SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                               SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'%');
                                 $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
     ;
 
@@ -421,14 +403,15 @@ static void yyerror(const char* /*msg*/)
 
 extern void SeExprLexerResetState(std::vector<std::pair<int,int> >& comments);
 
-static SeExprInternal::Mutex mutex;
+static SeExprInternal2::Mutex mutex;
 
-bool SeExprParse(SeExprNode*& parseTree,
+namespace SeExpr2 {
+bool ExprParse(SeExpr2::ExprNode*& parseTree,
     std::string& error, int& errorStart, int& errorEnd,
     std::vector<std::pair<int,int> >& comments,
-    const SeExpression* expr, const char* str, bool wantVec)
+    const SeExpr2::Expression* expr, const char* str, bool wantVec)
 {
-    SeExprInternal::AutoMutex locker(mutex);
+    SeExprInternal2::AutoMutex locker(mutex);
 
     // glue around crippled C interface - ugh!
     Expr = expr;
@@ -451,8 +434,8 @@ bool SeExprParse(SeExprNode*& parseTree,
         errorEnd=yylloc.last_column;
 	parseTree = 0;
 	// gather list of nodes with no parent
-	std::vector<SeExprNode*> delnodes;
-	std::vector<SeExprNode*>::iterator iter;
+	std::vector<SeExpr2::ExprNode*> delnodes;
+	std::vector<SeExpr2::ExprNode*>::iterator iter;
 	for (iter = ParseNodes.begin(); iter != ParseNodes.end(); iter++)
 	    if (!(*iter)->parent()) { delnodes.push_back(*iter); }
 	// now delete them (they will delete their own children)
@@ -462,5 +445,6 @@ bool SeExprParse(SeExprNode*& parseTree,
     ParseNodes.clear();
 
     return parseTree != 0;
+}
 }
 

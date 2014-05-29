@@ -1,38 +1,19 @@
 /*
- SEEXPR SOFTWARE
- Copyright 2011 Disney Enterprises, Inc. All rights reserved
- 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are
- met:
- 
- * Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- 
- * Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in
- the documentation and/or other materials provided with the
- distribution.
- 
- * The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
- Studios" or the names of its contributors may NOT be used to
- endorse or promote products derived from this software without
- specific prior written permission from Walt Disney Pictures.
- 
- Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
- CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIESname, INCLUDING,
- BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
- FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
- IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Copyright Disney Enterprises, Inc.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
+*
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
 */
-
 #ifndef SeControlSpec_h
 #define SeControlSpec_h
 
@@ -47,12 +28,12 @@
 #include "SeExprNode.h"
 #include "SeCurve.h"
 
-namespace SeExpr{
+namespace SeExpr2 {
 
-//! Generic SeExpression control specification
+//! Generic Expression control specification
 class ControlSpec {
  public:
-    ControlSpec(const SeExprNode& node)
+    ControlSpec(const ExprNode& node)
         :_start(node.startPos()), _end(node.endPos())
     {};
 
@@ -68,12 +49,12 @@ class ControlSpec {
 };
 
 //! Variable equals scalar control specification
-class SeExprScalarAssignSpec : public ControlSpec {
+class ExprScalarAssignSpec : public ControlSpec {
  public:
-    SeExprScalarAssignSpec(const SeExprAssignNode& node);
+    ExprScalarAssignSpec(const ExprAssignNode& node);
     virtual std::string toString() const;
     inline double value() const { return _val; };
-    static const SeExprScalarAssignSpec* match(const SeExprNode* node);
+    static const ExprScalarAssignSpec* match(const ExprNode* node);
 
  private:
     //! Range of values
@@ -83,48 +64,48 @@ class SeExprScalarAssignSpec : public ControlSpec {
 };
 
 //! Variable equals vector control specification
-class SeExprVectorAssignSpec : public ControlSpec {
+class ExprVectorAssignSpec : public ControlSpec {
  public:
-    SeExprVectorAssignSpec(const SeExprAssignNode& node);
+    ExprVectorAssignSpec(const ExprAssignNode& node);
     virtual std::string toString() const;
-    inline const SeVec3d & value() const { return _val; };
-    static const SeExprVectorAssignSpec* match(const SeExprNode* node);
+    inline const Vec3d & value() const { return _val; };
+    static const ExprVectorAssignSpec* match(const ExprNode* node);
 
  private:
     //! Range of values
     double _min,_max;
     //! Current Value
-    SeVec3d _val;
+    Vec3d _val;
 };
 
 //! Curve assignment expression. Assignment of curve to a variable.
 template<class T>
-class SeExprCurveAssignSpec : public ControlSpec {
+class ExprCurveAssignSpec : public ControlSpec {
 
  public:
-    SeExprCurveAssignSpec(const SeExprAssignNode& node);
+    ExprCurveAssignSpec(const ExprAssignNode& node);
     virtual std::string toString() const;
-    static const SeExprCurveAssignSpec* match(const SeExprNode* node);
+    static const ExprCurveAssignSpec* match(const ExprNode* node);
 
  private:
     //! Lookup subexpression text
     std::string _lookupText;
     //! Control points of curve spline
-    std::vector<typename SeExpr::SeCurve<T>::CV> _vec;
+    std::vector<typename Curve<T>::CV> _vec;
 };
 
-class SeExprStrSpec : public ControlSpec {
+class ExprStrSpec : public ControlSpec {
     enum Type {STRING,FILE,DIRECTORY};
  public:
     //! Takes name and type comments and takes ownership of them!
-    SeExprStrSpec(const SeExprStrNode& node,char* name,Type type)
+    ExprStrSpec(const ExprStrNode& node,char* name,Type type)
         : ControlSpec(node),_str(node.str()),_type(type)
     {
         _name=name;
     }
 
     virtual std::string toString() const;
-    static const SeExprStrSpec* match(const SeExprNode* node);
+    static const ExprStrSpec* match(const ExprNode* node);
 private:
     std::string _str;
     Type _type;
@@ -138,7 +119,7 @@ class SpecExaminer : public Examiner<true> {
  public:
     ~SpecExaminer();
 
-    virtual bool examine(const SeExprNode* examinee);
+    virtual bool examine(const ExprNode* examinee);
     virtual void reset() { _specList.clear(); };
     inline int length() const { return _specList.size(); };
     inline const ControlSpec* spec(int i) const { return _specList[i]; };

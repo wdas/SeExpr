@@ -1,36 +1,18 @@
 /*
- SEEXPR SOFTWARE
- Copyright 2011 Disney Enterprises, Inc. All rights reserved
- 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are
- met:
- 
- * Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- 
- * Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in
- the documentation and/or other materials provided with the
- distribution.
- 
- * The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
- Studios" or the names of its contributors may NOT be used to
- endorse or promote products derived from this software without
- specific prior written permission from Walt Disney Pictures.
- 
- Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
- CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
- BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
- FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
- IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Copyright Disney Enterprises, Inc.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
+*
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
 */
 #include "SeExpression.h"
 #include "SeExprBuiltins.h"
@@ -40,36 +22,36 @@
 
 #include "SeCurve.h"
 
-namespace SeExpr{
+namespace SeExpr2 {
 
-template<> double SeCurve<double>::comp(const double& val,const int)
+template<> double Curve<double>::comp(const double& val,const int)
 {return val;}
 
-template<> double SeCurve<SeVec3d>::comp(const SeVec3d& val,const int i)
+template<> double Curve<Vec3d>::comp(const Vec3d& val,const int i)
 {return val[i];}
     
-template<class T> bool SeCurve<T>::
+template<class T> bool Curve<T>::
 cvLessThan(const CV &cv1, const CV &cv2)
 {
     return cv1._pos < cv2._pos;
 }
 
-template<class T> SeCurve<T>::
-SeCurve()
+template<class T> Curve<T>::
+Curve()
     :cacheCV(0),prepared(false)
 {
     _cvData.push_back(CV(-FLT_MAX,T(),kNone));
     _cvData.push_back(CV(FLT_MAX,T(),kNone));
 }
 
-template<class T> void SeCurve<T>::
+template<class T> void Curve<T>::
 addPoint(double position,const T& val,InterpType type)
 {
     prepared=false;
     _cvData.push_back(CV(position,val,type));
 }
 
-template<class T> void SeCurve<T>::
+template<class T> void Curve<T>::
 preparePoints()
 {
     prepared=true;
@@ -120,7 +102,7 @@ preparePoints()
 
 // TODO: this function and the next could be merged with template magic
 //       but it might be simpler to just have two copies!
-template<class T> T SeCurve<T>::
+template<class T> T Curve<T>::
 getValue(const double param) const
 {
     assert(prepared);
@@ -174,7 +156,7 @@ getValue(const double param) const
 
 // TODO: this function and the previous could be merged with template magic
 //       but it might be simpler to just have two copies!
-template<class T> double SeCurve<T>::
+template<class T> double Curve<T>::
 getChannelValue(const double param,int channel) const{
     assert(prepared);
     // find the cv data point index just greater than the desired param
@@ -228,7 +210,7 @@ getChannelValue(const double param,int channel) const{
     }
 }
 
-template<class T> typename SeCurve<T>::CV SeCurve<T>::
+template<class T> typename Curve<T>::CV Curve<T>::
 getLowerBoundCV(const double param) const
 {
     assert(prepared);
@@ -241,7 +223,7 @@ getLowerBoundCV(const double param) const
     return _cvData[index];
 }
 
-template<class T> bool SeCurve<T>::
+template<class T> bool Curve<T>::
 interpTypeValid(InterpType interp)
 {
       return interp==kNone || interp==kLinear || interp==kSmooth 
@@ -249,28 +231,28 @@ interpTypeValid(InterpType interp)
 }
 
 template<>
-inline void SeCurve<double>::clampCurveSegment(const double& delta,double& d1,double& d2)
+inline void Curve<double>::clampCurveSegment(const double& delta,double& d1,double& d2)
 {
     if(delta==0) d1=d2=0;
     else{
-        d1=SeExpr::clamp(d1/delta,0,3)*delta;
-        d2=SeExpr::clamp(d2/delta,0,3)*delta;
+        d1=SeExpr2::clamp(d1/delta,0,3)*delta;
+        d2=SeExpr2::clamp(d2/delta,0,3)*delta;
     }
 }
 
 template<>
-void SeCurve<SeVec3d>::clampCurveSegment(const SeVec3d& delta,SeVec3d& d1,SeVec3d& d2)
+void Curve<Vec3d>::clampCurveSegment(const Vec3d& delta,Vec3d& d1,Vec3d& d2)
 {
     for(int i=0;i<3;i++){
         if(delta[i]==0) d1[i]=d2[i]=0;
         else{
-            d1[i]=SeExpr::clamp(d1[i]/delta[i],0,3)*delta[i];
-            d2[i]=SeExpr::clamp(d2[i]/delta[i],0,3)*delta[i];
+            d1[i]=SeExpr2::clamp(d1[i]/delta[i],0,3)*delta[i];
+            d2[i]=SeExpr2::clamp(d2[i]/delta[i],0,3)*delta[i];
         }
     }
 }
 
-template class SeCurve<SeVec3d>;
-template class SeCurve<double>;
+template class Curve<Vec3d>;
+template class Curve<double>;
 
 }

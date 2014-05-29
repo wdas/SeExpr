@@ -1,45 +1,25 @@
 /*
- SEEXPR SOFTWARE
- Copyright 2011 Disney Enterprises, Inc. All rights reserved
- 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are
- met:
- 
- * Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- 
- * Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in
- the documentation and/or other materials provided with the
- distribution.
- 
- * The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
- Studios" or the names of its contributors may NOT be used to
- endorse or promote products derived from this software without
- specific prior written permission from Walt Disney Pictures.
- 
- Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
- CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
- BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
- FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
- IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Copyright Disney Enterprises, Inc.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
+*
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
 */
-
 #include <iostream>
 #include "SeExprBuiltins.h"
+#include "SeNoise.h"
+
 namespace{
 #include "SeNoiseTables.h"
-}
-#include "SeNoise.h"
-namespace SeExpr{
 
 //! This is the Quintic interpolant from Perlin's Improved Noise Paper
 double s_curve(double t) {
@@ -91,19 +71,6 @@ template<int d> uint32_t hashReduce(uint32_t index[d])
     return u2.i;
 }
 
-//! Computes cellular noise (non-interpolated piecewise constant cell random values)
-template<int d_in,int d_out,class T>
-void CellNoise(const T* in,T* out)
-{
-    uint32_t index[d_in];
-    int dim=0;
-    for(int k=0;k<d_in;k++) index[k]=uint32_t(floor(in[k]));
-    while(1){
-        out[dim]=hashReduce<d_in>(index) * (1.0/0xffffffffu);
-        if(++dim>=d_out) break;
-        for(int k=0;k<d_in;k++) index[k]+=1000;
-    }
-}
 
 //! Noise with d_in dimensional domain, 1 dimensional abcissa
 template<int d,class T,bool periodic>
@@ -160,6 +127,25 @@ T noiseHelper(const T* X,const int* period=0)
     // return reduced version
     return vals[0];
 }
+
+}
+
+namespace SeExpr2 {
+
+//! Computes cellular noise (non-interpolated piecewise constant cell random values)
+template<int d_in,int d_out,class T>
+void CellNoise(const T* in,T* out)
+{
+    uint32_t index[d_in];
+    int dim=0;
+    for(int k=0;k<d_in;k++) index[k]=uint32_t(floor(in[k]));
+    while(1){
+        out[dim]=hashReduce<d_in>(index) * (1.0/0xffffffffu);
+        if(++dim>=d_out) break;
+        for(int k=0;k<d_in;k++) index[k]+=1000;
+    }
+}
+
 
 //! Noise with d_in dimensional domain, d_out dimensional abcissa
 template<int d_in,int d_out,class T> void Noise(const T* in,T* out)
@@ -244,7 +230,7 @@ int main(int argc,char* argv[])
     for(int i=0;i<10000000;i++){
         T foo[3]={.3,.3,.3};
         //for(int k=0;k<3;k++) foo[k]=(double)rand()/double(RAND_MAX)*100.;
-        sum+=SeExpr::noiseHelper<3,T,false>(foo);
+        sum+=SeExpr2::noiseHelper<3,T,false>(foo);
 
     }
 }

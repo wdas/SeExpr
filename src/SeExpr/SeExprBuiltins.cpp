@@ -1,40 +1,19 @@
 /*
- SEEXPR SOFTWARE
- Copyright 2011 Disney Enterprises, Inc. All rights reserved
- 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are
- met:
- 
- * Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- 
- * Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in
- the documentation and/or other materials provided with the
- distribution.
- 
- * The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
- Studios" or the names of its contributors may NOT be used to
- endorse or promote products derived from this software without
- specific prior written permission from Walt Disney Pictures.
- 
- Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
- CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
- BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
- FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
- IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Copyright Disney Enterprises, Inc.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
+*
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
 */
-
-
-#define __STDC_LIMIT_MACROS
 #include <cassert>
 #include <math.h>
 #include <stdlib.h>
@@ -49,7 +28,7 @@
 #include "SePlatform.h"
 #include "SeNoise.h"
 
-namespace SeExpr {
+namespace SeExpr2 {
 
 static const char* fabs_docstring="float abs(float x)\nabsolute value of x";
 
@@ -239,16 +218,16 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
     static const char* mix_docstring="mix(float a,float b,float alpha)\nBlend of a and b according to alpha.";
 
 
-    SeVec3d hsiAdjust(const SeVec3d& rgb, double h, double s, double i)
+    Vec3d hsiAdjust(const Vec3d& rgb, double h, double s, double i)
     {
-	SeVec3d hsl = rgbtohsl(rgb);
+	Vec3d hsl = rgbtohsl(rgb);
 	hsl[0] += h * (1.0/360);
 	hsl[1] *= s;
 	return hsltorgb(hsl) * i;
     }
 
 
-    SeVec3d hsi(int n, const SeVec3d* args)
+    Vec3d hsi(int n, const Vec3d* args)
     {
 	if (n < 4) return 0.0;
 
@@ -275,7 +254,7 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
 
 
 
-    SeVec3d midhsi(int n, const SeVec3d* args)
+    Vec3d midhsi(int n, const Vec3d* args)
     {
 	if (n < 4) return 0.0;
 
@@ -312,7 +291,7 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
         "the control map is centered around the mid point (value of 0.5)\n"
         "and can scale the shift in both directions.";
         
-    SeVec3d rgbtohsl(const SeVec3d& rgb) 
+    Vec3d rgbtohsl(const Vec3d& rgb)
     {
 	// RGB to HSL color space conversion
 	// This is based on Foley, Van Dam (2nd ed; p. 595)
@@ -326,7 +305,7 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
 	sum = x+y; diff = y-x;
 	L = sum/2;
 	if (diff < 1e-6) // achromatic
-	    return SeVec3d(0,0,L);
+	    return Vec3d(0,0,L);
 
 	// compute saturation
 	if (L <= .5) {
@@ -344,7 +323,7 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
 	H *= 1/6.;
 	H -= floor(H); // make sure hue is in range 0..1
 
-	return SeVec3d(H,S,L);
+	return Vec3d(H,S,L);
     }
     static const char* rgbtohsl_docstring=
         "color rgbtohsl(color rgb)\n"
@@ -367,7 +346,7 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
     }
 
 
-    SeVec3d hsltorgb(const SeVec3d& hsl) 
+    Vec3d hsltorgb(const Vec3d& hsl)
     {
 	// HSL to RGB color space conversion
 	// This is based on Foley, Van Dam (2nd ed; p. 596)
@@ -375,7 +354,7 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
 	double H,S,L,R,G,B,x,y;
 	H = hsl[0]; S = hsl[1]; L = hsl[2];
 	if (S <= 0)  // achromatic
-	    return SeVec3d(L,L,L);
+	    return Vec3d(L,L,L);
 
 	// find min/max rgb values
 	if (L < 0.5) {
@@ -391,7 +370,7 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
 	R = hslvalue(x,y,H+(1/3.));
 	G = hslvalue(x,y,H);
 	B = hslvalue(x,y,H-(1/3.));
-	return SeVec3d(R,G,B);
+	return Vec3d(R,G,B);
     }
     static const char* hsltorgb_docstring=
         "color hsltorgb(color hsl)\n"
@@ -459,7 +438,7 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
         "Like rand, but with no internal seeds. Any number of seeds may be given\n"
         "and the result will be a random function based on all the seeds.";
 
-    double noise(int n, const SeVec3d* args)
+    double noise(int n, const Vec3d* args)
     {
         if (n < 1) return 0;
         if (n == 1) { 
@@ -490,7 +469,7 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
         "float noise ( float x, float y, float z, float w )\n"
         "Original perlin noise at location (C2 interpolant)";
 
-    double snoise(const SeVec3d& p)
+    double snoise(const Vec3d& p)
     {
 	double result;
 	double args[3] = { p[0], p[1], p[2] };
@@ -502,9 +481,9 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
         "signed noise w/ range -1 to 1 formed with original perlin noise at location (C2 interpolant)";
 
 
-    SeVec3d vnoise(const SeVec3d& p)
+    Vec3d vnoise(const Vec3d& p)
     {
-        SeVec3d result;
+        Vec3d result;
 	double args[3] = { p[0], p[1], p[2] };
         Noise<3,3>(args,&result[0]);
         return result;
@@ -514,14 +493,14 @@ static const char* vnoise_docstring=
         "vector noise formed with original perlin noise at location (C2 interpolant)";
 
 
-    SeVec3d cnoise(const SeVec3d& p)
+    Vec3d cnoise(const Vec3d& p)
     {
-        return .5*vnoise(p)+SeVec3d(.5);
+        return .5*vnoise(p)+Vec3d(.5);
     }
     static const char* cnoise_docstring="color cnoise ( vector v)\n"
         "color noise formed with original perlin noise at location (C2 interpolant)";
 
-    double snoise4(int n, const SeVec3d* args)
+    double snoise4(int n, const Vec3d* args)
     {
 	double result;
 	double procargs[4] = { args[0][0], args[0][1], args[0][2], args[1][0] };
@@ -532,9 +511,9 @@ static const char* vnoise_docstring=
         "4D signed noise w/ range -1 to 1 formed with original perlin noise at location (C2 interpolant)";
 
 
-    SeVec3d vnoise4(int n, const SeVec3d* args)
+    Vec3d vnoise4(int n, const Vec3d* args)
     {
-	SeVec3d result;
+	Vec3d result;
 	double procargs[4] = { args[0][0], args[0][1], args[0][2], args[1][0] };
         Noise<4,3>(procargs,&result[0]);
 	return result;
@@ -543,20 +522,20 @@ static const char* vnoise_docstring=
         "4D vector noise formed with original perlin noise at location (C2 interpolant)";
 
 
-    SeVec3d cnoise4(int n, const SeVec3d* args)
+    Vec3d cnoise4(int n, const Vec3d* args)
     {
-        return .5*vnoise4(n,args)+SeVec3d(.5);
+        return .5*vnoise4(n,args)+Vec3d(.5);
     }
     static const char* cnoise4_docstring="color cnoise4 ( vector v,float t)\n"
         "4D color noise formed with original perlin noise at location (C2 interpolant)";
 
-    double turbulence(int n, const SeVec3d* args)
+    double turbulence(int n, const Vec3d* args)
     {
 	// args: octaves, lacunarity, gain
 	int octaves = 6;
 	double lacunarity = 2;
 	double gain = 0.5;
-	SeVec3d p = 0.0;
+	Vec3d p = 0.0;
 
 	switch (n) {
 	case 4: gain = args[3][0];
@@ -572,13 +551,13 @@ static const char* vnoise_docstring=
     }
 
 
-    SeVec3d vturbulence(int n, const SeVec3d* args)
+    Vec3d vturbulence(int n, const Vec3d* args)
     {
 	// args: octaves, lacunarity, gain
 	int octaves = 6;
 	double lacunarity = 2;
 	double gain = 0.5;
-	SeVec3d p = 0.0;
+	Vec3d p = 0.0;
 
 	switch (n) {
 	case 4: gain = args[3][0];
@@ -587,26 +566,26 @@ static const char* vnoise_docstring=
 	case 1: p = args[0];
 	}
 
-	SeVec3d result;
+	Vec3d result;
 	double P[3] = { p[0], p[1], p[2] };
         FBM<3,3,true>(P,&result[0],octaves,lacunarity,gain);
         return result;
     }
 
 
-    SeVec3d cturbulence(int n, const SeVec3d* args)
+    Vec3d cturbulence(int n, const Vec3d* args)
     {
-	return vturbulence(n, args) * .5 + SeVec3d(.5);
+	return vturbulence(n, args) * .5 + Vec3d(.5);
     }
 
 
-    double fbm(int n, const SeVec3d* args)
+    double fbm(int n, const Vec3d* args)
     {
 	// args: octaves, lacunarity, gain
 	int octaves = 6;
 	double lacunarity = 2;
 	double gain = 0.5;
-	SeVec3d p = 0.0;
+	Vec3d p = 0.0;
 
 	switch (n) {
 	case 4: gain = args[3][0];
@@ -630,13 +609,13 @@ static const char* vnoise_docstring=
         "frequency is scaled relative to the previous frequency.";
 
 
-    SeVec3d vfbm(int n, const SeVec3d* args)
+    Vec3d vfbm(int n, const Vec3d* args)
     {
 	// args: octaves, lacunarity, gain
 	int octaves = 6;
 	double lacunarity = 2;
 	double gain = 0.5;
-	SeVec3d p = 0.0;
+	Vec3d p = 0.0;
 
 	switch (n) {
 	case 4: gain = args[3][0];
@@ -645,7 +624,7 @@ static const char* vnoise_docstring=
 	case 1: p = args[0];
 	}
 
-	SeVec3d result = 0.0;
+	Vec3d result = 0.0;
 	double P[3] = { p[0], p[1], p[2] };
         FBM<3,3,false>(P,&result[0],octaves,lacunarity,gain);
         return result;
@@ -653,13 +632,13 @@ static const char* vnoise_docstring=
     static const char* vfbm_docstring="vector vfbm(vector vint octaves=6,float lacunarity=2,float gain=.5)";
 
 
-    double fbm4(int n, const SeVec3d* args)
+    double fbm4(int n, const Vec3d* args)
     {
 	// args: octaves, lacunarity, gain
 	int octaves = 6;
 	double lacunarity = 2;
 	double gain = 0.5;
-	SeVec3d p = 0.0;
+	Vec3d p = 0.0;
         float time = 0.0;
 
 	switch (n) {
@@ -684,13 +663,13 @@ static const char* vnoise_docstring=
         "frequency is scaled relative to the previous frequency.";
 
 
-    SeVec3d vfbm4(int n, const SeVec3d* args)
+    Vec3d vfbm4(int n, const Vec3d* args)
     {
 	// args: octaves, lacunarity, gain
 	int octaves = 6;
 	double lacunarity = 2;
 	double gain = 0.5;
-	SeVec3d p = 0.0;
+	Vec3d p = 0.0;
         float time = 0.0;
 
 	switch (n) {
@@ -701,7 +680,7 @@ static const char* vnoise_docstring=
         case 1: p = args[0];
 	}
 
-	SeVec3d result = 0.0;
+	Vec3d result = 0.0;
 	double P[4] = { p[0], p[1], p[2], time };
         FBM<4,3,false>(P,&result[0],octaves,lacunarity,gain);
         return result;
@@ -709,20 +688,20 @@ static const char* vnoise_docstring=
     static const char* vfbm4_docstring="vector vfbm4(vector v,float time,int octaves=6,float lacunarity=2,float gain=.5)";
 
 
-    SeVec3d cfbm(int n, const SeVec3d* args)
+    Vec3d cfbm(int n, const Vec3d* args)
     {
-	return vfbm(n, args) * .5 + SeVec3d(.5);
+	return vfbm(n, args) * .5 + Vec3d(.5);
     }
     static const char* cfbm_docstring="color cfbm(vector vint octaves=6,float lacunarity=2,float gain=.5)";
 
-    SeVec3d cfbm4(int n, const SeVec3d* args)
+    Vec3d cfbm4(int n, const Vec3d* args)
     {
-	return vfbm4(n, args) * .5 + SeVec3d(.5);
+	return vfbm4(n, args) * .5 + Vec3d(.5);
     }
     static const char* cfbm4_docstring="color cfbm4(vector v,float time,int octaves=6,float lacunarity=2,float gain=.5)";
 
 
-    double cellnoise(const SeVec3d& p)
+    double cellnoise(const Vec3d& p)
     {
 	double result;
 	double args[3] = { p[0], p[1], p[2] };
@@ -734,9 +713,9 @@ static const char* vnoise_docstring=
         "cellnoise generates a field of constant colored cubes based on the integer location.\n"
         "This is the same as the prman cellnoise function.";
 
-    SeVec3d ccellnoise(const SeVec3d& p)
+    Vec3d ccellnoise(const Vec3d& p)
     {
-        SeVec3d result;
+        Vec3d result;
 	double args[3] = { p[0], p[1], p[2] };
 	CellNoise<3,3>(args,&result[0]);
 	return result;
@@ -747,7 +726,7 @@ static const char* vnoise_docstring=
         "This is the same as the prman cellnoise function.";
 
 
-    double pnoise(const SeVec3d& p, const SeVec3d& period)
+    double pnoise(const Vec3d& p, const Vec3d& period)
     {
 	double result;
 	double args[3] = { p[0], p[1], p[2] };
@@ -758,276 +737,278 @@ static const char* vnoise_docstring=
     static const char* pnoise_docstring=
         "float pnoise ( vector v, vector period )\n"
         "periodic noise";
-    struct VoronoiPointData : public SeExprFuncNode::Data
+    struct VoronoiPointData : public ExprFuncNode::Data
     {
-	SeVec3d points[27];
-	SeVec3d cell;
-	double jitter;
-	VoronoiPointData() : jitter(-1) {}
-    };    
+        Vec3d points[27];
+        Vec3d cell;
+        double jitter;
+        VoronoiPointData() : jitter(-1) {}
+    };
 
-    static SeVec3d* voronoi_points(VoronoiPointData& data, const SeVec3d& cell, double jitter)
+    static Vec3d* voronoi_points(VoronoiPointData& data, const Vec3d& cell, double jitter)
     {
-	if (cell == data.cell && jitter == data.jitter) return data.points;
-	data.cell = cell;
-	data.jitter = jitter;
+        if (cell == data.cell && jitter == data.jitter) return data.points;
+        data.cell = cell;
+        data.jitter = jitter;
 
-	int n = 0;
-	for (double i = -1; i <= 1; i++) {
-	    for (double j = -1; j <= 1; j++) {
-		for (double k = -1; k <= 1; k++, n++) {
-		    SeVec3d testcell = cell + SeVec3d(i,j,k);
-		    data.points[n] = testcell + jitter * (ccellnoise(testcell - SeVec3d(.5)));
-		}
-	    }
-	}
-	return data.points;
+        int n = 0;
+        for (double i = -1; i <= 1; i++) {
+            for (double j = -1; j <= 1; j++) {
+                for (double k = -1; k <= 1; k++, n++) {
+                    Vec3d testcell = cell + Vec3d(i,j,k);
+                    data.points[n] = testcell + jitter * (ccellnoise(testcell - Vec3d(.5)));
+                }
+            }
+        }
+        return data.points;
     }
 
-    static void voronoi_f1_3d(VoronoiPointData& data, const SeVec3d& p, double jitter,
-			      double& f1, SeVec3d& pos1)
+    static void voronoi_f1_3d(VoronoiPointData& data, const Vec3d& p, double jitter,
+            double& f1, Vec3d& pos1)
     {
-	// from Advanced Renderman, page 257
-	SeVec3d thiscell(floor(p[0])+0.5, floor(p[1])+0.5,
-			 floor(p[2])+0.5);
+        // from Advanced Renderman, page 257
+        Vec3d thiscell(floor(p[0])+0.5, floor(p[1])+0.5,
+                floor(p[2])+0.5);
 
-	f1 = 1000;
-	SeVec3d* pos = voronoi_points(data, thiscell, jitter);
-	SeVec3d* end = pos + 27;
+        f1 = 1000;
+        Vec3d* pos = voronoi_points(data, thiscell, jitter);
+        Vec3d* end = pos + 27;
 
-	for (; pos != end; pos++) {
-	    SeVec3d offset = *pos - p;
-	    double dist = offset.dot(offset);
-	    if (dist < f1) {
-		f1 = dist;
-		pos1 = *pos;
-	    }
-	}
-	f1 = sqrt(f1);
+        for (; pos != end; pos++) {
+            Vec3d offset = *pos - p;
+            double dist = offset.dot(offset);
+            if (dist < f1) {
+                f1 = dist;
+                pos1 = *pos;
+            }
+        }
+        f1 = sqrt(f1);
     }
 
-    static void voronoi_f1f2_3d(VoronoiPointData& data, const SeVec3d& p, double jitter,
-				double& f1, SeVec3d& pos1,
-				double& f2, SeVec3d& pos2)
+    static void voronoi_f1f2_3d(VoronoiPointData& data, const Vec3d& p, double jitter,
+            double& f1, Vec3d& pos1,
+            double& f2, Vec3d& pos2)
     {
-	// from Advanced Renderman, page 258
-	SeVec3d thiscell(floor(p[0])+0.5, floor(p[1])+0.5,
-			 floor(p[2])+0.5);
-	f1 = f2 = 1000;
-	SeVec3d* pos = voronoi_points(data, thiscell, jitter);
-	SeVec3d* end = pos + 27;
+        // from Advanced Renderman, page 258
+        Vec3d thiscell(floor(p[0])+0.5, floor(p[1])+0.5,
+                floor(p[2])+0.5);
+        f1 = f2 = 1000;
+        Vec3d* pos = voronoi_points(data, thiscell, jitter);
+        Vec3d* end = pos + 27;
 
-	for (; pos != end; pos++) {
-	    SeVec3d offset = *pos - p;
-	    double dist = offset.dot(offset);
-	    if (dist < f1) {
-		f2 = f1; pos2 = pos1;
-		f1 = dist;
-		pos1 = *pos;
-	    } else if (dist < f2) {
-		f2 = dist; pos2 = *pos;
-	    }
-	}
-	f1 = sqrt(f1); f2 = sqrt(f2);
+        for (; pos != end; pos++) {
+            Vec3d offset = *pos - p;
+            double dist = offset.dot(offset);
+            if (dist < f1) {
+                f2 = f1; pos2 = pos1;
+                f1 = dist;
+                pos1 = *pos;
+            } else if (dist < f2) {
+                f2 = dist; pos2 = *pos;
+            }
+        }
+        f1 = sqrt(f1); f2 = sqrt(f2);
     }
 
-    SeVec3d voronoiFn(VoronoiPointData& data, int n, const SeVec3d* args)
+    Vec3d voronoiFn(VoronoiPointData& data, int n, const Vec3d* args)
     {
-	// args = p, type, jitter, 
-	//        fbmScale, fbmOctaves, fbmLacunarity, fbmGain
-	SeVec3d p;
-	int type = 1;
-	double jitter = 0.5;
-	double fbmScale = 0;
-	double fbmOctaves = 4;
-	double fbmLacunarity = 2;
-	double fbmGain = 0.5;
-	switch (n) {
-	case 7: fbmGain = args[6][0];
-	case 6: fbmLacunarity = args[5][0];
-	case 5: fbmOctaves = args[4][0];
-	case 4: fbmScale = args[3][0];
-	case 3: jitter = clamp(args[2][0], 1e-3, 1);
-	case 2: type = int(args[1][0]);
-	case 1: p = args[0];
-	}
+        // args = p, type, jitter,
+        //        fbmScale, fbmOctaves, fbmLacunarity, fbmGain
+        Vec3d p;
+        int type = 1;
+        double jitter = 0.5;
+        double fbmScale = 0;
+        double fbmOctaves = 4;
+        double fbmLacunarity = 2;
+        double fbmGain = 0.5;
+        switch (n) {
+        case 7: fbmGain = args[6][0];
+        case 6: fbmLacunarity = args[5][0];
+        case 5: fbmOctaves = args[4][0];
+        case 4: fbmScale = args[3][0];
+        case 3: jitter = clamp(args[2][0], 1e-3, 1);
+        case 2: type = int(args[1][0]);
+        case 1: p = args[0];
+        }
 
-	if (fbmScale > 0) {
-	    SeVec3d fbmArgs[4];
-	    fbmArgs[0] = 2*p;
-	    fbmArgs[1] = fbmOctaves;
-	    fbmArgs[2] = fbmLacunarity;
-	    fbmArgs[3] = fbmGain;
-	    p += fbmScale * vfbm(4, fbmArgs);
-	}
+        if (fbmScale > 0) {
+            Vec3d fbmArgs[4];
+            fbmArgs[0] = 2*p;
+            fbmArgs[1] = fbmOctaves;
+            fbmArgs[2] = fbmLacunarity;
+            fbmArgs[3] = fbmGain;
+            p += fbmScale * vfbm(4, fbmArgs);
+        }
 
-	double f1, f2;
-	SeVec3d pos1, pos2;
-	if (type >= 3)
-	    voronoi_f1f2_3d(data, p, jitter, f1, pos1, f2, pos2);
-	else 
-	    voronoi_f1_3d(data, p, jitter, f1, pos1);
+        double f1, f2;
+        Vec3d pos1, pos2;
+        if (type >= 3)
+            voronoi_f1f2_3d(data, p, jitter, f1, pos1, f2, pos2);
+        else
+            voronoi_f1_3d(data, p, jitter, f1, pos1);
 
-	switch (type) {
-	case 1: pos1[0] += 10; return cellnoise(pos1);
-	case 2: return f1;
-	case 3: return f2;
-	case 4: return f2-f1;
-	case 5:
-	    {
-		float scalefactor = 
-		    (pos2-pos1).length() /
-		    ((pos1-p).length() + (pos2-p).length());
-		return smoothstep(f2-f1, 0, 0.1*scalefactor);
-	    }
-	}
+        switch (type) {
+        case 1: pos1[0] += 10; return cellnoise(pos1);
+        case 2: return f1;
+        case 3: return f2;
+        case 4: return f2-f1;
+        case 5:
+        {
+            float scalefactor =
+                    (pos2-pos1).length() /
+                    ((pos1-p).length() + (pos2-p).length());
+            return smoothstep(f2-f1, 0, 0.1*scalefactor);
+        }
+        }
 
-	return 0.0;
+        return 0.0;
     }
     const static char* voronoi_docstring=
-        "float voronoi(vector v, int type=1,float jitter=0.5, float fbmScale=0, int fbmOctaves=4,float fbmLacunarity=2, float fbmGain=.5)\n"
-        "voronoi is a cellular noise pattern. It is a jittered variant of cellnoise.";
+            "float voronoi(vector v, int type=1,float jitter=0.5, float fbmScale=0, int fbmOctaves=4,float fbmLacunarity=2, float fbmGain=.5)\n"
+            "voronoi is a cellular noise pattern. It is a jittered variant of cellnoise.";
 
 
-    SeVec3d cvoronoiFn(VoronoiPointData& data, int n, const SeVec3d* args)
+    Vec3d cvoronoiFn(VoronoiPointData& data, int n, const Vec3d* args)
     {
-	// args = p, type, jitter, 
-	//        fbmScale, fbmOctaves, fbmLacunarity, fbmGain
-	SeVec3d p;
-	int type = 1;
-	double jitter = 0.5;
-	double fbmScale = 0;
-	double fbmOctaves = 4;
-	double fbmLacunarity = 2;
-	double fbmGain = 0.5;
-	switch (n) {
-	case 7: fbmGain = args[6][0];
-	case 6: fbmLacunarity = args[5][0];
-	case 5: fbmOctaves = args[4][0];
-	case 4: fbmScale = args[3][0];
-	case 3: jitter = clamp(args[2][0], 1e-3, 1);
-	case 2: type = int(args[1][0]);
-	case 1: p = args[0];
-	}
+        // args = p, type, jitter,
+        //        fbmScale, fbmOctaves, fbmLacunarity, fbmGain
+        Vec3d p;
+        int type = 1;
+        double jitter = 0.5;
+        double fbmScale = 0;
+        double fbmOctaves = 4;
+        double fbmLacunarity = 2;
+        double fbmGain = 0.5;
+        switch (n) {
+        case 7: fbmGain = args[6][0];
+        case 6: fbmLacunarity = args[5][0];
+        case 5: fbmOctaves = args[4][0];
+        case 4: fbmScale = args[3][0];
+        case 3: jitter = clamp(args[2][0], 1e-3, 1);
+        case 2: type = int(args[1][0]);
+        case 1: p = args[0];
+        }
 
-	if (fbmScale > 0) {
-	    SeVec3d fbmArgs[4];
-	    fbmArgs[0] = 2*p;
-	    fbmArgs[1] = fbmOctaves;
-	    fbmArgs[2] = fbmLacunarity;
-	    fbmArgs[3] = fbmGain;
-	    p += fbmScale * vfbm(4, fbmArgs);
-	}
+        if (fbmScale > 0) {
+            Vec3d fbmArgs[4];
+            fbmArgs[0] = 2*p;
+            fbmArgs[1] = fbmOctaves;
+            fbmArgs[2] = fbmLacunarity;
+            fbmArgs[3] = fbmGain;
+            p += fbmScale * vfbm(4, fbmArgs);
+        }
 
-	double f1, f2;
-	SeVec3d pos1, pos2;
-	if (type >= 3)
-	    voronoi_f1f2_3d(data, p, jitter, f1, pos1, f2, pos2);
-	else 
-	    voronoi_f1_3d(data, p, jitter, f1, pos1);
+        double f1, f2;
+        Vec3d pos1, pos2;
+        if (type >= 3)
+            voronoi_f1f2_3d(data, p, jitter, f1, pos1, f2, pos2);
+        else
+            voronoi_f1_3d(data, p, jitter, f1, pos1);
 
-	SeVec3d color = ccellnoise(pos1);
-	switch (type) {
-	case 1: pos1[0] += 10; return color;
-	case 2: return f1 * color;
-	case 3: return f2 * color;
-	case 4: return (f2-f1) * color;
-	case 5:
-	    {
-		float scalefactor = 
-		    (pos2-pos1).length() /
-		    ((pos1-p).length() + (pos2-p).length());
-		return smoothstep(f2-f1, 0, 0.1*scalefactor) * color;
-	    }
-	}
+        Vec3d color = ccellnoise(pos1);
+        switch (type) {
+        case 1: pos1[0] += 10; return color;
+        case 2: return f1 * color;
+        case 3: return f2 * color;
+        case 4: return (f2-f1) * color;
+        case 5:
+        {
+            float scalefactor =
+                    (pos2-pos1).length() /
+                    ((pos1-p).length() + (pos2-p).length());
+            return smoothstep(f2-f1, 0, 0.1*scalefactor) * color;
+        }
+        }
 
-	return 0.0;
+        return 0.0;
     }
     const static char* cvoronoi_docstring=
-        "color cvoronoi(vector v, int type=1,float jitter=0.5, float fbmScale=0, int fbmOctaves=4,float fbmLacunarity=2, float fbmGain=.5)\n"
-        "returns color in cellular pattern. It is a jittered variant of cellnoise.";
+            "color cvoronoi(vector v, int type=1,float jitter=0.5, float fbmScale=0, int fbmOctaves=4,float fbmLacunarity=2, float fbmGain=.5)\n"
+            "returns color in cellular pattern. It is a jittered variant of cellnoise.";
 
 
-    SeVec3d pvoronoiFn(VoronoiPointData& data, int n, const SeVec3d* args)
+    Vec3d pvoronoiFn(VoronoiPointData& data, int n, const Vec3d* args)
     {
-	// args = p, jitter, 
-	//        fbmScale, fbmOctaves, fbmLacunarity, fbmGain
-	SeVec3d p;
-	double jitter = 0.5;
-	double fbmScale = 0;
-	double fbmOctaves = 4;
-	double fbmLacunarity = 2;
-	double fbmGain = 0.5;
-	switch (n) {
-	case 6: fbmGain = args[5][0];
-	case 5: fbmLacunarity = args[4][0];
-	case 4: fbmOctaves = args[3][0];
-	case 3: fbmScale = args[2][0];
-	case 2: jitter = clamp(args[1][0], 1e-3, 1);
-	case 1: p = args[0];
-	}
+        // args = p, jitter,
+        //        fbmScale, fbmOctaves, fbmLacunarity, fbmGain
+        Vec3d p;
+        double jitter = 0.5;
+        double fbmScale = 0;
+        double fbmOctaves = 4;
+        double fbmLacunarity = 2;
+        double fbmGain = 0.5;
+        switch (n) {
+        case 6: fbmGain = args[5][0];
+        case 5: fbmLacunarity = args[4][0];
+        case 4: fbmOctaves = args[3][0];
+        case 3: fbmScale = args[2][0];
+        case 2: jitter = clamp(args[1][0], 1e-3, 1);
+        case 1: p = args[0];
+        }
 
-	if (fbmScale > 0) {
-	    SeVec3d fbmArgs[4];
-	    fbmArgs[0] = 2*p;
-	    fbmArgs[1] = fbmOctaves;
-	    fbmArgs[2] = fbmLacunarity;
-	    fbmArgs[3] = fbmGain;
-	    p += fbmScale * vfbm(4, fbmArgs);
-	}
+        if (fbmScale > 0) {
+            Vec3d fbmArgs[4];
+            fbmArgs[0] = 2*p;
+            fbmArgs[1] = fbmOctaves;
+            fbmArgs[2] = fbmLacunarity;
+            fbmArgs[3] = fbmGain;
+            p += fbmScale * vfbm(4, fbmArgs);
+        }
 
-	double f1;
-	SeVec3d pos1;
-	voronoi_f1_3d(data, p, jitter, f1, pos1);
-	return pos1;
+        double f1;
+        Vec3d pos1;
+        voronoi_f1_3d(data, p, jitter, f1, pos1);
+        return pos1;
     }
     const static char* pvoronoi_docstring=
-        "color pvoronoi(vector v, int type=1,float jitter=0.5, float fbmScale=0, int fbmOctaves=4,float fbmLacunarity=2, float fbmGain=.5)\n"
-        "returns center of voronoi cell.";
+            "color pvoronoi(vector v, int type=1,float jitter=0.5, float fbmScale=0, int fbmOctaves=4,float fbmLacunarity=2, float fbmGain=.5)\n"
+            "returns center of voronoi cell.";
 
-#if 0
-    class CachedVoronoiFunc : public SeExprFuncX
+    class CachedVoronoiFunc : public ExprFuncSimple
     {
-     public:
-	typedef SeVec3d VoronoiFunc(VoronoiPointData& data, int n, const SeVec3d* args);
-	CachedVoronoiFunc(VoronoiFunc* vfunc) : SeExprFuncX(true),_vfunc(vfunc) {}
+    public:
+        typedef Vec3d VoronoiFunc(VoronoiPointData& data, int n, const Vec3d* args);
+        CachedVoronoiFunc(VoronoiFunc* vfunc) : ExprFuncSimple(true),_vfunc(vfunc) {}
 
-	virtual SeExprType prep(SeExprFuncNode* node, SeExprType wanted, SeExprVarEnv & env)
-	{
-	    node->setData(new VoronoiPointData);
-	    // force wantVec to true - args are always vecs even of result is not
-            //TODO: check that this is correct
-            SeExprType _type = SeExprFuncX::prep(node, false, env);
-            {
-                //isScalar computation
-                _isScalar = false;
-                // int n = node->numChildren();
-                // for(int i = 0; _isScalar && i < n; i++)
-                //     _isScalar = node->child(i)->type().isFP1();
+        virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnv & env) const
+        {
+            // check number of arguments
+            int nargs = node->numChildren();
+            if (nargs < 1 || nargs > 7) {
+                node->addError("Wrong number of arguments, should be 1 to 7");
+                return ExprType().Error();
             }
-	    return _type;
-            //return SeExprFuncX::prep(node, true);
-	}
 
-        //TODO: check that this is correct
-        virtual bool isScalar() const { return _isScalar; }
+            bool valid=true;
+            valid &= node->checkArg(0,ExprType().FP(3).Varying(),env);
+            for(int i=1;i<nargs;i++)
+                valid &= node->checkArg(i,ExprType().FP(1).Constant(),env);
+            return valid ? ExprType().FP(3).Varying():ExprType().Error();
+        }
 
-        //TODO: check that this is correct
-        virtual SeExprType retType() const { return SeExprType().FP(3).Varying(); }
+        virtual ExprFuncNode::Data* evalConstant(ArgHandle args) const {
+            return new VoronoiPointData();
+        }
 
-	virtual void eval(const SeExprFuncNode* node, SeVec3d& result) const
-	{
-	    VoronoiPointData* data = static_cast<VoronoiPointData*>(node->getData());
-	    int nargs = node->numChildren();
-	    SeVec3d* args = (SeVec3d*) alloca(sizeof(SeVec3d) * nargs);
-	    for (int i = 0; i < nargs; i++) node->child(i)->eval(args[i]);
-	    result = _vfunc(*data, nargs, args);
-	}
+        virtual void eval(ArgHandle args)
+        {
+            VoronoiPointData* data = static_cast<VoronoiPointData*>(args.data);
+            int nargs = args.nargs();
+            Vec3d* sevArgs = (Vec3d*) alloca(sizeof(Vec3d) * nargs);
 
-     private:
-	VoronoiFunc* _vfunc;
+            for (int i = 0; i < nargs; i++)
+                for(int j = 0; j < 3; j++)
+                    sevArgs[i][j] = args.inFp<3>(i)[j];
+
+            Vec3d result = _vfunc(*data, nargs, sevArgs);
+            double* out=&args.outFp;
+            for(int i=0;i<3;i++) out[i]=result[i];
+        }
+
+        virtual ~CachedVoronoiFunc() {}
+    private:
+        VoronoiFunc* _vfunc;
     } voronoi(voronoiFn), cvoronoi(cvoronoiFn), pvoronoi(pvoronoiFn);
-#endif    
 
     double dist(double ax, double ay, double az, double bx, double by, double bz)
     {
@@ -1041,7 +1022,7 @@ static const char* vnoise_docstring=
         "distance between two points";
 
 
-    double length(const SeVec3d& v)
+    double length(const Vec3d& v)
     {
 	return sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
     }
@@ -1058,7 +1039,7 @@ static const char* vnoise_docstring=
         "float hypot(vector v)\n"
         "length of 2d vector [x,y]";
 
-    double dot(const SeVec3d& a, const SeVec3d& b)
+    double dot(const Vec3d& a, const Vec3d& b)
     {
 	return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
     }
@@ -1067,7 +1048,7 @@ static const char* vnoise_docstring=
         "vector dot product";
 
 
-    SeVec3d norm(const SeVec3d& a)
+    Vec3d norm(const Vec3d& a)
     {
 	double len = length(a);
 	if (len == 0) return 0.0;
@@ -1078,9 +1059,9 @@ static const char* vnoise_docstring=
         "vector scaled to unit length";
 
 
-    SeVec3d cross(const SeVec3d& a, const SeVec3d& b)
+    Vec3d cross(const Vec3d& a, const Vec3d& b)
     {
-	return SeVec3d(a[1]*b[2] - a[2]*b[1],
+	return Vec3d(a[1]*b[2] - a[2]*b[1],
 		       a[2]*b[0] - a[0]*b[2],
 		       a[0]*b[1] - a[1]*b[0]);
     }
@@ -1088,7 +1069,7 @@ static const char* vnoise_docstring=
         "vector cross(vector a,vector b)\n"
         "vector cross product";
 
-    double angle(const SeVec3d& a, const SeVec3d& b)
+    double angle(const Vec3d& a, const Vec3d& b)
     {
 	double len = length(a)*length(b);
 	if (len == 0) return 0;
@@ -1100,7 +1081,7 @@ static const char* vnoise_docstring=
 
 
 
-    SeVec3d ortho(const SeVec3d& a, const SeVec3d& b)
+    Vec3d ortho(const Vec3d& a, const Vec3d& b)
     {
 	return norm(cross(a,b));
     }
@@ -1109,11 +1090,11 @@ static const char* vnoise_docstring=
         "normalized vector orthogonal to a and b scaled to unit length";
 
 
-    SeVec3d rotate(int n, const SeVec3d* args)
+    Vec3d rotate(int n, const Vec3d* args)
     {
 	if (n != 3) return 0.0;
-	const SeVec3d& P = args[0];
-	const SeVec3d& axis = args[1];
+	const Vec3d& P = args[0];
+	const Vec3d& axis = args[1];
 	float angle = args[2][0];
 	double len = axis.length(); 
 	if (!len) return P;
@@ -1124,10 +1105,10 @@ static const char* vnoise_docstring=
         "rotates v around axis by given angle (in radians)";
 
 
-    SeVec3d up(const SeVec3d& P, const SeVec3d& upvec)
+    Vec3d up(const Vec3d& P, const Vec3d& upvec)
     {
 	// rotate vec so y-axis points to upvec
-	SeVec3d yAxis(0,1,0);
+	Vec3d yAxis(0,1,0);
 	return P.rotateBy(ortho(upvec, yAxis), angle(upvec, yAxis));
     }
     static const char* up_docstring=
@@ -1287,51 +1268,48 @@ static const char* vnoise_docstring=
 
 
     template<class T> 
-    struct CurveData:public SeExprFuncNode::Data
+    struct CurveData:public ExprFuncNode::Data
     {
-        SeCurve<T> curve;
+        Curve<T> curve;
         virtual ~CurveData(){}
     };
 
-    class CurveFuncX:public SeExprFuncSimple
+    class CurveFuncX:public ExprFuncSimple
     {
     public:
         CurveFuncX()
-            :SeExprFuncSimple(true)
+            :ExprFuncSimple(true)
         {}
 
-        virtual SeExprType prep(SeExprFuncNode* node, bool scalarWanted, SeExprVarEnv & env) const
+        virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnv & env) const
         {
             // check number of arguments
             int nargs = node->numChildren();
             if ((nargs - 1) % 3) {
                 node->addError("Wrong number of arguments, should be multiple of 3 plus 1");
-                //TODO: check that this is correct
-                return SeExprType().Error();
-                //return false;
+                return ExprType().Error();
             }
             
             bool valid=true;
-            valid &= node->checkArg(0,SeExprType().FP(1).Varying(),env);
+            valid &= node->checkArg(0,ExprType().FP(1).Varying(),env);
             for(int i=1;i<nargs;i+=3){
-                valid &= node->checkArg(i,SeExprType().FP(1).Constant(),env);
-                valid &= node->checkArg(i+1,SeExprType().FP(1).Constant(),env);
-                valid &= node->checkArg(i+2,SeExprType().FP(1).Constant(),env);
+                valid &= node->checkArg(i,ExprType().FP(1).Constant(),env);
+                valid &= node->checkArg(i+1,ExprType().FP(1).Constant(),env);
+                valid &= node->checkArg(i+2,ExprType().FP(1).Constant(),env);
             }
-            return valid ? SeExprType().FP(1).Varying():SeExprType().Error();
+            return valid ? ExprType().FP(1).Varying():ExprType().Error();
         }
 
-        virtual SeExprFuncNode::Data* evalConstant(ArgHandle args) const
+        virtual ExprFuncNode::Data* evalConstant(ArgHandle args) const
         {
             CurveData<double>* data = new CurveData<double>;
-            int nargs=args.nargs();
-            for (int i = 1; i < nargs-2; i+=3) {
+            for (int i = 1; i < args.nargs()-2; i+=3) {
                 double pos=args.inFp<1>(i)[0];
                 double val=args.inFp<1>(i+1)[0];
                 double interpDouble=args.inFp<1>(i+2)[0];
-                int interpInt=(int)interpDouble;                
-                SeCurve<double>::InterpType interpolant=(SeCurve<double>::InterpType)interpInt;
-                if(!SeCurve<double>::interpTypeValid(interpolant)){
+                int interpInt=(int)interpDouble;
+                Curve<double>::InterpType interpolant=(Curve<double>::InterpType)interpInt;
+                if(!Curve<double>::interpTypeValid(interpolant)){
                     // TODO: fix error checking!
                 }
                 data->curve.addPoint(pos, val, interpolant);
@@ -1355,40 +1333,37 @@ static const char* vnoise_docstring=
         "0 - none, 1 - linear, 2 - smooth, 3 - spline, \n"
         "4-monotone (non oscillating spline)";
     
-    class CCurveFuncX:public SeExprFuncSimple
+    class CCurveFuncX:public ExprFuncSimple
     {
-        virtual SeExprType prep(SeExprFuncNode* node, bool wantScalar, SeExprVarEnv & env) const
+        virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnv & env) const
         {
             // check number of arguments
             int nargs = node->numChildren();
             if ((nargs - 1) % 3) {
                 node->addError("Wrong number of arguments, should be multiple of 3 plus 1");
-                //TODO: check that this is correct
-                return SeExprType().Error().Varying();
-                //return false;
+                return ExprType().Error().Varying();
             }
 
             bool valid=true;
-            valid &= node->checkArg(0,SeExprType().FP(1).Varying(),env);
+            valid &= node->checkArg(0,ExprType().FP(1).Varying(),env);
             for(int i=1;i<nargs;i+=3){
-                valid &= node->checkArg(i,SeExprType().FP(1).Constant(),env);
-                valid &= node->checkArg(i+1,SeExprType().FP(3).Constant(),env);
-                valid &= node->checkArg(i+2,SeExprType().FP(1).Constant(),env);
+                valid &= node->checkArg(i,ExprType().FP(1).Constant(),env);
+                valid &= node->checkArg(i+1,ExprType().FP(3).Constant(),env);
+                valid &= node->checkArg(i+2,ExprType().FP(1).Constant(),env);
             }
-            return valid ? SeExprType().FP(3).Varying():SeExprType().Error();
+            return valid ? ExprType().FP(3).Varying():ExprType().Error();
         }
 
-        virtual SeExprFuncNode::Data* evalConstant(ArgHandle args) const
+        virtual ExprFuncNode::Data* evalConstant(ArgHandle args) const
         {
-            CurveData<SeVec3d>* data = new CurveData<SeVec3d>;
-            int nargs=args.nargs();
-            for (int i = 1; i < nargs-2; i+=3) {
+            CurveData<Vec3d>* data = new CurveData<Vec3d>;
+            for (int i = 1; i < args.nargs()-2; i+=3) {
                 double pos=args.inFp<1>(i)[0];
-                SeVec3d val(&args.inFp<3>(i+1)[0]);
+                Vec3d val(&args.inFp<3>(i+1)[0]);
                 double interpDouble=args.inFp<1>(i+2)[0];
-                int interpInt=(int)interpDouble;                
-                SeCurve<SeVec3d>::InterpType interpolant=(SeCurve<SeVec3d>::InterpType)interpInt;
-                if(!SeCurve<SeVec3d>::interpTypeValid(interpolant)){
+                int interpInt=(int)interpDouble;
+                Curve<Vec3d>::InterpType interpolant=(Curve<Vec3d>::InterpType)interpInt;
+                if(!Curve<Vec3d>::interpTypeValid(interpolant)){
                     // TODO: fix error checking!
                 }
                 data->curve.addPoint(pos, val, interpolant);
@@ -1399,15 +1374,15 @@ static const char* vnoise_docstring=
 
         virtual void eval(ArgHandle args)
         {
-            CurveData<SeVec3d> *data = static_cast<CurveData<SeVec3d>*>(args.data);
+            CurveData<Vec3d> *data = static_cast<CurveData<Vec3d>*>(args.data);
             double param=args.inFp<1>(0)[0];
-            SeVec3d result=data->curve.getValue(param);
+            Vec3d result=data->curve.getValue(param);
             double* out=&args.outFp;
             for(int k=0;k<3;k++) out[k]=result[k];
         }
 
     public:
-        CCurveFuncX():SeExprFuncSimple(true){}  // Thread Safe
+        CCurveFuncX():ExprFuncSimple(true){}  // Thread Safe
         virtual ~CCurveFuncX() {}
     } ccurve;
     static const char *ccurve_docstring=
@@ -1417,52 +1392,39 @@ static const char* vnoise_docstring=
         "0 - none, 1 - linear, 2 - smooth, 3 - spline, \n"
         "4 - monotone (non oscillating spline)";
 
-#if 0
 
-    class PrintFuncX:public SeExprFuncX
+
+    class PrintFuncX:public ExprFuncSimple
     {
-        struct Data : public SeExprFuncNode::Data
+        struct Data : public ExprFuncNode::Data
         {
             std::vector<std::pair<int,int> > ranges;
             std::string format;
         };
 
-        virtual SeExprType prep(SeExprFuncNode* node, SeExprType wanted, SeExprVarEnv & env)
-        {
-            // check number of arguments
-            int nargs = node->nargs();
-            if(!node->isStrArg(0)){
-                node->addError("first argument must be format");
-                //TODO: check that this is correct
-                return SeExprType().Error().Varying();
-                //return false;
+        public:
+        virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnv & env) const {
+            int nargs = node->numChildren();
+            if (nargs < 1) {
+                node->addError("Wrong number of arguments, should be GE 1");
+                return ExprType().Error().Varying();
             }
 
             bool valid=true;
-            for(int i=1;i<nargs;i++)
-                //TODO: check that this is correct
-                valid&=node->child(i)->prep(true, env).isValid();
-                //valid&=node->child(i)->prep(1);
+            valid &= node->checkArg(0,ExprType().String().Constant(),env);
+            for(int i=1;i<nargs;++i)
+                valid &= (node->checkArg(i,ExprType().FP(1),env) ||
+                          node->checkArg(i,ExprType().FP(3),env));
+            return ExprType().FP(1).Constant();
+        }
 
-            //TODO: check that this is correct
-            {
-                //isScalar computation
-                _isScalar = true;
-                int n = node->numChildren();
-                for(int i = 0; _isScalar && i < n; i++)
-                    _isScalar = node->child(i)->type().isFP(1);
-            }
-
-            //TODO: check that this is correct
-            if(!valid) return SeExprType().Error().Varying();
-            //if(!valid) return false;
-
+        virtual ExprFuncNode::Data* evalConstant(ArgHandle args) const {
             // parse format string
             unsigned int bakeStart=0;
             int searchStart=0;
             int needed=0;
             Data* data=new Data;
-            data->format=node->getStrArg(0);
+            data->format=args.inStr(0);
             std::string& format=data->format;
             std::vector<std::pair<int,int> >& ranges=data->ranges;
 
@@ -1471,11 +1433,9 @@ static const char* vnoise_docstring=
                 std::size_t percentStart=format.find('%',searchStart);
                 if(percentStart==std::string::npos) break;
                 if(percentStart+1==format.length()){
-                    node->addError("Unexpected end of format string");
+                    //node->addError("Unexpected end of format string");
                     delete data;
-                    //TODO: check that this is correct
-                    return SeExprType().Error().Varying();
-                    //return false;
+                   assert(false);
                 }
                 else if(format[percentStart+1]=='%'){
                     searchStart=percentStart+2;
@@ -1491,79 +1451,66 @@ static const char* vnoise_docstring=
                     searchStart=percentStart+2;
                     bakeStart=searchStart;
                 }else{
-                    node->addError("Invalid format string, only %v is allowed");
+                    //node->addError("Invalid format string, only %v is allowed");
                     delete data;
                     //TODO: check that this is correct
-                    return SeExprType().Error().Varying();
+                    //return ExprType().Error().Varying();
                     //return false;
+                    assert(false);
                 }
             }
             if(bakeStart!=format.length())
                 ranges.push_back(std::pair<int,int>(bakeStart,format.length()));
 
-            if(items!=nargs-1){
-                node->addError("Wrong number of arguments for format string");
+            if(items!=args.nargs()-1){
+                //node->addError("Wrong number of arguments for format string");
                 delete data;
                 //TODO: check that this is correct
-                return SeExprType().Error().Varying();
+                //return ExprType().Error().Varying();
                 //return false;
+                assert(false);
             }
 
-            node->setData(data);
             for(unsigned int i=0;i<data->ranges.size();i++){
                 const std::pair<int,int>& range=data->ranges[i];
                 std::cerr<<"range "<<range.first<<","<<range.second<<std::endl;
             }
-            //TODO: check that this is correct
-            return wanted;
-            //return true;
+
+            return data;
         }
 
-        //TODO: check that this is correct
-        virtual bool isScalar() const { return true; };
-
-        //TODO: check that this is correct
-        virtual SeExprType retType() const { return SeExprType().FP(1).Varying(); };
-
-        virtual void eval(const SeExprFuncNode* node, SeVec3d& result) const 
-        {
-            result[0]=result[1]=result[2]=0;
-
-            Data* data=(Data*)node->getData();;
+        virtual void eval(ArgHandle args) {
+            Data* data=(Data*)args.data;
             int item=1;
-            //int strLength=data->format.length();
             for(unsigned int i=0;i<data->ranges.size();i++){
                 const std::pair<int,int>& range=data->ranges[i];
                 if(range.first==-2){
-                    SeVec3d param;
-                    node->child(item)->eval(param);
-                    std::cerr<<param[0];
+                    std::cerr<< args.inFp<1>(item)[0];
                     item++;
                 }else if(range.first==-1){
-                    SeVec3d param;
-                    node->child(item)->eval(param);
-                    std::cerr<<"["<<param[0]<<","<<param[1]<<","<<param[2]<<"]";
+                    std::cerr<<"["<<args.inFp<3>(item)[0]<<","<<args.inFp<3>(item)[1]<<","<<args.inFp<3>(item)[2]<<"]";
                     item++;
                 }else{
                     std::cerr<<data->format.substr(range.first,range.second-range.first);
                 }
             }
                 std::cerr<<std::endl;
+
+                args.outFp=0;
         }        
-    public:
-        PrintFuncX():SeExprFuncX(false){} // not thread safe
+
+        PrintFuncX():ExprFuncSimple(false){} // not thread safe
 
     } printf;
     static const char* printf_docstring=
         "printf(string format,[vec0, vec1,  ...])\n"
         "Prints out a string to STDOUT, Format parameter allowed is %v";
 
+#if 0
 
-
-#endif
-class TestFunc:public SeExprFuncSimple
+class TestFunc:public ExprFuncSimple
 {
-    struct MyData:public SeExprFuncNode::Data
+    struct MyData:public ExprFuncNode::Data
     {
         float foo;
         MyData(float foo)
@@ -1572,16 +1519,16 @@ class TestFunc:public SeExprFuncSimple
     };
 public:
     TestFunc()
-        :SeExprFuncSimple(true)
+        :ExprFuncSimple(true)
     {}
-    virtual SeExprType prep(SeExprFuncNode* node,bool scalarWanted,SeExprVarEnv& env) const
+    virtual ExprType prep(ExprFuncNode* node,bool scalarWanted,ExprVarEnv& env) const
     {
         bool valid=true;
-        valid &= node->checkArg(0,SeExprType().FP(3).Varying(),env);
-        valid &= node->checkArg(1,SeExprType().FP(1).Constant(),env);
-        return valid ?SeExprType().FP(3).Varying():SeExprType().Error();
+        valid &= node->checkArg(0,ExprType().FP(3).Varying(),env);
+        valid &= node->checkArg(1,ExprType().FP(1).Constant(),env);
+        return valid ?ExprType().FP(3).Varying():ExprType().Error();
     }
-    virtual SeExprFuncNode::Data* evalConstant(ArgHandle args) const
+    virtual ExprFuncNode::Data* evalConstant(ArgHandle args) const
     {
         //std::cerr<<"evalling const "<<args.inFp<1>(1)<<std::endl;
         return new MyData(args.inFp<1>(1)[0]);
@@ -1589,17 +1536,20 @@ public:
     virtual void eval(ArgHandle args)
     {
         MyData* data=static_cast<MyData*>(args.data);
-        
-        SeVec<double,3,true>(&args.outFp)=args.inFp<3>(0)+SeVec<double,3,false>(data->foo);
+
+        Vec<double,3,true>(&args.outFp)=args.inFp<3>(0)+Vec<double,3,false>(data->foo);
     }
 } testfunc;
 static const char* testfunc_docstring="fdsA";
-    void defineBuiltins(SeExprFunc::Define define,SeExprFunc::Define3 define3)
+
+#endif
+
+    void defineBuiltins(ExprFunc::Define define,ExprFunc::Define3 define3)
     {
 	// functions from math.h (global namespace)
-//#define FUNC(func)	  define(#func, SeExprFunc(::func))
-#define FUNCADOC(name, func) define3(name, SeExprFunc(::func),func##_docstring)
-#define FUNCDOC(func)	  define3(#func, SeExprFunc(::func),func##_docstring)
+//#define FUNC(func)	  define(#func, ExprFunc(::func))
+#define FUNCADOC(name, func) define3(name, ExprFunc(::func),func##_docstring)
+#define FUNCDOC(func)	  define3(#func, ExprFunc(::func),func##_docstring)
 	FUNCADOC("abs", fabs);
 	FUNCDOC(acos);
 	FUNCDOC(asin);
@@ -1626,13 +1576,13 @@ static const char* testfunc_docstring="fdsA";
 	FUNCDOC(atanh);
 	FUNCDOC(trunc);
 #endif
-	// local functions (SeExpr namespace)
+	// local functions (SeExpr2 namespace)
 //#undef FUNC
 #undef FUNCDOC
-//#define FUNC(func)	      define(#func, SeExprFunc(SeExpr::func))
-//#define FUNCN(func, min, max) define(#func, SeExprFunc(SeExpr::func, min, max))
-#define FUNCDOC(func)	      define3(#func, SeExprFunc(SeExpr::func),func##_docstring)
-#define FUNCNDOC(func, min, max) define3(#func, SeExprFunc(SeExpr::func, min, max),func##_docstring)
+//#define FUNC(func)	      define(#func, ExprFunc(SeExpr2::func))
+//#define FUNCN(func, min, max) define(#func, ExprFunc(SeExpr2::func, min, max))
+#define FUNCDOC(func)	      define3(#func, ExprFunc(SeExpr2::func),func##_docstring)
+#define FUNCNDOC(func, min, max) define3(#func, ExprFunc(SeExpr2::func, min, max),func##_docstring)
 
 	// trig
 	FUNCDOC(deg);
@@ -1688,12 +1638,10 @@ static const char* testfunc_docstring="fdsA";
 	FUNCDOC(cellnoise);
 	FUNCDOC(ccellnoise);
 	FUNCDOC(pnoise);
-	//FUNCNDOC(voronoi, 1, 7);
-	//FUNCNDOC(cvoronoi, 1, 7);
-	//FUNCNDOC(pvoronoi, 1, 6);
 	FUNCNDOC(fbm4, 2, 5);
 	FUNCNDOC(vfbm4, 2, 5);
 	FUNCNDOC(cfbm4, 2, 5);
+
 	// vectors
 	FUNCDOC(dist);
 	FUNCDOC(length);
@@ -1712,9 +1660,16 @@ static const char* testfunc_docstring="fdsA";
 	FUNCNDOC(choose, 3, -1);
 	FUNCNDOC(wchoose, 4, -1);
 	FUNCNDOC(spline, 5, -1);
+
+	// FuncX interface
+    // noise
+    FUNCNDOC(voronoi, 1, 7);
+    FUNCNDOC(cvoronoi, 1, 7);
+    FUNCNDOC(pvoronoi, 1, 6);
+    // variations
 	FUNCNDOC(curve, 1, -1);
 	FUNCNDOC(ccurve, 1, -1);
-        //FUNCNDOC(printf,1,-1);
-        FUNCNDOC(testfunc,2,2);
+    FUNCNDOC(printf,1,-1);
+//        FUNCNDOC(testfunc,2,2);
     }
 }

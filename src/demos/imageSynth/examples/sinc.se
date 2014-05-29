@@ -2,5 +2,5 @@ x=u-.5;
 y=v-.5;
 dist=x*x+y*y;
 a=sin(dist*300)*cnoise(5*[$u,$v,0]);
-[a,a,a]
-
+#[a,a,a]
+a

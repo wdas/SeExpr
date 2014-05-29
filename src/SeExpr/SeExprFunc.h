@@ -1,3 +1,19 @@
+/*
+* Copyright Disney Enterprises, Inc.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
+*
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
+*/
 #ifndef SeExprFunc_h
 #define SeExprFunc_h
 
@@ -9,6 +25,8 @@
 #include "SeExprFuncX.h"
 #include "SeExprFuncStandard.h"
 
+namespace SeExpr2 {
+
 //! Function Definition, used in parse tree and func table.  
 /** This class in a static setting manages all builtin functions defined by
     SeExpr internally or through the use of shared object plugins.  These can be queried
@@ -16,14 +34,14 @@
 
     Users can create their own custom functions by creating one of these with the appropriate 
     argument template. Any function that doesn't work within the given templates
-    can be written using a SeExprFuncX template instead
+    can be written using a ExprFuncX template instead
     
-    Note: If you use the convenience prototypes instead of SeExprFuncX, the
+    Note: If you use the convenience prototypes instead of ExprFuncX, the
     user defined function will be assumed to be thread safe. If you have a
-    thread unsafe function be sure to use SeExprFuncX and call the base constructor
+    thread unsafe function be sure to use ExprFuncX and call the base constructor
     with false.
 */
-class SeExprFunc {
+class ExprFunc {
     static void initInternal(); // call to define built-in funcs and load standard plugins
 public:
     //! call to define built-in funcs and load standard plugins
@@ -39,13 +57,13 @@ public:
        expression plugins.  This should be called instead of calling
        the static method directly so that the plugin will work if the
        expression library is statically linked. */
-    static void define(const char* name, SeExprFunc f,const char* docString);
-    static void define(const char* name, SeExprFunc f);
-    typedef void (*Define) (const char* name, SeExprFunc f);
-    typedef void (*Define3) (const char* name, SeExprFunc f,const char* docString);
+    static void define(const char* name, ExprFunc f,const char* docString);
+    static void define(const char* name, ExprFunc f);
+    typedef void (*Define) (const char* name, ExprFunc f);
+    typedef void (*Define3) (const char* name, ExprFunc f,const char* docString);
 
     //! Lookup a builtin function by name
-    static const SeExprFunc* lookup(const std::string& name);
+    static const ExprFunc* lookup(const std::string& name);
 
     //! Get a list of registered builtin and DSO generated functions
     static void getFunctionNames(std::vector<std::string>& names);
@@ -55,58 +73,60 @@ public:
 
     //bool isScalar() const { return _scalar; };
 
-    SeExprFunc()
+    ExprFunc()
         : _func(0), _minargs(0), _maxargs(0)
     {};
 
     //! User defined function with custom argument parsing
-    SeExprFunc(SeExprFuncX& f, int min=1, int max=1)
+    ExprFunc(ExprFuncX& f, int min=1, int max=1)
 	: _func(&f), _minargs(min), _maxargs(max)
     {};
 
-    SeExprFunc(SeExprFuncStandard::Func0* f)
-        :_standardFunc(SeExprFuncStandard::FUNC0,(void*)f),_func(0),_minargs(0),_maxargs(0) {}
-    SeExprFunc(SeExprFuncStandard::Func1* f)
-        :_standardFunc(SeExprFuncStandard::FUNC1,(void*)f),_func(0),_minargs(1),_maxargs(1) {}
-    SeExprFunc(SeExprFuncStandard::Func2* f)
-        :_standardFunc(SeExprFuncStandard::FUNC2,(void*)f),_func(0),_minargs(2),_maxargs(2) {}
-    SeExprFunc(SeExprFuncStandard::Func3* f)
-        :_standardFunc(SeExprFuncStandard::FUNC3,(void*)f),_func(0),_minargs(3),_maxargs(3) {}
-    SeExprFunc(SeExprFuncStandard::Func4* f)
-        :_standardFunc(SeExprFuncStandard::FUNC4,(void*)f),_func(0),_minargs(4),_maxargs(4) {}
-    SeExprFunc(SeExprFuncStandard::Func5* f)
-        :_standardFunc(SeExprFuncStandard::FUNC5,(void*)f),_func(0),_minargs(5),_maxargs(5) {}
-    SeExprFunc(SeExprFuncStandard::Func6* f)
-        :_standardFunc(SeExprFuncStandard::FUNC6,(void*)f),_func(0),_minargs(6),_maxargs(6) {}
-    SeExprFunc(SeExprFuncStandard::Funcn* f,int minArgs,int maxArgs)
-        :_standardFunc(SeExprFuncStandard::FUNCN,(void*)f),_func(0),_minargs(minArgs),_maxargs(maxArgs) {}
-    SeExprFunc(SeExprFuncStandard::Func1v* f)
-        :_standardFunc(SeExprFuncStandard::FUNC1V,(void*)f),_func(0),_minargs(1),_maxargs(1) {}
-    SeExprFunc(SeExprFuncStandard::Func2v* f)
-        :_standardFunc(SeExprFuncStandard::FUNC2V,(void*)f),_func(0),_minargs(2),_maxargs(2) {}
-    SeExprFunc(SeExprFuncStandard::Funcnv* f,int minArgs,int maxArgs)
-        :_standardFunc(SeExprFuncStandard::FUNCNV,(void*)f),_func(0),_minargs(minArgs),_maxargs(maxArgs) {}
-    SeExprFunc(SeExprFuncStandard::Func1vv* f)
-        :_standardFunc(SeExprFuncStandard::FUNC1VV,(void*)f),_func(0),_minargs(1),_maxargs(1) {}
-    SeExprFunc(SeExprFuncStandard::Func2vv* f)
-        :_standardFunc(SeExprFuncStandard::FUNC2VV,(void*)f),_func(0),_minargs(2),_maxargs(2) {}
-    SeExprFunc(SeExprFuncStandard::Funcnvv* f)
-        :_standardFunc(SeExprFuncStandard::FUNC1VV,(void*)f),_func(0),_minargs(1),_maxargs(1) {}
-    SeExprFunc(SeExprFuncStandard::Funcnvv* f,int minArgs,int maxArgs)
-        :_standardFunc(SeExprFuncStandard::FUNCNVV,(void*)f),_func(0),_minargs(minArgs),_maxargs(maxArgs) {}
+    ExprFunc(ExprFuncStandard::Func0* f)
+        :_standardFunc(ExprFuncStandard::FUNC0,(void*)f),_func(0),_minargs(0),_maxargs(0) {}
+    ExprFunc(ExprFuncStandard::Func1* f)
+        :_standardFunc(ExprFuncStandard::FUNC1,(void*)f),_func(0),_minargs(1),_maxargs(1) {}
+    ExprFunc(ExprFuncStandard::Func2* f)
+        :_standardFunc(ExprFuncStandard::FUNC2,(void*)f),_func(0),_minargs(2),_maxargs(2) {}
+    ExprFunc(ExprFuncStandard::Func3* f)
+        :_standardFunc(ExprFuncStandard::FUNC3,(void*)f),_func(0),_minargs(3),_maxargs(3) {}
+    ExprFunc(ExprFuncStandard::Func4* f)
+        :_standardFunc(ExprFuncStandard::FUNC4,(void*)f),_func(0),_minargs(4),_maxargs(4) {}
+    ExprFunc(ExprFuncStandard::Func5* f)
+        :_standardFunc(ExprFuncStandard::FUNC5,(void*)f),_func(0),_minargs(5),_maxargs(5) {}
+    ExprFunc(ExprFuncStandard::Func6* f)
+        :_standardFunc(ExprFuncStandard::FUNC6,(void*)f),_func(0),_minargs(6),_maxargs(6) {}
+    ExprFunc(ExprFuncStandard::Funcn* f,int minArgs,int maxArgs)
+        :_standardFunc(ExprFuncStandard::FUNCN,(void*)f),_func(0),_minargs(minArgs),_maxargs(maxArgs) {}
+    ExprFunc(ExprFuncStandard::Func1v* f)
+        :_standardFunc(ExprFuncStandard::FUNC1V,(void*)f),_func(0),_minargs(1),_maxargs(1) {}
+    ExprFunc(ExprFuncStandard::Func2v* f)
+        :_standardFunc(ExprFuncStandard::FUNC2V,(void*)f),_func(0),_minargs(2),_maxargs(2) {}
+    ExprFunc(ExprFuncStandard::Funcnv* f,int minArgs,int maxArgs)
+        :_standardFunc(ExprFuncStandard::FUNCNV,(void*)f),_func(0),_minargs(minArgs),_maxargs(maxArgs) {}
+    ExprFunc(ExprFuncStandard::Func1vv* f)
+        :_standardFunc(ExprFuncStandard::FUNC1VV,(void*)f),_func(0),_minargs(1),_maxargs(1) {}
+    ExprFunc(ExprFuncStandard::Func2vv* f)
+        :_standardFunc(ExprFuncStandard::FUNC2VV,(void*)f),_func(0),_minargs(2),_maxargs(2) {}
+    ExprFunc(ExprFuncStandard::Funcnvv* f)
+        :_standardFunc(ExprFuncStandard::FUNC1VV,(void*)f),_func(0),_minargs(1),_maxargs(1) {}
+    ExprFunc(ExprFuncStandard::Funcnvv* f,int minArgs,int maxArgs)
+        :_standardFunc(ExprFuncStandard::FUNCNVV,(void*)f),_func(0),_minargs(minArgs),_maxargs(maxArgs) {}
 
     //! return the minimum number of acceptable arguments
     int minArgs() const { return _minargs; }
     //! return the maximum number of acceptable arguments
     int maxArgs() const { return _maxargs; }
     //! return pointer to the funcx
-    const SeExprFuncX* funcx() const { return _func ? _func : &_standardFunc; }
+    const ExprFuncX* funcx() const { return _func ? _func : &_standardFunc; }
 
 private:
-    SeExprFuncStandard _standardFunc;
-    SeExprFuncX*      _func;
+    ExprFuncStandard _standardFunc;
+    ExprFuncX*      _func;
     int        _minargs;
     int        _maxargs;
 };
+
+}
 
 #endif

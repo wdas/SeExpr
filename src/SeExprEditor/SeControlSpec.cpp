@@ -1,36 +1,18 @@
 /*
- SEEXPR SOFTWARE
- Copyright 2011 Disney Enterprises, Inc. All rights reserved
- 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are
- met:
- 
- * Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- 
- * Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in
- the documentation and/or other materials provided with the
- distribution.
- 
- * The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
- Studios" or the names of its contributors may NOT be used to
- endorse or promote products derived from this software without
- specific prior written permission from Walt Disney Pictures.
- 
- Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
- CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
- BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
- FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
- IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Copyright Disney Enterprises, Inc.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
+*
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
 */
 
 #ifndef MAKEDEPEND
@@ -45,7 +27,7 @@
 #include "SeExprPatterns.h"
 #include "SeControlSpec.h"
 
-namespace SeExpr{
+namespace SeExpr2 {
 
 SpecExaminer::~SpecExaminer() {
     std::vector<const ControlSpec*>::iterator i = _specList.begin();
@@ -55,26 +37,26 @@ SpecExaminer::~SpecExaminer() {
 };
 
 bool
-SpecExaminer::examine(const SeExprNode* examinee)
+SpecExaminer::examine(const ExprNode* examinee)
 {
-    if(const SeExprScalarAssignSpec* s_spec =
-       SeExprScalarAssignSpec::match(examinee)) {
+    if(const ExprScalarAssignSpec* s_spec =
+       ExprScalarAssignSpec::match(examinee)) {
         _specList.push_back(s_spec);
         return false;
-    } else if(const SeExprVectorAssignSpec* v_spec =
-              SeExprVectorAssignSpec::match(examinee)) {
+    } else if(const ExprVectorAssignSpec* v_spec =
+              ExprVectorAssignSpec::match(examinee)) {
         _specList.push_back(v_spec);
         return false;
-    } else if(const SeExprCurveAssignSpec<double>* c_spec =
-        SeExprCurveAssignSpec<double>::match(examinee)) {
+    } else if(const ExprCurveAssignSpec<double>* c_spec =
+        ExprCurveAssignSpec<double>::match(examinee)) {
         _specList.push_back(c_spec);
         return false;
-    } else if(const SeExprCurveAssignSpec<SeVec3d>* cc_spec =
-        SeExprCurveAssignSpec<SeVec3d>::match(examinee)) {
+    } else if(const ExprCurveAssignSpec<Vec3d>* cc_spec =
+        ExprCurveAssignSpec<Vec3d>::match(examinee)) {
         _specList.push_back(cc_spec);
         return false;
-    } else if(const SeExprStrSpec* str_spec =
-              SeExprStrSpec::match(examinee)) {
+    } else if(const ExprStrSpec* str_spec =
+              ExprStrSpec::match(examinee)) {
         _specList.push_back(str_spec);
         return false;
     };
@@ -103,8 +85,8 @@ inline bool isWS(const char* source,int start, int end) {
 };
 
 //! Checks if there is whitespace in the range specified in the string
-inline std::string findComment(const SeExprNode& node){
-    const SeExpression& expr=*node.expr();
+inline std::string findComment(const ExprNode& node){
+    const Expression& expr=*node.expr();
     typedef std::vector<std::pair<int,int> > Comments;
     const Comments& comments=expr.getComments();
     const std::string& s=expr.getExpr();
@@ -117,10 +99,10 @@ inline std::string findComment(const SeExprNode& node){
     return "";
 }
 
-SeExprScalarAssignSpec::
-SeExprScalarAssignSpec(const SeExprAssignNode& node)
+ExprScalarAssignSpec::
+ExprScalarAssignSpec(const ExprAssignNode& node)
     : ControlSpec(node),_min(0),_max(1),
-     _val(static_cast<const SeExprNumNode*>(node.child(0))->value())
+     _val(static_cast<const ExprNumNode*>(node.child(0))->value())
      
 {
     _name=node.name();
@@ -131,7 +113,7 @@ SeExprScalarAssignSpec(const SeExprAssignNode& node)
 }
 
 std::string
-SeExprScalarAssignSpec::toString() const
+ExprScalarAssignSpec::toString() const
 {
     std::stringstream ss;
 
@@ -143,21 +125,21 @@ SeExprScalarAssignSpec::toString() const
     return ss.str();
 }
 
-const SeExprScalarAssignSpec*
-SeExprScalarAssignSpec::match(const SeExprNode* node)
+const ExprScalarAssignSpec*
+ExprScalarAssignSpec::match(const ExprNode* node)
 {
-    if(const SeExprAssignNode* assign = isScalarAssign(node))
-        return new SeExprScalarAssignSpec(*assign);
+    if(const ExprAssignNode* assign = isScalarAssign(node))
+        return new ExprScalarAssignSpec(*assign);
 
     return 0;
 }
 
-SeExprVectorAssignSpec::
-SeExprVectorAssignSpec(const SeExprAssignNode& node)
+ExprVectorAssignSpec::
+ExprVectorAssignSpec(const ExprAssignNode& node)
     : ControlSpec(node),_min(0),_max(1),
-     _val(SeVec3d(static_cast<const SeExprNumNode*>(node.child(0)->child(0))->value(),
-             static_cast<const SeExprNumNode*>(node.child(0)->child(1))->value(),
-             static_cast<const SeExprNumNode*>(node.child(0)->child(2))->value()))
+     _val(Vec3d(static_cast<const ExprNumNode*>(node.child(0)->child(0))->value(),
+             static_cast<const ExprNumNode*>(node.child(0)->child(1))->value(),
+             static_cast<const ExprNumNode*>(node.child(0)->child(2))->value()))
 {
     _name=node.name();
     std::string comment=findComment(node);
@@ -166,7 +148,7 @@ SeExprVectorAssignSpec(const SeExprAssignNode& node)
 }
 
 std::string
-SeExprVectorAssignSpec::toString() const
+ExprVectorAssignSpec::toString() const
 {
     std::stringstream ss;
 
@@ -179,33 +161,33 @@ SeExprVectorAssignSpec::toString() const
 }
 
 
-template<class T> SeExprCurveAssignSpec<T>::
-SeExprCurveAssignSpec(const SeExprAssignNode& node)
+template<class T> ExprCurveAssignSpec<T>::
+ExprCurveAssignSpec(const ExprAssignNode& node)
     : ControlSpec(node),
      _vec()
 {
     _name=node.name();
-    const SeExprFuncNode* cnode=static_cast<const SeExprFuncNode*>(node.child(0));
+    const ExprFuncNode* cnode=static_cast<const ExprFuncNode*>(node.child(0));
     _lookupText=cnode->child(0)->toString();
     int num = cnode->numChildren();
     for(int i = 1; i < num - 2; i += 3)
-        _vec.push_back(typename SeCurve<T>::CV(
-                static_cast<const SeExprNumNode*>(cnode->child(i))->value(),
-                static_cast<const SeExprNumNode*>(cnode->child(i+1))->value(),
-                (typename SeCurve<T>::InterpType) static_cast<const SeExprNumNode*>(cnode->child(i+2))->value()));
+        _vec.push_back(typename Curve<T>::CV(
+                static_cast<const ExprNumNode*>(cnode->child(i))->value(),
+                static_cast<const ExprNumNode*>(cnode->child(i+1))->value(),
+                (typename Curve<T>::InterpType) static_cast<const ExprNumNode*>(cnode->child(i+2))->value()));
 }
 
-const SeExprVectorAssignSpec* SeExprVectorAssignSpec::
-match(const SeExprNode* node)
+const ExprVectorAssignSpec* ExprVectorAssignSpec::
+match(const ExprNode* node)
 {
-    if(const SeExprAssignNode* assign = isVectorAssign(node)) {
-        return new SeExprVectorAssignSpec(*assign);
+    if(const ExprAssignNode* assign = isVectorAssign(node)) {
+        return new ExprVectorAssignSpec(*assign);
     }
 
     return 0;
 }
 
-template<class T> std::string SeExprCurveAssignSpec<T>::
+template<class T> std::string ExprCurveAssignSpec<T>::
 toString() const
 {
     std::stringstream ss;
@@ -222,36 +204,36 @@ toString() const
     return ss.str();
 }
 
-template<class T> const SeExprCurveAssignSpec<T>* SeExprCurveAssignSpec<T>::
-match(const SeExprNode* node)
+template<class T> const ExprCurveAssignSpec<T>* ExprCurveAssignSpec<T>::
+match(const ExprNode* node)
 {
-    if(const SeExprAssignNode* assign = isCurveAssign(node))
-        return new SeExprCurveAssignSpec(*assign);
+    if(const ExprAssignNode* assign = isCurveAssign(node))
+        return new ExprCurveAssignSpec(*assign);
 
     return 0;
 }
 
 #if 0
 
-SeExprCcurveAssignSpec::
-SeExprCcurveAssignSpec(const SeExprAssignNode& node)
+ExprCcurveAssignSpec::
+ExprCcurveAssignSpec(const ExprAssignNode& node)
     : ControlSpec(node),
      _vec()
 {
     _name=node.name();
-    const SeExprFuncNode* cnode(static_cast<const SeExprFuncNode*>(node.child(0)));
+    const ExprFuncNode* cnode(static_cast<const ExprFuncNode*>(node.child(0)));
     _lookupText=cnode->child(0)->toString();
     int num = cnode->numChildren();
     for(int i = 1; i < num - 2; i += 3)
-        if(dynamic_cast<const SeExprNumNode*>(cnode->child(i+1)))
-            _vec.push_back(SeCurve<SeVec3d>::CV(
-                    static_cast<const SeExprNumNode*>(cnode->child(i))->value(),
-                    static_cast<const SeExprNumNode*>(cnode->child(i+1))->value(),
-                    (SeCurve<SeVec3d>::InterpType) static_cast<const SeExprNumNode*>(cnode->child(i+2))->value()));
+        if(dynamic_cast<const ExprNumNode*>(cnode->child(i+1)))
+            _vec.push_back(Curve<Vec3d>::CV(
+                    static_cast<const ExprNumNode*>(cnode->child(i))->value(),
+                    static_cast<const ExprNumNode*>(cnode->child(i+1))->value(),
+                    (Curve<Vec3d>::InterpType) static_cast<const ExprNumNode*>(cnode->child(i+2))->value()));
 }
 
 std::string
-SeExprCcurveAssignSpec::toString() const
+ExprCcurveAssignSpec::toString() const
 {
     std::stringstream ss;
 
@@ -272,11 +254,11 @@ SeExprCcurveAssignSpec::toString() const
     return ss.str();
 }
 
-const SeExprCcurveAssignSpec*
-SeExprCcurveAssignSpec::match(const SeExprNode* node)
+const ExprCcurveAssignSpec*
+ExprCcurveAssignSpec::match(const ExprNode* node)
 {
-    if(const SeExprAssignNode* assign = isCcurveAssign(node))
-        return new SeExprCcurveAssignSpec(*assign);
+    if(const ExprAssignNode* assign = isCcurveAssign(node))
+        return new ExprCcurveAssignSpec(*assign);
 
 
     return 0;
@@ -285,7 +267,7 @@ SeExprCcurveAssignSpec::match(const SeExprNode* node)
 #endif
 
 std::string
-SeExprStrSpec::toString() const
+ExprStrSpec::toString() const
 {
     std::stringstream ss;
     ss<<_name<<": \""+_str+"\" ";
@@ -298,10 +280,10 @@ SeExprStrSpec::toString() const
     return ss.str();
 }
 
-const SeExprStrSpec*
-SeExprStrSpec::match(const SeExprNode* node)
+const ExprStrSpec*
+ExprStrSpec::match(const ExprNode* node)
 {
-    if(const SeExprStrNode* strnode = isString(node)){
+    if(const ExprStrNode* strnode = isString(node)){
         std::string comment=findComment(*node);
         char* name=new char[comment.length()+1];
         char* type=new char[comment.length()+1];
@@ -314,7 +296,7 @@ SeExprStrSpec::match(const SeExprNode* node)
             else if(!strcmp(type,"file")) newType=FILE;
             else if(!strcmp(type,"directory")) newType=DIRECTORY;
             else valid=false;
-            if(valid) return new SeExprStrSpec(*strnode,name,newType);
+            if(valid) return new ExprStrSpec(*strnode,name,newType);
         }
         delete [] name; delete [] type;
     }

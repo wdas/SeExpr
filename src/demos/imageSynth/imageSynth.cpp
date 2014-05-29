@@ -1,39 +1,18 @@
 /*
- SEEXPR SOFTWARE
- Copyright 2011 Disney Enterprises, Inc. All rights reserved
- 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are
- met:
- 
- * Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- 
- * Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in
- the documentation and/or other materials provided with the
- distribution.
- 
- * The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
- Studios" or the names of its contributors may NOT be used to
- endorse or promote products derived from this software without
- specific prior written permission from Walt Disney Pictures.
- 
- Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
- CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
- BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
- FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
- IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-*/
-/**
-   @file imageSynth.cpp
+* Copyright Disney Enterprises, Inc.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
+*
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
 */
 #include <map>
 #include <cstdlib>
@@ -41,50 +20,54 @@
 #include <cstring>
 #include <SeExpression.h>
 #include <SeInterpreter.h>
+#include <SePlatform.h>
 #include <png.h>
 #include <fstream>
 
+namespace SeExpr2 {
 //! Simple image synthesizer expression class to support our function grapher
-class ImageSynthExpr:public SeExpression
+class ImageSynthExpr:public Expression
 {
 public:
     //! Constructor that takes the expression to parse
     ImageSynthExpr(const std::string& expr)
-        :SeExpression(expr)
+        :Expression(expr)
     {}
 
     //! Simple variable that just returns its internal value
-    struct Var:public SeExprVarRef
+    struct Var:public ExprVarRef
     {
         Var(const double val)
-	    : SeExprVarRef(SeExprType().FP(1).Varying()), val(val)
+	    : ExprVarRef(ExprType().FP(1).Varying()), val(val)
 	{}
 
 	Var()
-	    : SeExprVarRef(SeExprType().FP(1).Varying()), val(0.0)
+	    : ExprVarRef(ExprType().FP(1).Varying()), val(0.0)
 	{}
 
         double val; // independent variable
         void eval(double* result)
         {result[0]=val;}
 
-        void eval(char** result)
+        void eval(const char** result)
         {assert(false);}
     };
     //! variable map
     mutable std::map<std::string,Var> vars;
 
     //! resolve function that only supports one external variable 'x'
-    SeExprVarRef* resolveVar(const std::string& name) const
+    ExprVarRef* resolveVar(const std::string& name) const
     {
         std::map<std::string,Var>::iterator i=vars.find(name);
         if(i != vars.end()) return &i->second;
         return 0;
     }
 };
-
+}
 
 double clamp(double x){return std::max(0.,std::min(255.,x));}
+
+using namespace SeExpr2;
 
 int main(int argc,char *argv[]){
     if(argc != 5){
@@ -130,6 +113,8 @@ int main(int argc,char *argv[]){
     // evaluate expression
     std::cerr<<"Evaluating expresion...from "<<exprFile<<std::endl;
     unsigned char* image=new unsigned char[width*height*4];
+
+    {PrintTiming evalTime("eval time");
     double one_over_width=1./width,one_over_height=1./height;
     double& u=expr.vars["u"].val;
     double& v=expr.vars["v"].val;
@@ -138,8 +123,10 @@ int main(int argc,char *argv[]){
         for(int col=0;col<width;col++){
             u=one_over_width*(col+.5);
             v=one_over_height*(row+.5);
+
             const double* result=expr.evalFP();
-//            expr._interpreter->print();
+
+            // expr._interpreter->print();
             pixel[0]=clamp(result[0]*256.);
             pixel[1]=clamp(result[1]*256.);
             pixel[2]=clamp(result[2]*256.);
@@ -147,6 +134,7 @@ int main(int argc,char *argv[]){
             pixel+=4;
         }
     }
+    } // timer
 
     // write image as png
     std::cerr<<"Writing image..."<<imageFile<<std::endl;

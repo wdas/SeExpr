@@ -1,36 +1,18 @@
 /*
- SEEXPR SOFTWARE
- Copyright 2011 Disney Enterprises, Inc. All rights reserved
- 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are
- met:
- 
- * Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- 
- * Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in
- the documentation and/or other materials provided with the
- distribution.
- 
- * The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
- Studios" or the names of its contributors may NOT be used to
- endorse or promote products derived from this software without
- specific prior written permission from Walt Disney Pictures.
- 
- Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
- CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
- BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
- FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
- IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Copyright Disney Enterprises, Inc.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
+*
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
 */
 #ifndef _SeExprFuncX_h_
 #define _SeExprFuncX_h_
@@ -39,71 +21,72 @@
 #include "SeVec.h"
 #include "SeExprNode.h"
 
-
-class SeExprFuncNode;
-class SeInterpreter;
-class SeExprVarEnv;
+namespace SeExpr2 {
+class ExprFuncNode;
+class Interpreter;
+class ExprVarEnv;
 
 //! Extension function spec, used for complicated argument custom functions.
 /** Provides the ability to handle all argument type checking and processing manually.
-    Derive from this class and then make your own SeExprFunc that takes this object.
+    Derive from this class and then make your own ExprFunc that takes this object.
     This is necessary if you need string arguments or you have variable numbers of
     arguments.  See SeExprBuiltins.h for some examples */
-class SeExprFuncX {
+class ExprFuncX {
 public:
-    //! Create an SeExprFuncX. If the functions and type checking you implement
+    //! Create an ExprFuncX. If the functions and type checking you implement
     //! is thread safe your derived class should call this with true. If not,
     //! then false.  If you mark a function as thread unsafe,  and it is used
-    //! in an expression then bool SeExpression::isThreadSafe() will return false
+    //! in an expression then bool Expression::isThreadSafe() will return false
     //! and the controlling software should not attempt to run multiple threads
     //! of an expression.
-    SeExprFuncX(const bool threadSafe)
+    ExprFuncX(const bool threadSafe)
         :_threadSafe(threadSafe)
     {}
 
     /** prep the expression by doing all type checking argument checking, etc. */
-    virtual SeExprType prep(SeExprFuncNode* node, bool scalarWanted, SeExprVarEnv & env) const=0;
-    virtual SeExprType type() const {return _type;}
+    virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnv & env) const=0;
+    virtual ExprType type() const {return _type;}
 
     /** evaluate the expression. the given node is where in the parse tree
         the evaluation is for */
-    //virtual void eval(const SeExprFuncNode* node, SeVec3d& result) const = 0;
+    //virtual void eval(const ExprFuncNode* node, Vec3d& result) const = 0;
     //! Build an interpreter to evaluate the expression
-    virtual int buildInterpreter(const SeExprFuncNode* node,SeInterpreter* interpreter) const = 0;
-    virtual ~SeExprFuncX(){}
+    virtual int buildInterpreter(const ExprFuncNode* node,Interpreter* interpreter) const = 0;
+    virtual ~ExprFuncX(){}
 
     bool isThreadSafe() const {return _threadSafe;}
 
  protected:
     bool _isScalar;
-    SeExprType _type;
+    ExprType _type;
 private:
     bool _threadSafe;
 };
 
-class SeExprFuncSimple:public SeExprFuncX
+class ExprFuncSimple:public ExprFuncX
 {
 public:
-    SeExprFuncSimple(const bool threadSafe)
-        :SeExprFuncX(threadSafe)
+    ExprFuncSimple(const bool threadSafe)
+        :ExprFuncX(threadSafe)
     {}
     
     class ArgHandle{
     public:
-        ArgHandle(int* opData,double* fp,char** c,std::stack<int>& callStack)
+        ArgHandle(int* opData,double* fp,char** c,std::vector<int>& callStack)
             :outFp(fp[opData[2]]),outStr(c[opData[2]]),
-            data(reinterpret_cast<SeExprFuncNode::Data*>(c[opData[1]])),
+            data(reinterpret_cast<ExprFuncNode::Data*>(c[opData[1]])),
+            // TODO: put the value in opData rather than fp
             _nargs((int)fp[opData[3]]), // TODO: would be good not to have to convert to int!
             opData(opData+4),fp(fp),c(c)
         {}
 
-        template<int d> SeVec<double,d,true> inFp(int i){return SeVec<double,d,true>(&fp[opData[i]]);}
+        template<int d> Vec<double,d,true> inFp(int i){return Vec<double,d,true>(&fp[opData[i]]);}
         char* inStr(int i){return c[opData[i]];}
         int nargs() const{return _nargs;}
 
         double& outFp;
         char*& outStr;
-        SeExprFuncNode::Data* data;
+        ExprFuncNode::Data* data;
     private:
         int _nargs;
         int* opData;
@@ -112,26 +95,28 @@ public:
         //std::stack<int>& callStack;
     };
 
-    virtual int buildInterpreter(const SeExprFuncNode* node,SeInterpreter* interpreter) const;
+    virtual int buildInterpreter(const ExprFuncNode* node,Interpreter* interpreter) const;
 
-    virtual SeExprType prep(SeExprFuncNode* node,bool scalarWanted,SeExprVarEnv& env) const=0;
-    virtual SeExprFuncNode::Data* evalConstant(ArgHandle args) const=0;
+    virtual ExprType prep(ExprFuncNode* node,bool scalarWanted,ExprVarEnv& env) const=0;
+    virtual ExprFuncNode::Data* evalConstant(ArgHandle args) const=0;
     virtual void eval(ArgHandle args)=0;
 
 private:
-    static int EvalOp(int* opData,double* fp,char** c,std::stack<int>& callStack);
+    static int EvalOp(int* opData,double* fp,char** c,std::vector<int>& callStack);
 };
 
-class SeExprFuncLocal:public SeExprFuncX{
-    SeExprFuncLocal()
-    :SeExprFuncX(true)
+class ExprFuncLocal:public ExprFuncX{
+    ExprFuncLocal()
+    :ExprFuncX(true)
     {}
     
         /** prep the expression by doing all type checking argument checking, etc. */
-    virtual SeExprType prep(SeExprFuncNode* node, bool scalarWanted, SeExprVarEnv & env) const;
+    virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnv & env) const;
     //! Build an interpreter to evaluate the expression
-    virtual int buildInterpreter(const SeExprFuncNode* node,SeInterpreter* interpreter) const;
+    virtual int buildInterpreter(const ExprFuncNode* node,Interpreter* interpreter) const;
 
 };
+
+}
 
 #endif

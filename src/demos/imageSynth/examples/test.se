@@ -1,0 +1,11 @@
+x=u-.5;
+y=v-.5;
+dist=x*x+y*y;
+t = dist*300;
+t2 = t*t;
+t3 = t*t*t;
+t5 = t3 * t2;
+t7 = t5 * t2;
+sinApprox = (t-t3/6+t5/120-t7/5040);
+a=sinApprox ;
+[a,a,a]

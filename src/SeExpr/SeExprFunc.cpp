@@ -1,36 +1,18 @@
 /*
- SEEXPR SOFTWARE
- Copyright 2011 Disney Enterprises, Inc. All rights reserved
- 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are
- met:
- 
- * Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- 
- * Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in
- the documentation and/or other materials provided with the
- distribution.
- 
- * The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
- Studios" or the names of its contributors may NOT be used to
- endorse or promote products derived from this software without
- specific prior written permission from Walt Disney Pictures.
- 
- Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
- CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
- BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
- FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
- IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Copyright Disney Enterprises, Inc.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
+*
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
 */
 #include <string>
 #include <map>
@@ -54,12 +36,12 @@ namespace {
     // FuncTable - table of pre-defined functions
     class FuncTable {
     public:
-	void define(const char* name, SeExprFunc f,const char* docString=0) {
+	void define(const char* name, SeExpr2::ExprFunc f,const char* docString=0) {
             if(docString) funcmap[name] = FuncMapItem(std::string(docString),f); 
             else funcmap[name] = FuncMapItem(name,f); 
         }
 
-	const SeExprFunc* lookup(const std::string& name)
+	const SeExpr2::ExprFunc* lookup(const std::string& name)
 	{
 	    FuncMap::iterator iter;
 	    if ((iter = funcmap.find(name)) != funcmap.end())
@@ -82,7 +64,7 @@ namespace {
         }
 	
     private:
-        typedef std::pair<std::string,SeExprFunc> FuncMapItem;
+        typedef std::pair<std::string,SeExpr2::ExprFunc> FuncMapItem;
 	typedef std::map<std::string,FuncMapItem> FuncMap;
 	FuncMap funcmap;
     };
@@ -91,36 +73,37 @@ namespace {
 }
 
 
-SeExprType SeExprFuncX::prep(SeExprFuncNode* node, bool scalarWanted, SeExprVarEnv & env) const
+//ExprType ExprFuncX::prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnv & env) const
+//{
+//    /* call base node prep by default:
+//       this passes wantVec to all the children and sets isVec true if any
+//       child is a vec */
+//    /* TODO: check that this is correct behavior */
+//    return node->ExprNode::prep(scalarWanted, env);
+//}
+
+namespace SeExpr2 {
+
+static SeExprInternal2::Mutex mutex;
+
+void ExprFunc::init()
 {
-    /* call base node prep by default:
-       this passes wantVec to all the children and sets isVec true if any
-       child is a vec */
-    /* TODO: check that this is correct behavior */
-    return node->SeExprNode::prep(scalarWanted, env);
-}
-
-
-static SeExprInternal::Mutex mutex;
-
-void SeExprFunc::init()
-{
-    SeExprInternal::AutoMutex locker(mutex);
+    SeExprInternal2::AutoMutex locker(mutex);
     initInternal();
 }
 
-const SeExprFunc*
-SeExprFunc::lookup(const std::string& name)
+const ExprFunc*
+ExprFunc::lookup(const std::string& name)
 {
     mutex.lock();
     if (!Functions) initInternal();
-    const SeExprFunc* ret=Functions->lookup(name);
+    const ExprFunc* ret=Functions->lookup(name);
     mutex.unlock();
     return ret;
 }
     
 inline static void 
-defineInternal(const char* name,SeExprFunc f)
+defineInternal(const char* name,ExprFunc f)
 {
     // THIS FUNCTION IS NOT THREAD SAFE, it assumes you have a mutex from callee
     // ALSO YOU MUST BE VERY CAREFUL NOT TO CALL ANYTHING THAT TRIES TO REACQUIRE MUTEX!
@@ -128,14 +111,14 @@ defineInternal(const char* name,SeExprFunc f)
 }
 
 inline static void 
-defineInternal3(const char* name,SeExprFunc f,const char* docString)
+defineInternal3(const char* name,ExprFunc f,const char* docString)
 {
     // THIS FUNCTION IS NOT THREAD SAFE, it assumes you have a mutex from callee
     // ALSO YOU MUST BE VERY CAREFUL NOT TO CALL ANYTHING THAT TRIES TO REACQUIRE MUTEX!
     Functions->define(name,f,docString);
 }
 
-void SeExprFunc::initInternal()
+void ExprFunc::initInternal()
 {
     // THIS FUNCTION IS NOT THREAD SAFE, it assumes you have a mutex from callee
     // ALSO YOU MUST BE VERY CAREFUL NOT TO CALL ANYTHING THAT TRIES TO REACQUIRE MUTEX!
@@ -143,13 +126,13 @@ void SeExprFunc::initInternal()
     // TODO: make thread safe
     if (Functions) return;
     Functions = new FuncTable;
-    SeExpr::defineBuiltins(defineInternal,defineInternal3);
+    SeExpr2::defineBuiltins(defineInternal,defineInternal3);
     const char* path = getenv("SE_EXPR_PLUGINS");
     if (path) loadPlugins(path);
 }
 
 void
-SeExprFunc::define(const char* name, SeExprFunc f)
+ExprFunc::define(const char* name, ExprFunc f)
 {
     mutex.lock();
     if (!Functions) initInternal();
@@ -158,7 +141,7 @@ SeExprFunc::define(const char* name, SeExprFunc f)
 }
 
 void
-SeExprFunc::define(const char* name, SeExprFunc f,const char* docString)
+ExprFunc::define(const char* name, ExprFunc f,const char* docString)
 {
     mutex.lock();
     if (!Functions) initInternal();
@@ -167,7 +150,7 @@ SeExprFunc::define(const char* name, SeExprFunc f,const char* docString)
 }
 
 void 
-SeExprFunc::getFunctionNames(std::vector<std::string>& names)
+ExprFunc::getFunctionNames(std::vector<std::string>& names)
 {
     mutex.lock();
     if(!Functions) initInternal();
@@ -176,7 +159,7 @@ SeExprFunc::getFunctionNames(std::vector<std::string>& names)
 }
 
 std::string
-SeExprFunc::getDocString(const char* functionName)
+ExprFunc::getDocString(const char* functionName)
 {
     mutex.lock();
     if(!Functions) initInternal();
@@ -203,7 +186,7 @@ static int MatchPluginName(const struct dirent* dir)
 
 
 void
-SeExprFunc::loadPlugins(const char* path)
+ExprFunc::loadPlugins(const char* path)
 {
 #ifdef SEEXPR_WIN32
 
@@ -239,7 +222,7 @@ SeExprFunc::loadPlugins(const char* path)
 }
 
 void
-SeExprFunc::loadPlugin(const char* path)
+ExprFunc::loadPlugin(const char* path)
 {
 #ifdef SEEXPR_WIN32
     std::cerr<<"SeExpr: warning Plugins are not supported on windows currently"<<std::endl;
@@ -251,18 +234,22 @@ SeExprFunc::loadPlugin(const char* path)
 	if (err) std::cerr << err << std::endl;
 	return;
     }
-    typedef void (*initfn_v1) (SeExprFunc::Define);
-    initfn_v1 init_v1 = (initfn_v1) dlsym(handle, "SeExprPluginInit");
-    typedef void (*initfn_v2) (SeExprFunc::Define3);
-    initfn_v2 init_v2 = (initfn_v2) dlsym(handle, "SeExprPluginInitV2");
 
-    if(init_v2) init_v2(defineInternal3);
-    else if(init_v1) init_v1(defineInternal);
+    typedef void (*initfn_v3) (ExprFunc::Define3);
+    initfn_v3 init_v3 = (initfn_v3) dlsym(handle, "SeExpr2PluginInit");
+
+    if(init_v3) init_v3(defineInternal3);
     else{
-	std::cerr << "Error reading expression plugin: " << path << std::endl;
-	std::cerr << "No function named SeExprPluginInit or SeExprPluginInitV2 found" << std::endl;
-	dlclose(handle);
+        void* init_v2 = dlsym(handle, "SeExprPluginInitV2");
+        void* init_v1 = dlsym(handle, "SeExprPluginInit");
+        if(!init_v2 && !init_v2){
+        	std::cerr << "Error reading expression plugin: " << path << std::endl;
+        	std::cerr << "No function named SeExpr2PluginInit called"<<std::endl;
+        }
+    	dlclose(handle);
 	return;
     }
 #endif
+}
+
 }

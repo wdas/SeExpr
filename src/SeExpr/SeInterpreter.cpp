@@ -1,36 +1,18 @@
 /*
- SEEXPR SOFTWARE
- Copyright 2011 Disney Enterprises, Inc. All rights reserved
- 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are
- met:
- 
- * Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- 
- * Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in
- the documentation and/or other materials provided with the
- distribution.
- 
- * The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
- Studios" or the names of its contributors may NOT be used to
- endorse or promote products derived from this software without
- specific prior written permission from Walt Disney Pictures.
- 
- Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
- CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
- BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
- FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
- IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Copyright Disney Enterprises, Inc.  All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License
+* and the following modification to it: Section 6 Trademarks.
+* deleted and replaced with:
+*
+* 6. Trademarks. This License does not grant permission to use the
+* trade names, trademarks, service marks, or product names of the
+* Licensor and its affiliates, except as required for reproducing
+* the content of the NOTICE file.
+*
+* You may obtain a copy of the License at
+* http://www.apache.org/licenses/LICENSE-2.0
 */
 #include "SeExprNode.h"
 #include "SeInterpreter.h"
@@ -39,8 +21,8 @@
 #include <dlfcn.h>
 
 // TODO: optimize to write to location directly on a CondNode
-
-void SeInterpreter::eval(bool debug)
+namespace SeExpr2 {
+void Interpreter::eval(bool debug)
 {
     double* fp=&d[0];
     char** str=&s[0];
@@ -57,14 +39,14 @@ void SeInterpreter::eval(bool debug)
     }
 }
 
-void SeInterpreter::print(int pc) const
+void Interpreter::print(int pc) const
 {
     std::cerr<<"---- ops     ----------------------"<<std::endl;
     for(size_t i=0;i<ops.size();i++){
         Dl_info info;
         const char* name="";
         if(dladdr((void*)ops[i].first, &info)) name=info.dli_sname;
-        fprintf(stderr,"%s %s 0x%08x (",pc==i?"-->":"   ",name,ops[i].first);
+        fprintf(stderr,"%s %s 0x%08x (",pc==(int)i?"-->":"   ",name, ops[i].first);
         int nextGuy=(i==ops.size()-1 ? opData.size() : ops[i+1].second);
         for(int k=ops[i].second;k<nextGuy;k++){
             fprintf(stderr," %d",opData[k]);
@@ -88,13 +70,13 @@ void SeInterpreter::print(int pc) const
 
 
 
-//template SeInterpreter::OpF* getTemplatizedOp<Promote<1> >(int);
-//template SeInterpreter::OpF* getTemplatizedOp<Promote<2> >(int);
-//template SeInterpreter::OpF* getTemplatizedOp<Promote<3> >(int);
+//template Interpreter::OpF* getTemplatizedOp<Promote<1> >(int);
+//template Interpreter::OpF* getTemplatizedOp<Promote<2> >(int);
+//template Interpreter::OpF* getTemplatizedOp<Promote<3> >(int);
 
 //! Return the function f encapsulated in class T for the dynamic i converted to a static d. (partial application of template using c)
 template<char c,template<char c1,int d> class T>
-static SeInterpreter::OpF getTemplatizedOp2(int i)
+static Interpreter::OpF getTemplatizedOp2(int i)
 {
     switch(i){
         case 1: return T<c,1>::f;
@@ -129,7 +111,7 @@ struct BinaryOp
         return a - floor(a/b)*b;
     }
     
-    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack){
+    static int f(int* opData,double* fp,char** c,std::vector<int>& callStack){
         double* in1=fp+opData[0];
         double* in2=fp+opData[1];
         double* out=fp+opData[2];
@@ -160,7 +142,7 @@ struct BinaryOp
 /// Computes a unary op on a FP[d]
 template<char op,int d>
 struct UnaryOp{
-    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack)
+    static int f(int* opData,double* fp,char** c,std::vector<int>& callStack)
     {
         double* in=fp+opData[0];
         double* out=fp+opData[1];
@@ -181,7 +163,7 @@ struct UnaryOp{
 //! Subscripts 
 template<int d>
 struct Subscript{
-    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack)
+    static int f(int* opData,double* fp,char** c,std::vector<int>& callStack)
     {
         int tuple=opData[0];
         int subscript=int(fp[opData[1]]);
@@ -195,7 +177,7 @@ struct Subscript{
 //! build a vector tuple from a bunch of numbers
 template<int d>
 struct Tuple{
-    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack)
+    static int f(int* opData,double* fp,char** c,std::vector<int>& callStack)
     {
         int out=opData[d];
         for(int k=0;k<d;k++){
@@ -208,7 +190,7 @@ struct Tuple{
 //! build a vector tuple from a bunch of numbers
 template<int d>
 struct AssignOp{
-    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack)
+    static int f(int* opData,double* fp,char** c,std::vector<int>& callStack)
     {
         int in=opData[0];
         int out=opData[1];
@@ -221,7 +203,7 @@ struct AssignOp{
 
 //! Assigns a string from one position to another
 struct AssignStrOp{
-    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack)
+    static int f(int* opData,double* fp,char** c,std::vector<int>& callStack)
     {
         int in=opData[0];
         int out=opData[1];
@@ -232,7 +214,7 @@ struct AssignStrOp{
 
 //! Jumps relative to current executing pc if cond is true
 struct CondJmpRelative{
-    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack){
+    static int f(int* opData,double* fp,char** c,std::vector<int>& callStack){
         bool cond=(bool)fp[opData[0]];
         if(!cond) return opData[1];
         else return 1;
@@ -242,15 +224,15 @@ struct CondJmpRelative{
 
 //! Jumps relative to current executing pc unconditionally
 struct JmpRelative{
-    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack){
+    static int f(int* opData,double* fp,char** c,std::vector<int>& callStack){
         return opData[0];
     }
 };
 
 //! Evaluates an external variable
 struct EvalVar{
-    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack){
-        SeExprVarRef* ref=reinterpret_cast<SeExprVarRef*>(c[opData[0]]);
+    static int f(int* opData,double* fp,char** c,std::vector<int>& callStack){
+        ExprVarRef* ref=reinterpret_cast<ExprVarRef*>(c[opData[0]]);
         ref->eval(fp+opData[1]); // ,c+opData[1]);
         return 1;
     }
@@ -258,7 +240,7 @@ struct EvalVar{
 
 template<char op,int d>
 struct CompareEqOp{
-    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack){
+    static int f(int* opData,double* fp,char** c,std::vector<int>& callStack){
         bool result=true;
         double* in0=fp+opData[0];
         double* in1=fp+opData[1];
@@ -278,7 +260,7 @@ struct CompareEqOp{
 
 template<char op>
 struct CompareEqOp<op,3>{
-    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack){
+    static int f(int* opData,double* fp,char** c,std::vector<int>& callStack){
         bool eq=fp[opData[0]]==fp[opData[1]] && 
             fp[opData[0]+1]==fp[opData[1]+1] && 
             fp[opData[0]+2]==fp[opData[1]+2];
@@ -293,7 +275,7 @@ struct CompareEqOp<op,3>{
 template<char op,int d>
 struct StrCompareEqOp{
     // TODO: this should rely on tokenization and not use strcmp
-    static int f(int* opData,double* fp,char** c,std::stack<int>& callStack){
+    static int f(int* opData,double* fp,char** c,std::vector<int>& callStack){
         switch(op){
             case '=': fp[opData[2]] = strcmp(c[opData[0]],c[opData[1]])==0;break;
             case '!': fp[opData[2]] = strcmp(c[opData[0]],c[opData[1]])==0;break;
@@ -305,41 +287,42 @@ struct StrCompareEqOp{
 }
 
 namespace{
-    int ProcedureReturn(int* opData,double* fp,char** c,std::stack<int>& callStack){
-        int newPC = callStack.top();
-        callStack.pop();
+    int ProcedureReturn(int* opData,double* fp,char** c,std::vector<int>& callStack){
+        int newPC = callStack.back();
+        callStack.pop_back();
         return newPC - opData[0];
     }
 }
 
 namespace{
-    int ProcedureCall(int* opData,double* fp,char** c,std::stack<int>& callStack){
-        callStack.push(opData[0]);
+    int ProcedureCall(int* opData,double* fp,char** c,std::vector<int>& callStack){
+        callStack.push_back(opData[0]);
         return opData[1];
     }
 }
 
-int SeExprLocalFunctionNode::
-buildInterpreter(SeInterpreter* interpreter) const
+int ExprLocalFunctionNode::
+buildInterpreter(Interpreter* interpreter) const
 {
     _procedurePC = interpreter->nextPC();
     int lastOperand=0;
     for(int c=0;c<numChildren();c++) lastOperand=child(c)->buildInterpreter(interpreter);
     int basePC = interpreter->nextPC();;
     interpreter->addOp(ProcedureReturn);
-    int endPC = interpreter->addOperand(basePC);
+    //int endPC =
+    interpreter->addOperand(basePC);
     interpreter->endOp(false);
     _returnedDataOp = lastOperand;
 
     return 0;
 }
 
-int SeExprLocalFunctionNode::
-buildInterpreterForCall(const SeExprFuncNode* callerNode, SeInterpreter* interpreter) const
+int ExprLocalFunctionNode::
+buildInterpreterForCall(const ExprFuncNode* callerNode, Interpreter* interpreter) const
 {
     std::vector<int> operands;
     for(int c=0;c<callerNode->numChildren();c++){
-        const SeExprNode* child=callerNode->child(c);
+        const ExprNode* child=callerNode->child(c);
         // evaluate the argument
         int operand=callerNode->child(c)->buildInterpreter(interpreter);
         if(child->type().isFP()){
@@ -385,31 +368,31 @@ buildInterpreterForCall(const SeExprFuncNode* callerNode, SeInterpreter* interpr
 
 }
 
-int SeExprNode::buildInterpreter(SeInterpreter* interpreter) const
+int ExprNode::buildInterpreter(Interpreter* interpreter) const
 {
     for(int c=0;c<numChildren();c++) child(c)->buildInterpreter(interpreter);
     return -1;
 }
 
-int SeExprNumNode::buildInterpreter(SeInterpreter* interpreter) const
+int ExprNumNode::buildInterpreter(Interpreter* interpreter) const
 {
     int loc=interpreter->allocFP(1);
     interpreter->d[loc]=value();
     return loc;
 }
 
-int SeExprStrNode::buildInterpreter(SeInterpreter *interpreter) const
+int ExprStrNode::buildInterpreter(Interpreter *interpreter) const
 {
     int loc=interpreter->allocPtr();
     interpreter->s[loc]=const_cast<char*>(_str.c_str());
     return loc;
 }
 
-int SeExprVecNode::buildInterpreter(SeInterpreter* interpreter) const
+int ExprVecNode::buildInterpreter(Interpreter* interpreter) const
 {
     std::vector<int> locs;
     for(int k=0;k<numChildren();k++){
-        const SeExprNode* c=child(k);
+        const ExprNode* c=child(k);
         locs.push_back(c->buildInterpreter(interpreter));
     }
     interpreter->addOp(getTemplatizedOp<Tuple>(numChildren()));
@@ -420,9 +403,9 @@ int SeExprVecNode::buildInterpreter(SeInterpreter* interpreter) const
     return loc;
 }
 
-int SeExprBinaryOpNode::buildInterpreter(SeInterpreter* interpreter) const
+int ExprBinaryOpNode::buildInterpreter(Interpreter* interpreter) const
 {
-    const SeExprNode* child0=child(0),*child1=child(1);
+    const ExprNode* child0=child(0),*child1=child(1);
     int dim0=child0->type().dim(),dim1=child1->type().dim(),dimout=type().dim(); 
     int op0=child0->buildInterpreter(interpreter);
     int op1=child1->buildInterpreter(interpreter);
@@ -463,9 +446,9 @@ int SeExprBinaryOpNode::buildInterpreter(SeInterpreter* interpreter) const
     return op2;
 }
 
-int SeExprUnaryOpNode::buildInterpreter(SeInterpreter* interpreter) const
+int ExprUnaryOpNode::buildInterpreter(Interpreter* interpreter) const
 {
-    const SeExprNode* child0=child(0);
+    const ExprNode* child0=child(0);
     int dimout=type().dim(); 
     int op0=child0->buildInterpreter(interpreter);
 
@@ -483,9 +466,9 @@ int SeExprUnaryOpNode::buildInterpreter(SeInterpreter* interpreter) const
     return op1;
 }
 
-int SeExprSubscriptNode::buildInterpreter(SeInterpreter* interpreter) const
+int ExprSubscriptNode::buildInterpreter(Interpreter* interpreter) const
 {
-    const SeExprNode* child0=child(0),*child1=child(1);
+    const ExprNode* child0=child(0),*child1=child(1);
     int dimin=child0->type().dim();
     int op0=child0->buildInterpreter(interpreter);
     int op1=child1->buildInterpreter(interpreter);
@@ -499,19 +482,19 @@ int SeExprSubscriptNode::buildInterpreter(SeInterpreter* interpreter) const
     return op2;
 }
 
-int SeExprVarNode::buildInterpreter(SeInterpreter* interpreter) const
+int ExprVarNode::buildInterpreter(Interpreter* interpreter) const
 {
                     std::cerr<<"localvar of varnode "<<localVar()<<std::endl;
 
-    if(const SeExprLocalVar* var=_localVar){
+    if(const ExprLocalVar* var=_localVar){
         std::cerr<<"before phi we are "<<var<<std::endl;
-        if(const SeExprLocalVar* phi=var->getPhi()) var=phi;
+        if(const ExprLocalVar* phi=var->getPhi()) var=phi;
         std::cerr<<"after phi we are "<<var<<std::endl;
-        SeInterpreter::VarToLoc::iterator i=interpreter->varToLoc.find(var);
+        Interpreter::VarToLoc::iterator i=interpreter->varToLoc.find(var);
         if(i!=interpreter->varToLoc.end()) return i->second;
         assert(false);
-    }else if(const SeExprVarRef* var=_var){
-        SeExprType type=var->type();
+    }else if(const ExprVarRef* var=_var){
+        ExprType type=var->type();
         int varRefLoc=interpreter->allocPtr();
         int destLoc=-1;
         if(type.isFP()){
@@ -530,13 +513,13 @@ int SeExprVarNode::buildInterpreter(SeInterpreter* interpreter) const
     return -1;
 }
 
-int SeExprAssignNode::buildInterpreter(SeInterpreter* interpreter) const
+int ExprAssignNode::buildInterpreter(Interpreter* interpreter) const
 {
-    const SeExprLocalVar* var=_localVar;
-    if(const SeExprLocalVar* phi=var->getPhi()) var=phi;
-    SeInterpreter::VarToLoc::iterator i=interpreter->varToLoc.find(var);
+    const ExprLocalVar* var=_localVar;
+    if(const ExprLocalVar* phi=var->getPhi()) var=phi;
+    Interpreter::VarToLoc::iterator i=interpreter->varToLoc.find(var);
 
-    SeExprType child0Type=child(0)->type();
+    ExprType child0Type=child(0)->type();
     if(child0Type.isFP()){
         int dimout=child0Type.dim();
         int loc=-1;
@@ -568,7 +551,7 @@ int SeExprAssignNode::buildInterpreter(SeInterpreter* interpreter) const
     return -1;
 }
 
-int SeExprIfThenElseNode::buildInterpreter(SeInterpreter *interpreter) const
+int ExprIfThenElseNode::buildInterpreter(Interpreter *interpreter) const
 {
     int condop=child(0)->buildInterpreter(interpreter);
     int basePC=interpreter->nextPC();
@@ -594,9 +577,9 @@ int SeExprIfThenElseNode::buildInterpreter(SeInterpreter *interpreter) const
     return -1;
 }
 
-int SeExprCompareNode::buildInterpreter(SeInterpreter *interpreter) const
+int ExprCompareNode::buildInterpreter(Interpreter *interpreter) const
 {
-    const SeExprNode* child0=child(0),*child1=child(1);
+    const ExprNode* child0=child(0),*child1=child(1);
     assert(type().dim()==1 && type().isFP());
     int op0=child0->buildInterpreter(interpreter);
     int op1=child1->buildInterpreter(interpreter);
@@ -619,13 +602,13 @@ int SeExprCompareNode::buildInterpreter(SeInterpreter *interpreter) const
 
 
 int
-SeExprPrototypeNode::buildInterpreter(SeInterpreter* interpreter) const
+ExprPrototypeNode::buildInterpreter(Interpreter* interpreter) const
 {
     // set up parents
     _interpreterOps.clear();
     for(int c=0;c<numChildren();c++){
-        if(const SeExprVarNode* childVarNode=dynamic_cast<const SeExprVarNode*>(child(c))){
-            SeExprType childType = childVarNode->type();
+        if(const ExprVarNode* childVarNode=dynamic_cast<const ExprVarNode*>(child(c))){
+            ExprType childType = childVarNode->type();
             if(childType.isFP()){
                 std::cerr<<"localvar of prototype "<<childVarNode->localVar()<<std::endl;
                 std::cerr<<"phi "<<childVarNode->localVar()->getPhi()<<std::endl;
@@ -641,11 +624,12 @@ SeExprPrototypeNode::buildInterpreter(SeInterpreter* interpreter) const
         // make sure we have a slot in our global activation record for the variables!
 
     }
+    return 0;
 }
 
-int SeExprCompareEqNode::buildInterpreter(SeInterpreter* interpreter) const
+int ExprCompareEqNode::buildInterpreter(Interpreter* interpreter) const
 {
-    const SeExprNode* child0=child(0),*child1=child(1);
+    const ExprNode* child0=child(0),*child1=child(1);
     int op0=child0->buildInterpreter(interpreter);
     int op1=child1->buildInterpreter(interpreter);
 
@@ -680,7 +664,7 @@ int SeExprCompareEqNode::buildInterpreter(SeInterpreter* interpreter) const
     return op2;
 }
 
-int SeExprCondNode::buildInterpreter(SeInterpreter *interpreter) const
+int ExprCondNode::buildInterpreter(Interpreter *interpreter) const
 {
     int opOut=-1;
     // TODO: handle strings!
@@ -701,6 +685,8 @@ int SeExprCondNode::buildInterpreter(SeInterpreter *interpreter) const
     else assert(false);
     interpreter->addOperand(op1);
     int dataOutTrue=interpreter->addOperand(-1);
+    interpreter->endOp(false);
+
     // jump past false way of working
     interpreter->addOp(JmpRelative::f);
     int destEnd=interpreter->addOperand(0);
@@ -716,7 +702,7 @@ int SeExprCondNode::buildInterpreter(SeInterpreter *interpreter) const
     else assert(false);
     interpreter->addOperand(op2);
     int dataOutFalse=interpreter->addOperand(-1);
-    interpreter->endOp();
+    interpreter->endOp(false);
 
     // patch up relative jumps
     interpreter->opData[destFalse]=child2PC-basePC;
@@ -734,20 +720,22 @@ int SeExprCondNode::buildInterpreter(SeInterpreter *interpreter) const
     return opOut;
 }
 
-int SeExprBlockNode::buildInterpreter(SeInterpreter *interpreter) const
+int ExprBlockNode::buildInterpreter(Interpreter *interpreter) const
 {
     assert(numChildren()==2);
     child(0)->buildInterpreter(interpreter);
     return child(1)->buildInterpreter(interpreter);
 }
 
-int SeExprModuleNode::buildInterpreter(SeInterpreter *interpreter) const
+int ExprModuleNode::buildInterpreter(Interpreter *interpreter) const
 {
     int lastIdx=0;
-    int basePC=0;
     for(int c=0;c<numChildren();c++){
         if(c==numChildren()-1) interpreter->setPCStart(interpreter->nextPC());
         lastIdx=child(c)->buildInterpreter(interpreter);
     }
     return lastIdx;
 }
+
+}
+
