@@ -80,7 +80,7 @@ public:
         :text(bufIn),buf(text.c_str()),curr(buf)
         {}
         // read current character
-        char operator()() const{return *curr;}
+        char operator*() const{return *curr;}
         // Move character pointer backward
         void operator--(){
             // TODO: if you hit the edge this is wrong!
@@ -176,10 +176,10 @@ public:
         while(ateCommentsOrWhitespace){
             ateCommentsOrWhitespace=false;
             // skip whitespace
-            for(;buffer() == ' ' || buffer() == '\t' || buffer() == '\n'; ++buffer) ateCommentsOrWhitespace=true;
+            for(;*buffer == ' ' || *buffer == '\t' || *buffer == '\n'; ++buffer) ateCommentsOrWhitespace=true;
             // eat comments
-            if(buffer() == '#'){
-                while(buffer() != '\n' && buffer() != '\0') ++buffer;
+            if(*buffer == '#'){
+                while(*buffer != '\n' && *buffer != '\0') ++buffer;
                 ++buffer;
                 ateCommentsOrWhitespace=true;
             }
@@ -187,62 +187,62 @@ public:
         buffer.mark();
 
         // Look for idents and reserved words
-        if(buffer()=='$' || isalpha(buffer())){
+        if(*buffer=='$' || isalpha(*buffer)){
             std::string ident;
-            //ident.push_back(buffer());
-            if(buffer()=='$') ++buffer;
-            for(;isalpha(buffer()) || buffer() == '_' || isdigit(buffer());++buffer) ident.push_back(buffer());
+            //ident.push_back(*buffer);
+            if(*buffer=='$') ++buffer;
+            for(;isalpha(*buffer) || *buffer == '_' || isdigit(*buffer);++buffer) ident.push_back(*buffer);
             auto it=reservedWords.find(ident);
             return it==reservedWords.end() ? IDENT : it->second;
         }
 
         // Look for quoted strings.
-        if(buffer()=='"' || buffer() == '\''){
+        if(*buffer=='"' || *buffer == '\''){
             std::string s;
             ++buffer;
             for(;;++buffer){
-                if(buffer()=='\\'){
+                if(*buffer=='\\'){
                     ++buffer;
-                    s.push_back(buffer());
-                }else if(buffer()=='\n' || buffer()=='\0'){
+                    s.push_back(*buffer);
+                }else if(*buffer=='\n' || *buffer=='\0'){
                     throw std::runtime_error("unterminated string at '"+s+"'");
                     return END_OF_BUFFER;
-                }else if(buffer()=='"' || buffer()=='\''){
+                }else if(*buffer=='"' || *buffer=='\''){
                     ++buffer;
                     break;
                 }else{
-                    s.push_back(buffer());
+                    s.push_back(*buffer);
                 }
             }
             return STRING;
 
         }
         // Look for numbers
-        if(isdigit(buffer()) || buffer()=='.'){
+        if(isdigit(*buffer) || *buffer=='.'){
             recognizeNumber();
             return NUM;
         }
 
         // next operators
-        char firstChar = buffer();
+        char firstChar = *buffer;
         ++buffer;
         switch(firstChar){
-            case '|': if(buffer() == '|'){++buffer;return OR;}break;
-            case '&': if(buffer() == '&'){++buffer;return AND;}break;
-            case '=': if(buffer()=='='){++buffer;return EQUALS;} else return ASSIGN;break;
-            case '!': if(buffer()=='='){++buffer;return NOT_EQUALS;} else return NOT;break;
-            case '>': if(buffer()=='='){++buffer;return GREATER_EQUAL;} else return GREATER;break;
-            case '<': if(buffer()=='='){++buffer;return LESS_EQUAL;} else return LESS;break;
-            case '+': if(buffer()=='='){++buffer;return PLUS_EQUAL;} else return PLUS;break;
+            case '|': if(*buffer == '|'){++buffer;return OR;}break;
+            case '&': if(*buffer == '&'){++buffer;return AND;}break;
+            case '=': if(*buffer=='='){++buffer;return EQUALS;} else return ASSIGN;break;
+            case '!': if(*buffer=='='){++buffer;return NOT_EQUALS;} else return NOT;break;
+            case '>': if(*buffer=='='){++buffer;return GREATER_EQUAL;} else return GREATER;break;
+            case '<': if(*buffer=='='){++buffer;return LESS_EQUAL;} else return LESS;break;
+            case '+': if(*buffer=='='){++buffer;return PLUS_EQUAL;} else return PLUS;break;
             case '-': 
-                if(buffer()=='='){++buffer;return MINUS_EQUAL;}
-                if(buffer()=='>'){++buffer;return ARROW;}               
+                if(*buffer=='='){++buffer;return MINUS_EQUAL;}
+                if(*buffer=='>'){++buffer;return ARROW;}               
                 else return MINUS;
                 break;
-            case '*': if(buffer()=='='){++buffer;return TIMES_EQUAL;} else return TIMES;break;
-            case '/': if(buffer()=='='){++buffer;return DIVIDE_EQUAL;} else return DIVIDE;break;
-            case '%': if(buffer()=='='){++buffer;return MOD_EQUAL;} else return MOD;break;
-            case '^': if(buffer()=='='){++buffer;return POWER_EQUAL;} else return POWER;break;
+            case '*': if(*buffer=='='){++buffer;return TIMES_EQUAL;} else return TIMES;break;
+            case '/': if(*buffer=='='){++buffer;return DIVIDE_EQUAL;} else return DIVIDE;break;
+            case '%': if(*buffer=='='){++buffer;return MOD_EQUAL;} else return MOD;break;
+            case '^': if(*buffer=='='){++buffer;return POWER_EQUAL;} else return POWER;break;
             case '~': return TWIDLE;break;
             case '[': return BRACKET_OPEN;break;
             case ']': return BRACKET_CLOSE;break;
@@ -257,14 +257,14 @@ public:
 
         }
 
-        if(buffer()=='\0') return END_OF_BUFFER;
+        if(*buffer=='\0') return END_OF_BUFFER;
         throw std::runtime_error("Invalid token");
     }
 
     int readDigits(std::string& numBuf){
         int count=0;
-        for(;isdigit(buffer());++buffer,count++) 
-            numBuf.push_back(buffer());
+        for(;isdigit(*buffer);++buffer,count++) 
+            numBuf.push_back(*buffer);
         return count;
     }
 
@@ -273,16 +273,16 @@ public:
         std::string numBuf;
         numBuf.reserve(32);
         readDigits(numBuf);
-        if(buffer() == '.'){
-            numBuf.push_back(buffer());
+        if(*buffer == '.'){
+            numBuf.push_back(*buffer);
             ++buffer;
             readDigits(numBuf);
         }
-        if(buffer() == 'e' || buffer() == 'E'){
-            numBuf.push_back(buffer());
+        if(*buffer == 'e' || *buffer == 'E'){
+            numBuf.push_back(*buffer);
             ++buffer; //skip past e
-            if(buffer()=='+' || buffer()=='-'){
-                numBuf.push_back(buffer());
+            if(*buffer=='+' || *buffer=='-'){
+                numBuf.push_back(*buffer);
                 ++buffer;
             }
             int count=readDigits(numBuf);
@@ -293,9 +293,9 @@ public:
     }
 
     Token parseOperator(char primary, Token primaryToken, char secondary, Token secondaryToken){
-        if(buffer() == primary){
+        if(*buffer == primary){
             ++buffer;
-            if(buffer() == secondary) return secondaryToken;
+            if(*buffer == secondary) return secondaryToken;
             --buffer;
             return primaryToken;
         }

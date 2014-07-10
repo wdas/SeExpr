@@ -626,6 +626,7 @@ private:
 
 /// Policy which provides all the AST Types for the parser.
 class SeExprNodePolicy{
+    public:
     typedef SeExprNode Base;
     typedef std::unique_ptr<Base*> Ptr;
 

@@ -1,4 +1,5 @@
 #include "SeExprParse.h"
+#include "SeExprNode.h"
 #include <cassert>
 #include <vector>
 #include <memory>
@@ -146,9 +147,10 @@ public:
     }
 
     NodePtr parse(){
-        std::cerr<<"we!"<<std::endl;
+        // prime the token stream from the scanner
         getToken(); 
         getToken();
+        // begin parsing
         NodePtr tree = module();
         tree->print(std::cout);
         return tree;
@@ -466,7 +468,7 @@ public:
     }
 
     ASTPtr assignBlock(){
-        ASTPtr assigns(new typename Policy::Node());
+        ASTPtr assigns(new typename Policy::Node()) ;
         ensureAndGetToken(token == Lexer::BRACE_OPEN, "Expected opening braces after if condition");
         while(token == Lexer::IDENT){
             assigns->addChild(assign());
@@ -513,8 +515,10 @@ int main(int argc,char*argv[])
         std::istreambuf_iterator<char>());
     std::cerr<<"PARSING! '"<<content<<"'"<<std::endl;;
     SeParser<ASTPolicy> parser(content);
+    SeParser<SeExprNodePolicy> parser2(content);
     try{
         parser.parse();
+        parser2.parse();
     }catch(const ParseError& e){
         std::cerr<<"parse error: "<<e._errorStr<<std::endl;
     }
