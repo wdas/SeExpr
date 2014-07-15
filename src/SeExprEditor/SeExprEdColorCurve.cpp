@@ -391,9 +391,8 @@ SeExprEdColorCurve::SeExprEdColorCurve(QWidget* parent, QString pLabel, QString 
     _selPosEdit = new QLineEdit;
     QDoubleValidator *posValidator = new QDoubleValidator(0.0,1.0,6,_selPosEdit);
     _selPosEdit->setValidator(posValidator);
-    _selPosEdit->setFixedWidth(38);
+    _selPosEdit->setFixedWidth(50);
     _selPosEdit->setFixedHeight(20);
-    selPosLayout->addStretch(50);
     QLabel *posLabel;
     if (pLabel.isEmpty()) {
         posLabel = new QLabel("Selected Position:  ");
@@ -401,6 +400,7 @@ SeExprEdColorCurve::SeExprEdColorCurve(QWidget* parent, QString pLabel, QString 
         posLabel = new QLabel(pLabel);
     }
     selPosLayout->addWidget(posLabel);
+    selPosLayout->addStretch(50);
     selPosLayout->addWidget(_selPosEdit);
 
     QWidget *selVal = new QWidget;
@@ -409,9 +409,8 @@ SeExprEdColorCurve::SeExprEdColorCurve(QWidget* parent, QString pLabel, QString 
     selValLayout->setMargin(1);
     selVal->setLayout(selValLayout);
     _selValEdit = new SeExprEdCSwatchFrame(SeVec3d(.5));
-    _selValEdit->setFixedWidth(38);
+    _selValEdit->setFixedWidth(50);
     _selValEdit->setFixedHeight(20);
-    selValLayout->addStretch(50);
     QLabel *valLabel;
     if (vLabel.isEmpty()) {
         valLabel = new QLabel("Selected Color:  ");
@@ -419,6 +418,7 @@ SeExprEdColorCurve::SeExprEdColorCurve(QWidget* parent, QString pLabel, QString 
         valLabel = new QLabel(vLabel);
     }
     selValLayout->addWidget(valLabel);
+    selValLayout->addStretch(50);
     selValLayout->addWidget(_selValEdit);
 
     _interpComboBox = new QComboBox;
@@ -428,7 +428,7 @@ SeExprEdColorCurve::SeExprEdColorCurve(QWidget* parent, QString pLabel, QString 
     _interpComboBox->addItem("Spline");
     _interpComboBox->addItem("MSpline");
     _interpComboBox->setCurrentIndex(4);
-    _interpComboBox->setFixedWidth(70);
+    _interpComboBox->setFixedWidth(80);
     _interpComboBox->setFixedHeight(20);
 
     editsLayout->addWidget(selPos);
