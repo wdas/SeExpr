@@ -267,17 +267,17 @@ SeExprEdControl::SeExprEdControl(int id,SeExprEdEditable* editable,bool showColo
     :_id(id),_updating(false),_editable(editable)
 {
     hbox=new QHBoxLayout(this);
-    hbox->setSpacing(2);
-    hbox->setMargin(0);
+    hbox->setSpacing(5);
+    hbox->setMargin(2);
 
     _colorLinkCB=new QCheckBox(this);
-    _colorLinkCB->setFixedWidth(14);
+    _colorLinkCB->setFixedWidth(16);
     _colorLinkCB->setFocusPolicy(Qt::NoFocus);
     connect(_colorLinkCB,SIGNAL(stateChanged(int)),this,SLOT(linkStateChange(int)));
     hbox->addWidget(_colorLinkCB);
 
     _label = new QLabel(QString("<b>")+editable->name.c_str()+"</b>");
-    _label->setFixedWidth(72);
+    _label->setFixedWidth(70);
     _label->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
     _label->setIndent(2);
     _label->setAutoFillBackground(true);

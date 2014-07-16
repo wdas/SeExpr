@@ -147,6 +147,11 @@ ImageEditorDialog::ImageEditorDialog(QWidget *parent)
     QPixmap imagePixmap = QPixmap::fromImage(image);
     imagePixmap = imagePixmap.scaled(256, 256, Qt::KeepAspectRatio);
     _imageLabel->setPixmap(imagePixmap);
+    QWidget* imagePreviewWidget=new QWidget();
+    QHBoxLayout* imagePreviewLayout=new QHBoxLayout(imagePreviewWidget);
+    imagePreviewLayout->addStretch();
+    imagePreviewLayout->addWidget(_imageLabel);
+    imagePreviewLayout->addStretch();
 
     // Expression controls
     SeExprEdControlCollection *controls = new SeExprEdControlCollection();
@@ -192,7 +197,8 @@ ImageEditorDialog::ImageEditorDialog(QWidget *parent)
     QVBoxLayout *leftLayout=new QVBoxLayout();
     leftLayout->setContentsMargins(0,0,0,0);
     leftWidget->setLayout(leftLayout);
-    leftLayout->addWidget(_imageLabel);
+    // leftLayout->addWidget(_imageLabel);
+    leftLayout->addWidget(imagePreviewWidget);
     leftLayout->addWidget(scrollArea,1);
 
     QWidget *bottomWidget=new QWidget();
