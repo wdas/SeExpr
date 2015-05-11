@@ -205,7 +205,7 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
     }
     static const char* remap_docstring=
         "remap(float x, float\n"
-        "source, float range, float falloff, int interp)\nGeneral remapping function.\n"
+        "source, float range, float falloff, float interp)\nGeneral remapping function.\n"
         "When x is within +/- <i>range</i> of source, the result is one.\n"
         "The result falls to zero beyond that range over <i>falloff</i> distance.\n"
         "The falloff shape is controlled by <i>interp</i>. Numeric values\n"
@@ -824,7 +824,7 @@ static const char* vnoise_docstring=
 	    for (double j = -1; j <= 1; j++) {
 		for (double k = -1; k <= 1; k++, n++) {
 		    SeVec3d testcell = cell + SeVec3d(i,j,k);
-		    data.points[n] = testcell + jitter * ccellnoise(testcell - SeVec3d(.5));
+		    data.points[n] = testcell + jitter * (ccellnoise(testcell) - SeVec3d(.5));
 		}
 	    }
 	}
@@ -1239,10 +1239,12 @@ static const char* vnoise_docstring=
 
     double choose(int n, double* params)
     {
-	if (n < 3) return 0;
-	double key = params[0];
-	int nvals = n - 1;
-	return params[1+int(clamp(key * nvals, 0, nvals-1))];
+        if (n < 3) return 0;
+        double key = params[0];
+        // NaN protection
+        if (key != key) return 0;
+        int nvals = n - 1;
+        return params[1+int(clamp(key * nvals, 0, nvals-1))];
     }
     static const char* choose_docstring=
         "float choose(float index,float choice1, float choice2, [...])\n"
@@ -1253,6 +1255,8 @@ static const char* vnoise_docstring=
     {
 	if (n < 5) return 0;
 	double key = params[0];
+    // NaN protection
+    if (key != key) return 0;
 	int nvals = (n - 1) / 2; // nweights = nvals
 	
 	// build cutoff points based on weights

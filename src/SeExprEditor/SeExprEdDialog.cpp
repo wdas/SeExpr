@@ -30,10 +30,6 @@
 #include <iostream>
 #include <fstream>
 
-#ifdef SEEXPR_USE_PF
-#   include <pathfinder/pathfinder.h>
-#endif
-
 #define P3D_CONFIG_ENVVAR "P3D_CONFIG_PATH"
 
 
@@ -111,9 +107,9 @@ SeExprEdDialog::SeExprEdDialog(QWidget* parent)
 
     // make button bar
     editor=new SeExprEditor(this,controls);
-    connect(editor,SIGNAL(apply()),SLOT(applyExpression()));
-    connect(editor,SIGNAL(preview()),SLOT(applyExpression()));
-    connect(grapher,SIGNAL(preview()),SLOT(applyExpression()));
+    connect(editor,SIGNAL(apply()),SLOT(verifiedApply()));
+    connect(editor,SIGNAL(preview()),SLOT(previewExpression()));
+    connect(grapher,SIGNAL(preview()),SLOT(previewExpression()));
     bottomLayout->addWidget(editor);
 
     // make expression library browser
@@ -138,7 +134,7 @@ SeExprEdDialog::SeExprEdDialog(QWidget* parent)
     setupHelp(topTabWidget);
 
     // connect buttons
-    connect(previewButton,SIGNAL(clicked()),SLOT(applyExpression()));
+    connect(previewButton,SIGNAL(clicked()),SLOT(previewExpression()));
     connect(clearButton, SIGNAL(clicked()), SLOT(clearExpression()));
     connect(saveButton, SIGNAL(clicked()), browser,SLOT(saveExpression()));
     connect(saveAsButton, SIGNAL(clicked()), browser,SLOT(saveExpressionAs()));
@@ -157,6 +153,14 @@ void SeExprEdDialog::_showEditor()
     controls->showEditor(_currentEditorIdx);
 }
 
+void SeExprEdDialog::show()
+{
+    // populate the expressions
+    browser->getExpressionDirs();
+    browser->expandAll();
+    QDialog::show();
+}
+
 int SeExprEdDialog::exec()
 {
     // populate the expressions
@@ -169,6 +173,18 @@ void SeExprEdDialog::keyPressEvent(QKeyEvent* event)
 {
     if(event->key()==Qt::Key_Escape) return;
     return QDialog::keyPressEvent(event);
+}
+
+void SeExprEdDialog::closeEvent(QCloseEvent* event)
+{
+    emit dialogClosed();
+    QDialog::closeEvent(event);
+}
+
+void SeExprEdDialog::reject()
+{
+    emit dialogClosed();
+    QDialog::reject();
 }
 
 void SeExprEdDialog::verifiedApply()
@@ -196,6 +212,8 @@ void SeExprEdDialog::verifiedAccept()
 {
     applyExpression();
     if(grapher->expr.isValid()){
+        emit expressionApplied();
+        emit dialogClosed();
         accept();
     }else{
         QMessageBox msgBox;
@@ -205,7 +223,11 @@ void SeExprEdDialog::verifiedAccept()
         msgBox.addButton("Cancel",QMessageBox::AcceptRole);
         int ret = msgBox.exec();
         Q_UNUSED(ret);
-        if(msgBox.clickedButton()==okButton) accept();
+        if(msgBox.clickedButton()==okButton) {
+            emit expressionApplied();
+            emit dialogClosed();
+            accept();
+        }
     }
 }
 
@@ -214,20 +236,12 @@ void SeExprEdDialog::setupHelp(QTabWidget* tab)
     QWidget* browserspace = new QWidget(tab);
     helpBrowser = new QTextBrowser(browserspace);
     tab->addTab(browserspace, "Help");
-#ifdef SEEXPR_USE_PF
-    // TODO: Janet fix this!
-    char *path = pf_find_first("share/doc/SeExpr/SeExpressions.html");
-#else
-    char *path = (char *)"/usr/local/share/doc/SeExpr/SeExpressions.html";
-#endif
-    if (path) {
-        QString sheet="body {background-color: #eeeeee; color: #000000;} \na {color: #3333ff; text-decoration: none;}\n";
-        helpBrowser->document()->setDefaultStyleSheet(sheet);
-        helpBrowser->setSource(QString(path));
-#ifdef SEEXPR_USE_PF
-        free(path);
-#endif
-    }
+
+    // Locate help docs relative to location of the app itself
+    QString helpDoc = QCoreApplication::applicationDirPath() + "/../share/doc/SeExpr/SeExpressions.html";
+    QString sheet="body {background-color: #eeeeee; color: #000000;} \na {color: #3333ff; text-decoration: none;}\n";
+    helpBrowser->document()->setDefaultStyleSheet(sheet);
+    helpBrowser->setSource(helpDoc);
 
     QPushButton* backPb = new QPushButton("Back");
     //backPb->setIcon(QApplication::style()->standardIcon(QStyle::SP_ArrowLeft));
@@ -283,6 +297,12 @@ void SeExprEdDialog::findNextInHelp()
 
 void SeExprEdDialog::findPrevInHelp(){
     findHelper(QTextDocument::FindBackward);
+}
+
+void SeExprEdDialog::previewExpression()
+{
+    applyExpression();
+    emit preview();
 }
 
 void SeExprEdDialog::applyExpression()

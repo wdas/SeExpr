@@ -143,7 +143,11 @@ ImageEditorDialog::ImageEditorDialog(QWidget *parent)
     _imageLabel = new QLabel();
     _imageLabel->setFixedSize(256,256);
     _imageLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter );
-    QImage image("./src/doc/html/seexprlogo.png"); // just a fun default
+
+    // Locate logo image relative to location of the app itself
+    QString imageFile = QCoreApplication::applicationDirPath() + "/../share/doc/SeExpr/seexprlogo.png";
+    QImage image(imageFile); // just a fun default
+
     QPixmap imagePixmap = QPixmap::fromImage(image);
     imagePixmap = imagePixmap.scaled(256, 256, Qt::KeepAspectRatio);
     _imageLabel->setPixmap(imagePixmap);
@@ -197,7 +201,6 @@ ImageEditorDialog::ImageEditorDialog(QWidget *parent)
     QVBoxLayout *leftLayout=new QVBoxLayout();
     leftLayout->setContentsMargins(0,0,0,0);
     leftWidget->setLayout(leftLayout);
-    // leftLayout->addWidget(_imageLabel);
     leftLayout->addWidget(imagePreviewWidget);
     leftLayout->addWidget(scrollArea,1);
 

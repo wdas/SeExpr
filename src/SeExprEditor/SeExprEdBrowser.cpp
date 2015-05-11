@@ -263,7 +263,8 @@ SeExprEdBrowser::~SeExprEdBrowser()
 SeExprEdBrowser::SeExprEdBrowser(QWidget* parent, SeExprEditor* editor)
     :QWidget(parent),editor(editor),
      _context(""),
-     _searchPath("")
+     _searchPath(""),
+     _applyOnSelect(true)
 {
     QVBoxLayout* rootLayout = new QVBoxLayout;
     rootLayout->setMargin(0);
@@ -339,7 +340,7 @@ void SeExprEdBrowser::handleSelection(const QModelIndex& current,const QModelInd
         if(path.endsWith(".se")){
             std::ifstream file(path.toStdString().c_str());
             std::string fileContents((std::istreambuf_iterator<char>(file)),std::istreambuf_iterator<char>());
-            editor->setExpr(fileContents,true);
+            editor->setExpr(fileContents,_applyOnSelect);
         }
     }
 }

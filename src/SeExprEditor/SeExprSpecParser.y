@@ -29,6 +29,7 @@
 #define UNUSED(x) (void)(x)
 #endif
 #include "SePlatform.h"
+#include "SeMutex.h"
 #include "SeExprSpecType.h"
 #include "SeExprEdEditable.h"
 
@@ -60,7 +61,7 @@ void yy_delete_buffer(yy_buffer_state*);
 // temporary to the parse... all pointers deleted at end of parse
 static std::vector<SeExprSpecNode*> specNodes; 
 /// Remember the spec node, so we can delete it later
-SeExprSpecNode* remember(SeExprSpecNode* node)
+static SeExprSpecNode* remember(SeExprSpecNode* node)
 {specNodes.push_back(node);return node;}
 
 
@@ -92,14 +93,14 @@ static SeExprSpecNode* ParseResult; // must set result here since yyparse can't 
 
 
 /// Remember that there is an assignment to this variable (For autocomplete)
-void registerVariable(const char* var)
+static void specRegisterVariable(const char* var)
 {
     variables->push_back(var);
 }
 
 /// Variable Assignment/String literal should be turned into an editable
 /// an editable is the data part of a control (it's model essentially)
-void registerEditable(const char* var,SeExprSpecNode* node)
+static void specRegisterEditable(const char* var,SeExprSpecNode* node)
 {
     //std::cerr<<"we have editable var "<<var<<std::endl;
     if(!node){
@@ -282,8 +283,8 @@ assigns:
 assign:
       ifthenelse		{ $$ = 0; }
     | VAR '=' e ';'		{ 
-        registerVariable($1);
-        registerEditable($1,$3);
+        specRegisterVariable($1);
+        specRegisterEditable($1,$3);
       }
     | VAR AddEq e ';'           { $$ = 0; }
     | VAR SubEq e ';'           { $$ = 0; }
@@ -292,8 +293,8 @@ assign:
     | VAR ExpEq e ';'           { $$ = 0; }
     | VAR ModEq e ';'           { $$ = 0; }
     | NAME '=' e ';'		{ 
-        registerVariable($1);
-        registerEditable($1,$3);
+        specRegisterVariable($1);
+        specRegisterEditable($1,$3);
       }
     | NAME AddEq e ';'          {  $$ = 0; }
     | NAME SubEq e ';'          {  $$ = 0; }
@@ -364,7 +365,7 @@ e:
             if(SeExprSpecListNode* list=dynamic_cast<SeExprSpecListNode*>($3)){
                 for(size_t i=0;i<list->nodes.size();i++){
                     if(SeExprSpecStringNode* str=dynamic_cast<SeExprSpecStringNode*>(list->nodes[i])){
-                        registerEditable("<UNKNOWN>",str);
+                        specRegisterEditable("<UNKNOWN>",str);
                     }
                 }
             }
@@ -409,7 +410,7 @@ arg:
       e				{ $$ = $1;}
     | STR			{ 
         SeExprSpecStringNode* str=new SeExprSpecStringNode(@$.first_column,@$.last_column,$1);
-        //registerEditable("<UNKNOWN>",str);
+        //specRegisterEditable("<UNKNOWN>",str);
         // TODO: move string stuff out
         $$ = remember(str);
       }
@@ -453,7 +454,7 @@ static void yyerror(const char* /*msg*/)
     if (e != end) ParseError += "...";
 }
 
-extern void resetCounters(std::vector<std::pair<int,int> >& comments);
+extern void specResetCounters(std::vector<std::pair<int,int> >& comments);
 
 
 /* CallParser - This is our entrypoint from the rest of the expr library. 
@@ -462,15 +463,16 @@ extern void resetCounters(std::vector<std::pair<int,int> >& comments);
    along.
  */
 
-//static Mutex mutex;
+static SeExprInternal::Mutex mutex;
 
 /// Main entry point to parser
-bool SeExprParse(std::vector<SeExprEdEditable*>& outputEditables,
+bool SeExprSpecParse(std::vector<SeExprEdEditable*>& outputEditables,
     std::vector<std::string>& outputVariables,
     std::vector<std::pair<int,int> >& comments,
     const char* str)
 {
     // TODO: this needs a mutex!
+    SeExprInternal::AutoMutex locker(mutex);
 
     /// Make inputs/outputs accessible to parser actions
     editables=&outputEditables;
@@ -478,7 +480,7 @@ bool SeExprParse(std::vector<SeExprEdEditable*>& outputEditables,
     ParseStr=str;
 
     // setup and startup parser
-    resetCounters(comments); // reset lineNumber and columnNumber in scanner
+    specResetCounters(comments); // reset lineNumber and columnNumber in scanner
     yy_buffer_state* buffer = yy_scan_string(str); // setup lexer
     ParseResult = 0;
     int resultCode = yyparse(); // parser (don't care if it is a parse error)
