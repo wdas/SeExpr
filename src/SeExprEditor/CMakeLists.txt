@@ -44,8 +44,8 @@ find_package(PythonLibs)
 find_package(OpenGL)
 find_package(Qt4 COMPONENTS QtCore QtGui QtOpenGL)
 
-set(PYQT4_PATH "/usr/share/sip/PyQt4")               # for qt sip files
-set(SIP_PATH "/usr/include/python${PYTHON_VERSION}") # for sip.h
+set(PYQT4_PATH /usr/share/sip/PyQt4)               # for qt sip files
+set(SIP_PATH /usr/include/python${PYTHON_VERSION}) # for sip.h
 
 if(QT4_FOUND)
 
@@ -53,22 +53,18 @@ if(QT4_FOUND)
                        editor_parser_cpp)
 
     set(SeExprEd_MOC_HDRS SeExprEdBrowser.h SeExprEdColorCurve.h
-        #SeExprEdColorSwatchWidget.h
-        SeExprEdControlCollection.h
+        SeExprEdColorSwatchWidget.h SeExprEdControlCollection.h
         SeExprEdControl.h SeExprEdCurve.h SeExprEdDialog.h SeExprEditor.h
         SeExprEdFileDialog.h SeExprEdGrapher2d.h SeExprEdPopupDocumentation.h
-        SeExprEdShortEdit.h #SeExprEdDeepWater.h
-        )
+        SeExprEdShortEdit.h)
 
     set(SeExprEd_CPPS SeExprEdFileDialog.cpp SeExprEdControl.cpp
         SeExprEditor.cpp SeExpressionEditor.cpp SeExprEdShortEdit.cpp
-        SeExprEdCurve.cpp  SeExprEdColorCurve.cpp
-        #SeExprEdColorSwatchWidget.cpp
+        SeExprEdCurve.cpp  SeExprEdColorCurve.cpp SeExprEdColorSwatchWidget.cpp
         SeExprEdEditableExpression.cpp SeExprEdPopupDocumentation.cpp
         SeExprEdCompletionModel.cpp SeExprEdDialog.cpp
         SeExprEdControlCollection.cpp SeExprEdGrapher2d.cpp SeExprEdBrowser.cpp
-        SeExprEdExpression.cpp #SeExprEdDeepWater.cpp
-        )
+        SeExprEdExpression.cpp )
 
     qt4_wrap_cpp(SeExprEd_MOC_SRCS ${SeExprEd_MOC_HDRS})
 
@@ -104,7 +100,7 @@ ENDIF(WIN32)
     # Generate python module expreditor, using sip
 
     find_program(SIP_EXEC sip)
-    set(SIP_FLAGS "-t Qt_4_3_0")  # fix sip: QFileIconProvider is undefined
+    set(SIP_QT_TAG -t Qt_4_5_0)  # fix 'sip: QFileIconProvider is undefined'
 
     set(CMAKE_CXX_FLAGS "-std=c++0x")
     set(CMAKE_INSTALL_PYTHON "${CMAKE_INSTALL_PREFIX}/${PYTHON_SITE}/SeExpr/" )
@@ -117,9 +113,8 @@ ENDIF(WIN32)
                        COMMENT 'Processing SeExprEditor.sip'
                        COMMAND ${SIP_EXEC} -w -c .
                        -x VendorID -x PyQt_NoPrintRangeBug -x Py_v3
-                       -t Qt_4_3_0 # fix sip: QFileIconProvider is undefined
                        -t WS_X11 -g -j 1
-                       ${SIP_FLAGS}
+                       ${SIP_QT_TAG}
                        -I. -I${PYQT4_PATH} -I${SIP_PATH}
                        ${CMAKE_CURRENT_SOURCE_DIR}/SeExprEditor.sip
                        VERBATIM)

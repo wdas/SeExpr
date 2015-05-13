@@ -22,6 +22,7 @@
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QToolButton>
 #include <QtGui/QPushButton>
+#include <QtGui/QRadioButton>
 #include <QtGui/QFormLayout>
 #include <QtGui/QDialogButtonBox>
 #include <QtGui/QColorDialog>
@@ -72,16 +73,15 @@ SeExprEdControlCollection::~SeExprEdControlCollection()
         verticalLayout->setMargin(3);
         setLayout(verticalLayout);
         QHBoxLayout *horizontalLayout = new QHBoxLayout();
-        
+
         horizontalLayout->addWidget(new QLabel("Variable"));
         // TODO would be nice to unique this over multiple sessions
         variableName = new QLineEdit(QString("$var%1").arg(count++));
-        
+
         horizontalLayout->addWidget(variableName);
         verticalLayout->addLayout(horizontalLayout);
 
         tabWidget = new QTabWidget();
-
 
         // Curve
         {
@@ -103,19 +103,6 @@ SeExprEdControlCollection::~SeExprEdControlCollection()
             tabWidget->addTab(colorCurveTab, QString("Color Curve"));
         }
 
-        // Anim Curve
-        {
-            QWidget* curveTab = new QWidget();
-            QFormLayout* curveLayout = new QFormLayout(curveTab);
-            curveLayout->setWidget(0,QFormLayout::LabelRole,new QLabel("Lookup"));
-            curveLayout->setWidget(1,QFormLayout::LabelRole,new QLabel("Link"));
-            animCurveLookup=new QLineEdit("$frame");
-            animCurveLink=new QLineEdit("");
-            curveLayout->setWidget(0,QFormLayout::FieldRole,animCurveLookup);
-            curveLayout->setWidget(1,QFormLayout::FieldRole,animCurveLink);
-            tabWidget->addTab(curveTab, QString("AnimCurve"));
-        }
-
         // Integer
         {
             QWidget* intTab = new QWidget();
@@ -131,7 +118,7 @@ SeExprEdControlCollection::~SeExprEdControlCollection()
             intFormLayout->setWidget(2, QFormLayout::FieldRole, intMax);
             tabWidget->addTab(intTab, QString("Int"));
         }
-        
+
         // Float
         {
             QWidget* floatTab = new QWidget();
@@ -145,11 +132,11 @@ SeExprEdControlCollection::~SeExprEdControlCollection()
             floatFormLayout->setWidget(1, QFormLayout::FieldRole, floatMin);
             floatMax = new QLineEdit("1");
             floatFormLayout->setWidget(2, QFormLayout::FieldRole, floatMax);
-            
+
             tabWidget->addTab(floatTab, QString("Float"));
         }
 
-        // Float
+        // Vector
         {
             QWidget* vectorTab = new QWidget();
             QFormLayout* vectorFormLayout = new QFormLayout(vectorTab);
@@ -168,10 +155,10 @@ SeExprEdControlCollection::~SeExprEdControlCollection()
             vectorFormLayout->setWidget(1, QFormLayout::FieldRole, vectorMin);
             vectorMax = new QLineEdit("1");
             vectorFormLayout->setWidget(2, QFormLayout::FieldRole, vectorMax);
-            
+
             tabWidget->addTab(vectorTab, QString("Vector"));
         }
-        
+
         // Color
         {
             QWidget* colorTab = new QWidget();
@@ -190,6 +177,23 @@ SeExprEdControlCollection::~SeExprEdControlCollection()
             connect(colorWidget,SIGNAL(clicked()),this,SLOT(colorChooseClicked()));
         }
 
+        // Color Swatch
+        {
+            QWidget* swatchTab = new QWidget();
+            QFormLayout* swatchLayout = new QFormLayout(swatchTab);
+            swatchLookup=new QLineEdit("$u");
+            swatchLayout->setWidget(0,QFormLayout::LabelRole,new QLabel("Lookup"));
+            swatchLayout->setWidget(0,QFormLayout::FieldRole,swatchLookup);
+            rainbowPaletteBtn = new QRadioButton("Rainbow");
+            rainbowPaletteBtn->setChecked(true);
+            grayPaletteBtn = new QRadioButton("Shades of Gray");
+            swatchLayout->setWidget(1,QFormLayout::LabelRole,new QLabel("Colors"));
+            swatchLayout->setWidget(1,QFormLayout::FieldRole,rainbowPaletteBtn);
+            swatchLayout->setWidget(2,QFormLayout::LabelRole,new QLabel(""));
+            swatchLayout->setWidget(2,QFormLayout::FieldRole,grayPaletteBtn);
+            tabWidget->addTab(swatchTab, QString("Swatch"));
+        }
+
         // String literal
         {
             QWidget* stringTab = new QWidget();
@@ -200,7 +204,7 @@ SeExprEdControlCollection::~SeExprEdControlCollection()
             stringTypeWidget->addItem("directory");
             stringDefaultWidget=new QLineEdit();
             stringNameWidget=new QLineEdit("str1");
-            
+
             stringLayout->setWidget(0,QFormLayout::LabelRole,new QLabel("String Name"));
             stringLayout->setWidget(0,QFormLayout::FieldRole,stringNameWidget);
             stringLayout->setWidget(1,QFormLayout::LabelRole,new QLabel("String Type"));
@@ -211,18 +215,33 @@ SeExprEdControlCollection::~SeExprEdControlCollection()
             tabWidget->addTab(stringTab, QString("String"));
         }
 
+#ifdef SEEXPR_USE_ANIMLIB
+        // Anim Curve
+        {
+            QWidget* curveTab = new QWidget();
+            QFormLayout* curveLayout = new QFormLayout(curveTab);
+            curveLayout->setWidget(0,QFormLayout::LabelRole,new QLabel("Lookup"));
+            curveLayout->setWidget(1,QFormLayout::LabelRole,new QLabel("Link"));
+            animCurveLookup=new QLineEdit("$frame");
+            animCurveLink=new QLineEdit("");
+            curveLayout->setWidget(0,QFormLayout::FieldRole,animCurveLookup);
+            curveLayout->setWidget(1,QFormLayout::FieldRole,animCurveLink);
+            tabWidget->addTab(curveTab, QString("AnimCurve"));
+        }
+#endif
+
         verticalLayout->addWidget(tabWidget);
 
         QDialogButtonBox* buttonBox = new QDialogButtonBox();
         buttonBox->setOrientation(Qt::Horizontal);
         buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
-        
+
         verticalLayout->addWidget(buttonBox);
-        
-        
+
+
         QObject::connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
         QObject::connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
-        
+
         tabWidget->setCurrentIndex(0);
 
     }
@@ -234,8 +253,18 @@ void SeExprEdAddDialog::colorChooseClicked()
     {
         QPixmap colorPix(30,30);
         colorPix.fill(color);
-        colorWidget->setIcon(QIcon(colorPix));
+        ((QPushButton *)sender())->setIcon(QIcon(colorPix));
     }
+}
+
+const char* SeExprEdAddDialog::initSwatch()
+{
+    if(rainbowPaletteBtn->isChecked())
+        return( "[1,0,0],[1,.6,0],[1,1,0],[0,1,0],[0,1,1],[0,0,1],[.6,.1,.6],[1,0,1],[1,1,1],[0,0,0]");
+    else if (grayPaletteBtn->isChecked())
+        return( "[1,1,1],[.9,.9,.9],[.8,.8,.8],[.7,.7,.7],[.6,.6,.6],[.5,.5,.5],[.4,.4,.4],[.3,.3,.3],[.2,.2,.2],[0,0,0]");
+    else
+        return( "[1,1,1],[.5,.5,.5],[0,0,0]");
 }
 
 void SeExprEdControlCollection::addControlDialog()
@@ -255,22 +284,16 @@ void SeExprEdControlCollection::addControlDialog()
                     .arg(dialog->colorCurveLookup->text());
                 break;
             case 2:
-                s=QString("%1 = animCurve(%2,\"constant\",\"constant\",0,\"%3\");")
-                    .arg(dialog->variableName->text())
-                    .arg(dialog->animCurveLookup->text())
-                    .arg(dialog->animCurveLink->text());
-                break;
-            case 3:
                 s=dialog->variableName->text()+" = "+dialog->intDefault->text()
                     +"; # "+dialog->intMin->text()+","+dialog->intMax->text()+"\n";
                 break;
-            case 4:
+            case 3:
                 s=QString("%1 = %2; # %3, %4\n").arg(dialog->variableName->text())
                     .arg(dialog->floatDefault->text())
                     .arg(atof(dialog->floatMin->text().toStdString().c_str()),0,'f',3)
                     .arg(atof(dialog->floatMax->text().toStdString().c_str()),0,'f',3);
                 break;
-            case 5:
+            case 4:
                 s=QString("%1 = [%2,%3,%4]; # %5, %6\n").arg(dialog->variableName->text())
                     .arg(dialog->vectorDefault0->text())
                     .arg(dialog->vectorDefault1->text())
@@ -278,12 +301,18 @@ void SeExprEdControlCollection::addControlDialog()
                     .arg(atof(dialog->vectorMin->text().toStdString().c_str()),0,'f',3)
                     .arg(atof(dialog->vectorMax->text().toStdString().c_str()),0,'f',3);
                 break;
-            case 6:
+            case 5:
                 s=QString("%1 = [%2,%3,%4];\n")
                     .arg(dialog->variableName->text())
                     .arg(dialog->color.redF())
                     .arg(dialog->color.greenF())
                     .arg(dialog->color.blueF());
+                break;
+            case 6:
+                s=QString("%1 = swatch(%2,%3);\n")
+                    .arg(dialog->variableName->text())
+                    .arg(dialog->swatchLookup->text())
+                    .arg(dialog->initSwatch());
                 break;
             case 7:
                 s=QString("\"%1\" #%2 %3\n")
@@ -291,6 +320,14 @@ void SeExprEdControlCollection::addControlDialog()
                     .arg(dialog->stringTypeWidget->currentText())
                     .arg(dialog->stringNameWidget->text());
                 break;
+#ifdef SEEXPR_USE_ANIMLIB
+            case 8:
+                s=QString("%1 = animCurve(%2,\"constant\",\"constant\",0,\"%3\");")
+                    .arg(dialog->variableName->text())
+                    .arg(dialog->animCurveLookup->text())
+                    .arg(dialog->animCurveLink->text());
+                break;
+#endif
         }
         emit insertString(s.toStdString());
     }
@@ -304,7 +341,7 @@ rebuildControls(const QString& expressionText,std::vector<QString>& variables)
     newEditable->setExpr(expressionText.toStdString());
 
     // check for new variables
-    
+
     bool newVariables=true;
     if(editableExpression && editableExpression->getVariables()==newEditable->getVariables()) newVariables=false;
     if(newVariables){
@@ -314,7 +351,7 @@ rebuildControls(const QString& expressionText,std::vector<QString>& variables)
             variables.push_back(("$"+vars[k]).c_str());
         }
     }
-    
+
     if (newEditable->size()==0 && !editableExpression) return false;
 
     if(editableExpression && editableExpression->controlsMatch(*newEditable)){
@@ -328,7 +365,7 @@ rebuildControls(const QString& expressionText,std::vector<QString>& variables)
         for (unsigned int i = 0; i < _controls.size(); i++){
             controlLayout->removeWidget(_controls[i]);
             delete _controls[i];
-        }    
+        }
         _linkedId=-1;
         _controls.clear();
 
@@ -340,7 +377,6 @@ rebuildControls(const QString& expressionText,std::vector<QString>& variables)
         for(size_t i=0;i<editableExpression->size();i++){
             SeExprEdEditable* editable=(*editableExpression)[i];
             SeExprEdControl* widget=0;
-            //std::cerr<<"looking at control "<<editable->str()<<std::endl;
             // Create control "factory" (but since its only used here...)
             if(SeExprEdNumberEditable* x=dynamic_cast<SeExprEdNumberEditable*>(editable)) widget=new SeExprEdNumberControl(i,x);
             else if(SeExprEdVectorEditable* x=dynamic_cast<SeExprEdVectorEditable*>(editable)) widget=new SeExprEdVectorControl(i,x);
@@ -350,6 +386,8 @@ rebuildControls(const QString& expressionText,std::vector<QString>& variables)
             else if(SeExprEdAnimCurveEditable* x=dynamic_cast<SeExprEdAnimCurveEditable*>(editable)){
                 widget=new SeExprEdAnimCurveControl(i,x);
             }
+            else if(SeExprEdColorSwatchEditable* x=dynamic_cast<SeExprEdColorSwatchEditable*>(editable))
+                widget=new SeExprEdColorSwatchControl(i,x);
             else{
                 std::cerr<<"SeExpr editor logic error, cannot find a widget for the given editable"<<std::endl;
             }

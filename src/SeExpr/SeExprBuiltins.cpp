@@ -1582,6 +1582,15 @@ static const char* vnoise_docstring=
         "printf(string format,[vec0, vec1,  ...])\n"
         "Prints out a string to STDOUT, Format parameter allowed is %v";
 
+    double swatch(int n, double* params)
+    {
+        return choose(n, params);
+    }
+    static const char *swatch_docstring=
+        "color swatch(float index, color choice0, color choice1, color choice2, [...])\n"
+        "Chooses one of the supplied color choices based on the index (assumed to be in range [0..1]).";
+
+
     void defineBuiltins(SeExprFunc::Define /*define*/,SeExprFunc::Define3 define3)
     {
 	// functions from math.h (global namespace)
@@ -1704,6 +1713,7 @@ static const char* vnoise_docstring=
 	FUNCNDOC(spline, 5, -1);
 	FUNCNDOC(curve, 1, -1);
 	FUNCNDOC(ccurve, 1, -1);
+	FUNCNDOC(swatch, 3, -1);
         FUNCNDOC(printf,1,-1);
 
     }

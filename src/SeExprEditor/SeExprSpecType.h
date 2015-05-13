@@ -103,10 +103,13 @@ struct SeExprSpecAnimCurveNode:public SeExprSpecNode
     {}
 };
 
-
-
-
-    
+struct SeExprSpecColorSwatchNode:public SeExprSpecNode
+{
+    SeExprSpecNode* args;
+    SeExprSpecColorSwatchNode(SeExprSpecNode* args)
+        :SeExprSpecNode(args->startPos,args->endPos),args(args)
+    {}
+};
 
 #endif
 

@@ -80,10 +80,70 @@ public:
 %MethodCode
         {
             std::string (*old)(const std::string&);
-            SeExprEdControlCollection::setAnimCurveCallback((a0!=Py_None) ? 0 : 0);
+#ifdef SEEXPR_USE_ANIMLIB
+            SeExprEdControlCollection::setAnimCurveCallback((a0!=Py_None) ? animCurveCallbackPyWrapper : 0);
+            Py_XDECREF(animCurveCallbackPy);
+            animCurveCallbackPy=a0;
+            Py_INCREF(animCurveCallbackPy);
+#endif
         }
 %End
 };
+
+%ModuleCode
+#ifdef SEEXPR_USE_ANIMLIB
+#include <iostream>
+#include <animlib/AnimCurve.h>
+static PyObject* animCurveCallbackPy=0;
+void animCurveCallbackPyWrapper(const std::string& arg,animlib::AnimCurve& curve)
+{
+    PyObject* res;
+    SIP_BLOCK_THREADS;
+    res=sipCallMethod(0,animCurveCallbackPy,"s",arg.c_str());
+    char* buf;
+    if(res != NULL){
+        const int argsPerItem=9;
+        if(!PyTuple_Check(res))
+            std::cerr<<"python callback for anim curve did not yield tuple of args"<<std::endl;
+        else if((PyTuple_Size(res)-4)%argsPerItem != 0){
+            std::cerr<<"did not get argument count of form 4+9i we got "<<PyTuple_Size(res)<<std::endl;
+        }else{
+            curve.clearKeys();
+            if(PyObject* preInf=PyTuple_GetItem(res,0))
+                if(char* s=PyString_AsString(preInf))
+                    curve.setPreInfinity(curve.stringToInfinityType(s));
+            if(PyObject* postInf=PyTuple_GetItem(res,1))
+                if(char* s=PyString_AsString(postInf)) 
+                    if(s) curve.setPostInfinity(curve.stringToInfinityType(s));
+            if(PyObject* weighted=PyTuple_GetItem(res,2))
+                if(PyLong_Check(weighted))
+                    curve.setWeighted(PyLong_AsLong(weighted));
+            int count=PyTuple_Size(res);
+            for(int base=4;base<count;base+=argsPerItem){
+                // this would be super easy if pytuple supported slicing
+                PyObject* slice=PyTuple_GetSlice(res,base,base+9);
+                double pos,val,inWeight,outWeight,inAngle,outAngle;
+                char *inTang,*outTang;
+                int locked;
+                if(!PyArg_ParseTuple(slice,"ddddddssi",&pos,&val,&inWeight,&outWeight,&inAngle,&outAngle,&inTang,&outTang,&locked)){
+                    std::cerr<<"expreditor: unable to parse anim key\n";
+                }
+                animlib::AnimKeyframe key(pos,val);
+                key.setInWeight(inWeight);key.setOutWeight(outWeight);
+                key.setInAngle(inAngle);key.setOutAngle(outAngle);
+                key.setInTangentType(key.stringToTangentType(inTang));
+                key.setOutTangentType(key.stringToTangentType(outTang));
+                curve.addKey(key);
+            }
+        }
+
+        Py_XDECREF(res);
+        
+    }
+    SIP_UNBLOCK_THREADS;
+}
+#endif
+%End
 
 class SeExprEditor:QWidget{
 %TypeHeaderCode
@@ -221,5 +281,14 @@ class SeExprEdColorCurve:QWidget{
 %End
 public:
     SeExprEdColorCurve(QWidget* parent = NULL, QString pLabel = "", QString vLabel = "", QString iLabel = "");
+};
+
+
+class SeExprEdColorSwatchWidget:QWidget{
+%TypeHeaderCode
+#include "SeExprEdColorSwatchWidget.h"
+%End
+public:
+    SeExprEdColorSwatchWidget(bool indexLabel = false, QWidget* parent = NULL);
 };
 

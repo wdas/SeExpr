@@ -66,7 +66,7 @@ static SeExprSpecNode* remember(SeExprSpecNode* node)
 
 
 /// list of strings duplicated by lexer to avoid error mem leak
-static std::vector<char*> tokens; 
+static std::vector<char*> tokens;
 
 char* specRegisterToken(char* rawString)
 {
@@ -76,7 +76,7 @@ char* specRegisterToken(char* rawString)
 }
 
 //######################################################################
-// Expose parser API inputs/outputs to yacc as statics 
+// Expose parser API inputs/outputs to yacc as statics
 
 // these are pointers to the arguments send into parse API
 // made static here so the parser can see them in yacc actions
@@ -124,7 +124,7 @@ static void specRegisterEditable(const char* var,SeExprSpecNode* node)
                         ccurve->add(xnode->v,ynode->v,interpnode->v);
                     }else{
                         valid=false;
-                    }                
+                    }
                 }
                 if(valid) editables->push_back(ccurve);
                 else delete ccurve;
@@ -145,12 +145,29 @@ static void specRegisterEditable(const char* var,SeExprSpecNode* node)
                         ccurve->add(xnode->v,ynode->v,interpnode->v);
                     }else{
                         valid=false;
-                    }                
+                    }
                 }
                 if(valid) editables->push_back(ccurve);
                 else{
                     delete ccurve;
                 }
+            }
+        }
+    }else if(SeExprSpecColorSwatchNode* n=dynamic_cast<SeExprSpecColorSwatchNode*>(node)){
+        if(SeExprSpecListNode* args=dynamic_cast<SeExprSpecListNode*>(n->args)){
+            if(args->nodes.size()>0){
+                SeExprEdColorSwatchEditable* swatch=new SeExprEdColorSwatchEditable(var,node->startPos,node->endPos);
+                bool valid=true;
+                for(size_t i=0;i<args->nodes.size();i++){
+                    SeExprSpecVectorNode* colornode=dynamic_cast<SeExprSpecVectorNode*>(args->nodes[i]);
+                    if(colornode){
+                        swatch->add(colornode->v);
+                    }else{
+                        valid=false;
+                    }
+                }
+                if(valid) editables->push_back(swatch);
+                else delete swatch;
             }
         }
     }else if(SeExprSpecAnimCurveNode* n=dynamic_cast<SeExprSpecAnimCurveNode*>(node)){
@@ -159,7 +176,7 @@ static void specRegisterEditable(const char* var,SeExprSpecNode* node)
             if((args->nodes.size()-4)%9==0){
                 SeExprEdAnimCurveEditable* animCurve=new SeExprEdAnimCurveEditable(var,node->startPos,node->endPos);
                 bool valid=true;
-                
+
 
 #ifdef SEEXPR_USE_ANIMLIB
                 if(SeExprSpecStringNode* s=dynamic_cast<SeExprSpecStringNode*>(args->nodes[0])){
@@ -197,7 +214,7 @@ static void specRegisterEditable(const char* var,SeExprSpecNode* node)
                         animCurve->curve.addKey(key);
                     }else{
                         valid=false;
-                    }                
+                    }
                 }
                 if(valid) editables->push_back(animCurve);
                 else delete animCurve;
@@ -232,7 +249,7 @@ static void yyerror(const char* msg);
 %token <s> NAME VAR STR
 %token <d> NUMBER
 %token AddEq SubEq MultEq DivEq ExpEq ModEq
-%token '(' ')' 
+%token '(' ')'
 %left ARROW
 %nonassoc ':'
 %nonassoc '?'
@@ -278,11 +295,11 @@ assigns:
       assign			{ $$ = 0; }
     | assigns assign		{ $$ = 0; }
     ;
- 
+
 
 assign:
       ifthenelse		{ $$ = 0; }
-    | VAR '=' e ';'		{ 
+    | VAR '=' e ';'		{
         specRegisterVariable($1);
         specRegisterEditable($1,$3);
       }
@@ -292,7 +309,7 @@ assign:
     | VAR DivEq e ';'           { $$ = 0; }
     | VAR ExpEq e ';'           { $$ = 0; }
     | VAR ModEq e ';'           { $$ = 0; }
-    | NAME '=' e ';'		{ 
+    | NAME '=' e ';'		{
         specRegisterVariable($1);
         specRegisterEditable($1,$3);
       }
@@ -318,7 +335,7 @@ optelse:
 /* An expression or sub-expression */
 e:
       '(' e ')'			{ $$ = 0; }
-    | '[' e ',' e ',' e ']'     { 
+    | '[' e ',' e ',' e ']'     {
         if(SPEC_IS_NUMBER($2) && SPEC_IS_NUMBER($4) && SPEC_IS_NUMBER($6)){
             $$=remember(new SeExprSpecVectorNode(@$.first_column,@$.last_column,$2,$4,$6));
         }else $$=0;
@@ -334,7 +351,7 @@ e:
     | e LE e			{ $$ = 0; }
     | e GE e			{ $$ = 0; }
     | '+' e %prec UNARY		{ $$ = $2; }
-    | '-' e %prec UNARY		{ 
+    | '-' e %prec UNARY		{
         if(SPEC_IS_NUMBER($2)){
             SeExprSpecScalarNode* node=(SeExprSpecScalarNode*)$2;
             node->v*=-1;
@@ -349,17 +366,19 @@ e:
     | e '-' e			{ $$ = 0; }
     | e '*' e			{ $$ = 0; }
     | e '/' e			{ $$ = 0; }
-    | e '%' e			{ $$ = 0; } 
+    | e '%' e			{ $$ = 0; }
     | e '^' e			{ $$ = 0; }
-    | NAME '(' optargs ')'	{ 
+    | NAME '(' optargs ')'	{
         if($3 && strcmp($1,"curve")==0){
             $$=remember(new SeExprSpecCurveNode($3));
         }else if($3 && strcmp($1,"ccurve")==0){
             $$=remember(new SeExprSpecCCurveNode($3));
+        }else if($3 && strcmp($1,"swatch")==0){
+            $$=remember(new SeExprSpecColorSwatchNode($3));
         }else if($3 && strcmp($1,"animCurve")==0){
             $$=remember(new SeExprSpecAnimCurveNode($3));
         }else if($3){
-            // function arguments not parse of curve, ccurve, or animCurve 
+            // function arguments not parse of curve, ccurve, or animCurve
             // check if there are any string args that need to be made into controls
             // but be sure to return 0 as this parseable
             if(SeExprSpecListNode* list=dynamic_cast<SeExprSpecListNode*>($3)){
@@ -386,7 +405,7 @@ optargs:
 
 /* Argument list (comma-separated expression list) */
 args:
-   arg	{ 
+   arg	{
        // ignore first argument unless it is a string (because we parse strings in weird ways)
        SeExprSpecListNode* list=new SeExprSpecListNode(@$.last_column,@$.last_column);
        if($1 && SPEC_IS_STR($1)){
@@ -408,7 +427,7 @@ args:
 
 arg:
       e				{ $$ = $1;}
-    | STR			{ 
+    | STR			{
         SeExprSpecStringNode* str=new SeExprSpecStringNode(@$.first_column,@$.last_column,$1);
         //specRegisterEditable("<UNKNOWN>",str);
         // TODO: move string stuff out
@@ -471,7 +490,6 @@ bool SeExprSpecParse(std::vector<SeExprEdEditable*>& outputEditables,
     std::vector<std::pair<int,int> >& comments,
     const char* str)
 {
-    // TODO: this needs a mutex!
     SeExprInternal::AutoMutex locker(mutex);
 
     /// Make inputs/outputs accessible to parser actions

@@ -38,6 +38,8 @@ class SeExprEdStringEditable;
 class SeExprEdVectorEditable;
 class SeExprEdNumberEditable;
 class SeExprEdAnimCurveEditable;
+class SeExprEdColorSwatchEditable;
+class SeExprEdColorSwatchWidget;
 template<class TVAL> struct SeExprEdGenericCurveEditable;
 typedef SeExprEdGenericCurveEditable<SeVec3d> SeExprEdColorCurveEditable;
 typedef SeExprEdGenericCurveEditable<double> SeExprEdCurveEditable;
@@ -280,6 +282,26 @@ private slots:
 
 private:
     static AnimCurveCallback callback;
+};
+
+/// A control for editing color swatches
+class SeExprEdColorSwatchControl:public SeExprEdControl
+{
+    Q_OBJECT
+
+    /// model for the color swatches control
+    SeExprEdColorSwatchEditable* _swatchEditable;
+    /// Edit box for the color swatches
+    SeExprEdColorSwatchWidget *_swatch;
+public:
+    SeExprEdColorSwatchControl(int id,SeExprEdColorSwatchEditable* swatchEditable);
+private slots:
+    void buildSwatchWidget();
+    void colorChanged(int index, SeVec3d value);
+    void colorAdded(int index, SeVec3d value);
+    void colorRemoved(int index);
+private:
+    bool _indexLabel;
 };
 
 #endif
