@@ -99,7 +99,7 @@ SeExprEdShortEdit::SeExprEdShortEdit(QWidget* parent, bool expanded, bool applyO
     , _searchPath( "" )
     , _applyOnSelect(applyOnSelect)
 {
-    controlRebuildTimer = new QTimer();
+    controlRebuildTimer = new QTimer(this);
 
     vboxlayout = new QVBoxLayout();
     vboxlayout->setSpacing( 2 );
@@ -144,7 +144,6 @@ SeExprEdShortEdit::SeExprEdShortEdit(QWidget* parent, bool expanded, bool applyO
 
 SeExprEdShortEdit::~SeExprEdShortEdit()
 {
-    //delete controlRebuildTimer;
 }
 
 void SeExprEdShortEdit::setSearchPath(const QString& context, const QString& path)
