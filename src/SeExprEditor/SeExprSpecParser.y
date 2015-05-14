@@ -59,7 +59,7 @@ void yy_delete_buffer(yy_buffer_state*);
 // Keep track of mini parse tree nodes
 
 // temporary to the parse... all pointers deleted at end of parse
-static std::vector<SeExprSpecNode*> specNodes; 
+static std::vector<SeExprSpecNode*> specNodes;
 /// Remember the spec node, so we can delete it later
 static SeExprSpecNode* remember(SeExprSpecNode* node)
 {specNodes.push_back(node);return node;}
@@ -437,10 +437,10 @@ arg:
 
 %%
 
-      /* yyerror - Report an error.  This is called by the parser.
-	 (Note: the "msg" param is useless as it is usually just "sparse error".
-	 so it's ignored.)
-      */
+/* yyerror - Report an error.  This is called by the parser.
+(Note: the "msg" param is useless as it is usually just "sparse error".
+so it's ignored.)
+*/
 static void yyerror(const char* /*msg*/)
 {
     // find start of line containing error

@@ -447,6 +447,11 @@ void SeExprEdBrowser::expandAll()
     treeNew->expandAll();
 }
 
+void SeExprEdBrowser::expandToDepth(int depth)
+{
+    treeNew->expandToDepth(depth);
+}
+
 // Location for storing user's expression files
 void SeExprEdBrowser::addUserExpressionPath(const std::string &context)
 {

@@ -113,8 +113,8 @@ ENDIF(WIN32)
                        COMMENT 'Processing SeExprEditor.sip'
                        COMMAND ${SIP_EXEC} -w -c .
                        -x VendorID -x PyQt_NoPrintRangeBug -x Py_v3
-                       -t WS_X11 -g -j 1
                        ${SIP_QT_TAG}
+                       -t WS_X11 -g -j 1
                        -I. -I${PYQT4_PATH} -I${SIP_PATH}
                        ${CMAKE_CURRENT_SOURCE_DIR}/SeExprEditor.sip
                        VERBATIM)

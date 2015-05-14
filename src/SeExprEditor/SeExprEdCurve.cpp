@@ -31,6 +31,7 @@
 #include <QtGui/QPushButton>
 #include <QtGui/QResizeEvent>
 #include <QtGui/QDialogButtonBox>
+#include <QtGui/QMenu>
 
 #include <SeVec3d.h>
 #include <SeExprBuiltins.h>
@@ -142,16 +143,30 @@ void CurveScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
         }
         drawPoints();
     } else {
-        // getting here means we want to create a new point
-        double myx=pos.x()/_width;
-        T_INTERP interpFromNearby=_curve->getLowerBoundCV(SeExpr::clamp(myx,0,1))._interp;
-        if(interpFromNearby==T_CURVE::kNone) interpFromNearby=T_CURVE::kMonotoneSpline;
-    
-        addPoint(myx, pos.y()/_height, interpFromNearby);
-        emitCurveChanged();
+        if(mouseEvent->buttons() == Qt::LeftButton){
+            // getting here means we want to create a new point
+            double myx=pos.x()/_width;
+            T_INTERP interpFromNearby=_curve->getLowerBoundCV(SeExpr::clamp(myx,0,1))._interp;
+            if(interpFromNearby==T_CURVE::kNone)
+                interpFromNearby=T_CURVE::kMonotoneSpline;
+            addPoint(myx, pos.y()/_height, interpFromNearby);
+            emitCurveChanged();
+        }else{
+            _selectedItem=-1;
+            drawPoints();
+        }
     }
 }
 
+void CurveScene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event){
+    if(_selectedItem>=0){
+        QMenu *menu = new QMenu(event->widget());
+        QAction *deleteAction = menu->addAction("Delete Point");
+        //menu->addAction("Cancel");
+        QAction *action = menu->exec(event->screenPos());
+        if (action == deleteAction) removePoint(_selectedItem);
+    }
+}
 
 void CurveScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {

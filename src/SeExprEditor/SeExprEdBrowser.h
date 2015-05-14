@@ -69,6 +69,7 @@ public:
     bool getExpressionDirs(const std::string& context);
     void setSearchPath(const QString& context, const QString& path);
     void expandAll();
+    void expandToDepth(int depth);
     void setApplyOnSelect(bool on) {_applyOnSelect = on; }
 public slots:
     void handleSelection(const QModelIndex& current,const QModelIndex& previous);
