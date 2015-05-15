@@ -51,7 +51,7 @@ static int lineNumber=0; // not used
 static std::vector<std::pair<int,int> >* comments=0;
 
 extern char* specRegisterToken(char* tok);
-void resetCounters(std::vector<std::pair<int,int> >& commentsIn){
+void specResetCounters(std::vector<std::pair<int,int> >& commentsIn){
    columnNumber=lineNumber=0;
    comments=&commentsIn;
 }

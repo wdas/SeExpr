@@ -26,9 +26,10 @@
 #include <cstring>
 #include <SeExprMacros.h>
 #ifdef SEEXPR_USE_ANIMLIB
-#   include <animlib/AnimCurve.h>
-#   include <animlib/AnimKeyframe.h>
+#include <animlib/AnimCurve.h>
+#include <animlib/AnimKeyframe.h>
 #endif
+
 inline void printVal(std::stringstream& stream,double v){stream<<v;}
 inline void printVal(std::stringstream& stream,const SeVec3d& v){stream<<"["<<v[0]<<","<<v[1]<<","<<v[2]<<"]";}
 
@@ -244,11 +245,11 @@ struct SeExprEdAnimCurveEditable:public SeExprEdEditable
     std::string newText;
 
     SeExprEdAnimCurveEditable(const std::string& name,int startPos,int endPos)
-        :SeExprEdEditable(name,startPos,endPos)
+        :SeExprEdEditable(name,startPos,endPos
 #ifdef SEEXPR_USE_ANIMLIB
-        ,curve(animlib::AnimAttrID())
+        ,curve(animlib::AnimAttrID()
 #endif
-    {}
+    ){}
 
     ~SeExprEdAnimCurveEditable(){} // must have this to ensure destruction
 
@@ -294,16 +295,71 @@ struct SeExprEdAnimCurveEditable:public SeExprEdEditable
 
 };
 
+
+struct SeExprEdColorSwatchEditable:public SeExprEdEditable
+{
+    std::vector<SeVec3d> colors;
+    std::string labelType;
+
+    SeExprEdColorSwatchEditable(const std::string& name,
+                                  int startPos,int endPos)
+        :SeExprEdEditable(name,startPos,endPos)
+    {}
+
+
+    bool parseComment(const std::string& comment){
+        char labelbuf[1024];
+        int parsed=sscanf(comment.c_str(),"#%s",labelbuf);
+        if(parsed==1){
+            labelType=labelbuf;
+            return true;
+        }
+        return true;
+    }
+
+    std::string str() const{
+        std::stringstream s;
+        s<<name<<" swatch";
+        return s.str();
+    }
+
+    void appendString(std::stringstream& stream) const{
+        for(size_t i=0,sz=colors.size();i<sz;i++){
+            const SeVec3d& color=colors[i];
+            stream<<",";
+            printVal(stream,color);
+        }
+    }
+
+    virtual bool controlsMatch(const SeExprEdEditable& other) const
+    {
+        if(const SeExprEdColorSwatchEditable* o=dynamic_cast<const SeExprEdColorSwatchEditable*>(&other)){
+            // TODO: determine when controls match
+            UNUSED(o);
+            return false;
+        }else return false;
+    }
+
+    void add(const SeVec3d& value){
+        colors.push_back(value);
+    }
+
+    void change(int index, const SeVec3d& value){
+        colors[index] = value;
+    }
+
+    void remove(int index){
+        colors.erase(colors.begin()+index);
+    }
+
+    void print(){
+        std::cerr << "\nSeExprEdColorSwatchEditable:\n";
+        for(unsigned int i=0; i<colors.size(); i++){
+            std::cerr << colors[i][0] << ", " << colors[i][1] << ", "
+                      << colors[i][2] << std::endl;
+        }
+    }
+
+};
+
 #endif
-
-
-
-
-
-
-
-
-
-
-
-

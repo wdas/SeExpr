@@ -16,12 +16,23 @@
 */
 
 #include <iostream>
+#include <smmintrin.h>
+
 #include "SeExprBuiltins.h"
 namespace{
 #include "SeNoiseTables.h"
 }
 #include "SeNoise.h"
 namespace SeExpr{
+
+inline double floorSSE(double val) {
+    return _mm_cvtsd_f64(_mm_floor_sd(_mm_set_sd(0.0), _mm_set_sd(val)));
+}
+
+inline double roundSSE(double val) {
+    return _mm_cvtsd_f64(_mm_round_sd(_mm_set_sd(0.0), _mm_set_sd(val), _MM_FROUND_TO_NEAREST_INT));
+}
+
 
 //! This is the Quintic interpolant from Perlin's Improved Noise Paper
 double s_curve(double t) {
@@ -79,7 +90,7 @@ void CellNoise(const T* in,T* out)
 {
     uint32_t index[d_in];
     int dim=0;
-    for(int k=0;k<d_in;k++) index[k]=uint32_t(floor(in[k]));
+    for(int k=0;k<d_in;k++) index[k]=uint32_t(floorSSE(in[k]));
     while(1){
         out[dim]=hashReduce<d_in>(index) * (1.0/0xffffffffu);
         if(++dim>=d_out) break;
@@ -95,7 +106,7 @@ T noiseHelper(const T* X,const int* period=0)
     T weights[2][d]; // lower and upper weights
     int index[d];
     for(int k=0;k<d;k++){
-        T f=floor(X[k]);
+        T f=floorSSE(X[k]);
         index[k]=(int)f;
         if(periodic){
             index[k]%=period[k];
@@ -130,13 +141,14 @@ T noiseHelper(const T* X,const int* period=0)
     // perform multilinear interpolation (i.e. linear, bilinear, trilinear, quadralinear)
     for(int newd=d-1;newd>=0;newd--){
         int newnum=1<<newd;
+        int k=(d-newd-1);
+        T alpha=alphas[k];
+        T beta=T(1)-alphas[k];
         for(int dummy=0;dummy<newnum;dummy++){
             int index=dummy*(1<<(d-newd));
-            int k=(d-newd-1);
             int otherIndex=index+(1<<k);
             //T alpha=s_curve(weights[0][k]);
-            T alpha=alphas[k];
-            vals[index]=(1-alpha)*vals[index]+alpha*vals[otherIndex];
+            vals[index]=beta*vals[index]+alpha*vals[otherIndex];
         }
     }
     // return reduced version

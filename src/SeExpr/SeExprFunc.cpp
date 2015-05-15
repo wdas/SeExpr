@@ -192,7 +192,7 @@ SeExprFunc::getDocString(const char* functionName)
 
 #ifndef SEEXPR_WIN32
 
-#if defined(__APPLE__) && __MAC_OS_X_VERSION_MIN_REQUIRED <= __MAC_10_7
+#if defined(__APPLE__) && !defined(__MAC_10_9)
 static int MatchPluginName(struct dirent* dir)
 #else
 static int MatchPluginName(const struct dirent* dir)

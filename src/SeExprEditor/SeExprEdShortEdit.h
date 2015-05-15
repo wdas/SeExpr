@@ -41,6 +41,7 @@ class SeExprEdCompletionModel;
 class SeExprEdShortTextEdit;
 class QLabel;
 class SeExprEdPopupDocumentation;
+class SeExprEdDialog;
 
 class SeExprEdShortEdit : public QWidget
 {
@@ -50,13 +51,15 @@ protected:
     QTimer* controlRebuildTimer;
     QToolButton* editDetail;
     SeExprEdControlCollection* controls;
+    SeExprEdDialog* _dialog;
     QVBoxLayout* vboxlayout;
     QHBoxLayout* hboxlayout;
     QLabel* error;
     std::string _context;
     std::string _searchPath;
+    bool _applyOnSelect;
 public:
-    SeExprEdShortEdit(QWidget* parent, bool expanded = true);
+    SeExprEdShortEdit(QWidget* parent, bool expanded = true, bool applyOnSelect = true);
     virtual ~SeExprEdShortEdit();
     
     // Gets the string that is in the edit widget
@@ -78,12 +81,17 @@ public:
     void setDetailsMenu(QMenu *menu);
     // Set a colon-delimited path variable for finding expressions
     void setSearchPath(const QString& context, const QString& path);
+    // Set line wrap mode on the text edit
+    void setLineWrapMode(QTextEdit::LineWrapMode mode);
     // Set the vertical scrollbar policy -- set to Qt::ScrollBarAlwaysOff to
     // disable it
     void setVerticalScrollBarPolicy(Qt::ScrollBarPolicy policy);
+    // Set the horizontal scrollbar policy -- set to Qt::ScrollBarAlwaysOff to
+    // disable it
+    void setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy policy);
     //  Open the details window and open the Nth editor
     //  Pass -1 to not show the editor
-    int showDetails(int idx);
+    void showDetails(int idx);
 
     virtual QSize sizeHint() const{return QSize(400, 50);}
     virtual void hideErrors(bool hidden, const std::string &err);
@@ -102,6 +110,8 @@ protected slots:
     virtual void handleTextEdited();
     virtual void controlChanged(int id);
     virtual void rebuildControls();
+    virtual void expressionApplied();
+    virtual void dialogClosed();
 
 signals:
     void exprChanged();

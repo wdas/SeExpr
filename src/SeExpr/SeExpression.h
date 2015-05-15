@@ -21,8 +21,9 @@
 #include <map>
 #include <set>
 #include <vector>
-#include <SeExprMacros.h>
+#include "SeExprMacros.h"
 #include "SeVec3d.h"
+#include "SeContext.h"
 
 class SeExprNode;
 class SeExprVarNode;
@@ -39,7 +40,7 @@ class SeExprVarRef
     //! returns true for a vector type, false for a scalar type
     virtual bool isVec() = 0;
 
-    //! returns this variable's value by setting result, node refers to 
+    //! returns this variable's value by setting result, node refers to
     //! where in the parse tree the evaluation is occurring
     virtual void eval(const SeExprVarNode* node, SeVec3d& result) = 0;
 };
@@ -66,7 +67,7 @@ class SeExprLocalVarRef : public SeExprVarRef
     SeVec3d val;
     SeExprLocalVarRef() : _isVec(false) {}
     void setIsVec() { _isVec = true; }
-    virtual void eval(const SeExprVarNode*, SeVec3d& result) 
+    virtual void eval(const SeExprVarNode*, SeVec3d& result)
     { result = val; }
     virtual bool isVec() { return _isVec; }
  private:
@@ -98,15 +99,15 @@ class SeExpression
     };
 
     SeExpression( );
-    SeExpression( const std::string &e, bool wantVec=true );
+    SeExpression( const std::string &e, bool wantVec=true, const SeContext& context=SeContext::global() );
     virtual ~SeExpression();
 
     /** Sets the expression to desire a vector or a scalar.
-        This will allow the evaluation to potentially be optimized if 
+        This will allow the evaluation to potentially be optimized if
         only a scalar is desired. */
     void setWantVec(bool wantVec);
 
-    /** Set expression string to e.  
+    /** Set expression string to e.
         This invalidates all parsed state. */
     void setExpr(const std::string& e);
 
@@ -137,7 +138,7 @@ class SeExpression
 	Expr will be parsed if needed.  No binding is required. */
     bool isConstant() const;
 
-    /** Determine whether expression uses a particular external variable. 
+    /** Determine whether expression uses a particular external variable.
 	Expr will be parsed if needed.  No binding is required. */
     bool usesVar(const std::string& name) const;
 
@@ -157,7 +158,7 @@ class SeExpression
     /** Returns a list of functions that are not threadSafe **/
     const std::vector<std::string>& getThreadUnsafeFunctionCalls() const
     {return _threadUnsafeFunctionCalls;}
-    
+
     /** Get wantVec setting */
     bool wantVec() const { return _wantVec; }
 
@@ -185,6 +186,11 @@ class SeExpression
     /** Returns a read only map of local variables that were set **/
     const LocalVarTable& getLocalVars() const {return _localVars;}
 
+    /** An immutable reference to access context parameters from say SeExprFuncX's */
+    const SeContext& context() const {return *_context;}
+
+    void setContext(const SeContext& context);
+
  private:
     /** No definition by design. */
     SeExpression( const SeExpression &e );
@@ -193,7 +199,7 @@ class SeExpression
     /** Parse, and remember parse error if any */
     void parse() const;
 
-    /** Prepare expression (bind vars/functions, etc.) 
+    /** Prepare expression (bind vars/functions, etc.)
 	and remember error if any */
     void prep() const;
 
@@ -208,13 +214,13 @@ class SeExpression
 
     /** The expression. */
     std::string _expression;
-    
+
     /** Parse tree (null if syntax is bad). */
     mutable SeExprNode *_parseTree;
 
     /** Flag set once expr is parsed/prepped (parsing is automatic and lazy) */
     mutable bool _parsed, _prepped;
-    
+
     /** Cached parse error (returned by isValid) */
     mutable std::string _parseError;
 
@@ -236,6 +242,9 @@ class SeExpression
     /** String tokens allocated by lex */
     mutable std::vector<char*> _stringTokens;
 
+    /** Context for out of band function parameters */
+    const SeContext* _context;
+
     /* internal */ public:
 
     //! add local variable (this is for internal use)
@@ -254,7 +263,7 @@ class SeExpression
     /** get local variable reference. This is potentially useful for expression debuggers
         and/or uses of expressions where mutable variables are desired */
     SeExprLocalVarRef* getLocalVar(const char* n) const {
-	return &_localVars[n]; 
+	return &_localVars[n];
     }
 };
 

@@ -15,7 +15,7 @@
 # http://www.apache.org/licenses/LICENSE-2.0
 
 ## CMake compatibility issues: don't modify this, please!
-CMAKE_MINIMUM_REQUIRED( VERSION 2.4.6 ) 
+CMAKE_MINIMUM_REQUIRED( VERSION 2.4.6 )
 MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
 ## allow more human readable "if then else" constructs
 SET( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE )
@@ -30,7 +30,7 @@ SET( ${PROJECT_NAME}_MAJOR_VERSION 0 )
 SET( ${PROJECT_NAME}_MINOR_VERSION 1 )
 SET( ${PROJECT_NAME}_PATCH_LEVEL 0 )
 
-## policies     
+## policies
 if(COMMAND cmake_policy)
       cmake_policy(SET CMP0003 NEW)
     endif(COMMAND cmake_policy)
@@ -46,7 +46,7 @@ ELSE(WIN32)
   ADD_DEFINITIONS (-Wall  -Wextra)
   ADD_DEFINITIONS (-pthread)
 
-  SET( CMAKE_CXX_FLAGS "-fPIC")
+  SET( CMAKE_CXX_FLAGS "-fPIC -msse4.1")
 ENDIF(WIN32)
 
 ## Choose build options
