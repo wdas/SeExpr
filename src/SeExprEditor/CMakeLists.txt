@@ -38,6 +38,7 @@ FIND_LIBRARY(PYTHON_LIBRARY NAMES "python${PYTHON_VERSION}"
 
 find_package(PythonInterp)
 find_package(PythonLibs)
+set(CMAKE_INSTALL_PYTHON "${CMAKE_INSTALL_PREFIX}/${PYTHON_SITE}/SeExpr/" )
 
 # Other package dependencies...
 
@@ -94,8 +95,7 @@ ENDIF(WIN32)
     target_link_libraries(SeExprEditor ${SEEXPR_LIBRARIES})
 
     install(TARGETS SeExprEditor DESTINATION ${CMAKE_INSTALL_LIBDIR})
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${SeExprEd_MOC_HDRS}
-            DESTINATION include/SeExprEditor)
+    install(FILES ${SeExprEd_MOC_HDRS} DESTINATION include/SeExprEditor)
 
     # Generate python module expreditor, using sip
 
@@ -103,7 +103,6 @@ ENDIF(WIN32)
     set(SIP_QT_TAG -t Qt_4_5_0)  # fix 'sip: QFileIconProvider is undefined'
 
     set(CMAKE_CXX_FLAGS "-std=c++0x")
-    set(CMAKE_INSTALL_PYTHON "${CMAKE_INSTALL_PREFIX}/${PYTHON_SITE}/SeExpr/" )
     include_directories(${SIP_PATH} ${PYQT4_PATH}
                         ${PYTHON_INCLUDE_DIR} ${QT_INCLUDE_DIR}/QtCore
                         ${QT_INCLUDE_DIR}/QtGui)
@@ -128,7 +127,6 @@ ENDIF(WIN32)
     # No prefix on python module name
     set_target_properties(expreditor PROPERTIES PREFIX "")
     install(TARGETS expreditor DESTINATION ${CMAKE_INSTALL_PYTHON})
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
-            DESTINATION ${CMAKE_INSTALL_PYTHON})
+    install(FILES __init__.py DESTINATION ${CMAKE_INSTALL_PYTHON})
 
 endif(QT4_FOUND)

@@ -49,14 +49,6 @@ ELSE(WIN32)
   SET( CMAKE_CXX_FLAGS "-fPIC -msse4.1")
 ENDIF(WIN32)
 
-## Choose build options
-# Disney specific method of choosing variant
-IF("$ENV{FLAVOR}" STREQUAL "optimize")
-    SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "type of build" FORCE)
-ENDIF("$ENV{FLAVOR}" STREQUAL "optimize")
-IF("$ENV{FLAVOR}" STREQUAL "debug")
-    SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "type of build" FORCE)
-ENDIF("$ENV{FLAVOR}" STREQUAL "debug")
 # Set to release if nothing else defined
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE "Release" CACHE STRING

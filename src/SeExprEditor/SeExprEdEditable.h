@@ -245,11 +245,11 @@ struct SeExprEdAnimCurveEditable:public SeExprEdEditable
     std::string newText;
 
     SeExprEdAnimCurveEditable(const std::string& name,int startPos,int endPos)
-        :SeExprEdEditable(name,startPos,endPos
+        :SeExprEdEditable(name,startPos,endPos)
 #ifdef SEEXPR_USE_ANIMLIB
         ,curve(animlib::AnimAttrID()
 #endif
-    ){}
+    {}
 
     ~SeExprEdAnimCurveEditable(){} // must have this to ensure destruction
 
