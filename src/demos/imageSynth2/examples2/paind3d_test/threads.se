@@ -1,0 +1,18 @@
+##  Expression for making the threads on a bolt or screw or any kind of swirly pattern on a cylindrical shape.
+
+$length_uvxyz =1.000; # 0,4
+$circ_uvxyz =0.000; # 0,4
+
+$ss = choose($length_uvxyz/4,$u,$v,$P[0],$P[1],$P[2]);
+$tt = choose($circ_uvxyz/4,$u,$v,$P[0],$P[1],$P[2]);
+
+#$ss = $u;
+#$tt = $v;
+$twist =10.000; # 1,200
+$threadCount =14.000; #1,20
+$grooveShape =2.000; #0.1,10.00  
+$disp = ($ss*$threadCount - $tt*$twist)%1;
+$disp = (($disp -.5)*2) -> abs() -> pow($grooveShape) -> invert();
+
+$disp
+

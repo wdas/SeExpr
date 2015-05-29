@@ -1,0 +1,15 @@
+$direction=3.000; #0,3
+$units=1.000;#0.001,10.0;  # number of units per ramp.
+$units=1/$units;
+
+
+$P = $P * $units;
+#$P[1]%1 < $cutoff
+$w =0.609;
+$w = ($direction==0) ? $P[0]%1 : $w;
+$w = ($direction==1) ? $P[1]%1 : $w;
+$w = ($direction==2) ? $P[2]%1 : $w;
+$w = ($direction==3) ? 1-($P[0]%1)*($P[1]%1)*($P[2]%1) : $w;
+$w
+
+#1-($P[0]%1)*($P[1]%1)*($P[2]%1)

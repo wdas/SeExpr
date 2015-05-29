@@ -1,0 +1,8 @@
+#Remap Shadow Contribution Expression
+#This is a handy expression for sculpting the falloff of light for your
+#shadows, it changes the contribution of your shadow map to your 
+#volume surface.
+
+$newShadow =curve($Cs,  0.000, 0.000, 3,  1.000, 1.000, 3);
+$newShadow
+

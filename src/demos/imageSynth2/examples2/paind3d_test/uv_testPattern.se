@@ -1,0 +1,9 @@
+$sizeU = 1;#1:10
+$sizeV = 2.000;#1:10
+$rangeMult = 100;
+$sizeU = $sizeU * $rangeMult;
+$sizeV = $sizeV * $rangeMult;
+$Ct = sin($u*$sizeU) * sin($v*$sizeV);
+$Ct = ($Ct * [1,0,0] * $u) +
+($Ct * [0,0,1] * $v);
+$Ct

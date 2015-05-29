@@ -1,0 +1,30 @@
+$freq_fine = 0.700; #0.00,1.00
+$freq_coarse = 0.000; # 0,100
+$X = 1.000; #0.00,10.00
+$Y = 1; #0.00,10.00
+$Z = 1; #0.00,10.00
+$frequency = ($freq_fine+$freq_coarse) * [$X,$Y/5,$Z];
+$Strength = 0.175;
+$Contrast = 0.287;
+$Color = 1.000; #0,1
+$Type=2.000; #1,5
+$Jitter=1.000;
+$fbmScale=1.000;
+$fbmOctaves=3.000; #1,32
+$fbmLacunarity=2.000; #1.00,8.00
+$fbmGain=0.000;
+$R=0.275;#0.0,1
+$G=0.350;#0.0,1
+$B=0.387;#0.0,1
+
+$Cnew = choose($Color, 
+	voronoi($P*$frequency,$Type,$Jitter,$fbmScale,$fbmOctaves,$fbmLacunarity,$fbmGain),
+	cvoronoi($P*$frequency,$Type,$Jitter,$fbmScale,$fbmOctaves,$fbmLacunarity,$fbmGain))
+	-> contrast($Contrast);
+$Cnew = floor($Cnew * 7 + 0.5) / 7;
+mix([$R,$G,$B],$Cnew,$Strength)->invert()
+
+
+
+
+

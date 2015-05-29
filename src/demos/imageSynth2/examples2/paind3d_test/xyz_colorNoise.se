@@ -1,0 +1,4 @@
+$xScale=1.000;
+$yScale=1.000;
+$zScale=1.000;
+cnoise([$P*10*$xScale,$P*10*$yScale,$P*10*$zScale])

@@ -12,16 +12,17 @@
 #
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
-ADD_EXECUTABLE(asciiGraph "asciiGraph.cpp")
-target_link_libraries(asciiGraph ${SEEXPR_LIBRARIES})
-install(TARGETS asciiGraph DESTINATION bin)
 
-ADD_EXECUTABLE(asciiCalc "asciiCalculator.cpp")
-target_link_libraries(asciiCalc ${SEEXPR_LIBRARIES})
-install(TARGETS asciiCalc DESTINATION bin)
+ADD_EXECUTABLE(asciiGraph2 "asciiGraph.cpp")
+target_link_libraries(asciiGraph2 ${SEEXPR_LIBRARIES})
+install(TARGETS asciiGraph2 DESTINATION bin)
+
+ADD_EXECUTABLE(asciiCalc2 "asciiCalculator.cpp")
+target_link_libraries(asciiCalc2 ${SEEXPR_LIBRARIES})
+install(TARGETS asciiCalc2 DESTINATION bin)
  
 #todo re-enable
-ADD_SUBDIRECTORY (imageSynth)
+ADD_SUBDIRECTORY (imageSynth2)
 #ADD_SUBDIRECTORY (segraph)
 #ADD_SUBDIRECTORY (rman)
 

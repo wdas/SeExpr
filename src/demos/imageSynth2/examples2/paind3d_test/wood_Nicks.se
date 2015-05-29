@@ -1,0 +1,17 @@
+$freq_fine = 0.000; #0.00,1.00
+$freq_coarse = 1.000; # 0,100
+$X = 1.000; #0.00,10.00
+$Y = 1.000; #0.00,10.00
+$Z = 1.000; #0.00,10.00
+$frequency = ($freq_fine+$freq_coarse) * [$X,$Y,$Z];
+$Strength = 1.000;
+$Contrast = 0.500;
+$fbmOctaves=6.000; #1,32
+$fbmLacunarity=4.000; #1.00,8.00
+$fbmGain=0.805;
+
+$Cnew = 
+	turbulence($P*$frequency,$fbmOctaves,$fbmLacunarity,$fbmGain)
+	-> contrast($Contrast)
+	-> clamp(0.25, 0.75);
+mix($Cs,$Cnew,$Strength)

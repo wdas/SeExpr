@@ -1,31 +1,50 @@
 /*
-* Copyright Disney Enterprises, Inc.  All rights reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License
-* and the following modification to it: Section 6 Trademarks.
-* deleted and replaced with:
-*
-* 6. Trademarks. This License does not grant permission to use the
-* trade names, trademarks, service marks, or product names of the
-* Licensor and its affiliates, except as required for reproducing
-* the content of the NOTICE file.
-*
-* You may obtain a copy of the License at
-* http://www.apache.org/licenses/LICENSE-2.0
+ SEEXPR SOFTWARE
+ Copyright 2011 Disney Enterprises, Inc. All rights reserved
+ 
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are
+ met:
+ 
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ 
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in
+ the documentation and/or other materials provided with the
+ distribution.
+ 
+ * The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
+ Studios" or the names of its contributors may NOT be used to
+ endorse or promote products derived from this software without
+ specific prior written permission from Walt Disney Pictures.
+ 
+ Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
+ CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+ BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
+ FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
+ IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
+ CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 #ifndef TYPEITERATOR_H
 #define TYPEITERATOR_H
 
-#include <SeExpression.h>
+#include <Expression.h>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
 
-#include "SeExprNode.h"
-#include "SeExprFunc.h"
+#include "ExprNode.h"
+#include "ExprFunc.h"
 #include "TypeBuilder.h"
-#include "TypeTester.h"
+
+class TypeTesterExpr; // forward declaration for parent pointer
 
 /**
    @file TypeIterator.h
@@ -43,7 +62,7 @@ class EnvironmentManager {
 
     inline void set(const std::string & from) { parent()->setVar(_name, from); };
 
-    inline SeExprType type(const std::string & from) const { return parent()->resolveVar(from)->type(); };
+    inline ExprType type(const std::string & from) const { return parent()->resolveVar(from)->type(); };
 
     inline std::string toString(const std::string & from) const { return type(from).toString(); };
 
@@ -89,7 +108,7 @@ class PrimaryTypeIterator {
     };
 
     inline int         max      () const { return _counter.max      ();         };
-    inline SeExprType  current  () const { return _manager.type     (_current); };
+    inline ExprType  current  () const { return _manager.type     (_current); };
     inline std::string toString () const { return _manager.toString (_current); };
     inline int         remaining() const { return _counter.remaining();         };
 
@@ -120,7 +139,7 @@ class LifetimeTypeIterator {
     };
 
     inline int         max      () const { return _counter.max      ();         };
-    inline SeExprType  current  () const { return _manager.type     (_current); };
+    inline ExprType  current  () const { return _manager.type     (_current); };
     inline std::string toString () const { return _manager.toString (_current); };
     inline int         remaining() const { return _counter.remaining();         };
 
@@ -162,8 +181,8 @@ class DoubleTypeIterator {
 
     inline int max() const { return _first.max() * _second.max(); };
 
-    inline SeExprType first () const { return _first .current (); };
-    inline SeExprType second() const { return _second.current (); };
+    inline ExprType first () const { return _first .current (); };
+    inline ExprType second() const { return _second.current (); };
 
     inline std::string toString() const { return (_first .toString() + " " +
                                                   _second.toString()); };
@@ -207,9 +226,9 @@ class TripleTypeIterator {
 
     inline int max() const { return _first.max() * _second.max(); };
 
-    inline SeExprType first () const { return _first .current(); };
-    inline SeExprType second() const { return _second.first  (); };
-    inline SeExprType third () const { return _second.second (); };
+    inline ExprType first () const { return _first .current(); };
+    inline ExprType second() const { return _second.first  (); };
+    inline ExprType third () const { return _second.second (); };
 
     inline std::string toString() const { return (_first .toString() + " " +
                                                   _second.toString()); };
@@ -224,7 +243,7 @@ class TripleTypeIterator {
 
 class SingleWholeTypeIterator {
  public:
-    typedef SeExprType(*ProcType)(const SeExprType &);
+    typedef ExprType(*ProcType)(const ExprType &);
 
     SingleWholeTypeIterator(const std::string & var,
                             const ProcType proc,
@@ -250,13 +269,13 @@ class SingleWholeTypeIterator {
         return remaining();
     };
 
-    inline SeExprType result() const { return _proc(current()); };
+    inline ExprType result() const { return _proc(current()); };
 
     inline const std::string givenString() const { return current().toString(); };
 
     inline int remaining() const { return _primary.remaining() + _lifetime.remaining(); };
 
-    inline SeExprType current() const {
+    inline ExprType current() const {
         if(!_switch) return _primary .current();
         else         return _lifetime.current();
     };
@@ -270,7 +289,7 @@ class SingleWholeTypeIterator {
 
 class DoubleWholeTypeIterator {
  public:
-    typedef SeExprType(*ProcType)(const SeExprType &, const SeExprType &);
+    typedef ExprType(*ProcType)(const ExprType &, const ExprType &);
 
     DoubleWholeTypeIterator(const std::string & var1,
                             const std::string & var2,
@@ -292,19 +311,19 @@ class DoubleWholeTypeIterator {
         return remaining();
     };
 
-    inline SeExprType result() const { return _proc(first(), second()); };
+    inline ExprType result() const { return _proc(first(), second()); };
 
     inline const std::string givenString() const { return (first ().toString() + " " +
                                                            second().toString()); };
 
     inline int remaining() const { return _primary.remaining() + _lifetime.remaining(); };
 
-    inline SeExprType first() const {
+    inline ExprType first() const {
         if(!_switch) return _primary .first();
         else         return _lifetime.first();
     };
 
-    inline SeExprType second() const {
+    inline ExprType second() const {
         if(!_switch) return _primary .second();
         else         return _lifetime.second();
     };
@@ -318,7 +337,7 @@ class DoubleWholeTypeIterator {
 
 class TripleWholeTypeIterator {
  public:
-    typedef SeExprType(*ProcType)(const SeExprType &, const SeExprType &, const SeExprType &);
+    typedef ExprType(*ProcType)(const ExprType &, const ExprType &, const ExprType &);
 
     TripleWholeTypeIterator(const std::string & var1,
                             const std::string & var2,
@@ -341,7 +360,7 @@ class TripleWholeTypeIterator {
         return remaining();
     };
 
-    inline SeExprType result() const { return _proc(first(), second(), third()); };
+    inline ExprType result() const { return _proc(first(), second(), third()); };
 
     inline const std::string givenString() const { return (first ().toString() + " " +
                                                            second().toString() + " " +
@@ -349,17 +368,17 @@ class TripleWholeTypeIterator {
 
     inline int remaining() const { return _primary.remaining() + _lifetime.remaining(); };
 
-    inline SeExprType first() const {
+    inline ExprType first() const {
         if(!_switch) return _primary .first();
         else         return _lifetime.first();
     };
 
-    inline SeExprType second() const {
+    inline ExprType second() const {
         if(!_switch) return _primary .second();
         else         return _lifetime.second();
     };
 
-    inline SeExprType third() const {
+    inline ExprType third() const {
         if(!_switch) return _primary .third();
         else         return _lifetime.third();
     };

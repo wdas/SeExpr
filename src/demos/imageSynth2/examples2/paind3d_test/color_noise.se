@@ -1,0 +1,77 @@
+$adjustHue = 0.000; #0.0,1.0
+$adjustSat = 0.000; #0.0, 1.0
+$adjustVal = 0.000; #0.0, 1.0
+
+$freq_fine = 0.700; #0.00,1.00
+$freq_coarse = 0.000; # 0,100
+$X = 1.000; #0.00,10.00
+$Y = 1; #0.00,10.00
+$Z = 1; #0.00,10.00
+$frequency = ($freq_fine+$freq_coarse) * [$X,$Y,$Z];
+$Strength=1.000;
+$Contrast = 1.000;
+
+
+$Chsv = rgbtohsl($Cs);
+$Cnoise = 2 * (noise($P*$frequency)-> contrast($Contrast)) - 1;
+$Chsvout = [fmod($Chsv[0] + $Cnoise[0] * $adjustHue * 0.5, 1.0),
+                  $Chsv[1] + $Cnoise[1] * ((($Cnoise[1] < 0) && ($Chsv[1] < $adjustSat)) ? $Chsv[1] : $adjustSat),
+                  $Chsv[2] + $Cnoise[2] * ((($Cnoise[2] < 0) && ($Chsv[2] < $adjustVal)) ? $Chsv[2] : $adjustVal)];
+$Chsvout = hsltorgb($Chsvout);
+mix($Cs,$Chsvout,$Strength)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+ 
+
+

@@ -13,6 +13,7 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
+
 ## CMake compatibility issues: don't modify this, please!
 CMAKE_MINIMUM_REQUIRED( VERSION 2.4.6 )
 MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
@@ -105,7 +106,7 @@ SET(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/${VARIANT_DIRECTORY}-${FLAVORDIR}"
 ## Make modules able to see partio library
 # Setup environment variable to link partio
 SET( SEEXPR_LIBRARIES SeExpr2 )
-SET( SEEXPR_EDITOR_LIBRARIES SeExprEditor )
+SET( SEEXPR_EDITOR_LIBRARIES SeExprEditor2 )
 # make it so partio can be found
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/SeExpr )
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/SeExprEditor )
@@ -123,6 +124,5 @@ ADD_SUBDIRECTORY (src/SeExprEditor)
 ADD_SUBDIRECTORY (src/tests)
 #ADD_SUBDIRECTORY (src/doc)
 ADD_SUBDIRECTORY (src/demos)
-
 
 

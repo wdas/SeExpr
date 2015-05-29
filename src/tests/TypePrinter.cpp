@@ -1,29 +1,49 @@
 /*
-* Copyright Disney Enterprises, Inc.  All rights reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License
-* and the following modification to it: Section 6 Trademarks.
-* deleted and replaced with:
-*
-* 6. Trademarks. This License does not grant permission to use the
-* trade names, trademarks, service marks, or product names of the
-* Licensor and its affiliates, except as required for reproducing
-* the content of the NOTICE file.
-*
-* You may obtain a copy of the License at
-* http://www.apache.org/licenses/LICENSE-2.0
+ SEEXPR SOFTWARE
+ Copyright 2011 Disney Enterprises, Inc. All rights reserved
+ 
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are
+ met:
+ 
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ 
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in
+ the documentation and/or other materials provided with the
+ distribution.
+ 
+ * The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
+ Studios" or the names of its contributors may NOT be used to
+ endorse or promote products derived from this software without
+ specific prior written permission from Walt Disney Pictures.
+ 
+ Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
+ CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+ BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
+ FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
+ IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
+ CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
-#include <SeExpression.h>
+#include <Expression.h>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
 
-#include "SeExprWalker.h"
-#include "SeExprNode.h"
-#include "SeExprFunc.h"
+#include "ExprWalker.h"
+#include "ExprNode.h"
+#include "ExprFunc.h"
 #include "TypeBuilder.h"
 #include "TypePrinter.h"
+
+using namespace SeExpr2;
 
 //! Simple expression class to print out all intermediate types
 class TypePrinterExpr : public TypeBuilderExpr
@@ -45,14 +65,14 @@ public:
 
 private:
     TypePrintExaminer _examiner;
-    SeExpr::ConstWalker  _walker;
+    SeExpr2::ConstWalker  _walker;
 
 protected:
-    SeExprVarRef* resolveVar(const std::string& name) const {
+    ExprVarRef* resolveVar(const std::string& name) const {
         return TypeBuilderExpr::resolveVar(name);
     };
 
-    SeExprFunc* resolveFunc(const std::string& name) const
+    ExprFunc* resolveFunc(const std::string& name) const
     {
         return TypeBuilderExpr::resolveFunc(name);
     }
@@ -98,13 +118,10 @@ int main(int argc,char *argv[])
                 std::cerr << "Expression failed: " << expr.parseError() << std::endl;
             else if(expr.returnType().isFP() && expr.returnType().dim()<=16){
 
-                double foo[16];
-                for(int c=0;c<16;c++) foo[c]=0;
-                SeExprEvalResult res(16,foo);
-                
-                expr.evalNew(res);
+
+                const double* res=expr.evalFP();
                 for(int i=0;i<expr.returnType().dim();i++){
-                    std::cerr<<res.fp[i]<<" ";
+                    std::cerr<<res[i]<<" ";
                 }
                 std::cerr<<std::endl;
             }else{

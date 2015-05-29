@@ -15,7 +15,7 @@
 
 FILE(GLOB cpp "*.cpp")
 FILE(GLOB public_includes "*.h")
-ADD_LIBRARY (SeExprEditor SHARED ${cpp})
-target_link_libraries(SeExprEditor ${SEEXPR_LIBRARIES} ${SEEXPR_EDITOR_LIBRARIES})
-INSTALL (TARGETS SeExprEditor DESTINATION  ${CMAKE_INSTALL_LIBDIR})
+ADD_LIBRARY (SeExprEditor2 SHARED ${cpp})
+target_link_libraries(SeExprEditor2 ${SEEXPR_LIBRARIES} ${SEEXPR_EDITOR_LIBRARIES})
+INSTALL (TARGETS SeExprEditor2 DESTINATION  ${CMAKE_INSTALL_LIBDIR})
 INSTALL (FILES ${public_includes} DESTINATION include)

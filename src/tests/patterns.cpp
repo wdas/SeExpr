@@ -1,44 +1,62 @@
 /*
-* Copyright Disney Enterprises, Inc.  All rights reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License
-* and the following modification to it: Section 6 Trademarks.
-* deleted and replaced with:
-*
-* 6. Trademarks. This License does not grant permission to use the
-* trade names, trademarks, service marks, or product names of the
-* Licensor and its affiliates, except as required for reproducing
-* the content of the NOTICE file.
-*
-* You may obtain a copy of the License at
-* http://www.apache.org/licenses/LICENSE-2.0
+ SEEXPR SOFTWARE
+ Copyright 2011 Disney Enterprises, Inc. All rights reserved
+ 
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are
+ met:
+ 
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ 
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in
+ the documentation and/or other materials provided with the
+ distribution.
+ 
+ * The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
+ Studios" or the names of its contributors may NOT be used to
+ endorse or promote products derived from this software without
+ specific prior written permission from Walt Disney Pictures.
+ 
+ Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
+ CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+ BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
+ FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
+ IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
+ CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
-#include <SeExpression.h>
+#include <Expression.h>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
 
-#include "SeExprWalker.h"
-#include "SeExprPatterns.h"
-#include "SeExprFunc.h"
-#include "SeControlSpec.h"
+#include "ExprWalker.h"
+#include "ExprPatterns.h"
+#include "ExprFunc.h"
+#include "ControlSpec.h"
 
 
 /**
    @file assignmentPatterns.cpp
 */
 //! Simple expression class to list out variable uses
-class PatternExpr : public SeExpression
+class PatternExpr : public Expression
 {
 public:
-    struct DummyFuncX:SeExprFuncX
+    struct DummyFuncX:ExprFuncX
     {
         DummyFuncX()
-            : SeExprFuncX(false)
+            : ExprFuncX(false)
         {};
 
-        SeExprType prep(SeExprFuncNode* node, SeExprType wanted, SeExprVarEnv & env)
+        ExprType prep(ExprFuncNode* node, ExprType wanted, ExprVarEnv & env)
         {
             bool valid=true;
             for(int i=0;i<node->numChildren();i++){
@@ -49,23 +67,23 @@ public:
         }
 
         virtual bool       isScalar() const { return true;                          };
-        virtual SeExprType retType () const { return SeExprType().FP(1).Varying(); };
+        virtual ExprType retType () const { return ExprType().FP(1).Varying(); };
 
-        void eval(const SeExprFuncNode* node,SeVec3d& result) const
-        {result=SeVec3d();}
+        void eval(const ExprFuncNode* node,Vec3d& result) const
+        {result=Vec3d();}
     } dummyFuncX;
-    mutable SeExprFunc dummyFunc;
+    mutable ExprFunc dummyFunc;
 
     //! Constructor that takes the expression to parse
     PatternExpr(const std::string& expr) :
-        SeExpression(expr), dummyFunc(dummyFuncX,0,16),
+        Expression(expr), dummyFunc(dummyFuncX,0,16),
         _examiner(),
         _walker(&_examiner)
     {};
 
     //! Empty constructor
     PatternExpr() :
-        SeExpression(), dummyFunc(dummyFuncX,0,16),
+        Expression(), dummyFunc(dummyFuncX,0,16),
         _examiner(),
         _walker(&_examiner)
     {};
@@ -87,11 +105,11 @@ private:
     };
 
     //! resolve function that only supports one external variable 'x'
-    SeExprVarRef* resolveVar(const std::string& name) const {
+    ExprVarRef* resolveVar(const std::string& name) const {
 	return 0;
     };
 
-    SeExprFunc* resolveFunc(const std::string& name) const
+    ExprFunc* resolveFunc(const std::string& name) const
     {
         return &dummyFunc;
     }

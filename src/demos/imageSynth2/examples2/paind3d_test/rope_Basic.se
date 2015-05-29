@@ -1,0 +1,28 @@
+##  Expression for making the threads on a bolt or screw or any kind of swirly pattern on a cylindrical shape.
+
+$length_xyz = 0; #0,2 
+$width1_xyz = 1; #0,2 
+$width2_xyz = 2; #0,2 
+
+$x1 = choose($width1_xyz/2,$P[0],$P[1],$P[2]);
+$y1 = choose($width2_xyz/2,$P[0],$P[1],$P[2]);
+$ss = choose($length_xyz/2,$P[0],$P[1],$P[2]);
+
+$x = $x1;
+$y = $y1;
+
+$tt = ($x > 0 && $y >= 0) ? atan($y/$x): 
+	($x > 0 && $y < 0) ? atan($y/$x) + 2*PI :
+	($x <0) ? atan($y/$x) + PI :
+	($x == 0 && $y > 0) ? PI/2:
+	($x == 0 && $y < 0) ? 3*PI/2: 0;
+$tt = $tt/(2*PI);
+
+$twist =1.000; # 1,200.00
+$threadCount =1.000; #1,20.00
+$grooveShape =2.000; #0.1,10.00  
+$disp = ($ss*$threadCount - $tt*$twist)%1;
+$disp = (($disp -.5)*2) -> abs() -> pow($grooveShape) -> invert();
+
+$disp
+
