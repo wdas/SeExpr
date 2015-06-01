@@ -20,5 +20,5 @@ clean:
 
 install: all
 	cd build; make install
-	pkgconfig-gen --name SeExpr --desc 'SeExpr Library' \
+	pkgconfig-gen --name seexpr2 --desc 'SeExpr v2 Library' \
 		--generate --destdir '$(DESTDIR)' --prefix $(prefix) --libdir $(libdir)
