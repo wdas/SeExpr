@@ -90,7 +90,7 @@ ENDIF(NOT WIN32)
 ## Install binary and includes
 FILE(GLOB public_includes "*.h")
 INSTALL (TARGETS SeExpr2 DESTINATION ${CMAKE_INSTALL_LIBDIR})
-INSTALL (FILES ${public_includes} DESTINATION include)
+INSTALL (FILES ${public_includes} DESTINATION include/SeExpr2)
 
 if (ENABLE_LLVM_BACKEND)
 ## remove conditional inlucde in header file

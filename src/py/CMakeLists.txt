@@ -9,11 +9,11 @@ string(REGEX REPLACE "[ ]-I" " " PYTHON_INCLUDE_DIR "${PYTHON_INCLUDE_DIR}")
 separate_arguments(PYTHON_INCLUDE_DIR)
 
 message(${PYTHON_INCLUDE_DIR})
-find_package_handle_standard_args(PythonDev DEFAULT_MSG
-    PYTHON_CONFIG
-    PYTHON_INCLUDE_DIR
-    PYTHON_LIBRARIES
-)
+#find_package_handle_standard_args(PythonDev DEFAULT_MSG
+#    PYTHON_CONFIG
+#    PYTHON_INCLUDE_DIR
+#    PYTHON_LIBRARIES
+#)
 #FIND_PACKAGE(PythonLibs)
 #IF(PYTHONLIBS_FOUND)
 SET(PYTHON_DEST "lib64/python${PYTHON_VERSION}/site-packages" CACHED)

@@ -21,7 +21,7 @@ include_directories(BEFORE ${GTEST_INCLUDE_DIR})
 ADD_EXECUTABLE("testmain" "testmain.cpp" "basic.cpp" "typeTests.cpp"
 "multiTests.cpp")
 target_link_libraries("testmain" gtest gmock ${SEEXPR_LIBRARIES} ${SEEXPR_EDITOR_LIBRARIES})
-install(TARGETS "testmain" DESTINATION test)
+install(TARGETS "testmain" DESTINATION share/SeExpr2/test)
 
 
 #set(TOOLS listVar patterns TypePrinter eval)

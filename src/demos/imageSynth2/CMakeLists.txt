@@ -32,5 +32,5 @@ IF(PNG_FOUND)
     install(TARGETS imageSynthLLVMPaint3d DESTINATION bin)
     endif()
 
-    install(DIRECTORY examples2 DESTINATION share/demos/imageSynth USE_SOURCE_PERMISSIONS)
+    install(DIRECTORY examples2 DESTINATION share/SeExpr2/demos/imageSynth USE_SOURCE_PERMISSIONS)
 ENDIF(PNG_FOUND)

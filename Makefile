@@ -2,6 +2,9 @@ FLAVOR ?= optimize
 prefix ?= $(shell pf-makevar --absolute root)
 libdir ?= $(shell pf-makevar lib)
 
+CXX=/opt/rh/devtoolset-2/root/usr/bin/g++
+
+
 ## Temporary staging directory
 # DESTDIR =
 
@@ -12,7 +15,8 @@ export prefix DESTDIR
 
 all:
 	mkdir -p build
-	cd build && cmake -DCMAKE_INSTALL_PREFIX=$(prefix) -DCMAKE_INSTALL_LIBDIR=$(libdir) ../
+	export CXX=${CXX}
+	cd build &&  CXX=${CXX} cmake -DCMAKE_INSTALL_PREFIX=$(prefix) -DCMAKE_INSTALL_LIBDIR=$(libdir) ../
 	#cd build && cmake -DCMAKE_INSTALL_PREFIX=$(prefix) -DCMAKE_INSTALL_LIBDIR=$(libdir) -DENABLE_LLVM_BACKEND=ON -DLLVM_ROOT="/home/fahome/yuanfanc/Install" ../
 	cd build && make -j 32 # && make doc
 clean:

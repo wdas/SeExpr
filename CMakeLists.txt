@@ -13,7 +13,6 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
-
 ## CMake compatibility issues: don't modify this, please!
 CMAKE_MINIMUM_REQUIRED( VERSION 2.4.6 )
 MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
@@ -60,7 +59,7 @@ SET( ${PROJECT_NAME}_MAJOR_VERSION 0 )
 SET( ${PROJECT_NAME}_MINOR_VERSION 1 )
 SET( ${PROJECT_NAME}_PATCH_LEVEL 0 )
 
-## policies     
+## policies
 if(COMMAND cmake_policy)
       cmake_policy(SET CMP0003 NEW)
     endif(COMMAND cmake_policy)
@@ -73,7 +72,7 @@ ELSE(WIN32)
   ADD_DEFINITIONS (-Wall -Wextra -Wno-unused-parameter)
   ADD_DEFINITIONS (-pthread)
 
-  SET( CMAKE_CXX_FLAGS "-fPIC -g -rdynamic")
+  SET( CMAKE_CXX_FLAGS "-fPIC -g -rdynamic --std=c++11")
 ENDIF(WIN32)
 
 ## Choose build options
@@ -99,15 +98,17 @@ ENDIF(CMAKE_BUILD_TYPE STREQUAL "Release")
 
 
 ## Set install location
-EXECUTE_PROCESS(COMMAND sh -c "echo `uname`-`uname -r | cut -d'-' -f1`-`uname -m`" OUTPUT_VARIABLE VARIANT_DIRECTORY OUTPUT_STRIP_TRAILING_WHITESPACE)
-#EXECUTE_PROCESS(COMMAND uname OUTPUT_VARIABLE VARIANT_DIRECTORY OUTPUT_STRIP_TRAILING_WHITESPACE)
-SET(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/${VARIANT_DIRECTORY}-${FLAVORDIR}")
+IF (NOT DEFINED CMAKE_INSTALL_PREFIX)
+   EXECUTE_PROCESS(COMMAND sh -c "echo `uname`-`uname -r | cut -d'-' -f1`-`uname -m`" OUTPUT_VARIABLE VARIANT_DIRECTORY OUTPUT_STRIP_TRAILING_WHITESPACE)
+   #EXECUTE_PROCESS(COMMAND uname OUTPUT_VARIABLE VARIANT_DIRECTORY OUTPUT_STRIP_TRAILING_WHITESPACE)
+   SET(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/${VARIANT_DIRECTORY}-${FLAVORDIR}")
+ENDIF(NOT DEFINED CMAKE_INSTALL_PREFIX)
 
-## Make modules able to see partio library
-# Setup environment variable to link partio
+## Make modules able to see seexpr library
+# Setup environment variable to link seexpr
 SET( SEEXPR_LIBRARIES SeExpr2 )
 SET( SEEXPR_EDITOR_LIBRARIES SeExprEditor2 )
-# make it so partio can be found
+# make it so seexpr can be found
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/SeExpr )
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/SeExprEditor )
 
@@ -122,6 +123,7 @@ ADD_SUBDIRECTORY (src/SeExpr)
 ADD_SUBDIRECTORY (src/SeExprEditor)
 # TODO: re-enable
 ADD_SUBDIRECTORY (src/tests)
+ADD_SUBDIRECTORY (src/py)
 #ADD_SUBDIRECTORY (src/doc)
 ADD_SUBDIRECTORY (src/demos)
 
