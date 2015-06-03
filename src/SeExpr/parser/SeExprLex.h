@@ -137,12 +137,12 @@ public:
                 }
             }
             for(;  *endLine != '\0' && *endLine != '\n'; endLine++);
-            std::cerr<<"startLine "<<start<<std::endl;
+            //std::cerr<<"startLine "<<start<<std::endl;
             std::string newString(startLine+1,endLine); //-startLine+1);
             std::stringstream ss;
-            ss<<"Line "<<line<<": \n\n"<<newString<<"\n";
+            ss<<"Line "<<line<<": \n"<<newString<<"\n";
             ss<<std::string(offset-1,' ')<<std::string(std::max(1,position[1]-position[0]),'^')<<"\n";
-            ss<<std::string(offset-1,'_')<<std::string(std::max(1,position[1]-position[0]),'|')<<"\n";
+            //ss<<std::string(offset-1,'_')<<std::string(std::max(1,position[1]-position[0]),'|')<<"\n";
             return ss.str();
         }
 
@@ -199,6 +199,8 @@ public:
             if(buffer()=='$') ++buffer;
             for(;isalpha(buffer()) || buffer() == '_' || isdigit(buffer());++buffer) ident.push_back(buffer());
             auto it=reservedWords.find(ident);
+            if(ident.empty()) throw ParseError("Variable has no text length! hint: ${frame} should be substituted upstream"
+                +buffer.underlineToken(buffer.getTokenPosition()));
             return it==reservedWords.end() ? IDENT : it->second;
         }
 
@@ -211,7 +213,8 @@ public:
                     ++buffer;
                     s.push_back(buffer());
                 }else if(buffer()=='\n' || buffer()=='\0'){
-                    throw std::runtime_error("unterminated string at '"+s+"'");
+                    throw ParseError("unterminated string at '"+s+"'"
+                        +buffer.underlineToken(buffer.getTokenPosition()));
                     return END_OF_BUFFER;
                 }else if(buffer()=='"' || buffer()=='\''){
                     ++buffer;
@@ -264,7 +267,8 @@ public:
         }
 
         if(buffer()=='\0') return END_OF_BUFFER;
-        throw std::runtime_error("Invalid token");
+        throw ParseError("Invalid token "+buffer.underlineToken(buffer.getTokenPosition()));
+
     }
 
     int readDigits(std::string& numBuf){

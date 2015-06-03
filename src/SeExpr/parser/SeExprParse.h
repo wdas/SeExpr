@@ -41,13 +41,14 @@ public:
         lookAheadToken=lexer.getToken();
         lookAheadTokenText=lexer.getTokenText();
         lookAheadTokenPosition=lexer.getTokenPosition();
+        // DEBUG: std::cerr<<"token is "<<tokenText<<std::endl;
     }
 
     NodePtr parse(){
         getToken(); 
         getToken();
         NodePtr tree = module();
-        if(token != Lexer::END_OF_BUFFER) throw ParseError("Extra tokens at the end of the expression");
+        if(token != Lexer::END_OF_BUFFER) throw ParseError("Parse error, unexpected continued tokens!");
         return tree;
     }  
 
@@ -72,26 +73,30 @@ public:
         getToken();
     }
     void ensureNextTwoTokens(Lexer::Token token1,Lexer::Token token2, const std::string& msg){
-        if(token!=token1 && lookAheadToken!=token2) throw ParseError(msg);
+        if(token!=token1 && lookAheadToken!=token2) throw ParseError(msg+"\n"+lexer.underlineToken(tokenPosition));
     }
     NodePtr declaration(){
         RangeC rangec(oldTokenPosition,tokenPosition);
         ensureAndGetToken(token==Lexer::DEF, "Expected the word 'def' in declaration");
         if(token!=Lexer::IDENT) typeDeclare();
         ensureAndGetToken(token==Lexer::IDENT, "Expected identifier");
-        ensure(token==Lexer::PAREN_OPEN, "Expected open parentheses for function declaration");
+        ensureAndGetToken(token==Lexer::PAREN_OPEN, "Expected open parentheses for function declaration");
         typeList();
         ensureAndGetToken(token==Lexer::PAREN_CLOSE, "Expected close parentheses for function declaration");
-        // TODO: fix
-        assert(false);
-        //return NodePtr(new typename Policy::Base(rangec(),"declare"));
+
+        assignBlock(true);
+        
+        // TODO: return real types here instead of dummy
+        return NodePtr(new typename Policy::Def(rangec()));
     }
 
     void typeDeclare(){
         ensureAndGetToken(token==Lexer::STRING || token==Lexer::FLOAT, "Expected type 'FLOAT' or type 'STRING'");
-        ensureAndGetToken(token==Lexer::BRACKET_OPEN, "Expected '['");
-        ensureAndGetToken(token==Lexer::NUM, "Expected number between brackets in type declaration");
-        ensureAndGetToken(token==Lexer::BRACKET_CLOSE, "Expected closing ']'");
+        if(token==Lexer::BRACKET_OPEN){
+            getToken();
+            ensureAndGetToken(token==Lexer::NUM, "Expected number between brackets in type declaration");
+            ensureAndGetToken(token==Lexer::BRACKET_CLOSE, "Expected closing ']'");
+        }
         lifetimeOptional();
     }
 
@@ -102,8 +107,14 @@ public:
     }
 
     void typeList(){
-        while(token==Lexer::STRING || token==Lexer::FLOAT)
+        while(token!=Lexer::PAREN_CLOSE){
             typeDeclare();
+            ensureAndGetToken(token==Lexer::IDENT,"Need variable name in formal parameter declaration");
+            if(token==Lexer::COMMA) getToken();
+            else if(token==Lexer::PAREN_CLOSE) break;
+            else throw ParseError(std::string("Expected a comma or parentheses close here\n")
+                +lexer.underlineToken(tokenPosition));
+        }
     }
 
     bool isAssignOrMutator(Lexer::Token t) const{
@@ -146,7 +157,8 @@ public:
     args: expr {, expr}*
 */
 
-    // expr:  expr1 { -> IDENT (args) }*
+    /// expr: expr1 -> expr   (nominally)
+    // NOTE: expr must contain IDENT PARENOPEN immediately next in the token stream
     NodePtr expr(){
         RangeC rangec(oldTokenPosition,tokenPosition);
         NodePtr parent=expr1();
@@ -154,15 +166,9 @@ public:
             getToken();
             std::string identName=tokenText;
             ensureNextTwoTokens(Lexer::IDENT,Lexer::PAREN_OPEN,"Arrow operator requires function call immediately after '->' operator");
-            if(curriedArgument.get()) throw ParseError("Expected only one curriedArgument in flight, call developers fast.");
+            if(curriedArgument.get()) throw ParseError(std::string("Expected only one curriedArgument in flight, call developers fast.")+"\n"+lexer.underlineToken(tokenPosition));
             curriedArgument=std::move(parent);
             return expr();
-            //NodePtr arg=std::move(parent);
-            //parent=NodePtr(new typename Policy::Call(rangec(),identName));
-            //parent->addChild(std::move(arg));
-            //functionArgs(parent);
-            //ensureAndGetToken(token==Lexer::PAREN_CLOSE, "Expected closing parentheses in -> call");
-            //parent->setRange(rangec.toPrevious());
         }else
             return parent;
     }
@@ -420,12 +426,15 @@ public:
         return assignNode;
     }
 
-    NodePtr assignBlock(){
+    NodePtr assignBlock(bool exprAtEnd){
         RangeC rangec(oldTokenPosition,tokenPosition);
         NodePtr assigns(new typename Policy::Node(rangec()));
         ensureAndGetToken(token == Lexer::BRACE_OPEN, "Expected opening braces after if condition");
-        while(token == Lexer::IDENT){
+        while(token == Lexer::IDENT && isAssignOrMutator(lookAheadToken)){
             assigns->addChild(assign());
+        }
+        if(exprAtEnd){
+            assigns->addChild(expr());
         }
         ensureAndGetToken(token == Lexer::BRACE_CLOSE, "Expected opening braces after statements");
         assigns->setRange(rangec.toPrevious());
@@ -440,11 +449,11 @@ public:
         ensureAndGetToken(token == Lexer::PAREN_CLOSE, "Expected closing parentheses after if condition");
         // optionally handle assignments
         NodePtr ifthenelseNode(new typename Policy::IfThenElse(rangec(),condition));
-        ifthenelseNode->addChild(assignBlock());
+        ifthenelseNode->addChild(assignBlock(false));
         if(token == Lexer::ELSE){
             getToken();
             if(token == Lexer::IF) ifthenelseNode->addChild(ifthenelse());
-            else ifthenelseNode->addChild(assignBlock());
+            else ifthenelseNode->addChild(assignBlock(false));
         }else{
             NodePtr emptyNode(new typename Policy::Node({0,0}));
             ifthenelseNode->addChild(std::move(emptyNode));

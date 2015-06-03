@@ -19,13 +19,13 @@ enum class ASTType{
     BinaryOp,
     CompareEq,
     TernaryOp,
-    Func,
     Subscript,
     Var,
     Num,
     Call,
     Assign,
-    String
+    String,
+    Def
 };
 inline const char* ASTTypeToString(ASTType type){
     switch(type){
@@ -43,13 +43,13 @@ inline const char* ASTTypeToString(ASTType type){
     case ASTType::BinaryOp:  return "BinaryOp";
     case ASTType::CompareEq:  return "CompareEq";
     case ASTType::TernaryOp:  return "TernaryOp";
-    case ASTType::Func:  return "Func";
     case ASTType::Subscript:  return "Subscript";
     case ASTType::Var:  return "Var";
     case ASTType::Num:  return "Num";
     case ASTType::Call:  return "Call";
     case ASTType::Assign:  return "Assign";
     case ASTType::String:  return "String";
+    case ASTType::Def:  return "Def";
     }
     return "<invalid>";
 }
@@ -179,8 +179,8 @@ struct ASTPolicy{
     SEEXPR_AST_SUBCLASS_OP(BinaryOp);
     SEEXPR_AST_SUBCLASS_OP(CompareEq);
     SEEXPR_AST_SUBCLASS_OP(TernaryOp);
-    SEEXPR_AST_SUBCLASS(Func);
     SEEXPR_AST_SUBCLASS(Subscript);
+    SEEXPR_AST_SUBCLASS(Def);
 
     struct String : public Base {
         String(const Range& range,const std::string& s): Base(range,ASTType::String),s(s){}

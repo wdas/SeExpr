@@ -53,14 +53,12 @@ std::string Lexer::getTokenName(Token tok){
     return tokenNames[tok];
 }
 
-    
 std::map<std::string,Lexer::Token> Lexer::reservedWords;
 void Lexer::populateReservedWords(){
     static bool initialized=false;
     if(!initialized){
         // TODO: acquire mutex
         initialized=true;
-        std::cerr<<"rewriting and initializing reserved words"<<std::endl;
         reservedWords["extern"]=EXTERN;
         reservedWords["def"]=DEF;
         reservedWords["FLOAT"]=FLOAT;
