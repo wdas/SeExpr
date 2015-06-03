@@ -6,6 +6,8 @@
 
 class AST;
 
+// A handle to hold ASTNodes. It holds a shared_ptr of the root ASTNode to make lifetime of the whole tree held
+// to lifetime of this node.
 class ASTHandle{
 public:
 
@@ -25,8 +27,11 @@ public:
 
     boost::python::object value() const{
         boost::python::object object;
+        //exit(1);
         if(!node) return object;
         switch(node->type()){
+            case ASTType::Assign:return boost::python::str(static_cast<typename ASTPolicy::Assign*>(node)->value());
+            case ASTType::Var:return boost::python::str(static_cast<typename ASTPolicy::Var*>(node)->value());
             case ASTType::Call:return boost::python::str(static_cast<typename ASTPolicy::Call*>(node)->value());
             case ASTType::String:return boost::python::str(static_cast<typename ASTPolicy::String*>(node)->value());
             case ASTType::Num: return boost::python::object(static_cast<typename ASTPolicy::Num*>(node)->value());
@@ -50,6 +55,7 @@ private:
     ASTNode* node; // This is safe, because this lifetime is at least as long as expr
 };
 
+/// Hold an AST class
 class AST{
 public:
     AST(const std::string& s)
@@ -68,51 +74,16 @@ public:
         return !!_root;
     }
 
-#if 0 // Do this in python
-    void allCallsHelper(ASTNode* node,boost::python::list& ret){
-        if(node->type()==ASTType::Call) ret.append(new ASTHandle(_root,node));
-        for(const auto& it: node->children()) allCallsHelper(it.get(),ret);
-    }
-    boost::python::list allCalls(){
-        boost::python::list ret;
-        if(_root) allCallsHelper(_root.get(),ret);
-        return ret;
-    }
-#endif
-
-
     std::shared_ptr<ASTNode> _root;
     std::string _expressionString;
 };
-
-
-
-#if 0
-class Syntax {
-public:
-    //std::shared_ptr<SyntaxNode> getRoot(){}
-    Syntax(const std::string& exprString)
-        :expr(new expr(exprString))
-    {}
-    bool isValid(){return expr ? expr->isValid() : false;}
-    const std::string parseError(){return expr ? expr->parseError() : "No expression object";}
-    std::shared_ptr<ASTHandle> getRoot(){
-        std::shared_ptr<ASTHandle> ast;
-        //return expr
-        //return ast;
-    }
-private:
-    std::shared_ptr<AST> expr;
-};
-#endif
 
 void translateParseError(ParseError const& e){
     PyErr_SetString(PyExc_RuntimeError,e.what().c_str());
 }
 
-
 using namespace boost::python;
-BOOST_PYTHON_MODULE(SeExprPy){
+BOOST_PYTHON_MODULE(core){
     register_exception_translator<ParseError>(&translateParseError);
     class_<AST>("AST", init<std::string>())
         .def("isValid",&AST::isValid)
@@ -142,7 +113,7 @@ BOOST_PYTHON_MODULE(SeExprPy){
     .value("BinaryOp",ASTType::BinaryOp)
     .value("CompareEq",ASTType::CompareEq)
     .value("TernaryOp",ASTType::TernaryOp)
-    .value("Func",ASTType::Func)
+    .value("Def",ASTType::Def)
     .value("Subscript",ASTType::Subscript)
     .value("Var",ASTType::Var)
     .value("Num",ASTType::Num)
