@@ -757,7 +757,7 @@ static const char* vnoise_docstring=
             for (double j = -1; j <= 1; j++) {
                 for (double k = -1; k <= 1; k++, n++) {
                     Vec3d testcell = cell + Vec3d(i,j,k);
-                    data.points[n] = testcell + jitter * (ccellnoise(testcell - Vec3d(.5)));
+                    data.points[n] = testcell + jitter * (ccellnoise(testcell) - Vec3d(.5));
                 }
             }
         }
