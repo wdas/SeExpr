@@ -64,7 +64,6 @@ if(COMMAND cmake_policy)
       cmake_policy(SET CMP0003 NEW)
     endif(COMMAND cmake_policy)
 
-
 ## Setup platform specific helper defines build variants
 IF(WIN32)
   ADD_DEFINITIONS (-DSEEXPR_WIN32)
@@ -72,7 +71,7 @@ ELSE(WIN32)
   ADD_DEFINITIONS (-Wall -Wextra -Wno-unused-parameter)
   ADD_DEFINITIONS (-pthread)
 
-  SET( CMAKE_CXX_FLAGS "-fPIC -g -rdynamic --std=c++11")
+  SET( CMAKE_CXX_FLAGS "-fPIC -g -rdynamic --std=c++11 -msse4.1")
 ENDIF(WIN32)
 
 ## Choose build options
