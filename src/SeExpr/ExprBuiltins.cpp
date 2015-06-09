@@ -757,7 +757,7 @@ static const char* vnoise_docstring=
             for (double j = -1; j <= 1; j++) {
                 for (double k = -1; k <= 1; k++, n++) {
                     Vec3d testcell = cell + Vec3d(i,j,k);
-                    data.points[n] = testcell + jitter * (ccellnoise(testcell - Vec3d(.5)));
+                    data.points[n] = testcell + jitter * (ccellnoise(testcell) - Vec3d(.5));
                 }
             }
         }
@@ -1013,10 +1013,10 @@ static const char* vnoise_docstring=
 
     double dist(double ax, double ay, double az, double bx, double by, double bz)
     {
-	double x = ax-bx;
-	double y = ay-by;
-	double z = az-bz;
-	return sqrt(x*x + y*y + z*z);
+        double x = ax-bx;
+        double y = ay-by;
+        double z = az-bz;
+        return sqrt(x*x + y*y + z*z);
     }
     static const char* dist_docstring=
         "float dist(vector a, vector b)\n"
@@ -1025,7 +1025,7 @@ static const char* vnoise_docstring=
 
     double length(const Vec3d& v)
     {
-	return sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+        return sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
     }
     static const char* length_docstring=
         "float length(vector v)\n"
@@ -1034,7 +1034,7 @@ static const char* vnoise_docstring=
 
     double hypot(double x, double y)
     {
-	return sqrt(x*x+y*y);
+        return sqrt(x*x+y*y);
     }
     static const char* hypot_docstring=
         "float hypot(vector v)\n"
@@ -1042,7 +1042,7 @@ static const char* vnoise_docstring=
 
     double dot(const Vec3d& a, const Vec3d& b)
     {
-	return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+        return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
     }
     static const char* dot_docstring=
         "float dot(vector a,vector b)\n"
@@ -1051,9 +1051,9 @@ static const char* vnoise_docstring=
 
     Vec3d norm(const Vec3d& a)
     {
-	double len = length(a);
-	if (len == 0) return 0.0;
-	else return a / len;
+        double len = length(a);
+        if (len == 0) return 0.0;
+        else return a / len;
     }
     static const char* norm_docstring=
         "vector norm(vector v)\n"
@@ -1062,9 +1062,9 @@ static const char* vnoise_docstring=
 
     Vec3d cross(const Vec3d& a, const Vec3d& b)
     {
-	return Vec3d(a[1]*b[2] - a[2]*b[1],
-		       a[2]*b[0] - a[0]*b[2],
-		       a[0]*b[1] - a[1]*b[0]);
+        return Vec3d(a[1]*b[2] - a[2]*b[1],
+                     a[2]*b[0] - a[0]*b[2],
+                     a[0]*b[1] - a[1]*b[0]);
     }
     static const char* cross_docstring=
         "vector cross(vector a,vector b)\n"
@@ -1072,9 +1072,9 @@ static const char* vnoise_docstring=
 
     double angle(const Vec3d& a, const Vec3d& b)
     {
-	double len = length(a)*length(b);
-	if (len == 0) return 0;
-	return acos(dot(a,b) / len);
+        double len = length(a)*length(b);
+        if (len == 0) return 0;
+        return acos(dot(a,b) / len);
     }
     static const char* angle_docstring=
         "float angle(vector a,vector b)\n"
@@ -1084,7 +1084,7 @@ static const char* vnoise_docstring=
 
     Vec3d ortho(const Vec3d& a, const Vec3d& b)
     {
-	return norm(cross(a,b));
+        return norm(cross(a,b));
     }
     static const char* ortho_docstring=
         "vector angle(vector a,vector b)\n"
@@ -1093,13 +1093,13 @@ static const char* vnoise_docstring=
 
     Vec3d rotate(int n, const Vec3d* args)
     {
-	if (n != 3) return 0.0;
-	const Vec3d& P = args[0];
-	const Vec3d& axis = args[1];
-	float angle = args[2][0];
-	double len = axis.length(); 
-	if (!len) return P;
-	return P.rotateBy(axis/len, angle);
+        if (n != 3) return 0.0;
+        const Vec3d& P = args[0];
+        const Vec3d& axis = args[1];
+        float angle = args[2][0];
+        double len = axis.length(); 
+        if (!len) return P;
+        return P.rotateBy(axis/len, angle);
     }
     static const char* rotate_docstring=
         "vector rotate(vector v,vector axis,float angle)\n"
@@ -1108,9 +1108,9 @@ static const char* vnoise_docstring=
 
     Vec3d up(const Vec3d& P, const Vec3d& upvec)
     {
-	// rotate vec so y-axis points to upvec
-	Vec3d yAxis(0,1,0);
-	return P.rotateBy(ortho(upvec, yAxis), angle(upvec, yAxis));
+        // rotate vec so y-axis points to upvec
+        Vec3d yAxis(0,1,0);
+        return P.rotateBy(ortho(upvec, yAxis), angle(upvec, yAxis));
     }
     static const char* up_docstring=
         "vector up(vector P,vector upvec)\n"
@@ -1118,13 +1118,13 @@ static const char* vnoise_docstring=
 
     double cycle(double index, double loRange, double hiRange)
     {
-	int lo = int(loRange);
-	int hi = int(hiRange);
-	int range = hi - lo + 1;
-	if (range <= 0) return lo;
-	int result = int(index) % range;
-	if (result < 0) result += range;
-	return lo + result;
+        int lo = int(loRange);
+        int hi = int(hiRange);
+        int range = hi - lo + 1;
+        if (range <= 0) return lo;
+        int result = int(index) % range;
+        if (result < 0) result += range;
+        return lo + result;
     }
     static const char* cycle_docstring=
         "int cycle(int index, int loRange, int hiRange )\n"
@@ -1135,49 +1135,49 @@ static const char* vnoise_docstring=
 
     double pick(int n, double* params)
     {
-	if (n < 3) return 0;
-	double index = hash(1, &params[0]);
-	int loRange = int(params[1]);
-	int hiRange = int(params[2]);
-	int range = hiRange-loRange+1;
-	if (range <= 0) return loRange;
-	int numWeights = n-3;
-	if (numWeights > range) numWeights = range;
-	
-	// build cutoff points based on weights
-	double* cutoffs = (double*) alloca(sizeof(double)*range);
-	double* weights = (double*) alloca(sizeof(double)*range);
-	double total = 0;
-	for (int i = 0; i < range; i++) {
-	    double weight = i < numWeights ? params[i+3] : 1;
-	    total += weight;
-	    cutoffs[i] = total;
-	    weights[i] = weight;
-	}
+        if (n < 3) return 0;
+        double index = hash(1, &params[0]);
+        int loRange = int(params[1]);
+        int hiRange = int(params[2]);
+        int range = hiRange-loRange+1;
+        if (range <= 0) return loRange;
+        int numWeights = n-3;
+        if (numWeights > range) numWeights = range;
 
-	if (total == 0) return loRange;
+        // build cutoff points based on weights
+        double* cutoffs = (double*) alloca(sizeof(double)*range);
+        double* weights = (double*) alloca(sizeof(double)*range);
+        double total = 0;
+        for (int i = 0; i < range; i++) {
+            double weight = i < numWeights ? params[i+3] : 1;
+            total += weight;
+            cutoffs[i] = total;
+            weights[i] = weight;
+        }
 
-	// scale value from [0..1] to [0..total] range
-	index *= total;
-    
-	// bsearch cutoff table to find index that spans value
-	int lo = 0, hi = range-1;
-	while (lo < hi) {
-	    int m = (lo+hi)/2;
-	    if (index <= cutoffs[m]) hi = m;
-	    else lo = m+1;
-	}
+        if (total == 0) return loRange;
 
-	// skip zero-length intervals
-	if (weights[lo] == 0) {
-	    if (lo > 0 && cutoffs[lo] > 0) // scan backward if possible
-		while (--lo > 0 && weights[lo] == 0) ;
-	    else if (lo < range-1)	// else scan forward if possible
-		while (++lo < range-1 && weights[lo] == 0) ;
-	}
+        // scale value from [0..1] to [0..total] range
+        index *= total;
 
-	// add offset and return result
-	return loRange + lo;
+        // bsearch cutoff table to find index that spans value
+        int lo = 0, hi = range-1;
+        while (lo < hi) {
+            int m = (lo+hi)/2;
+            if (index <= cutoffs[m]) hi = m;
+            else lo = m+1;
+        }
+
+        // skip zero-length intervals
+        if (weights[lo] == 0) {
+            if (lo > 0 && cutoffs[lo] > 0) // scan backward if possible
+                while (--lo > 0 && weights[lo] == 0) ;
+            else if (lo < range-1)	// else scan forward if possible
+                while (++lo < range-1 && weights[lo] == 0) ;
+        }
+
+        // add offset and return result
+        return loRange + lo;
     }
     static const char* pick_docstring=
         "int pick(float index, int loRange, int hiRange, [float weights, ...] )\n"
@@ -1189,10 +1189,12 @@ static const char* vnoise_docstring=
 
     double choose(int n, double* params)
     {
-	if (n < 3) return 0;
-	double key = params[0];
-	int nvals = n - 1;
-	return params[1+int(clamp(key * nvals, 0, nvals-1))];
+        if (n < 3) return 0;
+        double key = params[0];
+        // NaN protection
+        if (key != key) return 0;
+        int nvals = n - 1;
+        return params[1+int(clamp(key * nvals, 0, nvals-1))];
     }
     static const char* choose_docstring=
         "float choose(float index,float choice1, float choice2, [...])\n"
@@ -1201,44 +1203,46 @@ static const char* vnoise_docstring=
 
     double wchoose(int n, double* params)
     {
-	if (n < 5) return 0;
-	double key = params[0];
-	int nvals = (n - 1) / 2; // nweights = nvals
-	
-	// build cutoff points based on weights
-	double* cutoffs = (double*) alloca(sizeof(double)*nvals);
-	double* weights = (double*) alloca(sizeof(double)*nvals);
-	double total = 0;
-	for (int i = 0; i < nvals; i++) {
-	    double weight = params[i*2+2];
-	    total += weight;
-	    cutoffs[i] = total;
-	    weights[i] = weight;
-	}
+        if (n < 5) return 0;
+        double key = params[0];
+        // NaN protection
+        if (key != key) return 0;
+        int nvals = (n - 1) / 2; // nweights = nvals
 
-	if (total == 0) return params[1];
+        // build cutoff points based on weights
+        double* cutoffs = (double*) alloca(sizeof(double)*nvals);
+        double* weights = (double*) alloca(sizeof(double)*nvals);
+        double total = 0;
+        for (int i = 0; i < nvals; i++) {
+            double weight = params[i*2+2];
+            total += weight;
+            cutoffs[i] = total;
+            weights[i] = weight;
+        }
 
-	// scale value from [0..1] to [0..total] range
-	key *= total;
-    
-	// bsearch cutoff table to find index that spans value
-	int lo = 0, hi = nvals-1;
-	while (lo < hi) {
-	    int m = (lo+hi)/2;
-	    if (key <= cutoffs[m]) hi = m;
-	    else lo = m+1;
-	}
+        if (total == 0) return params[1];
 
-	// skip zero-length intervals
-	if (weights[lo] == 0) {
-	    if (lo > 0 && cutoffs[lo] > 0) // scan backward if possible
-		while (--lo > 0 && weights[lo] == 0) ;
-	    else if (lo < nvals-1)	// else scan forward if possible
-		while (++lo < nvals-1 && weights[lo] == 0) ;
-	}
+        // scale value from [0..1] to [0..total] range
+        key *= total;
 
-	// return corresponding value
-	return params[lo*2+1];
+        // bsearch cutoff table to find index that spans value
+        int lo = 0, hi = nvals-1;
+        while (lo < hi) {
+            int m = (lo+hi)/2;
+            if (key <= cutoffs[m]) hi = m;
+            else lo = m+1;
+        }
+
+        // skip zero-length intervals
+        if (weights[lo] == 0) {
+            if (lo > 0 && cutoffs[lo] > 0) // scan backward if possible
+                while (--lo > 0 && weights[lo] == 0) ;
+            else if (lo < nvals-1)	// else scan forward if possible
+                while (++lo < nvals-1 && weights[lo] == 0) ;
+        }
+
+        // return corresponding value
+        return params[lo*2+1];
     }
     static const char* wchoose_docstring=
         "float wchoose(float index,float choice1, float weight1, float choice2, float weight2, [...] )\n"
@@ -1247,20 +1251,20 @@ static const char* vnoise_docstring=
 
     double spline(int n, double* params)
     {
-	if (n < 5) return 0;
-	double u = clamp(params[0], 0, 1);
-	if (u == 0) return params[2];
-	if (u == 1) return params[n-2];
-	int nsegs = n - 4;
-	double seg;
-	u = modf(u * nsegs, &seg);
-	double* p = &params[int(seg) + 1];
-	double u2 = u*u;
-	double u3 = u2*u;
-	return 0.5 * (p[0] * (  -u3 + 2*u2 - u) +
-		      p[1] * ( 3*u3 - 5*u2 + 2) +
-		      p[2] * (-3*u3 + 4*u2 + u) +
-		      p[3] * (   u3 -   u2));
+        if (n < 5) return 0;
+        double u = clamp(params[0], 0, 1);
+        if (u == 0) return params[2];
+        if (u == 1) return params[n-2];
+        int nsegs = n - 4;
+        double seg;
+        u = modf(u * nsegs, &seg);
+        double* p = &params[int(seg) + 1];
+        double u2 = u*u;
+        double u3 = u2*u;
+        return 0.5 * (p[0] * (  -u3 + 2*u2 - u) +
+                      p[1] * ( 3*u3 - 5*u2 + 2) +
+                      p[2] * (-3*u3 + 4*u2 + u) +
+                      p[3] * (   u3 -   u2));
     }
     static const char* spline_docstring=
         "float spline(float param,float y1,float y2,float y3,float y4,[...])\n\n"
@@ -1268,7 +1272,7 @@ static const char* vnoise_docstring=
         "distributed evenly from [0...1]";
 
 
-    template<class T> 
+    template<class T>
     struct CurveData:public ExprFuncNode::Data
     {
         Curve<T> curve;

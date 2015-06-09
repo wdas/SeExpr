@@ -25,6 +25,7 @@
 #include "ControlSpec.h"
 
 
+using namespace SeExpr2;
 /**
    @file assignmentPatterns.cpp
 */
@@ -74,8 +75,8 @@ public:
     void specs() { if(isValid()) { walk(); printSpecs(_examiner); }; };
 
 private:
-    SeExpr::SpecExaminer _examiner;
-    SeExpr::ConstWalker  _walker;
+    SeExpr2::SpecExaminer _examiner;
+    SeExpr2::ConstWalker  _walker;
     
     template<typename Examiner>
     void printSpecs(Examiner examiner) {
@@ -110,7 +111,7 @@ int main(int argc,char *argv[])
     PatternExpr expr;
     std::string str;
 
-    std::cout << "SeExpr Basic Pattern Matcher:";
+    std::cout << "SeExpr2 Basic Pattern Matcher:";
 
     while(true) {
 	std::cout << std::endl << "> ";
@@ -130,7 +131,7 @@ int main(int argc,char *argv[])
 	} else {
             std::cout << "Expression value:"
                       << std::endl;
-	    std::cout << "   " << expr.evaluate() << std::endl;
+	    std::cout << "   " << expr.evalFP() << std::endl;
             std::cout << "Expression patterns:"
                       << std::endl;
             expr.specs();

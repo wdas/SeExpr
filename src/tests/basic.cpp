@@ -20,7 +20,6 @@
 #include <Expression.h>
 #include <ExprFunc.h>
 #include <Vec3d.h>
-#include "SeTests.h"
 using namespace SeExpr2;
 
 struct SimpleExpression:public Expression

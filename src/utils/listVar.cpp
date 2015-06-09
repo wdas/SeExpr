@@ -22,7 +22,7 @@
 #include "ExprWalker.h"
 #include "ExprPatterns.h"
 
-using namespace SeExpr;
+using namespace SeExpr2;
 
 /// Examiner that builds a list of all variable references
 class VarListExaminer : public ConstExaminer {
@@ -120,7 +120,7 @@ int main(int argc,char *argv[])
 	if(!expr.isValid()) {
 	    std::cerr << "Expression failed: " << expr.parseError() << std::endl;
 	} else {
-	    std::cout << "   " << expr.evaluate() << std::endl;
+	    std::cout << "   " << expr.evalFP() << std::endl;
 	    expr.walk();
 	    std::cout << "   number of variable refs: " << expr.count() << std::endl;
 	};
