@@ -24,6 +24,7 @@
 #include <iomanip>
 #include <stdint.h>
 #include "Vec3d.h"
+#include "Context.h"
 #include "ExprEnv.h"
 
 namespace llvm {
@@ -172,7 +173,7 @@ class Expression
     };
 
     Expression(EvaluationStrategy be = defaultEvaluationStrategy);
-    Expression( const std::string &e, const ExprType & type = ExprType().FP(3), EvaluationStrategy be = defaultEvaluationStrategy);
+    Expression( const std::string &e, const ExprType & type = ExprType().FP(3), EvaluationStrategy be = defaultEvaluationStrategy, const Context& context=Context::global());
 
     virtual ~Expression();
 
@@ -278,6 +279,10 @@ class Expression
     /** Returns a read only map of local variables that were set **/
     //const LocalVarTable& getLocalVars() const {return _localVars;}
 
+    /** An immutable reference to access context parameters from say ExprFuncX's */
+    const Context& context() const {return *_context;}
+    void setContext(const Context& context);
+
  private:
     /** No definition by design. */
     Expression( const Expression &e );
@@ -301,8 +306,12 @@ class Expression
 
     /** The expression. */
     std::string _expression;
-    
+
     EvaluationStrategy _evaluationStrategy;
+
+    /** Context for out of band function parameters */
+    const Context* _context;
+
  protected:
 
     /** Computed return type. */
