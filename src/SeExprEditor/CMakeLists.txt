@@ -88,7 +88,7 @@ ENDIF(WIN32)
     set(SIP_QT_TAG -t Qt_4_5_0)  # fix 'sip: QFileIconProvider is undefined'
 
     set(CMAKE_CXX_FLAGS "-std=c++0x")
-    set(CMAKE_INSTALL_PYTHON "${CMAKE_INSTALL_PREFIX}/${PYTHON_SITE}/SeExpr/" )
+    set(CMAKE_INSTALL_PYTHON "${PYTHON_SITE}/SeExpr" )
     include_directories(${SIP_INCLUDE_DIR} ${PYQT4_SIP}
                         ${PYTHON_INCLUDE_DIRS} ${QT_INCLUDE_DIR}/QtCore
                         ${QT_INCLUDE_DIR}/QtGui)
