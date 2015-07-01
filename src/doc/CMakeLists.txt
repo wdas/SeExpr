@@ -23,7 +23,7 @@ IF(DOXYGEN_FOUND AND NOT WIN32)
     COMMENT "Generating API documentation with Doxygen" VERBATIM)
   add_dependencies(doc DOCUMENTED_FILES)
   
-  ADD_CUSTOM_TARGET(${HTML_TARGET} ALL /usr/bin/doxygen ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile)
+  ADD_CUSTOM_TARGET(html ALL /usr/bin/doxygen ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
   INSTALL( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html/ DESTINATION share/doc/SeExpr )
   INSTALL( FILES userdoc.txt   DESTINATION share/doc/SeExpr/ RENAME SeExpressions.html )
   INSTALL( FILES Se_voronoi_1.png Se_voronoi_2.png Se_voronoi_3.png Se_voronoi_4.png Se_voronoi_5.png DESTINATION share/doc/SeExpr )
