@@ -158,7 +158,7 @@ The browser reads from a config.txt file to locate expression files.  An example
     browser->addUserExpressionPath("imageEditor");
 #ifdef IMAGE_EDITOR_ROOT
     std::string exPathStr = IMAGE_EDITOR_ROOT;
-    exPathStr += "/expressions";
+    exPathStr += "/share/SeExpr/expressions";
     browser->addPath("Examples", exPathStr);
 #else
     browser->addPath("Examples", "./src/demos/imageEditor");

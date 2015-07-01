@@ -175,7 +175,7 @@ ImageEditorDialog::ImageEditorDialog(QWidget *parent)
     browser->addUserExpressionPath("imageEditor");
 #ifdef IMAGE_EDITOR_ROOT
     std::string exPathStr = IMAGE_EDITOR_ROOT;
-    exPathStr += "/expressions";
+    exPathStr += "/share/SeExpr/expressions";
     browser->addPath("Examples", exPathStr);
 #else
     browser->addPath("Examples", "./src/demos/imageEditor");
