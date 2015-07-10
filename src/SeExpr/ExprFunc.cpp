@@ -242,9 +242,9 @@ ExprFunc::loadPlugin(const char* path)
     else{
         void* init_v2 = dlsym(handle, "SeExprPluginInitV2");
         void* init_v1 = dlsym(handle, "SeExprPluginInit");
-        if(!init_v2 && !init_v2){
+        if(!init_v1 && !init_v2){
         	std::cerr << "Error reading expression plugin: " << path << std::endl;
-        	std::cerr << "No function named SeExpr2PluginInit called"<<std::endl;
+        	std::cerr << "No functions named SeExprPluginInit and SeExprPluginInitV2 called"<<std::endl;
         }
     	dlclose(handle);
 	return;

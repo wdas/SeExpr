@@ -2,7 +2,11 @@ FLAVOR ?= optimize
 prefix ?= $(shell pf-makevar --absolute root)
 libdir ?= $(shell pf-makevar lib)
 
-CXX=/opt/rh/devtoolset-2/root/usr/bin/g++
+# Don't set CXX when native GCC version is 4.8.
+SETCXX := $(shell expr `gcc -dumpversion` \< 4.8)
+ifeq "$(SETCXX)" "1"
+    CXX=/opt/rh/devtoolset-2/root/usr/bin/g++
+endif
 
 
 ## Temporary staging directory
