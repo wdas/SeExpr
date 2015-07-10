@@ -53,8 +53,7 @@ void Interpreter::print(int pc) const
         Dl_info info;
         const char* name="";
         if(dladdr((void*)ops[i].first, &info)) name=info.dli_sname;
-        fprintf(stderr,"%s %s 0x%08x (",pc==(int)i?"-->":"   ",name, &(ops[i].first));
-        //fprintf(stderr,"%s %s 0x%08x (",pc==(int)i?"-->":"   ",name, ops[i].first);
+        fprintf(stderr,"%s %s %p (",pc==(int)i?"-->":"   ",name, ops[i].first);
         int nextGuy=(i==ops.size()-1 ? opData.size() : ops[i+1].second);
         for(int k=ops[i].second;k<nextGuy;k++){
             fprintf(stderr," %d",opData[k]);
