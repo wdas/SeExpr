@@ -1473,6 +1473,54 @@ static const char* vnoise_docstring=
         "0 - none, 1 - linear, 2 - smooth, 3 - spline, \n"
         "4 - monotone (non oscillating spline)";
 
+    class GetVarFunc:public SeExprFuncX
+    {
+        struct Data:public SeExprFuncNode::Data
+        {
+            Data(SeExprVarNode* varNode) : varNode(varNode) {}
+            ~Data() { delete varNode; }
+
+            SeExprVarNode* varNode;
+        };
+
+        bool prep(SeExprFuncNode* node,bool wantVec)
+        {
+            if (!node->isStrArg(0)) {
+                node->child(1)->addError("First argument must be a string");
+                return false;
+            }
+
+            const SeExpression* expr = node->expr();
+            std::string varName = node->getStrArg(0);
+            SeExprVarNode* varNode = new SeExprVarNode(expr,varName.c_str());
+            if (varNode->prep(wantVec)) {
+                node->setData(new Data(varNode));
+            } else {
+                delete varNode;
+            }
+
+            return node->child(1)->prep(wantVec);
+        }
+
+        void eval(const SeExprFuncNode* node,SeVec3d& result) const
+        {
+            Data* data=static_cast<Data*>(node->getData());
+            if (data) {
+                data->varNode->eval(result);
+            } else {
+                SeVec3d* args=node->evalArgs();
+                result = args[1];
+            }
+        }
+
+    public:
+        GetVarFunc() : SeExprFuncX(true) {}
+        virtual ~GetVarFunc() {}
+    } getVar;
+    static const char *getVar_docstring=
+        "getVar(string varName,vector defaultValue)\n"
+        "return varName if variable exists, otherwise return defaultValue";
+
     class PrintFuncX:public SeExprFuncX
     {
         struct Data : public SeExprFuncNode::Data
@@ -1714,6 +1762,7 @@ static const char* vnoise_docstring=
 	FUNCNDOC(curve, 1, -1);
 	FUNCNDOC(ccurve, 1, -1);
 	FUNCNDOC(swatch, 3, -1);
+        FUNCNDOC(getVar,2,2);
         FUNCNDOC(printf,1,-1);
 
     }
