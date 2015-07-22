@@ -13,39 +13,24 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
-# Find python includes and libs. cmake doesn't seem to handle automatically
-
-set(PFMAKEVAR "pf-makevar")
-
-execute_process(COMMAND ${PFMAKEVAR} python-ver
-        OUTPUT_VARIABLE PYTHON_VERSION
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-execute_process(COMMAND ${PFMAKEVAR} python-inc
-        OUTPUT_VARIABLE PYTHON_INCLUDE_DIR
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-execute_process(COMMAND ${PFMAKEVAR} python-lib
-        OUTPUT_VARIABLE PYTHON_LIB_DIR
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-execute_process(COMMAND ${PFMAKEVAR} python-site
-        OUTPUT_VARIABLE PYTHON_SITE
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-FIND_LIBRARY(PYTHON_LIBRARY NAMES "python${PYTHON_VERSION}"
-        PATHS "${PYTHON_LIB_DIR}" NO_DEFAULT_PATH)
-
 find_package(PythonInterp)
 find_package(PythonLibs)
+
+macro(get_build_info NAME STORAGE)
+    execute_process(
+        COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/src/build/build-info ${NAME}
+        OUTPUT_VARIABLE ${STORAGE}
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+endmacro()
+
+get_build_info(python-site PYTHON_SITE)
+get_build_info(sip-inc SIP_INCLUDE_DIR)
+get_build_info(pyqt4-sip PYQT4_SIP)
 
 # Other package dependencies...
 
 find_package(OpenGL)
 find_package(Qt4 COMPONENTS QtCore QtGui QtOpenGL)
-
-set(PYQT4_PATH /usr/share/sip/PyQt4)               # for qt sip files
-set(SIP_PATH /usr/include/python${PYTHON_VERSION}) # for sip.h
 
 if(QT4_FOUND)
 
@@ -103,9 +88,9 @@ ENDIF(WIN32)
     set(SIP_QT_TAG -t Qt_4_5_0)  # fix 'sip: QFileIconProvider is undefined'
 
     set(CMAKE_CXX_FLAGS "-std=c++0x")
-    set(CMAKE_INSTALL_PYTHON "${CMAKE_INSTALL_PREFIX}/${PYTHON_SITE}/SeExpr/" )
-    include_directories(${SIP_PATH} ${PYQT4_PATH}
-                        ${PYTHON_INCLUDE_DIR} ${QT_INCLUDE_DIR}/QtCore
+    set(CMAKE_INSTALL_PYTHON "${PYTHON_SITE}/SeExpr" )
+    include_directories(${SIP_INCLUDE_DIR} ${PYQT4_SIP}
+                        ${PYTHON_INCLUDE_DIRS} ${QT_INCLUDE_DIR}/QtCore
                         ${QT_INCLUDE_DIR}/QtGui)
 
     add_custom_command(OUTPUT sipexpreditorpart0.cpp
@@ -115,7 +100,7 @@ ENDIF(WIN32)
                        -x VendorID -x PyQt_NoPrintRangeBug -x Py_v3
                        ${SIP_QT_TAG}
                        -t WS_X11 -g -j 1
-                       -I. -I${PYQT4_PATH} -I${SIP_PATH}
+                       -I. -I${PYQT4_SIP} -I${SIP_INCLUDE_DIR}
                        ${CMAKE_CURRENT_SOURCE_DIR}/SeExprEditor.sip
                        VERBATIM)
 

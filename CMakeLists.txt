@@ -86,9 +86,12 @@ SET( SEEXPR_EDITOR_LIBRARIES SeExprEditor )
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/SeExpr )
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/SeExprEditor )
 
-# Allowing to use lib64
-IF (NOT DEFINED CMAKE_INSTALL_LIBDIR)
-    SET(CMAKE_INSTALL_LIBDIR "lib")
+# The library directory is configured by setting CMAKE_INSTALL_LIBDIR.
+# Otherwise, the defaults set here are used.
+IF(EXISTS "/usr/lib64" AND NOT IS_SYMLINK "/usr/lib64")
+    SET(CMAKE_INSTALL_LIBDIR "lib64" CACHE STRING "Library Directory Basename")
+ELSE()
+    SET(CMAKE_INSTALL_LIBDIR "lib" CACHE STRING "Library Directory Basename")
 ENDIF()
 
 ## Traverse subdirectories
@@ -97,6 +100,3 @@ ADD_SUBDIRECTORY (src/SeExprEditor)
 ADD_SUBDIRECTORY (src/doc)
 ADD_SUBDIRECTORY (src/demos)
 ADD_SUBDIRECTORY (src/tests)
-
-
-

@@ -41,5 +41,6 @@ if(QT4_FOUND AND PNG_FOUND)
 endif(QT4_FOUND AND PNG_FOUND)
 
 
-INSTALL( FILES fbm.se noisecolor1.se noisecolor2.se noise.se raytrace.se sinc.se DESTINATION ${CMAKE_INSTALL_PREFIX}/expressions/ )
+INSTALL( FILES fbm.se noisecolor1.se noisecolor2.se noise.se raytrace.se sinc.se
+         DESTINATION share/SeExpr/expressions/ )
 
