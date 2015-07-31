@@ -38,9 +38,9 @@ if(QT4_FOUND AND PNG_FOUND)
     TARGET_LINK_LIBRARIES(imageEditor ${PNG_LIBRARIES})
     install(TARGETS imageEditor DESTINATION bin)
 
+endif(QT4_FOUND AND PNG_FOUND)
 
-endif(QT4_FOUND)
 
-
-INSTALL( FILES fbm.se noisecolor1.se noisecolor2.se noise.se raytrace.se sinc.se DESTINATION ${CMAKE_INSTALL_PREFIX}/expressions/ )
+INSTALL( FILES fbm.se noisecolor1.se noisecolor2.se noise.se raytrace.se sinc.se
+         DESTINATION share/SeExpr/expressions/ )
 

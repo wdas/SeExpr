@@ -232,10 +232,6 @@ SeExprFunc::loadPlugins(const char* path)
 			free(matches[i]);
 	    }
 	    if (matches) free(matches);
-	    else {
-		std::cerr << "No plugins found matching "
-			  << path << "/SeExpr*.so" << std::endl;
-	    }
 	}
 
 	entry = strtok_r(0, ":", &state);

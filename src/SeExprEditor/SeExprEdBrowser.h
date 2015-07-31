@@ -56,6 +56,7 @@ class SeExprEdBrowser : public QWidget
     std::string _localExprDir;
     std::string _context;
     std::string _searchPath;
+    bool _applyOnSelect;
 
 public:
     SeExprEdBrowser(QWidget* parent, SeExprEditor* editor);
@@ -68,6 +69,8 @@ public:
     bool getExpressionDirs(const std::string& context);
     void setSearchPath(const QString& context, const QString& path);
     void expandAll();
+    void expandToDepth(int depth);
+    void setApplyOnSelect(bool on) {_applyOnSelect = on; }
 public slots:
     void handleSelection(const QModelIndex& current,const QModelIndex& previous);
     void update();

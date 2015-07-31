@@ -18,7 +18,7 @@
 #include "SeExprEdEditableExpression.h"
 #include <sstream>
 
-bool SeExprParse(std::vector<SeExprEdEditable*>& literals,std::vector<std::string>& variables,
+bool SeExprSpecParse(std::vector<SeExprEdEditable*>& literals,std::vector<std::string>& variables,
     std::vector<std::pair<int,int> >& comments,const char* str);
 
 
@@ -39,7 +39,7 @@ setExpr(const std::string& expr)
     // run parser
     _expr=expr;
     std::vector<std::pair<int,int> > comments;
-    SeExprParse(_editables,_variables,comments,_expr.c_str());
+    SeExprSpecParse(_editables,_variables,comments,_expr.c_str());
 
     for(Editables::iterator it=_editables.begin();it!=_editables.end();){
         SeExprEdEditable& literal=**it;

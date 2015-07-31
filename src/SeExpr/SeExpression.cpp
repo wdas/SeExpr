@@ -30,15 +30,15 @@
 using namespace std;
 
 SeExpression::SeExpression()
-    : _wantVec(true), _parseTree(0), _parsed(0), _prepped(0)
+    : _wantVec(true), _parseTree(0), _parsed(0), _prepped(0), _context(&SeContext::global())
 {
     SeExprFunc::init();
 }
 
 
-SeExpression::SeExpression( const std::string &e, bool wantVec )
+SeExpression::SeExpression( const std::string &e, bool wantVec, const SeContext& context )
     : _wantVec(wantVec),  _expression(e), _parseTree(0),
-      _parsed(0), _prepped(0)
+      _parsed(0), _prepped(0), _context(&context)
 {
     SeExprFunc::init();
 }
@@ -62,6 +62,12 @@ void SeExpression::reset()
     for(size_t i=0;i<_stringTokens.size();i++) free(_stringTokens[i]);
     _stringTokens.clear();
     _threadUnsafeFunctionCalls.clear();
+}
+
+void SeExpression::setContext(const SeContext& context)
+{
+    reset();
+    _context = &context;
 }
 
 void SeExpression::setWantVec(bool wantVec)
@@ -112,7 +118,7 @@ SeExpression::parse() const
     if (_parsed) return;
     _parsed = true;
     int tempStartPos,tempEndPos;
-    SeExprParse(_parseTree, _parseError, tempStartPos, tempEndPos, 
+    SeExprParse(_parseTree, _parseError, tempStartPos, tempEndPos,
         this, _expression.c_str(), &_stringTokens);
     if(!_parseTree){
         addError(_parseError,tempStartPos,tempEndPos);

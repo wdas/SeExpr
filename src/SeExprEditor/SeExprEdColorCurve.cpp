@@ -31,10 +31,11 @@
 #include <QtGui/QResizeEvent>
 #include <QtGui/QPushButton>
 #include <QtGui/QDialogButtonBox>
+#include <QtGui/QMenu>
 
 #include <SeExprBuiltins.h>
 #ifdef SEEXPR_USE_QDGUI
-#   include <qdgui/QdColorPickerDialog.h>
+#include <qdgui/QdColorPickerDialog.h>
 #endif
 
 #include "SeExprEdColorCurve.h"
@@ -142,12 +143,18 @@ void CCurveScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
         }
         drawPoints();
     } else {
-        // getting here means we want to create a new point
-        double myx=pos.x()/_width;
-        T_INTERP interpFromNearby=_curve->getLowerBoundCV(SeExpr::clamp(myx,0,1))._interp;
-        if(interpFromNearby==T_CURVE::kNone) interpFromNearby=T_CURVE::kMonotoneSpline;
-        addPoint(pos.x()/_width, _color, interpFromNearby);
-        emitCurveChanged();
+        if(mouseEvent->buttons() == Qt::LeftButton){
+            // getting here means we want to create a new point
+            double myx=pos.x()/_width;
+            T_INTERP interpFromNearby=_curve->getLowerBoundCV(SeExpr::clamp(myx,0,1))._interp;
+            if(interpFromNearby==T_CURVE::kNone)
+                interpFromNearby=T_CURVE::kMonotoneSpline;
+            addPoint(myx, _curve->getValue(myx), interpFromNearby);
+            emitCurveChanged();
+        }else{
+            _selectedItem=-1;
+            drawPoints();
+        }
     }
 }
 
@@ -166,6 +173,15 @@ void CCurveScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
             drawPoints();
             emitCurveChanged();
         }
+    }
+}
+
+void CCurveScene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event){
+    if(_selectedItem>=0){
+        QMenu *menu = new QMenu(event->widget());
+        QAction *deleteAction = menu->addAction("Delete Point");
+        QAction *action = menu->exec(event->screenPos());
+        if (action == deleteAction) removePoint(_selectedItem);
     }
 }
 

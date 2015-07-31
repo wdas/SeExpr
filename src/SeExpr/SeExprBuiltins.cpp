@@ -205,7 +205,7 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
     }
     static const char* remap_docstring=
         "remap(float x, float\n"
-        "source, float range, float falloff, int interp)\nGeneral remapping function.\n"
+        "source, float range, float falloff, float interp)\nGeneral remapping function.\n"
         "When x is within +/- <i>range</i> of source, the result is one.\n"
         "The result falls to zero beyond that range over <i>falloff</i> distance.\n"
         "The falloff shape is controlled by <i>interp</i>. Numeric values\n"
@@ -824,7 +824,7 @@ static const char* vnoise_docstring=
 	    for (double j = -1; j <= 1; j++) {
 		for (double k = -1; k <= 1; k++, n++) {
 		    SeVec3d testcell = cell + SeVec3d(i,j,k);
-		    data.points[n] = testcell + jitter * ccellnoise(testcell - SeVec3d(.5));
+		    data.points[n] = testcell + jitter * (ccellnoise(testcell) - SeVec3d(.5));
 		}
 	    }
 	}
@@ -1239,10 +1239,12 @@ static const char* vnoise_docstring=
 
     double choose(int n, double* params)
     {
-	if (n < 3) return 0;
-	double key = params[0];
-	int nvals = n - 1;
-	return params[1+int(clamp(key * nvals, 0, nvals-1))];
+        if (n < 3) return 0;
+        double key = params[0];
+        // NaN protection
+        if (key != key) return 0;
+        int nvals = n - 1;
+        return params[1+int(clamp(key * nvals, 0, nvals-1))];
     }
     static const char* choose_docstring=
         "float choose(float index,float choice1, float choice2, [...])\n"
@@ -1253,6 +1255,8 @@ static const char* vnoise_docstring=
     {
 	if (n < 5) return 0;
 	double key = params[0];
+    // NaN protection
+    if (key != key) return 0;
 	int nvals = (n - 1) / 2; // nweights = nvals
 	
 	// build cutoff points based on weights
@@ -1469,6 +1473,54 @@ static const char* vnoise_docstring=
         "0 - none, 1 - linear, 2 - smooth, 3 - spline, \n"
         "4 - monotone (non oscillating spline)";
 
+    class GetVarFunc:public SeExprFuncX
+    {
+        struct Data:public SeExprFuncNode::Data
+        {
+            Data(SeExprVarNode* varNode) : varNode(varNode) {}
+            ~Data() { delete varNode; }
+
+            SeExprVarNode* varNode;
+        };
+
+        bool prep(SeExprFuncNode* node,bool wantVec)
+        {
+            if (!node->isStrArg(0)) {
+                node->child(1)->addError("First argument must be a string");
+                return false;
+            }
+
+            const SeExpression* expr = node->expr();
+            std::string varName = node->getStrArg(0);
+            SeExprVarNode* varNode = new SeExprVarNode(expr,varName.c_str());
+            if (varNode->prep(wantVec)) {
+                node->setData(new Data(varNode));
+            } else {
+                delete varNode;
+            }
+
+            return node->child(1)->prep(wantVec);
+        }
+
+        void eval(const SeExprFuncNode* node,SeVec3d& result) const
+        {
+            Data* data=static_cast<Data*>(node->getData());
+            if (data) {
+                data->varNode->eval(result);
+            } else {
+                SeVec3d* args=node->evalArgs();
+                result = args[1];
+            }
+        }
+
+    public:
+        GetVarFunc() : SeExprFuncX(true) {}
+        virtual ~GetVarFunc() {}
+    } getVar;
+    static const char *getVar_docstring=
+        "getVar(string varName,vector defaultValue)\n"
+        "return varName if variable exists, otherwise return defaultValue";
+
     class PrintFuncX:public SeExprFuncX
     {
         struct Data : public SeExprFuncNode::Data
@@ -1577,6 +1629,15 @@ static const char* vnoise_docstring=
     static const char* printf_docstring=
         "printf(string format,[vec0, vec1,  ...])\n"
         "Prints out a string to STDOUT, Format parameter allowed is %v";
+
+    double swatch(int n, double* params)
+    {
+        return choose(n, params);
+    }
+    static const char *swatch_docstring=
+        "color swatch(float index, color choice0, color choice1, color choice2, [...])\n"
+        "Chooses one of the supplied color choices based on the index (assumed to be in range [0..1]).";
+
 
     void defineBuiltins(SeExprFunc::Define /*define*/,SeExprFunc::Define3 define3)
     {
@@ -1700,6 +1761,8 @@ static const char* vnoise_docstring=
 	FUNCNDOC(spline, 5, -1);
 	FUNCNDOC(curve, 1, -1);
 	FUNCNDOC(ccurve, 1, -1);
+	FUNCNDOC(swatch, 3, -1);
+        FUNCNDOC(getVar,2,2);
         FUNCNDOC(printf,1,-1);
 
     }

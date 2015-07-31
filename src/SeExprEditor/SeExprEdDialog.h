@@ -80,6 +80,7 @@ public:
         editor->setExpr(str, /*apply*/ true);
     }
 
+    void show();
     int exec();
 
     // Show the Nth editor dialog
@@ -91,10 +92,14 @@ private:
 protected:
     void keyPressEvent(QKeyEvent* event);
     void findHelper(QTextDocument::FindFlags flags);
+    void closeEvent(QCloseEvent* event);
 
 signals:
+    void preview();
     void expressionApplied();
+    void dialogClosed();
 private slots:
+    void previewExpression();
     void verifiedApply();
     void verifiedAccept();
     void findNextInHelp();
@@ -106,6 +111,7 @@ public slots:
 
     void clearExpression();
 
+    void reject();
 };
 
 #endif

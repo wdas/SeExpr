@@ -33,6 +33,7 @@
 #include "SeExprEdControl.h"
 
 class QVBoxLayout;
+class QRadioButton;
 class SeExprEdEditableExpression;
 
 /// This class is the UI for adding widgets
@@ -57,6 +58,9 @@ public:
     QLineEdit *colorCurveLookup;
     QLineEdit *animCurveLookup;
     QLineEdit *animCurveLink;
+    QLineEdit *swatchLookup;
+    QRadioButton *rainbowPaletteBtn;
+    QRadioButton *grayPaletteBtn;
     QColor color;
     QPushButton* colorWidget;
     QComboBox* stringTypeWidget;
@@ -64,6 +68,7 @@ public:
     QLineEdit* stringNameWidget;
 
     SeExprEdAddDialog(int& count,QWidget* parent=0);
+    const char * initSwatch();
 private slots:
     void colorChooseClicked();
 

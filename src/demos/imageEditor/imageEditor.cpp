@@ -143,10 +143,19 @@ ImageEditorDialog::ImageEditorDialog(QWidget *parent)
     _imageLabel = new QLabel();
     _imageLabel->setFixedSize(256,256);
     _imageLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter );
-    QImage image("./src/doc/html/seexprlogo.png"); // just a fun default
+
+    // Locate logo image relative to location of the app itself
+    QString imageFile = QCoreApplication::applicationDirPath() + "/../share/doc/SeExpr/seexprlogo.png";
+    QImage image(imageFile); // just a fun default
+
     QPixmap imagePixmap = QPixmap::fromImage(image);
     imagePixmap = imagePixmap.scaled(256, 256, Qt::KeepAspectRatio);
     _imageLabel->setPixmap(imagePixmap);
+    QWidget* imagePreviewWidget=new QWidget();
+    QHBoxLayout* imagePreviewLayout=new QHBoxLayout(imagePreviewWidget);
+    imagePreviewLayout->addStretch();
+    imagePreviewLayout->addWidget(_imageLabel);
+    imagePreviewLayout->addStretch();
 
     // Expression controls
     SeExprEdControlCollection *controls = new SeExprEdControlCollection();
@@ -166,7 +175,7 @@ ImageEditorDialog::ImageEditorDialog(QWidget *parent)
     browser->addUserExpressionPath("imageEditor");
 #ifdef IMAGE_EDITOR_ROOT
     std::string exPathStr = IMAGE_EDITOR_ROOT;
-    exPathStr += "/expressions";
+    exPathStr += "/share/SeExpr/expressions";
     browser->addPath("Examples", exPathStr);
 #else
     browser->addPath("Examples", "./src/demos/imageEditor");
@@ -192,7 +201,7 @@ ImageEditorDialog::ImageEditorDialog(QWidget *parent)
     QVBoxLayout *leftLayout=new QVBoxLayout();
     leftLayout->setContentsMargins(0,0,0,0);
     leftWidget->setLayout(leftLayout);
-    leftLayout->addWidget(_imageLabel);
+    leftLayout->addWidget(imagePreviewWidget);
     leftLayout->addWidget(scrollArea,1);
 
     QWidget *bottomWidget=new QWidget();

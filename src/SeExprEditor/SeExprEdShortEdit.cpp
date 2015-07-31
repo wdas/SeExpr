@@ -92,58 +92,58 @@ static const char *stop_xpm[] = {
 
 
 
-SeExprEdShortEdit::SeExprEdShortEdit(QWidget* parent, bool expanded)
-    :QWidget(parent), _context(""), _searchPath("")
+SeExprEdShortEdit::SeExprEdShortEdit(QWidget* parent, bool expanded, bool applyOnSelect)
+    :QWidget(parent)
+    , _dialog( 0 )
+    , _context( "" )
+    , _searchPath( "" )
+    , _applyOnSelect(applyOnSelect)
 {
-    controlRebuildTimer=new QTimer();
+    controlRebuildTimer = new QTimer(this);
 
-    vboxlayout=new QVBoxLayout();
-    vboxlayout->setMargin(0);
-    hboxlayout=new QHBoxLayout();
-    hboxlayout->setMargin(0);
-    //edit=new SeExprEdShortEdit();
-    //edit=new QLineEdit();
-    edit=new SeExprEdShortTextEdit(parent);
+    vboxlayout = new QVBoxLayout();
+    vboxlayout->setSpacing( 2 );
+    vboxlayout->setContentsMargins( 0, 0, 0, 0 );
+    hboxlayout = new QHBoxLayout();
+    hboxlayout->setSpacing( 2 );
+    hboxlayout->setContentsMargins( 0, 0, 0, 0 );
+    edit = new SeExprEdShortTextEdit( parent );
 
-    error=new QLabel();
-    error->setPixmap(QPixmap(stop_xpm));
-    error->setHidden(true);
-    
-    expandButton=new QToolButton;
-    expandButton->setMinimumSize(20,20);
-    expandButton->setMaximumSize(20,20);
-    expandButton->setFocusPolicy(Qt::NoFocus);
-    if (expanded) expandButton->setArrowType(Qt::DownArrow);
-    else expandButton->setArrowType(Qt::RightArrow);
-    connect(expandButton,SIGNAL(clicked()),SLOT(expandPressed()));
+    error = new QLabel();
+    error->setPixmap( QPixmap(stop_xpm) );
+    error->setHidden( true );
 
-    QToolButton* button=new QToolButton;
-    editDetail=button;
-    button->setIcon(QIcon(QPixmap(sum_xpm)));
-    hboxlayout->addWidget(expandButton);
-    hboxlayout->addWidget(edit);
-    hboxlayout->addWidget(error);
-    hboxlayout->addWidget(editDetail);
+    expandButton = new QToolButton();
+    expandButton->setFixedSize( 20, 20 );
+    expandButton->setFocusPolicy( Qt::NoFocus );
+    if (expanded) expandButton->setArrowType( Qt::DownArrow );
+    else expandButton->setArrowType( Qt::RightArrow );
+    connect( expandButton, SIGNAL(clicked()), SLOT(expandPressed()) );
 
-    editDetail->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-    editDetail->setMinimumSize(20,20);
-    editDetail->setMaximumSize(20,20);
-    connect(editDetail,SIGNAL(clicked()),SLOT(detailPressed()));
-    //connect(edit,SIGNAL(textChanged()),SLOT(handleTextEdited()));
-    connect(edit,SIGNAL(editingFinished()),SLOT(textFinished()));
+    QToolButton* button = new QToolButton();
+    editDetail = button;
+    button->setIcon( QIcon(QPixmap(sum_xpm)) );
+    hboxlayout->addWidget( expandButton );
+    hboxlayout->addWidget( edit );
+    hboxlayout->addWidget( error );
+    hboxlayout->addWidget( editDetail );
 
-    vboxlayout->addLayout(hboxlayout);
+    editDetail->setFixedSize( 20, 20 );
+    connect( editDetail, SIGNAL(clicked()), SLOT(detailPressed()) );
+    connect( edit, SIGNAL(editingFinished()), SLOT(textFinished()) );
 
-    controls=0;
-    if (expanded) expandPressed();
+    vboxlayout->addLayout( hboxlayout );
 
-    setLayout(vboxlayout);
-    connect(controlRebuildTimer, SIGNAL(timeout()), SLOT(rebuildControls()));
+    controls = 0;
+    if ( expanded )
+        expandPressed();
+
+    setLayout( vboxlayout );
+    connect( controlRebuildTimer, SIGNAL(timeout()), SLOT(rebuildControls()) );
 }
 
 SeExprEdShortEdit::~SeExprEdShortEdit()
 {
-    delete controlRebuildTimer;
 }
 
 void SeExprEdShortEdit::setSearchPath(const QString& context, const QString& path)
@@ -157,42 +157,53 @@ void SeExprEdShortEdit::detailPressed()
     showDetails(-1);
 }
 
-int SeExprEdShortEdit::showDetails(int idx)
+void SeExprEdShortEdit::showDetails(int idx)
 {
-    SeExprEdDialog dialog(0);
-    dialog.editor->replaceExtras(*edit->completionModel);
+    _dialog = new SeExprEdDialog(0);
+    _dialog->editor->replaceExtras(*edit->completionModel);
 
-    dialog.browser->setSearchPath(_context.c_str(), _searchPath.c_str());
-    dialog.browser->expandAll();
-    dialog.setExpressionString(getExpressionString());
+    _dialog->browser->setApplyOnSelect(_applyOnSelect);
+    _dialog->browser->setSearchPath(_context.c_str(), _searchPath.c_str());
+    _dialog->browser->expandAll();
+    _dialog->setExpressionString(getExpressionString());
     if (idx >= 0) {
-        dialog.showEditor(idx);
+        _dialog->showEditor(idx);
     }
 
-    int result = dialog.exec();
+    connect(_dialog,SIGNAL(expressionApplied()),SLOT(expressionApplied()));
+    connect(_dialog,SIGNAL(dialogClosed()),SLOT(dialogClosed()));
+    _dialog->show();
+    setEnabled(false);
+}
 
-    if (QDialog::Accepted == result) {
-        setExpressionString(dialog.getExpressionString());
-    }
+void SeExprEdShortEdit::expressionApplied()
+{
+    setExpressionString(_dialog->getExpressionString());
+}
 
-    return result;
+void SeExprEdShortEdit::dialogClosed()
+{
+    setEnabled(true);
 }
 
 void SeExprEdShortEdit::rebuildControls()
 {
     if(controls){
 	bool wasShown=!edit->completer->popup()->isHidden();
-        //std::vector<QString> variables;
         bool newVariables=controls->rebuildControls(getExpression(),edit->completionModel->local_variables);
         if (controls->numControls()==0)
-	{
+        {
             controls->deleteLater();
             controls=0;
             expandButton->setArrowType(Qt::RightArrow);
-	}
-	else vboxlayout->addWidget(controls);
-        if(newVariables) edit->completer->setModel(edit->completionModel);
-        if(wasShown) edit->completer->popup()->show();
+        }
+        else
+            vboxlayout->addWidget(controls);
+
+        if(newVariables)
+            edit->completer->setModel(edit->completionModel);
+        if(wasShown)
+            edit->completer->popup()->show();
     }
 }
 
@@ -226,8 +237,7 @@ void SeExprEdShortEdit::textFinished()
 
 void SeExprEdShortEdit::setExpressionString(const std::string& expression)
 {
-    edit->setText(QString(expression.c_str()).replace("\n","\\n"));
-    //rebuildControls();
+    edit->setText(QString(expression.c_str()));
     controlRebuildTimer->setSingleShot(true);
     controlRebuildTimer->start(0);
     checkErrors();
@@ -236,7 +246,7 @@ void SeExprEdShortEdit::setExpressionString(const std::string& expression)
 
 QString SeExprEdShortEdit::getExpression() const
 {
-    return edit->toPlainText().replace("\\n","\n");
+    return edit->toPlainText();
 }
 
 std::string SeExprEdShortEdit::getExpressionString()const
@@ -249,7 +259,7 @@ void SeExprEdShortEdit::controlChanged(int id)
     if(controls){
         QString newText=getExpression();
         controls->updateText(id,newText);
-        edit->setText(newText.replace("\n","\\n"));
+        edit->setText(newText);
         checkErrors();
         emit exprChanged();
     }
@@ -319,6 +329,15 @@ void SeExprEdShortEdit::setVerticalScrollBarPolicy(Qt::ScrollBarPolicy policy)
     edit->setVerticalScrollBarPolicy(policy);
 }
 
+void SeExprEdShortEdit::setHorizontalScrollBarPolicy( Qt::ScrollBarPolicy policy )
+{
+    edit->setHorizontalScrollBarPolicy( policy );
+}
+
+void SeExprEdShortEdit::setLineWrapMode( QTextEdit::LineWrapMode mode )
+{
+    edit->setLineWrapMode( mode );
+}
 
 SeExprEdShortTextEdit::SeExprEdShortTextEdit(QWidget* parent)
 :QTextEdit(parent),editing(false),_tip(0)

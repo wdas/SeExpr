@@ -76,7 +76,7 @@ public:
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
-
+    virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
     void drawRect();
 
     void drawPoly();

@@ -47,11 +47,12 @@
 
 #include "SeExprEdControl.h"
 #include "SeExprEdColorCurve.h"
+#include "SeExprEdColorSwatchWidget.h"
 #include "SeExprEdFileDialog.h"
 #include "SeExprEdEditable.h"
 #ifdef SEEXPR_USE_ANIMLIB
-#   include <animlib/AnimCurve.h>
-#   include <animlib/AnimKeyframe.h>
+#include <animlib/AnimCurve.h>
+#include <animlib/AnimKeyframe.h>
 #endif
 
 /* XPM */
@@ -819,14 +820,57 @@ void SeExprEdAnimCurveControl::setAnimCurveCallback(AnimCurveCallback newCallbac
 
 SeExprEdAnimCurveControl::AnimCurveCallback SeExprEdAnimCurveControl::callback=0;
 
+// Editing widget for color swatch
+SeExprEdColorSwatchControl::SeExprEdColorSwatchControl(int id,SeExprEdColorSwatchEditable* editable)
+    :SeExprEdControl(id,editable,false),
+     _swatchEditable(editable), _indexLabel(false)
+{
+    // include index labels if user specifies 'indices' as labelType
+    if(_swatchEditable->labelType=="indices")
+        _indexLabel = true;
+    buildSwatchWidget();
+}
 
+void SeExprEdColorSwatchControl::colorChanged(int index, SeVec3d value)
+{
+    if(_updating) return;
+    if(index >= 0 && index < int(_swatchEditable->colors.size()))
+        _swatchEditable->change(index, value);
+    emit controlChanged(_id);
+}
 
+void SeExprEdColorSwatchControl::colorAdded(int index, SeVec3d value)
+{
+    if(_updating) return;
+    if(index >= 0 && index <= int(_swatchEditable->colors.size()))
+        _swatchEditable->add(value); // add to end; TODO insert
+    emit controlChanged(_id);
+}
 
+void SeExprEdColorSwatchControl::colorRemoved(int index)
+{
+    if(_updating) return;
+    if(index >= 0 && index < int(_swatchEditable->colors.size())){
+        _swatchEditable->remove(index);
+        _swatch->deleteLater();
+        _swatch = 0;
+        buildSwatchWidget();
+    }
+    emit controlChanged(_id);
+}
 
+void SeExprEdColorSwatchControl::buildSwatchWidget()
+{
+    _swatch = new SeExprEdColorSwatchWidget(_indexLabel, this);
+    connect(_swatch,SIGNAL(swatchChanged(int,SeVec3d)),this, SLOT(colorChanged(int,SeVec3d)));
+    connect(_swatch,SIGNAL(swatchAdded(int,SeVec3d)),this, SLOT(colorAdded(int,SeVec3d)));
+    connect(_swatch,SIGNAL(swatchRemoved(int)),this, SLOT(colorRemoved(int)));
 
-
-
-
-
-
-
+    _updating = true;
+    for (unsigned int i=0; i<_swatchEditable->colors.size(); i++) {
+        SeVec3d val = _swatchEditable->colors[i];
+        _swatch->addSwatch(val,i);
+    }
+    _updating = false;
+    hbox->addWidget(_swatch);
+}

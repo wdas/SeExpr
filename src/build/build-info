@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+
+import argparse
+import os
+import sys
+
+# Some Mac OS X Python installs are busted and cannot import sysconfig without
+# this workaround...
+if 'MACOSX_DEPLOYMENT_TARGET' in os.environ:
+    del os.environ['MACOSX_DEPLOYMENT_TARGET']
+from distutils import sysconfig as sc
+
+import sipconfig
+from PyQt4 import pyqtconfig
+
+def main():
+    parser = argparse.ArgumentParser()
+    subp = parser.add_subparsers()
+
+    callbacks = (
+        ('python-site', python_site),
+        ('pyqt4-sip', pyqt4_sip),
+        ('sip-inc', sip_inc),
+    )
+
+    for (name, func) in callbacks:
+        subparser = subp.add_parser(name)
+        subparser.set_defaults(func=func)
+
+    args = parser.parse_args()
+    print(args.func(args))
+
+    return 0
+
+
+def lib(args):
+    """Return the architecture-specific library directory
+
+    """
+    return os.path.basename(sc.get_config_var('LIBDIR'))
+
+
+def python_ver(args):
+    return sc.get_python_version()
+
+
+def python_site(args):
+    ver = python_ver(args)
+    return os.path.join(lib(args), 'python' + ver, 'site-packages')
+
+
+def pyqt4_sip(args):
+    pkg_cfg = pyqtconfig._pkg_config
+    return pkg_cfg['pyqt_sip_dir']
+
+
+def sip_inc(args):
+    pkg_cfg = sipconfig._pkg_config
+    return pkg_cfg['sip_inc_dir']
+
+
+if __name__ == '__main__':
+    sys.exit(main())

@@ -58,7 +58,7 @@ namespace SeExpr
     double linearstep(double x, double a, double b);
     double smoothstep(double x, double a, double b);
     double gaussstep(double x, double a, double b);
-    double remap(double x, double s, double r, double f, int interp);
+    double remap(double x, double s, double r, double f, double interp);
     double mix(double x, double y, double alpha);
     SeVec3d hsi(int n, const SeVec3d* args);
     SeVec3d midhsi(int n, const SeVec3d* args);
