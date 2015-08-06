@@ -19,6 +19,7 @@ def main():
 
     callbacks = (
         ('python-site', python_site),
+        ('python-inc', python_inc),
         ('pyqt4-sip', pyqt4_sip),
         ('sip-inc', sip_inc),
     )
@@ -42,6 +43,10 @@ def lib(args):
 
 def python_ver(args):
     return sc.get_python_version()
+
+
+def python_inc(args):
+    return sc.get_config_var('CONFINCLUDEPY')
 
 
 def python_site(args):

@@ -24,6 +24,7 @@ macro(get_build_info NAME STORAGE)
 endmacro()
 
 get_build_info(python-site PYTHON_SITE)
+get_build_info(python-inc PYTHON_INCLUDE_DIR)
 get_build_info(sip-inc SIP_INCLUDE_DIR)
 get_build_info(pyqt4-sip PYQT4_SIP)
 
@@ -90,7 +91,7 @@ ENDIF(WIN32)
     set(CMAKE_CXX_FLAGS "-std=c++0x")
     set(CMAKE_INSTALL_PYTHON "${PYTHON_SITE}/SeExpr" )
     include_directories(${SIP_INCLUDE_DIR} ${PYQT4_SIP}
-                        ${PYTHON_INCLUDE_DIRS} ${QT_INCLUDE_DIR}/QtCore
+                        ${PYTHON_INCLUDE_DIR} ${QT_INCLUDE_DIR}/QtCore
                         ${QT_INCLUDE_DIR}/QtGui)
 
     add_custom_command(OUTPUT sipexpreditorpart0.cpp
