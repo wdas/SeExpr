@@ -248,6 +248,7 @@ public:
     }
 };
 
+
 //! Class for evaluating expression and generating 2D image
 class TestImage
 {
@@ -271,7 +272,6 @@ TestImage::TestImage()
 //! Evaluate given expression string and generate image
 bool TestImage::generateImage(const std::string &exprStr)
 {
-    //std::cerr<<exprStr<<std::endl;
     ImageSynthExpr expr(exprStr);
 
     // make variables
@@ -378,7 +378,7 @@ std::string outDir = rootDir;
 
 // Callback from file tree walk function, ftw(), to process each expr file
 int evalExpressionFile(const char*filepath,
-                       const struct stat *sb,
+                       const struct stat */*sb*/,
                        int typeflag)
 {
     // Process file types that match *.se.
@@ -406,7 +406,7 @@ int evalExpressionFile(const char*filepath,
 // Test example *.se files in SeExpr demo expressions.
 TEST(Examples, SeExprDemos)
 {
-    outDir = rootDir+"seexprDemos/";
+    outDir = rootDir+"build/demo-images/";
 
 #include <sys/stat.h>
     // make outDir if it doesn't already exist
@@ -420,14 +420,13 @@ TEST(Examples, SeExprDemos)
     }
 
     // Output log file for cerr messages
-    std::string logfile(outDir+"imageTests.log");
+    std::string logfile(outDir);
+    logfile.append("imageTests.log");
     std::ofstream ofs(logfile.c_str());
     std::streambuf *curr_cerr = std::cerr.rdbuf();
     std::cerr.rdbuf(ofs.rdbuf());
 
-    std::string examplePath = getenv("SEEXPR");
-    examplePath += "/src/demos/imageSynth/examples/";
-    //ftw("/src/demos/imageSynth/examples/",
+    std::string examplePath("./src/demos/imageSynth2/examples2/");
     ftw(examplePath.c_str(), evalExpressionFile, 64);
 
     std::cerr.rdbuf(curr_cerr);
@@ -438,7 +437,7 @@ TEST(Examples, SeExprDemos)
 // Test example *.se files in show paint3d expressions.
 TEST(Examples, Paint3dShow)
 {
-    outDir = rootDir+"paint3dExamples/";
+    outDir = rootDir+"build/p3d-images/";
 
 #include <sys/stat.h>
     // make outDir if it doesn't already exist

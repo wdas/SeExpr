@@ -13,7 +13,7 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
-# testmain running test suite using google test framework
+# Google test framework
 
 set (GTEST_INCLUDE_DIR /usr/include/gtest)
 include_directories(BEFORE ${GTEST_INCLUDE_DIR})
@@ -23,5 +23,6 @@ if(PNG_FOUND)
     include_directories(${PNG_INCLUDE_DIR})
     ADD_EXECUTABLE("testmain2" "testmain.cpp" "imageTests.cpp" "basic.cpp" "typeTests.cpp")
     target_link_libraries("testmain2" gtest pcrecpp ${SEEXPR_LIBRARIES} ${PNG_LIBRARIES})
-    install(TARGETS "testmain2" DESTINATION share/SeExpr2/test)
+    install(TARGETS "testmain2" DESTINATION share/test/SeExpr2)
+    install(PROGRAMS imagediff.py DESTINATION share/test/SeExpr2)
 endif(PNG_FOUND)
