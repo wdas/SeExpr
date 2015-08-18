@@ -124,8 +124,6 @@ ADD_SUBDIRECTORY (src/tests)
 ADD_SUBDIRECTORY (src/py)
 ADD_SUBDIRECTORY (src/utils)
 ADD_SUBDIRECTORY (src/demos)
-
-# TODO: re-enable
-#ADD_SUBDIRECTORY (src/doc)
+ADD_SUBDIRECTORY (src/doc)
 
 

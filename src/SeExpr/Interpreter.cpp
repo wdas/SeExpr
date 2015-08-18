@@ -652,6 +652,7 @@ int ExprCompareEqNode::buildInterpreter(Interpreter* interpreter) const
                 int promotedOp0=interpreter->allocFP(dim1);
                 interpreter->addOperand(op0);
                 interpreter->addOperand(promotedOp0);
+                interpreter->endOp();
                 op0=promotedOp0;
             }
             if(dim1 == 1){
@@ -659,6 +660,7 @@ int ExprCompareEqNode::buildInterpreter(Interpreter* interpreter) const
                 int promotedOp1=interpreter->allocFP(dim0);
                 interpreter->addOperand(op1);
                 interpreter->addOperand(promotedOp1);
+                interpreter->endOp();
                 op1=promotedOp1;
             }
         }
