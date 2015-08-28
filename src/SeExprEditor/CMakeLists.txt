@@ -91,8 +91,8 @@ ENDIF(WIN32)
     set(CMAKE_CXX_FLAGS "-std=c++0x")
     set(CMAKE_INSTALL_PYTHON "${PYTHON_SITE}/SeExpr" )
     include_directories(${SIP_INCLUDE_DIR} ${PYQT4_SIP}
-                        ${PYTHON_INCLUDE_DIR} ${QT_INCLUDE_DIR}/QtCore
-                        ${QT_INCLUDE_DIR}/QtGui)
+                        ${PYTHON_INCLUDE_DIR} ${QT_HEADERS_DIR}/QtCore
+                        ${QT_HEADERS_DIR}/QtGui)
 
     add_custom_command(OUTPUT sipexpreditorpart0.cpp
                        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/SeExprEditor.sip
