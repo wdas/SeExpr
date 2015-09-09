@@ -24,7 +24,7 @@ all:
 	#cd build && cmake -DCMAKE_INSTALL_PREFIX=$(prefix) -DCMAKE_INSTALL_LIBDIR=$(libdir) -DENABLE_LLVM_BACKEND=ON -DLLVM_ROOT="/home/fahome/yuanfanc/Install" ../
 	cd build && make -j 32 # && make doc
 clean:
-	rm -rf build
+	rm -rf build Linux-*
 
 install: all
 	cd build; make install

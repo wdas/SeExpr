@@ -71,43 +71,45 @@ private:
     ExprType _type;
 };
 
+// TODO: deprecate class and just use ExprVarRef base class
 /// simple vector variable reference reference base class
-class ExprVectorVarRef : public ExprVarRef
-{
- public:
-    ExprVectorVarRef(int dim = 3)
-        : ExprVarRef(ExprType().FP(dim).Varying())
-    {};
+// class ExprVectorVarRef : public ExprVarRef
+// {
+//  public:
+//     ExprVectorVarRef(int dim = 3)
+//         : ExprVarRef(ExprType().FP(dim).Varying())
+//     {};
 
-    virtual bool isVec() { return 1; }
-    virtual void eval(const ExprVarNode* node, Vec3d& result)=0;
-    virtual void eval(double* result){
-        Vec3d ret;
-        eval(0,ret);
-        for(int k=0;k<3;k++) result[k]=ret[k];
-    }
-    virtual void eval(const char** result){assert(false);}
-};
+//     virtual bool isVec() { return 1; }
+//     virtual void eval(const ExprVarNode* node, Vec3d& result)=0;
+//     virtual void eval(double* result){
+//         Vec3d ret;
+//         eval(0,ret);
+//         for(int k=0;k<3;k++) result[k]=ret[k];
+//     }
+//     virtual void eval(const char** result){assert(false);}
+// };
 
 
+// TODO: deprecate class and just use ExprVarRef base class
 /// simple scalar variable reference reference base class
-class ExprScalarVarRef : public ExprVarRef
-{
- public:
-    ExprScalarVarRef()
-        : ExprVarRef(ExprType().FP(1).Varying())
-    {};
+// class ExprScalarVarRef : public ExprVarRef
+// {
+//  public:
+//     ExprScalarVarRef()
+//         : ExprVarRef(ExprType().FP(1).Varying())
+//     {};
 
-    virtual bool isVec() { return 0; }
-    virtual void eval(const ExprVarNode* node, Vec3d& result)=0;
-    virtual void eval(double* result){
-        Vec3d ret;
-        eval(0,ret);
-        for(int k=0;k<1;k++) result[k]=ret[k];
-    }
-    virtual void eval(const char** result){assert(false);}
+//     virtual bool isVec() { return 0; }
+//     virtual void eval(const ExprVarNode* node, Vec3d& result)=0;
+//     virtual void eval(double* result){
+//         Vec3d ret;
+//         eval(0,ret);
+//         for(int k=0;k<1;k++) result[k]=ret[k];
+//     }
+//     virtual void eval(const char** result){assert(false);}
 
-};
+// };
 
 #if 0
 /// uses internally to represent local variables
