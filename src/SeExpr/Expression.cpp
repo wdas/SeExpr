@@ -161,7 +161,7 @@ void Expression::prepLLVM() const {
 
 
 Expression::Expression(EvaluationStrategy evaluationStrategy)
-    : _wantVec(true), _evaluationStrategy(evaluationStrategy), _desiredReturnType(ExprType().FP(3).Varying()), _varEnv(0), _parseTree(0), _isValid(0), _parsed(0), _prepped(0),_interpreter(0)
+    : _wantVec(true), _evaluationStrategy(evaluationStrategy), _desiredReturnType(ExprType().FP(3).Varying()), _varEnv(0), _parseTree(0), _isValid(0), _parsed(0), _prepped(0),_interpreter(0),_context(&Context::global())
 {
     ExprFunc::init();
 
@@ -171,8 +171,8 @@ Expression::Expression(EvaluationStrategy evaluationStrategy)
 #endif
 }
 
-Expression::Expression( const std::string &e, const ExprType & type, EvaluationStrategy evaluationStrategy)
-    : _wantVec(true), _expression(e), _evaluationStrategy(evaluationStrategy),  _desiredReturnType(type), _varEnv(0),  _parseTree(0), _isValid(0), _parsed(0), _prepped(0),_interpreter(0)
+    Expression::Expression( const std::string &e, const ExprType & type, EvaluationStrategy evaluationStrategy, const Context& context)
+    : _wantVec(true), _expression(e), _evaluationStrategy(evaluationStrategy),  _desiredReturnType(type), _varEnv(0),  _parseTree(0), _isValid(0), _parsed(0), _prepped(0),_interpreter(0), _context(&context)
 {
     ExprFunc::init();
 #ifdef SEEXPR_ENABLE_LLVM
@@ -208,6 +208,12 @@ void Expression::reset()
     delete TheExecutionEngine; TheExecutionEngine = 0;
     delete Context; Context = 0;
 #endif
+}
+
+void Expression::setContext(const Context& context)
+{
+    reset();
+    _context = &context;
 }
 
 void Expression::setDesiredReturnType(const ExprType & type)

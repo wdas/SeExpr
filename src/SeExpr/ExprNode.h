@@ -562,6 +562,7 @@ public:
     virtual int buildInterpreter(Interpreter* interpreter) const;
     virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
     const char* str() const { return _str.c_str(); }
+    void str(const char* newstr) { _str=newstr; }
 
 private:
     std::string _str;

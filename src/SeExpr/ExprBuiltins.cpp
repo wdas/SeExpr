@@ -202,7 +202,7 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
     }
     static const char* remap_docstring=
         "remap(float x, float\n"
-        "source, float range, float falloff, int interp)\nGeneral remapping function.\n"
+        "source, float range, float falloff, float interp)\nGeneral remapping function.\n"
         "When x is within +/- <i>range</i> of source, the result is one.\n"
         "The result falls to zero beyond that range over <i>falloff</i> distance.\n"
         "The falloff shape is controlled by <i>interp</i>. Numeric values\n"

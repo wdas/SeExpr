@@ -24,6 +24,7 @@
 #include <iomanip>
 #include <stdint.h>
 #include "Vec3d.h"
+#include "Context.h"
 #include "ExprEnv.h"
 
 namespace llvm {
@@ -70,43 +71,45 @@ private:
     ExprType _type;
 };
 
+// TODO: deprecate class and just use ExprVarRef base class
 /// simple vector variable reference reference base class
-class ExprVectorVarRef : public ExprVarRef
-{
- public:
-    ExprVectorVarRef(int dim = 3)
-        : ExprVarRef(ExprType().FP(dim).Varying())
-    {};
+// class ExprVectorVarRef : public ExprVarRef
+// {
+//  public:
+//     ExprVectorVarRef(int dim = 3)
+//         : ExprVarRef(ExprType().FP(dim).Varying())
+//     {};
 
-    virtual bool isVec() { return 1; }
-    virtual void eval(const ExprVarNode* node, Vec3d& result)=0;
-    virtual void eval(double* result){
-        Vec3d ret;
-        eval(0,ret);
-        for(int k=0;k<3;k++) result[k]=ret[k];
-    }
-    virtual void eval(const char** result){assert(false);}
-};
+//     virtual bool isVec() { return 1; }
+//     virtual void eval(const ExprVarNode* node, Vec3d& result)=0;
+//     virtual void eval(double* result){
+//         Vec3d ret;
+//         eval(0,ret);
+//         for(int k=0;k<3;k++) result[k]=ret[k];
+//     }
+//     virtual void eval(const char** result){assert(false);}
+// };
 
 
+// TODO: deprecate class and just use ExprVarRef base class
 /// simple scalar variable reference reference base class
-class ExprScalarVarRef : public ExprVarRef
-{
- public:
-    ExprScalarVarRef()
-        : ExprVarRef(ExprType().FP(1).Varying())
-    {};
+// class ExprScalarVarRef : public ExprVarRef
+// {
+//  public:
+//     ExprScalarVarRef()
+//         : ExprVarRef(ExprType().FP(1).Varying())
+//     {};
 
-    virtual bool isVec() { return 0; }
-    virtual void eval(const ExprVarNode* node, Vec3d& result)=0;
-    virtual void eval(double* result){
-        Vec3d ret;
-        eval(0,ret);
-        for(int k=0;k<1;k++) result[k]=ret[k];
-    }
-    virtual void eval(const char** result){assert(false);}
+//     virtual bool isVec() { return 0; }
+//     virtual void eval(const ExprVarNode* node, Vec3d& result)=0;
+//     virtual void eval(double* result){
+//         Vec3d ret;
+//         eval(0,ret);
+//         for(int k=0;k<1;k++) result[k]=ret[k];
+//     }
+//     virtual void eval(const char** result){assert(false);}
 
-};
+// };
 
 #if 0
 /// uses internally to represent local variables
@@ -172,7 +175,7 @@ class Expression
     };
 
     Expression(EvaluationStrategy be = defaultEvaluationStrategy);
-    Expression( const std::string &e, const ExprType & type = ExprType().FP(3), EvaluationStrategy be = defaultEvaluationStrategy);
+    Expression( const std::string &e, const ExprType & type = ExprType().FP(3), EvaluationStrategy be = defaultEvaluationStrategy, const Context& context=Context::global());
 
     virtual ~Expression();
 
@@ -278,6 +281,10 @@ class Expression
     /** Returns a read only map of local variables that were set **/
     //const LocalVarTable& getLocalVars() const {return _localVars;}
 
+    /** An immutable reference to access context parameters from say ExprFuncX's */
+    const Context& context() const {return *_context;}
+    void setContext(const Context& context);
+
  private:
     /** No definition by design. */
     Expression( const Expression &e );
@@ -301,8 +308,12 @@ class Expression
 
     /** The expression. */
     std::string _expression;
-    
+
     EvaluationStrategy _evaluationStrategy;
+
+    /** Context for out of band function parameters */
+    const Context* _context;
+
  protected:
 
     /** Computed return type. */
