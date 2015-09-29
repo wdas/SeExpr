@@ -390,7 +390,7 @@ const double* Expression::evalFP() const
         }
     }
 
-    return 0;
+    return SeExpr2::Vec3d(0,0,0);
 }
 
 const char* Expression::evalStr() const
