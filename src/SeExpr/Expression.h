@@ -60,10 +60,7 @@ class ExprVarRef
     //! returns (current) type
     virtual ExprType type() const { return _type; };
 
-    // TODO: this is deprecated!
-    //! returns this variable's value by setting result, node refers to 
-    //! where in the parse tree the evaluation is occurring
-    //virtual void eval(double* result,char**)=0;
+    //! returns this variable's value by setting result
     virtual void eval(double* result)=0;
     virtual void eval(const char** resultStr)=0;
 
