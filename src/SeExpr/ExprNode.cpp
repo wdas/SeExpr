@@ -168,7 +168,7 @@ ExprNode::addChildren_without_delete(ExprNode* surrogate)
 ExprType
 ExprNode::prep(bool wantScalar, ExprVarEnv & env)
 {
-    /** The default behavior is to call prep on children (giving AnyType as desired type).
+    /** Default is to call prep on children (giving AnyType as desired type).
      *  If all children return valid types, returns NoneType.
      *  Otherwise,                          returns ErrorType.
      *  *Note:* Ignores wanted type.
@@ -365,7 +365,7 @@ ExprAssignNode::prep(bool wantScalar, ExprVarEnv & env)
     bool error=false;
 	// TODO: fix
     //checkIsValue(_assignedType,error);
-	checkCondition(_assignedType.isValid(),"tesT",error);
+	checkCondition(_assignedType.isValid(),std::string("Assignment operation has bad type: ") + _type.toString(),error);
 
     if(error) setType(ExprType().Error());
     else setTypeWithChildLife(ExprType().None());
@@ -590,7 +590,7 @@ ExprFuncNode::prep(bool wantScalar, ExprVarEnv & env)
         if(!_func) _func = _expr->resolveFunc(_name);
         if(!_func) _func = ExprFunc::lookup(_name);
 
-    //check that function exisits and that the function has the right number of arguments
+    //check that function exists and that the function has the right number of arguments
         if(checkCondition(_func,"Function " + _name + " has no definition", error) 
             && checkCondition(nargs >= _func->minArgs(),"Too few args for function"+_name,error)
             && checkCondition(nargs <= _func->maxArgs() || _func->maxArgs() < 0, "Too many args for function "+_name,error)) {
