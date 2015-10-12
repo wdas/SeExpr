@@ -690,7 +690,10 @@ bool ExprFuncNode::
 checkArg(int arg,ExprType type,ExprVarEnv& env)
 {
     ExprType childType=child(arg)->prep(type.isFP(1),env);
+#if 0
+    // debug
     std::cerr<<"we have "<<childType.toString()<<" and want "<<type.toString()<<std::endl;
+#endif
     _promote[arg]=0;
     if(ExprType::valuesCompatible(type,childType) && type.isLifeCompatible(childType)){
         if(type.isFP() && type.dim() > childType.dim()){

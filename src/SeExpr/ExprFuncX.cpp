@@ -35,7 +35,10 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node,Interpreter* inter
     std::vector<int> operands;
     for(int c=0;c<node->numChildren();c++){
         int operand=node->child(c)->buildInterpreter(interpreter);
+#if 0
+        // debug
         std::cerr<<"we are "<<node->promote(c)<<" "<<c<<std::endl;
+#endif
         if(node->promote(c) != 0) {
             interpreter->addOp(getTemplatizedOp<Promote>(node->promote(c)));
             int promotedOperand=interpreter->allocFP(node->promote(c));
