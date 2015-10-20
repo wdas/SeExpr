@@ -20,6 +20,9 @@ if(NOT ENABLE_LLVM_BACKEND)
   list(REMOVE_ITEM io_cpp ${to_remove})
 endif()
 
+# uncomment below to print debug messages
+#add_definitions(-DSEEXPR_DEBUG)
+
 ## find our parser generators
 find_program(BISON_EXE bison)
 find_program(FLEX_EXE flex)
