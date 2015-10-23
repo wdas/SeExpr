@@ -664,10 +664,14 @@ int ExprCompareEqNode::buildInterpreter(Interpreter* interpreter) const
                 op1=promotedOp1;
             }
         }
-        interpreter->addOp(getTemplatizedOp2<'=',CompareEqOp>(dimCompare));
-    }else if(child0->type().isString())
-        interpreter->addOp(getTemplatizedOp2<'=',StrCompareEqOp>(1));
-    else assert(false);
+        if(_op=='=')  interpreter->addOp(getTemplatizedOp2<'=',CompareEqOp>(dimCompare));
+        else if(_op=='!')  interpreter->addOp(getTemplatizedOp2<'!',CompareEqOp>(dimCompare));
+        else assert(false && "Invalid operation");
+    }else if(child0->type().isString()){
+        if(_op=='=') interpreter->addOp(getTemplatizedOp2<'=',StrCompareEqOp>(1));
+        else if(_op=='!') interpreter->addOp(getTemplatizedOp2<'!',StrCompareEqOp>(1));
+        else assert(false && "Invalid operation");
+    } else assert(false && "Invalid type for comparison");
     int op2=interpreter->allocFP(1);
     interpreter->addOperand(op0);
     interpreter->addOperand(op1);
