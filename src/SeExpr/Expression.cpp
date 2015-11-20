@@ -172,7 +172,7 @@ Expression::Expression(EvaluationStrategy evaluationStrategy)
 }
 
     Expression::Expression( const std::string &e, const ExprType & type, EvaluationStrategy evaluationStrategy, const Context& context)
-    : _wantVec(true), _expression(e), _evaluationStrategy(evaluationStrategy), _context(&context),_desiredReturnType(type), _varEnv(0),  _parseTree(0), _isValid(0), _parsed(0), _prepped(0), _interpreter(0)
+    : _wantVec(true), _expression(e), _evaluationStrategy(evaluationStrategy), _context(&context), _desiredReturnType(type), _varEnv(0),  _parseTree(0), _isValid(0), _parsed(0), _prepped(0), _interpreter(0)
 {
     ExprFunc::init();
 #ifdef SEEXPR_ENABLE_LLVM
@@ -413,4 +413,4 @@ const char* Expression::evalStr() const
     return 0;
 }
 
-}
+} // end namespace SeExpr2/

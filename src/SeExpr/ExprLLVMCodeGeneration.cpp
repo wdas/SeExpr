@@ -32,11 +32,11 @@ using namespace SeExpr2;
 // TODO: factor out integer/double constant creation
 namespace {
 
-Function* llvm_getFunction(IRBuilder<> &Builder) {
+Function* llvm_getFunction(LLVM_BUILDER Builder) {
     return Builder.GetInsertBlock()->getParent();
 }
 
-Module* llvm_getModule(IRBuilder<> &Builder) {
+Module* llvm_getModule(LLVM_BUILDER Builder) {
     return llvm_getFunction(Builder)->getParent();
 }
 
@@ -126,36 +126,36 @@ Type *createLLVMTyForSeExprType(LLVMContext &Context, ExprType seType) {
 }
 
 // Copy a scalar "val" to a vector of "dim" length
-Value *createVecVal(IRBuilder<> &Builder, Value *val, unsigned dim) {
+LLVM_VALUE createVecVal(LLVM_BUILDER Builder, LLVM_VALUE val, unsigned dim) {
     LLVMContext &Context = Builder.getContext();
     VectorType *doubleVecTy = VectorType::get(Type::getDoubleTy(Context), dim);
-    Value *vecVal = UndefValue::get(doubleVecTy);
+    LLVM_VALUE vecVal = UndefValue::get(doubleVecTy);
     for (unsigned i = 0; i < dim; i++)
         vecVal = Builder.CreateInsertElement(vecVal, val, ConstantInt::get(Type::getInt32Ty(Context), i));
     return vecVal;
 }
 
 // Copy a vector "val" to a vector of the same length
-Value *createVecVal(IRBuilder<> &Builder, ArrayRef<Value *> val) {
+LLVM_VALUE createVecVal(LLVM_BUILDER Builder, ArrayRef<LLVM_VALUE > val) {
     if(!val.size())
         return 0;
 
     LLVMContext &Context = Builder.getContext();
     unsigned dim = val.size();
     VectorType *elemType = VectorType::get(val[0]->getType(), dim);
-    Value *vecVal = UndefValue::get(elemType);
+    LLVM_VALUE vecVal = UndefValue::get(elemType);
     for (unsigned i = 0; i < dim; i++)
         vecVal = Builder.CreateInsertElement(vecVal, val[i], ConstantInt::get(Type::getInt32Ty(Context), i));
     return vecVal;
 }
 
-Value *createVecValFromAlloca(IRBuilder<> &Builder, AllocaInst *destPtr, unsigned vecLen) {
+LLVM_VALUE createVecValFromAlloca(LLVM_BUILDER Builder, AllocaInst *destPtr, unsigned vecLen) {
     Type *destTy = destPtr->getType()->getPointerElementType();
     assert(destTy->isDoubleTy() || destTy->isArrayTy());
-    std::vector<Value*> vals;
+    std::vector<LLVM_VALUE > vals;
 
         for(unsigned i = 0; i < vecLen; ++i) {
-            Value *ptr = destTy->isDoubleTy()?
+            LLVM_VALUE ptr = destTy->isDoubleTy()?
                          Builder.CreateConstGEP1_32(destPtr, i):
                          Builder.CreateConstGEP2_32(destPtr, 0, i);
             vals.push_back(Builder.CreateLoad(ptr));
@@ -164,18 +164,18 @@ Value *createVecValFromAlloca(IRBuilder<> &Builder, AllocaInst *destPtr, unsigne
     return createVecVal(Builder, vals);
 }
 
-Value *getFirstElement(Value *V, IRBuilder<> Builder) {
+LLVM_VALUE getFirstElement(LLVM_VALUE V, IRBuilder<> Builder) {
     Type *VTy = V->getType();
     if(VTy->isDoubleTy())
         return V;
 
     assert(VTy->isVectorTy());
     LLVMContext &Context = Builder.getContext();
-    Value *zero = ConstantInt::get(Type::getInt32Ty(Context), 0);
+    LLVM_VALUE zero = ConstantInt::get(Type::getInt32Ty(Context), 0);
     return Builder.CreateExtractElement(V, zero);
 }
 
-Value* promoteToTy(Value *val, Type *destTy, IRBuilder<> &Builder) {
+LLVM_VALUE promoteToTy(LLVM_VALUE val, Type *destTy, LLVM_BUILDER Builder) {
     Type *srcTy = val->getType();
     if(srcTy == destTy)
         return val;
@@ -186,7 +186,7 @@ Value* promoteToTy(Value *val, Type *destTy, IRBuilder<> &Builder) {
     return createVecVal(Builder, val, destTy->getVectorNumElements());
 }
 
-AllocaInst *createAllocaInst(IRBuilder<> &Builder, Type *ty,
+AllocaInst *createAllocaInst(LLVM_BUILDER Builder, Type *ty,
                              unsigned arraySize = 1,
                              const std::string &varName = "") {
     // move builder to first position of entry BB
@@ -199,14 +199,14 @@ AllocaInst *createAllocaInst(IRBuilder<> &Builder, Type *ty,
 
     // allocate stack memory and store value to it.
     LLVMContext &Context = Builder.getContext();
-    Value *arraySizeVal = ConstantInt::get(Type::getInt32Ty(Context), arraySize);
+    LLVM_VALUE arraySizeVal = ConstantInt::get(Type::getInt32Ty(Context), arraySize);
     AllocaInst *varPtr = Builder.CreateAlloca(ty, arraySizeVal, varName);
     // restore builder insertion position
     Builder.restoreIP(oldIP);
     return varPtr;
 }
 
-AllocaInst *createArray(IRBuilder<> &Builder, Type *ty,
+AllocaInst *createArray(LLVM_BUILDER Builder, Type *ty,
                              unsigned arraySize,
                              const std::string &varName = "") {
     // move builder to first position of entry BB
@@ -225,22 +225,22 @@ AllocaInst *createArray(IRBuilder<> &Builder, Type *ty,
     return varPtr;
 }
 
-std::pair<Value*,Value*> promoteBinaryOperandsToAppropriateVector(IRBuilder<> &Builder,
-                                              Value *op1, Value *op2) {
+std::pair<LLVM_VALUE, LLVM_VALUE > promoteBinaryOperandsToAppropriateVector(LLVM_BUILDER Builder,
+                                              LLVM_VALUE op1, LLVM_VALUE op2) {
     Type *op1Ty = op1->getType();
     Type *op2Ty = op2->getType();
     if(op1Ty == op2Ty)
         return std::make_pair(op1,op2);
 
-    Value *toPromote = op1;
-    Value *target = op2;
+    LLVM_VALUE toPromote = op1;
+    LLVM_VALUE target = op2;
     if(op1Ty->isVectorTy())
         std::swap(toPromote, target);
 
     assert(target->getType()->isVectorTy());
 
     unsigned dim = target->getType()->getVectorNumElements();
-    Value *vecVal = createVecVal(Builder, toPromote, dim);
+    LLVM_VALUE vecVal = createVecVal(Builder, toPromote, dim);
 
     if(op1Ty->isVectorTy())
         op2 = vecVal;
@@ -250,7 +250,7 @@ std::pair<Value*,Value*> promoteBinaryOperandsToAppropriateVector(IRBuilder<> &B
     return std::make_pair(op1,op2);
 }
 
-Function *getOrCreateEvalVarDeclaration(IRBuilder<> &Builder) {
+Function *getOrCreateEvalVarDeclaration(LLVM_BUILDER Builder) {
     LLVMContext &Context = Builder.getContext();
     Type *i8PtrTy = Type::getInt8PtrTy(Context);
     Type *doublePtrTy = Type::getDoublePtrTy(Context);
@@ -262,10 +262,10 @@ Function *getOrCreateEvalVarDeclaration(IRBuilder<> &Builder) {
     if(callback)
         return callback;
 
-    return Function::Create(FT, GlobalValue::ExternalLinkage, "evaluateVarRef", M);
+    return Function::Create(FT, GlobalLLVM_VALUE ::ExternalLinkage, "evaluateVarRef", M);
 }
 
-Function *getOrCreateCustomFunctionWrapperDeclaration(IRBuilder<> &Builder) {
+Function *getOrCreateCustomFunctionWrapperDeclaration(LLVM_BUILDER Builder) {
     LLVMContext &Context = Builder.getContext();
     Type *i8PtrTy = Type::getInt8PtrTy(Context);
     Type *i32PtrTy = Type::getInt32PtrTy(Context);
@@ -286,7 +286,7 @@ Function *getOrCreateCustomFunctionWrapperDeclaration(IRBuilder<> &Builder) {
     return Function::Create(FT, GlobalValue::ExternalLinkage, "resolveCustomFunction", M);
 }
 
-Value *resolveLocalVar(const char *name, IRBuilder<> &Builder) {
+LLVM_VALUE resolveLocalVar(const char *name, LLVM_BUILDER Builder) {
     // TODO: can we just remember the llvm value so we don't have to go searching for this?
     BasicBlock &entryBB = llvm_getFunction(Builder)->getEntryBlock();
     for(BasicBlock::iterator BI = entryBB.begin(),
@@ -300,82 +300,82 @@ Value *resolveLocalVar(const char *name, IRBuilder<> &Builder) {
     return 0;
 }
 
-AllocaInst *storeVectorToArrayPtr(IRBuilder<> &Builder, Value *vecVal) {
+AllocaInst *storeVectorToArrayPtr(LLVM_BUILDER Builder, LLVM_VALUE vecVal) {
     LLVMContext &Context = Builder.getContext();
     AllocaInst *arrayPtr = createArray(Builder, Type::getDoubleTy(Context),
                                        vecVal->getType()->getVectorNumElements());
 
     for(unsigned i = 0; i < 3; ++i) {
-        Value *idx = ConstantInt::get(Type::getInt32Ty(Context), i);
-        Value *val = Builder.CreateExtractElement(vecVal, idx);
-        Value *ptr = Builder.CreateConstGEP2_32(arrayPtr, 0, i);
+        LLVM_VALUE idx = ConstantInt::get(Type::getInt32Ty(Context), i);
+        LLVM_VALUE val = Builder.CreateExtractElement(vecVal, idx);
+        LLVM_VALUE ptr = Builder.CreateConstGEP2_32(arrayPtr, 0, i);
         Builder.CreateStore(val, ptr);
     }
     return arrayPtr;
 }
 
-void storeVectorToArrayPtr(IRBuilder<> &Builder, Value *vecVal, Value *arrayPtr) {
+void storeVectorToArrayPtr(LLVM_BUILDER Builder, LLVM_VALUE vecVal, LLVM_VALUE arrayPtr) {
     LLVMContext &Context = Builder.getContext();
     for(unsigned i = 0; i < 3; ++i) {
-        Value *idx = ConstantInt::get(Type::getInt32Ty(Context), i);
-        Value *val = Builder.CreateExtractElement(vecVal, idx);
-        Value *ptr = Builder.CreateConstGEP2_32(arrayPtr, 0, i);
+        LLVM_VALUE idx = ConstantInt::get(Type::getInt32Ty(Context), i);
+        LLVM_VALUE val = Builder.CreateExtractElement(vecVal, idx);
+        LLVM_VALUE ptr = Builder.CreateConstGEP2_32(arrayPtr, 0, i);
         Builder.CreateStore(val, ptr);
     }
 }
 
-AllocaInst *storeVectorToDoublePtr(IRBuilder<> &Builder, Value *vecVal) {
+AllocaInst *storeVectorToDoublePtr(LLVM_BUILDER Builder, LLVM_VALUE vecVal) {
     LLVMContext &Context = Builder.getContext();
     AllocaInst *doublePtr = createAllocaInst(Builder, Type::getDoubleTy(Context),
                                    vecVal->getType()->getVectorNumElements());
     for(unsigned i = 0; i < 3; ++i) {
-        Value *idx = ConstantInt::get(Type::getInt32Ty(Context), i);
-        Value *val = Builder.CreateExtractElement(vecVal, idx);
-        Value *ptr = Builder.CreateConstGEP1_32(doublePtr, i);
+        LLVM_VALUE idx = ConstantInt::get(Type::getInt32Ty(Context), i);
+        LLVM_VALUE val = Builder.CreateExtractElement(vecVal, idx);
+        LLVM_VALUE ptr = Builder.CreateConstGEP1_32(doublePtr, i);
         Builder.CreateStore(val, ptr);
     }
     return doublePtr;
 }
 
-std::vector<Value*> codegenFuncCallArgs(IRBuilder<> &Builder,
+std::vector<LLVM_VALUE > codegenFuncCallArgs(LLVM_BUILDER Builder,
                                         const ExprFuncNode* funcNode) {
-    std::vector<Value*> args;
+    std::vector<LLVM_VALUE > args;
     for(int i = 0; i < funcNode->numChildren(); ++i)
         args.push_back(funcNode->child(i)->codegen(Builder));
     return args;
 }
 
-std::vector<Value*> promoteArgs(std::vector<Value*> args, IRBuilder<> &Builder,
+std::vector<LLVM_VALUE > promoteArgs(std::vector<LLVM_VALUE > args, LLVM_BUILDER Builder,
                            FunctionType *llvmFuncType) {
-    std::vector<Value*> ret;
+    std::vector<LLVM_VALUE > ret;
     for(unsigned i = 0; i < args.size(); ++i)
         ret.push_back(promoteToTy(args[i], llvmFuncType->getParamType(i), Builder));
     return ret;
 }
 
-std::vector<Value*> promoteArgs(std::vector<Value*> args, IRBuilder<> &Builder,
+std::vector<LLVM_VALUE > promoteArgs(std::vector<LLVM_VALUE > args, LLVM_BUILDER Builder,
                                 ExprFuncStandard::FuncType seFuncType) {
     if(isTakeOnlyDoubleArg(seFuncType))
         return args;
 
     LLVMContext &Context = Builder.getContext();
     VectorType *destTy = VectorType::get(Type::getDoubleTy(Context), 3);
-    std::vector<Value*> ret;
+    std::vector<LLVM_VALUE > ret;
     for(unsigned i = 0; i < args.size(); ++i)
         ret.push_back(promoteToTy(args[i], destTy, Builder));
     return ret;
 }
 
-std::vector<Value*> replaceVecArgWithDoublePointer(IRBuilder<> &Builder,
-        std::vector<Value*> args) {
+std::vector<LLVM_VALUE > replaceVecArgWithDoublePointer(LLVM_BUILDER Builder,
+        std::vector<LLVM_VALUE > args) {
     for(unsigned i = 0; i < args.size(); ++i)
         if(args[i]->getType()->isVectorTy())
             args[i] = storeVectorToDoublePtr(Builder, args[i]);
     return args;
 }
 
-std::vector<Value*> convertArgsToPointerAndLength(IRBuilder<> &Builder,
-                                            std::vector<Value*> actualArgs,
+std::vector<LLVM_VALUE > convertArgsToPointerAndLength(LLVM_BUILDER Builder,
+                                            std::vector<LLVM_VALUE > actualArgs,
                                             ExprFuncStandard::FuncType seFuncType) {
     assert(isVarArg(seFuncType));
 
@@ -387,14 +387,14 @@ std::vector<Value*> convertArgsToPointerAndLength(IRBuilder<> &Builder,
         assert(actualArgs[i]->getType()->isDoubleTy() ||
                actualArgs[i]->getType() == Type::getDoublePtrTy(Context));
 
-    std::vector<Value*> args;
+    std::vector<LLVM_VALUE > args;
     // push "int n"
     args.push_back(ConstantInt::get(Type::getInt32Ty(Context), numArgs));
 
     if(seFuncType == ExprFuncStandard::FUNCN) {
         AllocaInst *doublePtr = createAllocaInst(Builder, Type::getDoubleTy(Context), numArgs);
         for(unsigned i = 0; i < numArgs; ++i) {
-            Value *ptr = Builder.CreateConstGEP1_32(doublePtr, i);
+            LLVM_VALUE ptr = Builder.CreateConstGEP1_32(doublePtr, i);
             Builder.CreateStore(actualArgs[i], ptr);
         }
         args.push_back(doublePtr);
@@ -403,11 +403,11 @@ std::vector<Value*> convertArgsToPointerAndLength(IRBuilder<> &Builder,
 
     AllocaInst *arrayPtr = createArray(Builder, ArrayType::get(Type::getDoubleTy(Context), 3), numArgs);
     for(unsigned i = 0; i < numArgs; ++i) {
-        Value *toInsert = actualArgs[i];
-        Value *subArrayPtr = Builder.CreateConstGEP2_32(arrayPtr, 0, i);
+        LLVM_VALUE toInsert = actualArgs[i];
+        LLVM_VALUE subArrayPtr = Builder.CreateConstGEP2_32(arrayPtr, 0, i);
         for(unsigned j = 0; j < 3; ++j) {
-            Value *destAddr = Builder.CreateConstGEP2_32(subArrayPtr, 0, j);
-            Value *srcAddr = Builder.CreateConstGEP1_32(toInsert, j);
+            LLVM_VALUE destAddr = Builder.CreateConstGEP2_32(subArrayPtr, 0, j);
+            LLVM_VALUE srcAddr = Builder.CreateConstGEP1_32(toInsert, j);
             Builder.CreateStore(Builder.CreateLoad(srcAddr), destAddr);
         }
     }
@@ -415,8 +415,8 @@ std::vector<Value*> convertArgsToPointerAndLength(IRBuilder<> &Builder,
     return args;
 }
 
-Value *executeStandardFunction(IRBuilder<> &Builder, ExprFuncStandard::FuncType seFuncType,
-         std::vector<Value*> args, Value *addrVal) {
+LLVM_VALUE executeStandardFunction(LLVM_BUILDER Builder, ExprFuncStandard::FuncType seFuncType,
+         std::vector<LLVM_VALUE > args, LLVM_VALUE addrVal) {
     LLVMContext &Context = Builder.getContext();
 
     args = promoteArgs(args, Builder, seFuncType);
@@ -437,9 +437,9 @@ Value *executeStandardFunction(IRBuilder<> &Builder, ExprFuncStandard::FuncType 
 }
 
 // TODO: Is this necessary? why not use printf custom function?
-Value *callPrintf(const ExprFuncNode *seFunc, IRBuilder<> &Builder, Function *callee) {
+LLVM_VALUE callPrintf(const ExprFuncNode *seFunc, LLVM_BUILDER Builder, Function *callee) {
     LLVMContext &Context = Builder.getContext();
-    std::vector<Value*> args;
+    std::vector<LLVM_VALUE > args;
 
     // TODO: promotion for printf?
     { // preprocess format string.
@@ -454,11 +454,11 @@ Value *callPrintf(const ExprFuncNode *seFunc, IRBuilder<> &Builder, Function *ca
     }
 
     for(int i = 1; i < seFunc->numChildren(); ++i) {
-        Value *arg = seFunc->child(i)->codegen(Builder);
+        LLVM_VALUE arg = seFunc->child(i)->codegen(Builder);
         if(arg->getType()->isVectorTy()) {
             AllocaInst *vecArray = storeVectorToDoublePtr(Builder, arg);
             for(unsigned i=0; i<arg->getType()->getVectorNumElements(); ++i) {
-                Value *elemPtr = Builder.CreateConstGEP1_32(vecArray, i);
+                LLVM_VALUE elemPtr = Builder.CreateConstGEP1_32(vecArray, i);
                 args.push_back(Builder.CreateLoad(elemPtr));
             }
         } else
@@ -470,16 +470,16 @@ Value *callPrintf(const ExprFuncNode *seFunc, IRBuilder<> &Builder, Function *ca
 }
 
 // TODO: not good. need better implementation.
-Value *callCustomFunction(const ExprFuncNode *funcNode, IRBuilder<> &Builder) {
+LLVM_VALUE callCustomFunction(const ExprFuncNode *funcNode, LLVM_BUILDER Builder) {
     LLVMContext &Context = Builder.getContext();
     int nargs = funcNode->numChildren();
-    std::vector<Value*> args = codegenFuncCallArgs(Builder,funcNode);
+    std::vector<LLVM_VALUE > args = codegenFuncCallArgs(Builder,funcNode);
 
     unsigned sizeOfRet = (unsigned)funcNode->type().dim();
     assert(sizeOfRet == 1 || sizeOfRet == 3);
     AllocaInst *result = createAllocaInst(Builder, Type::getDoubleTy(Context), sizeOfRet);
-    Value *varName = Builder.CreateGlobalString(funcNode->name());
-    Value *ptrToFirstChar = Builder.CreateConstGEP2_32(varName, 0, 0);
+    LLVM_VALUE varName = Builder.CreateGlobalString(funcNode->name());
+    LLVM_VALUE ptrToFirstChar = Builder.CreateConstGEP2_32(varName, 0, 0);
 
     unsigned sizeOfFpArgs = 0;
     unsigned sizeOfStrArgs = 0;
@@ -510,22 +510,22 @@ Value *callCustomFunction(const ExprFuncNode *funcNode, IRBuilder<> &Builder) {
         } else if (argType == Type::getInt8PtrTy(Context)) {
             opIdx = strIdx + 2;
         } else assert(false);
-        Value *idxVal = ConstantInt::get(Type::getInt32Ty(Context), opIdx);
-        Value *opDataPtr = Builder.CreateConstGEP1_32(opDataArg, i);
+        LLVM_VALUE idxVal = ConstantInt::get(Type::getInt32Ty(Context), opIdx);
+        LLVM_VALUE opDataPtr = Builder.CreateConstGEP1_32(opDataArg, i);
         Builder.CreateStore(idxVal, opDataPtr);
 
         if(argType->isDoubleTy()) {
-            Value *fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx++);
+            LLVM_VALUE fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx++);
             Builder.CreateStore(args[i], fpArgPtr);
         } else if (argType->isVectorTy()) {
             for(unsigned j = 0; j < 3; ++j) {
-                Value *vecIdx = ConstantInt::get(Type::getInt32Ty(Context), j);
-                Value *val = Builder.CreateExtractElement(args[i], vecIdx);
-                Value *fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx++);
+                LLVM_VALUE vecIdx = ConstantInt::get(Type::getInt32Ty(Context), j);
+                LLVM_VALUE val = Builder.CreateExtractElement(args[i], vecIdx);
+                LLVM_VALUE fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx++);
                 Builder.CreateStore(val, fpArgPtr);
             }
         } else if (argType == Type::getInt8PtrTy(Context)) {
-            Value *strArgPtr = Builder.CreateConstGEP1_32(strArg, strIdx++);
+            LLVM_VALUE strArgPtr = Builder.CreateConstGEP1_32(strArg, strIdx++);
             Builder.CreateStore(args[i], strArgPtr);
         } else assert(false);
     }
@@ -537,7 +537,7 @@ Value *callCustomFunction(const ExprFuncNode *funcNode, IRBuilder<> &Builder) {
     GlobalVariable *dataGV  = new GlobalVariable(*M, Type::getInt8PtrTy(Context), false,
                                       GlobalValue::InternalLinkage, nullPtrVal);
 
-    std::vector<Value*> params;
+    std::vector<LLVM_VALUE > params;
     params.push_back(ptrToFirstChar);
     params.push_back(opDataArg);
     params.push_back(ConstantInt::get(Type::getInt32Ty(Context), nargs));
@@ -555,9 +555,9 @@ Value *callCustomFunction(const ExprFuncNode *funcNode, IRBuilder<> &Builder) {
     if(sizeOfRet == 1) {
         return Builder.CreateLoad(result);
     } else if(sizeOfRet == 3) {
-        std::vector<Value*> resultArray;
+        std::vector<LLVM_VALUE > resultArray;
         for (int i = 0; i < 3; i++) {
-            Value *ptr = Builder.CreateConstGEP1_32(result, i);
+            LLVM_VALUE ptr = Builder.CreateConstGEP1_32(result, i);
             resultArray.push_back(Builder.CreateLoad(ptr));
         }
         return createVecVal(Builder, resultArray);
@@ -576,7 +576,7 @@ extern "C" void evaluateVarRef(ExprVarRef* seVR, double *result) {
 
 namespace SeExpr2 {
 
-Value* promoteToDim(Value *val, unsigned dim, IRBuilder<> &Builder) {
+LLVM_VALUE promoteToDim(LLVM_VALUE val, unsigned dim, LLVM_BUILDER Builder) {
     Type *srcTy = val->getType();
     if(srcTy->isVectorTy() || dim <= 1)
         return val;
@@ -585,38 +585,38 @@ Value* promoteToDim(Value *val, unsigned dim, IRBuilder<> &Builder) {
     return createVecVal(Builder, val, dim);
 }
 
-Value* ExprNode::codegen(IRBuilder<> &Builder) const {
+LLVM_VALUE ExprNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     for (int i = 0; i < numChildren(); i++)
         child(i)->codegen(Builder);
     return 0;
 }
 
-Value* ExprModuleNode::codegen(IRBuilder<> &Builder) const {
-    Value *lastVal = 0;
+LLVM_VALUE ExprModuleNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
+    LLVM_VALUE lastVal = 0;
     for (int i = 0; i < numChildren(); i++)
         lastVal = child(i)->codegen(Builder);
     assert(lastVal);
     return lastVal;
 }
 
-Value* ExprBlockNode::codegen(IRBuilder<> &Builder) const {
-    Value *lastVal = 0;
+LLVM_VALUE ExprBlockNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
+    LLVM_VALUE lastVal = 0;
     for (int i = 0; i < numChildren(); i++)
         lastVal = child(i)->codegen(Builder);
     assert(lastVal);
     return lastVal;
 }
 
-Value* ExprNumNode::codegen(IRBuilder<> &Builder) const {
+LLVM_VALUE ExprNumNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     return ConstantFP::get(Builder.getContext(), APFloat(_val));
 }
 
-Value* ExprBinaryOpNode::codegen(IRBuilder<> &Builder) const {
-    Value *c1 = child(0)->codegen(Builder);
-    Value *c2 = child(1)->codegen(Builder);
-    std::pair<Value*,Value*> pv = promoteBinaryOperandsToAppropriateVector(Builder, c1, c2);
-    Value *op1 = pv.first;
-    Value *op2 = pv.second;
+LLVM_VALUE ExprBinaryOpNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
+    LLVM_VALUE c1 = child(0)->codegen(Builder);
+    LLVM_VALUE c2 = child(1)->codegen(Builder);
+    std::pair<LLVM_VALUE, LLVM_VALUE > pv = promoteBinaryOperandsToAppropriateVector(Builder, c1, c2);
+    LLVM_VALUE op1 = pv.first;
+    LLVM_VALUE op2 = pv.second;
 
     switch (_op) {
     case '+':
@@ -647,18 +647,18 @@ Value* ExprBinaryOpNode::codegen(IRBuilder<> &Builder) const {
 
 // This is the def of def-use chain
 // We don't go to VarNode::codegen. It is codegen'd here.
-Value* ExprAssignNode::codegen(IRBuilder<> &Builder) const {
+LLVM_VALUE ExprAssignNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     // codegen stored value.
-    Value *val = child(0)->codegen(Builder);
+    LLVM_VALUE val = child(0)->codegen(Builder);
 
     const std::string &varName = name();
-    if(Value *existingPtr = resolveLocalVar(varName.c_str(), Builder)) {
+    if(LLVM_VALUE existingPtr = resolveLocalVar(varName.c_str(), Builder)) {
         Type *ptrType = existingPtr->getType()->getPointerElementType();
         Type *valType = val->getType();
         if(ptrType == valType)
             Builder.CreateStore(val, existingPtr);
         else if(valType->isDoubleTy() && ptrType->isVectorTy()) {// promotion
-            Value *proVal = createVecVal(Builder,val, ptrType->getVectorNumElements());
+            LLVM_VALUE proVal = createVecVal(Builder,val, ptrType->getVectorNumElements());
             Builder.CreateStore(proVal, existingPtr);
         } else {
             AllocaInst *varPtr = createAllocaInst(Builder,val->getType());
@@ -674,11 +674,11 @@ Value* ExprAssignNode::codegen(IRBuilder<> &Builder) const {
     return 0;
 }
 
-Value* ExprCompareEqNode::codegen(IRBuilder<> &Builder) const {
-    Value *op1 = getFirstElement(child(0)->codegen(Builder), Builder);
-    Value *op2 = getFirstElement(child(1)->codegen(Builder), Builder);
+LLVM_VALUE ExprCompareEqNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
+    LLVM_VALUE op1 = getFirstElement(child(0)->codegen(Builder), Builder);
+    LLVM_VALUE op2 = getFirstElement(child(1)->codegen(Builder), Builder);
 
-    Value *boolVal = 0;
+    LLVM_VALUE boolVal = 0;
     switch(_op) {
     case '!':
         boolVal = Builder.CreateFCmpONE(op1, op2);
@@ -693,24 +693,24 @@ Value* ExprCompareEqNode::codegen(IRBuilder<> &Builder) const {
     return Builder.CreateUIToFP(boolVal, op1->getType());
 }
 
-Value* ExprCompareNode::codegen(IRBuilder<> &Builder) const {
-    Value *op1 = getFirstElement(child(0)->codegen(Builder), Builder);
-    Value *op2 = getFirstElement(child(1)->codegen(Builder), Builder);
+LLVM_VALUE ExprCompareNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
+    LLVM_VALUE op1 = getFirstElement(child(0)->codegen(Builder), Builder);
+    LLVM_VALUE op2 = getFirstElement(child(1)->codegen(Builder), Builder);
 
     Type *opTy = op1->getType();
     Constant *zero = ConstantFP::get(opTy, 0.0);
-    Value *boolVal = 0;
+    LLVM_VALUE boolVal = 0;
 
     switch (_op) {
     case '|': {
-         Value *op1IsOne = Builder.CreateFCmpUNE(op1, zero);
-         Value *op2IsOne = Builder.CreateFCmpUNE(op2, zero);
+         LLVM_VALUE op1IsOne = Builder.CreateFCmpUNE(op1, zero);
+         LLVM_VALUE op2IsOne = Builder.CreateFCmpUNE(op2, zero);
          boolVal = Builder.CreateOr(op1IsOne, op2IsOne);
          break;
     }
     case '&': {
-        Value *op1IsOne = Builder.CreateFCmpONE(op1, zero);
-        Value *op2IsOne = Builder.CreateFCmpONE(op2, zero);
+        LLVM_VALUE op1IsOne = Builder.CreateFCmpONE(op1, zero);
+        LLVM_VALUE op2IsOne = Builder.CreateFCmpONE(op2, zero);
         boolVal = Builder.CreateAnd(op1IsOne, op2IsOne);
         break;
     }
@@ -733,17 +733,17 @@ Value* ExprCompareNode::codegen(IRBuilder<> &Builder) const {
     return Builder.CreateUIToFP(boolVal, opTy);
 }
 
-Value* ExprCondNode::codegen(IRBuilder<> &Builder) const {
-    Value *condVal = getFirstElement(child(0)->codegen(Builder), Builder);
-    Value *cond = Builder.CreateFCmpUNE(condVal,
+LLVM_VALUE ExprCondNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
+    LLVM_VALUE condVal = getFirstElement(child(0)->codegen(Builder), Builder);
+    LLVM_VALUE cond = Builder.CreateFCmpUNE(condVal,
                                      ConstantFP::get(condVal->getType(), 0.0));
-    Value *trueVal = child(1)->codegen(Builder);
-    Value *falseVal = child(2)->codegen(Builder);
-    std::pair<Value*,Value*> pv = promoteBinaryOperandsToAppropriateVector(Builder, trueVal, falseVal);
+    LLVM_VALUE trueVal = child(1)->codegen(Builder);
+    LLVM_VALUE falseVal = child(2)->codegen(Builder);
+    std::pair<LLVM_VALUE, LLVM_VALUE> pv = promoteBinaryOperandsToAppropriateVector(Builder, trueVal, falseVal);
     return Builder.CreateSelect(cond, pv.first, pv.second);
 }
 
-Value* ExprFuncNode::codegen(IRBuilder<> &Builder) const {
+LLVM_VALUE ExprFuncNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     LLVMContext &Context = Builder.getContext();
     Module *M = llvm_getModule(Builder);
     std::string calleeName(name());
@@ -759,7 +759,7 @@ Value* ExprFuncNode::codegen(IRBuilder<> &Builder) const {
         }
         return callPrintf(this, Builder, callee);
     } else if (callee) {
-        std::vector<Value*> args = promoteArgs(codegenFuncCallArgs(Builder,this), Builder,
+        std::vector<LLVM_VALUE > args = promoteArgs(codegenFuncCallArgs(Builder,this), Builder,
                            callee->getFunctionType());
         return Builder.CreateCall(callee, args);
     }
@@ -777,10 +777,10 @@ Value* ExprFuncNode::codegen(IRBuilder<> &Builder) const {
     FunctionType *llvmFuncType =  getSeExprFuncStandardLLVMType(seFuncType, Context);
     void *fp = standfunc->getFuncPointer();
     ConstantInt *funcAddr = ConstantInt::get(Type::getInt64Ty(Context), (uint64_t)fp);
-    Value *addrVal = Builder.CreateIntToPtr(funcAddr, PointerType::getUnqual(llvmFuncType));
+    LLVM_VALUE addrVal = Builder.CreateIntToPtr(funcAddr, PointerType::getUnqual(llvmFuncType));
 
     // Collect distribution positions
-    std::vector<Value*> args = codegenFuncCallArgs(Builder,this);
+    std::vector<LLVM_VALUE > args = codegenFuncCallArgs(Builder,this);
     std::set<int> distributionArgPos;
     if(seFuncType == ExprFuncStandard::FUNCN) {
         for(unsigned i = 0; i < args.size(); ++i)
@@ -806,12 +806,12 @@ Value* ExprFuncNode::codegen(IRBuilder<> &Builder) const {
     Type *firstArgType = args[*distributionArgPos.begin()]->getType();
     assert(firstArgType->isVectorTy());
 
-    std::vector<Value*> ret;
+    std::vector<LLVM_VALUE > ret;
     for(unsigned i = 0; i < firstArgType->getVectorNumElements(); ++i) {
-        Value *idx = ConstantInt::get(Type::getInt32Ty(Context), i);
-        std::vector<Value*> realArgs;
+        LLVM_VALUE idx = ConstantInt::get(Type::getInt32Ty(Context), i);
+        std::vector<LLVM_VALUE > realArgs;
         for(unsigned j = 0; j < args.size(); ++j) {
-            Value *realArg = args[j];
+            LLVM_VALUE realArg = args[j];
             if(distributionArgPos.count(j)) {
                 if(args[j]->getType()->isPointerTy())
                     realArg = Builder.CreateLoad(Builder.CreateConstGEP2_32(args[j], 0, i));
@@ -826,14 +826,14 @@ Value* ExprFuncNode::codegen(IRBuilder<> &Builder) const {
     return createVecVal(Builder, ret);
 }
 
-Value* ExprIfThenElseNode::codegen(IRBuilder<> &Builder) const {
-    Value *condVal = getFirstElement(child(0)->codegen(Builder), Builder);
+LLVM_VALUE ExprIfThenElseNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
+    LLVM_VALUE condVal = getFirstElement(child(0)->codegen(Builder), Builder);
     Type *condTy = condVal->getType();
 
     LLVMContext &Context = Builder.getContext();
 
     Constant *zero = ConstantFP::get(condTy, 0.0);
-    Value *intCond = Builder.CreateFCmpUNE(condVal, zero);
+    LLVM_VALUE intCond = Builder.CreateFCmpUNE(condVal, zero);
 
     Function *F = llvm_getFunction(Builder);
     BasicBlock *thenBlock = BasicBlock::Create(Context, "then", F);
@@ -854,7 +854,7 @@ Value* ExprIfThenElseNode::codegen(IRBuilder<> &Builder) const {
     return 0;
 }
 
-Value* ExprLocalFunctionNode::codegen(IRBuilder<> &Builder) const {
+LLVM_VALUE ExprLocalFunctionNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     IRBuilder<>::InsertPoint oldIP = Builder.saveIP();
     LLVMContext &Context = Builder.getContext();
 
@@ -871,7 +871,7 @@ Value* ExprLocalFunctionNode::codegen(IRBuilder<> &Builder) const {
         Builder.CreateStore(AI, Alloca);
     }
 
-    Value *result = 0;
+    LLVM_VALUE result = 0;
     for (int i = 1; i < numChildren(); i++)
         result = child(i)->codegen(Builder);
 
@@ -880,7 +880,7 @@ Value* ExprLocalFunctionNode::codegen(IRBuilder<> &Builder) const {
     return 0;
 }
 
-Value* ExprPrototypeNode::codegen(IRBuilder<> &Builder) const {
+LLVM_VALUE ExprPrototypeNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     LLVMContext &Context = Builder.getContext();
 
     // get arg type
@@ -891,7 +891,7 @@ Value* ExprPrototypeNode::codegen(IRBuilder<> &Builder) const {
     Type* retTy = createLLVMTyForSeExprType(Context, returnType());
 
     FunctionType *FT = FunctionType::get(retTy, ParamTys, false);
-    Function *F = Function::Create(FT, GlobalValue::InternalLinkage,
+    Function *F = Function::Create(FT, GlobalLLVM_VALUE ::InternalLinkage,
                                          name(), llvm_getModule(Builder));
 
     // Set names for all arguments.
@@ -905,24 +905,24 @@ Value* ExprPrototypeNode::codegen(IRBuilder<> &Builder) const {
     return F;
 }
 
-Value* ExprStrNode::codegen(IRBuilder<> &Builder) const {
+LLVM_VALUE ExprStrNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     return Builder.CreateGlobalStringPtr(_str);
 }
 
-Value* ExprSubscriptNode::codegen(IRBuilder<> &Builder) const {
-    Value *op1 = child(0)->codegen(Builder);
-    Value *op2 = child(1)->codegen(Builder);
+LLVM_VALUE ExprSubscriptNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
+    LLVM_VALUE op1 = child(0)->codegen(Builder);
+    LLVM_VALUE op2 = child(1)->codegen(Builder);
 
     if(op1->getType()->isDoubleTy())
         return op1;
 
     LLVMContext &Context = Builder.getContext();
-    Value *idx = Builder.CreateFPToUI(op2, Type::getInt32Ty(Context));
+    LLVM_VALUE idx = Builder.CreateFPToUI(op2, Type::getInt32Ty(Context));
     return Builder.CreateExtractElement(op1, idx);
 }
 
-Value* ExprUnaryOpNode::codegen(IRBuilder<> &Builder) const {
-    Value *op1 = child(0)->codegen(Builder);
+LLVM_VALUE ExprUnaryOpNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
+    LLVM_VALUE op1 = child(0)->codegen(Builder);
     Type *op1Ty = op1->getType();
     Constant *negateZero = ConstantFP::getZeroValueForNegation(op1Ty);
     Constant *zero = ConstantFP::get(op1Ty, 0.0);
@@ -932,11 +932,11 @@ Value* ExprUnaryOpNode::codegen(IRBuilder<> &Builder) const {
     case '-':
         return Builder.CreateFSub(negateZero, op1);
     case '~': {
-        Value *neg = Builder.CreateFSub(negateZero, op1);
+        LLVM_VALUE neg = Builder.CreateFSub(negateZero, op1);
         return Builder.CreateFAdd(neg, one);
     }
     case '!': {
-        Value *eqZero = Builder.CreateFCmpOEQ(zero, op1);
+        LLVM_VALUE eqZero = Builder.CreateFCmpOEQ(zero, op1);
         return Builder.CreateSelect(eqZero, one, zero);
     }
     }
@@ -946,13 +946,13 @@ Value* ExprUnaryOpNode::codegen(IRBuilder<> &Builder) const {
 }
 
 // This is the use of def-use chain
-Value* ExprVarNode::codegen(IRBuilder<> &Builder) const {
+LLVM_VALUE ExprVarNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     if(_var) {
         // All external var has the prefix "external_" in current function to avoid
         // potential name conflict with local variable
         std::string varName("external_");
         varName.append(name());
-        if(Value *valPtr = resolveLocalVar(varName.c_str(), Builder))
+        if(LLVM_VALUE valPtr = resolveLocalVar(varName.c_str(), Builder))
             return Builder.CreateLoad(valPtr);
         LLVMContext &Context = Builder.getContext();
         Type *voidPtrType = Type::getInt8PtrTy(Context);
@@ -960,15 +960,15 @@ Value* ExprVarNode::codegen(IRBuilder<> &Builder) const {
         ExprVarRef* varRef = expr()->resolveVar(name());
         ConstantInt *varAddr = ConstantInt::get(Type::getInt64Ty(Context),
                                                 (uint64_t)varRef);
-        Value *addrVal = Builder.CreateIntToPtr(varAddr, voidPtrType);
+        LLVM_VALUE addrVal = Builder.CreateIntToPtr(varAddr, voidPtrType);
         Function *evalVarFunc = getOrCreateEvalVarDeclaration(Builder);
 
         int dim = varRef->type().dim();
         AllocaInst *varAlloca = createAllocaInst(Builder, doubleTy, dim);
-        Value *params[2] = {addrVal, varAlloca};
+        LLVM_VALUE params[2] = {addrVal, varAlloca};
         Builder.CreateCall(evalVarFunc, params);
 
-        Value *ret = 0;
+        LLVM_VALUE ret = 0;
         if(dim == 1) {
             ret = Builder.CreateLoad(varAlloca);
         } else {
@@ -982,7 +982,7 @@ Value* ExprVarNode::codegen(IRBuilder<> &Builder) const {
     } else if(_localVar) {
         ExprType varTy = _localVar->type();
         if(varTy.isFP() || varTy.isString()) {
-            Value *valPtr = resolveLocalVar(name(), Builder);
+            LLVM_VALUE valPtr = resolveLocalVar(name(), Builder);
             assert(valPtr && "can not found symbol?");
             return Builder.CreateLoad(valPtr);
         }
@@ -992,8 +992,8 @@ Value* ExprVarNode::codegen(IRBuilder<> &Builder) const {
     return 0;
 }
 
-Value* ExprVecNode::codegen(IRBuilder<> &Builder) const {
-    std::vector<Value*> elems;
+LLVM_VALUE ExprVecNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
+    std::vector<LLVM_VALUE > elems;
     for (int i = 0; i < numChildren(); i++)
         elems.push_back(child(i)->codegen(Builder));
 
@@ -1003,7 +1003,7 @@ Value* ExprVecNode::codegen(IRBuilder<> &Builder) const {
 
     LLVMContext &Context = Builder.getContext();
     ConstantInt *zero = ConstantInt::get(Type::getInt32Ty(Context), 0);
-    std::vector<Value*> firstArgs;
+    std::vector<LLVM_VALUE > firstArgs;
     for (int i = 0; i < numChildren(); i++)
         firstArgs.push_back(Builder.CreateExtractElement(elems[i], zero));
     return createVecVal(Builder, firstArgs);
