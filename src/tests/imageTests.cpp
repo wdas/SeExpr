@@ -41,6 +41,7 @@
 #include <assert.h>
 #include <dirent.h>
 #include <pcrecpp.h>
+#include <sys/time.h>
 
 #include <gtest.h>
 #include <ftw.h>
@@ -51,6 +52,15 @@
 #include <ExprFuncX.h>
 
 double clamp(double x){return std::max(0.,std::min(255.,x));}
+
+// Get timestamp in microseconds, for recording elapsed time
+typedef unsigned long long timestamp_t;
+static timestamp_t get_timestamp ()
+{
+    struct timeval now;
+    gettimeofday (&now, NULL);
+    return  now.tv_usec + (timestamp_t)now.tv_sec * 1000000;
+}
 
 namespace SeExpr2 {
 
@@ -427,11 +437,18 @@ TEST(Examples, SeExprDemos)
     std::cerr.rdbuf(ofs.rdbuf());
 
     std::string examplePath("./src/demos/imageSynth2/examples2/");
-    ftw(examplePath.c_str(), evalExpressionFile, 64);
+
+    // Walk files in tree, evaluating expression in each
+    timestamp_t start = get_timestamp();
+    ftw(examplePath.c_str(), evalExpressionFile, 16);
+    timestamp_t end = get_timestamp();
+
+    double elapsedTime = (end - start) / 1000000.0L;
+    std::cerr << "Total evaluation time, all files: " << elapsedTime << std::endl;
 
     std::cerr.rdbuf(curr_cerr);
     ofs.close();
-    std::cerr << "Logfile saved in " << logfile.c_str() << std::endl;
+    std::cerr << "[ Logfile  ] " << logfile.c_str() << std::endl;
 }
 
 // Test example *.se files in show paint3d expressions.
@@ -456,11 +473,17 @@ TEST(Examples, Paint3dShow)
     std::streambuf *curr_cerr = std::cerr.rdbuf();
     std::cerr.rdbuf(ofs.rdbuf());
 
+    // Walk files in tree, evaluating expression in each
+    timestamp_t start = get_timestamp();
     ftw("/disney/shows/default/rel/global/expressions/",
         evalExpressionFile,
         16);
+    timestamp_t end = get_timestamp();
+
+    double elapsedTime = (end - start) / 1000000.0L;
+    std::cerr << "Total evaluation time, all files: " << elapsedTime << std::endl;
 
     std::cerr.rdbuf(curr_cerr);
     ofs.close();
-    std::cerr << "Logfile saved in " << logfile.c_str() << std::endl;
+    std::cerr << "[ Logfile  ] " << logfile.c_str() << std::endl;
 }

@@ -15,13 +15,17 @@
 
 FILE(GLOB io_cpp "*.cpp")
 set_source_files_properties("ExprBuiltins.cpp" PROPERTIES COMPILE_DEFINITIONS "__STDC_LIMIT_MACROS")
+
+# uncomment below to print debug messages
+#add_definitions(-DSEEXPR_DEBUG)
+
+# uncomment below to build for LLVM
+#add_definitions(-DENABLE_LLVM_BACKEND)
+
 if(NOT ENABLE_LLVM_BACKEND)
   file(GLOB to_remove "ExprLLVMCodeGeneration.cpp")
   list(REMOVE_ITEM io_cpp ${to_remove})
 endif()
-
-# uncomment below to print debug messages
-#add_definitions(-DSEEXPR_DEBUG)
 
 ## find our parser generators
 find_program(BISON_EXE bison)
