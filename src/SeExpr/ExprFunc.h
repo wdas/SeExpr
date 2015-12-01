@@ -71,6 +71,12 @@ public:
     //! Get doc string for a specific function
     static std::string getDocString(const char* functionName);
 
+    //! Get the total size estimate of all plugins
+    static size_t sizeInBytes();
+
+    //! Dump statistics
+    static Statistics statistics();
+
     //bool isScalar() const { return _scalar; };
 
     ExprFunc()
