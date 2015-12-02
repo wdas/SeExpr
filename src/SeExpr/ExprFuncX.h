@@ -25,6 +25,7 @@ namespace SeExpr2 {
 class ExprFuncNode;
 class Interpreter;
 class ExprVarEnv;
+typedef std::map<std::string,double> Statistics;
 
 //! Extension function spec, used for complicated argument custom functions.
 /** Provides the ability to handle all argument type checking and processing manually.
@@ -55,6 +56,12 @@ public:
     virtual ~ExprFuncX(){}
 
     bool isThreadSafe() const {return _threadSafe;}
+
+    /// Return memory usage of a funcX in bytes.
+    virtual size_t sizeInBytes() const {return 0;}
+
+    /// Give this function a chance to populate its statistics
+    virtual void statistics(Statistics& /*statistics*/) const {}
 
  protected:
     bool _isScalar;

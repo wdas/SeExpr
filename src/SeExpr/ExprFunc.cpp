@@ -62,6 +62,32 @@ namespace {
             if(i==funcmap.end()) return "";
             else return i->second.first;
         }
+
+
+        size_t sizeInBytes() const{
+            size_t totalSize=0;
+            for(FuncMap::const_iterator it=funcmap.begin();it!=funcmap.end();++it){
+                totalSize+=it->first.size()+sizeof(FuncMapItem);
+                const SeExpr2::ExprFunc& function=it->second.second;
+                if(const SeExpr2::ExprFuncX* funcx=function.funcx()){
+                    totalSize+=funcx->sizeInBytes();
+                }
+            }
+            return totalSize;
+        }
+
+        SeExpr2::Statistics statistics() const{
+            SeExpr2::Statistics statisticsDump;
+            size_t totalSize=0;
+            for(FuncMap::const_iterator it=funcmap.begin();it!=funcmap.end();++it){
+                totalSize+=it->first.size()+sizeof(FuncMapItem);
+                const SeExpr2::ExprFunc& function=it->second.second;
+                if(const SeExpr2::ExprFuncX* funcx=function.funcx()){
+                    funcx->statistics(statisticsDump);
+                }
+            }
+            return statisticsDump;
+        }
 	
     private:
         typedef std::pair<std::string,SeExpr2::ExprFunc> FuncMapItem;
@@ -166,6 +192,19 @@ ExprFunc::getDocString(const char* functionName)
     std::string ret=Functions->getDocString(functionName);
     mutex.unlock();
     return ret;
+}
+
+size_t
+ExprFunc::sizeInBytes(){
+    SeExprInternal2::AutoMutex locker(mutex);
+    if(!Functions) initInternal();
+    return Functions->sizeInBytes();
+}
+
+SeExpr2::Statistics ExprFunc::statistics() {
+    SeExprInternal2::AutoMutex locker(mutex);
+    if(!Functions) initInternal();
+    return Functions->statistics();
 }
 
 #ifndef SEEXPR_WIN32
