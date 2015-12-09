@@ -17,10 +17,7 @@ FILE(GLOB io_cpp "*.cpp")
 set_source_files_properties("ExprBuiltins.cpp" PROPERTIES COMPILE_DEFINITIONS "__STDC_LIMIT_MACROS")
 
 # uncomment below to print debug messages
-#add_definitions(-DSEEXPR_DEBUG)
-
-# uncomment below to build for LLVM
-#add_definitions(-DENABLE_LLVM_BACKEND)
+add_definitions(-DSEEXPR_DEBUG)
 
 if(NOT ENABLE_LLVM_BACKEND)
   file(GLOB to_remove "ExprLLVMCodeGeneration.cpp")
@@ -85,22 +82,37 @@ else ((BISON_EXE STREQUAL "BISON_EXE-NOTFOUND") OR (FLEX_EXE STREQUAL "FLEX_EXE-
 
 endif( (BISON_EXE STREQUAL "BISON_EXE-NOTFOUND") OR (FLEX_EXE STREQUAL "FLEX_EXE-NOTFOUND")  OR (SED_EXE STREQUAL "SED_EXE-NOTFOUND"))
 
+set(LLVM_LIB "")
+IF(ENABLE_LLVM_BACKEND)
+    #todo infinite loop in this?
+    #llvm_map_components_to_libraries(REQ_LLVM_LIBRARIES jit native)
+
+    # construct library name
+    execute_process(
+        COMMAND ${LLVM_CONFIG_EXECUTABLE} --version
+        OUTPUT_VARIABLE LLVM_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    set(LLVM_LIB "-lLLVM-${LLVM_VERSION}")
+    message(STATUS "LLVM library " ${LLVM_LIB})
+
+    add_definitions(-DSEEXPR_ENABLE_LLVM)
+ENDIF(ENABLE_LLVM_BACKEND)
+
 ## Make the SeExpr library
 ADD_LIBRARY (SeExpr2 SHARED ${io_cpp} ${core_cpp} ${parser_cpp})
 IF(NOT WIN32)
-   set(SEEXPR_LINK_LIB "dl" "pthread")
-   IF(ENABLE_LLVM_BACKEND)
-      list(APPEND SEEXPR_LINK_LIB ${REQ_LLVM_LIBRARIES})
-   ENDIF()
+   set(SEEXPR_LINK_LIB ${LLVM_LIB} "dl" "pthread")
    TARGET_LINK_LIBRARIES(SeExpr2 ${SEEXPR_LINK_LIB})
 ENDIF(NOT WIN32)
+
 ## Install binary and includes
 FILE(GLOB public_includes "*.h")
 INSTALL (TARGETS SeExpr2 DESTINATION ${CMAKE_INSTALL_LIBDIR})
 INSTALL (FILES ${public_includes} DESTINATION include/SeExpr2)
 
 if (ENABLE_LLVM_BACKEND)
-## remove conditional inlucde in header file
+## remove conditional include in header file
 ADD_CUSTOM_COMMAND(
    OUTPUT Expression.h
    COMMAND unifdef -DSEEXPR_ENABLE_LLVM -o Expression.h ${CMAKE_CURRENT_SOURCE_DIR}/Expression.h || true #unifdef not always return 0 when succeed. 

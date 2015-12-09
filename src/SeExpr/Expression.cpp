@@ -95,8 +95,8 @@ void Expression::prepLLVM() const {
     std::string uniqueName = getUniqueName();
 
     // create Module
-    Context = new LLVMContext();
-    Module *TheModule = new Module(uniqueName+"_module", *Context);
+    _llvmContext = new LLVMContext();
+    Module *TheModule = new Module(uniqueName+"_module", *_llvmContext);
 
     // Create the JIT.  This takes ownership of the module.
     std::string ErrStr;
@@ -112,11 +112,11 @@ void Expression::prepLLVM() const {
 
     // create function and entry BB
     bool desireFP = _desiredReturnType.isFP();
-    Type *ParamTys[1] = {desireFP?Type::getDoublePtrTy(*Context):
-                PointerType::getUnqual(Type::getInt8PtrTy(*Context))};
-    FunctionType *FT = FunctionType::get(Type::getVoidTy(*Context), ParamTys, false);
+    Type *ParamTys[1] = {desireFP?Type::getDoublePtrTy(*_llvmContext):
+                PointerType::getUnqual(Type::getInt8PtrTy(*_llvmContext))};
+    FunctionType *FT = FunctionType::get(Type::getVoidTy(*_llvmContext), ParamTys, false);
     Function *F = Function::Create(FT, Function::ExternalLinkage, uniqueName+"_func", TheModule);
-    BasicBlock *BB = BasicBlock::Create(*Context, "entry", F);
+    BasicBlock *BB = BasicBlock::Create(*_llvmContext, "entry", F);
     IRBuilder<> Builder(BB);
 
     // codegen
@@ -130,7 +130,7 @@ void Expression::prepLLVM() const {
             Value *newLastVal = promoteToDim(lastVal, dim, Builder);
             assert(newLastVal->getType()->getVectorNumElements() == dim);
             for(unsigned i = 0; i < dim; ++i) {
-                Value *idx = ConstantInt::get(Type::getInt32Ty(*Context), i);
+                Value *idx = ConstantInt::get(Type::getInt32Ty(*_llvmContext), i);
                 Value *val = Builder.CreateExtractElement(newLastVal, idx);
                 Value *ptr = Builder.CreateInBoundsGEP(firstArg, idx);
                 Builder.CreateStore(val, ptr);
@@ -166,7 +166,7 @@ Expression::Expression(EvaluationStrategy evaluationStrategy)
     ExprFunc::init();
 
 #ifdef SEEXPR_ENABLE_LLVM
-    Context = 0;
+    _llvmContext = 0;
     TheExecutionEngine = 0;
 #endif
 }
@@ -176,7 +176,8 @@ Expression::Expression(EvaluationStrategy evaluationStrategy)
 {
     ExprFunc::init();
 #ifdef SEEXPR_ENABLE_LLVM
-    Context = 0;
+    std::cerr << "default is LLVM\n";
+    _llvmContext = 0;
     TheExecutionEngine = 0;
 #endif
 }
@@ -206,7 +207,7 @@ void Expression::reset()
     _llvmEvalFP.reset();
     _llvmEvalStr.reset();
     delete TheExecutionEngine; TheExecutionEngine = 0;
-    delete Context; Context = 0;
+    delete _llvmContext; _llvmContext = 0;
 #endif
 }
 

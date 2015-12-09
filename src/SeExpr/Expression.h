@@ -383,7 +383,7 @@ class Expression
     mutable LLVMEvaluationContext<double> _llvmEvalFP;
     mutable LLVMEvaluationContext<char*> _llvmEvalStr;
 
-    mutable llvm::LLVMContext *Context;
+    mutable llvm::LLVMContext *_llvmContext;
     mutable llvm::ExecutionEngine *TheExecutionEngine;
     void prepLLVM() const;
     std::string getUniqueName() const {

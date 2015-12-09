@@ -64,13 +64,13 @@ bool isTakeOnlyDoubleArg(ExprFuncStandard::FuncType seFuncType) {
 }
 
 FunctionType* getSeExprFuncStandardLLVMType(ExprFuncStandard::FuncType sft,
-                                           LLVMContext &Context) {
+                                           LLVMContext &llvmContext) {
     assert(sft != ExprFuncStandard::NONE);
 
-    Type *intType = TypeBuilder<int,false>::get(Context);
-    Type *doubleType = TypeBuilder<double,false>::get(Context);
-    Type *doublePtrType = TypeBuilder<double*,false>::get(Context);
-    Type *voidType = TypeBuilder<void,false>::get(Context);
+    Type *intType = TypeBuilder<int,false>::get(llvmContext);
+    Type *doubleType = TypeBuilder<double,false>::get(llvmContext);
+    Type *doublePtrType = TypeBuilder<double*,false>::get(llvmContext);
+    Type *voidType = TypeBuilder<void,false>::get(llvmContext);
     FunctionType *FT = 0;
 
     if(sft <= ExprFuncStandard::FUNC6) {
@@ -112,14 +112,14 @@ FunctionType* getSeExprFuncStandardLLVMType(ExprFuncStandard::FuncType sft,
     return FT;
 }
 
-Type *createLLVMTyForSeExprType(LLVMContext &Context, ExprType seType) {
+Type *createLLVMTyForSeExprType(LLVMContext &llvmContext, ExprType seType) {
     if(seType.isFP()) {
         int dim = seType.dim();
-        return dim == 1 ? Type::getDoubleTy(Context) : VectorType::get(Type::getDoubleTy(Context), dim);
+        return dim == 1 ? Type::getDoubleTy(llvmContext) : VectorType::get(Type::getDoubleTy(llvmContext), dim);
     } else if(seType.isString()) {
         // TODO: post c++11
         // static_assert(sizeof(char*) == 8, "Expect 64-bit pointers");
-        return Type::getInt8PtrTy(Context);
+        return Type::getInt8PtrTy(llvmContext);
     }
     assert(!"unknown SeExpr type encountered"); // unknown type 
     return 0;
@@ -127,11 +127,11 @@ Type *createLLVMTyForSeExprType(LLVMContext &Context, ExprType seType) {
 
 // Copy a scalar "val" to a vector of "dim" length
 LLVM_VALUE createVecVal(LLVM_BUILDER Builder, LLVM_VALUE val, unsigned dim) {
-    LLVMContext &Context = Builder.getContext();
-    VectorType *doubleVecTy = VectorType::get(Type::getDoubleTy(Context), dim);
+    LLVMContext &llvmContext = Builder.getContext();
+    VectorType *doubleVecTy = VectorType::get(Type::getDoubleTy(llvmContext), dim);
     LLVM_VALUE vecVal = UndefValue::get(doubleVecTy);
     for (unsigned i = 0; i < dim; i++)
-        vecVal = Builder.CreateInsertElement(vecVal, val, ConstantInt::get(Type::getInt32Ty(Context), i));
+        vecVal = Builder.CreateInsertElement(vecVal, val, ConstantInt::get(Type::getInt32Ty(llvmContext), i));
     return vecVal;
 }
 
@@ -140,12 +140,12 @@ LLVM_VALUE createVecVal(LLVM_BUILDER Builder, ArrayRef<LLVM_VALUE > val) {
     if(!val.size())
         return 0;
 
-    LLVMContext &Context = Builder.getContext();
+    LLVMContext &llvmContext = Builder.getContext();
     unsigned dim = val.size();
     VectorType *elemType = VectorType::get(val[0]->getType(), dim);
     LLVM_VALUE vecVal = UndefValue::get(elemType);
     for (unsigned i = 0; i < dim; i++)
-        vecVal = Builder.CreateInsertElement(vecVal, val[i], ConstantInt::get(Type::getInt32Ty(Context), i));
+        vecVal = Builder.CreateInsertElement(vecVal, val[i], ConstantInt::get(Type::getInt32Ty(llvmContext), i));
     return vecVal;
 }
 
@@ -170,8 +170,8 @@ LLVM_VALUE getFirstElement(LLVM_VALUE V, IRBuilder<> Builder) {
         return V;
 
     assert(VTy->isVectorTy());
-    LLVMContext &Context = Builder.getContext();
-    LLVM_VALUE zero = ConstantInt::get(Type::getInt32Ty(Context), 0);
+    LLVMContext &llvmContext = Builder.getContext();
+    LLVM_VALUE zero = ConstantInt::get(Type::getInt32Ty(llvmContext), 0);
     return Builder.CreateExtractElement(V, zero);
 }
 
@@ -198,8 +198,8 @@ AllocaInst *createAllocaInst(LLVM_BUILDER Builder, Type *ty,
         Builder.SetInsertPoint(entryBB);
 
     // allocate stack memory and store value to it.
-    LLVMContext &Context = Builder.getContext();
-    LLVM_VALUE arraySizeVal = ConstantInt::get(Type::getInt32Ty(Context), arraySize);
+    LLVMContext &llvmContext = Builder.getContext();
+    LLVM_VALUE arraySizeVal = ConstantInt::get(Type::getInt32Ty(llvmContext), arraySize);
     AllocaInst *varPtr = Builder.CreateAlloca(ty, arraySizeVal, varName);
     // restore builder insertion position
     Builder.restoreIP(oldIP);
@@ -251,32 +251,32 @@ std::pair<LLVM_VALUE, LLVM_VALUE > promoteBinaryOperandsToAppropriateVector(LLVM
 }
 
 Function *getOrCreateEvalVarDeclaration(LLVM_BUILDER Builder) {
-    LLVMContext &Context = Builder.getContext();
-    Type *i8PtrTy = Type::getInt8PtrTy(Context);
-    Type *doublePtrTy = Type::getDoublePtrTy(Context);
+    LLVMContext &llvmContext = Builder.getContext();
+    Type *i8PtrTy = Type::getInt8PtrTy(llvmContext);
+    Type *doublePtrTy = Type::getDoublePtrTy(llvmContext);
     Type *ParamTys[2] = {i8PtrTy, doublePtrTy};
-    FunctionType *FT = FunctionType::get(Type::getVoidTy(Context), ParamTys, false);
+    FunctionType *FT = FunctionType::get(Type::getVoidTy(llvmContext), ParamTys, false);
 
     Module *M = llvm_getModule(Builder);
     Function *callback = M->getFunction("evaluateVarRef");
     if(callback)
         return callback;
 
-    return Function::Create(FT, GlobalLLVM_VALUE ::ExternalLinkage, "evaluateVarRef", M);
+    return Function::Create(FT, GlobalValue::ExternalLinkage, "evaluateVarRef", M);
 }
 
 Function *getOrCreateCustomFunctionWrapperDeclaration(LLVM_BUILDER Builder) {
-    LLVMContext &Context = Builder.getContext();
-    Type *i8PtrTy = Type::getInt8PtrTy(Context);
-    Type *i32PtrTy = Type::getInt32PtrTy(Context);
-    Type *i32Ty = Type::getInt32Ty(Context);
-    Type *doublePtrTy = Type::getDoublePtrTy(Context);
+    LLVMContext &llvmContext = Builder.getContext();
+    Type *i8PtrTy = Type::getInt8PtrTy(llvmContext);
+    Type *i32PtrTy = Type::getInt32PtrTy(llvmContext);
+    Type *i32Ty = Type::getInt32Ty(llvmContext);
+    Type *doublePtrTy = Type::getDoublePtrTy(llvmContext);
     PointerType *i8PtrPtr = PointerType::getUnqual(i8PtrTy);
     Type *ParamTys[10] = {i8PtrTy, i32PtrTy, i32Ty,
                           doublePtrTy, i32Ty, //fp
                           i8PtrPtr, i32Ty,    //str
                           i8PtrPtr, doublePtrTy, i32Ty};
-    FunctionType *FT = FunctionType::get(Type::getVoidTy(Context), ParamTys, false);
+    FunctionType *FT = FunctionType::get(Type::getVoidTy(llvmContext), ParamTys, false);
 
     Module *M = llvm_getModule(Builder);
     Function *callback = M->getFunction("resolveCustomFunction");
@@ -301,12 +301,12 @@ LLVM_VALUE resolveLocalVar(const char *name, LLVM_BUILDER Builder) {
 }
 
 AllocaInst *storeVectorToArrayPtr(LLVM_BUILDER Builder, LLVM_VALUE vecVal) {
-    LLVMContext &Context = Builder.getContext();
-    AllocaInst *arrayPtr = createArray(Builder, Type::getDoubleTy(Context),
+    LLVMContext &llvmContext = Builder.getContext();
+    AllocaInst *arrayPtr = createArray(Builder, Type::getDoubleTy(llvmContext),
                                        vecVal->getType()->getVectorNumElements());
 
     for(unsigned i = 0; i < 3; ++i) {
-        LLVM_VALUE idx = ConstantInt::get(Type::getInt32Ty(Context), i);
+        LLVM_VALUE idx = ConstantInt::get(Type::getInt32Ty(llvmContext), i);
         LLVM_VALUE val = Builder.CreateExtractElement(vecVal, idx);
         LLVM_VALUE ptr = Builder.CreateConstGEP2_32(arrayPtr, 0, i);
         Builder.CreateStore(val, ptr);
@@ -315,9 +315,9 @@ AllocaInst *storeVectorToArrayPtr(LLVM_BUILDER Builder, LLVM_VALUE vecVal) {
 }
 
 void storeVectorToArrayPtr(LLVM_BUILDER Builder, LLVM_VALUE vecVal, LLVM_VALUE arrayPtr) {
-    LLVMContext &Context = Builder.getContext();
+    LLVMContext &llvmContext = Builder.getContext();
     for(unsigned i = 0; i < 3; ++i) {
-        LLVM_VALUE idx = ConstantInt::get(Type::getInt32Ty(Context), i);
+        LLVM_VALUE idx = ConstantInt::get(Type::getInt32Ty(llvmContext), i);
         LLVM_VALUE val = Builder.CreateExtractElement(vecVal, idx);
         LLVM_VALUE ptr = Builder.CreateConstGEP2_32(arrayPtr, 0, i);
         Builder.CreateStore(val, ptr);
@@ -325,11 +325,11 @@ void storeVectorToArrayPtr(LLVM_BUILDER Builder, LLVM_VALUE vecVal, LLVM_VALUE a
 }
 
 AllocaInst *storeVectorToDoublePtr(LLVM_BUILDER Builder, LLVM_VALUE vecVal) {
-    LLVMContext &Context = Builder.getContext();
-    AllocaInst *doublePtr = createAllocaInst(Builder, Type::getDoubleTy(Context),
+    LLVMContext &llvmContext = Builder.getContext();
+    AllocaInst *doublePtr = createAllocaInst(Builder, Type::getDoubleTy(llvmContext),
                                    vecVal->getType()->getVectorNumElements());
     for(unsigned i = 0; i < 3; ++i) {
-        LLVM_VALUE idx = ConstantInt::get(Type::getInt32Ty(Context), i);
+        LLVM_VALUE idx = ConstantInt::get(Type::getInt32Ty(llvmContext), i);
         LLVM_VALUE val = Builder.CreateExtractElement(vecVal, idx);
         LLVM_VALUE ptr = Builder.CreateConstGEP1_32(doublePtr, i);
         Builder.CreateStore(val, ptr);
@@ -358,8 +358,8 @@ std::vector<LLVM_VALUE > promoteArgs(std::vector<LLVM_VALUE > args, LLVM_BUILDER
     if(isTakeOnlyDoubleArg(seFuncType))
         return args;
 
-    LLVMContext &Context = Builder.getContext();
-    VectorType *destTy = VectorType::get(Type::getDoubleTy(Context), 3);
+    LLVMContext &llvmContext = Builder.getContext();
+    VectorType *destTy = VectorType::get(Type::getDoubleTy(llvmContext), 3);
     std::vector<LLVM_VALUE > ret;
     for(unsigned i = 0; i < args.size(); ++i)
         ret.push_back(promoteToTy(args[i], destTy, Builder));
@@ -379,20 +379,20 @@ std::vector<LLVM_VALUE > convertArgsToPointerAndLength(LLVM_BUILDER Builder,
                                             ExprFuncStandard::FuncType seFuncType) {
     assert(isVarArg(seFuncType));
 
-    LLVMContext &Context = Builder.getContext();
+    LLVMContext &llvmContext = Builder.getContext();
     unsigned numArgs = actualArgs.size();
 
     // type of arg should be either double or double*(aka. vector).
     for(unsigned i = 0; i < numArgs; ++i)
         assert(actualArgs[i]->getType()->isDoubleTy() ||
-               actualArgs[i]->getType() == Type::getDoublePtrTy(Context));
+               actualArgs[i]->getType() == Type::getDoublePtrTy(llvmContext));
 
     std::vector<LLVM_VALUE > args;
     // push "int n"
-    args.push_back(ConstantInt::get(Type::getInt32Ty(Context), numArgs));
+    args.push_back(ConstantInt::get(Type::getInt32Ty(llvmContext), numArgs));
 
     if(seFuncType == ExprFuncStandard::FUNCN) {
-        AllocaInst *doublePtr = createAllocaInst(Builder, Type::getDoubleTy(Context), numArgs);
+        AllocaInst *doublePtr = createAllocaInst(Builder, Type::getDoubleTy(llvmContext), numArgs);
         for(unsigned i = 0; i < numArgs; ++i) {
             LLVM_VALUE ptr = Builder.CreateConstGEP1_32(doublePtr, i);
             Builder.CreateStore(actualArgs[i], ptr);
@@ -401,7 +401,7 @@ std::vector<LLVM_VALUE > convertArgsToPointerAndLength(LLVM_BUILDER Builder,
         return args;
     }
 
-    AllocaInst *arrayPtr = createArray(Builder, ArrayType::get(Type::getDoubleTy(Context), 3), numArgs);
+    AllocaInst *arrayPtr = createArray(Builder, ArrayType::get(Type::getDoubleTy(llvmContext), 3), numArgs);
     for(unsigned i = 0; i < numArgs; ++i) {
         LLVM_VALUE toInsert = actualArgs[i];
         LLVM_VALUE subArrayPtr = Builder.CreateConstGEP2_32(arrayPtr, 0, i);
@@ -411,13 +411,13 @@ std::vector<LLVM_VALUE > convertArgsToPointerAndLength(LLVM_BUILDER Builder,
             Builder.CreateStore(Builder.CreateLoad(srcAddr), destAddr);
         }
     }
-    args.push_back(Builder.CreateBitCast(arrayPtr, Type::getDoublePtrTy(Context)));
+    args.push_back(Builder.CreateBitCast(arrayPtr, Type::getDoublePtrTy(llvmContext)));
     return args;
 }
 
 LLVM_VALUE executeStandardFunction(LLVM_BUILDER Builder, ExprFuncStandard::FuncType seFuncType,
          std::vector<LLVM_VALUE > args, LLVM_VALUE addrVal) {
-    LLVMContext &Context = Builder.getContext();
+    LLVMContext &llvmContext = Builder.getContext();
 
     args = promoteArgs(args, Builder, seFuncType);
     args = replaceVecArgWithDoublePointer(Builder, args);
@@ -430,7 +430,7 @@ LLVM_VALUE executeStandardFunction(LLVM_BUILDER Builder, ExprFuncStandard::FuncT
 
     // TODO: assume standard function all use vector of length 3 as parameter
     //       or return type.
-    AllocaInst *retPtr = createAllocaInst(Builder, Type::getDoubleTy(Context), 3);
+    AllocaInst *retPtr = createAllocaInst(Builder, Type::getDoubleTy(llvmContext), 3);
     args.insert(args.begin(), retPtr);
     Builder.CreateCall(addrVal, replaceVecArgWithDoublePointer(Builder, args));
     return createVecValFromAlloca(Builder, retPtr, 3);
@@ -438,7 +438,7 @@ LLVM_VALUE executeStandardFunction(LLVM_BUILDER Builder, ExprFuncStandard::FuncT
 
 // TODO: Is this necessary? why not use printf custom function?
 LLVM_VALUE callPrintf(const ExprFuncNode *seFunc, LLVM_BUILDER Builder, Function *callee) {
-    LLVMContext &Context = Builder.getContext();
+    LLVMContext &llvmContext = Builder.getContext();
     std::vector<LLVM_VALUE > args;
 
     // TODO: promotion for printf?
@@ -466,18 +466,18 @@ LLVM_VALUE callPrintf(const ExprFuncNode *seFunc, LLVM_BUILDER Builder, Function
     }
 
     Builder.CreateCall(callee, args);
-    return ConstantFP::get(Type::getDoubleTy(Context), 0.0);
+    return ConstantFP::get(Type::getDoubleTy(llvmContext), 0.0);
 }
 
 // TODO: not good. need better implementation.
 LLVM_VALUE callCustomFunction(const ExprFuncNode *funcNode, LLVM_BUILDER Builder) {
-    LLVMContext &Context = Builder.getContext();
+    LLVMContext &llvmContext = Builder.getContext();
     int nargs = funcNode->numChildren();
     std::vector<LLVM_VALUE > args = codegenFuncCallArgs(Builder,funcNode);
 
     unsigned sizeOfRet = (unsigned)funcNode->type().dim();
     assert(sizeOfRet == 1 || sizeOfRet == 3);
-    AllocaInst *result = createAllocaInst(Builder, Type::getDoubleTy(Context), sizeOfRet);
+    AllocaInst *result = createAllocaInst(Builder, Type::getDoubleTy(llvmContext), sizeOfRet);
     LLVM_VALUE varName = Builder.CreateGlobalString(funcNode->name());
     LLVM_VALUE ptrToFirstChar = Builder.CreateConstGEP2_32(varName, 0, 0);
 
@@ -490,15 +490,15 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode *funcNode, LLVM_BUILDER Builder
         else if (argType->isVectorTy()) {
             assert(argType->getVectorNumElements() == 3);
             sizeOfFpArgs += 3;
-        } else if (argType == Type::getInt8PtrTy(Context)) {
+        } else if (argType == Type::getInt8PtrTy(llvmContext)) {
             sizeOfStrArgs += 1;
         } else assert(false);
     }
 
     // allocate opData
-    AllocaInst *opDataArg = createAllocaInst(Builder, Type::getInt32Ty(Context), (unsigned)nargs);
-    AllocaInst *fpArg = createAllocaInst(Builder, Type::getDoubleTy(Context), sizeOfFpArgs);
-    AllocaInst *strArg = createAllocaInst(Builder, Type::getInt8PtrTy(Context), sizeOfStrArgs);
+    AllocaInst *opDataArg = createAllocaInst(Builder, Type::getInt32Ty(llvmContext), (unsigned)nargs);
+    AllocaInst *fpArg = createAllocaInst(Builder, Type::getDoubleTy(llvmContext), sizeOfFpArgs);
+    AllocaInst *strArg = createAllocaInst(Builder, Type::getInt8PtrTy(llvmContext), sizeOfStrArgs);
     unsigned fpIdx = 0;
     unsigned strIdx = 0;
     for(int i=0; i < nargs; ++i) {
@@ -507,10 +507,10 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode *funcNode, LLVM_BUILDER Builder
         unsigned opIdx = 0;
         if(argType->isDoubleTy() || argType->isVectorTy()) {
             opIdx = fpIdx + 1 + sizeOfRet;
-        } else if (argType == Type::getInt8PtrTy(Context)) {
+        } else if (argType == Type::getInt8PtrTy(llvmContext)) {
             opIdx = strIdx + 2;
         } else assert(false);
-        LLVM_VALUE idxVal = ConstantInt::get(Type::getInt32Ty(Context), opIdx);
+        LLVM_VALUE idxVal = ConstantInt::get(Type::getInt32Ty(llvmContext), opIdx);
         LLVM_VALUE opDataPtr = Builder.CreateConstGEP1_32(opDataArg, i);
         Builder.CreateStore(idxVal, opDataPtr);
 
@@ -519,12 +519,12 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode *funcNode, LLVM_BUILDER Builder
             Builder.CreateStore(args[i], fpArgPtr);
         } else if (argType->isVectorTy()) {
             for(unsigned j = 0; j < 3; ++j) {
-                LLVM_VALUE vecIdx = ConstantInt::get(Type::getInt32Ty(Context), j);
+                LLVM_VALUE vecIdx = ConstantInt::get(Type::getInt32Ty(llvmContext), j);
                 LLVM_VALUE val = Builder.CreateExtractElement(args[i], vecIdx);
                 LLVM_VALUE fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx++);
                 Builder.CreateStore(val, fpArgPtr);
             }
-        } else if (argType == Type::getInt8PtrTy(Context)) {
+        } else if (argType == Type::getInt8PtrTy(llvmContext)) {
             LLVM_VALUE strArgPtr = Builder.CreateConstGEP1_32(strArg, strIdx++);
             Builder.CreateStore(args[i], strArgPtr);
         } else assert(false);
@@ -532,22 +532,22 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode *funcNode, LLVM_BUILDER Builder
 
     // TODO: thread safety?
     ConstantPointerNull *nullPtrVal =
-                          ConstantPointerNull::get(Type::getInt8PtrTy(Context));
+                          ConstantPointerNull::get(Type::getInt8PtrTy(llvmContext));
     Module *M = llvm_getModule(Builder);
-    GlobalVariable *dataGV  = new GlobalVariable(*M, Type::getInt8PtrTy(Context), false,
+    GlobalVariable *dataGV  = new GlobalVariable(*M, Type::getInt8PtrTy(llvmContext), false,
                                       GlobalValue::InternalLinkage, nullPtrVal);
 
     std::vector<LLVM_VALUE > params;
     params.push_back(ptrToFirstChar);
     params.push_back(opDataArg);
-    params.push_back(ConstantInt::get(Type::getInt32Ty(Context), nargs));
+    params.push_back(ConstantInt::get(Type::getInt32Ty(llvmContext), nargs));
     params.push_back(fpArg);
-    params.push_back(ConstantInt::get(Type::getInt32Ty(Context), sizeOfFpArgs));
+    params.push_back(ConstantInt::get(Type::getInt32Ty(llvmContext), sizeOfFpArgs));
     params.push_back(strArg);
-    params.push_back(ConstantInt::get(Type::getInt32Ty(Context), sizeOfStrArgs));
+    params.push_back(ConstantInt::get(Type::getInt32Ty(llvmContext), sizeOfStrArgs));
     params.push_back(dataGV);
     params.push_back(result);
-    params.push_back(ConstantInt::get(Type::getInt32Ty(Context), sizeOfRet));
+    params.push_back(ConstantInt::get(Type::getInt32Ty(llvmContext), sizeOfRet));
 
     Function *callee = getOrCreateCustomFunctionWrapperDeclaration(Builder);
     Builder.CreateCall(callee, params);
@@ -744,7 +744,7 @@ LLVM_VALUE ExprCondNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
 }
 
 LLVM_VALUE ExprFuncNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
-    LLVMContext &Context = Builder.getContext();
+    LLVMContext &llvmContext = Builder.getContext();
     Module *M = llvm_getModule(Builder);
     std::string calleeName(name());
 
@@ -752,10 +752,10 @@ LLVM_VALUE ExprFuncNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     Function *callee = M->getFunction(calleeName);
     if(calleeName == "printf") {
         if(!callee) {
-            FunctionType *FT = FunctionType::get(Type::getVoidTy(Context),
-                    Type::getInt8PtrTy(Context), true);
+            FunctionType *FT = FunctionType::get(Type::getVoidTy(llvmContext),
+                    Type::getInt8PtrTy(llvmContext), true);
             callee = Function::Create(FT, GlobalValue::ExternalLinkage,
-                    "printf", llvm_getModule(Builder));
+                                      "printf", llvm_getModule(Builder));
         }
         return callPrintf(this, Builder, callee);
     } else if (callee) {
@@ -774,9 +774,9 @@ LLVM_VALUE ExprFuncNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     // call standard function
     // get function pointer
     ExprFuncStandard::FuncType seFuncType = standfunc->getFuncType();
-    FunctionType *llvmFuncType =  getSeExprFuncStandardLLVMType(seFuncType, Context);
+    FunctionType *llvmFuncType =  getSeExprFuncStandardLLVMType(seFuncType, llvmContext);
     void *fp = standfunc->getFuncPointer();
-    ConstantInt *funcAddr = ConstantInt::get(Type::getInt64Ty(Context), (uint64_t)fp);
+    ConstantInt *funcAddr = ConstantInt::get(Type::getInt64Ty(llvmContext), (uint64_t)fp);
     LLVM_VALUE addrVal = Builder.CreateIntToPtr(funcAddr, PointerType::getUnqual(llvmFuncType));
 
     // Collect distribution positions
@@ -808,7 +808,7 @@ LLVM_VALUE ExprFuncNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
 
     std::vector<LLVM_VALUE > ret;
     for(unsigned i = 0; i < firstArgType->getVectorNumElements(); ++i) {
-        LLVM_VALUE idx = ConstantInt::get(Type::getInt32Ty(Context), i);
+        LLVM_VALUE idx = ConstantInt::get(Type::getInt32Ty(llvmContext), i);
         std::vector<LLVM_VALUE > realArgs;
         for(unsigned j = 0; j < args.size(); ++j) {
             LLVM_VALUE realArg = args[j];
@@ -830,15 +830,15 @@ LLVM_VALUE ExprIfThenElseNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     LLVM_VALUE condVal = getFirstElement(child(0)->codegen(Builder), Builder);
     Type *condTy = condVal->getType();
 
-    LLVMContext &Context = Builder.getContext();
+    LLVMContext &llvmContext = Builder.getContext();
 
     Constant *zero = ConstantFP::get(condTy, 0.0);
     LLVM_VALUE intCond = Builder.CreateFCmpUNE(condVal, zero);
 
     Function *F = llvm_getFunction(Builder);
-    BasicBlock *thenBlock = BasicBlock::Create(Context, "then", F);
-    BasicBlock *elseBlock = BasicBlock::Create(Context, "else", F);
-    BasicBlock *phiBlock = BasicBlock::Create(Context, "phi", F);
+    BasicBlock *thenBlock = BasicBlock::Create(llvmContext, "then", F);
+    BasicBlock *elseBlock = BasicBlock::Create(llvmContext, "else", F);
+    BasicBlock *phiBlock = BasicBlock::Create(llvmContext, "phi", F);
     Builder.CreateCondBr(intCond, thenBlock, elseBlock);
 
     Builder.SetInsertPoint(thenBlock);
@@ -856,13 +856,13 @@ LLVM_VALUE ExprIfThenElseNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
 
 LLVM_VALUE ExprLocalFunctionNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     IRBuilder<>::InsertPoint oldIP = Builder.saveIP();
-    LLVMContext &Context = Builder.getContext();
+    LLVMContext &llvmContext = Builder.getContext();
 
     // codegen prototype
     Function *F = cast<Function>(child(0)->codegen(Builder));
 
     // create alloca for args
-    BasicBlock *BB = BasicBlock::Create(Context, "entry", F);
+    BasicBlock *BB = BasicBlock::Create(llvmContext, "entry", F);
     Builder.SetInsertPoint(BB);
     Function::arg_iterator AI = F->arg_begin();
     for (int i = 0, e = F->arg_size(); i != e; ++i, ++AI) {
@@ -881,18 +881,18 @@ LLVM_VALUE ExprLocalFunctionNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
 }
 
 LLVM_VALUE ExprPrototypeNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
-    LLVMContext &Context = Builder.getContext();
+    LLVMContext &llvmContext = Builder.getContext();
 
     // get arg type
     std::vector<Type*>ParamTys;
     for(int i = 0; i < numChildren(); ++i)
-        ParamTys.push_back(createLLVMTyForSeExprType(Context, argType(i)));
+        ParamTys.push_back(createLLVMTyForSeExprType(llvmContext, argType(i)));
     // get ret type
-    Type* retTy = createLLVMTyForSeExprType(Context, returnType());
+    Type* retTy = createLLVMTyForSeExprType(llvmContext, returnType());
 
     FunctionType *FT = FunctionType::get(retTy, ParamTys, false);
-    Function *F = Function::Create(FT, GlobalLLVM_VALUE ::InternalLinkage,
-                                         name(), llvm_getModule(Builder));
+    Function *F = Function::Create(FT, GlobalValue::InternalLinkage,
+                                   name(), llvm_getModule(Builder));
 
     // Set names for all arguments.
     Function::arg_iterator AI = F->arg_begin();
@@ -916,8 +916,8 @@ LLVM_VALUE ExprSubscriptNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     if(op1->getType()->isDoubleTy())
         return op1;
 
-    LLVMContext &Context = Builder.getContext();
-    LLVM_VALUE idx = Builder.CreateFPToUI(op2, Type::getInt32Ty(Context));
+    LLVMContext &llvmContext = Builder.getContext();
+    LLVM_VALUE idx = Builder.CreateFPToUI(op2, Type::getInt32Ty(llvmContext));
     return Builder.CreateExtractElement(op1, idx);
 }
 
@@ -954,11 +954,11 @@ LLVM_VALUE ExprVarNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
         varName.append(name());
         if(LLVM_VALUE valPtr = resolveLocalVar(varName.c_str(), Builder))
             return Builder.CreateLoad(valPtr);
-        LLVMContext &Context = Builder.getContext();
-        Type *voidPtrType = Type::getInt8PtrTy(Context);
-        Type *doubleTy = Type::getDoubleTy(Context);
+        LLVMContext &llvmContext = Builder.getContext();
+        Type *voidPtrType = Type::getInt8PtrTy(llvmContext);
+        Type *doubleTy = Type::getDoubleTy(llvmContext);
         ExprVarRef* varRef = expr()->resolveVar(name());
-        ConstantInt *varAddr = ConstantInt::get(Type::getInt64Ty(Context),
+        ConstantInt *varAddr = ConstantInt::get(Type::getInt64Ty(llvmContext),
                                                 (uint64_t)varRef);
         LLVM_VALUE addrVal = Builder.CreateIntToPtr(varAddr, voidPtrType);
         Function *evalVarFunc = getOrCreateEvalVarDeclaration(Builder);
@@ -1001,8 +1001,8 @@ LLVM_VALUE ExprVecNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     if(elemType->isDoubleTy())
         return createVecVal(Builder, elems);
 
-    LLVMContext &Context = Builder.getContext();
-    ConstantInt *zero = ConstantInt::get(Type::getInt32Ty(Context), 0);
+    LLVMContext &llvmContext = Builder.getContext();
+    ConstantInt *zero = ConstantInt::get(Type::getInt32Ty(llvmContext), 0);
     std::vector<LLVM_VALUE > firstArgs;
     for (int i = 0; i < numChildren(); i++)
         firstArgs.push_back(Builder.CreateExtractElement(elems[i], zero));

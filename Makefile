@@ -20,13 +20,13 @@ export prefix DESTDIR
 all:
 	mkdir -p build
 	export CXX=${CXX}
-	cd build &&  CXX=${CXX} cmake -DCMAKE_INSTALL_PREFIX=$(prefix) -DCMAKE_INSTALL_LIBDIR=$(libdir) ../
-	#cd build && cmake -DCMAKE_INSTALL_PREFIX=$(prefix) -DCMAKE_INSTALL_LIBDIR=$(libdir) -DENABLE_LLVM_BACKEND=ON -DLLVM_ROOT="/home/fahome/yuanfanc/Install" ../
-	cd build && make -j 32 # && make doc
+	cd build &&  CXX=${CXX} cmake -DCMAKE_INSTALL_PREFIX=$(prefix) -DCMAKE_INSTALL_LIBDIR=$(libdir) -DENABLE_LLVM_BACKEND=ON ../
+# cd build && cmake -DCMAKE_INSTALL_PREFIX=$(prefix) -DCMAKE_INSTALL_LIBDIR=$(libdir) -DENABLE_LLVM_BACKEND=ON -DLLVM_ROOT="/home/fahome/yuanfanc/Install" ../
+	$(MAKE) -C build all
 clean:
 	rm -rf build Linux-*
 
 install: all
-	cd build; make install
+	$(MAKE) -C build install
 	pkgconfig-gen --name seexpr2 --desc 'SeExpr v2 Library' \
-		--generate --destdir '$(DESTDIR)' --prefix $(prefix) --libdir $(libdir)
+	--generate --destdir '$(DESTDIR)' --prefix $(prefix) --libdir $(libdir)
