@@ -388,8 +388,8 @@ static const char* vturbulence_docstring="vector vturbulence(vector v,int octave
 	uint32_t seed = 0;
 	for (int i = 0; i < n; i++) {
 	    // make irrational to generate fraction and combine xor into 32 bits
-	    int exp;
-	    double frac = frexp(args[i] * (M_E*M_PI), &exp);
+	    int exp=0;
+	    double frac = frexp(args[i] * double(M_E*M_PI), &exp);
 	    uint32_t s = (uint32_t) (frac * UINT32_MAX) ^ (uint32_t) exp;
 
 	    // blend with seed (constants from Numerical Recipes, attrib. from Knuth)

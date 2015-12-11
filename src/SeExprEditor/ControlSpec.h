@@ -37,7 +37,8 @@ class ControlSpec {
     ControlSpec(const ExprNode& node)
         :_start(node.startPos()), _end(node.endPos())
     {};
-
+    virtual ~ControlSpec() {}
+    
     //! Generates a replacement string based on changes to the spec
     virtual std::string toString() const = 0;
  protected:
