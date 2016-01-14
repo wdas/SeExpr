@@ -27,6 +27,7 @@
 #include "Context.h"
 #include "ExprEnv.h"
 
+
 namespace llvm {
     class ExecutionEngine;
     class LLVMContext;
@@ -143,6 +144,8 @@ class ExprLocalVarRef : public ExprVarRef
 
 enum EvaluationStrategy {UseInterpreter, UseLLVM};
 extern EvaluationStrategy defaultEvaluationStrategy;
+
+struct LLVMEvaluator;
 
 /// main expression class
 class Expression
@@ -278,6 +281,15 @@ class Expression
     const Context& context() const {return *_context;}
     void setContext(const Context& context);
 
+    /** Debug printout of parse tree */
+    void debugPrintParseTree();
+
+    /** Debug printout of interpreter evaluation program  **/
+    void debugPrintInterpreter();
+
+    /** Debug printout of LLVM evaluation  **/
+    void debugPrintLLVM();
+
  private:
     /** No definition by design. */
     Expression( const Expression &e );
@@ -347,56 +359,13 @@ class Expression
     /** Whether or not we have unsafe functions */
     mutable std::vector<std::string> _threadUnsafeFunctionCalls;
 
-#ifdef SEEXPR_ENABLE_LLVM
-    // TODO: let the dev code allocate memory?
-    // FP is the native function for this expression.
-    template<class T>
-    class LLVMEvaluationContext{
-    private:
-        typedef void (*FunctionPtr)(T*);
-        FunctionPtr functionPtr;
-        T* resultData;
-    public:
-        LLVMEvaluationContext(const LLVMEvaluationContext&)=delete;
-        LLVMEvaluationContext& operator=(const LLVMEvaluationContext&)=delete;
-
-        LLVMEvaluationContext(){ reset(); }
-        void init(void* fp,int dim){
-            reset();
-            functionPtr=reinterpret_cast<FunctionPtr>(fp);
-            resultData=new T[dim];
-        }
-        void reset(){
-            if(resultData) delete[] resultData;
-            functionPtr=0;
-            resultData=0;
-        }
-        const T* operator()()
-        {
-            assert(functionPtr && resultData);
-            functionPtr(resultData);
-            return resultData;
-        }
-    };
-    mutable LLVMEvaluationContext<double> _llvmEvalFP;
-    mutable LLVMEvaluationContext<char*> _llvmEvalStr;
-
-    mutable llvm::LLVMContext *_llvmContext;
-    mutable llvm::ExecutionEngine *TheExecutionEngine;
-    void prepLLVM() const;
-    std::string getUniqueName() const {
-        std::ostringstream o;
-        o << std::setbase(16) << (uint64_t)(this);
-        return ("_" + o.str());
-    }
-#endif
-
     /** Interpreter */
-public:
-    // TODO: make this public for debugging during devel
     mutable Interpreter* _interpreter;
     mutable int _returnSlot;
-private:
+
+    // LLVM evaluation layer
+    mutable LLVMEvaluator* _llvmEvaluator;
+
 
     /* internal */ public:
 

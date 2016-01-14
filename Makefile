@@ -20,7 +20,7 @@ export prefix DESTDIR
 all:
 	mkdir -p build
 	export CXX=${CXX}
-	cd build &&  CXX=${CXX} cmake -DCMAKE_INSTALL_PREFIX=$(prefix) -DCMAKE_INSTALL_LIBDIR=$(libdir) ../
+	cd build &&  CXX=${CXX} cmake -DENABLE_LLVM_BACKEND=ON -DCMAKE_INSTALL_PREFIX=$(prefix) -DCMAKE_INSTALL_LIBDIR=$(libdir) ../
 	$(MAKE) -C build all
 clean:
 	rm -rf build Linux-*

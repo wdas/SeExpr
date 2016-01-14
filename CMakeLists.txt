@@ -90,6 +90,24 @@ IF (NOT DEFINED CMAKE_INSTALL_LIBDIR)
 ENDIF()
 
 
+set(LLVM_LIB "")
+IF(ENABLE_LLVM_BACKEND)
+    #todo infinite loop in this?
+    #llvm_map_components_to_libraries(REQ_LLVM_LIBRARIES jit native)
+
+    # construct library name
+    execute_process(
+        COMMAND ${LLVM_CONFIG_EXECUTABLE} --version
+        OUTPUT_VARIABLE LLVM_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    set(LLVM_LIB "-lLLVM-${LLVM_VERSION}")
+    message(STATUS "LLVM library " ${LLVM_LIB})
+
+    add_definitions(-DSEEXPR_ENABLE_LLVM)
+ENDIF(ENABLE_LLVM_BACKEND)
+
+
 ## Traverse subdirectories
 ADD_SUBDIRECTORY (src/SeExpr)
 ADD_SUBDIRECTORY (src/SeExprEditor)
