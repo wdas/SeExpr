@@ -159,9 +159,14 @@ void Expression::prepLLVM() const {
 // no need to allocate memory in user program to call this.
 #endif
 
+#ifdef SEEXPR_ENABLE_LLVM
+    EvaluationStrategy defaultEvaluationStrategy = UseLLVM;
+#else
+    EvaluationStrategy defaultEvaluationStrategy = UseInterpreter;
+#endif
 
 Expression::Expression(EvaluationStrategy evaluationStrategy)
-    : _wantVec(true), _evaluationStrategy(evaluationStrategy), _context(&Context::global()), _desiredReturnType(ExprType().FP(3).Varying()), _varEnv(0), _parseTree(0), _isValid(0), _parsed(0), _prepped(0), _interpreter(0)
+    : _wantVec(true), _expression(""), _evaluationStrategy(evaluationStrategy), _context(&Context::global()), _desiredReturnType(ExprType().FP(3).Varying()), _varEnv(0), _parseTree(0), _isValid(0), _parsed(0), _prepped(0), _interpreter(0)
 {
     ExprFunc::init();
 
@@ -191,7 +196,10 @@ void Expression::reset()
 {
      delete _parseTree;_parseTree=0;
      delete _varEnv;_varEnv=0;
-     delete _interpreter;_interpreter=0;
+     if(_evaluationStrategy == UseInterpreter) {
+         delete _interpreter;
+         _interpreter=0;
+     }
     _isValid = 0;
     _parsed = 0;
     _prepped = 0;
@@ -225,7 +233,8 @@ void Expression::setDesiredReturnType(const ExprType & type)
 
 void Expression::setExpr(const std::string& e)
 {
-    reset();
+    if(_expression != "")
+        reset();
     _expression = e;
 }
 

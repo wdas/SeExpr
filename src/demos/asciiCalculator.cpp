@@ -38,7 +38,7 @@ public:
 	for(int i = 0; i < STACK_DEPTH; i++) {
 	    stack[i].val = Vec<double,3,false>(0.0);
 	    fail_stack[i] = false;
-	};
+	}
     };
     
     //! Empty constructor
@@ -100,7 +100,7 @@ private:
 	    for(int k=0;k<3;k++) result[k] = val[k];
 	}
 
-        void eval(const char** reuslt)
+        void eval(const char** result)
         {}
 
     };

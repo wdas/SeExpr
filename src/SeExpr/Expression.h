@@ -142,11 +142,7 @@ class ExprLocalVarRef : public ExprVarRef
 
 
 enum EvaluationStrategy {UseInterpreter, UseLLVM};
-#ifdef SEEXPR_ENABLE_LLVM
-    static EvaluationStrategy defaultEvaluationStrategy = UseLLVM;
-#else
-    static EvaluationStrategy defaultEvaluationStrategy = UseInterpreter;
-#endif
+extern EvaluationStrategy defaultEvaluationStrategy;
 
 /// main expression class
 class Expression
@@ -356,20 +352,22 @@ class Expression
     // FP is the native function for this expression.
     template<class T>
     class LLVMEvaluationContext{
+    private:
         typedef void (*FunctionPtr)(T*);
         FunctionPtr functionPtr;
         T* resultData;
     public:
-        LLVMEvaluationContext()
-            :functionPtr(0), resultData(0)
-        {}
+        LLVMEvaluationContext(const LLVMEvaluationContext&)=delete;
+        LLVMEvaluationContext& operator=(const LLVMEvaluationContext&)=delete;
+
+        LLVMEvaluationContext(){ reset(); }
         void init(void* fp,int dim){
             reset();
             functionPtr=reinterpret_cast<FunctionPtr>(fp);
             resultData=new T[dim];
         }
         void reset(){
-            delete resultData; resultData=0;
+            if(resultData) delete[] resultData;
             functionPtr=0;
             resultData=0;
         }
