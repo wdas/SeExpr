@@ -306,6 +306,7 @@ void Expression::debugPrintParseTree(){
 
 void Expression::reset()
 {
+     delete _llvmEvaluator;_llvmEvaluator=new LLVMEvaluator();
      delete _parseTree;_parseTree=0;
      delete _varEnv;_varEnv=0;
      if(_evaluationStrategy == UseInterpreter) {
