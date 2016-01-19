@@ -141,11 +141,10 @@ class ExprLocalVarRef : public ExprVarRef
 };
 #endif
 
-
 enum EvaluationStrategy {UseInterpreter, UseLLVM};
 extern EvaluationStrategy defaultEvaluationStrategy;
 
-struct LLVMEvaluator;
+class LLVMEvaluator;
 
 /// main expression class
 class Expression
@@ -365,7 +364,6 @@ class Expression
 
     // LLVM evaluation layer
     mutable LLVMEvaluator* _llvmEvaluator;
-
 
     /* internal */ public:
 
