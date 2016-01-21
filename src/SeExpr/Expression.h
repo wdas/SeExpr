@@ -141,11 +141,10 @@ class ExprLocalVarRef : public ExprVarRef
 };
 #endif
 
-
 enum EvaluationStrategy {UseInterpreter, UseLLVM};
 extern EvaluationStrategy defaultEvaluationStrategy;
 
-struct LLVMEvaluator;
+class LLVMEvaluator;
 
 /// main expression class
 class Expression
@@ -282,13 +281,13 @@ class Expression
     void setContext(const Context& context);
 
     /** Debug printout of parse tree */
-    void debugPrintParseTree();
+    void debugPrintParseTree() const;
 
     /** Debug printout of interpreter evaluation program  **/
-    void debugPrintInterpreter();
+    void debugPrintInterpreter() const;
 
     /** Debug printout of LLVM evaluation  **/
-    void debugPrintLLVM();
+    void debugPrintLLVM() const;
 
  private:
     /** No definition by design. */
@@ -365,7 +364,6 @@ class Expression
 
     // LLVM evaluation layer
     mutable LLVMEvaluator* _llvmEvaluator;
-
 
     /* internal */ public:
 

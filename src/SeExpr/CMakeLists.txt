@@ -16,8 +16,9 @@
 FILE(GLOB io_cpp "*.cpp")
 set_source_files_properties("ExprBuiltins.cpp" PROPERTIES COMPILE_DEFINITIONS "__STDC_LIMIT_MACROS")
 
-# uncomment below to print debug messages
-add_definitions(-DSEEXPR_DEBUG)
+# uncomment below to print debug messages / performance stats
+#add_definitions(-DSEEXPR_DEBUG)
+#add_definitions(-DSEEXPR_PERFORMANCE)
 
 if(NOT ENABLE_LLVM_BACKEND)
   file(GLOB to_remove "ExprLLVMCodeGeneration.cpp")
