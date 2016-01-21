@@ -33,20 +33,20 @@ class CalculatorExpr : public Expression
 public:
     //! Constructor that takes the expression to parse
     CalculatorExpr(const std::string& expr)
-	:Expression(expr), _count(0)
+    :Expression(expr), _count(0)
     {
-	for(int i = 0; i < STACK_DEPTH; i++) {
-	    stack[i].val = Vec<double,3,false>(0.0);
-	    fail_stack[i] = false;
-	};
+    for(int i = 0; i < STACK_DEPTH; i++) {
+        stack[i].val = Vec<double,3,false>(0.0);
+        fail_stack[i] = false;
+    }
     };
     
     //! Empty constructor
     CalculatorExpr()
-	:Expression(), _count(0)
+    :Expression(), _count(0)
     {
-	for(int i = 0; i < STACK_DEPTH; i++)
-	    fail_stack[i] = false;
+    for(int i = 0; i < STACK_DEPTH; i++)
+        fail_stack[i] = false;
     };
     
     //! Push current result on stack
@@ -74,9 +74,9 @@ public:
     
     //! Failed attempt; push 0 on stack
     void fail_push() {
-	fail_stack[_count] = true;
-	stack[_count].val = Vec<double,3,false>(0.0);
-	_count++;
+    fail_stack[_count] = true;
+    stack[_count].val = Vec<double,3,false>(0.0);
+    _count++;
     };
     
     Vec<double,3,false> peek() {
@@ -89,18 +89,18 @@ private:
     //! Simple variable that just returns its internal value
     struct SimpleVar:public ExprVarRef
     {
-	SimpleVar()
-	    : ExprVarRef(ExprType().FP(3).Varying()), val(0.0)
-	{}
-	
-	Vec<double,3,false> val; // independent variable
-	
-	void eval(double* result)
-	{
-	    for(int k=0;k<3;k++) result[k] = val[k];
-	}
+    SimpleVar()
+        : ExprVarRef(ExprType().FP(3).Varying()), val(0.0)
+    {}
+    
+    Vec<double,3,false> val; // independent variable
+    
+    void eval(double* result)
+    {
+        for(int k=0;k<3;k++) result[k] = val[k];
+    }
 
-        void eval(const char** reuslt)
+        void eval(const char** result)
         {}
 
     };
@@ -112,16 +112,16 @@ private:
     
     //! resolve function that only supports one external variable 'x'
     ExprVarRef* resolveVar(const std::string& name) const {
-	if(name[0] == '_') {
-	    int position = atoi(name.substr(1,name.size() - 1).c_str());
-	    if(position >= count())
-		std::cerr << "Use of unused result line." << std::endl;
-	    if(fail_stack[position])
-		std::cerr << "Use of invalid result line." << std::endl;
-	    return &(stack[position]);
-	};
-		std::cerr << "Use of undefined variable." << std::endl;
-	return 0;
+    if(name[0] == '_') {
+        int position = atoi(name.substr(1,name.size() - 1).c_str());
+        if(position >= count())
+        std::cerr << "Use of unused result line." << std::endl;
+        if(fail_stack[position])
+        std::cerr << "Use of invalid result line." << std::endl;
+        return &(stack[position]);
+    };
+        std::cerr << "Use of undefined variable." << std::endl;
+    return 0;
     };
 };
 
@@ -129,39 +129,39 @@ private:
 void quit(const std::string & str) {
     if(str == "quit"
        || str == "q")
-	exit(0);
+    exit(0);
 };
 
 
 int main(int argc,char *argv[])
 {
-    CalculatorExpr expr;
-    std::string str;
     
     std::cout << "SeExpr Basic Calculator";
     
+    CalculatorExpr expr;
     while(true) {
-	std::cout << std::endl << expr.count() << "> ";
-	//std::cin >> str;
-	getline(std::cin, str);
-	
-	if(std::cin.eof()) {
-	    std::cout << std::endl;
-	    str = "q";
-	};
-	
-	quit(str);
-	expr.setDesiredReturnType(ExprType().FP(3));
-	expr.setExpr(str);
-	
-	if(!expr.isValid()) {
-	    expr.fail_push();
-	    std::cerr << "Expression failed: " << expr.parseError() << std::endl;
-	} else {
-	    expr.push();
-	    std::cout << "   " << expr.peek();
-	};
-    };
+        std::string str;
+        std::cout << std::endl << expr.count() << "> ";
+        //std::cin >> str;
+        getline(std::cin, str);
+        
+        if(std::cin.eof()) {
+            std::cout << std::endl;
+            str = "q";
+        };
+        
+        quit(str);
+        expr.setDesiredReturnType(ExprType().FP(3));
+        expr.setExpr(str);
+        
+        if(!expr.isValid()) {
+            expr.fail_push();
+            std::cerr << "Expression failed: " << expr.parseError() << std::endl;
+        } else {
+            expr.push();
+            std::cout << "   " << expr.peek();
+        }
+    }
     
     return 0;
 }

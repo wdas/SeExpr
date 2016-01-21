@@ -34,28 +34,7 @@
 #include <typeinfo>
 #include <ExprWalker.h>
 
-#ifdef SEEXPR_ENABLE_LLVM
-#include <llvm/ADT/ArrayRef.h>
-#include <llvm/Analysis/Passes.h>
-#include <llvm/Analysis/Verifier.h>
-#include <llvm/ExecutionEngine/ExecutionEngine.h>
-#include <llvm/ExecutionEngine/GenericValue.h>
-#include <llvm/ExecutionEngine/Interpreter.h>
-#include <llvm/ExecutionEngine/MCJIT.h>
-#include <llvm/ExecutionEngine/SectionMemoryManager.h>
-#include <llvm/IR/DataLayout.h>
-#include <llvm/IR/DerivedTypes.h>
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Module.h>
-#include <llvm/IR/Function.h>
-#include <llvm/PassManager.h>
-#include <llvm/Support/DynamicLibrary.h>
-#include <llvm/Support/ManagedStatic.h>
-#include <llvm/Support/NoFolder.h>
-#include <llvm/Support/TargetSelect.h>
-#include <llvm/Transforms/Utils/Cloning.h>
-using namespace llvm;
-#endif
+#include "LLVMEvaluator.h"
 
 namespace SeExpr2 {
 
@@ -86,71 +65,7 @@ TypePrintExaminer::examine(const ExprNode* examinee)
 };
 
 #ifdef SEEXPR_ENABLE_LLVM
-Value* promoteToDim(Value *val, unsigned dim, IRBuilder<> &Builder);
-void Expression::prepLLVM() const {
-    InitializeNativeTarget();
-    InitializeNativeTargetAsmPrinter();
-    InitializeNativeTargetAsmParser();
 
-    std::string uniqueName = getUniqueName();
-
-    // create Module
-    Context = new LLVMContext();
-    Module *TheModule = new Module(uniqueName+"_module", *Context);
-
-    // Create the JIT.  This takes ownership of the module.
-    std::string ErrStr;
-    TheExecutionEngine
-    = EngineBuilder(TheModule).setErrorStr(&ErrStr)
-    .setUseMCJIT(true)
-    .setOptLevel(CodeGenOpt::Default)
-    .create();
-    if (!TheExecutionEngine) {
-        fprintf(stderr, "Could not create ExecutionEngine: %s\n", ErrStr.c_str());
-        exit(1);
-    }
-
-    // create function and entry BB
-    bool desireFP = _desiredReturnType.isFP();
-    Type *ParamTys[1] = {desireFP?Type::getDoublePtrTy(*Context):
-                PointerType::getUnqual(Type::getInt8PtrTy(*Context))};
-    FunctionType *FT = FunctionType::get(Type::getVoidTy(*Context), ParamTys, false);
-    Function *F = Function::Create(FT, Function::ExternalLinkage, uniqueName+"_func", TheModule);
-    BasicBlock *BB = BasicBlock::Create(*Context, "entry", F);
-    IRBuilder<> Builder(BB);
-
-    // codegen
-    Value *lastVal = _parseTree->codegen(Builder);
-
-    // return values through parameter.
-    Value *firstArg = &*F->arg_begin();
-    unsigned dim = (unsigned)_desiredReturnType.dim();
-    if(desireFP) {
-        if(dim > 1) {
-            Value *newLastVal = promoteToDim(lastVal, dim, Builder);
-            assert(newLastVal->getType()->getVectorNumElements() == dim);
-            for(unsigned i = 0; i < dim; ++i) {
-                Value *idx = ConstantInt::get(Type::getInt32Ty(*Context), i);
-                Value *val = Builder.CreateExtractElement(newLastVal, idx);
-                Value *ptr = Builder.CreateInBoundsGEP(firstArg, idx);
-                Builder.CreateStore(val, ptr);
-            }
-        } else if(dim == 1) {
-            Value *ptr = Builder.CreateConstInBoundsGEP1_32(firstArg, 0);
-            Builder.CreateStore(lastVal, ptr);
-        } else {assert(false && "error. dim of FP is less than 1.");}
-    } else {
-        Builder.CreateStore(lastVal, firstArg);
-    }
-
-    Builder.CreateRetVoid();
-
-    verifyModule(*TheModule);
-
-    TheExecutionEngine->finalizeObject();
-    void* fp=TheExecutionEngine->getPointerToFunction(F);
-    if(desireFP) _llvmEvalFP.init(fp,dim); else _llvmEvalStr.init(fp,dim);
-}
 
 // TODO: add proper attributes for functions
 // TODO: figure out where to store result
@@ -159,38 +74,65 @@ void Expression::prepLLVM() const {
 // no need to allocate memory in user program to call this.
 #endif
 
+#ifdef SEEXPR_ENABLE_LLVM
+    EvaluationStrategy defaultEvaluationStrategy = UseLLVM;
+#else
+    EvaluationStrategy defaultEvaluationStrategy = UseInterpreter;
+#endif
 
 Expression::Expression(EvaluationStrategy evaluationStrategy)
-    : _wantVec(true), _evaluationStrategy(evaluationStrategy), _context(&Context::global()), _desiredReturnType(ExprType().FP(3).Varying()), _varEnv(0), _parseTree(0), _isValid(0), _parsed(0), _prepped(0), _interpreter(0)
+    : _wantVec(true), _expression(""), _evaluationStrategy(evaluationStrategy), _context(&Context::global()), _desiredReturnType(ExprType().FP(3).Varying()), _varEnv(0), _parseTree(0), _isValid(0), _parsed(0), _prepped(0), _interpreter(0),
+    _llvmEvaluator(new LLVMEvaluator())
 {
     ExprFunc::init();
-
-#ifdef SEEXPR_ENABLE_LLVM
-    Context = 0;
-    TheExecutionEngine = 0;
-#endif
 }
 
-    Expression::Expression( const std::string &e, const ExprType & type, EvaluationStrategy evaluationStrategy, const Context& context)
-    : _wantVec(true), _expression(e), _evaluationStrategy(evaluationStrategy), _context(&context),_desiredReturnType(type), _varEnv(0),  _parseTree(0), _isValid(0), _parsed(0), _prepped(0), _interpreter(0)
+Expression::Expression( const std::string &e, const ExprType & type, EvaluationStrategy evaluationStrategy, const Context& context)
+    : _wantVec(true), _expression(e), _evaluationStrategy(evaluationStrategy), _context(&context), _desiredReturnType(type), _varEnv(0),  _parseTree(0), _isValid(0), _parsed(0), _prepped(0), _interpreter(0),
+    _llvmEvaluator(new LLVMEvaluator())
 {
     ExprFunc::init();
 #ifdef SEEXPR_ENABLE_LLVM
-    Context = 0;
-    TheExecutionEngine = 0;
+    std::cerr << "default is LLVM\n";
 #endif
 }
 
 Expression::~Expression()
 {
     reset();
+    delete _llvmEvaluator;
+}
+
+void Expression::debugPrintInterpreter() const {
+    if(_interpreter){
+        _interpreter->print();
+        std::cerr<<"return slot "<<_returnSlot<<std::endl;
+    }
+}
+
+void Expression::debugPrintLLVM() const {
+    _llvmEvaluator->debugPrint();
+}
+
+void Expression::debugPrintParseTree() const {
+    if(_parseTree){
+        // print the parse tree
+        std::cerr<<"Parse tree desired type "<<_desiredReturnType.toString()<<" actual "<<_parseTree->type().toString()<<std::endl;
+        TypePrintExaminer _examiner;
+        SeExpr2::ConstWalker  _walker(&_examiner);
+        _walker.walk(_parseTree);
+    }
 }
 
 void Expression::reset()
 {
+     delete _llvmEvaluator;_llvmEvaluator=new LLVMEvaluator();
      delete _parseTree;_parseTree=0;
      delete _varEnv;_varEnv=0;
-     delete _interpreter;_interpreter=0;
+     if(_evaluationStrategy == UseInterpreter) {
+         delete _interpreter;
+         _interpreter=0;
+     }
     _isValid = 0;
     _parsed = 0;
     _prepped = 0;
@@ -201,13 +143,6 @@ void Expression::reset()
     _errors.clear();
     _threadUnsafeFunctionCalls.clear();
     _comments.clear();
-
-#ifdef SEEXPR_ENABLE_LLVM
-    _llvmEvalFP.reset();
-    _llvmEvalStr.reset();
-    delete TheExecutionEngine; TheExecutionEngine = 0;
-    delete Context; Context = 0;
-#endif
 }
 
 void Expression::setContext(const Context& context)
@@ -224,7 +159,8 @@ void Expression::setDesiredReturnType(const ExprType & type)
 
 void Expression::setExpr(const std::string& e)
 {
-    reset();
+    if(_expression != "")
+        reset();
     _expression = e;
 }
 
@@ -287,23 +223,17 @@ void Expression::prep() const {
             +_parseTree->type().toString()+" incompatible with desired type "
             +_desiredReturnType.toString());
     }else{
-        if(_parseTree && debugMode){
-            // print the parse tree
-            std::cerr<<"Parse tree desired type "<<_desiredReturnType.toString()<<" actual "<<_parseTree->type().toString()<<std::endl;
-            TypePrintExaminer _examiner;
-            SeExpr2::ConstWalker  _walker(&_examiner);
-            _walker.walk(_parseTree);
-        }
-
         _isValid=true;
 
         if(_evaluationStrategy == UseInterpreter) {
-#           ifdef SEEXPR_DEBUG
+#           ifdef SEEXPR_PERFORMANCE
             PrintTiming timer("interpreter build time: ");
+#           endif
+#           ifdef SEEXPR_DEBUG
+            debugPrintParseTree();
 #           endif
             _interpreter=new Interpreter;
             _returnSlot=_parseTree->buildInterpreter(_interpreter);
-            if(debugMode) _interpreter->print();
             if(_desiredReturnType.isFP()){
                 int dimWanted=_desiredReturnType.dim();
                 int dimHave=_parseTree->type().dim();
@@ -317,14 +247,13 @@ void Expression::prep() const {
                 }
             }
         } else {
-#ifdef SEEXPR_ENABLE_LLVM
-#           ifdef SEEXPR_DEBUG
+#           ifdef SEEXPR_PERFORMANCE
             PrintTiming timer("llvm codegen time: ");
 #           endif
-            prepLLVM();
-#else
-            assert(false && "forget to enable llvm in libSeExpr?");
-#endif
+#           ifdef SEEXPR_DEBUG
+            debugPrintParseTree();
+#           endif
+            _llvmEvaluator->prepLLVM(_parseTree,_desiredReturnType);
         }
 
         // TODO: need promote
@@ -382,11 +311,7 @@ const double* Expression::evalFP() const
             _interpreter->eval();
             return &_interpreter->d[_returnSlot];
         } else {
-#ifdef SEEXPR_ENABLE_LLVM
-            return _llvmEvalFP();
-#else
-            assert(false && "forget to enable llvm in libSeExpr?");
-#endif
+            return _llvmEvaluator->evalFP();
         }
     }
 
@@ -402,15 +327,11 @@ const char* Expression::evalStr() const
             _interpreter->eval();
             return _interpreter->s[_returnSlot];
         } else {
-#ifdef SEEXPR_ENABLE_LLVM
-            return *_llvmEvalStr();
-#else
-            assert(false && "forget to enable llvm in libSeExpr?");
-#endif
+            _llvmEvaluator->evalStr();
         }
     }
 
     return 0;
 }
 
-}
+} // end namespace SeExpr2/

@@ -78,7 +78,7 @@ int main(int argc,char* argv[])
     }else{
         // pre eval
         std::cerr<<"pre eval interp"<<std::endl;
-        expr._interpreter->print();
+        expr.debugPrintInterpreter();
         std::cerr<<"starting eval interp"<<std::endl;
 
         //expr._interpreter->print();
@@ -94,8 +94,7 @@ int main(int argc,char* argv[])
             sum+=d[0];
         }
         std::cerr<<"sum "<<sum<<std::endl;
-        expr._interpreter->print();
-        std::cerr<<"return slot is "<<expr._returnSlot<<std::endl;
+        expr.debugPrintInterpreter();
     }
 
     return 0;

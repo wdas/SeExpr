@@ -21,36 +21,9 @@ SET( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE )
 ## Use verbose make file
 SET ( CMAKE_VERBOSE_MAKEFILE TRUE )
 
-option(ENABLE_LLVM_BACKEND "Enable LLVM backend." OFF)
+option(ENABLE_LLVM_BACKEND "Enable LLVM backend." ON)
 if (ENABLE_LLVM_BACKEND)
-   #set(CMAKE_CXX_COMPILER clang++)
-   # A convenience variable:
-   set(LLVM_ROOT "" CACHE PATH "Root of LLVM install.")
-
-   # A bit of a sanity check:
-   if( NOT EXISTS ${LLVM_ROOT}/include/llvm )
-     message(FATAL_ERROR "LLVM_ROOT (${LLVM_ROOT}) is not a valid LLVM install")
-   endif()
-
-   # We incorporate the CMake features provided by LLVM:
-   set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${LLVM_ROOT}/share/llvm/cmake")
-   include(LLVMConfig)
-
-   # Now set the header and library paths:
-   include_directories(BEFORE ${LLVM_INCLUDE_DIRS} )
-   link_directories( ${LLVM_LIBRARY_DIRS} )
-   add_definitions( ${LLVM_DEFINITIONS} )
-   add_definitions(-DSEEXPR_ENABLE_LLVM)
-
-   #todo infinite loop in this?
-   #llvm_map_components_to_libraries(REQ_LLVM_LIBRARIES jit native)
-   find_program(LLVM_CONFIG_EXECUTABLE NAMES llvm-config PATHS ${LLVM_ROOT}/bin)
-   execute_process(
-     COMMAND ${LLVM_CONFIG_EXECUTABLE} --libs
-     OUTPUT_VARIABLE REQ_LLVM_LIBRARIES 
-     OUTPUT_STRIP_TRAILING_WHITESPACE
-   )
-   list(APPEND REQ_LLVM_LIBRARIES "-lncurses")
+   include(llvm-make.txt)
 endif()
 
 ## project name & version
@@ -71,7 +44,7 @@ ELSE(WIN32)
   ADD_DEFINITIONS (-Wall -Wextra -Wno-unused-parameter)
   ADD_DEFINITIONS (-pthread)
 
-  SET( CMAKE_CXX_FLAGS "-fPIC -g -rdynamic --std=c++11 -msse4.1")
+  SET( CMAKE_CXX_FLAGS "-fPIC -g -rdynamic -std=c++11 -msse4.1")
 ENDIF(WIN32)
 
 ## Choose build options
@@ -115,6 +88,24 @@ INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/SeExprEditor )
 IF (NOT DEFINED CMAKE_INSTALL_LIBDIR)
     SET(CMAKE_INSTALL_LIBDIR "lib")
 ENDIF()
+
+
+set(LLVM_LIB "")
+IF(ENABLE_LLVM_BACKEND)
+    #todo infinite loop in this?
+    #llvm_map_components_to_libraries(REQ_LLVM_LIBRARIES jit native)
+
+    # construct library name
+    execute_process(
+        COMMAND ${LLVM_CONFIG_EXECUTABLE} --version
+        OUTPUT_VARIABLE LLVM_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    set(LLVM_LIB "-lLLVM-${LLVM_VERSION}")
+    message(STATUS "LLVM library " ${LLVM_LIB})
+
+    add_definitions(-DSEEXPR_ENABLE_LLVM)
+ENDIF(ENABLE_LLVM_BACKEND)
 
 
 ## Traverse subdirectories
