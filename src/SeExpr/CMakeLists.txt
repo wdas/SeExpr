@@ -18,7 +18,7 @@ set_source_files_properties("ExprBuiltins.cpp" PROPERTIES COMPILE_DEFINITIONS "_
 
 # uncomment below to print debug messages / performance stats
 #add_definitions(-DSEEXPR_DEBUG)
-#add_definitions(-DSEEXPR_PERFORMANCE)
+add_definitions(-DSEEXPR_PERFORMANCE)
 
 if(NOT ENABLE_LLVM_BACKEND)
   file(GLOB to_remove "ExprLLVMCodeGeneration.cpp")
