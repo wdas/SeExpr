@@ -74,12 +74,6 @@ TypePrintExaminer::examine(const ExprNode* examinee)
 // no need to allocate memory in user program to call this.
 #endif
 
-#ifdef SEEXPR_ENABLE_LLVM
-    EvaluationStrategy defaultEvaluationStrategy = UseLLVM;
-#else
-    EvaluationStrategy defaultEvaluationStrategy = UseInterpreter;
-#endif
-
 Expression::Expression(EvaluationStrategy evaluationStrategy)
     : _wantVec(true), _expression(""), _evaluationStrategy(evaluationStrategy), _context(&Context::global()), _desiredReturnType(ExprType().FP(3).Varying()), _varEnv(0), _parseTree(0), _isValid(0), _parsed(0), _prepped(0), _interpreter(0),
     _llvmEvaluator(new LLVMEvaluator())
@@ -92,9 +86,6 @@ Expression::Expression( const std::string &e, const ExprType & type, EvaluationS
     _llvmEvaluator(new LLVMEvaluator())
 {
     ExprFunc::init();
-#ifdef SEEXPR_ENABLE_LLVM
-    std::cerr << "default is LLVM\n";
-#endif
 }
 
 Expression::~Expression()

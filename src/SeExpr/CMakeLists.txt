@@ -13,17 +13,18 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
-FILE(GLOB io_cpp "*.cpp")
+# Source files for llvm supported library and interpreter library
+file(GLOB llvm_cpp "*.cpp")
+file(GLOB io_cpp "*.cpp")
+file(GLOB to_remove "ExprLLVMCodeGeneration.cpp")
+list(REMOVE_ITEM io_cpp ${to_remove})
+
 set_source_files_properties("ExprBuiltins.cpp" PROPERTIES COMPILE_DEFINITIONS "__STDC_LIMIT_MACROS")
 
-# uncomment below to print debug messages / performance stats
+# Uncomment below to print debug messages / performance stats
 #add_definitions(-DSEEXPR_DEBUG)
 add_definitions(-DSEEXPR_PERFORMANCE)
 
-if(NOT ENABLE_LLVM_BACKEND)
-  file(GLOB to_remove "ExprLLVMCodeGeneration.cpp")
-  list(REMOVE_ITEM io_cpp ${to_remove})
-endif()
 
 ## find our parser generators
 find_program(BISON_EXE bison)
@@ -84,25 +85,29 @@ else ((BISON_EXE STREQUAL "BISON_EXE-NOTFOUND") OR (FLEX_EXE STREQUAL "FLEX_EXE-
 endif( (BISON_EXE STREQUAL "BISON_EXE-NOTFOUND") OR (FLEX_EXE STREQUAL "FLEX_EXE-NOTFOUND")  OR (SED_EXE STREQUAL "SED_EXE-NOTFOUND"))
 
 
-## Make the SeExpr library
+## Make the SeExpr library with and without LLVM support
 ADD_LIBRARY (SeExpr2 SHARED ${io_cpp} ${core_cpp} ${parser_cpp})
+ADD_LIBRARY (SeExpr2LLVM SHARED ${llvm_cpp} ${core_cpp} ${parser_cpp})
 IF(NOT WIN32)
-   set(SEEXPR_LINK_LIB ${LLVM_LIB} "dl" "pthread")
-   TARGET_LINK_LIBRARIES(SeExpr2 ${SEEXPR_LINK_LIB})
+   TARGET_LINK_LIBRARIES(SeExpr2 "dl" "pthread")
+   TARGET_LINK_LIBRARIES(SeExpr2LLVM ${LLVM_LIB} "dl" "pthread")
 ENDIF(NOT WIN32)
 
 ## Install binary and includes
 FILE(GLOB public_includes "*.h")
 INSTALL (TARGETS SeExpr2 DESTINATION ${CMAKE_INSTALL_LIBDIR})
+INSTALL (TARGETS SeExpr2LLVM DESTINATION ${CMAKE_INSTALL_LIBDIR})
 INSTALL (FILES ${public_includes} DESTINATION include/SeExpr2)
 
 if (ENABLE_LLVM_BACKEND)
-## remove conditional include in header file
-ADD_CUSTOM_COMMAND(
-   OUTPUT Expression.h
-   COMMAND unifdef -DSEEXPR_ENABLE_LLVM -o Expression.h ${CMAKE_CURRENT_SOURCE_DIR}/Expression.h || true #unifdef not always return 0 when succeed. 
-   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Expression.h
-)
-add_custom_target(Expression_Header ALL DEPENDS Expression.h)
-INSTALL (FILES ${CMAKE_CURRENT_BINARY_DIR}/Expression.h DESTINATION include)
+    set_target_properties(SeExpr2LLVM PROPERTIES
+                          COMPILE_FLAGS "-DSEEXPR_ENABLE_LLVM")
+    ## remove conditional include in header file
+    ADD_CUSTOM_COMMAND(
+       OUTPUT Expression.h
+       COMMAND unifdef -DSEEXPR_ENABLE_LLVM -o Expression.h ${CMAKE_CURRENT_SOURCE_DIR}/Expression.h || true #unifdef not always return 0 when succeed.
+       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Expression.h
+    )
+    add_custom_target(Expression_Header ALL DEPENDS Expression.h)
+    INSTALL (FILES ${CMAKE_CURRENT_BINARY_DIR}/Expression.h DESTINATION include)
 endif()
