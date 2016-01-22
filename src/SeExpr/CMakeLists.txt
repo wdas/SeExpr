@@ -94,20 +94,34 @@ IF(NOT WIN32)
 ENDIF(NOT WIN32)
 
 ## Install binary and includes
-FILE(GLOB public_includes "*.h")
 INSTALL (TARGETS SeExpr2 DESTINATION ${CMAKE_INSTALL_LIBDIR})
 INSTALL (TARGETS SeExpr2LLVM DESTINATION ${CMAKE_INSTALL_LIBDIR})
-INSTALL (FILES ${public_includes} DESTINATION include/SeExpr2)
+INSTALL (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION include/SeExpr2
+        FILES_MATCHING PATTERN "*.h")
 
 if (ENABLE_LLVM_BACKEND)
     set_target_properties(SeExpr2LLVM PROPERTIES
                           COMPILE_FLAGS "-DSEEXPR_ENABLE_LLVM")
-    ## remove conditional include in header file
+    ## generate LLVM headers without #ifdef macros
     ADD_CUSTOM_COMMAND(
-       OUTPUT Expression.h
-       COMMAND unifdef -DSEEXPR_ENABLE_LLVM -o Expression.h ${CMAKE_CURRENT_SOURCE_DIR}/Expression.h || true #unifdef not always return 0 when succeed.
+       OUTPUT ExpressionLLVM.h
+       COMMAND unifdef -DSEEXPR_ENABLE_LLVM -o ExpressionLLVM.h ${CMAKE_CURRENT_SOURCE_DIR}/Expression.h || true #unifdef not always return 0 when succeed.
        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Expression.h
     )
-    add_custom_target(Expression_Header ALL DEPENDS Expression.h)
-    INSTALL (FILES ${CMAKE_CURRENT_BINARY_DIR}/Expression.h DESTINATION include)
+    ADD_CUSTOM_COMMAND(
+       OUTPUT ExprNodeLLVM.h
+       COMMAND unifdef -DSEEXPR_ENABLE_LLVM -o ExprNodeLLVM.h ${CMAKE_CURRENT_SOURCE_DIR}/ExprNode.h || true #unifdef not always return 0 when succeed.
+       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ExprNode.h
+    )
+    ADD_CUSTOM_COMMAND(
+       OUTPUT EvaluatorLLVM.h
+       COMMAND unifdef -DSEEXPR_ENABLE_LLVM -o EvaluatorLLVM.h ${CMAKE_CURRENT_SOURCE_DIR}/Evaluator.h || true #unifdef not always return 0 when succeed.
+       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Evaluator.h
+    )
+    add_custom_target(LLVM_Headers ALL DEPENDS ExpressionLLVM.h ExprNodeLLVM.h EvaluatorLLVM.h)
+    INSTALL (FILES
+             ${CMAKE_CURRENT_BINARY_DIR}/ExpressionLLVM.h
+             ${CMAKE_CURRENT_BINARY_DIR}/ExprNodeLLVM.h
+             ${CMAKE_CURRENT_BINARY_DIR}/EvaluatorLLVM.h
+             DESTINATION include/SeExpr2)
 endif()

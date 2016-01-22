@@ -34,7 +34,7 @@
 #include <typeinfo>
 #include <ExprWalker.h>
 
-#include "LLVMEvaluator.h"
+#include "Evaluator.h"
 
 namespace SeExpr2 {
 

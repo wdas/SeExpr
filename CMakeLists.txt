@@ -104,7 +104,6 @@ IF(ENABLE_LLVM_BACKEND)
     )
     set(LLVM_LIB "-lLLVM-${LLVM_VERSION}")
     message(STATUS "LLVM library " ${LLVM_LIB})
-
 ENDIF(ENABLE_LLVM_BACKEND)
 
 
@@ -116,5 +115,3 @@ ADD_SUBDIRECTORY (src/py)
 ADD_SUBDIRECTORY (src/utils)
 ADD_SUBDIRECTORY (src/demos)
 ADD_SUBDIRECTORY (src/doc)
-
-

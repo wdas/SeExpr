@@ -47,7 +47,12 @@
 #include <ftw.h>
 #include <png.h>
 
+#ifdef SEEXPR_ENABLE_LLVM
+#include <ExpressionLLVM.h>
+#else
 #include <Expression.h>
+#endif
+
 #include <ExprFunc.h>
 #include <ExprFuncX.h>
 

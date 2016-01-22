@@ -13,14 +13,23 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
+include_directories(${CMAKE_BINARY_DIR}/src/SeExpr)
+
 ADD_EXECUTABLE(asciiGraph2 "asciiGraph.cpp")
-target_link_libraries(asciiGraph2 ${SEEXPR_LIBRARIES})
+target_link_libraries(asciiGraph2 SeExpr2)
 install(TARGETS asciiGraph2 DESTINATION bin)
 
 ADD_EXECUTABLE(asciiCalc2 "asciiCalculator.cpp")
-target_link_libraries(asciiCalc2 ${SEEXPR_LIBRARIES})
+target_link_libraries(asciiCalc2 SeExpr2)
 install(TARGETS asciiCalc2 DESTINATION bin)
- 
+
+if (ENABLE_LLVM_BACKEND)
+    ADD_EXECUTABLE(asciiCalc2LLVM "asciiCalculator.cpp")
+    set_target_properties(asciiCalc2LLVM PROPERTIES COMPILE_FLAGS "-DSEEXPR_ENABLE_LLVM")
+    target_link_libraries(asciiCalc2LLVM SeExpr2LLVM)
+    install(TARGETS asciiCalc2LLVM DESTINATION bin)
+endif()
+
 #todo re-enable
 ADD_SUBDIRECTORY (imageSynth2)
 #ADD_SUBDIRECTORY (segraph)

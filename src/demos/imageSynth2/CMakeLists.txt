@@ -16,7 +16,7 @@
 FIND_PACKAGE(PNG)
 IF(PNG_FOUND)
     INCLUDE_DIRECTORIES(${PNG_INCLUDE_DIR})
-    
+
     ADD_EXECUTABLE(imageSynth2 "imageSynth.cpp")
     TARGET_LINK_LIBRARIES(imageSynth2 ${PNG_LIBRARIES} ${SEEXPR_LIBRARIES})
     install(TARGETS imageSynth2 DESTINATION bin)
@@ -24,12 +24,12 @@ IF(PNG_FOUND)
     ADD_EXECUTABLE(imageSynthPaint3d2 "imageSynthForPaint3d.cpp")
     TARGET_LINK_LIBRARIES(imageSynthPaint3d2 ${PNG_LIBRARIES} ${SEEXPR_LIBRARIES})
     install(TARGETS imageSynthPaint3d2 DESTINATION bin)
-    
+
     if (ENABLE_LLVM_BACKEND)
-    ADD_EXECUTABLE(imageSynthLLVMPaint3d "imageSynthForPaint3d.cpp")
-    set_target_properties(imageSynthLLVMPaint3d PROPERTIES COMPILE_FLAGS "-DUSECODEGEN")
-    TARGET_LINK_LIBRARIES(imageSynthLLVMPaint3d ${PNG_LIBRARIES} ${SEEXPR_LIBRARIES})
-    install(TARGETS imageSynthLLVMPaint3d DESTINATION bin)
+        ADD_EXECUTABLE(imageSynthLLVMPaint3d "imageSynthForPaint3d.cpp")
+        set_target_properties(imageSynthLLVMPaint3d PROPERTIES COMPILE_FLAGS "-DUSECODEGEN")
+        TARGET_LINK_LIBRARIES(imageSynthLLVMPaint3d ${PNG_LIBRARIES} ${SEEXPR_LIBRARIES})
+        install(TARGETS imageSynthLLVMPaint3d DESTINATION bin)
     endif()
 
     install(DIRECTORY examples2 DESTINATION share/SeExpr2/demos/imageSynth USE_SOURCE_PERMISSIONS)
