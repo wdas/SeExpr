@@ -27,7 +27,7 @@ IF(PNG_FOUND)
 
     if (ENABLE_LLVM_BACKEND)
         ADD_EXECUTABLE(imageSynthLLVMPaint3d "imageSynthForPaint3d.cpp")
-        set_target_properties(imageSynthLLVMPaint3d PROPERTIES COMPILE_FLAGS "-DUSECODEGEN")
+        set_target_properties(imageSynthLLVMPaint3d PROPERTIES COMPILE_FLAGS "-DSEEXPR_ENABLE_LLVM")
         TARGET_LINK_LIBRARIES(imageSynthLLVMPaint3d ${PNG_LIBRARIES} ${SEEXPR_LIBRARIES})
         install(TARGETS imageSynthLLVMPaint3d DESTINATION bin)
     endif()
