@@ -141,14 +141,19 @@ class ExprLocalVarRef : public ExprVarRef
 };
 #endif
 
-enum EvaluationStrategy {UseInterpreter, UseLLVM};
-extern EvaluationStrategy defaultEvaluationStrategy;
-
 class LLVMEvaluator;
 
 /// main expression class
 class Expression
 {
+protected:
+    enum EvaluationStrategy {UseInterpreter, UseLLVM};
+#ifdef SEEXPR_ENABLE_LLVM
+    static const EvaluationStrategy defaultEvaluationStrategy = UseLLVM;
+#else
+    static const EvaluationStrategy defaultEvaluationStrategy = UseInterpreter;
+#endif
+
  public:
     //typedef std::map<std::string, ExprLocalVarRef> LocalVarTable;
 
@@ -169,8 +174,8 @@ class Expression
         {}
     };
 
-    Expression(EvaluationStrategy be = defaultEvaluationStrategy);
-    Expression( const std::string &e, const ExprType & type = ExprType().FP(3), EvaluationStrategy be = defaultEvaluationStrategy, const Context& context=Context::global());
+    Expression(EvaluationStrategy be = Expression::defaultEvaluationStrategy);
+    Expression( const std::string &e, const ExprType & type = ExprType().FP(3), EvaluationStrategy be = Expression::defaultEvaluationStrategy, const Context& context=Context::global());
 
     virtual ~Expression();
 

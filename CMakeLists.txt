@@ -79,6 +79,7 @@ ENDIF(NOT DEFINED CMAKE_INSTALL_PREFIX)
 ## Make modules able to see seexpr library
 # Setup environment variable to link seexpr
 SET( SEEXPR_LIBRARIES SeExpr2 )
+SET( SEEXPR_LLVM_LIBRARIES SeExpr2LLVM )
 SET( SEEXPR_EDITOR_LIBRARIES SeExprEditor2 )
 # make it so seexpr can be found
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/SeExpr )
@@ -103,8 +104,6 @@ IF(ENABLE_LLVM_BACKEND)
     )
     set(LLVM_LIB "-lLLVM-${LLVM_VERSION}")
     message(STATUS "LLVM library " ${LLVM_LIB})
-
-    add_definitions(-DSEEXPR_ENABLE_LLVM)
 ENDIF(ENABLE_LLVM_BACKEND)
 
 
@@ -116,5 +115,3 @@ ADD_SUBDIRECTORY (src/py)
 ADD_SUBDIRECTORY (src/utils)
 ADD_SUBDIRECTORY (src/demos)
 ADD_SUBDIRECTORY (src/doc)
-
-
