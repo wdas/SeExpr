@@ -23,8 +23,7 @@ set_source_files_properties("ExprBuiltins.cpp" PROPERTIES COMPILE_DEFINITIONS "_
 
 # Uncomment below to print debug messages / performance stats
 #add_definitions(-DSEEXPR_DEBUG)
-add_definitions(-DSEEXPR_PERFORMANCE)
-
+#add_definitions(-DSEEXPR_PERFORMANCE)
 
 ## find our parser generators
 find_program(BISON_EXE bison)
