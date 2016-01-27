@@ -83,7 +83,7 @@
 #else
     typedef off_t FilePos;
 #endif
-    
+
 namespace SeExpr2 {
 #ifndef WINDOWS
 class Timer{
@@ -91,9 +91,7 @@ class Timer{
     bool started;
 
 public:
-    Timer()
-        :started(false)
-    {}
+    Timer() :started(false) {}
 
     void start()
     {
@@ -109,8 +107,17 @@ public:
         return elapsedTime;
     }
 };
-#else
-// TODO: Implement Windows timer
+#else // Windows
+class Timer{
+public:
+    Timer() :started(false) {}
+
+    void start()
+    {
+        std::cerr<< "timer not implemented on Windows" << std::endl;
+    }
+    float elapsedTime() {return 0;}
+};
 #endif
 
 class PrintTiming{
@@ -120,7 +127,7 @@ public:
     }
 
     ~PrintTiming()
-	{
+    {
         std::cerr<<_s<<" ( "<<_timer.elapsedTime()<<"s)"<<std::endl;
     }
   private:

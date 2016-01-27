@@ -55,6 +55,7 @@
 
 #include <ExprFunc.h>
 #include <ExprFuncX.h>
+#include <Platform.h> # performance timing
 
 double clamp(double x){return std::max(0.,std::min(255.,x));}
 
@@ -305,6 +306,7 @@ bool TestImage::generateImage(const std::string &exprStr)
     if(!valid){
         std::cerr<<"Invalid expression "<<std::endl;
         std::cerr<<expr.parseError()<<std::endl;
+        std::cerr<<"string = " << exprStr <<std::endl;
         return valid;
     }
 
@@ -406,7 +408,21 @@ int evalExpressionFile(const char*filepath,
                 std::string exprStr( (std::istreambuf_iterator<char>(ifs) ),
                                      (std::istreambuf_iterator<char>() ) );
                 TestImage *_testImage = new TestImage();
-                if(_testImage->generateImage(exprStr)) {
+                bool result;
+
+                {
+#               if 1 //SEEXPR_PERFORMANCE
+#               ifdef SEEXPR_ENABLE_LLVM
+                    string info("v2 LLVM eval time for ");
+#               else
+                    string info("v2 interpreter eval time for ");
+#               endif
+                    PrintTiming timer(info + filepath + " : ");
+                    result = _testImage->generateImage(exprStr);
+#               endif
+                }
+
+                if(result) {
                     std::string outFile(outDir+basename(filepath)+".png");
                     _testImage->writePNGImage(outFile.c_str());
                 } else
