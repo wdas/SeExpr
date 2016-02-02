@@ -2,12 +2,13 @@
 
 import sys
 import os
-
+import re
 
 ###################################
 def printUsage():
     print "Usage: genImageTestFile.py <dir> <outfile>"
     print "       traverse given dir for expr examples, write tests to outfile\n"
+    print "       ex: genImageTestFile.py ./src/demos/imageSynth2/examples2 src/tests/testSeExprExamples.cpp"
     sys.exit()
 ###################################
 
@@ -27,9 +28,11 @@ print >> f, "#include \"imageTests.h\"\n"
 for dir_name, sub_dirs, se_files in os.walk(rootdir):
     for se_file in se_files:
         fullpath = os.path.join(dir_name, se_file)
-        print >> f, "TEST(" + os.path.basename(dir_name) + ", " + os.path.splitext(se_file)[0]+ ")"
-        print >> f, "{"
-        print >> f, "    evalExpressionFile2(\"" + fullpath + "\");"
-        print >> f, "}\n"
+        (filename,ext) = os.path.splitext(se_file)
+        if(re.match('\.se', ext)):
+            print >> f, "TEST(" + os.path.basename(dir_name) + ", " + filename + ")"
+            print >> f, "{"
+            print >> f, "    evalExpressionFile2(\"" + fullpath + "\");"
+            print >> f, "}\n"
 
 f.close()

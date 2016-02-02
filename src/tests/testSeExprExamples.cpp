@@ -5,11 +5,6 @@ TEST(examples2, 111)
     evalExpressionFile2("./src/demos/imageSynth2/examples2/111.se");
 }
 
-TEST(examples2, TestExpressionsInPaint3D)
-{
-    evalExpressionFile2("./src/demos/imageSynth2/examples2/TestExpressionsInPaint3D.sh");
-}
-
 TEST(examples2, fbm)
 {
     evalExpressionFile2("./src/demos/imageSynth2/examples2/fbm.se");
@@ -33,11 +28,6 @@ TEST(examples2, noisecolor2)
 TEST(examples2, raytrace)
 {
     evalExpressionFile2("./src/demos/imageSynth2/examples2/raytrace.se");
-}
-
-TEST(examples2, run)
-{
-    evalExpressionFile2("./src/demos/imageSynth2/examples2/run.sh");
 }
 
 TEST(examples2, sinc)

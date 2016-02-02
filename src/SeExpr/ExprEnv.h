@@ -60,11 +60,13 @@ public:
     ExprLocalVarPhi(ExprType condLife,ExprLocalVar* thenVar,ExprLocalVar* elseVar)
         :ExprLocalVar(ExprType()),_thenVar(thenVar),_elseVar(elseVar)
     {
-        if(_thenVar->type() != _elseVar->type()){
-            _type=ExprType().Error();
-        }else{
+        if(_thenVar->type().type() == _elseVar->type().type() &&
+           _thenVar->type().isLifeCompatible(_elseVar->type())){
+            // same type, compatible lifetime
             _type=ExprType(_thenVar->type()).setLifetime(condLife);
             setPhi(this);
+        } else {
+            _type=ExprType().Error();
         }
     }
 
