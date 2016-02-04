@@ -348,7 +348,7 @@ bool TestImage::writePNGImage(const char* imageFile)
 {
     if(_image && imageFile){
         // write image as png
-        std::cerr<<"[ WRITE    ] Image: "<<imageFile<<std::endl;
+        std::cout<<"[ WRITE    ] Image: "<<imageFile<<std::endl;
         FILE *fp=fopen(imageFile,"wb");
         if(!fp){
             perror("fopen");

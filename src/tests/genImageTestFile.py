@@ -8,7 +8,7 @@ import re
 def printUsage():
     print "Usage: genImageTestFile.py <dir> <outfile>"
     print "       traverse given dir for expr examples, write tests to outfile\n"
-    print "       ex: genImageTestFile.py ./src/demos/imageSynth2/examples2 src/tests/testSeExprExamples.cpp"
+    print "       ex: genImageTestFile.py ./src/demos/imageSynth/examples src/tests/testSeExprExamples.cpp"
     sys.exit()
 ###################################
 

@@ -25,12 +25,12 @@ if(PNG_FOUND)
 
     # generate test cases for dev example expressions
     ADD_CUSTOM_COMMAND(
-      SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/../demos/imageSynth2/examples2
+      SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/../demos/imageSynth/examples
       COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/genImageTestFile.py"
-      ARGS "${CMAKE_CURRENT_SOURCE_DIR}/../demos/imageSynth2/examples2" "testSeExprExamples.cpp"
+      ARGS "${CMAKE_CURRENT_SOURCE_DIR}/../demos/imageSynth/examples" "testSeExprExamples.cpp"
       OUTPUT testSeExprExamples.cpp
       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/genImageTestFile.py
-              ${CMAKE_CURRENT_SOURCE_DIR}/../demos/imageSynth2/examples2
+              ${CMAKE_CURRENT_SOURCE_DIR}/../demos/imageSynth/examples
     )
     # generate test cases for paint3d show examples
     ADD_CUSTOM_COMMAND(

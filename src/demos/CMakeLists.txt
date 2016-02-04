@@ -31,7 +31,7 @@ if (ENABLE_LLVM_BACKEND)
 endif()
 
 #todo re-enable
-ADD_SUBDIRECTORY (imageSynth2)
+ADD_SUBDIRECTORY (imageSynth)
 #ADD_SUBDIRECTORY (segraph)
 #ADD_SUBDIRECTORY (rman)
 
