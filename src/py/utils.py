@@ -32,6 +32,18 @@ def traverseCallback(x,callback):
     callback(x,children)
     for childNode in children: traverseCallback(childNode,callback)
 
+def getComment(node,sorig):
+    """Get the comment after the last character position of the given ast node"""
+    charRange=node.range
+    lineEnd=sorig.find("\n",node.range[1])
+    line=""
+    if lineEnd==-1: line=sorig[node.range[1]:]
+    else: line=sorig[node.range[1]:lineEnd]
+    pound=line.find("#",charRange[1])
+    if pound == -1: return ""
+    else: return line[pound+1:]
+
+
 def traverseFilter(node,filterCallback):
     """Traverse every node and return a list of the nodes that matched the given expression
 
