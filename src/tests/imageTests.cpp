@@ -33,6 +33,8 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
+// Set up helper methods and classes for generating images from test expressions
+
 #include <map>
 #include <cstdlib>
 #include <cstdio>
@@ -41,10 +43,8 @@
 #include <assert.h>
 #include <dirent.h>
 #include <pcrecpp.h>
-#include <sys/time.h>
 
 #include <gtest.h>
-#include <ftw.h>
 #include <png.h>
 
 #ifdef SEEXPR_ENABLE_LLVM
@@ -55,18 +55,9 @@
 
 #include <ExprFunc.h>
 #include <ExprFuncX.h>
-#include <Platform.h> # performance timing
+#include <Platform.h> // performance timing
 
 double clamp(double x){return std::max(0.,std::min(255.,x));}
-
-// Get timestamp in microseconds, for recording elapsed time
-typedef unsigned long long timestamp_t;
-static timestamp_t get_timestamp ()
-{
-    struct timeval now;
-    gettimeofday (&now, NULL);
-    return  now.tv_usec + (timestamp_t)now.tv_sec * 1000000;
-}
 
 namespace SeExpr2 {
 
@@ -306,7 +297,6 @@ bool TestImage::generateImage(const std::string &exprStr)
     if(!valid){
         std::cerr<<"Invalid expression "<<std::endl;
         std::cerr<<expr.parseError()<<std::endl;
-        std::cerr<<"string = " << exprStr <<std::endl;
         return valid;
     }
 
@@ -358,7 +348,7 @@ bool TestImage::writePNGImage(const char* imageFile)
 {
     if(_image && imageFile){
         // write image as png
-        std::cerr<<"[ WRITE    ] Image: "<<imageFile<<std::endl;
+        std::cout<<"[ WRITE    ] Image: "<<imageFile<<std::endl;
         FILE *fp=fopen(imageFile,"wb");
         if(!fp){
             perror("fopen");
@@ -393,118 +383,32 @@ bool TestImage::writePNGImage(const char* imageFile)
 std::string rootDir("./");
 std::string outDir = rootDir;
 
-// Callback from file tree walk function, ftw(), to process each expr file
-int evalExpressionFile(const char*filepath,
-                       const struct stat */*sb*/,
-                       int typeflag)
+void evalExpressionFile(const char*filepath)
 {
-    // Process file types that match *.se.
-    if(typeflag == FTW_F) {
-        pcrecpp::RE seFileExt(".*\\.se");
-        if( seFileExt.FullMatch(filepath) ) {
-            // Get expression content of .se file
-            std::ifstream ifs(filepath);
-            if(ifs.good()){
-                std::string exprStr( (std::istreambuf_iterator<char>(ifs) ),
-                                     (std::istreambuf_iterator<char>() ) );
-                TestImage *_testImage = new TestImage();
-                bool result;
+    std::ifstream ifs(filepath);
+    if(ifs.good()){
+        std::string exprStr( (std::istreambuf_iterator<char>(ifs) ),
+                             (std::istreambuf_iterator<char>() ) );
+        TestImage *_testImage = new TestImage();
+        bool result;
 
-                {
-#               if 1 //SEEXPR_PERFORMANCE
-#               ifdef SEEXPR_ENABLE_LLVM
-                    string info("v2 LLVM eval time for ");
-#               else
-                    string info("v2 interpreter eval time for ");
-#               endif
-                    PrintTiming timer(info + filepath + " : ");
-                    result = _testImage->generateImage(exprStr);
-#               endif
-                }
-
-                if(result) {
-                    std::string outFile(outDir+basename(filepath)+".png");
-                    _testImage->writePNGImage(outFile.c_str());
-                } else
-                    std::cerr<<"Evaluation failure: "<<filepath<<std::endl;
-            } else
-                std::cerr<<"Failure to open file: "<<filepath<<std::endl;
+        {
+#       if SEEXPR_PERFORMANCE
+#       ifdef SEEXPR_ENABLE_LLVM
+            string info("v2 LLVM eval time for ");
+#       else
+            string info("v2 interpreter eval time for ");
+#       endif
+            PrintTiming timer(info + filepath + " : ");
+#       endif
+        result = _testImage->generateImage(exprStr);
         }
+
+        ASSERT_TRUE(result) << "Evaluation failure: "<< filepath;
+
+        std::string outDir("/tmp/");
+        std::string outFile(outDir+basename(filepath)+".png");
+        _testImage->writePNGImage(outFile.c_str());
     }
-    return 0;
 }
 
-// Test example *.se files in SeExpr demo expressions.
-TEST(Examples, SeExprDemos)
-{
-    outDir = rootDir+"build/demo-images/";
-
-#include <sys/stat.h>
-    // make outDir if it doesn't already exist
-    struct stat info;
-    if(stat( outDir.c_str(), &info ) != 0){
-        int status = mkdir( outDir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-        if(status != 0 ){
-            std::cerr<<"Failure to mkdir: "<< outDir.c_str() <<std::endl;
-            return;
-        }
-    }
-
-    // Output log file for cerr messages
-    std::string logfile(outDir);
-    logfile.append("imageTests.log");
-    std::ofstream ofs(logfile.c_str());
-    std::streambuf *curr_cerr = std::cerr.rdbuf();
-    std::cerr.rdbuf(ofs.rdbuf());
-
-    std::string examplePath("./src/demos/imageSynth2/examples2/");
-
-    // Walk files in tree, evaluating expression in each
-    timestamp_t start = get_timestamp();
-    ftw(examplePath.c_str(), evalExpressionFile, 16);
-    timestamp_t end = get_timestamp();
-
-    double elapsedTime = (end - start) / 1000000.0L;
-    std::cerr << "Total evaluation time, all files: " << elapsedTime << std::endl;
-
-    std::cerr.rdbuf(curr_cerr);
-    ofs.close();
-    std::cerr << "[ Logfile  ] " << logfile.c_str() << std::endl;
-}
-
-// Test example *.se files in show paint3d expressions.
-TEST(Examples, Paint3dShow)
-{
-    outDir = rootDir+"build/p3d-images/";
-
-#include <sys/stat.h>
-    // make outDir if it doesn't already exist
-    struct stat info;
-    if(stat( outDir.c_str(), &info ) != 0){
-        int status = mkdir( outDir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-        if(status != 0 ){
-            std::cerr<<"Failure to mkdir: "<< outDir.c_str() <<std::endl;
-            return;
-        }
-    }
-
-    // Output log file for cerr messages
-    std::string logfile(outDir+"imageTests.log");
-    std::ofstream ofs(logfile.c_str());
-    std::streambuf *curr_cerr = std::cerr.rdbuf();
-    std::cerr.rdbuf(ofs.rdbuf());
-
-    // Walk files in tree, evaluating expression in each
-    timestamp_t start = get_timestamp();
-    ftw("/disney/shows/default/rel/global/expressions/",
-        evalExpressionFile,
-        16);
-    timestamp_t end = get_timestamp();
-
-    double elapsedTime = (end - start) / 1000000.0L;
-    std::cerr << "Total evaluation time, all files: " << elapsedTime << std::endl;
-
-    std::cerr.rdbuf(curr_cerr);
-    ofs.close();
-    std::cerr << "[ Logfile  ] " << logfile.c_str() << std::endl;
-}
