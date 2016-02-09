@@ -5,12 +5,12 @@ import subprocess
 import re
 
 # Assumes script is run from inside a code repo, at project root dir
-imageDir = "./build/p3d-images/" # "./build/demo-images/"
+imageDir = "./build/images/"
 
 # Baseline images for paint3d and imageSynth examples
 baselineRoot = "/disney/depts/tech/techweb_files/SeExpr/"
 baselineUrl = "http://techweb/files/SeExpr/"
-exampleDir = "p3d-images/" # "demo-images/"
+exampleDir = "images/"
 
 # ln -s p3dDir /disney/depts/tech/techweb_files/SeExpr/expressions
 p3dDir = "/disney/shows/default/rel/global/expressions/"
