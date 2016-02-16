@@ -117,7 +117,8 @@ if (ENABLE_LLVM_BACKEND)
        COMMAND unifdef -DSEEXPR_ENABLE_LLVM -o EvaluatorLLVM.h ${CMAKE_CURRENT_SOURCE_DIR}/Evaluator.h || true #unifdef not always return 0 when succeed.
        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Evaluator.h
     )
-    add_custom_target(LLVM_Headers ALL DEPENDS ExpressionLLVM.h ExprNodeLLVM.h EvaluatorLLVM.h)
+    add_custom_target(LLVM_Headers DEPENDS ExpressionLLVM.h ExprNodeLLVM.h EvaluatorLLVM.h)
+    add_dependencies(SeExpr2LLVM LLVM_Headers)
     INSTALL (FILES
              ${CMAKE_CURRENT_BINARY_DIR}/ExpressionLLVM.h
              ${CMAKE_CURRENT_BINARY_DIR}/ExprNodeLLVM.h

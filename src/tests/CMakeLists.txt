@@ -18,6 +18,9 @@ set (GTEST_INCLUDE_DIR /usr/include/gtest)
 include_directories(BEFORE ${GTEST_INCLUDE_DIR})
 include_directories(${CMAKE_BINARY_DIR}/src/SeExpr)
 
+# Uncomment below to print performance stats
+# add_definitions(-DSEEXPR_PERFORMANCE)
+
 find_package(PNG)
 if(PNG_FOUND)
     include_directories(${PNG_INCLUDE_DIR})
