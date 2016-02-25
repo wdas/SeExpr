@@ -314,6 +314,10 @@ bool TestImage::generateImage(const std::string &exprStr)
 
     unsigned char* pixel=image;
 
+#   ifdef SEEXPR_PERFORMANCE
+    PrintTiming timer("[ EVAL     ] v2 eval time: ");
+#   endif
+
     for(int row=0;row<_height;row++){
         for(int col=0;col<_width;col++){
             u=one_over_width*(col+.5);
@@ -383,6 +387,7 @@ bool TestImage::writePNGImage(const char* imageFile)
 std::string rootDir("./");
 std::string outDir = rootDir;
 
+// Evaluate expression in given file and generate output image.
 void evalExpressionFile(const char*filepath)
 {
     std::ifstream ifs(filepath);
@@ -392,21 +397,17 @@ void evalExpressionFile(const char*filepath)
         TestImage *_testImage = new TestImage();
         bool result;
 
-        {
-#       if SEEXPR_PERFORMANCE
-#       ifdef SEEXPR_ENABLE_LLVM
-            string info("v2 LLVM eval time for ");
-#       else
-            string info("v2 interpreter eval time for ");
-#       endif
-            PrintTiming timer(info + filepath + " : ");
-#       endif
         result = _testImage->generateImage(exprStr);
-        }
-
         ASSERT_TRUE(result) << "Evaluation failure: "<< filepath;
 
-        std::string outDir("/tmp/");
+        // make outDir if it doesn't already exist
+        std::string outDir("./build/images/");
+#include <sys/stat.h>
+        struct stat info;
+        if(stat( outDir.c_str(), &info ) != 0){
+            int status = mkdir( outDir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+            ASSERT_EQ(status, 0) << "Failure to mkdir: "<< outDir.c_str();
+        }
         std::string outFile(outDir+basename(filepath)+".png");
         _testImage->writePNGImage(outFile.c_str());
     }

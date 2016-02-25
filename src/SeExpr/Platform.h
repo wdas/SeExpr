@@ -87,23 +87,25 @@
 namespace SeExpr2 {
 #ifndef WINDOWS
 class Timer{
-    timeval startTime,stopTime;
+    timespec startTime,stopTime;
     bool started;
 
 public:
-    Timer() :started(false) {}
+    Timer() :started(false){}
 
     void start()
     {
         started=true;
-        gettimeofday(&startTime,0);
+        clock_gettime(CLOCK_MONOTONIC, &startTime);
     }
 
-    float elapsedTime()
+    long elapsedTime()
     {
         assert(started);
-        gettimeofday(&stopTime,0);
-        float elapsedTime=(stopTime.tv_sec-startTime.tv_sec)+1e-6*(stopTime.tv_usec-startTime.tv_usec);
+        clock_gettime(CLOCK_MONOTONIC, &stopTime);
+        long seconds = stopTime.tv_sec - startTime.tv_sec;
+        long nseconds = stopTime.tv_nsec - startTime.tv_nsec;
+        long elapsedTime = ((seconds) * 1000 + nseconds/1000000.0) + 0.5;
         return elapsedTime;
     }
 };
@@ -116,7 +118,7 @@ public:
     {
         std::cerr<< "timer not implemented on Windows" << std::endl;
     }
-    float elapsedTime() {return 0;}
+    long elapsedTime() {return 0;}
 };
 #endif
 
@@ -128,7 +130,7 @@ public:
 
     ~PrintTiming()
     {
-        std::cerr<<_s<<" ( "<<_timer.elapsedTime()<<"s)"<<std::endl;
+        std::cout<<_s<<" ("<<_timer.elapsedTime()<<" ms)"<<std::endl;
     }
   private:
     Timer _timer;
