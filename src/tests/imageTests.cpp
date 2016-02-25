@@ -77,7 +77,7 @@ class RandFuncX:public ExprFuncSimple
         return valid ? ExprType().FP(1).Varying():ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(ArgHandle args) const {
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node,ArgHandle args) const {
         return new Data;
     }
 
@@ -112,7 +112,7 @@ public:
         return valid ? ExprType().FP(3).Varying():ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(ArgHandle args) const {
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node,ArgHandle args) const {
         return new Data;
     }
 
@@ -148,7 +148,7 @@ class TriplanarFuncX:public ExprFuncSimple
         return valid ? ExprType().FP(3).Varying():ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(ArgHandle args) const {
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node,ArgHandle args) const {
         return new Data;
     }
 
