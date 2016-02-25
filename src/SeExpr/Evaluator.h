@@ -141,7 +141,7 @@ public:
 
         Builder.CreateRetVoid();
 
-        // verifyModule(*TheModule);
+        verifyModule(*TheModule);
 #       ifdef SEEXPR_DEBUG
         TheModule->dump();
 #       endif
