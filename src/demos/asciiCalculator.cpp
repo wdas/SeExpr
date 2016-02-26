@@ -120,7 +120,7 @@ private:
         std::cerr << "Use of invalid result line." << std::endl;
         return &(stack[position]);
     };
-        std::cerr << "Use of undefined variable." << std::endl;
+        addError("Use of undefined variable.",0,0);
     return 0;
     };
 };
