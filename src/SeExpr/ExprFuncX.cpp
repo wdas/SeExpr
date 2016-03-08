@@ -74,7 +74,7 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node,Interpreter* inter
     int* opCurr=(&interpreter->opData[0])+interpreter->ops[pc].second;
 
     ArgHandle args(opCurr,&interpreter->d[0],&interpreter->s[0],interpreter->callStack);
-    interpreter->s[ptrDataLoc]=reinterpret_cast<char*>(evalConstant(args));
+    interpreter->s[ptrDataLoc]=reinterpret_cast<char*>(evalConstant(node,args));
     
 
     return outoperand;
@@ -109,7 +109,7 @@ extern "C" {
 void resolveCustomFunction(const char *name, int *opDataArg, int nargs,
                            double *fpArg, int fpArglen,
                            char **strArg, int strArglen,
-                           void **funcdata, double *result, int retSize) {
+                           void **funcdata, double *result, int retSize,const SeExpr2::ExprFuncNode* node) {
     const SeExpr2::ExprFunc *func = SeExpr2::ExprFunc::lookup(name);
     SeExpr2::ExprFuncX *funcX = const_cast<SeExpr2::ExprFuncX*>(func->funcx());
     SeExpr2::ExprFuncSimple *funcSimple = static_cast<SeExpr2::ExprFuncSimple*>(funcX);
@@ -138,7 +138,7 @@ void resolveCustomFunction(const char *name, int *opDataArg, int nargs,
     std::vector<int> callStack;
     SeExpr2::ExprFuncSimple::ArgHandle handle(opData,fp,c,callStack);
     if(!*funcdata) {
-        handle.data = funcSimple->evalConstant(handle);
+        handle.data = funcSimple->evalConstant(node,handle);
         *funcdata = reinterpret_cast<void*>(handle.data);
     } else {
         handle.data = reinterpret_cast<SeExpr2::ExprFuncNode::Data*>(*funcdata);

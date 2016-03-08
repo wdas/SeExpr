@@ -987,7 +987,7 @@ static const char* vnoise_docstring=
             return valid ? ExprType().FP(3).Varying():ExprType().Error();
         }
 
-        virtual ExprFuncNode::Data* evalConstant(ArgHandle args) const {
+        virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node,ArgHandle args) const {
             return new VoronoiPointData();
         }
 
@@ -1305,7 +1305,7 @@ static const char* vnoise_docstring=
             return valid ? ExprType().FP(1).Varying():ExprType().Error();
         }
 
-        virtual ExprFuncNode::Data* evalConstant(ArgHandle args) const
+        virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node,ArgHandle args) const
         {
             CurveData<double>* data = new CurveData<double>;
             for (int i = 1; i < args.nargs()-2; i+=3) {
@@ -1359,7 +1359,7 @@ static const char* vnoise_docstring=
             return valid ? ExprType().FP(3).Varying():ExprType().Error();
         }
 
-        virtual ExprFuncNode::Data* evalConstant(ArgHandle args) const
+        virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node,ArgHandle args) const
         {
             CurveData<Vec3d>* data = new CurveData<Vec3d>;
             for (int i = 1; i < args.nargs()-2; i+=3) {
@@ -1398,6 +1398,76 @@ static const char* vnoise_docstring=
         "4 - monotone (non oscillating spline)";
 
 
+    class GetVar:public ExprFuncSimple
+    {
+        struct Data:public ExprFuncNode::Data
+        {
+            ExprType type;
+            Data(const ExprType type):type(type){}
+        };
+
+        virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnv & env) const
+        {
+            bool valid=true;
+            valid &= node->checkArg(0,ExprType().String().Constant(),env);
+            std::string varName = node->getStrArg(0);
+            ExprVarNode* varNode = new ExprVarNode(node->expr(),varName.c_str());
+            ExprType varType=varNode->prep(wantScalar, env);
+            if (varType.isValid()) {
+                node->removeLastChild(); // remove the useless default argument from the arugment list
+                node->removeLastChild(); // remove the useless default argument from the arugment list
+                node->addChild(varNode);
+            } else {
+                delete varNode;
+            	node->swapChildren(0,1); // move the default argument in the beginning
+            	varType=node->child(0)->prep(wantScalar,env);
+            	node->removeLastChild(); // remove the useless string argument
+            }
+            return varType.isValid() ? varType : ExprType().Error();
+        }
+
+        virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node,ArgHandle args) const {
+        	return new Data(node->type());
+        }
+
+        virtual void eval(ArgHandle args)
+        {
+        	Data* data=static_cast<Data*>(args.data);assert(data);
+        	ExprType type=data->type;
+        	if(type.isFP()){
+	            double* out=&args.outFp;
+        		switch(type.dim()){
+        			case 1: out[0]=args.inFp<1>(0)[0];break;
+        			case 2: for(int k=0;k<2;k++) out[k]=args.inFp<2>(0)[k];break;
+        			case 3: for(int k=0;k<3;k++) out[k]=args.inFp<3>(0)[k];break;
+        			case 4: for(int k=0;k<4;k++) out[k]=args.inFp<4>(0)[k];break;
+        			case 5: for(int k=0;k<5;k++) out[k]=args.inFp<5>(0)[k];break;
+        			case 6: for(int k=0;k<6;k++) out[k]=args.inFp<6>(0)[k];break;
+        			case 7: for(int k=0;k<7;k++) out[k]=args.inFp<7>(0)[k];break;
+        			case 8: for(int k=0;k<8;k++) out[k]=args.inFp<8>(0)[k];break;
+        			case 9: for(int k=0;k<9;k++) out[k]=args.inFp<9>(0)[k];break;
+        			case 10: for(int k=0;k<10;k++) out[k]=args.inFp<10>(0)[k];break;
+        			case 11: for(int k=0;k<11;k++) out[k]=args.inFp<11>(0)[k];break;
+        			case 12: for(int k=0;k<12;k++) out[k]=args.inFp<12>(0)[k];break;
+        			case 13: for(int k=0;k<13;k++) out[k]=args.inFp<13>(0)[k];break;
+        			case 14: for(int k=0;k<14;k++) out[k]=args.inFp<14>(0)[k];break;
+        			case 15: for(int k=0;k<15;k++) out[k]=args.inFp<15>(0)[k];break;
+        			case 16: for(int k=0;k<16;k++) out[k]=args.inFp<16>(0)[k];break;
+        			default: throw std::runtime_error("Unsupported type in getVar "+type.toString());
+        		}
+        	}else{
+        		throw std::runtime_error("getVar does not support non FP types right now got type "+type.toString());
+        	}
+        }
+
+    public:
+        GetVar():ExprFuncSimple(true){}  // Thread Safe
+        virtual ~GetVar() {}
+    } getVar;
+    static const char *getVar_docstring=
+        "getVar(string varName,vector defaultValue)\n"
+        "return value of varName if variable exists, otherwise return defaultValue";
+
 
     class PrintFuncX:public ExprFuncSimple
     {
@@ -1423,7 +1493,7 @@ static const char* vnoise_docstring=
             return ExprType().FP(1).Constant();
         }
 
-        virtual ExprFuncNode::Data* evalConstant(ArgHandle args) const {
+        virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node,ArgHandle args) const {
             // parse format string
             unsigned int bakeStart=0;
             int searchStart=0;
@@ -1674,6 +1744,7 @@ static const char* testfunc_docstring="fdsA";
     // variations
 	FUNCNDOC(curve, 1, -1);
 	FUNCNDOC(ccurve, 1, -1);
+	FUNCNDOC(getVar, 2, 2);
     FUNCNDOC(printf,1,-1);
 //        FUNCNDOC(testfunc,2,2);
     }

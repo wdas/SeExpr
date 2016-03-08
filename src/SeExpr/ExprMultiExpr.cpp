@@ -127,7 +127,7 @@ ExprVarRef* DExpression::resolveVar(const std::string& name) const {
             return *I;
         }
 
-    std::cerr << name << " fail resolveVar\n";
+    addError(name+" fail resolveVar",0,0);
     return 0;
 }
 

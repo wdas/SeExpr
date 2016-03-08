@@ -139,10 +139,26 @@ public:
 
     /// Access parent node - root node has no parent
     const ExprNode* parent() const { return _parent; }
-    /// Access children
+    /// Number of children
     int numChildren() const { return _children.size(); }
+
+    /// Get 0 indexed child
     const ExprNode* child(int i) const { return _children[i]; }
+    
+    /// Get 0 indexed child
     ExprNode* child(int i) { return _children[i]; }
+
+    /// Swap children, do not use unless you know what you are doing
+    void swapChildren(int i,int j) {
+        assert(i!=j && i<_children.size() && j<_children.size() && i>=0 && j>=0);std::swap(_children[i],_children[j]);
+    }
+
+    /// Remove last child and delete the entry
+    void removeLastChild() {
+        if(_children.size()){
+            delete _children.back();_children.pop_back();
+        }
+    }
 
     /// Add a child to the child list (for parser use only)
     void addChild(ExprNode* child);

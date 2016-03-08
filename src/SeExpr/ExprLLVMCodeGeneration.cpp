@@ -272,12 +272,13 @@ Function *getOrCreateCustomFunctionWrapperDeclaration(LLVM_BUILDER Builder) {
     Type *i8PtrTy = Type::getInt8PtrTy(llvmContext);
     Type *i32PtrTy = Type::getInt32PtrTy(llvmContext);
     Type *i32Ty = Type::getInt32Ty(llvmContext);
+    Type *i64Ty = Type::getInt64Ty(llvmContext);
     Type *doublePtrTy = Type::getDoublePtrTy(llvmContext);
     PointerType *i8PtrPtr = PointerType::getUnqual(i8PtrTy);
-    Type *ParamTys[10] = {i8PtrTy, i32PtrTy, i32Ty,
+    Type *ParamTys[] = {i8PtrTy, i32PtrTy, i32Ty,
                           doublePtrTy, i32Ty, //fp
                           i8PtrPtr, i32Ty,    //str
-                          i8PtrPtr, doublePtrTy, i32Ty};
+                          i8PtrPtr, doublePtrTy, i32Ty, i64Ty};
     FunctionType *FT = FunctionType::get(Type::getVoidTy(llvmContext), ParamTys, false);
 
     Module *M = llvm_getModule(Builder);
@@ -550,6 +551,9 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode *funcNode, LLVM_BUILDER Builder
     params.push_back(dataGV);
     params.push_back(result);
     params.push_back(ConstantInt::get(Type::getInt32Ty(llvmContext), sizeOfRet));
+    ConstantInt *ptrToExprNode = ConstantInt::get(Type::getInt64Ty(llvmContext),
+                                                (uint64_t)funcNode);
+    params.push_back(ptrToExprNode);
 
     Function *callee = getOrCreateCustomFunctionWrapperDeclaration(Builder);
     Builder.CreateCall(callee, params);

@@ -105,7 +105,7 @@ public:
     virtual int buildInterpreter(const ExprFuncNode* node,Interpreter* interpreter) const;
 
     virtual ExprType prep(ExprFuncNode* node,bool scalarWanted,ExprVarEnv& env) const=0;
-    virtual ExprFuncNode::Data* evalConstant(ArgHandle args) const=0;
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*node,ArgHandle args) const=0;
     virtual void eval(ArgHandle args)=0;
 
 private:
