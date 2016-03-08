@@ -195,6 +195,9 @@ Expression::parse() const
 
 void Expression::prep() const {
     if (_prepped) return;
+#   ifdef SEEXPR_PERFORMANCE
+    PrintTiming timer("[ PREP     ] v2 prep time: ");
+#   endif
     _prepped = true;
     parseIfNeeded();
     _varEnv=new ExprVarEnv;
@@ -220,9 +223,6 @@ void Expression::prep() const {
 #           ifdef SEEXPR_DEBUG
             debugPrintParseTree();
 #           endif
-#           ifdef SEEXPR_PERFORMANCE
-            PrintTiming timer("v2 interpreter build time: ");
-#           endif
             _interpreter=new Interpreter;
             _returnSlot=_parseTree->buildInterpreter(_interpreter);
             if(_desiredReturnType.isFP()){
@@ -240,9 +240,6 @@ void Expression::prep() const {
         } else { // useLLVM
 #           ifdef SEEXPR_DEBUG
             debugPrintParseTree();
-#           endif
-#           ifdef SEEXPR_PERFORMANCE
-            PrintTiming timer("v2 llvm codegen time: ");
 #           endif
             _llvmEvaluator->prepLLVM(_parseTree,_desiredReturnType);
         }
@@ -296,50 +293,28 @@ Expression::returnType() const
 const double* Expression::evalFP() const
 {
     prepIfNeeded();
-
     if (_isValid) {
         if(_evaluationStrategy == UseInterpreter) {
-
-#           ifdef SEEXPR_PERFORMANCE
-            PrintTiming timer("v2 interpreter eval time: ");
-#           endif
             _interpreter->eval();
             return &_interpreter->d[_returnSlot];
-
         } else { // useLLVM
-
-#           ifdef SEEXPR_PERFORMANCE
-            PrintTiming timer("v2 llvm eval time: ");
-#           endif
             return _llvmEvaluator->evalFP();
         }
     }
-
     return SeExpr2::Vec3d(0,0,0);
 }
 
 const char* Expression::evalStr() const
 {
     prepIfNeeded();
-
     if (_isValid) {
         if(_evaluationStrategy == UseInterpreter) {
-
-#           ifdef SEEXPR_PERFORMANCE
-            PrintTiming timer("v2 interpreter eval time: ");
-#           endif
             _interpreter->eval();
             return _interpreter->s[_returnSlot];
-
         } else { // useLLVM
-
-#           ifdef SEEXPR_PERFORMANCE
-            PrintTiming timer("v2 llvm eval time: ");
-#           endif
             _llvmEvaluator->evalStr();
         }
     }
-
     return 0;
 }
 

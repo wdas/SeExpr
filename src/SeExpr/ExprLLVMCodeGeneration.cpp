@@ -64,7 +64,8 @@ bool isTakeOnlyDoubleArg(ExprFuncStandard::FuncType seFuncType) {
 }
 
 FunctionType* getSeExprFuncStandardLLVMType(ExprFuncStandard::FuncType sft,
-                                           LLVMContext &llvmContext) {
+                                            ExprType desiredReturnType,
+                                            LLVMContext &llvmContext) {
     assert(sft != ExprFuncStandard::NONE);
 
     Type *intType = TypeBuilder<int,false>::get(llvmContext);
@@ -75,13 +76,14 @@ FunctionType* getSeExprFuncStandardLLVMType(ExprFuncStandard::FuncType sft,
 
     if(sft <= ExprFuncStandard::FUNC6) {
         std::vector<Type*> paramTypes;
+        Type *ptype = desiredReturnType.dim()==1 ? doubleType : doublePtrType;
         switch(sft) {
-        case ExprFuncStandard::FUNC6: paramTypes.push_back(doubleType);
-        case ExprFuncStandard::FUNC5: paramTypes.push_back(doubleType);
-        case ExprFuncStandard::FUNC4: paramTypes.push_back(doubleType);
-        case ExprFuncStandard::FUNC3: paramTypes.push_back(doubleType);
-        case ExprFuncStandard::FUNC2: paramTypes.push_back(doubleType);
-        case ExprFuncStandard::FUNC1: paramTypes.push_back(doubleType);
+        case ExprFuncStandard::FUNC6: paramTypes.push_back(ptype);
+        case ExprFuncStandard::FUNC5: paramTypes.push_back(ptype);
+        case ExprFuncStandard::FUNC4: paramTypes.push_back(ptype);
+        case ExprFuncStandard::FUNC3: paramTypes.push_back(ptype);
+        case ExprFuncStandard::FUNC2: paramTypes.push_back(ptype);
+        case ExprFuncStandard::FUNC1: paramTypes.push_back(ptype);
         case ExprFuncStandard::FUNC0:
         default:
                    FT = FunctionType::get(doubleType, paramTypes, false);
@@ -774,7 +776,7 @@ LLVM_VALUE ExprFuncNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     // call standard function
     // get function pointer
     ExprFuncStandard::FuncType seFuncType = standfunc->getFuncType();
-    FunctionType *llvmFuncType =  getSeExprFuncStandardLLVMType(seFuncType, llvmContext);
+    FunctionType *llvmFuncType =  getSeExprFuncStandardLLVMType(seFuncType, _type, llvmContext);
     void *fp = standfunc->getFuncPointer();
     ConstantInt *funcAddr = ConstantInt::get(Type::getInt64Ty(llvmContext), (uint64_t)fp);
     LLVM_VALUE addrVal = Builder.CreateIntToPtr(funcAddr, PointerType::getUnqual(llvmFuncType));

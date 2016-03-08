@@ -21,7 +21,7 @@ SET( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE )
 ## Use verbose make file
 SET ( CMAKE_VERBOSE_MAKEFILE TRUE )
 
-option(ENABLE_LLVM_BACKEND "Enable LLVM backend." ON)
+option(ENABLE_LLVM_BACKEND "Enable LLVM backend." OFF)
 if (ENABLE_LLVM_BACKEND)
    include(llvm-make.txt)
 endif()

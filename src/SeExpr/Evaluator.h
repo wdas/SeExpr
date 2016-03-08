@@ -167,8 +167,8 @@ public:
 #else // no LLVM support
 class LLVMEvaluator{
 public:
-    const char* evalStr(){assert("LLVM is not enabled in build" && false);}
-    const double* evalFP(){assert("LLVM is not enabled in build" && false);}
+    const char* evalStr(){assert("LLVM is not enabled in build" && false); return "";}
+    const double* evalFP(){assert("LLVM is not enabled in build" && false); return 0;}
     void prepLLVM(ExprNode* parseTree,ExprType desiredReturnType)  {
         assert("LLVM is not enabled in build" && false);
     }
