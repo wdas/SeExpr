@@ -14,7 +14,6 @@
 # http://www.apache.org/licenses/LICENSE-2.0
 
 # Source files for llvm supported library and interpreter library
-file(GLOB llvm_cpp "*.cpp")
 file(GLOB io_cpp "*.cpp")
 file(GLOB to_remove "ExprLLVMCodeGeneration.cpp")
 list(REMOVE_ITEM io_cpp ${to_remove})
@@ -86,19 +85,22 @@ endif( (BISON_EXE STREQUAL "BISON_EXE-NOTFOUND") OR (FLEX_EXE STREQUAL "FLEX_EXE
 
 ## Make the SeExpr library with and without LLVM support
 ADD_LIBRARY (SeExpr2 SHARED ${io_cpp} ${core_cpp} ${parser_cpp})
-ADD_LIBRARY (SeExpr2LLVM SHARED ${llvm_cpp} ${core_cpp} ${parser_cpp})
 IF(NOT WIN32)
    TARGET_LINK_LIBRARIES(SeExpr2 "dl" "pthread")
-   TARGET_LINK_LIBRARIES(SeExpr2LLVM ${LLVM_LIB} "dl" "pthread")
 ENDIF(NOT WIN32)
 
 ## Install binary and includes
 INSTALL (TARGETS SeExpr2 DESTINATION ${CMAKE_INSTALL_LIBDIR})
-INSTALL (TARGETS SeExpr2LLVM DESTINATION ${CMAKE_INSTALL_LIBDIR})
 INSTALL (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ DESTINATION include/SeExpr2
         FILES_MATCHING PATTERN "*.h")
 
 if (ENABLE_LLVM_BACKEND)
+    file(GLOB llvm_cpp "*.cpp")
+    ADD_LIBRARY (SeExpr2LLVM SHARED ${llvm_cpp} ${core_cpp} ${parser_cpp})
+IF(NOT WIN32)
+       TARGET_LINK_LIBRARIES(SeExpr2LLVM ${LLVM_LIB} "dl" "pthread")
+ENDIF(NOT WIN32)
+    INSTALL (TARGETS SeExpr2LLVM DESTINATION ${CMAKE_INSTALL_LIBDIR})
     set_target_properties(SeExpr2LLVM PROPERTIES
                           COMPILE_FLAGS "-DSEEXPR_ENABLE_LLVM")
     ## generate LLVM headers without #ifdef macros
