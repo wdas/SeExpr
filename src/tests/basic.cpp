@@ -22,14 +22,24 @@
 #include <Vec3d.h>
 using namespace SeExpr2;
 
+static int invocations=0;
+static double countInvocations(double x){
+    invocations++;
+    return x;
+}
+
 struct SimpleExpression:public Expression
 {
     // Define simple scalar variable type that just stores the value it returns
-    struct Var:public ExprScalarVarRef
+    struct Var:public ExprVarRef
     {
         double value;
-        void eval(const ExprVarNode* node,Vec3d& result)
-        {result[0]=value;}
+        Var():ExprVarRef(ExprType().FP(1).Varying()){
+        }
+        void eval(double* result){
+            result[0]=value;
+        }
+        void eval(const char**){}
     };
     mutable Var x,y;
 
@@ -45,17 +55,19 @@ struct SimpleExpression:public Expression
     mutable ExprFunc customFunc;
     static double customFuncHelper(double x,double y)
     {return x+y;}
+    mutable ExprFunc countInvocationsFunc;
 
     // Custom function resolver
     ExprFunc* resolveFunc(const std::string& name) const
     {
         if(name=="custom") return &customFunc;
+        if(name=="countInvocations") return &countInvocationsFunc;
         return 0;
     }
 
     // Constructor
     SimpleExpression(const std::string& str)
-        :Expression(str),customFunc(customFuncHelper)
+        :Expression(str),customFunc(customFuncHelper),countInvocationsFunc(countInvocations)
     {}
 
 };
@@ -116,3 +128,24 @@ TEST(BasicTests, VectorAssignment)
     EXPECT_EQ(val3,val4);
 }
 
+TEST(BasicTests, LogicalShortCircuiting)
+{
+    auto testExpr=[&](const char* expr,int expectedOutput,int invocationsExpected){
+        SimpleExpression expr1(expr);
+        if(!expr1.isValid()) throw std::runtime_error(expr1.parseError());
+        invocations=0;
+        Vec<double,1,true> val(const_cast<double*>(expr1.evalFP()));
+        EXPECT_EQ(val[0],expectedOutput);
+        EXPECT_EQ(invocations,invocationsExpected);
+    };
+    testExpr("countInvocations(1)&&countInvocations(0)",0,2);
+    testExpr("countInvocations(1)&&countInvocations(1)",1,2);
+    testExpr("countInvocations(0)&&countInvocations(1)",0,1);
+    testExpr("countInvocations(0)&&countInvocations(0)",0,1);
+    testExpr("countInvocations(1)||countInvocations(0)",1,1);
+    testExpr("countInvocations(1)||countInvocations(1)",1,1);
+    testExpr("countInvocations(0)||countInvocations(1)",1,2);
+    testExpr("countInvocations(0)||countInvocations(0)",0,2);
+    testExpr("1?countInvocations(5):countInvocations(10)",5,1);
+    testExpr("0?countInvocations(5):countInvocations(10)",10,1);
+}

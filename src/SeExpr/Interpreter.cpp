@@ -221,10 +221,19 @@ struct AssignStrOp{
 };
 
 //! Jumps relative to current executing pc if cond is true
-struct CondJmpRelative{
+struct CondJmpRelativeIfFalse{
     static int f(int* opData,double* fp,char** c,std::vector<int>& callStack){
         bool cond=(bool)fp[opData[0]];
         if(!cond) return opData[1];
+        else return 1;
+    }
+};
+
+//! Jumps relative to current executing pc if cond is true
+struct CondJmpRelativeIfTrue{
+    static int f(int* opData,double* fp,char** c,std::vector<int>& callStack){
+        bool cond=(bool)fp[opData[0]];
+        if(cond) return opData[1];
         else return 1;
     }
 };
@@ -564,7 +573,7 @@ int ExprIfThenElseNode::buildInterpreter(Interpreter *interpreter) const
     int condop=child(0)->buildInterpreter(interpreter);
     int basePC=interpreter->nextPC();
     
-    interpreter->addOp(CondJmpRelative::f);
+    interpreter->addOp(CondJmpRelativeIfFalse::f);
     interpreter->addOperand(condop);
     int destFalse=interpreter->addOperand(0);
     interpreter->endOp();
@@ -589,23 +598,65 @@ int ExprCompareNode::buildInterpreter(Interpreter *interpreter) const
 {
     const ExprNode* child0=child(0),*child1=child(1);
     assert(type().dim()==1 && type().isFP());
-    int op0=child0->buildInterpreter(interpreter);
-    int op1=child1->buildInterpreter(interpreter);
-    switch(_op){
-        case '<': interpreter->addOp(getTemplatizedOp2<'<',BinaryOp>(1));break;
-        case '>': interpreter->addOp(getTemplatizedOp2<'>',BinaryOp>(1));break;
-        case 'l': interpreter->addOp(getTemplatizedOp2<'l',BinaryOp>(1));break;
-        case 'g': interpreter->addOp(getTemplatizedOp2<'g',BinaryOp>(1));break;
-        case '&': interpreter->addOp(getTemplatizedOp2<'&',BinaryOp>(1));break;
-        case '|': interpreter->addOp(getTemplatizedOp2<'|',BinaryOp>(1));break;
-        default: assert(false);
+
+    if(_op=='&' || _op=='|'){
+        // Handle short circuiting
+
+        // allocate output
+        int op2=interpreter->allocFP(1);
+        // unconditionally evaluate first argument
+        int op0=child0->buildInterpreter(interpreter);
+        // conditional to check if that argument could continue
+        int basePC=(interpreter->nextPC());
+        interpreter->addOp(_op=='&' ? CondJmpRelativeIfFalse::f : CondJmpRelativeIfTrue::f);
+            interpreter->addOperand(op0);
+            int destFalse=interpreter->addOperand(0);
+        interpreter->endOp();
+        // this is the no-branch case (op1=true for & and op0=false for |), so eval op1
+        int op1=child1->buildInterpreter(interpreter);
+        // combine with &
+        interpreter->addOp(_op=='&' ? getTemplatizedOp2<'&',BinaryOp>(1) : getTemplatizedOp2<'|',BinaryOp>(1));
+        interpreter->addOperand(op0);
+        interpreter->addOperand(op1);
+        interpreter->addOperand(op2);
+        interpreter->endOp();
+        interpreter->addOp(JmpRelative::f);
+        int destEnd=interpreter->addOperand(0);
+        interpreter->endOp();
+        // this is the branch case (op1=false for & and op0=true for |) so no eval of op1 required
+        // just copy from the op0's value
+        int falseConditionPC=interpreter->nextPC();
+        interpreter->addOp(AssignOp<1>::f);
+        interpreter->addOperand(op0);
+        interpreter->addOperand(op2);
+        interpreter->endOp();
+
+        // fix PC relative jump addressses
+        interpreter->opData[destFalse]=falseConditionPC-basePC;
+        interpreter->opData[destEnd]=interpreter->nextPC()-(falseConditionPC-1);
+
+        return op2;
+
+    }else{
+        // Noraml case, always have to evaluatee everything
+        int op0=child0->buildInterpreter(interpreter);
+        int op1=child1->buildInterpreter(interpreter);
+        switch(_op){
+            case '<': interpreter->addOp(getTemplatizedOp2<'<',BinaryOp>(1));break;
+            case '>': interpreter->addOp(getTemplatizedOp2<'>',BinaryOp>(1));break;
+            case 'l': interpreter->addOp(getTemplatizedOp2<'l',BinaryOp>(1));break;
+            case 'g': interpreter->addOp(getTemplatizedOp2<'g',BinaryOp>(1));break;
+            case '&': assert(false); // interpreter->addOp(getTemplatizedOp2<'&',BinaryOp>(1));break;
+            case '|': assert(false); //interpreter->addOp(getTemplatizedOp2<'|',BinaryOp>(1));break;
+            default: assert(false);
+        }
+        int op2=interpreter->allocFP(1);
+        interpreter->addOperand(op0);
+        interpreter->addOperand(op1);
+        interpreter->addOperand(op2);
+        interpreter->endOp();
+        return op2;
     }
-    int op2=interpreter->allocFP(1);
-    interpreter->addOperand(op0);
-    interpreter->addOperand(op1);
-    interpreter->addOperand(op2);
-    interpreter->endOp();
-    return op2;
 }
 
 
@@ -689,7 +740,7 @@ int ExprCondNode::buildInterpreter(Interpreter *interpreter) const
     // conditional
     int condOp=child(0)->buildInterpreter(interpreter);
     int basePC=(interpreter->nextPC());
-    interpreter->addOp(CondJmpRelative::f);
+    interpreter->addOp(CondJmpRelativeIfFalse::f);
     interpreter->addOperand(condOp);
     int destFalse=interpreter->addOperand(0);
     interpreter->endOp();
