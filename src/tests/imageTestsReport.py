@@ -31,7 +31,7 @@ for t in test_case:
             line = (line).strip()
             if re.search('OK', line):
                 (prefix, time) = re.split('\(', line)
-                test_case[t][0]=time.strip('\)')
+                test_case[t][0]=int(time.strip('\)').strip('ms'))
 
     # test time in v2 with interpreter
     with os.popen("./build/src/tests/testmain2 --gtest_filter="+t) as pipe:
@@ -39,7 +39,7 @@ for t in test_case:
             line = (line).strip()
             if re.search('OK', line):
                 (prefix, time) = re.split('\(', line)
-                test_case[t][1]=time.strip('\)')
+                test_case[t][1]=int(time.strip('\)').strip('ms'))
 
     # test time in v2 with llvm
     with os.popen("./build/src/tests/testmain2LLVM --gtest_filter="+t) as pipe:
@@ -47,6 +47,6 @@ for t in test_case:
             line = (line).strip()
             if re.search('OK', line):
                 (prefix, time) = re.split('\(', line)
-                test_case[t][2]=time.strip('\)')
+                test_case[t][2]=int(time.strip('\)').strip('ms'))
 
     print t+","+str(test_case[t][0])+","+str(test_case[t][1])+','+str(test_case[t][2])
