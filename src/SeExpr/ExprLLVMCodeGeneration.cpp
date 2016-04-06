@@ -700,46 +700,100 @@ LLVM_VALUE ExprCompareEqNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
 }
 
 LLVM_VALUE ExprCompareNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
-    LLVM_VALUE op1 = getFirstElement(child(0)->codegen(Builder), Builder);
-    LLVM_VALUE op2 = getFirstElement(child(1)->codegen(Builder), Builder);
+    if(_op=='&' || _op=='|'){
+        // Handle & and | specially as conditionals to handle short circuiting!
+        LLVMContext &llvmContext = Builder.getContext();
 
-    Type *opTy = op1->getType();
-    Constant *zero = ConstantFP::get(opTy, 0.0);
-    LLVM_VALUE boolVal = 0;
+        LLVM_VALUE op1 = getFirstElement(child(0)->codegen(Builder), Builder);
+        Type *opTy = op1->getType();
+        Constant *zero = ConstantFP::get(opTy, 0.0);
 
-    switch (_op) {
-    case '|': {
-         LLVM_VALUE op1IsOne = Builder.CreateFCmpUNE(op1, zero);
-         LLVM_VALUE op2IsOne = Builder.CreateFCmpUNE(op2, zero);
-         boolVal = Builder.CreateOr(op1IsOne, op2IsOne);
-         break;
-    }
-    case '&': {
-        LLVM_VALUE op1IsOne = Builder.CreateFCmpONE(op1, zero);
-        LLVM_VALUE op2IsOne = Builder.CreateFCmpONE(op2, zero);
-        boolVal = Builder.CreateAnd(op1IsOne, op2IsOne);
-        break;
-    }
-    case 'g':
-        boolVal = Builder.CreateFCmpOGE(op1, op2);
-        break;
-    case 'l':
-        boolVal = Builder.CreateFCmpOLE(op1, op2);
-        break;
-    case '>':
-        boolVal = Builder.CreateFCmpOGT(op1, op2);
-        break;
-    case '<':
-        boolVal = Builder.CreateFCmpOLT(op1, op2);
-        break;
-    default:
-        assert(false && "Unkown Compare op.");
-    }
+        LLVM_VALUE op1IsOne =  Builder.CreateFCmpUNE(op1, zero);
 
-    return Builder.CreateUIToFP(boolVal, opTy);
+        Function *F = llvm_getFunction(Builder);
+        BasicBlock *thenBlock = BasicBlock::Create(llvmContext, "then", F);
+        BasicBlock *elseBlock = BasicBlock::Create(llvmContext, "else", F);
+        BasicBlock *phiBlock = BasicBlock::Create(llvmContext, "phi", F);
+        Builder.CreateCondBr(op1IsOne, thenBlock, elseBlock);
+
+        LLVM_VALUE op2IsOne;
+        Type *intTy = Type::getInt1Ty(llvmContext);
+        Type *doubleTy = Type::getDoubleTy(llvmContext);
+        llvm::PHINode* phiNode;
+        if(_op=='&'){
+            // TODO: full IfThenElsenot needed
+            Builder.SetInsertPoint(thenBlock);
+            LLVM_VALUE op2=child(1)->codegen(Builder);
+            op2IsOne=Builder.CreateFCmpUNE(op2,zero);
+            Builder.CreateBr(phiBlock);
+            Builder.SetInsertPoint(elseBlock);
+            Builder.CreateBr(phiBlock);
+            Builder.SetInsertPoint(phiBlock);
+            
+            Builder.SetInsertPoint(phiBlock);
+            phiNode = Builder.CreatePHI(intTy,2,"iftmp");
+            phiNode->addIncoming(op2IsOne,thenBlock);
+            phiNode->addIncoming(op1IsOne,elseBlock);
+        }else if(_op=='|'){
+            // TODO: full IfThenElsenot needed
+            Builder.SetInsertPoint(thenBlock);
+            Builder.CreateBr(phiBlock);
+            Builder.SetInsertPoint(elseBlock);
+            LLVM_VALUE op2=child(1)->codegen(Builder);
+            op2IsOne=Builder.CreateFCmpUNE(op2,zero);
+            Builder.CreateBr(phiBlock);
+            
+            Builder.SetInsertPoint(phiBlock);
+            phiNode = Builder.CreatePHI(intTy,2,"iftmp");
+            phiNode->addIncoming(op1IsOne,thenBlock);
+            phiNode->addIncoming(op2IsOne,elseBlock);
+        }else{
+            assert(false);
+        }
+        LLVM_VALUE out=Builder.CreateUIToFP(phiNode,doubleTy);
+        return out;
+    }else{
+        LLVM_VALUE op1 = getFirstElement(child(0)->codegen(Builder), Builder);
+        LLVM_VALUE op2 = getFirstElement(child(1)->codegen(Builder), Builder);
+
+        Type *opTy = op1->getType();
+        Constant *zero = ConstantFP::get(opTy, 0.0);
+        LLVM_VALUE boolVal = 0;
+
+        switch (_op) {
+        case '|': {
+             LLVM_VALUE op1IsOne = Builder.CreateFCmpUNE(op1, zero);
+             LLVM_VALUE op2IsOne = Builder.CreateFCmpUNE(op2, zero);
+             boolVal = Builder.CreateOr(op1IsOne, op2IsOne);
+             break;
+        }
+        case '&': {
+            assert(false);// handled above
+            break;
+        }
+        case 'g':
+            boolVal = Builder.CreateFCmpOGE(op1, op2);
+            break;
+        case 'l':
+            boolVal = Builder.CreateFCmpOLE(op1, op2);
+            break;
+        case '>':
+            boolVal = Builder.CreateFCmpOGT(op1, op2);
+            break;
+        case '<':
+            boolVal = Builder.CreateFCmpOLT(op1, op2);
+            break;
+        default:
+            assert(false && "Unkown Compare op.");
+        }
+
+        return Builder.CreateUIToFP(boolVal, opTy);
+    }
 }
 
 LLVM_VALUE ExprCondNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
+
+#if 0 // old non-short circuit
     LLVM_VALUE condVal = getFirstElement(child(0)->codegen(Builder), Builder);
     LLVM_VALUE cond = Builder.CreateFCmpUNE(condVal,
                                      ConstantFP::get(condVal->getType(), 0.0));
@@ -747,6 +801,32 @@ LLVM_VALUE ExprCondNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     LLVM_VALUE falseVal = child(2)->codegen(Builder);
     std::pair<LLVM_VALUE, LLVM_VALUE> pv = promoteBinaryOperandsToAppropriateVector(Builder, trueVal, falseVal);
     return Builder.CreateSelect(cond, pv.first, pv.second);
+#else // new short circuit version
+    LLVM_VALUE condVal = getFirstElement(child(0)->codegen(Builder), Builder);
+    LLVM_VALUE condAsBool = Builder.CreateFCmpUNE(condVal,
+                                     ConstantFP::get(condVal->getType(), 0.0));
+    LLVMContext &llvmContext = Builder.getContext();
+    Function *F = llvm_getFunction(Builder);
+    BasicBlock *thenBlock = BasicBlock::Create(llvmContext, "then", F);
+    BasicBlock *elseBlock = BasicBlock::Create(llvmContext, "else", F);
+    BasicBlock *phiBlock = BasicBlock::Create(llvmContext, "phi", F);
+    Builder.CreateCondBr(condAsBool, thenBlock, elseBlock);
+
+    Builder.SetInsertPoint(thenBlock);
+    LLVM_VALUE trueVal=child(1)->codegen(Builder);
+    Builder.CreateBr(phiBlock);
+    
+    Builder.SetInsertPoint(elseBlock);
+    LLVM_VALUE falseVal=child(2)->codegen(Builder);
+    Builder.CreateBr(phiBlock);
+
+    Builder.SetInsertPoint(phiBlock);
+    llvm::PHINode *phiNode = Builder.CreatePHI(trueVal->getType(),2,"iftmp");
+    phiNode->addIncoming(trueVal,thenBlock);
+    phiNode->addIncoming(falseVal,elseBlock);
+    return phiNode;
+
+#endif
 }
 
 LLVM_VALUE ExprFuncNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
