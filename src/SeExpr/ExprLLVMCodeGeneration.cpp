@@ -250,6 +250,16 @@ std::pair<LLVM_VALUE, LLVM_VALUE > promoteBinaryOperandsToAppropriateVector(LLVM
     return std::make_pair(op1,op2);
 }
 
+LLVM_VALUE promoteOperand(LLVM_BUILDER Builder,const ExprType refType,LLVM_VALUE val) {
+    Type *valTy = val->getType();
+    if(!valTy->isVectorTy()){
+        return createVecVal(Builder,val,refType.dim());
+    }else{
+        return val;
+    }
+}
+
+
 Function *getOrCreateEvalVarDeclaration(LLVM_BUILDER Builder) {
     LLVMContext &llvmContext = Builder.getContext();
     Type *i8PtrTy = Type::getInt8PtrTy(llvmContext);
@@ -811,11 +821,11 @@ LLVM_VALUE ExprCondNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     Builder.CreateCondBr(condAsBool, thenBlock, elseBlock);
 
     Builder.SetInsertPoint(thenBlock);
-    LLVM_VALUE trueVal=child(1)->codegen(Builder);
+    LLVM_VALUE trueVal=promoteOperand(Builder,_type,child(1)->codegen(Builder));
     Builder.CreateBr(phiBlock);
     
     Builder.SetInsertPoint(elseBlock);
-    LLVM_VALUE falseVal=child(2)->codegen(Builder);
+    LLVM_VALUE falseVal=promoteOperand(Builder,_type,child(2)->codegen(Builder));
     Builder.CreateBr(phiBlock);
 
     Builder.SetInsertPoint(phiBlock);
