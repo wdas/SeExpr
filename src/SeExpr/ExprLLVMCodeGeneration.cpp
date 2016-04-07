@@ -64,7 +64,6 @@ bool isTakeOnlyDoubleArg(ExprFuncStandard::FuncType seFuncType) {
 }
 
 FunctionType* getSeExprFuncStandardLLVMType(ExprFuncStandard::FuncType sft,
-                                            ExprType desiredReturnType,
                                             LLVMContext &llvmContext) {
     assert(sft != ExprFuncStandard::NONE);
 
@@ -76,14 +75,13 @@ FunctionType* getSeExprFuncStandardLLVMType(ExprFuncStandard::FuncType sft,
 
     if(sft <= ExprFuncStandard::FUNC6) {
         std::vector<Type*> paramTypes;
-        Type *ptype = desiredReturnType.dim()==1 ? doubleType : doublePtrType;
         switch(sft) {
-        case ExprFuncStandard::FUNC6: paramTypes.push_back(ptype);
-        case ExprFuncStandard::FUNC5: paramTypes.push_back(ptype);
-        case ExprFuncStandard::FUNC4: paramTypes.push_back(ptype);
-        case ExprFuncStandard::FUNC3: paramTypes.push_back(ptype);
-        case ExprFuncStandard::FUNC2: paramTypes.push_back(ptype);
-        case ExprFuncStandard::FUNC1: paramTypes.push_back(ptype);
+        case ExprFuncStandard::FUNC6: paramTypes.push_back(doubleType);
+        case ExprFuncStandard::FUNC5: paramTypes.push_back(doubleType);
+        case ExprFuncStandard::FUNC4: paramTypes.push_back(doubleType);
+        case ExprFuncStandard::FUNC3: paramTypes.push_back(doubleType);
+        case ExprFuncStandard::FUNC2: paramTypes.push_back(doubleType);
+        case ExprFuncStandard::FUNC1: paramTypes.push_back(doubleType);
         case ExprFuncStandard::FUNC0:
         default:
                    FT = FunctionType::get(doubleType, paramTypes, false);
@@ -860,7 +858,7 @@ LLVM_VALUE ExprFuncNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     // call standard function
     // get function pointer
     ExprFuncStandard::FuncType seFuncType = standfunc->getFuncType();
-    FunctionType *llvmFuncType =  getSeExprFuncStandardLLVMType(seFuncType, _type, llvmContext);
+    FunctionType *llvmFuncType =  getSeExprFuncStandardLLVMType(seFuncType,  llvmContext);
     void *fp = standfunc->getFuncPointer();
     ConstantInt *funcAddr = ConstantInt::get(Type::getInt64Ty(llvmContext), (uint64_t)fp);
     LLVM_VALUE addrVal = Builder.CreateIntToPtr(funcAddr, PointerType::getUnqual(llvmFuncType));
@@ -893,18 +891,19 @@ LLVM_VALUE ExprFuncNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     assert(firstArgType->isVectorTy());
 
     std::vector<LLVM_VALUE > ret;
-    for(unsigned i = 0; i < firstArgType->getVectorNumElements(); ++i) {
-        LLVM_VALUE idx = ConstantInt::get(Type::getInt32Ty(llvmContext), i);
+    for(unsigned vecComponent = 0; vecComponent < firstArgType->getVectorNumElements(); ++vecComponent) {
+        LLVM_VALUE idx = ConstantInt::get(Type::getInt32Ty(llvmContext), vecComponent);
         std::vector<LLVM_VALUE > realArgs;
-        for(unsigned j = 0; j < args.size(); ++j) {
-            LLVM_VALUE realArg = args[j];
-            if(distributionArgPos.count(j)) {
-                if(args[j]->getType()->isPointerTy())
-                    realArg = Builder.CreateLoad(Builder.CreateConstGEP2_32(args[j], 0, i));
+        // Break the function into multiple calls per component of the output
+        // i.e. sin([1,2,3]) should be [sin(1),sin(2),sin(3)]
+        for(unsigned argIndex = 0; argIndex < args.size(); ++argIndex) {
+            LLVM_VALUE realArg = args[argIndex];
+            if(distributionArgPos.count(argIndex)) {
+                if(args[argIndex]->getType()->isPointerTy())
+                    realArg = Builder.CreateLoad(Builder.CreateConstGEP2_32(args[argIndex], 0, vecComponent));
                 else
-                    realArg = Builder.CreateExtractElement(args[j], idx);
+                    realArg = Builder.CreateExtractElement(args[argIndex], idx);
             }
-
             realArgs.push_back(realArg);
         }
         ret.push_back(executeStandardFunction(Builder, seFuncType, realArgs, addrVal));
