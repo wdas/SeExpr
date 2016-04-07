@@ -868,18 +868,21 @@ LLVM_VALUE ExprFuncNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     // call standard function
     // get function pointer
     ExprFuncStandard::FuncType seFuncType = standfunc->getFuncType();
-    FunctionType *llvmFuncType =  getSeExprFuncStandardLLVMType(seFuncType,  llvmContext);
+    FunctionType *llvmFuncType =  getSeExprFuncStandardLLVMType(seFuncType, llvmContext);
     void *fp = standfunc->getFuncPointer();
     ConstantInt *funcAddr = ConstantInt::get(Type::getInt64Ty(llvmContext), (uint64_t)fp);
     LLVM_VALUE addrVal = Builder.CreateIntToPtr(funcAddr, PointerType::getUnqual(llvmFuncType));
 
     // Collect distribution positions
     std::vector<LLVM_VALUE > args = codegenFuncCallArgs(Builder,this);
-    std::set<int> distributionArgPos;
+    std::vector<int> argumentIsVectorAndNeedsDistribution(args.size(),0);
+    Type* maxVectorArgType=nullptr;
     if(seFuncType == ExprFuncStandard::FUNCN) {
         for(unsigned i = 0; i < args.size(); ++i)
-            if(args[i]->getType()->isVectorTy())
-                distributionArgPos.insert(i);
+            if(args[i]->getType()->isVectorTy()){
+                maxVectorArgType=args[i]->getType();
+                argumentIsVectorAndNeedsDistribution[i]=1;
+            }
     } else if(
        seFuncType == ExprFuncStandard::FUNCNV ||
        seFuncType == ExprFuncStandard::FUNCNVV) {
@@ -889,30 +892,31 @@ LLVM_VALUE ExprFuncNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
         for(unsigned i = 0; i < args.size(); ++i) {
             Type *paramType = llvmFuncType->getParamType(i+shift);
             Type *argType = args[i]->getType();
-            if(argType->isVectorTy() && paramType->isDoubleTy())
-                distributionArgPos.insert(i);
+            if(argType->isVectorTy() && paramType->isDoubleTy()){
+                maxVectorArgType=args[i]->getType();
+                argumentIsVectorAndNeedsDistribution[i]=1;
+            }
         }
     }
 
-    if(distributionArgPos.size() == 0)
+    if(!maxVectorArgType) // nothing needs distribution so just execute normally
         return executeStandardFunction(Builder, seFuncType, args, addrVal);
 
-    Type *firstArgType = args[*distributionArgPos.begin()]->getType();
-    assert(firstArgType->isVectorTy());
+    assert(maxVectorArgType->isVectorTy());
 
     std::vector<LLVM_VALUE > ret;
-    for(unsigned vecComponent = 0; vecComponent < firstArgType->getVectorNumElements(); ++vecComponent) {
+    for(unsigned vecComponent = 0; vecComponent < maxVectorArgType->getVectorNumElements(); ++vecComponent) {
         LLVM_VALUE idx = ConstantInt::get(Type::getInt32Ty(llvmContext), vecComponent);
         std::vector<LLVM_VALUE > realArgs;
         // Break the function into multiple calls per component of the output
         // i.e. sin([1,2,3]) should be [sin(1),sin(2),sin(3)]
         for(unsigned argIndex = 0; argIndex < args.size(); ++argIndex) {
             LLVM_VALUE realArg = args[argIndex];
-            if(distributionArgPos.count(argIndex)) {
+            if(argumentIsVectorAndNeedsDistribution[argIndex]) {
                 if(args[argIndex]->getType()->isPointerTy())
-                    realArg = Builder.CreateLoad(Builder.CreateConstGEP2_32(args[argIndex], 0, vecComponent));
+                        realArg = Builder.CreateLoad(Builder.CreateConstGEP2_32(args[argIndex], 0, vecComponent));
                 else
-                    realArg = Builder.CreateExtractElement(args[argIndex], idx);
+                        realArg = Builder.CreateExtractElement(args[argIndex], idx);
             }
             realArgs.push_back(realArg);
         }
