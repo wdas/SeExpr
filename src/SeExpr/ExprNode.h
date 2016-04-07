@@ -659,6 +659,7 @@ public:
     */
     Data* getData() const { return _data; }
     int promote(int i) const {return _promote[i];}
+    const ExprFunc* func() const{return _func;}
 private:
     std::string _name;
     const ExprFunc* _func;
