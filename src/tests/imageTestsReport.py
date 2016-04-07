@@ -49,7 +49,7 @@ def runAndParseTest(cmd):
         line = (line).strip()
         if re.search('OK', line):
             (prefix, time) = re.split('\(', line)
-            test_case[t][2]=int(time.strip('\)').strip('ms'))
+            return (time.strip('\)').strip('ms'))
 
     return -1
 

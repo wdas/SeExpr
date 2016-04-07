@@ -1093,19 +1093,12 @@ LLVM_VALUE ExprVarNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
 
 LLVM_VALUE ExprVecNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     std::vector<LLVM_VALUE > elems;
-    for (int i = 0; i < numChildren(); i++)
-        elems.push_back(child(i)->codegen(Builder));
-
-    Type *elemType = elems[0]->getType();
-    if(elemType->isDoubleTy())
-        return createVecVal(Builder, elems);
-
-    LLVMContext &llvmContext = Builder.getContext();
-    ConstantInt *zero = ConstantInt::get(Type::getInt32Ty(llvmContext), 0);
-    std::vector<LLVM_VALUE > firstArgs;
-    for (int i = 0; i < numChildren(); i++)
-        firstArgs.push_back(Builder.CreateExtractElement(elems[i], zero));
-    return createVecVal(Builder, firstArgs);
+    ConstantInt *zero = ConstantInt::get(Type::getInt32Ty(Builder.getContext()), 0);
+    for (int i = 0; i < numChildren(); i++){
+        LLVM_VALUE val=child(i)->codegen(Builder);
+        elems.push_back(val->getType()->isVectorTy()?Builder.CreateExtractElement(val, zero):val);
+    }
+    return createVecVal(Builder, elems);
 }
 
 }
