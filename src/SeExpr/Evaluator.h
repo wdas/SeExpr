@@ -7,17 +7,20 @@
 #include <llvm/ExecutionEngine/Interpreter.h>
 #include <llvm/ExecutionEngine/MCJIT.h>
 #include <llvm/ExecutionEngine/SectionMemoryManager.h>
+#include <llvm/InitializePasses.h>
 #include <llvm/IR/DataLayout.h>
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Function.h>
+#include <llvm/LinkAllPasses.h>
 #include <llvm/PassManager.h>
 #include <llvm/Support/DynamicLibrary.h>
 #include <llvm/Support/ManagedStatic.h>
 #include <llvm/Support/NoFolder.h>
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Transforms/Utils/Cloning.h>
+
 using namespace llvm;
 #endif
 
@@ -98,7 +101,7 @@ public:
         TheExecutionEngine.reset(
             EngineBuilder(TheModule).setErrorStr(&ErrStr)
             .setUseMCJIT(true)
-            .setOptLevel(CodeGenOpt::Default)
+            .setOptLevel(CodeGenOpt::Aggressive)
             .create());
 
         if (!TheExecutionEngine) {
@@ -142,9 +145,41 @@ public:
         Builder.CreateRetVoid();
 
         verifyModule(*TheModule);
+
+
 #       ifdef SEEXPR_DEBUG
         TheModule->dump();
 #       endif
+
+    #if 1
+        llvm::FunctionPassManager *FPM = new llvm::FunctionPassManager(TheModule);
+
+        auto target_layout = TheExecutionEngine->getDataLayout();
+        //TheModule->setDataLayout(target_layout);
+        FPM->add(new llvm::DataLayout(*TheExecutionEngine->getDataLayout()));
+
+        FPM->add(llvm::createTypeBasedAliasAnalysisPass());
+        // Provide basic AliasAnalysis support for GVN.
+        FPM->add(llvm::createBasicAliasAnalysisPass());
+        FPM->add(llvm::createLICMPass());
+        // Promote allocas to registers.
+        FPM->add(llvm::createPromoteMemoryToRegisterPass());
+        // Do simple "peephole" optimizations and bit-twiddling optzns.
+        FPM->add(llvm::createInstructionCombiningPass());
+        // Reassociate expressions.
+        FPM->add(llvm::createReassociatePass());
+        // Eliminate Common SubExpressions.
+        FPM->add(llvm::createGVNPass());
+        // Simplify the control flow graph (deleting unreachable blocks, etc).
+        FPM->add(llvm::createCFGSimplificationPass());
+        FPM->doInitialization();
+
+        // For each function in the module
+        // Run the FPM on this function
+        FPM->run(*F);
+#endif
+
+
 
         TheExecutionEngine->finalizeObject();
         void* fp=TheExecutionEngine->getPointerToFunction(F);
@@ -155,6 +190,10 @@ public:
             _llvmEvalStr.reset(new LLVMEvaluationContext<char*>);
             _llvmEvalStr->init(fp,dim);   
         }
+
+#       ifdef SEEXPR_DEBUG
+        TheModule->dump();
+#       endif
     }
 
     std::string getUniqueName() const {
