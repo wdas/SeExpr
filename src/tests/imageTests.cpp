@@ -134,22 +134,18 @@ public:
 //           [vector translation])
 class TriplanarFuncX:public ExprFuncSimple
 {
-    struct Data : public ExprFuncNode::Data {
-        std::vector<std::pair<int,int> > ranges;
-        std::string format;
-    };
+ 
 
     virtual ExprType prep(ExprFuncNode* node, bool wantScalar,
                           ExprVarEnv & env) const {
         bool valid=true;
         valid &= node->checkArg(0,ExprType().String().Constant(),env);
         for(int i=1;i<node->numChildren();i++)
-            valid &= node->checkArg(i,ExprType().FP(1).Varying(),env);
+            valid &= node->checkArg(i,ExprType().FP(3).Varying(),env);
         return valid ? ExprType().FP(3).Varying():ExprType().Error();
     }
 
     virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node,ArgHandle args) const {
-        return new Data;
     }
 
     virtual void eval(ArgHandle args) {
@@ -167,7 +163,10 @@ class TriplanarFuncX:public ExprFuncSimple
     public:
     TriplanarFuncX():ExprFuncSimple(true){}  // Thread Safe
     virtual ~TriplanarFuncX() {}
-} triplanar;
+} triplanarX;
+
+ExprFunc mapStub(mapStubX,1,5);
+ExprFunc triplanar(triplanarX,1,5);
 
 }
 
@@ -244,14 +243,11 @@ public:
         return 0;
     }
 
-    ExprFunc mapStub;
-
     ExprFunc* resolveFunc(const std::string& name) const
     {
-        ExprFunc* func = 0;
-        if(name=="map")
-            func = (ExprFunc *)&mapStub;
-        return func;
+        if(name=="map") return &mapStub;
+        if(name=="triplanar") return &triplanar;
+        return nullptr;
     }
 };
 

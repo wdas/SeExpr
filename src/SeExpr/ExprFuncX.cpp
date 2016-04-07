@@ -110,7 +110,7 @@ void resolveCustomFunction(const char *name, int *opDataArg, int nargs,
                            double *fpArg, int fpArglen,
                            char **strArg, int strArglen,
                            void **funcdata, double *result, int retSize,const SeExpr2::ExprFuncNode* node) {
-    const SeExpr2::ExprFunc *func = SeExpr2::ExprFunc::lookup(name);
+    const SeExpr2::ExprFunc *func = node->func();
     SeExpr2::ExprFuncX *funcX = const_cast<SeExpr2::ExprFuncX*>(func->funcx());
     SeExpr2::ExprFuncSimple *funcSimple = static_cast<SeExpr2::ExprFuncSimple*>(funcX);
 

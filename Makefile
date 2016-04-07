@@ -18,14 +18,14 @@ endif
 export prefix DESTDIR
 
 all:
-	mkdir -p build
+	mkdir -p build/${FLAVOR}
 	export CXX=${CXX}
-	cd build &&  CXX=${CXX} cmake -DENABLE_LLVM_BACKEND=ON -DCMAKE_INSTALL_PREFIX=$(prefix) -DCMAKE_INSTALL_LIBDIR=$(libdir) ../
-	$(MAKE) -C build all
+	cd build/${FLAVOR} &&  CXX=${CXX} cmake -DENABLE_LLVM_BACKEND=ON -DCMAKE_INSTALL_PREFIX=$(prefix) -DCMAKE_INSTALL_LIBDIR=$(libdir) ../../
+	$(MAKE) -C build/${FLAVOR} all
 clean:
-	rm -rf build Linux-*
+	rm -rf build/${FLAVOR} Linux-*
 
 install: all
-	$(MAKE) -C build install
+	$(MAKE) -C build/${FLAVOR} install
 	pkgconfig-gen --name seexpr2 --desc 'SeExpr v2 Library' \
 	--generate --destdir '$(DESTDIR)' --prefix $(prefix) --libdir $(libdir)
