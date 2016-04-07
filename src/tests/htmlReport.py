@@ -3,7 +3,11 @@
 import sys
 import os
 
-filenameIn=sys.argv[1]
+if len(sys.argv)==2:
+    filenameIn=sys.argv[1]
+else:
+    print "    usage: htmlReport <CSV_filename>"
+    sys.exit(0)
 
 tbl="""<html>
 <head>
@@ -33,7 +37,13 @@ def percentToStyle(percent):
 	else:
 		return "good"
 
-lines=open(filenameIn).readlines()
+try:
+    csvData=open(filenameIn)
+except:
+    print "File " + filenameIn + " doesn't exist"
+    sys.exit(1)
+
+lines=csvData.readlines()
 tbl+="<table>\n"
 lines.insert(0,"Test,V1,V2 interpreter,V2 llvm,V2 interpreter percent,V2 llvm percent")
 
