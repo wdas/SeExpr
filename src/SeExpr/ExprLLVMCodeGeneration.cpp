@@ -252,7 +252,7 @@ std::pair<LLVM_VALUE, LLVM_VALUE > promoteBinaryOperandsToAppropriateVector(LLVM
 
 LLVM_VALUE promoteOperand(LLVM_BUILDER Builder,const ExprType refType,LLVM_VALUE val) {
     Type *valTy = val->getType();
-    if(!valTy->isVectorTy()){
+    if(refType.isFP() && refType.dim()>1 && !valTy->isVectorTy()){
         return createVecVal(Builder,val,refType.dim());
     }else{
         return val;
@@ -734,11 +734,12 @@ LLVM_VALUE ExprCompareNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
             LLVM_VALUE op2=child(1)->codegen(Builder);
             op2IsOne=Builder.CreateFCmpUNE(op2,zero);
             Builder.CreateBr(phiBlock);
+            thenBlock=Builder.GetInsertBlock();
+            
             Builder.SetInsertPoint(elseBlock);
             Builder.CreateBr(phiBlock);
             Builder.SetInsertPoint(phiBlock);
             
-            Builder.SetInsertPoint(phiBlock);
             phiNode = Builder.CreatePHI(intTy,2,"iftmp");
             phiNode->addIncoming(op2IsOne,thenBlock);
             phiNode->addIncoming(op1IsOne,elseBlock);
@@ -746,10 +747,12 @@ LLVM_VALUE ExprCompareNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
             // TODO: full IfThenElsenot needed
             Builder.SetInsertPoint(thenBlock);
             Builder.CreateBr(phiBlock);
+
             Builder.SetInsertPoint(elseBlock);
             LLVM_VALUE op2=child(1)->codegen(Builder);
             op2IsOne=Builder.CreateFCmpUNE(op2,zero);
             Builder.CreateBr(phiBlock);
+            elseBlock=Builder.GetInsertBlock();
             
             Builder.SetInsertPoint(phiBlock);
             phiNode = Builder.CreatePHI(intTy,2,"iftmp");
