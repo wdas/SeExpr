@@ -823,10 +823,12 @@ LLVM_VALUE ExprCondNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     Builder.SetInsertPoint(thenBlock);
     LLVM_VALUE trueVal=promoteOperand(Builder,_type,child(1)->codegen(Builder));
     Builder.CreateBr(phiBlock);
+    thenBlock = Builder.GetInsertBlock();
     
     Builder.SetInsertPoint(elseBlock);
     LLVM_VALUE falseVal=promoteOperand(Builder,_type,child(2)->codegen(Builder));
     Builder.CreateBr(phiBlock);
+    elseBlock = Builder.GetInsertBlock();
 
     Builder.SetInsertPoint(phiBlock);
     llvm::PHINode *phiNode = Builder.CreatePHI(trueVal->getType(),2,"iftmp");
@@ -943,10 +945,12 @@ LLVM_VALUE ExprIfThenElseNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     Builder.SetInsertPoint(thenBlock);
     child(1)->codegen(Builder);
     Builder.CreateBr(phiBlock);
+    thenBlock = Builder.GetInsertBlock();
 
     Builder.SetInsertPoint(elseBlock);
     child(2)->codegen(Builder);
     Builder.CreateBr(phiBlock);
+    elseBlock = Builder.GetInsertBlock();
 
     Builder.SetInsertPoint(phiBlock);
 
