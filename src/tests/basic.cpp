@@ -148,4 +148,17 @@ TEST(BasicTests, LogicalShortCircuiting)
     testExpr("countInvocations(0)||countInvocations(0)",0,2);
     testExpr("1?countInvocations(5):countInvocations(10)",5,1);
     testExpr("0?countInvocations(5):countInvocations(10)",10,1);
+    testExpr("countInvocations(0)||countInvocations(0)||countInvocations(0)",0,3);
+
 }
+
+
+TEST(BasicTests, NestedTernary)
+{
+    SimpleExpression expr1("1?2:3?4:5");
+    if(!expr1.isValid()) throw std::runtime_error(expr1.parseError());
+    Vec<double,1,true> val(const_cast<double*>(expr1.evalFP()));
+    EXPECT_EQ(val[0],2);
+    // TODO: put this expr in foo=3?1:2;Cs*foo
+}
+
