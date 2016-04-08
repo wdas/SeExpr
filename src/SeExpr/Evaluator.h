@@ -143,13 +143,11 @@ public:
         }
 
         Builder.CreateRetVoid();
-
-        verifyModule(*TheModule);
-
-
 #       ifdef SEEXPR_DEBUG
         TheModule->dump();
 #       endif
+
+        verifyModule(*TheModule);
 
     #if 1
         llvm::FunctionPassManager *FPM = new llvm::FunctionPassManager(TheModule);
