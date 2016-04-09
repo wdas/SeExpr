@@ -45,7 +45,7 @@ except:
 
 lines=csvData.readlines()
 tbl+="<table>\n"
-lines.insert(0,"Test,V1,V2 interpreter,V2 llvm,V2 interpreter percent,V2 llvm percent")
+lines.insert(0,"Test,V1,V2 interpreter,V2 interpreter percent,V2 llvm,V2 llvm percent")
 
 tbl+="<thead>"
 items=lines[0].split(",")
