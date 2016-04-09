@@ -12,7 +12,7 @@ else:
 tbl="""<html>
 <head>
 <style>
-body {font-family: Helvetica, sans-serif;}
+body {font-family: Arial, sans-serif;}
 td {width: 100pt;}
 td.medium {background: orange;}
 td.bad {background: red;}
@@ -22,9 +22,93 @@ tr:nth-child(even) {background: #CCC}
 tr:nth-child(odd) {background: #FFF}
 tr.head {background:#333333;color:#eeeeee;}
 td.neutral {} 
+.sorty{
+	float:right;
+    display:block;
+    width:0; height:0;
+    border-left: 5px solid black;
+    border-right: 5px solid black;
+    border-bottom: 5px solid black;
+    border-color: #eeeeee;
+    margin:5px;
+}
+.upArrow{
+    float:right;
+    display:block;
+    width:0; height:0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid black;
+    border-color: #eeeeee;
+    margin:5px;
+}
+.downArrow{
+    display:block;
+    float:right;
+    width:0; height:0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid black;
+    border-color: #eeeeee;
+    margin:5px;
+}
 </style>
 </head>
 <body>
+
+<script>
+	function sortTable(table,col,reverse){
+		var body=table.tBodies[0];
+		var tr=Array.prototype.slice.call(body.rows,0);
+		if(reverse==0) reverse=-1;
+		tr=tr.sort(function(a,b){
+			if(col == 0) return -reverse*a.cells[col].textContent.trim().localeCompare(b.cells[col].textContent.trim());
+			var anum=parseFloat(a.cells[col].textContent)
+			var bnum=parseFloat(b.cells[col].textContent);
+			return -reverse*(anum-bnum);
+
+			//return reverse*a.cells[col].textContent.trim().localeCompare(b.cells[col].textContent.trim());
+
+		});
+		for(var i=0;i<tr.length;i++) body.appendChild(tr[i]);
+	}
+	function makeSortable(table) {
+	    var th = table.tHead;
+	    if(th){
+	    	var thRows=th.rows[0];
+	    	if(thRows){
+	    		var thRowsCells=thRows.cells;
+	    		if(thRowsCells){
+		    		for(var i=0;i<thRowsCells.length;i++){
+		    			var sorterClosure=function ( ii){
+					        var dir = 1;
+					        var spans=thRowsCells[i].getElementsByTagName("span")[0];
+					        thRowsCells[ii].addEventListener('click', function () {
+						        //spans.innerHTML=dir;
+						        for(var j=0;j<thRowsCells.length;j++){
+							        var spans2=thRowsCells[j].getElementsByTagName("span")[0];
+						    		spans2.className="sorty";
+						        }
+					        	spans.className=dir ? "upArrow" : "downArrow";
+					            sortTable(table, ii, (dir = 1 - dir))
+					        });
+					    };
+					    sorterClosure(i);
+				    }
+				}
+	    	}
+	    }
+	}
+
+	var done;
+	window.onload=function(){
+		done=1;
+		var tables=document.body.getElementsByTagName("table");
+		for(var i=0;i<tables.length;i++){
+			makeSortable(tables[i]);
+		}
+	}
+</script>
 """
 
 def getFloat(val):
@@ -49,7 +133,7 @@ lines.insert(0,"Test,V1,V2 interpreter,V2 interpreter percent,V2 llvm,V2 llvm pe
 
 tbl+="<thead>"
 items=lines[0].split(",")
-tbl+="<tr class='head'>\n"+"".join(["    <td>"+x+"</td>\n" for x in items])+"</tr>"
+tbl+="<tr class='head'>\n"+"".join(["    <td><span class='sorty'></span>"+x+"</td>\n" for x in items])+"</tr>"
 tbl+="</thead>"
 tbl+="<tbody>"
 
