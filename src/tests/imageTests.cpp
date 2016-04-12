@@ -59,6 +59,12 @@
 
 double clamp(double x){return std::max(0.,std::min(255.,x));}
 
+static int forceStaticInitializationToMakeTimingBetter=[](){
+    SeExpr2::ExprFunc::init(); // force static initialize
+    return 1;
+}();
+
+
 namespace SeExpr2 {
 
 class RandFuncX:public ExprFuncSimple
