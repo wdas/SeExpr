@@ -52,10 +52,14 @@
 #else
 #include <Expression.h>
 #endif
+#include <functional>
 
 #include <ExprFunc.h>
 #include <ExprFuncX.h>
 #include <Platform.h> // performance timing
+#include <memory>
+
+ #include <gtest.h>
 
 double clamp(double x){return std::max(0.,std::min(255.,x));}
 
@@ -152,6 +156,7 @@ class TriplanarFuncX:public ExprFuncSimple
     }
 
     virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node,ArgHandle args) const {
+        return nullptr;
     }
 
     virtual void eval(ArgHandle args) {
@@ -264,61 +269,43 @@ class TestImage
 public:
     TestImage();
     bool generateImage(const std::string &exprStr);
+    template<class TFUNC>
+    bool generateImageWithoutExpression(TFUNC func);
     bool writePNGImage(const char* imageFile);
 private:
     int _width;
     int _height;
-    unsigned char *_image;
+    std::vector<unsigned char> _image;
 };
 
 TestImage::TestImage()
-{
-    _width = 256;
-    _height = 256;
-    _image = NULL;
-}
+:_width(256),_height(256)
+{}
 
-//! Evaluate given expression string and generate image
-bool TestImage::generateImage(const std::string &exprStr)
-{
-    ImageSynthExpr expr(exprStr);
+template<class TFUNC>
+bool TestImage::generateImageWithoutExpression(TFUNC func){
+    Timer totalTime;
+    Timer prepareTiming;
 
-    // make variables
-    expr.vars["u"]=ImageSynthExpr::Var(0.);
-    expr.vars["v"]=ImageSynthExpr::Var(0.);
-    expr.vars["w"]=ImageSynthExpr::Var(_width);
-    expr.vars["h"]=ImageSynthExpr::Var(_height);
-
-    expr.vars["faceId"]=ImageSynthExpr::Var(0.);
-    expr.vecvars["P"]=ImageSynthExpr::VecVar();
-    expr.vecvars["Cs"]=ImageSynthExpr::VecVar();
-    expr.vecvars["Ci"]=ImageSynthExpr::VecVar();
-
-    // check if expression is valid
-    bool valid=expr.isValid();
-    if(!valid){
-        std::cerr<<"Invalid expression "<<std::endl;
-        std::cerr<<expr.parseError()<<std::endl;
-        return valid;
-    }
-
+    
+    testing::Test::RecordProperty("prepareTime",std::to_string(prepareTiming.elapsedTime()).c_str());
     // evaluate expression
-    unsigned char* image=new unsigned char[_width*_height*4];
+    std::vector<unsigned char> image(_width*_height*4);
     double one_over_width=1./_width, one_over_height=1./_height;
-    double& u=expr.vars["u"].val;
-    double& v=expr.vars["v"].val;
+    double u=0;
+    double v=0;
+    Vec<double,3,false> P;
+    Vec<double,3,false> Cs;
+    Vec<double,3,false> Ci;
+    Vec<double,3,false> result;
+    double faceId;
 
-
-    double& faceId=expr.vars["faceId"].val;
-    Vec<double,3,false> &P = expr.vecvars["P"].val;
-    Vec<double,3,false> &Cs = expr.vecvars["Cs"].val;
-    Vec<double,3,false> &Ci = expr.vecvars["Ci"].val;
-
-    unsigned char* pixel=image;
+    unsigned char* pixel=image.data();
 
 #   ifdef SEEXPR_PERFORMANCE
     PrintTiming timer("[ EVAL     ] v2 eval time: ");
 #   endif
+    Timer evalTiming;
 
     for(int row=0;row<_height;row++){
         for(int col=0;col<_width;col++){
@@ -335,9 +322,7 @@ bool TestImage::generateImage(const std::string &exprStr)
             Ci[0]=0.2;
             Ci[1]=0.4;
             Ci[2]=0.6;
-
-            const double* result=expr.evalFP();
-
+            func(u,v,P,Cs,Ci,faceId,result);
             pixel[0]=clamp(result[0]*256.);
             pixel[1]=clamp(result[1]*256.);
             pixel[2]=clamp(result[2]*256.);
@@ -345,14 +330,16 @@ bool TestImage::generateImage(const std::string &exprStr)
             pixel+=4;
         }
     }
-    _image = image;
-    return valid;
+    _image = std::move(image);
+    testing::Test::RecordProperty("evalTime",std::to_string(evalTiming.elapsedTime()).c_str());
+    testing::Test::RecordProperty("totalTime",std::to_string(totalTime.elapsedTime()).c_str());
+    return true;
 }
 
 //! Write image to file in PNG format
 bool TestImage::writePNGImage(const char* imageFile)
 {
-    if(_image && imageFile){
+    if(_image.size() && imageFile){
         // write image as png
         std::cout<<"[ WRITE    ] Image: "<<imageFile<<std::endl;
         FILE *fp=fopen(imageFile,"wb");
@@ -382,6 +369,82 @@ bool TestImage::writePNGImage(const char* imageFile)
     return false;
 }
 
+//! Evaluate given expression string and generate image
+bool TestImage::generateImage(const std::string &exprStr)
+{
+    Timer totalTime;totalTime.start();
+    Timer prepareTiming;prepareTiming.start();
+    ImageSynthExpr expr(exprStr);
+
+    // make variables
+    expr.vars["u"]=ImageSynthExpr::Var(0.);
+    expr.vars["v"]=ImageSynthExpr::Var(0.);
+    expr.vars["w"]=ImageSynthExpr::Var(_width);
+    expr.vars["h"]=ImageSynthExpr::Var(_height);
+
+    expr.vars["faceId"]=ImageSynthExpr::Var(0.);
+    expr.vecvars["P"]=ImageSynthExpr::VecVar();
+    expr.vecvars["Cs"]=ImageSynthExpr::VecVar();
+    expr.vecvars["Ci"]=ImageSynthExpr::VecVar();
+
+    // check if expression is valid
+    bool valid=expr.isValid();
+    if(!valid){
+        std::cerr<<"Invalid expression "<<std::endl;
+        std::cerr<<expr.parseError()<<std::endl;
+        return valid;
+    }
+    testing::Test::RecordProperty("prepareTime",prepareTiming.elapsedTime());
+    // evaluate expression
+    std::vector<unsigned char> image(_width*_height*4);
+    double one_over_width=1./_width, one_over_height=1./_height;
+    double& u=expr.vars["u"].val;
+    double& v=expr.vars["v"].val;
+
+
+    double& faceId=expr.vars["faceId"].val;
+    Vec<double,3,false> &P = expr.vecvars["P"].val;
+    Vec<double,3,false> &Cs = expr.vecvars["Cs"].val;
+    Vec<double,3,false> &Ci = expr.vecvars["Ci"].val;
+
+    unsigned char* pixel=image.data();
+
+#   ifdef SEEXPR_PERFORMANCE
+    PrintTiming timer("[ EVAL     ] v2 eval time: ");
+#   endif
+    Timer evalTiming;evalTiming.start();
+
+    for(int row=0;row<_height;row++){
+        for(int col=0;col<_width;col++){
+            u=one_over_width*(col+.5);
+            v=one_over_height*(row+.5);
+
+            faceId=floor(u*5);
+            P[0]=u*10;
+            P[1]=v*10;
+            P[2]=0.5*10;
+            Cs[0]=0.2;
+            Cs[1]=0.4;
+            Cs[2]=0.6;
+            Ci[0]=0.2;
+            Ci[1]=0.4;
+            Ci[2]=0.6;
+
+            const double* result=expr.evalFP();
+
+            pixel[0]=clamp(result[0]*256.);
+            pixel[1]=clamp(result[1]*256.);
+            pixel[2]=clamp(result[2]*256.);
+            pixel[3]=255;
+            pixel+=4;
+        }
+    }
+    _image = std::move(image);
+    testing::Test::RecordProperty("evalTime",evalTiming.elapsedTime());
+    testing::Test::RecordProperty("totalTime",totalTime.elapsedTime());
+    return valid;
+}
+
 /**************************************************/
 /* Testing example expressions to generate images */
 /**************************************************/
@@ -392,6 +455,7 @@ std::string outDir = rootDir;
 // Evaluate expression in given file and generate output image.
 void evalExpressionFile(const char*filepath)
 {
+    testing::Test::RecordProperty("path",filepath);
     std::ifstream ifs(filepath);
     if(ifs.good()){
         std::string exprStr( (std::istreambuf_iterator<char>(ifs) ),
@@ -415,3 +479,35 @@ void evalExpressionFile(const char*filepath)
     }
 }
 
+
+
+TEST(perf,noexpr){
+    Timer totalTime;totalTime.start();
+    Timer prepareTime;prepareTime.start();
+    TestImage foo;
+    typedef Vec<double,3,false> VecT;
+    float prept=prepareTime.elapsedTime();
+
+    auto func=[](double u,double v,const VecT& P,const VecT& Cs,const VecT& Ci,double faceId,VecT& result){
+        VecT foo(u*u+v*v),bar=foo*foo;
+        bar+=VecT(u*v);
+        result=bar;
+    };
+
+    Timer evalTiming;evalTiming.start();
+    if(true){
+        foo.generateImageWithoutExpression(func);
+    }else{
+        std::function<void(double,double,const VecT&,const VecT&, const VecT&, double, VecT&)> slowFunction=func;
+        foo.generateImageWithoutExpression(slowFunction);
+    }
+    float evalt=evalTiming.elapsedTime();
+    float totalt=totalTime.elapsedTime();
+    std::cerr<<"evalt "<<evalt<<" prept "<<prept<<" totalt "<<totalt<<std::endl;
+    testing::Test::RecordProperty("prepareTime",std::to_string(prept).c_str());
+    testing::Test::RecordProperty("evalTime",std::to_string(evalt).c_str());
+    testing::Test::RecordProperty("totalTime",std::to_string(totalt).c_str());
+    foo.writePNGImage("/tmp/ka.png");
+
+       
+}
