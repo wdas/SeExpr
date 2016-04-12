@@ -24,7 +24,7 @@ outfile = sys.argv[2]
 # open outfile
 f = open(outfile, 'w')
 print >> f, "#include <gtest.h>\n"
-print >> f, "extern void evalExpressionFile(const char *filepath);\n"
+print >> f, "void evalExpressionFile(const char *filepath);\n"
 
 for dir_name, sub_dirs, se_files in os.walk(rootdir):
     for se_file in se_files:
