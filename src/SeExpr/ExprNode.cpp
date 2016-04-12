@@ -628,7 +628,6 @@ checkArg(int arg,ExprType type,ExprVarEnv& env)
     _promote[arg]=0;
     if(ExprType::valuesCompatible(type,childType) && type.isLifeCompatible(childType)){
         if(type.isFP() && type.dim() > childType.dim()){
-            std::cerr<<"setting promote "<<std::endl;
             _promote[arg]=type.dim();
         }
         return true;
