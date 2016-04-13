@@ -80,6 +80,7 @@ def process():
     # Read everything into a nice dictionary
     attrs=["prepareTime","evalTime","totalTime"]
     attrsShort=["prep","eval","tot"]
+
     for version in versions.keys():
         xmlfile="tmp/%s.xml"%version
         e = xml.etree.ElementTree.parse(xmlfile).getroot()
@@ -97,6 +98,12 @@ def process():
             table[fullname][version]["totalTime"]=test.get("totalTime")
     #print table
 
+    # headers
+    headers=["Test Name"]
+    for v in versionKeys:
+        for c in attrsShort:
+            headers.append("%s %s"%(v,c))
+    fpData.write(",".join(headers)+"\n")
     # Build a table representation and the csv
     line="%-50s"%""
     for v in versionKeys:
@@ -123,15 +130,10 @@ def process():
                 if data:
                     if type(data)==str: data=float(data)
                     line+=" %5d"%data
+                    csvLine.append(str(data))
                 else:
                     line+=" -----"
-            csvVal="-1"
-            try:
-                csvVal=entryData[v]["evalTime"]
-                if csvVal==None: csvVal="-1"
-                else: csvVal="%d"%csvVal
-            except: pass
-            csvLine.append(csvVal)
+                    csvLine.append("")
         fpData.write(",".join(csvLine)+"\n")
         print line
 
