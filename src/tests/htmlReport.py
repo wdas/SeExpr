@@ -13,7 +13,10 @@ tbl="""<html>
 <head>
 <style>
 body {font-family: Arial, sans-serif;}
-td {width: 100pt;}
+table {border-spacing : 0px;}
+td.spanned:nth-child(even) {text-align: center; padding: 5px; font-weight: bold; background: #222;}
+td.spanned:nth-child(odd) {text-align: center;  padding: 5px; font-weight: bold; background: #444;}
+td {width: 100pt;text-align:right;}
 td.medium {background: orange;}
 td.bad {background: red;}
 td.good {background: green;}
@@ -72,7 +75,7 @@ td.neutral {}
 	function makeSortable(table) {
 	    var th = table.tHead;
 	    if(th){
-	    	var thRows=th.rows[0];
+	    	var thRows=th.rows[1];
 	    	if(thRows){
 	    		var thRowsCells=thRows.cells;
 	    		if(thRowsCells){
@@ -85,7 +88,7 @@ td.neutral {}
 							        var spans2=thRowsCells[j].getElementsByTagName("span")[0];
 						    		spans2.className="sorty";
 						        }
-					        	spans.className=dir ? "upArrow" : "downArrow";
+					        	spans.className=dir ? "downArrow" : "upArrow";
 					            sortTable(table, ii, (dir = 1 - dir))
 					        });
 					    };
@@ -108,7 +111,9 @@ td.neutral {}
 """
 
 def getFloat(val):
-	return float(val.split(" ")[0])
+	try:
+		return float(val.split(" ")[0])
+	except: return None
 def percentToStyle(percent):
 	if percent<-5:
 		return "bad"
@@ -125,38 +130,49 @@ except:
 
 lines=csvData.readlines()
 tbl+="<table>\n"
-lines.insert(0,"Test,V1,V2 interpreter,V2 interpreter percent,V2 llvm,V2 llvm percent")
+#lines.insert(0,"Test,V1,V2 interpreter,V2 interpreter percent,V2 llvm,V2 llvm percent")
 
 tbl+="<thead>"
 items=lines[0].split(",")
-tbl+="<tr class='head'>\n"+"".join(["    <td><span class='sorty'></span>"+x+"</td>\n" for x in items])+"</tr>"
+spannedItems=[(1,"")]
+curatedItems=[items[0]]
+for idx in range(1,len(items),3):
+	for j in range(3):
+		spanname,subname=items[idx+j].split(" ")
+		if j==0:
+			spannedItems.append((4,spanname))
+		curatedItems.append(subname)
+	curatedItems.append("% diff")
+tbl+="<tr class='head'>\n"+"".join(["    <td class='spanned' colspan='%d'>%s</td>\n"%(span,x) for span,x in spannedItems])+"</tr>"
+tbl+="<tr class='head'>\n"+"".join(["    <td><span class='sorty'></span>"+x+"</td>\n" for x in curatedItems])+"</tr>"
 tbl+="</thead>"
 tbl+="<tbody>"
 
 for line in lines[1:]:
 	items=line.split(",")
 	v1=getFloat(items[1])
-	styles=["label","","broke","broke","broke","broke"]
-	if v1 < 0: styles[1]="broke"
-	v2interpreter=getFloat(items[2])
-	v2llvm=getFloat(items[3])
 
-	items[1]="%.1f ms"%v1
-	if v2interpreter != -1 and v1!=-1:
-		styles[2]=""
-		items[2]="%.1f ms"%v2interpreter
-		percent=(v1-v2interpreter)/v1*100
-		items[3]="%.0f%%"%percent
-		styles[3]=percentToStyle(percent)
-	items.append("")
-	items.append("")
-	if v2llvm != -1 and v1!=-1:
-		styles[4]=""
-		items[4]="%.1f ms"%v2llvm
-		percent=(v1-v2llvm)/v1*100
-		items[5]="%.0f%%"%percent
-		styles[5]=percentToStyle(percent)
-	s="<tr>"+"".join(["<td class='%s'>%s</td>\n"%xs for xs in zip(styles,items)])+"</tr>"
+	styles=["label"]
+	curatedItems=[items[0]]
+	for idx in range(1,len(items),3):
+		for subidx in range(0,3):
+			val=getFloat(items[idx+subidx])
+			style="broke"
+			if not val is None:
+				style="neutral"
+			styles.append(style)
+			curatedItems.append(val)
+		ref=getFloat(items[1+2])
+		curr=getFloat(items[idx+2])
+		if not (ref is None or curr is None):
+			percent=(ref-curr)/ref*100.
+			styles.append(percentToStyle(percent))
+			curatedItems.append("%.0f%%"%percent)
+		else:
+			styles.append("broke")
+			curatedItems.append("")
+
+	s="<tr>"+"".join(["<td class='%s'>%s</td>\n"%xs for xs in zip(styles,curatedItems)])+"</tr>"
 	tbl+=s
 tbl+="</tbody>"
 tbl+="</table>\n"
