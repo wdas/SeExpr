@@ -29,7 +29,7 @@ td.neutral {}
     border-left: 5px solid black;
     border-right: 5px solid black;
     border-bottom: 5px solid black;
-    border-color: #eeeeee;
+    border-color: white;
     margin:5px;
 }
 .upArrow{
@@ -38,8 +38,7 @@ td.neutral {}
     width:0; height:0;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-bottom: 5px solid black;
-    border-color: #eeeeee;
+    border-bottom: 5px solid white;
     margin:5px;
 }
 .downArrow{
@@ -48,8 +47,7 @@ td.neutral {}
     width:0; height:0;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-top: 5px solid black;
-    border-color: #eeeeee;
+    border-top: 5px solid white;
     margin:5px;
 }
 </style>
@@ -65,10 +63,9 @@ td.neutral {}
 			if(col == 0) return -reverse*a.cells[col].textContent.trim().localeCompare(b.cells[col].textContent.trim());
 			var anum=parseFloat(a.cells[col].textContent)
 			var bnum=parseFloat(b.cells[col].textContent);
+			if(!isFinite(anum)) anum=-1e7;
+			if(!isFinite(bnum)) bnum=-1e7;
 			return -reverse*(anum-bnum);
-
-			//return reverse*a.cells[col].textContent.trim().localeCompare(b.cells[col].textContent.trim());
-
 		});
 		for(var i=0;i<tr.length;i++) body.appendChild(tr[i]);
 	}
@@ -84,7 +81,6 @@ td.neutral {}
 					        var dir = 1;
 					        var spans=thRowsCells[i].getElementsByTagName("span")[0];
 					        thRowsCells[ii].addEventListener('click', function () {
-						        //spans.innerHTML=dir;
 						        for(var j=0;j<thRowsCells.length;j++){
 							        var spans2=thRowsCells[j].getElementsByTagName("span")[0];
 						    		spans2.className="sorty";
@@ -140,12 +136,13 @@ tbl+="<tbody>"
 for line in lines[1:]:
 	items=line.split(",")
 	v1=getFloat(items[1])
+	styles=["label","","broke","broke","broke","broke"]
+	if v1 < 0: styles[1]="broke"
 	v2interpreter=getFloat(items[2])
 	v2llvm=getFloat(items[3])
 
-	styles=["label","","broke","broke","broke","broke"]
 	items[1]="%.1f ms"%v1
-	if v2interpreter != -1:
+	if v2interpreter != -1 and v1!=-1:
 		styles[2]=""
 		items[2]="%.1f ms"%v2interpreter
 		percent=(v1-v2interpreter)/v1*100
@@ -153,7 +150,7 @@ for line in lines[1:]:
 		styles[3]=percentToStyle(percent)
 	items.append("")
 	items.append("")
-	if v2llvm != -1:
+	if v2llvm != -1 and v1!=-1:
 		styles[4]=""
 		items[4]="%.1f ms"%v2llvm
 		percent=(v1-v2llvm)/v1*100

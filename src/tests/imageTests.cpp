@@ -59,14 +59,9 @@
 #include <Platform.h> // performance timing
 #include <memory>
 
- #include <gtest.h>
+#include <gtest.h>
 
 double clamp(double x){return std::max(0.,std::min(255.,x));}
-
-static int forceStaticInitializationToMakeTimingBetter=[](){
-    SeExpr2::ExprFunc::init(); // force static initialize
-    return 1;
-}();
 
 
 namespace SeExpr2 {
@@ -284,11 +279,11 @@ TestImage::TestImage()
 
 template<class TFUNC>
 bool TestImage::generateImageWithoutExpression(TFUNC func){
-    Timer totalTime;
-    Timer prepareTiming;
+    Timer totalTime;totalTime.start();
+    Timer prepareTiming;prepareTiming.start();
 
     
-    testing::Test::RecordProperty("prepareTime",std::to_string(prepareTiming.elapsedTime()).c_str());
+    testing::Test::RecordProperty("prepareTime",prepareTiming.elapsedTime());
     // evaluate expression
     std::vector<unsigned char> image(_width*_height*4);
     double one_over_width=1./_width, one_over_height=1./_height;
@@ -305,7 +300,7 @@ bool TestImage::generateImageWithoutExpression(TFUNC func){
 #   ifdef SEEXPR_PERFORMANCE
     PrintTiming timer("[ EVAL     ] v2 eval time: ");
 #   endif
-    Timer evalTiming;
+    Timer evalTiming;evalTiming.start();
 
     for(int row=0;row<_height;row++){
         for(int col=0;col<_width;col++){
@@ -331,8 +326,8 @@ bool TestImage::generateImageWithoutExpression(TFUNC func){
         }
     }
     _image = std::move(image);
-    testing::Test::RecordProperty("evalTime",std::to_string(evalTiming.elapsedTime()).c_str());
-    testing::Test::RecordProperty("totalTime",std::to_string(totalTime.elapsedTime()).c_str());
+    testing::Test::RecordProperty("evalTime",evalTiming.elapsedTime());
+    testing::Test::RecordProperty("totalTime",totalTime.elapsedTime());
     return true;
 }
 
@@ -510,4 +505,17 @@ TEST(perf,noexpr){
     foo.writePNGImage("/tmp/ka.png");
 
        
-}
+} 
+
+
+
+static int forceStaticInitializationToMakeTimingBetter=[](){
+    SeExpr2::ExprFunc::init(); // force static initialize
+    ImageSynthExpr e("deepTMA(P,1,1,1,1,1,1,1,1,1,1,1,1,1)");
+    if(!e.isValid()){
+        std::cerr<<"INVALID!"<<std::endl;
+    }
+    const double* foo=e.evalFP();
+    std::cout<<"foo "<<foo[0]<<" "<<std::endl;
+    return 1;
+}();
