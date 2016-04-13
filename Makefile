@@ -29,3 +29,6 @@ install: all
 	$(MAKE) -C build/${FLAVOR} install
 	pkgconfig-gen --name seexpr2 --desc 'SeExpr v2 Library' \
 	--generate --destdir '$(DESTDIR)' --prefix $(prefix) --libdir $(libdir)
+
+test: install
+	python src/tests/imageTestsReportNew.py runall
