@@ -1,16 +1,16 @@
 /*
  Copyright Disney Enterprises, Inc.  All rights reserved.
- 
+
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License
  and the following modification to it: Section 6 Trademarks.
  deleted and replaced with:
- 
+
  6. Trademarks. This License does not grant permission to use the
  trade names, trademarks, service marks, or product names of the
  Licensor and its affiliates, except as required for reproducing
  the content of the NOTICE file.
- 
+
  You may obtain a copy of the License at
  http://www.apache.org/licenses/LICENSE-2.0
 */
@@ -22,17 +22,29 @@
 
 namespace SeExpr2 {
 
-class ExprFuncStandard:public ExprFuncX
-{
-public:
+class ExprFuncStandard : public ExprFuncX {
+  public:
     enum FuncType {
-	NONE=0, 
-	// scalar args and result
-	FUNC0, FUNC1, FUNC2, FUNC3, FUNC4, FUNC5, FUNC6, FUNCN,
-	// vector args, scalar result
-	VEC, FUNC1V=VEC, FUNC2V, FUNCNV,
-	// vector args and result
-	VECVEC, FUNC1VV=VECVEC, FUNC2VV, FUNCNVV
+        NONE = 0,
+        // scalar args and result
+        FUNC0,
+        FUNC1,
+        FUNC2,
+        FUNC3,
+        FUNC4,
+        FUNC5,
+        FUNC6,
+        FUNCN,
+        // vector args, scalar result
+        VEC,
+        FUNC1V = VEC,
+        FUNC2V,
+        FUNCNV,
+        // vector args and result
+        VECVEC,
+        FUNC1VV = VECVEC,
+        FUNC2VV,
+        FUNCNVV
     };
 
     typedef double Func0();
@@ -49,7 +61,6 @@ public:
     typedef double Funcn(int n, double* params);
     typedef double Funcnv(int n, const Vec3d* params);
     typedef Vec3d Funcnvv(int n, const Vec3d* params);
-
 
 #if 0
     Func0* func0() const { return (Func0*)_func; }
@@ -68,11 +79,8 @@ public:
     Funcnvv* funcnvv() const { return (Funcnvv*)_func; }
 #endif
 
-
     //! No argument function
-    ExprFuncStandard(FuncType funcType,void* f)
-        : ExprFuncX(true), _funcType(funcType), _func(f)
-    {}
+    ExprFuncStandard(FuncType funcType, void* f) : ExprFuncX(true), _funcType(funcType), _func(f) {}
 #if 0
     //! User defined function with prototype double f(double)
     ExprFunc(Func1* f)
@@ -128,24 +136,18 @@ public:
     {};
 #endif
 
-public:
-    ExprFuncStandard()
-        :ExprFuncX(true)
-    {}
+  public:
+    ExprFuncStandard() : ExprFuncX(true) {}
 
+    virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnv& env) const;
+    virtual int buildInterpreter(const ExprFuncNode* node, Interpreter* interpreter) const;
+    void* getFuncPointer() const { return _func; }
+    FuncType getFuncType() const { return _funcType; }
 
-    virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnv & env) const;
-    virtual int buildInterpreter(const ExprFuncNode* node,Interpreter* interpreter) const;
-    void *getFuncPointer() const {return _func;}
-    FuncType getFuncType() const {return _funcType;}
-
-private:
-    FuncType   _funcType;
-    void* _func; // blind func style
-
-
+  private:
+    FuncType _funcType;
+    void* _func;  // blind func style
 };
-
 }
 
 #endif

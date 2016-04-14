@@ -20,19 +20,13 @@
 
 namespace SeExpr2 {
 
-namespace /* anonymous */{
-    const std::string disableThreading = "disableThreading";
-} // namespace anonymous
+namespace /* anonymous */ {
+const std::string disableThreading = "disableThreading";
+}  // namespace anonymous
 
-void
-ContextUtils::DisableThreading(Context& context)
-{
-    context.setParameter(disableThreading, "true");
-}
+void ContextUtils::DisableThreading(Context& context) { context.setParameter(disableThreading, "true"); }
 
-bool
-ContextUtils::IsThreading(const Context& context)
-{
+bool ContextUtils::IsThreading(const Context& context) {
     bool isThreading = true;
 
     std::string result;
@@ -43,4 +37,4 @@ ContextUtils::IsThreading(const Context& context)
     return isThreading;
 }
 
-} // namespace SeExpr2
+}  // namespace SeExpr2
