@@ -22,6 +22,7 @@
 #include <sstream>
 #endif
 
+#include "ExprConfig.h"
 #include "ExprNode.h"
 #include "ExprParser.h"
 #include "ExprFunc.h"
@@ -30,19 +31,36 @@
 #include "ExprEnv.h"
 #include "Platform.h"
 
+#include "Evaluator.h"
+
 #include <cstdio>
 #include <typeinfo>
 #include <ExprWalker.h>
 
-#include "Evaluator.h"
 
 namespace SeExpr2 {
 
-#ifdef SEEXPR_DEBUG
-static const bool debugMode=true;
-#else
-static const bool debugMode=false;
-#endif
+// Get debugging flag from environment
+bool Expression::debugging = getenv("SE_EXPR_DEBUG")!=0;
+// Choose the defeault strategy based on what we've compiled with (SEEXPR_ENABLE_LLVM)
+// And the environment variables SE_EXPR_DEBUG
+static Expression::EvaluationStrategy chooseDefaultEvaluationStrategy(){
+    if(Expression::debugging) {
+        std::cerr<<"SeExpr2 Debug Mode Enabled "<<__VERSION__<<" built "<<__DATE__<<" "<<__TIME__<<std::endl;
+    }
+    #ifdef SEEXPR_ENABLE_LLVM
+        if(char* env=getenv("SE_EXPR_EVAL")){
+            if(Expression::debugging)
+                std::cerr<<"Overriding SeExpr Evaluation Default to be "<<env<<std::endl;
+            return !strcmp(env,"LLVM") ? Expression::UseLLVM 
+                : !strcmp(env,"INTERPRETER") ? Expression::UseInterpreter
+                : Expression::UseInterpreter;
+        }else return Expression::UseLLVM;
+    #else
+       return Expression::UseInterpreter;
+    #endif
+}
+Expression::EvaluationStrategy Expression::defaultEvaluationStrategy = chooseDefaultEvaluationStrategy();
 
 class TypePrintExaminer : public SeExpr2::Examiner<true> {
 public:
@@ -64,17 +82,7 @@ TypePrintExaminer::examine(const ExprNode* examinee)
     return true;
 };
 
-#ifdef SEEXPR_ENABLE_LLVM
-
-
-// TODO: add proper attributes for functions
-// TODO: figure out where to store result
-// codegen'd function use heap to store return value,
-// pass pointer to memory back to caller.
-// no need to allocate memory in user program to call this.
-#endif
-
-Expression::Expression(EvaluationStrategy evaluationStrategy)
+Expression::Expression(Expression::EvaluationStrategy evaluationStrategy)
     : _wantVec(true), _expression(""), _evaluationStrategy(evaluationStrategy), _context(&Context::global()), _desiredReturnType(ExprType().FP(3).Varying()), _varEnv(0), _parseTree(0), _isValid(0), _parsed(0), _prepped(0), _interpreter(0),
     _llvmEvaluator(new LLVMEvaluator())
 {
@@ -220,9 +228,11 @@ void Expression::prep() const {
         _isValid=true;
 
         if(_evaluationStrategy == UseInterpreter) {
-#           ifdef SEEXPR_DEBUG
-            debugPrintParseTree();
-#           endif
+            if(debugging){
+                debugPrintParseTree();
+                std::cerr<<"Eval strategy is interpreter"<<std::endl;
+            }
+            assert(!_interpreter);
             _interpreter=new Interpreter;
             _returnSlot=_parseTree->buildInterpreter(_interpreter);
             if(_desiredReturnType.isFP()){
@@ -237,10 +247,13 @@ void Expression::prep() const {
                     _interpreter->endOp();
                 }
             }
+            if(debugging)
+                _interpreter->print();
         } else { // useLLVM
-#           ifdef SEEXPR_DEBUG
-            debugPrintParseTree();
-#           endif
+            if(debugging){
+                std::cerr<<"Eval strategy is llvm"<<std::endl;
+                debugPrintParseTree();
+            }
             _llvmEvaluator->prepLLVM(_parseTree,_desiredReturnType);
         }
 
@@ -272,7 +285,7 @@ void Expression::prep() const {
         _parseError=std::string(sstream.str());
     }
 
-    if(debugMode) std::cerr<<"ending with isValid "<<_isValid<<std::endl;
+    if(debugging) std::cerr<<"ending with isValid "<<_isValid<<std::endl;
 }
 
 

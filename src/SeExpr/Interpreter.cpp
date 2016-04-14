@@ -23,12 +23,6 @@
 // TODO: optimize to write to location directly on a CondNode
 namespace SeExpr2 {
 
-#ifdef SEEXPR_DEBUG
-static const bool debugMode=true;
-#else
-static const bool debugMode=false;
-#endif
-
 void Interpreter::eval(bool debug)
 {
     double* fp=&d[0];
@@ -69,7 +63,8 @@ void Interpreter::print(int pc) const
         std::cerr<<"fp["<<k<<"]= "<<d[k]<<std::endl;;
     }
     std::cerr<<"---- str     ----------------------"<<std::endl;
-    for(size_t k=0;k<s.size();k++){
+    std::cerr<<"s[0] reserved for datablock"<<std::endl;
+    for(size_t k=1;k<s.size();k++){
         std::cerr<<"s["<<k<<"]= 0x"<<s[k]<<" '"<<s[k][0]<<s[k][1]<<s[k][2]<<s[k][3]<<"'..."<<std::endl;;
     }
 
@@ -160,8 +155,6 @@ struct UnaryOp{
                 case '!': *out=!*in;break;
                 default: assert(false);
             }
-            if(debugMode)
-                std::cerr<<"In "<<*in<<" out "<<*out<<std::endl;
             in++;out++;
         }
         return 1;
@@ -501,12 +494,8 @@ int ExprSubscriptNode::buildInterpreter(Interpreter* interpreter) const
 
 int ExprVarNode::buildInterpreter(Interpreter* interpreter) const
 {
-    if(debugMode) std::cerr<<"localvar of varnode "<<localVar()<<std::endl;
-
     if(const ExprLocalVar* var=_localVar){
-        if(debugMode) std::cerr<<"before phi we are "<<var<<std::endl;
         if(const ExprLocalVar* phi=var->getPhi()) var=phi;
-        if(debugMode) std::cerr<<"after phi we are "<<var<<std::endl;
         Interpreter::VarToLoc::iterator i=interpreter->varToLoc.find(var);
         if(i!=interpreter->varToLoc.end()) return i->second;
         assert(false);
@@ -669,10 +658,6 @@ ExprPrototypeNode::buildInterpreter(Interpreter* interpreter) const
         if(const ExprVarNode* childVarNode=dynamic_cast<const ExprVarNode*>(child(c))){
             ExprType childType = childVarNode->type();
             if(childType.isFP()){
-                if (debugMode) {
-                    std::cerr<<"localvar of prototype "<<childVarNode->localVar()<<std::endl;
-                    std::cerr<<"phi "<<childVarNode->localVar()->getPhi()<<std::endl;
-                }
                 int operand = interpreter->allocFP(childType.dim());
                 _interpreterOps.push_back(operand);
                 interpreter->varToLoc[childVarNode->localVar()]=operand;

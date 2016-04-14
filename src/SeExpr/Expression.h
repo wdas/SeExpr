@@ -23,6 +23,7 @@
 #include <vector>
 #include <iomanip>
 #include <stdint.h>
+#include "ExprConfig.h"
 #include "Vec3d.h"
 #include "Context.h"
 #include "ExprEnv.h"
@@ -146,15 +147,14 @@ class LLVMEvaluator;
 /// main expression class
 class Expression
 {
-protected:
-    enum EvaluationStrategy {UseInterpreter, UseLLVM};
-#ifdef SEEXPR_ENABLE_LLVM
-    static const EvaluationStrategy defaultEvaluationStrategy = UseLLVM;
-#else
-    static const EvaluationStrategy defaultEvaluationStrategy = UseInterpreter;
-#endif
-
  public:
+    //! Types of evaluation strategies that are available
+    enum EvaluationStrategy {UseInterpreter, UseLLVM};
+    //! What evaluation strategy to use by default
+    static EvaluationStrategy defaultEvaluationStrategy;
+    //! Whether to debug expressions
+    static bool debugging;
+
     //typedef std::map<std::string, ExprLocalVarRef> LocalVarTable;
 
     //! Represents a parse or type checking error in an expression

@@ -58,8 +58,8 @@ N=len(test_case)
 for test in test_case:
     # test time in v
     test_case[test][0]=runAndParseTest(v1+"/testmain --gtest_filter="+test)
-    test_case[test][1]=runAndParseTest(v2+"/testmain2 --gtest_filter="+test)
-    test_case[test][2]=runAndParseTest(v2+"/testmain2LLVM --gtest_filter="+test)
+    test_case[test][1]=runAndParseTest("SE_EXPR_EVAL=INTERPRETER "+v2+"/testmain2 --gtest_filter="+test)
+    test_case[test][2]=runAndParseTest("SE_EXPR_EVAL=LLVM "+v2+"/testmain2 --gtest_filter="+test)
 
     fpData.write(test+","+str(test_case[test][0])+","+str(test_case[test][1])+','+str(test_case[test][2])+"\n")
     idx+=1
