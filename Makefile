@@ -32,3 +32,9 @@ install: all
 
 test: install
 	python src/tests/imageTestsReportNew.py runall
+	
+format:
+	find $(CURDIR)/src -name '*.cpp' | xargs clang-format -i
+	find $(CURDIR)/src -name '*.h' | xargs clang-format -i
+	
+precommit: format

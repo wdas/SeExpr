@@ -1,0 +1,34 @@
+---
+BasedOnStyle: "Google"
+AccessModifierOffset: -2
+AlignEscapedNewlinesLeft: true
+AlignTrailingComments: true
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortIfStatementsOnASingleLine: true
+ConstructorInitializerIndentWidth: 4
+AllowShortLoopsOnASingleLine: true
+AlwaysBreakBeforeMultilineStrings: true
+AlwaysBreakTemplateDeclarations: true
+BinPackParameters: false
+BreakBeforeBraces: Attach
+BreakConstructorInitializersBeforeComma: false
+ColumnLimit: 120
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+Cpp11BracedListStyle: true
+IndentCaseLabels: true
+IndentFunctionDeclarationAfterType: true
+IndentWidth: 4
+MaxEmptyLinesToKeep: 1
+SpaceAfterControlStatementKeyword: true
+SpaceBeforeAssignmentOperators: true
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 2
+SpacesInAngles:  false
+SpacesInCStyleCastParentheses: false
+SpacesInParentheses: false
+UseTab: Never
+PointerBindsToType: true
+#DerivePointerAlignment: false
+#AllowShortCaseLabelsOnASingleLine: true
+
+...
