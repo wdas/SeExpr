@@ -7,63 +7,56 @@ namespace SeExpr2 {
 
 LLVM_VALUE promoteToDim(LLVM_VALUE val, unsigned dim, llvm::IRBuilder<> &Builder);
 
-class LLVMEvaluator{
+class LLVMEvaluator {
     // TODO: this seems needlessly complex, let's fix it
     // TODO: let the dev code allocate memory?
     // FP is the native function for this expression.
-    template<class T>
-    class LLVMEvaluationContext{
-    private:
-        typedef void (*FunctionPtr)(T*,double*);
+    template <class T>
+    class LLVMEvaluationContext {
+      private:
+        typedef void (*FunctionPtr)(T *, double *);
         FunctionPtr functionPtr;
-        T* resultData;
-    public:
-        LLVMEvaluationContext(const LLVMEvaluationContext&)=delete;
-        LLVMEvaluationContext& operator=(const LLVMEvaluationContext&)=delete;
+        T *resultData;
 
-        LLVMEvaluationContext()
-        :functionPtr(nullptr),resultData(nullptr)
-        {}
-        void init(void* fp,int dim){
+      public:
+        LLVMEvaluationContext(const LLVMEvaluationContext &) = delete;
+        LLVMEvaluationContext &operator=(const LLVMEvaluationContext &) = delete;
+
+        LLVMEvaluationContext() : functionPtr(nullptr), resultData(nullptr) {}
+        void init(void *fp, int dim) {
             reset();
-            functionPtr=reinterpret_cast<FunctionPtr>(fp);
-            resultData=new T[dim];
+            functionPtr = reinterpret_cast<FunctionPtr>(fp);
+            resultData = new T[dim];
         }
-        void reset(){
-            if(resultData) delete[] resultData;
-            functionPtr=nullptr;
-            resultData=nullptr;
+        void reset() {
+            if (resultData) delete[] resultData;
+            functionPtr = nullptr;
+            resultData = nullptr;
         }
-        const T* operator()(ExprVarBlock* varBlock)
-        {
+        const T *operator()(ExprVarBlock *varBlock) {
             assert(functionPtr && resultData);
             functionPtr(resultData, varBlock ? varBlock->fpData() : nullptr);
             return resultData;
         }
     };
     std::unique_ptr<LLVMEvaluationContext<double>> _llvmEvalFP;
-    std::unique_ptr<LLVMEvaluationContext<char*>> _llvmEvalStr;
+    std::unique_ptr<LLVMEvaluationContext<char *>> _llvmEvalStr;
 
     std::unique_ptr<llvm::LLVMContext> _llvmContext;
     std::unique_ptr<llvm::ExecutionEngine> TheExecutionEngine;
-public:
 
-    LLVMEvaluator()
-    {}
+  public:
+    LLVMEvaluator() {}
 
-    const char* evalStr(ExprVarBlock* varBlock){
-        return *(*_llvmEvalStr)(varBlock);
+    const char *evalStr(ExprVarBlock *varBlock) { return *(*_llvmEvalStr)(varBlock); }
+
+    const double *evalFP(ExprVarBlock *varBlock) { return (*_llvmEvalFP)(varBlock); }
+
+    void debugPrint() {
+        // TheModule->dump();
     }
 
-    const double* evalFP(ExprVarBlock* varBlock){
-        return (*_llvmEvalFP)(varBlock);
-    }
-
-    void debugPrint(){
-        //TheModule->dump();
-    }
-
-    void prepLLVM(ExprNode* parseTree,ExprType desiredReturnType)  {
+    void prepLLVM(ExprNode *parseTree, ExprType desiredReturnType) {
         using namespace llvm;
         InitializeNativeTarget();
         InitializeNativeTargetAsmPrinter();
@@ -73,15 +66,15 @@ public:
 
         // create Module
         _llvmContext.reset(new LLVMContext());
-        Module* TheModule = new Module(uniqueName+"_module", *_llvmContext);
+        Module *TheModule = new Module(uniqueName + "_module", *_llvmContext);
 
         // Create the JIT.  This takes ownership of the module.
         std::string ErrStr;
-        TheExecutionEngine.reset(
-            EngineBuilder(TheModule).setErrorStr(&ErrStr)
-            .setUseMCJIT(true)
-            .setOptLevel(CodeGenOpt::Aggressive)
-            .create());
+        TheExecutionEngine.reset(EngineBuilder(TheModule)
+                                     .setErrorStr(&ErrStr)
+                                     .setUseMCJIT(true)
+                                     .setOptLevel(CodeGenOpt::Aggressive)
+                                     .create());
 
         if (!TheExecutionEngine) {
             fprintf(stderr, "Could not create ExecutionEngine: %s\n", ErrStr.c_str());
@@ -90,11 +83,11 @@ public:
 
         // create function and entry BB
         bool desireFP = desiredReturnType.isFP();
-        Type *ParamTys[2] = {desireFP?Type::getDoublePtrTy(*_llvmContext):
-                    PointerType::getUnqual(Type::getInt8PtrTy(*_llvmContext)),
-                    Type::getDoublePtrTy(*_llvmContext)};
+        Type *ParamTys[2] = {
+            desireFP ? Type::getDoublePtrTy(*_llvmContext) : PointerType::getUnqual(Type::getInt8PtrTy(*_llvmContext)),
+            Type::getDoublePtrTy(*_llvmContext)};
         FunctionType *FT = FunctionType::get(Type::getVoidTy(*_llvmContext), ParamTys, false);
-        Function *F = Function::Create(FT, Function::ExternalLinkage, uniqueName+"_func", TheModule);
+        Function *F = Function::Create(FT, Function::ExternalLinkage, uniqueName + "_func", TheModule);
         BasicBlock *BB = BasicBlock::Create(*_llvmContext, "entry", F);
         IRBuilder<> Builder(BB);
 
@@ -104,40 +97,42 @@ public:
         // return values through parameter.
         Value *firstArg = &*F->arg_begin();
         unsigned dim = (unsigned)desiredReturnType.dim();
-        if(desireFP) {
-            if(dim > 1) {
+        if (desireFP) {
+            if (dim > 1) {
                 Value *newLastVal = promoteToDim(lastVal, dim, Builder);
                 assert(newLastVal->getType()->getVectorNumElements() == dim);
-                for(unsigned i = 0; i < dim; ++i) {
+                for (unsigned i = 0; i < dim; ++i) {
                     Value *idx = ConstantInt::get(Type::getInt32Ty(*_llvmContext), i);
                     Value *val = Builder.CreateExtractElement(newLastVal, idx);
                     Value *ptr = Builder.CreateInBoundsGEP(firstArg, idx);
                     Builder.CreateStore(val, ptr);
                 }
-            } else if(dim == 1) {
+            } else if (dim == 1) {
                 Value *ptr = Builder.CreateConstInBoundsGEP1_32(firstArg, 0);
                 Builder.CreateStore(lastVal, ptr);
-            } else {assert(false && "error. dim of FP is less than 1.");}
+            } else {
+                assert(false && "error. dim of FP is less than 1.");
+            }
         } else {
             Builder.CreateStore(lastVal, firstArg);
         }
 
         Builder.CreateRetVoid();
-        if(Expression::debugging) {
-            std::cerr<<"Pre verified LLVM byte code "<<std::endl;
+        if (Expression::debugging) {
+            std::cerr << "Pre verified LLVM byte code " << std::endl;
             TheModule->dump();
         }
 
-        if(verifyModule(*TheModule)){
-            std::cerr<<"Logic error in code generation of LLVM alert developers"<<std::endl;
+        if (verifyModule(*TheModule)) {
+            std::cerr << "Logic error in code generation of LLVM alert developers" << std::endl;
             TheModule->dump();
         }
 
-    #if 1
+#if 1
         llvm::FunctionPassManager *FPM = new llvm::FunctionPassManager(TheModule);
 
         auto target_layout = TheExecutionEngine->getDataLayout();
-        //TheModule->setDataLayout(target_layout);
+        // TheModule->setDataLayout(target_layout);
         FPM->add(new llvm::DataLayout(*TheExecutionEngine->getDataLayout()));
 
         FPM->add(llvm::createTypeBasedAliasAnalysisPass());
@@ -161,20 +156,18 @@ public:
         FPM->run(*F);
 #endif
 
-
-
         TheExecutionEngine->finalizeObject();
-        void* fp=TheExecutionEngine->getPointerToFunction(F);
-        if(desireFP){
+        void *fp = TheExecutionEngine->getPointerToFunction(F);
+        if (desireFP) {
             _llvmEvalFP.reset(new LLVMEvaluationContext<double>);
-            _llvmEvalFP->init(fp,dim); 
-        }else{
-            _llvmEvalStr.reset(new LLVMEvaluationContext<char*>);
-            _llvmEvalStr->init(fp,dim);   
+            _llvmEvalFP->init(fp, dim);
+        } else {
+            _llvmEvalStr.reset(new LLVMEvaluationContext<char *>);
+            _llvmEvalStr->init(fp, dim);
         }
 
-        if(Expression::debugging){
-            std::cerr<<"Pre verified LLVM byte code "<<std::endl;
+        if (Expression::debugging) {
+            std::cerr << "Pre verified LLVM byte code " << std::endl;
             TheModule->dump();
         }
     }
@@ -186,16 +179,20 @@ public:
     }
 };
 
-#else // no LLVM support
-class LLVMEvaluator{
-public:
-    const char* evalStr(ExprVarBlock* varBlock){assert("LLVM is not enabled in build" && false); return "";}
-    const double* evalFP(ExprVarBlock* varBlock){assert("LLVM is not enabled in build" && false); return 0;}
-    void prepLLVM(ExprNode* parseTree,ExprType desiredReturnType)  {
+#else  // no LLVM support
+class LLVMEvaluator {
+  public:
+    const char* evalStr(ExprVarBlock* varBlock) {
         assert("LLVM is not enabled in build" && false);
+        return "";
     }
-    void debugPrint(){}
+    const double* evalFP(ExprVarBlock* varBlock) {
+        assert("LLVM is not enabled in build" && false);
+        return 0;
+    }
+    void prepLLVM(ExprNode* parseTree, ExprType desiredReturnType) { assert("LLVM is not enabled in build" && false); }
+    void debugPrint() {}
 };
 #endif
 
-} // end namespace SeExpr2
+}  // end namespace SeExpr2

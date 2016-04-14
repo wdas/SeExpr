@@ -1,16 +1,16 @@
 /*
  Copyright Disney Enterprises, Inc.  All rights reserved.
- 
+
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License
  and the following modification to it: Section 6 Trademarks.
  deleted and replaced with:
- 
+
  6. Trademarks. This License does not grant permission to use the
  trade names, trademarks, service marks, or product names of the
  Licensor and its affiliates, except as required for reproducing
  the content of the NOTICE file.
- 
+
  You may obtain a copy of the License at
  http://www.apache.org/licenses/LICENSE-2.0
 */
@@ -37,101 +37,104 @@
 #include <typeinfo>
 #include <ExprWalker.h>
 
-
 namespace SeExpr2 {
 
 // Get debugging flag from environment
-bool Expression::debugging = getenv("SE_EXPR_DEBUG")!=0;
+bool Expression::debugging = getenv("SE_EXPR_DEBUG") != 0;
 // Choose the defeault strategy based on what we've compiled with (SEEXPR_ENABLE_LLVM)
 // And the environment variables SE_EXPR_DEBUG
-static Expression::EvaluationStrategy chooseDefaultEvaluationStrategy(){
-    if(Expression::debugging) {
-        std::cerr<<"SeExpr2 Debug Mode Enabled "<<__VERSION__<<" built "<<__DATE__<<" "<<__TIME__<<std::endl;
+static Expression::EvaluationStrategy chooseDefaultEvaluationStrategy() {
+    if (Expression::debugging) {
+        std::cerr << "SeExpr2 Debug Mode Enabled " << __VERSION__ << " built " << __DATE__ << " " << __TIME__
+                  << std::endl;
     }
-    #ifdef SEEXPR_ENABLE_LLVM
-        if(char* env=getenv("SE_EXPR_EVAL")){
-            if(Expression::debugging)
-                std::cerr<<"Overriding SeExpr Evaluation Default to be "<<env<<std::endl;
-            return !strcmp(env,"LLVM") ? Expression::UseLLVM 
-                : !strcmp(env,"INTERPRETER") ? Expression::UseInterpreter
-                : Expression::UseInterpreter;
-        }else return Expression::UseLLVM;
-    #else
-       return Expression::UseInterpreter;
-    #endif
+#ifdef SEEXPR_ENABLE_LLVM
+    if (char* env = getenv("SE_EXPR_EVAL")) {
+        if (Expression::debugging) std::cerr << "Overriding SeExpr Evaluation Default to be " << env << std::endl;
+        return !strcmp(env, "LLVM") ? Expression::UseLLVM : !strcmp(env, "INTERPRETER") ? Expression::UseInterpreter
+                                                                                        : Expression::UseInterpreter;
+    } else
+        return Expression::UseLLVM;
+#else
+    return Expression::UseInterpreter;
+#endif
 }
 Expression::EvaluationStrategy Expression::defaultEvaluationStrategy = chooseDefaultEvaluationStrategy();
 
 class TypePrintExaminer : public SeExpr2::Examiner<true> {
-public:
+  public:
     virtual bool examine(const SeExpr2::ExprNode* examinee);
-    virtual void reset  ()                           {};
+    virtual void reset() {};
 };
 
-bool
-TypePrintExaminer::examine(const ExprNode* examinee)
-{
-    const ExprNode* curr=examinee;
-    int depth=0;
+bool TypePrintExaminer::examine(const ExprNode* examinee) {
+    const ExprNode* curr = examinee;
+    int depth = 0;
     char buf[1024];
-    while(curr != 0) {depth++;curr=curr->parent();}
-    sprintf(buf,"%*s",depth*2," ");
-    std::cout <<buf<<"'"<<examinee->toString()<<"' "<<typeid(*examinee).name()
-              <<" type=" << examinee->type().toString() << std::endl;
+    while (curr != 0) {
+        depth++;
+        curr = curr->parent();
+    }
+    sprintf(buf, "%*s", depth * 2, " ");
+    std::cout << buf << "'" << examinee->toString() << "' " << typeid(*examinee).name()
+              << " type=" << examinee->type().toString() << std::endl;
 
     return true;
 };
 
 Expression::Expression(Expression::EvaluationStrategy evaluationStrategy)
-    : _wantVec(true), _expression(""), _evaluationStrategy(evaluationStrategy), _context(&Context::global()), _desiredReturnType(ExprType().FP(3).Varying()), _varEnv(0), _parseTree(0), _isValid(0), _parsed(0), _prepped(0), _interpreter(0),
-    _llvmEvaluator(new LLVMEvaluator())
-{
+    : _wantVec(true), _expression(""), _evaluationStrategy(evaluationStrategy), _context(&Context::global()),
+      _desiredReturnType(ExprType().FP(3).Varying()), _varEnv(0), _parseTree(0), _isValid(0), _parsed(0), _prepped(0),
+      _interpreter(0), _llvmEvaluator(new LLVMEvaluator()) {
     ExprFunc::init();
 }
 
-Expression::Expression( const std::string &e, const ExprType & type, EvaluationStrategy evaluationStrategy, const Context& context)
-    : _wantVec(true), _expression(e), _evaluationStrategy(evaluationStrategy), _context(&context), _desiredReturnType(type), _varEnv(0),  _parseTree(0), _isValid(0), _parsed(0), _prepped(0), _interpreter(0),
-    _llvmEvaluator(new LLVMEvaluator())
-{
+Expression::Expression(const std::string& e,
+                       const ExprType& type,
+                       EvaluationStrategy evaluationStrategy,
+                       const Context& context)
+    : _wantVec(true), _expression(e), _evaluationStrategy(evaluationStrategy), _context(&context),
+      _desiredReturnType(type), _varEnv(0), _parseTree(0), _isValid(0), _parsed(0), _prepped(0), _interpreter(0),
+      _llvmEvaluator(new LLVMEvaluator()) {
     ExprFunc::init();
 }
 
-Expression::~Expression()
-{
+Expression::~Expression() {
     reset();
     delete _llvmEvaluator;
 }
 
 void Expression::debugPrintInterpreter() const {
-    if(_interpreter){
+    if (_interpreter) {
         _interpreter->print();
-        std::cerr<<"return slot "<<_returnSlot<<std::endl;
+        std::cerr << "return slot " << _returnSlot << std::endl;
     }
 }
 
-void Expression::debugPrintLLVM() const {
-    _llvmEvaluator->debugPrint();
-}
+void Expression::debugPrintLLVM() const { _llvmEvaluator->debugPrint(); }
 
 void Expression::debugPrintParseTree() const {
-    if(_parseTree){
+    if (_parseTree) {
         // print the parse tree
-        std::cerr<<"Parse tree desired type "<<_desiredReturnType.toString()<<" actual "<<_parseTree->type().toString()<<std::endl;
+        std::cerr << "Parse tree desired type " << _desiredReturnType.toString() << " actual "
+                  << _parseTree->type().toString() << std::endl;
         TypePrintExaminer _examiner;
-        SeExpr2::ConstWalker  _walker(&_examiner);
+        SeExpr2::ConstWalker _walker(&_examiner);
         _walker.walk(_parseTree);
     }
 }
 
-void Expression::reset()
-{
-     delete _llvmEvaluator;_llvmEvaluator=new LLVMEvaluator();
-     delete _parseTree;_parseTree=0;
-     delete _varEnv;_varEnv=0;
-     if(_evaluationStrategy == UseInterpreter) {
-         delete _interpreter;
-         _interpreter=0;
-     }
+void Expression::reset() {
+    delete _llvmEvaluator;
+    _llvmEvaluator = new LLVMEvaluator();
+    delete _parseTree;
+    _parseTree = 0;
+    delete _varEnv;
+    _varEnv = 0;
+    if (_evaluationStrategy == UseInterpreter) {
+        delete _interpreter;
+        _interpreter = 0;
+    }
     _isValid = 0;
     _parsed = 0;
     _prepped = 0;
@@ -144,193 +147,172 @@ void Expression::reset()
     _comments.clear();
 }
 
-void Expression::setContext(const Context& context)
-{
+void Expression::setContext(const Context& context) {
     reset();
     _context = &context;
 }
 
-void Expression::setDesiredReturnType(const ExprType & type)
-{
+void Expression::setDesiredReturnType(const ExprType& type) {
     reset();
-    _desiredReturnType=type;
+    _desiredReturnType = type;
 }
 
-void Expression::setExpr(const std::string& e)
-{
-    if(_expression != "")
-        reset();
+void Expression::setExpr(const std::string& e) {
+    if (_expression != "") reset();
     _expression = e;
 }
 
-bool Expression::syntaxOK() const
-{
+bool Expression::syntaxOK() const {
     parseIfNeeded();
     return _isValid;
 }
 
-bool Expression::isConstant() const
-{
+bool Expression::isConstant() const {
     parseIfNeeded();
     return returnType().isLifetimeConstant();
 }
 
-bool Expression::usesVar(const std::string& name) const
-{
+bool Expression::usesVar(const std::string& name) const {
     parseIfNeeded();
     return _vars.find(name) != _vars.end();
 }
 
-bool Expression::usesFunc(const std::string& name) const
-{
+bool Expression::usesFunc(const std::string& name) const {
     parseIfNeeded();
     return _funcs.find(name) != _funcs.end();
 }
 
-void
-Expression::parse() const
-{
+void Expression::parse() const {
     if (_parsed) return;
     _parsed = true;
-    int tempStartPos,tempEndPos;
-    ExprParse(_parseTree,
-        _parseError, tempStartPos, tempEndPos, 
-        _comments, this, _expression.c_str(), _wantVec);
-    if(!_parseTree){
-        addError(_parseError,tempStartPos,tempEndPos);
+    int tempStartPos, tempEndPos;
+    ExprParse(_parseTree, _parseError, tempStartPos, tempEndPos, _comments, this, _expression.c_str(), _wantVec);
+    if (!_parseTree) {
+        addError(_parseError, tempStartPos, tempEndPos);
     }
 }
 
 void Expression::prep() const {
     if (_prepped) return;
-#   ifdef SEEXPR_PERFORMANCE
+#ifdef SEEXPR_PERFORMANCE
     PrintTiming timer("[ PREP     ] v2 prep time: ");
-#   endif
+#endif
     _prepped = true;
     parseIfNeeded();
-    _varEnv=new ExprVarEnv;
+    _varEnv = new ExprVarEnv;
 
-    bool error=false;
+    bool error = false;
 
-    if(!_parseTree){
+    if (!_parseTree) {
         // parse error
-        error=true;
-    }else if (!_parseTree->prep(_desiredReturnType.isFP(1), *_varEnv).isValid()) {
+        error = true;
+    } else if (!_parseTree->prep(_desiredReturnType.isFP(1), *_varEnv).isValid()) {
         // prep error
-        error=true;
-    }else if(!ExprType::valuesCompatible(_parseTree->type(),_desiredReturnType)){
+        error = true;
+    } else if (!ExprType::valuesCompatible(_parseTree->type(), _desiredReturnType)) {
         // incompatible type error
-        error=true;
-        _parseTree->addError("Expression generated type "
-            +_parseTree->type().toString()+" incompatible with desired type "
-            +_desiredReturnType.toString());
-    }else{
-        _isValid=true;
+        error = true;
+        _parseTree->addError("Expression generated type " + _parseTree->type().toString() +
+                             " incompatible with desired type " + _desiredReturnType.toString());
+    } else {
+        _isValid = true;
 
-        if(_evaluationStrategy == UseInterpreter) {
-            if(debugging){
+        if (_evaluationStrategy == UseInterpreter) {
+            if (debugging) {
                 debugPrintParseTree();
-                std::cerr<<"Eval strategy is interpreter"<<std::endl;
+                std::cerr << "Eval strategy is interpreter" << std::endl;
             }
             assert(!_interpreter);
-            _interpreter=new Interpreter;
-            int variableBlockSlot=_interpreter->allocPtr(); // first char is the pointer to the variable block!
-            assert(variableBlockSlot==0);
-            _returnSlot=_parseTree->buildInterpreter(_interpreter);
-            if(_desiredReturnType.isFP()){
-                int dimWanted=_desiredReturnType.dim();
-                int dimHave=_parseTree->type().dim();
-                if(dimWanted>dimHave){
+            _interpreter = new Interpreter;
+            int variableBlockSlot = _interpreter->allocPtr();  // first char is the pointer to the variable block!
+            assert(variableBlockSlot == 0);
+            _returnSlot = _parseTree->buildInterpreter(_interpreter);
+            if (_desiredReturnType.isFP()) {
+                int dimWanted = _desiredReturnType.dim();
+                int dimHave = _parseTree->type().dim();
+                if (dimWanted > dimHave) {
                     _interpreter->addOp(getTemplatizedOp<Promote>(dimWanted));
-                    int finalOp=_interpreter->allocFP(dimWanted);
+                    int finalOp = _interpreter->allocFP(dimWanted);
                     _interpreter->addOperand(_returnSlot);
                     _interpreter->addOperand(finalOp);
-                    _returnSlot=finalOp;
+                    _returnSlot = finalOp;
                     _interpreter->endOp();
                 }
             }
-            if(debugging)
-                _interpreter->print();
-        } else { // useLLVM
-            if(debugging){
-                std::cerr<<"Eval strategy is llvm"<<std::endl;
+            if (debugging) _interpreter->print();
+        } else {  // useLLVM
+            if (debugging) {
+                std::cerr << "Eval strategy is llvm" << std::endl;
                 debugPrintParseTree();
             }
-            _llvmEvaluator->prepLLVM(_parseTree,_desiredReturnType);
+            _llvmEvaluator->prepLLVM(_parseTree, _desiredReturnType);
         }
 
         // TODO: need promote
-        _returnType=_parseTree->type();
+        _returnType = _parseTree->type();
     }
 
-    if(error){
-        _isValid=false;
-        _returnType=ExprType().Error();
+    if (error) {
+        _isValid = false;
+        _returnType = ExprType().Error();
 
         // build line lookup table
         std::vector<int> lines;
-        const char* start=_expression.c_str();
-        const char* p=_expression.c_str();
-        while(*p!=0){
-            if(*p=='\n') lines.push_back(p-start);
+        const char* start = _expression.c_str();
+        const char* p = _expression.c_str();
+        while (*p != 0) {
+            if (*p == '\n') lines.push_back(p - start);
             p++;
         }
-        lines.push_back(p-start);
+        lines.push_back(p - start);
 
         std::stringstream sstream;
-        for(unsigned int i=0;i<_errors.size();i++){
-            int* bound=std::lower_bound(&*lines.begin(),&*lines.end(),_errors[i].startPos);
-            int line=bound-&*lines.begin()+1;
-            //int column=_errors[i].startPos-lines[line-1];
-            sstream<<"  Line "<<line<<": "<<_errors[i].error<<std::endl;
+        for (unsigned int i = 0; i < _errors.size(); i++) {
+            int* bound = std::lower_bound(&*lines.begin(), &*lines.end(), _errors[i].startPos);
+            int line = bound - &*lines.begin() + 1;
+            // int column=_errors[i].startPos-lines[line-1];
+            sstream << "  Line " << line << ": " << _errors[i].error << std::endl;
         }
-        _parseError=std::string(sstream.str());
+        _parseError = std::string(sstream.str());
     }
 
-    if(debugging) std::cerr<<"ending with isValid "<<_isValid<<std::endl;
+    if (debugging) std::cerr << "ending with isValid " << _isValid << std::endl;
 }
 
-
-bool
-Expression::isVec() const
-{
+bool Expression::isVec() const {
     prepIfNeeded();
     return _isValid ? _parseTree->isVec() : _wantVec;
 }
 
-const ExprType &
-Expression::returnType() const
-{
+const ExprType& Expression::returnType() const {
     prepIfNeeded();
     return _returnType;
 }
 
-const double* Expression::evalFP(ExprVarBlock* varBlock) const
-{
+const double* Expression::evalFP(ExprVarBlock* varBlock) const {
     prepIfNeeded();
     if (_isValid) {
-        if(_evaluationStrategy == UseInterpreter) {
+        if (_evaluationStrategy == UseInterpreter) {
             _interpreter->eval(varBlock);
             return &_interpreter->d[_returnSlot];
-        } else { // useLLVM
+        } else {  // useLLVM
             return _llvmEvaluator->evalFP(varBlock);
         }
     }
-    return SeExpr2::Vec3d(0,0,0);
+    return SeExpr2::Vec3d(0, 0, 0);
 }
 
-const char* Expression::evalStr(ExprVarBlock* varBlock) const
-{
+const char* Expression::evalStr(ExprVarBlock* varBlock) const {
     prepIfNeeded();
     if (_isValid) {
-        if(_evaluationStrategy == UseInterpreter) {
+        if (_evaluationStrategy == UseInterpreter) {
             _interpreter->eval(varBlock);
             return _interpreter->s[_returnSlot];
-        } else { // useLLVM
+        } else {  // useLLVM
             _llvmEvaluator->evalStr(varBlock);
         }
     }
     return 0;
 }
 
-} // end namespace SeExpr2/
+}  // end namespace SeExpr2/
