@@ -1,0 +1,5 @@
+foo=u*u+v*v;
+bar=foo*foo;
+bar+=u*v;
+bar
+	
