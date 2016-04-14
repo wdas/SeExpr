@@ -20,12 +20,6 @@
 
 namespace SeExpr2 {
 
-#ifdef SEEXPR_DEBUG
-static const bool debugMode=true;
-#else
-static const bool debugMode=false;
-#endif
-
 ExprType ExprFuncStandard::prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnv & env) const
 {
     if(_funcType<VEC){
@@ -172,8 +166,6 @@ int ExprFuncStandard::buildInterpreter(const ExprFuncNode* node,Interpreter* int
         default:assert(false);
     }
 
-    if(debugMode)
-        std::cerr<<"we have arg ops "<<argOps.size()<<std::endl;
     if(_funcType<VEC){
         retOp=interpreter->allocFP(node->type().dim());
         for(int k=0;k<node->type().dim();k++){
@@ -210,8 +202,10 @@ int ExprFuncStandard::buildInterpreter(const ExprFuncNode* node,Interpreter* int
         interpreter->addOperand(retOp);
         interpreter->endOp();
     }
-    if(debugMode)
+    if(Expression::debugging){
+        std::cerr<<"Interpreter dump"<<std::endl;
         interpreter->print();
+    }
     return retOp;
 }
 

@@ -25,12 +25,5 @@ IF(PNG_FOUND)
     TARGET_LINK_LIBRARIES(imageSynthPaint3d2 ${PNG_LIBRARIES} ${SEEXPR_LIBRARIES})
     install(TARGETS imageSynthPaint3d2 DESTINATION bin)
 
-    if (ENABLE_LLVM_BACKEND)
-        ADD_EXECUTABLE(imageSynthLLVMPaint3d "imageSynthForPaint3d.cpp")
-        set_target_properties(imageSynthLLVMPaint3d PROPERTIES COMPILE_FLAGS "-DSEEXPR_ENABLE_LLVM")
-        TARGET_LINK_LIBRARIES(imageSynthLLVMPaint3d ${PNG_LIBRARIES} ${SEEXPR_LIBRARIES})
-        install(TARGETS imageSynthLLVMPaint3d DESTINATION bin)
-    endif()
-
     install(DIRECTORY examples DESTINATION share/SeExpr2/demos/imageSynth USE_SOURCE_PERMISSIONS)
 ENDIF(PNG_FOUND)

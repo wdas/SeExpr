@@ -14,16 +14,12 @@
  You may obtain a copy of the License at
  http://www.apache.org/licenses/LICENSE-2.0
 */
+#include "ExprConfig.h"
 
+#ifdef SEEXPR_ENABLE_LLVM
+#include "ExprLLVM.h"
 #include "ExprNode.h"
 #include "ExprFunc.h"
-#include <llvm/IR/Constants.h>
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Module.h>
-#include <llvm/IR/Intrinsics.h>
-#include <llvm/IR/TypeBuilder.h>
-#include <llvm/Transforms/Utils/BasicBlockUtils.h>
-#include <llvm/Transforms/Utils/Cloning.h>
 using namespace llvm;
 using namespace SeExpr2;
 
@@ -1109,3 +1105,5 @@ LLVM_VALUE ExprVecNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
 }
 
 }
+
+#endif

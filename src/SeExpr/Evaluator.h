@@ -1,33 +1,11 @@
-#ifdef SEEXPR_ENABLE_LLVM
-#include <llvm/ADT/ArrayRef.h>
-#include <llvm/Analysis/Passes.h>
-#include <llvm/Analysis/Verifier.h>
-#include <llvm/ExecutionEngine/ExecutionEngine.h>
-#include <llvm/ExecutionEngine/GenericValue.h>
-#include <llvm/ExecutionEngine/Interpreter.h>
-#include <llvm/ExecutionEngine/MCJIT.h>
-#include <llvm/ExecutionEngine/SectionMemoryManager.h>
-#include <llvm/InitializePasses.h>
-#include <llvm/IR/DataLayout.h>
-#include <llvm/IR/DerivedTypes.h>
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Module.h>
-#include <llvm/IR/Function.h>
-#include <llvm/LinkAllPasses.h>
-#include <llvm/PassManager.h>
-#include <llvm/Support/DynamicLibrary.h>
-#include <llvm/Support/ManagedStatic.h>
-#include <llvm/Support/NoFolder.h>
-#include <llvm/Support/TargetSelect.h>
-#include <llvm/Transforms/Utils/Cloning.h>
 
-using namespace llvm;
-#endif
+#include "ExprConfig.h"
+#include "ExprLLVM.h"
 
 namespace SeExpr2 {
 #ifdef SEEXPR_ENABLE_LLVM
 
-Value* promoteToDim(Value *val, unsigned dim, IRBuilder<> &Builder);
+LLVM_VALUE promoteToDim(LLVM_VALUE val, unsigned dim, llvm::IRBuilder<> &Builder);
 
 class LLVMEvaluator{
     // TODO: this seems needlessly complex, let's fix it
@@ -86,6 +64,7 @@ public:
     }
 
     void prepLLVM(ExprNode* parseTree,ExprType desiredReturnType)  {
+        using namespace llvm;
         InitializeNativeTarget();
         InitializeNativeTargetAsmPrinter();
         InitializeNativeTargetAsmParser();
@@ -143,11 +122,15 @@ public:
         }
 
         Builder.CreateRetVoid();
-#       ifdef SEEXPR_DEBUG
-        TheModule->dump();
-#       endif
+        if(Expression::debugging) {
+            std::cerr<<"Pre verified LLVM byte code "<<std::endl;
+            TheModule->dump();
+        }
 
-        verifyModule(*TheModule);
+        if(verifyModule(*TheModule)){
+            std::cerr<<"Logic error in code generation of LLVM alert developers"<<std::endl;
+            TheModule->dump();
+        }
 
     #if 1
         llvm::FunctionPassManager *FPM = new llvm::FunctionPassManager(TheModule);
@@ -189,9 +172,10 @@ public:
             _llvmEvalStr->init(fp,dim);   
         }
 
-#       ifdef SEEXPR_DEBUG
-        TheModule->dump();
-#       endif
+        if(Expression::debugging){
+            std::cerr<<"Pre verified LLVM byte code "<<std::endl;
+            TheModule->dump();
+        }
     }
 
     std::string getUniqueName() const {

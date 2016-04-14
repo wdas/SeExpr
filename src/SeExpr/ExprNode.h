@@ -20,34 +20,20 @@
 
 #include <cstdlib>
 
+// TODO: get rid of makedepends everywhere
 #ifndef MAKEDEPEND
 #include <string.h>
 #include <string>
 #include <vector>
 #endif
 
+#include "ExprConfig.h"
+#include "ExprLLVM.h"
 #include "Expression.h"
 #include "ExprType.h"
 #include "ExprEnv.h"
 #include "Vec3d.h"
 #include "Interpreter.h"
-
-#ifdef SEEXPR_ENABLE_LLVM
-#include <llvm/IR/IRBuilder.h>
-namespace llvm {
-  class Value;
-  class Type;
-  class Module;
-  class Function;
-}
-typedef llvm::Value* LLVM_VALUE;
-typedef llvm::IRBuilder<> & LLVM_BUILDER;
-#define LLVM_BODY const
-#else
-typedef double LLVM_VALUE;
-typedef double LLVM_BUILDER;
-#define LLVM_BODY {return 0;}
-#endif
 
 namespace SeExpr2 {
 class ExprFunc;

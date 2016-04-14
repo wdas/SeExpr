@@ -31,7 +31,7 @@ find_program(SED_EXE sed)
 
 # TODO use recent cmake to use FindFlex FindBison
 if((BISON_EXE STREQUAL "BISON_EXE-NOTFOUND") OR (FLEX_EXE STREQUAL "FLEX_EXE-NOTFOUND")  OR (SED_EXE STREQUAL "SED_EXE-NOTFOUND"))
-     # don't have flex/bison/sed, use pregenerated versions
+    # don't have flex/bison/sed, use pregenerated versions
     set (parser_cpp generated/ExprParser.cpp generated/ExprParserLex.cpp )
 else ((BISON_EXE STREQUAL "BISON_EXE-NOTFOUND") OR (FLEX_EXE STREQUAL "FLEX_EXE-NOTFOUND")  OR (SED_EXE STREQUAL "SED_EXE-NOTFOUND"))
      ## build the parser from the flex/yacc sources
@@ -84,9 +84,10 @@ endif( (BISON_EXE STREQUAL "BISON_EXE-NOTFOUND") OR (FLEX_EXE STREQUAL "FLEX_EXE
 
 
 ## Make the SeExpr library with and without LLVM support
-ADD_LIBRARY (SeExpr2 SHARED ${io_cpp} ${core_cpp} ${parser_cpp})
+file(GLOB llvm_cpp "*.cpp")
+ADD_LIBRARY (SeExpr2 SHARED ${io_cpp} ${core_cpp} ${parser_cpp} ${llvm_cpp})
 IF(NOT WIN32)
-   TARGET_LINK_LIBRARIES(SeExpr2 "dl" "pthread")
+    TARGET_LINK_LIBRARIES(SeExpr2 "dl" "pthread")
 ENDIF(NOT WIN32)
 
 ## Install binary and includes
@@ -94,36 +95,10 @@ INSTALL (TARGETS SeExpr2 DESTINATION ${CMAKE_INSTALL_LIBDIR})
 INSTALL (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ DESTINATION include/SeExpr2
         FILES_MATCHING PATTERN "*.h")
 
+
+configure_file(ExprConfig.h.in ExprConfig.h)
+INSTALL (FILES ${CMAKE_CURRENT_BINARY_DIR}/ExprConfig.h DESTINATION include/SeExpr2)
+
 if (ENABLE_LLVM_BACKEND)
-    file(GLOB llvm_cpp "*.cpp")
-    ADD_LIBRARY (SeExpr2LLVM SHARED ${llvm_cpp} ${core_cpp} ${parser_cpp})
-IF(NOT WIN32)
-       TARGET_LINK_LIBRARIES(SeExpr2LLVM ${LLVM_LIB} "dl" "pthread")
-ENDIF(NOT WIN32)
-    INSTALL (TARGETS SeExpr2LLVM DESTINATION ${CMAKE_INSTALL_LIBDIR})
-    set_target_properties(SeExpr2LLVM PROPERTIES
-                          COMPILE_FLAGS "-DSEEXPR_ENABLE_LLVM")
-    ## generate LLVM headers without #ifdef macros
-    ADD_CUSTOM_COMMAND(
-       OUTPUT ExpressionLLVM.h
-       COMMAND unifdef -DSEEXPR_ENABLE_LLVM -o ExpressionLLVM.h ${CMAKE_CURRENT_SOURCE_DIR}/Expression.h || true #unifdef not always return 0 when succeed.
-       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Expression.h
-    )
-    ADD_CUSTOM_COMMAND(
-       OUTPUT ExprNodeLLVM.h
-       COMMAND unifdef -DSEEXPR_ENABLE_LLVM -o ExprNodeLLVM.h ${CMAKE_CURRENT_SOURCE_DIR}/ExprNode.h || true #unifdef not always return 0 when succeed.
-       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/ExprNode.h
-    )
-    ADD_CUSTOM_COMMAND(
-       OUTPUT EvaluatorLLVM.h
-       COMMAND unifdef -DSEEXPR_ENABLE_LLVM -o EvaluatorLLVM.h ${CMAKE_CURRENT_SOURCE_DIR}/Evaluator.h || true #unifdef not always return 0 when succeed.
-       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Evaluator.h
-    )
-    add_custom_target(LLVM_Headers DEPENDS ExpressionLLVM.h ExprNodeLLVM.h EvaluatorLLVM.h)
-    add_dependencies(SeExpr2LLVM LLVM_Headers)
-    INSTALL (FILES
-             ${CMAKE_CURRENT_BINARY_DIR}/ExpressionLLVM.h
-             ${CMAKE_CURRENT_BINARY_DIR}/ExprNodeLLVM.h
-             ${CMAKE_CURRENT_BINARY_DIR}/EvaluatorLLVM.h
-             DESTINATION include/SeExpr2)
+       TARGET_LINK_LIBRARIES(SeExpr2 ${LLVM_LIB} "dl" "pthread")
 endif()

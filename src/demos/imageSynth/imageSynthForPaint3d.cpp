@@ -156,11 +156,7 @@ class ImageSynthExpr:public Expression
 public:
     //! Constructor that takes the expression to parse
     ImageSynthExpr(const std::string& expr)
-#ifdef SEEXPR_ENABLE_LLVM
-        :Expression(expr, ExprType().FP(3), UseLLVM)
-#else
-        :Expression(expr, ExprType().FP(3), UseInterpreter)
-#endif
+        :Expression(expr, ExprType().FP(3))
 
     {}
 
