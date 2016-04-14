@@ -20,11 +20,10 @@ namespace SeExpr2 {
 
 class Context;
 
-class ContextUtils
-{
-public:
+class ContextUtils {
+  public:
     static void DisableThreading(Context& context);
     static bool IsThreading(const Context& context);
 };
 
-} // namespace SeExpr2
+}  // namespace SeExpr2
