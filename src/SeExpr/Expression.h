@@ -28,7 +28,6 @@
 #include "Context.h"
 #include "ExprEnv.h"
 
-
 namespace llvm {
     class ExecutionEngine;
     class LLVMContext;
@@ -70,79 +69,8 @@ private:
     ExprType _type;
 };
 
-// TODO: deprecate class and just use ExprVarRef base class
-/// simple vector variable reference reference base class
-// class ExprVectorVarRef : public ExprVarRef
-// {
-//  public:
-//     ExprVectorVarRef(int dim = 3)
-//         : ExprVarRef(ExprType().FP(dim).Varying())
-//     {};
-
-//     virtual bool isVec() { return 1; }
-//     virtual void eval(const ExprVarNode* node, Vec3d& result)=0;
-//     virtual void eval(double* result){
-//         Vec3d ret;
-//         eval(0,ret);
-//         for(int k=0;k<3;k++) result[k]=ret[k];
-//     }
-//     virtual void eval(const char** result){assert(false);}
-// };
-
-
-// TODO: deprecate class and just use ExprVarRef base class
-/// simple scalar variable reference reference base class
-// class ExprScalarVarRef : public ExprVarRef
-// {
-//  public:
-//     ExprScalarVarRef()
-//         : ExprVarRef(ExprType().FP(1).Varying())
-//     {};
-
-//     virtual bool isVec() { return 0; }
-//     virtual void eval(const ExprVarNode* node, Vec3d& result)=0;
-//     virtual void eval(double* result){
-//         Vec3d ret;
-//         eval(0,ret);
-//         for(int k=0;k<1;k++) result[k]=ret[k];
-//     }
-//     virtual void eval(const char** result){assert(false);}
-
-// };
-
-#if 0
-/// uses internally to represent local variables
-class ExprLocalVarRef : public ExprVarRef
-{
-    ExprLocalVarRef()
-        : ExprVarRef(ExprType().Error().Varying()), val(0)
-    {}
-
- public:
-    union{
-        double *val;
-        const char* s;
-    };
-    ExprLocalVarRef(const ExprType & intype)
-        :ExprVarRef(intype),val(0)
-    {
-        if(type().isFP()) val=new double[type().dim()];
-    }
-
-    virtual ~ExprLocalVarRef()
-    {delete [] val;}
-
-    virtual void evaluate(const ExprVarNode* node,const ExprEvalResult& evalResult){
-        if(type().isString()) *evalResult.str=s;
-        else{
-            int d=type().dim();
-            for(int k=0;k<d;k++) evalResult.fp[k]=val[k];
-        }
-    }
-};
-#endif
-
 class LLVMEvaluator;
+class ExprVarBlock;
 
 /// main expression class
 class Expression
@@ -254,11 +182,11 @@ class Expression
 
     // TODO: make this deprecated
     /** Evaluates and returns float (check returnType()!) */
-    const double* evalFP() const;
+    const double* evalFP(ExprVarBlock* varBlock=nullptr) const;
 
     // TODO: make this deprecated
     /** Evaluates and returns string (check returnType()!) */
-    const char* evalStr() const;
+    const char* evalStr(ExprVarBlock* varBlock=nullptr) const;
 
     /** Reset expr - force reparse/rebind */
     void reset();
