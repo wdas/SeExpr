@@ -1,3 +1,19 @@
+#!/bin/env python
+# Copyright Disney Enterprises, Inc.  All rights reserved.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License
+# and the following modification to it: Section 6 Trademarks.
+# deleted and replaced with:
+# 
+# 6. Trademarks. This License does not grant permission to use the
+# trade names, trademarks, service marks, or product names of the
+# Licensor and its affiliates, except as required for reproducing
+# the content of the NOTICE file.
+# 
+# You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0
+
 import os
 import sys
 import subprocess
@@ -7,8 +23,8 @@ seexpr1=os.environ["RP_SeExpr"]
 seexpr2=os.environ["RP_seexpr2"]
 
 versionKeys="v1","v2-interp","v2-llvm"
-versions={"v2-llvm": "SE_EXPR_DEBUG=1 SE_EXPR_EVAL=LLVM "+os.path.join(seexpr2,"share","test","SeExpr2","testmain2"),
-        "v2-interp": "SE_EXPR_DEBUG=1 SE_EXPR_EVAL=INTERPRETER "+os.path.join(seexpr2,"share","test","SeExpr2","testmain2"),
+versions={"v2-llvm": "SE_EXPR_EVAL=LLVM "+os.path.join(seexpr2,"share","test","SeExpr2","testmain2"),
+        "v2-interp": "SE_EXPR_EVAL=INTERPRETER "+os.path.join(seexpr2,"share","test","SeExpr2","testmain2"),
         "v1": os.path.join(seexpr1,"share","test","SeExpr","testmain")}
 
 
