@@ -50,6 +50,9 @@
 #include <Expression.h>
 #include <functional>
 
+#include <VarBlock.h>
+
+
 #include <ExprFunc.h>
 #include <ExprFuncX.h>
 #include <Platform.h> // performance timing
@@ -59,6 +62,7 @@
 
 double clamp(double x){return std::max(0.,std::min(255.,x));}
 
+#undef USE_OLD_VARS
 
 namespace SeExpr2 {
 
@@ -222,23 +226,29 @@ public:
     //! variable map
     mutable std::map<std::string,Var> vars;
     mutable std::map<std::string,VecVar> vecvars;
+    mutable ExprVarBlockCreator blockCreator;
 
     //! resolve function that only supports one external variable 'x'
     ExprVarRef* resolveVar(const std::string& name) const
     {
+        #ifdef USE_OLD_VARS
         {
-        std::map<std::string,Var>::iterator i=vars.find(name);
-        if(i != vars.end()) return &i->second;
+            std::map<std::string,Var>::iterator i=vars.find(name);
+            if(i != vars.end()) return &i->second;
+        }{
+            std::map<std::string,VecVar>::iterator i=vecvars.find(name);
+            if(i != vecvars.end()) return &i->second;
+        }{ // default to color for any unknown vars
+            std::map<std::string,VecVar>::iterator i=vecvars.find("Cs");
+            if(i != vecvars.end()) return &i->second;
         }
-        {
-        std::map<std::string,VecVar>::iterator i=vecvars.find(name);
-        if(i != vecvars.end()) return &i->second;
-        }
-        { // default to color for any unknown vars
-        std::map<std::string,VecVar>::iterator i=vecvars.find("Cs");
-        if(i != vecvars.end()) return &i->second;
-        }
-        return 0;
+        return nullptr;
+        #else
+        if(ExprVarRef* blockVar=blockCreator.resolveVar(name)) return blockVar;
+        else if(ExprVarRef* blockVar=blockCreator.resolveVar("Cs")) return blockVar;
+        else return nullptr;
+        #endif
+
     }
 
     ExprFunc* resolveFunc(const std::string& name) const
@@ -363,6 +373,7 @@ bool TestImage::generateImage(const std::string &exprStr)
     Timer prepareTiming;prepareTiming.start();
     ImageSynthExpr expr(exprStr);
 
+#ifdef USE_OLD_VARS
     // make variables
     expr.vars["u"]=ImageSynthExpr::Var(0.);
     expr.vars["v"]=ImageSynthExpr::Var(0.);
@@ -373,6 +384,21 @@ bool TestImage::generateImage(const std::string &exprStr)
     expr.vecvars["P"]=ImageSynthExpr::VecVar();
     expr.vecvars["Cs"]=ImageSynthExpr::VecVar();
     expr.vecvars["Ci"]=ImageSynthExpr::VecVar();
+
+#else
+    int dummyH=expr.blockCreator.registerVariable("dummy",ExprType().FP(3).Varying());
+    int uH=expr.blockCreator.registerVariable("u",ExprType().FP(1).Varying());
+    int vH=expr.blockCreator.registerVariable("v",ExprType().FP(1).Varying());
+    int wH=expr.blockCreator.registerVariable("w",ExprType().FP(1).Varying());
+    int hH=expr.blockCreator.registerVariable("h",ExprType().FP(1).Varying());
+    int faceIdH=expr.blockCreator.registerVariable("faceId",ExprType().FP(1).Varying());
+    int PH=expr.blockCreator.registerVariable("P",ExprType().FP(3).Varying());
+    int CsH=expr.blockCreator.registerVariable("Cs",ExprType().FP(3).Varying());
+    int CiH=expr.blockCreator.registerVariable("Ci",ExprType().FP(3).Varying());
+#endif
+    ExprVarBlock varBlock=expr.blockCreator.evaluator();
+
+
 
     // check if expression is valid
     bool valid=expr.isValid();
@@ -385,22 +411,30 @@ bool TestImage::generateImage(const std::string &exprStr)
     // evaluate expression
     std::vector<unsigned char> image(_width*_height*4);
     double one_over_width=1./_width, one_over_height=1./_height;
+#ifdef USE_OLD_VARS
     double& u=expr.vars["u"].val;
     double& v=expr.vars["v"].val;
-
-
     double& faceId=expr.vars["faceId"].val;
     Vec<double,3,false> &P = expr.vecvars["P"].val;
     Vec<double,3,false> &Cs = expr.vecvars["Cs"].val;
     Vec<double,3,false> &Ci = expr.vecvars["Ci"].val;
-
+#else
+    varBlock.FP<3>(dummyH)=Vec<double,3>(0.);
+    varBlock.FP<1>(wH)[0]=_width;
+    varBlock.FP<1>(hH)[0]=_height;
+    double& u=varBlock.FP<1>(uH)[0];
+    double& v=varBlock.FP<1>(vH)[0];
+    double& faceId=varBlock.FP<1>(faceIdH)[0];
+    double* P=&varBlock.FP<3>(PH)[0];
+    double* Cs=&varBlock.FP<3>(CsH)[0];
+    double* Ci=&varBlock.FP<3>(CiH)[0];
+#endif  
     unsigned char* pixel=image.data();
 
 #   ifdef SEEXPR_PERFORMANCE
     PrintTiming timer("[ EVAL     ] v2 eval time: ");
 #   endif
     Timer evalTiming;evalTiming.start();
-
     for(int row=0;row<_height;row++){
         for(int col=0;col<_width;col++){
             u=one_over_width*(col+.5);
@@ -417,7 +451,7 @@ bool TestImage::generateImage(const std::string &exprStr)
             Ci[1]=0.4;
             Ci[2]=0.6;
 
-            const double* result=expr.evalFP();
+            const double* result=expr.evalFP(&varBlock);
 
             pixel[0]=clamp(result[0]*256.);
             pixel[1]=clamp(result[1]*256.);
@@ -503,11 +537,13 @@ TEST(perf,noexpr){
 
 static int forceStaticInitializationToMakeTimingBetter=[](){
     SeExpr2::ExprFunc::init(); // force static initialize
+    #if 0
     ImageSynthExpr e("deepTMA(P,1,1,1,1,1,1,1,1,1,1,1,1,1)");
     if(!e.isValid()){
         std::cerr<<"INVALID!"<<std::endl;
     }
     const double* foo=e.evalFP();
     std::cout<<"foo "<<foo[0]<<" "<<std::endl;
+    #endif
     return 1;
 }();

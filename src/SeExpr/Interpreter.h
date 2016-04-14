@@ -117,7 +117,7 @@ public:
     }
 
     /// Evaluate program
-    void eval(bool debug=false);
+    void eval(ExprVarBlock* varBlock,bool debug=false);
     /// Debug by printing program
     void print(int  pc=-1) const;
 

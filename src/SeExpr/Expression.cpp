@@ -234,6 +234,8 @@ void Expression::prep() const {
             }
             assert(!_interpreter);
             _interpreter=new Interpreter;
+            int variableBlockSlot=_interpreter->allocPtr(); // first char is the pointer to the variable block!
+            assert(variableBlockSlot==0);
             _returnSlot=_parseTree->buildInterpreter(_interpreter);
             if(_desiredReturnType.isFP()){
                 int dimWanted=_desiredReturnType.dim();
@@ -303,29 +305,29 @@ Expression::returnType() const
     return _returnType;
 }
 
-const double* Expression::evalFP() const
+const double* Expression::evalFP(ExprVarBlock* varBlock) const
 {
     prepIfNeeded();
     if (_isValid) {
         if(_evaluationStrategy == UseInterpreter) {
-            _interpreter->eval();
+            _interpreter->eval(varBlock);
             return &_interpreter->d[_returnSlot];
         } else { // useLLVM
-            return _llvmEvaluator->evalFP();
+            return _llvmEvaluator->evalFP(varBlock);
         }
     }
     return SeExpr2::Vec3d(0,0,0);
 }
 
-const char* Expression::evalStr() const
+const char* Expression::evalStr(ExprVarBlock* varBlock) const
 {
     prepIfNeeded();
     if (_isValid) {
         if(_evaluationStrategy == UseInterpreter) {
-            _interpreter->eval();
+            _interpreter->eval(varBlock);
             return _interpreter->s[_returnSlot];
         } else { // useLLVM
-            _llvmEvaluator->evalStr();
+            _llvmEvaluator->evalStr(varBlock);
         }
     }
     return 0;

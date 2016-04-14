@@ -20,6 +20,7 @@
 #include "ExprLLVM.h"
 #include "ExprNode.h"
 #include "ExprFunc.h"
+#include "VarBlock.h"
 using namespace llvm;
 using namespace SeExpr2;
 
@@ -132,7 +133,7 @@ LLVM_VALUE createVecVal(LLVM_BUILDER Builder, LLVM_VALUE val, unsigned dim) {
 }
 
 // Copy a vector "val" to a vector of the same length
-LLVM_VALUE createVecVal(LLVM_BUILDER Builder, ArrayRef<LLVM_VALUE > val) {
+LLVM_VALUE createVecVal(LLVM_BUILDER Builder, ArrayRef<LLVM_VALUE > val,const std::string& name="") {
     if(!val.size())
         return 0;
 
@@ -141,7 +142,7 @@ LLVM_VALUE createVecVal(LLVM_BUILDER Builder, ArrayRef<LLVM_VALUE > val) {
     VectorType *elemType = VectorType::get(val[0]->getType(), dim);
     LLVM_VALUE vecVal = UndefValue::get(elemType);
     for (unsigned i = 0; i < dim; i++)
-        vecVal = Builder.CreateInsertElement(vecVal, val[i], ConstantInt::get(Type::getInt32Ty(llvmContext), i));
+        vecVal = Builder.CreateInsertElement(vecVal, val[i], ConstantInt::get(Type::getInt32Ty(llvmContext), i),name);
     return vecVal;
 }
 
@@ -1047,19 +1048,12 @@ LLVM_VALUE ExprUnaryOpNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     return 0;
 }
 
-// This is the use of def-use chain
-LLVM_VALUE ExprVarNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
-    if(_var) {
-        // All external var has the prefix "external_" in current function to avoid
-        // potential name conflict with local variable
-        std::string varName("external_");
-        varName.append(name());
-        if(LLVM_VALUE valPtr = resolveLocalVar(varName.c_str(), Builder))
-            return Builder.CreateLoad(valPtr);
+/// Visitor pattern for VarCodeGeneration to make ExprVarNode behave more like a delegation
+struct VarCodeGeneration{
+    static LLVM_VALUE codegen(ExprVarRef* varRef,const std::string& varName,LLVM_BUILDER Builder){
         LLVMContext &llvmContext = Builder.getContext();
         Type *voidPtrType = Type::getInt8PtrTy(llvmContext);
         Type *doubleTy = Type::getDoubleTy(llvmContext);
-        ExprVarRef* varRef = expr()->resolveVar(name());
         ConstantInt *varAddr = ConstantInt::get(Type::getInt64Ty(llvmContext),
                                                 (uint64_t)varRef);
         LLVM_VALUE addrVal = Builder.CreateIntToPtr(varAddr, voidPtrType);
@@ -1074,6 +1068,7 @@ LLVM_VALUE ExprVarNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
         if(dim == 1) {
             ret = Builder.CreateLoad(varAlloca);
         } else {
+            // TODO: I don't really see how this requires dim==3... this assert should be removable
             assert(dim == 3 && "future work.");
             ret = createVecValFromAlloca(Builder, varAlloca, dim);
         }
@@ -1081,6 +1076,53 @@ LLVM_VALUE ExprVarNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
         AllocaInst *thisvar = createAllocaInst(Builder, ret->getType(), 1, varName);
         Builder.CreateStore(ret, thisvar);
         return ret;
+     }
+
+    static LLVM_VALUE codegen(ExprVarBlockCreator::Ref* varRef,const std::string& varName,LLVM_BUILDER Builder){
+        LLVMContext &llvmContext = Builder.getContext();
+        
+        int variableOffset=varRef->offset();
+        Function* function=llvm_getFunction(Builder);;
+        Value *secondArg = &*(++function->arg_begin());
+
+        int dim=varRef->type().dim();
+        if(dim>1){
+            std::vector<Value*> values;
+            for(int i=0;i<dim;i++){
+                Value* idx=ConstantInt::get(Type::getInt32Ty(llvmContext),variableOffset+i);
+                Value* ptr=Builder.CreateInBoundsGEP(secondArg,idx);
+                Type* vectorTy=llvm::PointerType::get(createLLVMTyForSeExprType(llvmContext,varRef->type()),0);
+                // NOTE: This will crash without 32 byte alignment (enforced by the blocktype)
+                Value* vectorPtr=Builder.CreatePointerCast(ptr,vectorTy);
+                //values.push_back(Builder.CreateLoad(ptr));
+                return Builder.CreateLoad(vectorPtr);
+            }
+            return createVecVal(Builder,values,varName);
+        }else{
+            Value* idx=ConstantInt::get(Type::getInt32Ty(llvmContext),variableOffset);
+            Value* ptr=Builder.CreateInBoundsGEP(secondArg,idx);
+            return Builder.CreateLoad(ptr,varName);
+        }
+    }
+};
+
+// This is the use of def-use chain
+LLVM_VALUE ExprVarNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
+    if(_var) {
+        // All external var has the prefix "external_" in current function to avoid
+        // potential name conflict with local variable
+        std::string varName("external_");
+        varName.append(name());
+        if(LLVM_VALUE valPtr = resolveLocalVar(varName.c_str(), Builder))
+            return Builder.CreateLoad(valPtr);
+        else if(ExprVarRef* varRef = expr()->resolveVar(name())){
+            if(ExprVarBlockCreator::Ref* varBlockRef=dynamic_cast<ExprVarBlockCreator::Ref*>(varRef))
+                return VarCodeGeneration::codegen(varBlockRef,varName,Builder);
+            else
+                return VarCodeGeneration::codegen(varRef,varName,Builder);
+        }else{
+            assert(false && "varRef was not found, even though we passed prep");
+        }
     } else if(_localVar) {
         ExprType varTy = _localVar->type();
         if(varTy.isFP() || varTy.isString()) {

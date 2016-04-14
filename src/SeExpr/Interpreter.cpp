@@ -16,6 +16,7 @@
 */
 #include "ExprNode.h"
 #include "Interpreter.h"
+#include "VarBlock.h"
 #include <iostream>
 #include <cstdio>
 #include <dlfcn.h>
@@ -23,8 +24,9 @@
 // TODO: optimize to write to location directly on a CondNode
 namespace SeExpr2 {
 
-void Interpreter::eval(bool debug)
+void Interpreter::eval(ExprVarBlock* block,bool debug)
 {
+    s[0]=reinterpret_cast<char*>(block->fpData());
     double* fp=&d[0];
     char** str=&s[0];
     int pc=_pcStart;
@@ -244,6 +246,19 @@ struct EvalVar{
     static int f(int* opData,double* fp,char** c,std::vector<int>& callStack){
         ExprVarRef* ref=reinterpret_cast<ExprVarRef*>(c[opData[0]]);
         ref->eval(fp+opData[1]); // ,c+opData[1]);
+        return 1;
+    }
+};
+
+//! Evaluates an external variable using a variable block
+template<int dim>
+struct EvalVarBlock{
+    static int f(int* opData,double* fp,char** c,std::vector<int>& callStack){
+        if(c[0]){
+            double* basePointer=reinterpret_cast<double*>(c[0])+opData[0];
+            double* destPointer=fp+opData[1];
+            for(int i=0;i<dim;i++) destPointer[i]=basePointer[i];
+        }
         return 1;
     }
 };
@@ -501,20 +516,26 @@ int ExprVarNode::buildInterpreter(Interpreter* interpreter) const
         assert(false);
     }else if(const ExprVarRef* var=_var){
         ExprType type=var->type();
-        int varRefLoc=interpreter->allocPtr();
         int destLoc=-1;
         if(type.isFP()){
             int dim=type.dim();
             destLoc=interpreter->allocFP(dim);
         }else destLoc=interpreter->allocPtr();
-
-        interpreter->addOp(EvalVar::f);
-        interpreter->s[varRefLoc]=const_cast<char*>(reinterpret_cast<const char*>(var));
-        interpreter->addOperand(varRefLoc);
-        interpreter->addOperand(destLoc);
-        interpreter->endOp();
+        if(const auto* blockVarRef=dynamic_cast<const ExprVarBlockCreator::Ref*>(var)){
+            // TODO: handle strings
+            interpreter->addOp(getTemplatizedOp<EvalVarBlock>(type.dim()));
+            interpreter->addOperand(blockVarRef->offset());
+            interpreter->addOperand(destLoc);
+            interpreter->endOp();
+        }else{
+            int varRefLoc=interpreter->allocPtr();
+            interpreter->addOp(EvalVar::f);
+            interpreter->s[varRefLoc]=const_cast<char*>(reinterpret_cast<const char*>(var));
+            interpreter->addOperand(varRefLoc);
+            interpreter->addOperand(destLoc);
+            interpreter->endOp();
+        }
         return destLoc;
-
     }
     return -1;
 }
