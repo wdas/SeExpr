@@ -1,6 +1,6 @@
-
 #include "ExprConfig.h"
 #include "ExprLLVM.h"
+#include "VarBlock.h"
 
 namespace SeExpr2 {
 #ifdef SEEXPR_ENABLE_LLVM
@@ -14,7 +14,7 @@ class LLVMEvaluator{
     template<class T>
     class LLVMEvaluationContext{
     private:
-        typedef void (*FunctionPtr)(T*);
+        typedef void (*FunctionPtr)(T*,double*);
         FunctionPtr functionPtr;
         T* resultData;
     public:
@@ -34,10 +34,10 @@ class LLVMEvaluator{
             functionPtr=nullptr;
             resultData=nullptr;
         }
-        const T* operator()()
+        const T* operator()(ExprVarBlock* varBlock)
         {
             assert(functionPtr && resultData);
-            functionPtr(resultData);
+            functionPtr(resultData, varBlock ? varBlock->fpData() : nullptr);
             return resultData;
         }
     };
@@ -51,12 +51,12 @@ public:
     LLVMEvaluator()
     {}
 
-    const char* evalStr(){
-        return *(*_llvmEvalStr)();
+    const char* evalStr(ExprVarBlock* varBlock){
+        return *(*_llvmEvalStr)(varBlock);
     }
 
-    const double* evalFP(){
-        return (*_llvmEvalFP)();
+    const double* evalFP(ExprVarBlock* varBlock){
+        return (*_llvmEvalFP)(varBlock);
     }
 
     void debugPrint(){
@@ -90,8 +90,9 @@ public:
 
         // create function and entry BB
         bool desireFP = desiredReturnType.isFP();
-        Type *ParamTys[1] = {desireFP?Type::getDoublePtrTy(*_llvmContext):
-                    PointerType::getUnqual(Type::getInt8PtrTy(*_llvmContext))};
+        Type *ParamTys[2] = {desireFP?Type::getDoublePtrTy(*_llvmContext):
+                    PointerType::getUnqual(Type::getInt8PtrTy(*_llvmContext)),
+                    Type::getDoublePtrTy(*_llvmContext)};
         FunctionType *FT = FunctionType::get(Type::getVoidTy(*_llvmContext), ParamTys, false);
         Function *F = Function::Create(FT, Function::ExternalLinkage, uniqueName+"_func", TheModule);
         BasicBlock *BB = BasicBlock::Create(*_llvmContext, "entry", F);
@@ -188,8 +189,8 @@ public:
 #else // no LLVM support
 class LLVMEvaluator{
 public:
-    const char* evalStr(){assert("LLVM is not enabled in build" && false); return "";}
-    const double* evalFP(){assert("LLVM is not enabled in build" && false); return 0;}
+    const char* evalStr(ExprVarBlock* varBlock){assert("LLVM is not enabled in build" && false); return "";}
+    const double* evalFP(ExprVarBlock* varBlock){assert("LLVM is not enabled in build" && false); return 0;}
     void prepLLVM(ExprNode* parseTree,ExprType desiredReturnType)  {
         assert("LLVM is not enabled in build" && false);
     }
