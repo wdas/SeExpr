@@ -65,9 +65,9 @@ void Interpreter::print(int pc) const {
     std::cerr << "---- str     ----------------------" << std::endl;
     std::cerr << "s[0] reserved for datablock" << std::endl;
     for (size_t k = 1; k < s.size(); k++) {
-        std::cerr << "s[" << k << "]= 0x" << s[k] << " '" << s[k][0] << s[k][1] << s[k][2] << s[k][3] << "'..."
-                  << std::endl;
-        ;
+        std::cerr << "s[" << k << "]= 0x" << s[k];
+        if(s[k]) std::cerr << " '" << s[k][0] << s[k][1] << s[k][2] << s[k][3] << "...'";
+        std::cerr << std::endl;
     }
 }
 

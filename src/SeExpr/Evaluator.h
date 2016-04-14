@@ -146,7 +146,6 @@ class LLVMEvaluator {
 #if 1
         llvm::FunctionPassManager *FPM = new llvm::FunctionPassManager(TheModule);
 
-        auto target_layout = TheExecutionEngine->getDataLayout();
         // TheModule->setDataLayout(target_layout);
         FPM->add(new llvm::DataLayout(*TheExecutionEngine->getDataLayout()));
 
