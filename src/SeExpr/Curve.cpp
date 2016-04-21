@@ -14,8 +14,8 @@
 * You may obtain a copy of the License at
 * http://www.apache.org/licenses/LICENSE-2.0
 */
-#include "Expression.h"
-#include "ExprBuiltins.h"
+#include <SeExpr2/Expression.h>
+#include <SeExpr2/ExprBuiltins.h>
 #include <cfloat>
 #include <cassert>
 #include <algorithm>

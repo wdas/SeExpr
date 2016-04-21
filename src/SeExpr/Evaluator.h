@@ -16,7 +16,8 @@
 */
 
 #include "ExprConfig.h"
-#include "ExprLLVM.h"
+#include "ExprLLVMAll.h"
+#include "VarBlock.h"
 
 namespace SeExpr2 {
 #ifdef SEEXPR_ENABLE_LLVM

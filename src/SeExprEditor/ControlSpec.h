@@ -25,9 +25,9 @@
 #endif
 #include <cstdio>
 
-#include "ExprWalker.h"
-#include "ExprNode.h"
-#include "Curve.h"
+#include <SeExpr2/ExprWalker.h>
+#include <SeExpr2/ExprNode.h>
+#include <SeExpr2/Curve.h>
 
 namespace SeExpr2 {
 

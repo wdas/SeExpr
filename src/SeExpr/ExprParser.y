@@ -101,7 +101,7 @@ inline void Forget(SeExpr2::ExprNode* n)
 %left OR
 %left AND
 %left EQ NE
-%left '<' '>' LE GE
+%left '<' '>' SEEXPR_LE SEEXPR_GE
 %left '+' '-'
 %left '*' '/' '%'
 %right UNARY '!' '~'
@@ -306,8 +306,8 @@ e:
     | e NE e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareEqNode, $1, $3,'!'); }
     | e '<' e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'<'); }
     | e '>' e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'>'); }
-    | e LE e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'l'); }
-    | e GE e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'g'); }
+    | e SEEXPR_LE e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'l'); }
+    | e SEEXPR_GE e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'g'); }
     | '+' e %prec UNARY		{ $$ = $2; }
     | '-' e %prec UNARY		{ $$ = NODE2(@$.first_column,@$.last_column,UnaryOpNode, $2, '-'); }
     | '!' e			{ $$ = NODE2(@$.first_column,@$.last_column,UnaryOpNode, $2, '!'); }

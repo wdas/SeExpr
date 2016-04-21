@@ -23,8 +23,8 @@
 
 #include <sstream>
 
-#include "ExprNode.h"
-#include "ExprPatterns.h"
+#include <SeExpr2/ExprNode.h>
+#include <SeExpr2/ExprPatterns.h>
 #include "ControlSpec.h"
 
 namespace SeExpr2 {

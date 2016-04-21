@@ -14,7 +14,7 @@
  You may obtain a copy of the License at
  http://www.apache.org/licenses/LICENSE-2.0
 */
-#include <gtest.h>
+#include <gtest/gtest.h>
 #include <gmock.h>
 #include "ExprMultiExpr.h"
 

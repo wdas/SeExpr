@@ -18,6 +18,7 @@
 
 #ifdef SEEXPR_ENABLE_LLVM
 #include "ExprLLVM.h"
+#include "ExprLLVMAll.h"
 #include "ExprNode.h"
 #include "ExprFunc.h"
 using namespace llvm;
@@ -628,12 +629,13 @@ LLVM_VALUE ExprAssignNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     LLVM_VALUE val = child(0)->codegen(Builder);
 
     const std::string &varName = name();
+#if 1
     if (LLVM_VALUE existingPtr = resolveLocalVar(varName.c_str(), Builder)) {
         Type *ptrType = existingPtr->getType()->getPointerElementType();
         Type *valType = val->getType();
-        if (ptrType == valType)
+        if (ptrType == valType){
             Builder.CreateStore(val, existingPtr);
-        else if (valType->isDoubleTy() && ptrType->isVectorTy()) {  // promotion
+        }else if (valType->isDoubleTy() && ptrType->isVectorTy()) {  // promotion
             LLVM_VALUE proVal = createVecVal(Builder, val, ptrType->getVectorNumElements());
             Builder.CreateStore(proVal, existingPtr);
         } else {
@@ -645,6 +647,10 @@ LLVM_VALUE ExprAssignNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
         AllocaInst *varPtr = createAllocaInst(Builder, val->getType(), 1, varName);
         Builder.CreateStore(val, varPtr);
     }
+#else
+    AllocaInst *varPtr = createAllocaInst(Builder, val->getType(), 1, varName);
+    Builder.CreateStore(val, varPtr);
+#endif
 
     // ExprAssignNode has no parent node.
     return 0;

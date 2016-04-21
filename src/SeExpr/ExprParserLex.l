@@ -86,8 +86,8 @@ else			{ return ELSE; }
 "&&"                    { return AND; }
 "=="                    { return EQ; }
 "!="                    { return NE; }
-"<="                    { return LE; }
-">="                    { return GE; }
+"<="                    { return SEEXPR_LE; }
+">="                    { return SEEXPR_GE; }
 "->"			{ return ARROW; }
 "+="                    { return AddEq; }
 "-="                    { return SubEq; }

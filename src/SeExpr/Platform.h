@@ -24,6 +24,7 @@
 
 #ifdef __APPLE__
 #include <Availability.h>
+#include <libgen.h>
 #endif
 
 // platform-specific includes
@@ -84,8 +85,14 @@ typedef off_t FilePos;
 
 namespace SeExpr2 {
 #ifndef WINDOWS
+
 class Timer {
-    timespec startTime, stopTime;
+#ifdef __APPLE__
+    typedef struct timeval Time;
+#else
+    typedef timespec Time;
+#endif
+    Time startTime, stopTime;
     bool started;
 
   public:
@@ -93,15 +100,26 @@ class Timer {
 
     void start() {
         started = true;
+#ifdef __APPLE__
+        gettimeofday(&startTime, 0);
+#else
         clock_gettime(CLOCK_MONOTONIC, &startTime);
+#endif
     }
 
     long elapsedTime() {
         assert(started);
+#ifdef __APPLE__
+        gettimeofday(&stopTime, 0);
+        long seconds = stopTime.tv_sec - startTime.tv_sec;
+        long useconds = stopTime.tv_usec - startTime.tv_usec;
+        long elapsedTime = ((seconds) * 1000 + useconds / 1000.0) + 0.5;
+#else
         clock_gettime(CLOCK_MONOTONIC, &stopTime);
         long seconds = stopTime.tv_sec - startTime.tv_sec;
         long nseconds = stopTime.tv_nsec - startTime.tv_nsec;
         long elapsedTime = ((seconds) * 1000 + nseconds / 1000000.0) + 0.5;
+#endif
         return elapsedTime;
     }
 };

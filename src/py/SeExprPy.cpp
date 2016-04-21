@@ -15,7 +15,7 @@
  http://www.apache.org/licenses/LICENSE-2.0
 */ 
 
-#include<boost/python.hpp>
+#include <boost/python.hpp>
 #include <SeExprParse.h>
 #include <ASTNode.h>
 #include <memory>

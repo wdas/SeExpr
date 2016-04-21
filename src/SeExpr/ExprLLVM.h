@@ -35,34 +35,3 @@ typedef double LLVM_BUILDER;
 #define LLVM_BODY \
     { return 0; }
 #endif
-
-#ifdef SEEXPR_ENABLE_LLVM
-#include <llvm/IR/Constants.h>
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Module.h>
-#include <llvm/IR/Intrinsics.h>
-#include <llvm/IR/TypeBuilder.h>
-#include <llvm/Transforms/Utils/BasicBlockUtils.h>
-#include <llvm/Transforms/Utils/Cloning.h>
-#include <llvm/ADT/ArrayRef.h>
-#include <llvm/Analysis/Passes.h>
-#include <llvm/Analysis/Verifier.h>
-#include <llvm/ExecutionEngine/ExecutionEngine.h>
-#include <llvm/ExecutionEngine/GenericValue.h>
-#include <llvm/ExecutionEngine/Interpreter.h>
-#include <llvm/ExecutionEngine/MCJIT.h>
-#include <llvm/ExecutionEngine/SectionMemoryManager.h>
-#include <llvm/InitializePasses.h>
-#include <llvm/IR/DataLayout.h>
-#include <llvm/IR/DerivedTypes.h>
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Module.h>
-#include <llvm/IR/Function.h>
-#include <llvm/LinkAllPasses.h>
-#include <llvm/PassManager.h>
-#include <llvm/Support/DynamicLibrary.h>
-#include <llvm/Support/ManagedStatic.h>
-#include <llvm/Support/NoFolder.h>
-#include <llvm/Support/TargetSelect.h>
-#include <llvm/Transforms/Utils/Cloning.h>
-#endif
