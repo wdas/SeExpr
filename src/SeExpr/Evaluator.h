@@ -31,8 +31,10 @@ class LLVMEvaluator {
     template <class T>
     class LLVMEvaluationContext {
       private:
-        typedef void (*FunctionPtr)(T *);
+        typedef void (*FunctionPtr)(T *, char **, size_t);
+        typedef void (*FunctionPtrMultiple)(char **, int, size_t, size_t);
         FunctionPtr functionPtr;
+        FunctionPtrMultiple functionPtrMultiple;
         T *resultData;
 
       public:
@@ -40,9 +42,10 @@ class LLVMEvaluator {
         LLVMEvaluationContext &operator=(const LLVMEvaluationContext &) = delete;
 
         LLVMEvaluationContext() : functionPtr(nullptr), resultData(nullptr) {}
-        void init(void *fp, int dim) {
+        void init(void *fp, void *fpLoop, int dim) {
             reset();
             functionPtr = reinterpret_cast<FunctionPtr>(fp);
+            functionPtrMultiple = reinterpret_cast<FunctionPtrMultiple>(fpLoop);
             resultData = new T[dim];
         }
         void reset() {
@@ -50,10 +53,14 @@ class LLVMEvaluator {
             functionPtr = nullptr;
             resultData = nullptr;
         }
-        const T *operator()() {
+        const T *operator()(VarBlock *varBlock) {
             assert(functionPtr && resultData);
-            functionPtr(resultData);
+            functionPtr(resultData, varBlock ? varBlock->data() : nullptr, varBlock ? varBlock->indirectIndex : 0);
             return resultData;
+        }
+        const void operator()(VarBlock *varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) {
+            assert(functionPtr && resultData);
+            functionPtrMultiple(varBlock ? varBlock->data() : nullptr, outputVarBlockOffset, rangeStart, rangeEnd);
         }
     };
     std::unique_ptr<LLVMEvaluationContext<double>> _llvmEvalFP;
@@ -65,9 +72,12 @@ class LLVMEvaluator {
   public:
     LLVMEvaluator() {}
 
-    const char *evalStr() { return *(*_llvmEvalStr)(); }
+    const char *evalStr(VarBlock *varBlock) { return *(*_llvmEvalStr)(varBlock); }
 
-    const double *evalFP() { return (*_llvmEvalFP)(); }
+    const double *evalFP(VarBlock *varBlock) { return (*_llvmEvalFP)(varBlock); }
+    void evalMultiple(VarBlock *varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) {
+        return (*_llvmEvalFP)(varBlock, outputVarBlockOffset, rangeStart, rangeEnd);
+    }
 
     void debugPrint() {
         // TheModule->dump();
@@ -83,107 +93,204 @@ class LLVMEvaluator {
 
         // create Module
         _llvmContext.reset(new LLVMContext());
-        Module *TheModule = new Module(uniqueName + "_module", *_llvmContext);
 
-        // Create the JIT.  This takes ownership of the module.
+        std::unique_ptr<Module> TheModule(new Module(uniqueName + "_module", *_llvmContext));
+
+        // create function and entry BB
+        bool desireFP = desiredReturnType.isFP();
+        Type *ParamTys[] = {desireFP ? Type::getDoublePtrTy(*_llvmContext)
+                                     : PointerType::getUnqual(Type::getInt8PtrTy(*_llvmContext)),
+                            Type::getDoublePtrTy(*_llvmContext), Type::getInt64Ty(*_llvmContext), };
+        FunctionType *FT = FunctionType::get(Type::getVoidTy(*_llvmContext), ParamTys, false);
+        Function *F = Function::Create(FT, Function::ExternalLinkage, uniqueName + "_func", TheModule.get());
+        F->addAttribute(llvm::AttributeSet::FunctionIndex, llvm::Attribute::AlwaysInline);
+        {
+            // label the function with names
+            const char *names[] = {"outputPointer", "dataBlock", "indirectIndex"};
+            int idx = 0;
+            for (auto &arg : F->args()) arg.setName(names[idx++]);
+        }
+
+        unsigned int dimDesired = (unsigned)desiredReturnType.dim();
+        unsigned int dimGenerated = parseTree->type().dim();
+        {
+            BasicBlock *BB = BasicBlock::Create(*_llvmContext, "entry", F);
+            IRBuilder<> Builder(BB);
+
+            // codegen
+            Value *lastVal = parseTree->codegen(Builder);
+
+            // return values through parameter.
+            Value *firstArg = &*F->arg_begin();
+            if (desireFP) {
+                if (dimGenerated > 1) {
+                    Value *newLastVal = promoteToDim(lastVal, dimDesired, Builder);
+                    assert(newLastVal->getType()->getVectorNumElements() >= dimDesired);
+                    for (unsigned i = 0; i < dimDesired; ++i) {
+                        Value *idx = ConstantInt::get(Type::getInt64Ty(*_llvmContext), i);
+                        Value *val = Builder.CreateExtractElement(newLastVal, idx);
+                        Value *ptr = Builder.CreateInBoundsGEP(firstArg, idx);
+                        Builder.CreateStore(val, ptr);
+                    }
+                } else if (dimGenerated == 1) {
+                    for (unsigned i = 0; i < dimDesired; ++i) {
+                        Value *ptr = Builder.CreateConstInBoundsGEP1_32(nullptr, firstArg, i);
+                        Builder.CreateStore(lastVal, ptr);
+                    }
+                } else {
+                    assert(false && "error. dim of FP is less than 1.");
+                }
+            } else {
+                Builder.CreateStore(lastVal, firstArg);
+            }
+            Builder.CreateRetVoid();
+        }
+
+        // write a new function
+        Type *LOOPParamTys[] = {Type::getInt8PtrTy(*_llvmContext), Type::getInt32Ty(*_llvmContext),
+                                Type::getInt64Ty(*_llvmContext),   Type::getInt64Ty(*_llvmContext), };
+        FunctionType *FTLOOP = FunctionType::get(Type::getVoidTy(*_llvmContext), LOOPParamTys, false);
+
+        Function *FLOOP =
+            Function::Create(FTLOOP, Function::ExternalLinkage, uniqueName + "_loopfunc", TheModule.get());
+        {
+            // label the function with names
+            const char *names[] = {"dataBlock", "outputVarBlockOffset", "rangeStart", "rangeEnd"};
+            int idx = 0;
+            for (auto &arg : FLOOP->args()) {
+                arg.setName(names[idx++]);
+            }
+        }
+        {
+            // Local variables
+            Value *dimValue = ConstantInt::get(Type::getInt64Ty(*_llvmContext), dimDesired);
+            Value *oneValue = ConstantInt::get(Type::getInt64Ty(*_llvmContext), 1);
+
+            // Basic blocks
+            BasicBlock *entryBlock = BasicBlock::Create(*_llvmContext, "entry", FLOOP);
+            BasicBlock *loopCmpBlock = BasicBlock::Create(*_llvmContext, "loopCmp", FLOOP);
+            BasicBlock *loopRepeatBlock = BasicBlock::Create(*_llvmContext, "loopRepeat", FLOOP);
+            BasicBlock *loopIncBlock = BasicBlock::Create(*_llvmContext, "loopInc", FLOOP);
+            BasicBlock *loopEndBlock = BasicBlock::Create(*_llvmContext, "loopEnd", FLOOP);
+            IRBuilder<> Builder(entryBlock);
+            Builder.SetInsertPoint(entryBlock);
+            Function::arg_iterator argIterator = FLOOP->arg_begin();
+            // Value* outputDoublePtr=&*argIterator;++argIterator;
+            Value *varBlockCharPtrPtrArg = &*argIterator;
+            ++argIterator;
+            Value *outputVarBlockOffsetArg = &*argIterator;
+            ++argIterator;
+            Value *rangeStartArg = &*argIterator;
+            ++argIterator;
+            Value *rangeEndArg = &*argIterator;
+            ++argIterator;
+
+            // Allocate Variables
+            Value *rangeStartVar = Builder.CreateAlloca(Type::getInt64Ty(*_llvmContext), oneValue, "rangeStartVar");
+            Value *rangeEndVar = Builder.CreateAlloca(Type::getInt64Ty(*_llvmContext), oneValue, "rangeEndVar");
+            Value *indexVar = Builder.CreateAlloca(Type::getInt64Ty(*_llvmContext), oneValue, "indexVar");
+            Value *outputVarBlockOffsetVar =
+                Builder.CreateAlloca(Type::getInt64Ty(*_llvmContext), oneValue, "outputVarBlockOffsetVar");
+            Type *doublePtrPtrTy = llvm::PointerType::get(Type::getDoublePtrTy(*_llvmContext), 0);
+            Value *varBlockDoublePtrPtrVar = Builder.CreateAlloca(doublePtrPtrTy, oneValue, "varBlockDoublePtrPtrVar");
+            // Value*
+            // currentOutputVar=Builder.CreateAlloca(Type::getDoublePtrTy(*_llvmContext),oneValue,"currentOutputVar");
+            // Copy variables from args
+            Value *varBlockDoublePtrPtr =
+                Builder.CreatePointerCast(varBlockCharPtrPtrArg, doublePtrPtrTy, "varBlockAsDoublePtrPtr");
+            Builder.CreateStore(varBlockDoublePtrPtr, varBlockDoublePtrPtrVar);
+            Builder.CreateStore(rangeStartArg, rangeStartVar);
+            Builder.CreateStore(rangeEndArg, rangeEndVar);
+            Builder.CreateStore(outputVarBlockOffsetArg, outputVarBlockOffsetVar);
+
+            // TODO: we need char* support right here
+            Value *outputBasePtrPtr = Builder.CreateGEP(
+                nullptr, Builder.CreateLoad(varBlockDoublePtrPtrVar), outputVarBlockOffsetArg, "outputBasePtrPtr");
+            Value *outputBasePtr = Builder.CreateLoad(outputBasePtrPtr, "outputBasePtr");
+            // Value*
+            // outputBasePtrOffset=Builder.CreateGEP(nullptr,outputBasePtr,Builder.CreateMul(dimValue,Builder.CreateLoad(rangeStartVar)),"outputPtr");
+            // Builder.CreateStore(outputBasePtrOffset,currentOutputVar);
+            Builder.CreateStore(Builder.CreateLoad(rangeStartVar), indexVar);
+
+            Builder.CreateBr(loopCmpBlock);
+
+            Builder.SetInsertPoint(loopCmpBlock);
+            Value *cond = Builder.CreateICmpULT(Builder.CreateLoad(indexVar), Builder.CreateLoad(rangeEndVar));
+            Builder.CreateCondBr(cond, loopRepeatBlock, loopEndBlock);
+
+            Builder.SetInsertPoint(loopRepeatBlock);
+            Value *myOutputPtr =
+                Builder.CreateGEP(nullptr, outputBasePtr, Builder.CreateMul(dimValue, Builder.CreateLoad(indexVar)));
+            Builder.CreateCall(
+                F, {myOutputPtr, Builder.CreateLoad(varBlockDoublePtrPtrVar), Builder.CreateLoad(indexVar)});
+            // Builder.CreateStore(ConstantFP::get(Type::getDoubleTy(*_llvmContext),
+            // 3.14),Builder.CreateLoad(ptrVariable));
+
+            Builder.CreateBr(loopIncBlock);
+
+            Builder.SetInsertPoint(loopIncBlock);
+            Builder.CreateStore(Builder.CreateAdd(Builder.CreateLoad(indexVar), oneValue), indexVar);  // i++
+            // Builder.CreateStore(Builder.CreateGEP(Builder.CreateLoad(currentOutputVar),dimValue),currentOutputVar);
+            // // currentOutput+=dim
+            Builder.CreateBr(loopCmpBlock);
+
+            Builder.SetInsertPoint(loopEndBlock);
+            Builder.CreateRetVoid();
+        }
+
+        if (Expression::debugging) {
+            std::cerr << "Pre verified LLVM byte code " << std::endl;
+            TheModule->dump();
+        }
+
+        // TODO: Find out if there is a new way to veirfy
+        // if (verifyModule(*TheModule)) {
+        //     std::cerr << "Logic error in code generation of LLVM alert developers" << std::endl;
+        //     TheModule->dump();
+        // }
+        Module *altModule = TheModule.get();
         std::string ErrStr;
-        TheExecutionEngine.reset(EngineBuilder(TheModule)
+        TheExecutionEngine.reset(EngineBuilder(std::move(TheModule))
                                      .setErrorStr(&ErrStr)
-                                     .setUseMCJIT(true)
+                                 //     .setUseMCJIT(true)
                                      .setOptLevel(CodeGenOpt::Aggressive)
                                      .create());
+
+        altModule->setDataLayout(TheExecutionEngine->getDataLayout());
+        // Setup optimization
+        llvm::PassManagerBuilder builder;
+        llvm::legacy::PassManager *pm = new llvm::legacy::PassManager;
+        llvm::legacy::FunctionPassManager *fpm = new llvm::legacy::FunctionPassManager(altModule);
+        builder.OptLevel = 0;
+        builder.Inliner = llvm::createAlwaysInlinerPass();
+        builder.populateModulePassManager(*pm);
+        // fpm->add(new llvm::DataLayoutPass());
+        builder.populateFunctionPassManager(*fpm);
+        fpm->run(*F);
+        fpm->run(*FLOOP);
+        pm->run(*altModule);
+
+        // Create the JIT.  This takes ownership of the module.
 
         if (!TheExecutionEngine) {
             fprintf(stderr, "Could not create ExecutionEngine: %s\n", ErrStr.c_str());
             exit(1);
         }
 
-        // create function and entry BB
-        bool desireFP = desiredReturnType.isFP();
-        Type *ParamTys[1] = {desireFP ? Type::getDoublePtrTy(*_llvmContext)
-                                      : PointerType::getUnqual(Type::getInt8PtrTy(*_llvmContext))};
-        FunctionType *FT = FunctionType::get(Type::getVoidTy(*_llvmContext), ParamTys, false);
-        Function *F = Function::Create(FT, Function::ExternalLinkage, uniqueName + "_func", TheModule);
-        BasicBlock *BB = BasicBlock::Create(*_llvmContext, "entry", F);
-        IRBuilder<> Builder(BB);
-
-        // codegen
-        Value *lastVal = parseTree->codegen(Builder);
-
-        // return values through parameter.
-        Value *firstArg = &*F->arg_begin();
-        unsigned dim = (unsigned)desiredReturnType.dim();
-        if (desireFP) {
-            if (dim > 1) {
-                Value *newLastVal = promoteToDim(lastVal, dim, Builder);
-                assert(newLastVal->getType()->getVectorNumElements() == dim);
-                for (unsigned i = 0; i < dim; ++i) {
-                    Value *idx = ConstantInt::get(Type::getInt32Ty(*_llvmContext), i);
-                    Value *val = Builder.CreateExtractElement(newLastVal, idx);
-                    Value *ptr = Builder.CreateInBoundsGEP(firstArg, idx);
-                    Builder.CreateStore(val, ptr);
-                }
-            } else if (dim == 1) {
-                Value *ptr = Builder.CreateConstInBoundsGEP1_32(firstArg, 0);
-                Builder.CreateStore(lastVal, ptr);
-            } else {
-                assert(false && "error. dim of FP is less than 1.");
-            }
-        } else {
-            Builder.CreateStore(lastVal, firstArg);
-        }
-
-        Builder.CreateRetVoid();
-        if (Expression::debugging) {
-            std::cerr << "Pre verified LLVM byte code " << std::endl;
-            TheModule->dump();
-        }
-
-        if (verifyModule(*TheModule)) {
-            std::cerr << "Logic error in code generation of LLVM alert developers" << std::endl;
-            TheModule->dump();
-        }
-
-#if 1
-        llvm::FunctionPassManager *FPM = new llvm::FunctionPassManager(TheModule);
-
-        // TheModule->setDataLayout(target_layout);
-        FPM->add(new llvm::DataLayout(*TheExecutionEngine->getDataLayout()));
-
-        FPM->add(llvm::createTypeBasedAliasAnalysisPass());
-        // Provide basic AliasAnalysis support for GVN.
-        FPM->add(llvm::createBasicAliasAnalysisPass());
-        FPM->add(llvm::createLICMPass());
-        // Promote allocas to registers.
-        FPM->add(llvm::createPromoteMemoryToRegisterPass());
-        // Do simple "peephole" optimizations and bit-twiddling optzns.
-        FPM->add(llvm::createInstructionCombiningPass());
-        // Reassociate expressions.
-        FPM->add(llvm::createReassociatePass());
-        // Eliminate Common SubExpressions.
-        FPM->add(llvm::createGVNPass());
-        // Simplify the control flow graph (deleting unreachable blocks, etc).
-        FPM->add(llvm::createCFGSimplificationPass());
-        FPM->doInitialization();
-
-        // For each function in the module
-        // Run the FPM on this function
-        FPM->run(*F);
-#endif
-
         TheExecutionEngine->finalizeObject();
         void *fp = TheExecutionEngine->getPointerToFunction(F);
+        void *fpLoop = TheExecutionEngine->getPointerToFunction(FLOOP);
         if (desireFP) {
             _llvmEvalFP.reset(new LLVMEvaluationContext<double>);
-            _llvmEvalFP->init(fp, dim);
+            _llvmEvalFP->init(fp, fpLoop, dimDesired);
         } else {
             _llvmEvalStr.reset(new LLVMEvaluationContext<char *>);
-            _llvmEvalStr->init(fp, dim);
+            _llvmEvalStr->init(fp, fpLoop, dimDesired);
         }
 
         if (Expression::debugging) {
             std::cerr << "Pre verified LLVM byte code " << std::endl;
-            TheModule->dump();
+            altModule->dump();
         }
     }
 
@@ -197,15 +304,16 @@ class LLVMEvaluator {
 #else  // no LLVM support
 class LLVMEvaluator {
   public:
-    const char* evalStr() {
-        assert("LLVM is not enabled in build" && false);
+    void unsupported() { throw std::runtime_error("LLVM is not enabled in build"); }
+    const char* evalStr(VarBlock* varBlock) {
+        unsupported();
         return "";
     }
-    const double* evalFP() {
-        assert("LLVM is not enabled in build" && false);
-        return 0;
+    const double* evalFP(VarBlock* varBlock) { unsupported(); }
+    void prepLLVM(ExprNode* parseTree, ExprType desiredReturnType) { unsupported(); }
+    void evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) {
+        unsupported();
     }
-    void prepLLVM(ExprNode* parseTree, ExprType desiredReturnType) { assert("LLVM is not enabled in build" && false); }
     void debugPrint() {}
 };
 #endif

@@ -69,6 +69,8 @@ class ExprVarRef {
 };
 
 class LLVMEvaluator;
+class VarBlock;
+class VarBlockCreator;
 
 /// main expression class
 class Expression {
@@ -179,13 +181,16 @@ class Expression {
         variables and functions will be bound if needed. */
     const ExprType& returnType() const;
 
+    /// Evaluate multiple blocks
+    void evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) const;
+
     // TODO: make this deprecated
     /** Evaluates and returns float (check returnType()!) */
-    const double* evalFP() const;
+    const double* evalFP(VarBlock* varBlock = nullptr) const;
 
     // TODO: make this deprecated
     /** Evaluates and returns string (check returnType()!) */
-    const char* evalStr() const;
+    const char* evalStr(VarBlock* varBlock = nullptr) const;
 
     /** Reset expr - force reparse/rebind */
     void reset();
@@ -219,6 +224,11 @@ class Expression {
 
     /** Debug printout of LLVM evaluation  **/
     void debugPrintLLVM() const;
+
+    /** Set variable block creator (lifetime of expression must be <= block) **/
+    void setVarBlockCreator(const VarBlockCreator* varBlockCreator);
+
+    const VarBlockCreator* varBlockCreator() const { return _varBlockCreator; }
 
   private:
     /** No definition by design. */
@@ -298,6 +308,9 @@ class Expression {
 
     // LLVM evaluation layer
     mutable LLVMEvaluator* _llvmEvaluator;
+
+    // Var block creator
+    const VarBlockCreator* _varBlockCreator;
 
     /* internal */ public:
 

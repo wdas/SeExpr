@@ -25,6 +25,7 @@
 #include "ExprEnv.h"
 #include "ExprNode.h"
 #include "ExprFunc.h"
+#include "VarBlock.h"
 
 // TODO: add and other binary op demote to scalar if wantScalar
 // TODO: logical operations like foo<bar should they do vector returns... right now no... implicit demote
@@ -464,13 +465,25 @@ ExprType ExprVarNode::prep(bool wantScalar, ExprVarEnv& env) {
     bool error = false;
     if ((_localVar = env.find(name()))) {
         setType(_localVar->type());
-    } else if ((_var = _expr->resolveVar(name()))) {
-        _expr->addVar(name());
-        setType(_var->type());
+        return _type;
     } else {
-        checkCondition(_var || _localVar, std::string("No variable named $") + name(), error);
-        setType(ExprType().Error());
+        // user defined external variable
+        _var = _expr->resolveVar(name());
+        if (!_var) {
+            if (const VarBlockCreator* creator = _expr->varBlockCreator()) {
+                // data block defined external var
+                _var = creator->resolveVar(name());
+            }
+        }
+        if (_var) {
+            _expr->addVar(name());  // register used variable so _expr->usedVar() works
+            setType(_var->type());
+            return _type;
+        }
     }
+    // If we get here we do not have a variable!
+    checkCondition(_var || _localVar, std::string("No variable named ''") + name() + "'", error);
+    setType(ExprType().Error());
     return _type;
 }
 

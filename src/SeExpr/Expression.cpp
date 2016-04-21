@@ -157,6 +157,11 @@ void Expression::setDesiredReturnType(const ExprType& type) {
     _desiredReturnType = type;
 }
 
+void Expression::setVarBlockCreator(const VarBlockCreator* creator) {
+    reset();
+    _varBlockCreator = creator;
+}
+
 void Expression::setExpr(const std::string& e) {
     if (_expression != "") reset();
     _expression = e;
@@ -287,27 +292,49 @@ const ExprType& Expression::returnType() const {
     return _returnType;
 }
 
-const double* Expression::evalFP() const {
+const double* Expression::evalFP(VarBlock* varBlock) const {
     prepIfNeeded();
     if (_isValid) {
         if (_evaluationStrategy == UseInterpreter) {
-            _interpreter->eval();
+            _interpreter->eval(varBlock);
             return &_interpreter->d[_returnSlot];
         } else {  // useLLVM
-            return _llvmEvaluator->evalFP();
+            return _llvmEvaluator->evalFP(varBlock);
         }
     }
     return SeExpr2::Vec3d(0, 0, 0);
 }
 
-const char* Expression::evalStr() const {
+void Expression::evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd)
+    const {
     prepIfNeeded();
     if (_isValid) {
         if (_evaluationStrategy == UseInterpreter) {
-            _interpreter->eval();
+            // TODO: need strings to work
+            int dim = _desiredReturnType.dim();
+            // double* iHack=reinterpret_cast<double**>(varBlock->data())[outputVarBlockOffset];
+            double* destBase = reinterpret_cast<double**>(varBlock->data())[outputVarBlockOffset];
+            for (size_t i = rangeStart; i < rangeEnd; i++) {
+                varBlock->indirectIndex = i;
+                const double* f = evalFP(varBlock);
+                for (int k = 0; k < dim; k++) {
+                    destBase[dim * i + k] = f[k];
+                }
+            }
+        } else {  // useLLVM
+            _llvmEvaluator->evalMultiple(varBlock, outputVarBlockOffset, rangeStart, rangeEnd);
+        }
+    }
+}
+
+const char* Expression::evalStr(VarBlock* varBlock) const {
+    prepIfNeeded();
+    if (_isValid) {
+        if (_evaluationStrategy == UseInterpreter) {
+            _interpreter->eval(varBlock);
             return _interpreter->s[_returnSlot];
         } else {  // useLLVM
-            _llvmEvaluator->evalStr();
+            _llvmEvaluator->evalStr(varBlock);
         }
     }
     return 0;

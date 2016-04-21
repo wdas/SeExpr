@@ -225,7 +225,13 @@ class ExprType {
     //! lifetime of type
     Lifetime _lifetime;
 };
+
+/// Quick way to get a vector type i.e. 3 vec is TypeVec(3)
+inline ExprType TypeVec(int n){
+    return ExprType().FP(n).Varying();
 }
+
+} // namespace
 
 #pragma pop_macro("None")
 
