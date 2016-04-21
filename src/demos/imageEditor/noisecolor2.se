@@ -1,3 +1,4 @@
+
 # Copyright Disney Enterprises, Inc.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,9 +14,10 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
-FILE(GLOB cpp "*.cpp")
-FILE(GLOB public_includes "*.h")
-ADD_LIBRARY (SeExprEditor2 SHARED ${cpp})
-target_link_libraries(SeExprEditor2 ${SEEXPR_LIBRARIES} ${SEEXPR_EDITOR_LIBRARIES})
-INSTALL (TARGETS SeExprEditor2 DESTINATION  ${CMAKE_INSTALL_LIBDIR})
-INSTALL (FILES ${public_includes} DESTINATION include/SeExpr2)
+$val=voronoi(5*[$u,$v,.5],4,.6,.2);
+$color=ccurve($val,
+    0.000, [0.141, 0.059, 0.051], 4, 
+    0.185, [0.302, 0.176, 0.122], 4, 
+    0.301, [0.651, 0.447, 0.165], 4,  
+    0.462, [0.976, 0.976, 0.976], 4);
+$color

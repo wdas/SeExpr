@@ -1,0 +1,46 @@
+
+# Copyright Disney Enterprises, Inc.  All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License
+# and the following modification to it: Section 6 Trademarks.
+# deleted and replaced with:
+#
+# 6. Trademarks. This License does not grant permission to use the
+# trade names, trademarks, service marks, or product names of the
+# Licensor and its affiliates, except as required for reproducing
+# the content of the NOTICE file.
+#
+# You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0
+
+$Cs=[1.000, 0.000, 1.000]; # Sphere Color
+$L1=norm([-1.3,-.3,0]); # Light Direction 1
+$L2=norm([.8,-1,-1]); # Light Direction 2
+$sp=[0.000, 0.000, -3.000]; # Sphere center
+$d=norm([$u-.5,$v-.5,-1]); # ray direction
+$o=[0.000, 0.000, 0.000]; # ray origin
+$r=1.000; # sphere radius
+# quadratic coefficients
+$a=dot($d,$d);
+$ominussp=$o-$sp;
+$b=2*dot($d,$ominussp);
+$c=dot($ominussp,$ominussp)-$r*$r;
+# discriminant
+$disc=$b*$b-4*$a*$c;
+$color=0.000;
+if($disc>0){ # two hit case
+  # minimum ray parameter
+  $t=min((-$b+sqrt($disc))/(2*$a),(-$b-sqrt($disc))/(2*$a))[0];
+  if($t>=0){ # if we are in front of camera
+      $Pintersect=$o+$d*$t;  # point of intersection
+      $N=norm($Pintersect-$sp); # intersection normal
+      # lighting
+      $H1=(-$L1+-$d)/length($L1+$d);
+      $color=max(dot($N,-$L1),0)*($Cs*.3+.5*max(0,dot($H1,$N))^80);
+      $H2=(-$L2+-$d)/length($L2+$d);
+      $color+=max(dot($N,-$L2),0)*($Cs*.3+.5*max(0,dot($H2,$N))^80);
+   }
+}
+# return color
+$color

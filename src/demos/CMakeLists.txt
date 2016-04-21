@@ -25,6 +25,7 @@ install(TARGETS asciiCalc2 DESTINATION bin)
 
 #todo re-enable
 ADD_SUBDIRECTORY (imageSynth)
+ADD_SUBDIRECTORY (imageEditor)
 #ADD_SUBDIRECTORY (segraph)
 #ADD_SUBDIRECTORY (rman)
 
