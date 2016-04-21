@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 # Copyright Disney Enterprises, Inc.  All rights reserved.
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,7 +38,7 @@ outfile = sys.argv[2]
 
 # open outfile
 f = open(outfile, 'w')
-print >> f, "#include <gtest.h>\n"
+print >> f, "#include <gtest/gtest.h>\n"
 print >> f, "void evalExpressionFile(const char *filepath);\n"
 
 for dir_name, sub_dirs, se_files in os.walk(rootdir):

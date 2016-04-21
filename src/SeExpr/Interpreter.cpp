@@ -16,6 +16,7 @@
 */
 #include "ExprNode.h"
 #include "Interpreter.h"
+#include "VarBlock.h"
 #include <iostream>
 #include <cstdio>
 #include <dlfcn.h>
@@ -23,7 +24,12 @@
 // TODO: optimize to write to location directly on a CondNode
 namespace SeExpr2 {
 
-void Interpreter::eval(bool debug) {
+void Interpreter::eval(VarBlock* block, bool debug) {
+    if (block) {
+        static_assert(sizeof(char*) == sizeof(size_t), "Expect to fit size_t in char*");
+        s[0] = reinterpret_cast<char*>(block->data());
+        s[1] = reinterpret_cast<char*>(block->indirectIndex);
+    }
     double* fp = &d[0];
     char** str = &s[0];
     int pc = _pcStart;
@@ -63,10 +69,11 @@ void Interpreter::print(int pc) const {
         ;
     }
     std::cerr << "---- str     ----------------------" << std::endl;
-    std::cerr << "s[0] reserved for datablock" << std::endl;
-    for (size_t k = 1; k < s.size(); k++) {
+    std::cerr << "s[0] reserved for datablock = " << reinterpret_cast<size_t>(s[0]) << std::endl;
+    std::cerr << "s[1] is indirectIndex = " << reinterpret_cast<size_t>(s[1]) << std::endl;
+    for (size_t k = 2; k < s.size(); k++) {
         std::cerr << "s[" << k << "]= 0x" << s[k];
-        if(s[k]) std::cerr << " '" << s[k][0] << s[k][1] << s[k][2] << s[k][3] << "...'";
+        if (s[k]) std::cerr << " '" << s[k][0] << s[k][1] << s[k][2] << s[k][3] << "...'";
         std::cerr << std::endl;
     }
 }
@@ -76,7 +83,7 @@ void Interpreter::print(int pc) const {
 // template Interpreter::OpF* getTemplatizedOp<Promote<3> >(int);
 
 //! Return the function f encapsulated in class T for the dynamic i converted to a static d. (partial application of
-//template using c)
+// template using c)
 template <char c, template <char c1, int d> class T>
 static Interpreter::OpF getTemplatizedOp2(int i) {
     switch (i) {
@@ -293,6 +300,41 @@ struct EvalVar {
     static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
         ExprVarRef* ref = reinterpret_cast<ExprVarRef*>(c[opData[0]]);
         ref->eval(fp + opData[1]);  // ,c+opData[1]);
+        return 1;
+    }
+};
+
+//! Evaluates an external variable using a variable block
+template <int dim>
+struct EvalVarBlock {
+    static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+        if (c[0]) {
+            double* basePointer = reinterpret_cast<double*>(c[0]) + opData[0];
+            double* destPointer = fp + opData[1];
+            for (int i = 0; i < dim; i++) destPointer[i] = basePointer[i];
+        }
+        return 1;
+    }
+};
+
+//! Evaluates an external variable using a variable block
+template <char uniform, int dim>
+struct EvalVarBlockIndirect {
+    static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+        if (c[0]) {
+            int stride = opData[2];
+            int outputVarBlockOffset = opData[0];
+            int destIndex = opData[1];
+            size_t indirectIndex = reinterpret_cast<size_t>(c[1]);
+            double* basePointer =
+                reinterpret_cast<double**>(c[0])[outputVarBlockOffset] + (uniform ? 0 : (stride * indirectIndex));
+            double* destPointer = fp + destIndex;
+            for (int i = 0; i < dim; i++) destPointer[i] = basePointer[i];
+        } else {
+            // TODO: this happens in initial evaluation!
+            // std::cerr<<"Did not get data block"<<std::endl;
+            // assert(false && "Did not get data block");
+        }
         return 1;
     }
 };
@@ -567,19 +609,30 @@ int ExprVarNode::buildInterpreter(Interpreter* interpreter) const {
         assert(false);
     } else if (const ExprVarRef* var = _var) {
         ExprType type = var->type();
-        int varRefLoc = interpreter->allocPtr();
         int destLoc = -1;
         if (type.isFP()) {
             int dim = type.dim();
             destLoc = interpreter->allocFP(dim);
         } else
             destLoc = interpreter->allocPtr();
-
-        interpreter->addOp(EvalVar::f);
-        interpreter->s[varRefLoc] = const_cast<char*>(reinterpret_cast<const char*>(var));
-        interpreter->addOperand(varRefLoc);
-        interpreter->addOperand(destLoc);
-        interpreter->endOp();
+        if (const auto* blockVarRef = dynamic_cast<const VarBlockCreator::Ref*>(var)) {
+            // TODO: handle strings
+            if (blockVarRef->type().isLifetimeUniform())
+                interpreter->addOp(getTemplatizedOp2<1, EvalVarBlockIndirect>(type.dim()));
+            else
+                interpreter->addOp(getTemplatizedOp2<0, EvalVarBlockIndirect>(type.dim()));
+            interpreter->addOperand(blockVarRef->offset());
+            interpreter->addOperand(destLoc);
+            interpreter->addOperand(blockVarRef->stride());
+            interpreter->endOp();
+        } else {
+            int varRefLoc = interpreter->allocPtr();
+            interpreter->addOp(EvalVar::f);
+            interpreter->s[varRefLoc] = const_cast<char*>(reinterpret_cast<const char*>(var));
+            interpreter->addOperand(varRefLoc);
+            interpreter->addOperand(destLoc);
+            interpreter->endOp();
+        }
         return destLoc;
     }
     return -1;

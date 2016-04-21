@@ -61,7 +61,10 @@ class Interpreter {
     int _pcStart;
 
   public:
-    Interpreter() : _startedOp(false) {}
+    Interpreter() : _startedOp(false) {
+        s.push_back(nullptr);  // reserved for double** of variable block
+        s.push_back(nullptr);  // reserved for double** of variable block
+    }
 
     /// Return the position that the next instruction will be placed at
     int nextPC() { return ops.size(); }
@@ -112,7 +115,7 @@ class Interpreter {
     }
 
     /// Evaluate program
-    void eval(bool debug = false);
+    void eval(VarBlock* varBlock, bool debug = false);
     /// Debug by printing program
     void print(int pc = -1) const;
 

@@ -17,7 +17,7 @@
 #pragma once
 
 // This should be substituted externally by CMake
-#if @ENABLE_LLVM_BACKEND@
+#if @SEEXPR_ENABLE_LLVM_BACKEND@
 #	define	SEEXPR_ENABLE_LLVM
 #endif
 

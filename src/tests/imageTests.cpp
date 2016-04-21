@@ -24,22 +24,25 @@
 #include <fstream>
 #include <assert.h>
 #include <dirent.h>
-#include <pcrecpp.h>
+//#include <gtest/pcrecpp.h>
 
-#include <gtest.h>
 #include <png.h>
 
-#include <Expression.h>
+#include <SeExpr2/Expression.h>
 #include <functional>
 
-#include <ExprFunc.h>
-#include <ExprFuncX.h>
-#include <Platform.h>  // performance timing
+#include <SeExpr2/VarBlock.h>
+
+#include <SeExpr2/ExprFunc.h>
+#include <SeExpr2/ExprFuncX.h>
+#include <SeExpr2/Platform.h>  // performance timing
 #include <memory>
 
-#include <gtest.h>
+#include <gtest/gtest.h>
 
 double clamp(double x) { return std::max(0., std::min(255., x)); }
+
+#undef USE_OLD_VARS
 
 namespace SeExpr2 {
 
@@ -171,9 +174,11 @@ class ImageSynthExpr : public Expression {
     //! variable map
     mutable std::map<std::string, Var> vars;
     mutable std::map<std::string, VecVar> vecvars;
+    mutable VarBlockCreator blockCreator;
 
     //! resolve function that only supports one external variable 'x'
     ExprVarRef* resolveVar(const std::string& name) const {
+#ifdef USE_OLD_VARS
         {
             std::map<std::string, Var>::iterator i = vars.find(name);
             if (i != vars.end()) return &i->second;
@@ -186,7 +191,15 @@ class ImageSynthExpr : public Expression {
             std::map<std::string, VecVar>::iterator i = vecvars.find("Cs");
             if (i != vecvars.end()) return &i->second;
         }
-        return 0;
+        return nullptr;
+#else
+        if (ExprVarRef* blockVar = blockCreator.resolveVar(name))
+            return blockVar;
+        else if (ExprVarRef* blockVar = blockCreator.resolveVar("Cs"))
+            return blockVar;
+        else
+            return nullptr;
+#endif
     }
 
     ExprFunc* resolveFunc(const std::string& name) const {
@@ -315,6 +328,7 @@ bool TestImage::generateImage(const std::string& exprStr) {
     prepareTiming.start();
     ImageSynthExpr expr(exprStr);
 
+#ifdef USE_OLD_VARS
     // make variables
     expr.vars["u"] = ImageSynthExpr::Var(0.);
     expr.vars["v"] = ImageSynthExpr::Var(0.);
@@ -325,6 +339,19 @@ bool TestImage::generateImage(const std::string& exprStr) {
     expr.vecvars["P"] = ImageSynthExpr::VecVar();
     expr.vecvars["Cs"] = ImageSynthExpr::VecVar();
     expr.vecvars["Ci"] = ImageSynthExpr::VecVar();
+
+#else
+    int dummyH = expr.blockCreator.registerVariable("dummy", ExprType().FP(3).Varying());
+    int uH = expr.blockCreator.registerVariable("u", ExprType().FP(1).Varying());
+    int vH = expr.blockCreator.registerVariable("v", ExprType().FP(1).Varying());
+    int wH = expr.blockCreator.registerVariable("w", ExprType().FP(1).Uniform());
+    int hH = expr.blockCreator.registerVariable("h", ExprType().FP(1).Uniform());
+    int faceIdH = expr.blockCreator.registerVariable("faceId", ExprType().FP(1).Varying());
+    int PH = expr.blockCreator.registerVariable("P", ExprType().FP(3).Varying());
+    int CsH = expr.blockCreator.registerVariable("Cs", ExprType().FP(3).Varying());
+    int CiH = expr.blockCreator.registerVariable("Ci", ExprType().FP(3).Varying());
+#endif
+    VarBlock varBlock = expr.blockCreator.create();
 
     // check if expression is valid
     bool valid = expr.isValid();
@@ -337,14 +364,28 @@ bool TestImage::generateImage(const std::string& exprStr) {
     // evaluate expression
     std::vector<unsigned char> image(_width * _height * 4);
     double one_over_width = 1. / _width, one_over_height = 1. / _height;
+#ifdef USE_OLD_VARS
     double& u = expr.vars["u"].val;
     double& v = expr.vars["v"].val;
-
     double& faceId = expr.vars["faceId"].val;
     Vec<double, 3, false>& P = expr.vecvars["P"].val;
     Vec<double, 3, false>& Cs = expr.vecvars["Cs"].val;
     Vec<double, 3, false>& Ci = expr.vecvars["Ci"].val;
-
+#else
+    Vec<double, 3> dummy(0.);
+    varBlock.Pointer(dummyH) = &dummy[0];
+    double widthDouble = _width, heightDouble = _height;
+    varBlock.Pointer(wH) = &widthDouble;
+    varBlock.Pointer(hH) = &heightDouble;
+    double u,v,faceId;
+    Vec<double,3> P,Cs,Ci;
+    varBlock.Pointer(uH)=&u;
+    varBlock.Pointer(vH)=&v;
+    varBlock.Pointer(faceIdH)=&faceId;
+    varBlock.Pointer(PH)=&P[0];
+    varBlock.Pointer(CsH)=&Cs[0];
+    varBlock.Pointer(CiH)=&Ci[0];
+#endif
     unsigned char* pixel = image.data();
 
 #ifdef SEEXPR_PERFORMANCE
@@ -352,7 +393,6 @@ bool TestImage::generateImage(const std::string& exprStr) {
 #endif
     Timer evalTiming;
     evalTiming.start();
-
     for (int row = 0; row < _height; row++) {
         for (int col = 0; col < _width; col++) {
             u = one_over_width * (col + .5);
@@ -369,7 +409,7 @@ bool TestImage::generateImage(const std::string& exprStr) {
             Ci[1] = 0.4;
             Ci[2] = 0.6;
 
-            const double* result = expr.evalFP();
+            const double* result = expr.evalFP(&varBlock);
 
             pixel[0] = clamp(result[0] * 256.);
             pixel[1] = clamp(result[1] * 256.);
@@ -411,7 +451,7 @@ void evalExpressionFile(const char* filepath) {
             int status = mkdir(outDir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
             ASSERT_EQ(status, 0) << "Failure to mkdir: " << outDir.c_str();
         }
-        std::string outFile(outDir + basename(filepath) + ".png");
+        std::string outFile(outDir + basename(const_cast<char*>(filepath)) + ".png");
         _testImage->writePNGImage(outFile.c_str());
     }
 }
@@ -450,11 +490,13 @@ TEST(perf, noexpr) {
 
 static int forceStaticInitializationToMakeTimingBetter = []() {
     SeExpr2::ExprFunc::init();  // force static initialize
+    #if 0
     ImageSynthExpr e("deepTMA(P,1,1,1,1,1,1,1,1,1,1,1,1,1)");
     if (!e.isValid()) {
         std::cerr << "INVALID!" << std::endl;
     }
-    const double* foo = e.evalFP();
-    std::cout << "foo " << foo[0] << " " << std::endl;
+    const double* foo=e.evalFP();
+    std::cout<<"foo "<<foo[0]<<" "<<std::endl;
+    #endif
     return 1;
 }();

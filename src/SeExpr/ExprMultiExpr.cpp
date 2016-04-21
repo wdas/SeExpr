@@ -19,7 +19,8 @@
 #include <set>
 
 namespace SeExpr2 {
-struct GlobalVal : public ExprVarRef {
+class GlobalVal : public ExprVarRef {
+  public:
     GlobalVal(const std::string &varName, const SeExpr2::ExprType &et) : ExprVarRef(et), varName(varName) {}
     std::set<DExpression *> users;
     std::string varName;

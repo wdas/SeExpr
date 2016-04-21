@@ -1,12 +1,15 @@
+-include Makefile.config
+
 FLAVOR ?= optimize
 prefix ?= $(shell pf-makevar --absolute root)
 libdir ?= $(shell pf-makevar lib)
 
+# TODO: when RHEL6 is fully retired remove th
 # Don't set CXX when native GCC version is 4.8.
-SETCXX := $(shell expr `gcc -dumpversion` \< 4.8)
-ifeq "$(SETCXX)" "1"
-    CXX=/opt/rh/devtoolset-2/root/usr/bin/g++
-endif
+#SETCXX := $(shell expr `gcc -dumpversion` \< 4.8)
+#ifeq "$(SETCXX)" "1"
+#    CXX=/opt/rh/devtoolset-2/root/usr/bin/g++
+#endif
 
 
 ## Temporary staging directory
@@ -20,7 +23,7 @@ export prefix DESTDIR
 all:
 	mkdir -p build/${FLAVOR}
 	export CXX=${CXX}
-	cd build/${FLAVOR} &&  CXX=${CXX} cmake -DENABLE_LLVM_BACKEND=1 -DCMAKE_INSTALL_PREFIX=$(prefix) -DCMAKE_INSTALL_LIBDIR=$(libdir) ../../
+	cd build/${FLAVOR} &&  CXX=${CXX} cmake -DCMAKE_INSTALL_PREFIX=$(prefix) -DCMAKE_INSTALL_LIBDIR=$(libdir) ${EXTRA_CMAKE_ARGS}  ../../
 	$(MAKE) -C build/${FLAVOR} all
 clean:
 	rm -rf build/${FLAVOR} Linux-*
@@ -32,9 +35,9 @@ install: all
 
 test: install
 	python src/tests/imageTestsReportNew.py runall
-	
+
 format:
 	find $(CURDIR)/src -name '*.cpp' | xargs clang-format -i
 	find $(CURDIR)/src -name '*.h' | xargs clang-format -i
-	
+
 precommit: format

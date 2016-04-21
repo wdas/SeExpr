@@ -1,16 +1,16 @@
 /*
  Copyright Disney Enterprises, Inc.  All rights reserved.
- 
+
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License
  and the following modification to it: Section 6 Trademarks.
  deleted and replaced with:
- 
+
  6. Trademarks. This License does not grant permission to use the
  trade names, trademarks, service marks, or product names of the
  Licensor and its affiliates, except as required for reproducing
  the content of the NOTICE file.
- 
+
  You may obtain a copy of the License at
  http://www.apache.org/licenses/LICENSE-2.0
 */
@@ -62,9 +62,9 @@ static const SeExpr2::Expression* Expr;// used for parenting created SeExprOp's
    and free any nodes that were allocated before the error to avoid a
    memory leak. */
 static std::vector<SeExpr2::ExprNode*> ParseNodes;
-inline SeExpr2::ExprNode* Remember(SeExpr2::ExprNode* n,const int startPos,const int endPos) 
+inline SeExpr2::ExprNode* Remember(SeExpr2::ExprNode* n,const int startPos,const int endPos)
     { ParseNodes.push_back(n); n->setPosition(startPos,endPos); return n; }
-inline void Forget(SeExpr2::ExprNode* n) 
+inline void Forget(SeExpr2::ExprNode* n)
     { ParseNodes.erase(std::find(ParseNodes.begin(), ParseNodes.end(), n)); }
 /* These are handy node constructors for 0-3 arguments */
 #define NODE(startPos,endPos,name) Remember(new SeExpr2::Expr##name(Expr),startPos,endPos)
@@ -94,14 +94,14 @@ inline void Forget(SeExpr2::ExprNode* n)
 %token <d> NUMBER
 %token <l> LIFETIME_CONSTANT LIFETIME_UNIFORM LIFETIME_VARYING LIFETIME_ERROR
 %token AddEq SubEq MultEq DivEq ExpEq ModEq
-%token '(' ')' 
+%token '(' ')'
 %left ARROW
 %nonassoc ':'
 %nonassoc '?'
 %left OR
 %left AND
 %left EQ NE
-%left '<' '>' LE GE
+%left '<' '>' SEEXPR_LE SEEXPR_GE
 %left '+' '-'
 %left '*' '/' '%'
 %right UNARY '!' '~'
@@ -306,8 +306,8 @@ e:
     | e NE e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareEqNode, $1, $3,'!'); }
     | e '<' e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'<'); }
     | e '>' e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'>'); }
-    | e LE e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'l'); }
-    | e GE e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'g'); }
+    | e SEEXPR_LE e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'l'); }
+    | e SEEXPR_GE e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'g'); }
     | '+' e %prec UNARY		{ $$ = $2; }
     | '-' e %prec UNARY		{ $$ = NODE2(@$.first_column,@$.last_column,UnaryOpNode, $2, '-'); }
     | '!' e			{ $$ = NODE2(@$.first_column,@$.last_column,UnaryOpNode, $2, '!'); }
@@ -318,12 +318,12 @@ e:
     | e '/' e			{ $$ = NODE3(@$.first_column,@$.last_column,BinaryOpNode, $1, $3, '/'); }
     | e '%' e			{ $$ = NODE3(@$.first_column,@$.last_column,BinaryOpNode, $1, $3, '%'); }
     | e '^' e			{ $$ = NODE3(@$.first_column,@$.last_column,BinaryOpNode, $1, $3, '^'); }
-    | NAME '(' optargs ')'	{ $$ = NODE1(@$.first_column,@$.last_column,FuncNode, $1); 
+    | NAME '(' optargs ')'	{ $$ = NODE1(@$.first_column,@$.last_column,FuncNode, $1);
 				  free($1); // free name string
 				  // add args directly and discard arg list node
 				  $$->addChildren($3); Forget($3); }
     | e ARROW NAME '(' optargs ')'
-    				{ $$ = NODE1(@$.first_column,@$.last_column,FuncNode, $3); 
+    				{ $$ = NODE1(@$.first_column,@$.last_column,FuncNode, $3);
 				  free($3); // free name string
 				  $$->addChild($1);
 				  // add args directly and discard arg list node
@@ -395,7 +395,7 @@ static void yyerror(const char* /*msg*/)
 }
 
 
-/* CallParser - This is our entrypoint from the rest of the expr library. 
+/* CallParser - This is our entrypoint from the rest of the expr library.
    A string is passed in and a parse tree is returned.	If the tree is null,
    an error string is returned.  Any flags set during parsing are passed
    along.
@@ -447,4 +447,3 @@ bool ExprParse(SeExpr2::ExprNode*& parseTree,
     return parseTree != 0;
 }
 }
-

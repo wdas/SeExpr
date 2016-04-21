@@ -95,8 +95,12 @@ INSTALL (TARGETS SeExpr2 DESTINATION ${CMAKE_INSTALL_LIBDIR})
 INSTALL (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ DESTINATION include/SeExpr2
         FILES_MATCHING PATTERN "*.h")
 
+# Setup header files
+FILE(GLOB public_includes "*.h")
+FILE(COPY ${public_includes} DESTINATION ${CMAKE_BINARY_DIR}/include/SeExpr2)
 
 configure_file(ExprConfig.h.in ExprConfig.h)
+FILE(COPY ${CMAKE_CURRENT_BINARY_DIR}/ExprConfig.h DESTINATION ${CMAKE_BINARY_DIR}/include/SeExpr2)
 INSTALL (FILES ${CMAKE_CURRENT_BINARY_DIR}/ExprConfig.h DESTINATION include/SeExpr2)
 
 if (ENABLE_LLVM_BACKEND)

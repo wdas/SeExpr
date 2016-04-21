@@ -15,7 +15,7 @@
  http://www.apache.org/licenses/LICENSE-2.0
 */
 
-#include <Expression.h>
+#include <SeExpr2/Expression.h>
 
 #include <Vec.h>
 #include <cstdlib>

@@ -15,11 +15,11 @@
  http://www.apache.org/licenses/LICENSE-2.0
 */
 
-#include <gtest.h>
+#include <gtest/gtest.h>
 
-#include <Expression.h>
-#include <ExprFunc.h>
-#include <Vec3d.h>
+#include <SeExpr2/Expression.h>
+#include <SeExpr2/ExprFunc.h>
+#include <SeExpr2/Vec3d.h>
 using namespace SeExpr2;
 
 static int invocations = 0;
