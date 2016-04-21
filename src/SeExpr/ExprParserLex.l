@@ -1,16 +1,16 @@
 /*
  Copyright Disney Enterprises, Inc.  All rights reserved.
- 
+
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License
  and the following modification to it: Section 6 Trademarks.
  deleted and replaced with:
- 
+
  6. Trademarks. This License does not grant permission to use the
  trade names, trademarks, service marks, or product names of the
  Licensor and its affiliates, except as required for reproducing
  the content of the NOTICE file.
- 
+
  You may obtain a copy of the License at
  http://www.apache.org/licenses/LICENSE-2.0
 */
@@ -58,7 +58,7 @@ int yypos();
 #define YY_USER_ACTION { \
     yylloc.first_line=lineNumber;yylloc.first_column=columnNumber; \
     columnNumber+=yyleng;\
-    yylloc.last_column=columnNumber;yylloc.last_line=lineNumber;} 
+    yylloc.last_column=columnNumber;yylloc.last_line=lineNumber;}
 
 %}
 
@@ -105,11 +105,11 @@ box			{ yylval.d = 3; return NUMBER; }
 
 {REAL}			{ yylval.d = atof(yytext); return NUMBER; }
 \"(\\\"|[^"\n])*\"	{ /* match quoted string, allow embedded quote, \" */
-			  yylval.s = strdup(&yytext[1]); 
+			  yylval.s = strdup(&yytext[1]);
 			  yylval.s[strlen(yylval.s)-1] = '\0';
                           return STR; }
 \'(\\\'|[^'\n])*\'	{ /* match quoted string, allow embedded quote, \' */
-			  yylval.s = strdup(&yytext[1]); 
+			  yylval.s = strdup(&yytext[1]);
 			  yylval.s[strlen(yylval.s)-1] = '\0';
                           return STR; }
 ${IDENT}		{ yylval.s = strdup(&yytext[1]); return VAR; }
@@ -119,7 +119,7 @@ ${IDENT}"::"{IDENT}	{ yylval.s = strdup(&yytext[1]); return VAR; }
 "\\n"			/* ignore quoted newline */;
 "\\t"			/* ignore quoted tab */;
 [ \t\n]			/* ignore whitespace */;
-\#([^\\\n]|\\[^n\n])*	{ /* match comment */ 
+\#([^\\\n]|\\[^n\n])*	{ /* match comment */
                          int startPos=yypos(),endPos=yypos()+strlen(&yytext[1])+1;
 			  comments->push_back(std::pair<int,int>(startPos,endPos));}
 
@@ -127,12 +127,10 @@ ${IDENT}"::"{IDENT}	{ yylval.s = strdup(&yytext[1]); return VAR; }
 
 %%
 
-/* Gets index of current token (corresponding to yytext).  
+/* Gets index of current token (corresponding to yytext).
    Used for error reporting.
  */
 int yypos()
 {
     return yy_c_buf_p - YY_CURRENT_BUFFER->yy_ch_buf - yyleng;
 }
-
-
