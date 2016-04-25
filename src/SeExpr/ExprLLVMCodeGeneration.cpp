@@ -35,6 +35,14 @@ Function *llvm_getFunction(LLVM_BUILDER Builder) { return Builder.GetInsertBlock
 
 Module *llvm_getModule(LLVM_BUILDER Builder) { return llvm_getFunction(Builder)->getParent(); }
 
+//! Turn LLVM type into a std::string, convenience to work around needing to use raw_string_ostream everywhere
+std::string llvmTypeString(llvm::Type* type){
+    std::string myString;
+    llvm::raw_string_ostream rawStream(myString);
+    type->print(rawStream);
+    return rawStream.str();
+}
+
 bool isVarArg(ExprFuncStandard::FuncType seFuncType) {
     if (seFuncType == ExprFuncStandard::FUNCN || seFuncType == ExprFuncStandard::FUNCNV ||
         seFuncType == ExprFuncStandard::FUNCNVV)
@@ -1051,7 +1059,7 @@ struct VarCodeGeneration {
 
         int dim = varRef->type().dim();
 
-        Type *ptrToPtrTy = llvm::PointerType::get(variableBlock->getType(), 0);
+        Type *ptrToPtrTy = variableBlock->getType();
         Value *variableBlockAsPtrPtr = Builder.CreatePointerCast(variableBlock, ptrToPtrTy);
         Value *variableOffsetIndex = ConstantInt::get(Type::getInt32Ty(llvmContext), variableOffset);
         Value *variableBlockIndirectPtrPtr = Builder.CreateInBoundsGEP(variableBlockAsPtrPtr, variableOffsetIndex);
