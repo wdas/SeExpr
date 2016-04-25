@@ -160,6 +160,15 @@ class Vec {
         return *this;
     }
 
+    template<class Tother,bool refother>
+    bool operator==(const Vec<Tother, d, refother>& other) const{
+        for(int k=0;k<d;k++) if(x[k] != other[k]) return false;
+        return true;
+    }
+
+    template<class Tother,bool refother>
+    bool operator!=(const Vec<Tother, d, refother>& other) const {return !(*this != other);}
+
     // non-const element access
     T& operator[](const int i) { return x[i]; }
 
