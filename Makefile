@@ -40,4 +40,7 @@ format:
 	find $(CURDIR)/src -name '*.cpp' | xargs clang-format -i
 	find $(CURDIR)/src -name '*.h' | xargs clang-format -i
 
+basictest: install
+	lldb $(prefix)/share/test/SeExpr2/testmain2 -- --gtest_filter="BasicTests.*"
+
 precommit: format
