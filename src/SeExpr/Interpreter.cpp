@@ -245,7 +245,7 @@ struct Tuple {
     }
 };
 
-//! build a vector tuple from a bunch of numbers
+//! Assign a floating point to another (NOTE: if src and dest have different dimensions, use Promote)
 template <int d>
 struct AssignOp {
     static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
@@ -603,10 +603,10 @@ int ExprSubscriptNode::buildInterpreter(Interpreter* interpreter) const {
 
 int ExprVarNode::buildInterpreter(Interpreter* interpreter) const {
     if (const ExprLocalVar* var = _localVar) {
-        if (const ExprLocalVar* phi = var->getPhi()) var = phi;
+        //if (const ExprLocalVar* phi = var->getPhi()) var = phi;
         Interpreter::VarToLoc::iterator i = interpreter->varToLoc.find(var);
         if (i != interpreter->varToLoc.end()) return i->second;
-        assert(false);
+        else throw std::runtime_error("Unallocated variable encountered.");
     } else if (const ExprVarRef* var = _var) {
         ExprType type = var->type();
         int destLoc = -1;
@@ -638,65 +638,99 @@ int ExprVarNode::buildInterpreter(Interpreter* interpreter) const {
     return -1;
 }
 
+int ExprLocalVar::buildInterpreter(Interpreter* interpreter) const {
+    return interpreter->varToLoc[this] = _type.isFP() ? interpreter->allocFP(_type.dim()) :
+                                        _type.isString() ? interpreter->allocPtr()
+                                            : -1;
+}
+
 int ExprAssignNode::buildInterpreter(Interpreter* interpreter) const {
-    const ExprLocalVar* var = _localVar;
-    if (const ExprLocalVar* phi = var->getPhi()) var = phi;
-    Interpreter::VarToLoc::iterator i = interpreter->varToLoc.find(var);
+    int loc = _localVar->buildInterpreter(interpreter);
+    assert(loc != -1 && "Invalid type found");
 
     ExprType child0Type = child(0)->type();
+    int op0 = child(0)->buildInterpreter(interpreter);
     if (child0Type.isFP()) {
-        int dimout = child0Type.dim();
-        int loc = -1;
-        if (i == interpreter->varToLoc.end())
-            loc = interpreter->varToLoc[var] = interpreter->allocFP(dimout);
-        else
-            loc = i->second;
-
-        int op0 = child(0)->buildInterpreter(interpreter);
-        interpreter->addOp(getTemplatizedOp<AssignOp>(dimout));
-        interpreter->addOperand(op0);
-        interpreter->addOperand(loc);
-        interpreter->endOp();
-
-        return loc;
-    } else if (child0Type.isString()) {
-        int loc = -1;
-        if (i == interpreter->varToLoc.end())
-            loc = interpreter->varToLoc[var] = interpreter->allocPtr();
-        else
-            loc = i->second;
-
-        int op0 = child(0)->buildInterpreter(interpreter);
+        interpreter->addOp(getTemplatizedOp<AssignOp>(child0Type.dim()));
+    }else if(child0Type.isString()){
         interpreter->addOp(AssignStrOp::f);
-        interpreter->addOperand(op0);
-        interpreter->addOperand(loc);
-        interpreter->endOp();
-        return loc;
+    }else{
+        assert(false && "Invalid desired assign type");
+        return -1;
     }
+    interpreter->addOperand(op0);
+    interpreter->addOperand(loc);
+    interpreter->endOp();
+    return loc;
+}
 
-    assert(false);
-    return -1;
+void copyVarToPromotedPosition(Interpreter* interpreter, ExprLocalVar* varSource, ExprLocalVar* varDest){
+    if(varDest->type().isFP()){
+        int destDim=varDest->type().dim();
+        int sourceDim=varSource->type().dim();
+        if(destDim!=varSource->type().dim()){
+            assert(sourceDim==1);
+            interpreter->addOp(getTemplatizedOp<Promote>(destDim));
+        }else{
+            interpreter->addOp(getTemplatizedOp<AssignOp>(destDim));
+        }
+        interpreter->addOperand(interpreter->varToLoc[varSource]);
+        interpreter->addOperand(interpreter->varToLoc[varDest]);
+        interpreter->endOp();
+    }else if(varDest->type().isString()){
+        interpreter->addOp(AssignStrOp::f);
+        interpreter->addOperand(interpreter->varToLoc[varSource]);
+        interpreter->addOperand(interpreter->varToLoc[varDest]);
+        interpreter->endOp();
+    }else{
+        assert(false && "failed to promote invalid type");
+    }
 }
 
 int ExprIfThenElseNode::buildInterpreter(Interpreter* interpreter) const {
     int condop = child(0)->buildInterpreter(interpreter);
     int basePC = interpreter->nextPC();
 
+    const auto& merges=_varEnv->merge(_varEnvMergeIndex);
+    // Allocate spots for all the join variables
+    // they are before in the sequence of operands, but it doesn't matter
+    // NOTE: at this point the variables thenVar and elseVar have not been codegen'd
+    for(auto& it:merges){
+        ExprLocalVarPhi* finalVar = it.second;
+        if(finalVar->valid()){
+            finalVar->buildInterpreter(interpreter);
+        }
+    }
+
+    // Setup the conditional jump
     interpreter->addOp(CondJmpRelativeIfFalse::f);
     interpreter->addOperand(condop);
     int destFalse = interpreter->addOperand(0);
     interpreter->endOp();
 
+    // Then block (build interpreter and copy variables out then jump to end)
     child(1)->buildInterpreter(interpreter);
-
+    for(auto& it:merges){
+        ExprLocalVarPhi* finalVar = it.second;
+        if(finalVar->valid()){
+            copyVarToPromotedPosition(interpreter,finalVar->_thenVar,finalVar);
+        }
+    }
     interpreter->addOp(JmpRelative::f);
     int destEnd = interpreter->addOperand(0);
     interpreter->endOp();
 
+    // Else block (build interpreter, copy variables out and then we're at end)
     int child2PC = interpreter->nextPC();
-
     child(2)->buildInterpreter(interpreter);
+    for(auto& it:merges){
+        ExprLocalVarPhi* finalVar = it.second;
+        if(finalVar->valid()){
+            copyVarToPromotedPosition(interpreter,finalVar->_elseVar,finalVar);
+        }
+    }
 
+    // Patch the jump addresses in the conditional
     interpreter->opData[destFalse] = child2PC - basePC;
     interpreter->opData[destEnd] = interpreter->nextPC() - (child2PC - 1);
 

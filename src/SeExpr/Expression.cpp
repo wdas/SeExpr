@@ -84,7 +84,7 @@ bool TypePrintExaminer::examine(const ExprNode* examinee) {
 
 Expression::Expression(Expression::EvaluationStrategy evaluationStrategy)
     : _wantVec(true), _expression(""), _evaluationStrategy(evaluationStrategy), _context(&Context::global()),
-      _desiredReturnType(ExprType().FP(3).Varying()), _varEnv(0), _parseTree(0), _isValid(0), _parsed(0), _prepped(0),
+      _desiredReturnType(ExprType().FP(3).Varying()), _parseTree(0), _isValid(0), _parsed(0), _prepped(0),
       _interpreter(0), _llvmEvaluator(new LLVMEvaluator()) {
     ExprFunc::init();
 }
@@ -94,7 +94,7 @@ Expression::Expression(const std::string& e,
                        EvaluationStrategy evaluationStrategy,
                        const Context& context)
     : _wantVec(true), _expression(e), _evaluationStrategy(evaluationStrategy), _context(&context),
-      _desiredReturnType(type), _varEnv(0), _parseTree(0), _isValid(0), _parsed(0), _prepped(0), _interpreter(0),
+      _desiredReturnType(type), _parseTree(0), _isValid(0), _parsed(0), _prepped(0), _interpreter(0),
       _llvmEvaluator(new LLVMEvaluator()) {
     ExprFunc::init();
 }
@@ -129,8 +129,6 @@ void Expression::reset() {
     _llvmEvaluator = new LLVMEvaluator();
     delete _parseTree;
     _parseTree = 0;
-    delete _varEnv;
-    _varEnv = 0;
     if (_evaluationStrategy == UseInterpreter) {
         delete _interpreter;
         _interpreter = 0;
@@ -143,6 +141,7 @@ void Expression::reset() {
     _funcs.clear();
     //_localVars.clear();
     _errors.clear();
+    _envBuilder.reset();
     _threadUnsafeFunctionCalls.clear();
     _comments.clear();
 }
@@ -204,14 +203,13 @@ void Expression::prep() const {
 #endif
     _prepped = true;
     parseIfNeeded();
-    _varEnv = new ExprVarEnv;
 
     bool error = false;
 
     if (!_parseTree) {
         // parse error
         error = true;
-    } else if (!_parseTree->prep(_desiredReturnType.isFP(1), *_varEnv).isValid()) {
+    } else if (!_parseTree->prep(_desiredReturnType.isFP(1), _envBuilder).isValid()) {
         // prep error
         error = true;
     } else if (!ExprType::valuesCompatible(_parseTree->type(), _desiredReturnType)) {
@@ -248,7 +246,9 @@ void Expression::prep() const {
                 std::cerr << "Eval strategy is llvm" << std::endl;
                 debugPrintParseTree();
             }
-            _llvmEvaluator->prepLLVM(_parseTree, _desiredReturnType);
+            if(!_llvmEvaluator->prepLLVM(_parseTree, _desiredReturnType)){
+                error=true;
+            }
         }
 
         // TODO: need promote
@@ -273,13 +273,17 @@ void Expression::prep() const {
         for (unsigned int i = 0; i < _errors.size(); i++) {
             int* bound = std::lower_bound(&*lines.begin(), &*lines.end(), _errors[i].startPos);
             int line = bound - &*lines.begin() + 1;
-            // int column=_errors[i].startPos-lines[line-1];
-            sstream << "  Line " << line << ": " << _errors[i].error << std::endl;
+            int lineStart = line == 1 ? 0 : lines[line-1];
+            int col = _errors[i].startPos - lineStart;
+            sstream << "  Line " << line << " Col " << col << _errors[i].error << std::endl;
         }
         _parseError = std::string(sstream.str());
     }
 
-    if (debugging) std::cerr << "ending with isValid " << _isValid << std::endl;
+    if (debugging){
+        std::cerr << "ending with isValid " << _isValid << std::endl;
+        std::cerr << "parse error \n" << parseError()<<std::endl;
+    }
 }
 
 bool Expression::isVec() const {

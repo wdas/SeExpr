@@ -26,15 +26,12 @@ ExprVarEnv::~ExprVarEnv() { resetAndSetParent(0); }
 
 void ExprVarEnv::resetAndSetParent(ExprVarEnv* parent) {
     _parent = parent;
-    // TODO: can't delete these, because they need to live longer than prep()
-    // for(VarDictType::const_iterator ienv=_map.begin(); ienv != _map.end(); ++ienv)
-    //    delete ienv->second;
 }
 
 ExprLocalVar* ExprVarEnv::find(const std::string& name) {
     VarDictType::iterator iter = _map.find(name);
     if (iter != _map.end())
-        return iter->second;
+        return iter->second.get();
     else if (_parent)
         return _parent->find(name);
     else
@@ -54,7 +51,7 @@ ExprLocalFunctionNode* ExprVarEnv::findFunction(const std::string& name) {
 ExprLocalVar const* ExprVarEnv::lookup(const std::string& name) const {
     VarDictType::const_iterator iter = _map.find(name);
     if (iter != _map.end())
-        return iter->second;
+        return iter->second.get();
     else if (_parent)
         return _parent->lookup(name);
     return 0;
@@ -73,36 +70,43 @@ void ExprVarEnv::addFunction(const std::string& name, ExprLocalFunctionNode* pro
     }
 }
 
-void ExprVarEnv::add(const std::string& name, ExprLocalVar* var) {
+void ExprVarEnv::add(const std::string& name, std::unique_ptr<ExprLocalVar> var) {
     VarDictType::iterator iter = _map.find(name);
-    if (iter != _map.end())
-        iter->second = var;
-    else
-        _map.insert(std::make_pair(name, var));
+    if (iter != _map.end()){
+        //throw std::runtime_error("Invalid creation of existing variable in same scope!");
+        shadowedVariables.emplace_back(std::move(iter->second));
+        iter->second=std::move(var);
+    }else
+        _map.insert(std::make_pair(name, std::move(var)));
 }
 
-void ExprVarEnv::mergeBranches(const ExprType& type, ExprVarEnv& env1, ExprVarEnv& env2) {
+size_t ExprVarEnv::mergeBranches(const ExprType& type, ExprVarEnv& env1, ExprVarEnv& env2) {
     typedef std::map<std::pair<ExprLocalVar*, ExprLocalVar*>, std::string> MakeMap;
     MakeMap phisToMake;
-    for (VarDictType::iterator ienv = env1._map.begin(); ienv != env1._map.end(); ++ienv) {
-        const std::string& name = ienv->first;
-        ExprLocalVar* var = ienv->second;
-        ExprLocalVar* env2Var = env2.find(name);
-        if (env2Var) {
+    /// For each thing in env1 see if env2 has an entry
+    for (auto& ienv: env1._map){
+        const std::string& name = ienv.first;
+        ExprLocalVar* var = ienv.second.get();
+        if(ExprLocalVar* env2Var = env2.find(name)){
             phisToMake[std::make_pair(var, env2Var)] = name;
         }
     }
-    for (VarDictType::iterator ienv = env2._map.begin(); ienv != env2._map.end(); ++ienv) {
-        const std::string& name = ienv->first;
-        ExprLocalVar* var = ienv->second;
-        ExprLocalVar* env1Var = env1.find(name);
-        if (env1Var) {
+    /// For each thing in env2 see if env1 has an entry
+    for (auto& ienv: env2._map){
+        const std::string& name = ienv.first;
+        ExprLocalVar* var = ienv.second.get();
+        if (ExprLocalVar* env1Var = env1.find(name)) {
             phisToMake[std::make_pair(env1Var, var)] = name;
         }
     }
 
+    std::vector<std::pair<std::string,ExprLocalVarPhi*>> mergedVariablesInThisCall;
     for (MakeMap::iterator it = phisToMake.begin(); it != phisToMake.end(); ++it) {
-        add(it->second, new ExprLocalVarPhi(type, it->first.first, it->first.second));
+        std::unique_ptr<ExprLocalVar> newVar(new ExprLocalVarPhi(type, it->first.first, it->first.second));
+        mergedVariablesInThisCall.emplace_back(it->second,static_cast<ExprLocalVarPhi*>(newVar.get()));
+        add(it->second, std::move(newVar));
     }
+    _mergedVariables.emplace_back(std::move(mergedVariablesInThisCall));
+    return _mergedVariables.size()-1;
 }
 }
