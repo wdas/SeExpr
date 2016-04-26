@@ -40,7 +40,7 @@ class LLVMEvaluator {
       public:
         LLVMEvaluationContext(const LLVMEvaluationContext &) = delete;
         LLVMEvaluationContext &operator=(const LLVMEvaluationContext &) = delete;
-
+        ~LLVMEvaluationContext() {delete [] resultData;}
         LLVMEvaluationContext() : functionPtr(nullptr), resultData(nullptr) {}
         void init(void *fp, void *fpLoop, int dim) {
             reset();
@@ -268,8 +268,8 @@ class LLVMEvaluator {
 
         // Setup optimization
         llvm::PassManagerBuilder builder;
-        llvm::legacy::PassManager *pm = new llvm::legacy::PassManager;
-        llvm::legacy::FunctionPassManager *fpm = new llvm::legacy::FunctionPassManager(altModule);
+        std::unique_ptr<llvm::legacy::PassManager> pm(new llvm::legacy::PassManager);
+        std::unique_ptr<llvm::legacy::FunctionPassManager> fpm(new llvm::legacy::FunctionPassManager(altModule));
         builder.OptLevel = 0;
         builder.Inliner = llvm::createAlwaysInlinerPass();
         builder.populateModulePassManager(*pm);

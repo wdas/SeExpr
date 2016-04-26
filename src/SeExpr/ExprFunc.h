@@ -48,6 +48,8 @@ class ExprFunc {
     /** In addition to initializing all builtins, this loads all plugins given in a
         a colon delimited SE_EXPR_PLUGINS environment variable **/
     static void init();
+    //! cleanup all functions
+    static void cleanup();
     //! load all plugins in a given path
     static void loadPlugins(const char* path);
     //! load a given plugin

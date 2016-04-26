@@ -112,6 +112,12 @@ void ExprFunc::init() {
     initInternal();
 }
 
+void ExprFunc::cleanup() {
+    SeExprInternal2::AutoMutex locker(mutex);
+    delete Functions;
+    Functions = nullptr;
+}
+
 const ExprFunc* ExprFunc::lookup(const std::string& name) {
     mutex.lock();
     if (!Functions) initInternal();

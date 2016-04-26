@@ -139,9 +139,6 @@ class ExprNode {
     /// Transfer children from surrogate parent (for parser use only)
     void addChildren(ExprNode* surrogate);
 
-    /// Transfer children from surrogate parent (does not delete surrogate)
-    void addChildren_without_delete(ExprNode* surrogate);
-
     /// @}
 
     /// The type of the node
@@ -242,12 +239,6 @@ class ExprNode {
 
     /// Position line and collumn
     unsigned short int _startPos, _endPos;
-
-    /// Fast evaluation function pointer
-    typedef void (*EvalFunction)(ExprNode* self, const ExprEvalResult& result);
-
-  public:
-    EvalFunction evaluate;
 };
 
 /// Node that contains entire program
@@ -388,9 +379,7 @@ class ExprAssignNode : public ExprNode {
 /// Node that constructs a vector from three scalars
 class ExprVecNode : public ExprNode {
   public:
-    ExprVecNode(const Expression* expr, ExprNode* surrogate) : ExprNode(expr) {
-        addChildren_without_delete(surrogate);
-    };
+    ExprVecNode(const Expression* expr) : ExprNode(expr) {}
 
     virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;

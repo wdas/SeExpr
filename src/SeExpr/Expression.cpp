@@ -85,7 +85,7 @@ bool TypePrintExaminer::examine(const ExprNode* examinee) {
 Expression::Expression(Expression::EvaluationStrategy evaluationStrategy)
     : _wantVec(true), _expression(""), _evaluationStrategy(evaluationStrategy), _context(&Context::global()),
       _desiredReturnType(ExprType().FP(3).Varying()), _parseTree(0), _isValid(0), _parsed(0), _prepped(0),
-      _interpreter(0), _llvmEvaluator(new LLVMEvaluator()) {
+      _interpreter(0), _llvmEvaluator(0) {
     ExprFunc::init();
 }
 
@@ -95,13 +95,12 @@ Expression::Expression(const std::string& e,
                        const Context& context)
     : _wantVec(true), _expression(e), _evaluationStrategy(evaluationStrategy), _context(&context),
       _desiredReturnType(type), _parseTree(0), _isValid(0), _parsed(0), _prepped(0), _interpreter(0),
-      _llvmEvaluator(new LLVMEvaluator()) {
+      _llvmEvaluator(0) {
     ExprFunc::init();
 }
 
 Expression::~Expression() {
     reset();
-    delete _llvmEvaluator;
 }
 
 void Expression::debugPrintInterpreter() const {
@@ -126,7 +125,7 @@ void Expression::debugPrintParseTree() const {
 
 void Expression::reset() {
     delete _llvmEvaluator;
-    _llvmEvaluator = new LLVMEvaluator();
+    _llvmEvaluator=0;
     delete _parseTree;
     _parseTree = 0;
     if (_evaluationStrategy == UseInterpreter) {
@@ -246,6 +245,7 @@ void Expression::prep() const {
                 std::cerr << "Eval strategy is llvm" << std::endl;
                 debugPrintParseTree();
             }
+            _llvmEvaluator=new LLVMEvaluator;
             if(!_llvmEvaluator->prepLLVM(_parseTree, _desiredReturnType)){
                 error=true;
             }
