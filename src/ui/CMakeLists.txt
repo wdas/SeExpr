@@ -101,21 +101,23 @@ IF(DEFINED ENV{RP_qdgui})
     target_link_libraries(SeExpr2Editor ${COLORLIB})
 ENDIF(DEFINED ENV{RP_qdgui})
 
-    # --- DISNEY INTERNAL --- Anim Curves w/DMsg
-    set(ANIM_PATH $ENV{RP_animlib})
-    set(DMSG_PATH $ENV{RP_dmsg})
-    set(DERR_PATH $ENV{RP_derr})
-    include_directories(${ANIM_PATH}/include ${DMSG_PATH}/include
-                        ${DERR_PATH}/include)
-    find_library(ANIMLIB animlib HINT ${ANIM_PATH}/${CMAKE_INSTALL_LIBDIR})
-    find_library(DMSGLIB DMsg HINT ${DMSG_PATH}/${CMAKE_INSTALL_LIBDIR})
-    find_library(DERRLIB DErr HINT ${DERR_PATH}/${CMAKE_INSTALL_LIBDIR})
+    if(DEFINED ENV{RP_animlib} AND DEFINED ENV{RP_dmsg} AND DEFINED ENV{RP_derr})
+        # --- DISNEY INTERNAL --- Anim Curves w/DMsg
+        set(ANIM_PATH $ENV{RP_animlib})
+        set(DMSG_PATH $ENV{RP_dmsg})
+        set(DERR_PATH $ENV{RP_derr})
+        include_directories(${ANIM_PATH}/include ${DMSG_PATH}/include
+        ${DERR_PATH}/include)
+        find_library(ANIMLIB animlib HINT ${ANIM_PATH}/${CMAKE_INSTALL_LIBDIR})
+        find_library(DMSGLIB DMsg HINT ${DMSG_PATH}/${CMAKE_INSTALL_LIBDIR})
+        find_library(DERRLIB DErr HINT ${DERR_PATH}/${CMAKE_INSTALL_LIBDIR})
 
-    target_link_libraries(SeExpr2Editor ${SEEXPR_LIBRARIES}
-                          ${ANIMLIB} # --- DISNEY INTERNAL ---
-                          ${DMSGLIB} # --- DISNEY INTERNAL ---
-                          ${DERRLIB} # --- DISNEY INTERNAL ---
-                          )
+        target_link_libraries(SeExpr2Editor ${SEEXPR_LIBRARIES}
+                              ${ANIMLIB} # --- DISNEY INTERNAL ---
+                              ${DMSGLIB} # --- DISNEY INTERNAL ---
+                              ${DERRLIB} # --- DISNEY INTERNAL ---
+                              )
+    endif()
 
     install(TARGETS SeExpr2Editor DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
