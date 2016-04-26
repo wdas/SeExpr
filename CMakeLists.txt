@@ -81,6 +81,9 @@ if(COMMAND cmake_policy)
       cmake_policy(SET CMP0003 NEW)
     endif(COMMAND cmake_policy)
 
+# macros
+include(src/build/macros.cmake)
+
 ## Setup platform specific helper defines build variants
 IF(WIN32)
   ADD_DEFINITIONS (-DSEEXPR_WIN32)
@@ -104,12 +107,22 @@ ENDIF("$ENV{FLAVOR}" STREQUAL "optimize")
 IF("$ENV{FLAVOR}" STREQUAL "debug")
     SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "type of build" FORCE)
 ENDIF("$ENV{FLAVOR}" STREQUAL "debug")
+
 # Set to release if nothing else defined
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE "Release" CACHE STRING
       "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
       FORCE)
 ENDIF(NOT CMAKE_BUILD_TYPE)
+
+# --- DISNEY INTERNAL --- (use custom color picker)
+IF(DEFINED ENV{RP_qdgui})
+    ADD_DEFINITIONS (-DSEEXPR_USE_QDGUI)
+ENDIF(DEFINED ENV{RP_qdgui})
+
+IF(DEFINED ENV{RP_animlib})
+    ADD_DEFINITIONS (-DSEEXPR_USE_ANIMLIB)
+ENDIF(DEFINED ENV{RP_animlib})
 
 IF(CMAKE_BUILD_TYPE STREQUAL "Release")
    SET(FLAVORDIR "optimize")
@@ -125,16 +138,20 @@ IF (NOT DEFINED CMAKE_INSTALL_PREFIX)
    SET(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/${VARIANT_DIRECTORY}-${FLAVORDIR}")
 ENDIF(NOT DEFINED CMAKE_INSTALL_PREFIX)
 
+## Install location for html documentation
+SET( SEEXPR_HTML_DOC_PATH "share/doc/SeExpr" )
+
 ## Make modules able to see seexpr library
 # Setup environment variable to link seexpr
 SET( SEEXPR_LIBRARIES SeExpr2 )
 SET( SEEXPR_LLVM_LIBRARIES SeExpr2LLVM )
-SET( SEEXPR_EDITOR_LIBRARIES SeExprEditor2 )
+SET( SEEXPR_EDITOR_LIBRARIES SeExpr2Editor )
+
 # make it so seexpr can be found
 INCLUDE_DIRECTORIES(BEFORE ${CMAKE_BINARY_DIR}/include )
 INCLUDE_DIRECTORIES(BEFORE ${CMAKE_BINARY_DIR}/src/SeExpr )
 INCLUDE_DIRECTORIES(BEFORE ${CMAKE_SOURCE_DIR}/src/SeExpr )
-INCLUDE_DIRECTORIES(BEFORE ${CMAKE_SOURCE_DIR}/src/SeExprEditor )
+INCLUDE_DIRECTORIES(BEFORE ${CMAKE_SOURCE_DIR}/src/EditorUI )
 
 # Allowing to use lib64
 IF (NOT DEFINED CMAKE_INSTALL_LIBDIR)
@@ -162,7 +179,7 @@ ENDIF(ENABLE_LLVM_BACKEND)
 
 ## Traverse subdirectories
 ADD_SUBDIRECTORY (src/SeExpr)
-ADD_SUBDIRECTORY (src/SeExprEditor)
+ADD_SUBDIRECTORY (src/ui)
 ADD_SUBDIRECTORY (src/tests)
 #TODO: put this back
 ADD_SUBDIRECTORY (src/py)

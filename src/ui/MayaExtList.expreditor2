@@ -1,0 +1,2 @@
+EXT O expreditor2 "SeExpr2 Expression Editor" \
+    PLUGIN seexpr2MayaAnimCurvePlugin.py
