@@ -51,12 +51,12 @@ class BasicExpression : public SeExpr2::Expression
             DummyFuncX() :SeExpr2::ExprFuncSimple(true) {}
             virtual ~DummyFuncX() {}
 
-            virtual SeExpr2::ExprType prep(SeExpr2::ExprFuncNode* node, bool scalarWanted, SeExpr2::ExprVarEnv& env) const
+            virtual SeExpr2::ExprType prep(SeExpr2::ExprFuncNode* node, bool scalarWanted, SeExpr2::ExprVarEnvBuilder& envBuilder) const
             {
                 bool valid=true;
                 int nargs = node->numChildren();
                 for(int i=0; i<nargs; i++)
-                    valid &= node->checkArg(i, SeExpr2::ExprType().FP(3).Constant(), env);
+                    valid &= node->checkArg(i, SeExpr2::ExprType().FP(3).Constant(), envBuilder);
                 return valid ? SeExpr2::ExprType().FP(3).Varying() : SeExpr2::ExprType().Error();
             }
 
