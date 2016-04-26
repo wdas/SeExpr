@@ -96,8 +96,16 @@ class Vec {
     typedef Vec<T, d, false> T_VEC_VALUE;
     typedef Vec<T, d, true> T_VEC_REF;
 
+    //! Initialize vector value using raw memory
+    template<class T2>
+    static Vec<T,d,false> copy(T2* raw, INVALID_WITH_VECTOR_REFERENCE u = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())){
+        Vec<T,d,false> ret;
+        for(int k=0;k<d;k++) ret[k]=static_cast<T>(raw[k]);
+        return ret;
+    }
+    
     //! Initialize vector to be reference to plain raw data
-    Vec(T* raw, INVALID_WITH_VECTOR_VALUE u = (typename my_enable_if<ref, INVALID_WITH_VECTOR_VALUE>::TYPE()))
+    explicit Vec(T* raw, INVALID_WITH_VECTOR_VALUE u = (typename my_enable_if<ref, INVALID_WITH_VECTOR_VALUE>::TYPE()))
         : x(raw) {}
 
     //! Empty constructor (this is invalid for a reference type)
@@ -147,15 +155,15 @@ class Vec {
     //{typename static_assert<!ref,INVALID_WITH_VECTOR_REFERENCE>::TYPE();}
 
     //! Copy construct. Only valid if we are not going to be reference data!
-    template <bool refother>
-    Vec(const Vec<T, d, refother>& other,
+    template <class T2,bool refother>
+    Vec(const Vec<T2, d, refother>& other,
         INVALID_WITH_VECTOR_REFERENCE u =
             (typename my_enable_if<!ref && refother != ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
         *this = other;
     }
 
-    template <bool refother>
-    Vec& operator=(const Vec<T, d, refother>& other) {
+    template <class T2,bool refother>
+    Vec& operator=(const Vec<T2, d, refother>& other) {
         for (int k = 0; k < d; k++) x[k] = other[k];
         return *this;
     }

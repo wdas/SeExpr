@@ -76,7 +76,6 @@ class ExprLocalVarPhi : public ExprLocalVar {
         // lifetime should be the minimum (error=0,varying=1,uniform=2,constant=3).
         // i.e. you can only guarantee something is constant if the condition, ifvar, and else var are the same
         _type.setLifetime(firstType,secondType,condLife);
-        std::cerr<<"ExprLocalVarPhi type is if="<<condLife.toString()<<" then="<<firstType.toString()<<" else="<<secondType.toString()<<" final="<<_type.toString()<<std::endl;
     }
 
     bool valid() const{

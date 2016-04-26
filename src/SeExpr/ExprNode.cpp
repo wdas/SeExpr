@@ -291,7 +291,6 @@ ExprType ExprIfThenElseNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder
     elseEnv=envBuilder.current();
 
     if (!error && thenType.isValid() && elseType.isValid()) {
-        std::cerr<<"starting merge"<<std::endl;
         ExprVarEnv* newEnv=envBuilder.createDescendant(parentEnv);
         _varEnvMergeIndex=newEnv->mergeBranches(condType, *thenEnv, *elseEnv);
         envBuilder.setCurrent(newEnv);
