@@ -15,6 +15,7 @@
  http://www.apache.org/licenses/LICENSE-2.0
 */
 #include <SeExpr2/Expression.h>
+#include <SeExpr2/ExprFunc.h>
 #include <SeExpr2/Vec.h>
 #include <cstdlib>
 #include <cstdio>
@@ -111,10 +112,6 @@ class CalculatorExpr : public Expression {
     };
 };
 
-void quit(const std::string& str) {
-    if (str == "quit" || str == "q") exit(0);
-};
-
 int main(int argc, char* argv[]) {
 
     std::cout << "SeExpr Basic Calculator";
@@ -131,7 +128,7 @@ int main(int argc, char* argv[]) {
             str = "q";
         };
 
-        quit(str);
+        if(str == "quit" || str == "q") break;
         expr.setDesiredReturnType(ExprType().FP(3));
         expr.setExpr(str);
 
@@ -143,6 +140,6 @@ int main(int argc, char* argv[]) {
             std::cout << "   " << expr.peek();
         }
     }
-
+    ExprFunc::cleanup();
     return 0;
 }

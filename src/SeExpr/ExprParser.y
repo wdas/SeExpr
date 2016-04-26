@@ -297,7 +297,7 @@ optelse:
 /* An expression or sub-expression */
 e:
       '(' e ')'			{ $$ = $2; }
-    | '[' exprlist ']'          { $$ = NODE1(@$.first_column,@$.last_column,VecNode, $2); }
+    | '[' exprlist ']'          { SeExpr2::ExprNode* newNode = NODE(@$.first_column,@$.last_column,VecNode); newNode->addChildren($2); Forget($2); $$=newNode;}
     | e '[' e ']'               { $$ = NODE2(@$.first_column,@$.last_column,SubscriptNode, $1, $3); }
     | e '?' e ':' e		{ $$ = NODE3(@$.first_column,@$.last_column,CondNode, $1, $3, $5); }
     | e OR e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3, '|'); }

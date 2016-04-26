@@ -99,14 +99,6 @@ void ExprNode::addChildren(ExprNode* surrogate) {
     delete surrogate;
 }
 
-void ExprNode::addChildren_without_delete(ExprNode* surrogate) {
-    std::vector<ExprNode*>::iterator iter;
-    for (iter = surrogate->_children.begin(); iter != surrogate->_children.end(); iter++) {
-        addChild(*iter);
-    }
-    surrogate->_children.clear();
-}
-
 ExprType ExprNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     /** Default is to call prep on children (giving AnyType as desired type).
      *  If all children return valid types, returns NoneType.
