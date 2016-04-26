@@ -88,7 +88,12 @@ ELSE(WIN32)
   ADD_DEFINITIONS (-Wall -Wextra -Wno-unused-parameter)
   ADD_DEFINITIONS (-pthread)
 
-  SET( CMAKE_CXX_FLAGS "-fPIC -g -rdynamic -std=c++11 -msse4.1")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -g -std=c++11 -msse4.1")
+  if(NOT APPLE)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -rdynamic")
+  else()
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-date-time")
+  endif()
 ENDIF(WIN32)
 
 ## Choose build options

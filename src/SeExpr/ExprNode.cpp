@@ -107,7 +107,7 @@ void ExprNode::addChildren_without_delete(ExprNode* surrogate) {
     surrogate->_children.clear();
 }
 
-ExprType ExprNode::prep(bool wantScalar, ExprVarEnv& env) {
+ExprType ExprNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     /** Default is to call prep on children (giving AnyType as desired type).
      *  If all children return valid types, returns NoneType.
      *  Otherwise,                          returns ErrorType.
@@ -117,7 +117,7 @@ ExprType ExprNode::prep(bool wantScalar, ExprVarEnv& env) {
 
     _maxChildDim = 0;
     for (int c = 0; c < numChildren(); c++) {
-        error |= !child(c)->prep(false, env).isValid();
+        error |= !child(c)->prep(false, envBuilder).isValid();
         int childDim = child(c)->type().isFP() ? child(c)->type().dim() : 0;
         if (childDim > _maxChildDim) _maxChildDim = childDim;
     }
@@ -130,10 +130,10 @@ ExprType ExprNode::prep(bool wantScalar, ExprVarEnv& env) {
     return _type;
 }
 
-ExprType ExprModuleNode::prep(bool wantScalar, ExprVarEnv& env) {
+ExprType ExprModuleNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     bool error = false;
 
-    for (int c = 0; c < numChildren(); c++) error |= !child(c)->prep(false, env).isValid();
+    for (int c = 0; c < numChildren(); c++) error |= !child(c)->prep(false, envBuilder).isValid();
     if (error)
         setType(ExprType().Error());
     else
@@ -142,7 +142,12 @@ ExprType ExprModuleNode::prep(bool wantScalar, ExprVarEnv& env) {
     return _type;
 }
 
-ExprType ExprPrototypeNode::prep(bool wantScalar, ExprVarEnv& env) {
+ExprType ExprPrototypeNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
+    // TODO: implement prototype
+    bool error=false;
+    checkCondition(false, "Prototypes are currently not supported",error);
+    return ExprType().Error();
+    #if 0
     bool error = false;
 
     if (_retTypeSet) checkCondition(returnType().isValid(), "Function has bad return type", error);
@@ -153,9 +158,9 @@ ExprType ExprPrototypeNode::prep(bool wantScalar, ExprVarEnv& env) {
         checkCondition(type.isValid(), "Function has a parameter with a bad type", error);
         _argTypes.push_back(type);
         ExprLocalVar* localVar = new ExprLocalVar(type);
-        env.add(((ExprVarNode*)child(c))->name(), localVar);
+        envBuilder.current()->add(((ExprVarNode*)child(c))->name(), localVar);
         std::cerr << "after create localvar phi " << localVar->getPhi() << std::endl;
-        child(c)->prep(wantScalar, env);
+        child(c)->prep(wantScalar, envBuilder);
     }
 
     if (error)
@@ -164,6 +169,8 @@ ExprType ExprPrototypeNode::prep(bool wantScalar, ExprVarEnv& env) {
         setType(ExprType().None().Varying());
 
     return _type;
+    #endif
+
 }
 
 void ExprPrototypeNode::addArgTypes(ExprNode* surrogate) {
@@ -188,7 +195,8 @@ void ExprPrototypeNode::addArgs(ExprNode* surrogate) {
 #endif
 }
 
-ExprType ExprLocalFunctionNode::prep(bool wantScalar, ExprVarEnv& env) {
+ExprType ExprLocalFunctionNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
+    #if 0 // TODO: no local functions for now
     bool error = false;
 
     // prep prototype and check for errors
@@ -224,10 +232,16 @@ ExprType ExprLocalFunctionNode::prep(bool wantScalar, ExprVarEnv& env) {
         error = true;
     }
     return _type = error ? ExprType().Error() : ExprType().None().Varying();
+    #else
+    bool error=false;
+    checkCondition(false,"Local functions are currently not supported.",error);
+    return ExprType().Error();
+    #endif
 }
 
 // TODO: write buildInterpreter for local function node
-ExprType ExprLocalFunctionNode::prep(ExprFuncNode* callerNode, bool scalarWanted, ExprVarEnv& env) const {
+ExprType ExprLocalFunctionNode::prep(ExprFuncNode* callerNode, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const {
+#if 0
     bool error = false;
     callerNode->checkCondition(callerNode->numChildren() == prototype()->numChildren(),
                                "Incorrect number of arguments to function call",
@@ -235,15 +249,20 @@ ExprType ExprLocalFunctionNode::prep(ExprFuncNode* callerNode, bool scalarWanted
     for (int i = 0; i < callerNode->numChildren(); i++) {
         // TODO: is this right?
         // bool compatible=ExprType::valuesCompatible(callerNode->child(i)->prep(false,env), prototype()->argType(i));
-        if (!callerNode->checkArg(i, prototype()->argType(i), env)) error = true;
+        if (!callerNode->checkArg(i, prototype()->argType(i), envBuilder)) error = true;
         // callerNode->child(i)->checkCondition(compatible,"Incorrect type for argument",error);
     }
     return error ? ExprType().Error() : prototype()->returnType();
+#else
+    bool error=false;
+    callerNode->checkCondition(false,"Local functions are currently not supported.",error);
+    return ExprType().Error();
+#endif
 }
 
-ExprType ExprBlockNode::prep(bool wantScalar, ExprVarEnv& env) {
-    ExprType assignType = child(0)->prep(false, env);
-    ExprType resultType = child(1)->prep(wantScalar, env);
+ExprType ExprBlockNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
+    ExprType assignType = child(0)->prep(false, envBuilder);
+    ExprType resultType = child(1)->prep(wantScalar, envBuilder);
 
     if (!assignType.isValid())
         setType(ExprType().Error());
@@ -253,25 +272,36 @@ ExprType ExprBlockNode::prep(bool wantScalar, ExprVarEnv& env) {
     return _type;
 }
 
-ExprType ExprIfThenElseNode::prep(bool wantScalar, ExprVarEnv& env) {
+ExprType ExprIfThenElseNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     ExprType condType, thenType, elseType;
 
     bool error = false;
 
-    condType = child(0)->prep(true, env);
+    condType = child(0)->prep(true, envBuilder);
     checkIsFP(condType, error);
 
-    thenEnv.resetAndSetParent(&env);
-    elseEnv.resetAndSetParent(&env);
-
-    thenType = child(1)->prep(false, thenEnv);
-    elseType = child(2)->prep(false, elseEnv);
+    ExprVarEnv* parentEnv=envBuilder.current();
+    ExprVarEnv* thenEnv=envBuilder.createDescendant(parentEnv);
+    ExprVarEnv* elseEnv=envBuilder.createDescendant(parentEnv);
+    envBuilder.setCurrent(thenEnv);
+    thenType = child(1)->prep(false, envBuilder);
+    thenEnv=envBuilder.current();
+    envBuilder.setCurrent(elseEnv);
+    elseType = child(2)->prep(false, envBuilder);
+    elseEnv=envBuilder.current();
 
     if (!error && thenType.isValid() && elseType.isValid()) {
-        env.mergeBranches(condType, thenEnv, elseEnv);
+        std::cerr<<"starting merge"<<std::endl;
+        ExprVarEnv* newEnv=envBuilder.createDescendant(parentEnv);
+        _varEnvMergeIndex=newEnv->mergeBranches(condType, *thenEnv, *elseEnv);
+        envBuilder.setCurrent(newEnv);
         // TODO: aselle insert the phi nodes!
-    } else
+    } else{
+        envBuilder.setCurrent(parentEnv); // since the conditionals broke don't include them in new environment
         error = true;
+    }
+    _varEnv=envBuilder.current();
+
 
     if (error)
         setType(ExprType().Error());
@@ -281,15 +311,13 @@ ExprType ExprIfThenElseNode::prep(bool wantScalar, ExprVarEnv& env) {
     return _type;
 }
 
-ExprType ExprAssignNode::prep(bool wantScalar, ExprVarEnv& env) {
-    _assignedType = child(0)->prep(false, env);
+ExprType ExprAssignNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
+    _assignedType = child(0)->prep(false, envBuilder);
 
-    // TODO: This could add errors to the variable environment
-    _localVar = new ExprLocalVar(child(0)->type());
-    env.add(_name, _localVar);
+    std::unique_ptr<ExprLocalVar> localVar(new ExprLocalVar(child(0)->type()));
+    _localVar = localVar.get();
+    envBuilder.current()->add(_name, std::move(localVar));
     bool error = false;
-    // TODO: fix
-    // checkIsValue(_assignedType,error);
     checkCondition(
         _assignedType.isValid(), std::string("Assignment operation has bad type: ") + _type.toString(), error);
 
@@ -300,12 +328,12 @@ ExprType ExprAssignNode::prep(bool wantScalar, ExprVarEnv& env) {
     return _type;
 }
 
-ExprType ExprVecNode::prep(bool wantScalar, ExprVarEnv& env) {
+ExprType ExprVecNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     bool error = false;
 
     int max_child_d = 0;
     for (int c = 0; c < numChildren(); c++) {
-        ExprType childType = child(c)->prep(true, env);
+        ExprType childType = child(c)->prep(true, envBuilder);
         // TODO: add way to tell what element of vector has the type mismatch
         checkIsFP(childType, error);
         max_child_d = std::max(max_child_d, childType.dim());
@@ -333,11 +361,11 @@ Vec3d ExprVecNode::value() const {
     return Vec3d(0.0);
 };
 
-ExprType ExprUnaryOpNode::prep(bool wantScalar, ExprVarEnv& env) {
+ExprType ExprUnaryOpNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     bool error = false;
 
     // TODO: aselle may want to implicitly demote to FP[1] if wantScalar is true!
-    ExprType childType = child(0)->prep(wantScalar, env);
+    ExprType childType = child(0)->prep(wantScalar, envBuilder);
     checkIsFP(childType, error);
     if (error)
         setType(ExprType().Error());
@@ -346,18 +374,18 @@ ExprType ExprUnaryOpNode::prep(bool wantScalar, ExprVarEnv& env) {
     return _type;
 }
 
-ExprType ExprCondNode::prep(bool wantScalar, ExprVarEnv& env) {
+ExprType ExprCondNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     // TODO: determine if extra environments are necessary, currently not included
     ExprType condType, thenType, elseType;
 
     bool error = false;
 
-    condType = child(0)->prep(true, env);
+    condType = child(0)->prep(true, envBuilder);
 
     checkIsFP(condType, error);
 
-    thenType = child(1)->prep(wantScalar, env);
-    elseType = child(2)->prep(wantScalar, env);
+    thenType = child(1)->prep(wantScalar, envBuilder);
+    elseType = child(2)->prep(wantScalar, envBuilder);
 
     checkIsValue(thenType, error);
     checkIsValue(elseType, error);
@@ -376,16 +404,16 @@ ExprType ExprCondNode::prep(bool wantScalar, ExprVarEnv& env) {
     return _type;
 }
 
-ExprType ExprSubscriptNode::prep(bool wantScalar, ExprVarEnv& env) {
+ExprType ExprSubscriptNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     // TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
     ExprType vecType, scriptType;
 
     bool error = false;
 
-    vecType = child(0)->prep(false, env);  // want scalar is false because we aren't just doing foo[0]
+    vecType = child(0)->prep(false, envBuilder);  // want scalar is false because we aren't just doing foo[0]
     checkIsFP(vecType, error);
 
-    scriptType = child(1)->prep(true, env);
+    scriptType = child(1)->prep(true, envBuilder);
     checkIsFP(scriptType, error);
 
     if (error)
@@ -396,15 +424,15 @@ ExprType ExprSubscriptNode::prep(bool wantScalar, ExprVarEnv& env) {
     return _type;
 }
 
-ExprType ExprCompareEqNode::prep(bool wantScalar, ExprVarEnv& env) {
+ExprType ExprCompareEqNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     // TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
     ExprType firstType, secondType;
 
     bool error = false;
 
-    firstType = child(0)->prep(false, env);
+    firstType = child(0)->prep(false, envBuilder);
     checkIsValue(firstType, error);
-    secondType = child(1)->prep(false, env);
+    secondType = child(1)->prep(false, envBuilder);
     checkIsValue(secondType, error);
 
     if (firstType.isValid() && secondType.isValid()) checkTypesCompatible(firstType, secondType, error);
@@ -417,16 +445,16 @@ ExprType ExprCompareEqNode::prep(bool wantScalar, ExprVarEnv& env) {
     return _type;
 }
 
-ExprType ExprCompareNode::prep(bool wantScalar, ExprVarEnv& env) {
+ExprType ExprCompareNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     // TODO: assume we want scalar
     // TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
     ExprType firstType, secondType;
 
     bool error = false;
 
-    firstType = child(0)->prep(true, env);
+    firstType = child(0)->prep(true, envBuilder);
     checkIsFP(firstType, error);
-    secondType = child(1)->prep(true, env);
+    secondType = child(1)->prep(true, envBuilder);
     checkIsFP(secondType, error);
 
     if (firstType.isValid() && secondType.isValid()) checkTypesCompatible(firstType, secondType, error);
@@ -439,16 +467,16 @@ ExprType ExprCompareNode::prep(bool wantScalar, ExprVarEnv& env) {
     return _type;
 }
 
-ExprType ExprBinaryOpNode::prep(bool wantScalar, ExprVarEnv& env) {
+ExprType ExprBinaryOpNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     // TODO: aselle this probably should set the type to be FP1 if wantScalar is true!
     // TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
     ExprType firstType, secondType;
 
     bool error = false;
 
-    firstType = child(0)->prep(false, env);
+    firstType = child(0)->prep(false, envBuilder);
     checkIsFP(firstType, error);
-    secondType = child(1)->prep(false, env);
+    secondType = child(1)->prep(false, envBuilder);
     checkIsFP(secondType, error);
     checkTypesCompatible(firstType, secondType, error);
 
@@ -460,10 +488,18 @@ ExprType ExprBinaryOpNode::prep(bool wantScalar, ExprVarEnv& env) {
     return _type;
 }
 
-ExprType ExprVarNode::prep(bool wantScalar, ExprVarEnv& env) {
+ExprType ExprVarNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     // ask expression to resolve var
     bool error = false;
-    if ((_localVar = env.find(name()))) {
+    if ((_localVar = envBuilder.current()->find(name()))) {
+        if(_localVar->type().isError()){
+            /// Some friendlier error suggestions
+            if(ExprLocalVarPhi* phi=dynamic_cast<ExprLocalVarPhi*>(_localVar)){
+                if(!phi->_thenVar->type().isError() && !phi->_elseVar->type().isError()){
+                    addError(std::string("Variable ")+name()+" defined in conditionals inconsistently.");
+                }
+            }
+        }
         setType(_localVar->type());
         return _type;
     } else {
@@ -487,17 +523,17 @@ ExprType ExprVarNode::prep(bool wantScalar, ExprVarEnv& env) {
     return _type;
 }
 
-ExprType ExprNumNode::prep(bool wantScalar, ExprVarEnv& env) {
+ExprType ExprNumNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     _type = ExprType().FP(1).Constant();
     return _type;
 }
 
-ExprType ExprStrNode::prep(bool wantScalar, ExprVarEnv& env) {
+ExprType ExprStrNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     _type = ExprType().String().Constant();
     return _type;
 }
 
-ExprType ExprFuncNode::prep(bool wantScalar, ExprVarEnv& env) {
+ExprType ExprFuncNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     bool error = false;
 
     int nargs = numChildren();
@@ -506,9 +542,9 @@ ExprType ExprFuncNode::prep(bool wantScalar, ExprVarEnv& env) {
     // find function using per-expression callback and then global table
     // TODO: put lookup of local functions here
     _func = 0;
-    if (ExprLocalFunctionNode* localFunction = env.findFunction(_name)) {
+    if (ExprLocalFunctionNode* localFunction = envBuilder.current()->findFunction(_name)) {
         _localFunc = localFunction;
-        setTypeWithChildLife(localFunction->prep(this, wantScalar, env));
+        setTypeWithChildLife(localFunction->prep(this, wantScalar, envBuilder));
         // TODO: we need to type check arguments here
     } else {
         if (!_func) _func = _expr->resolveFunc(_name);
@@ -521,10 +557,10 @@ ExprType ExprFuncNode::prep(bool wantScalar, ExprVarEnv& env) {
                 nargs <= _func->maxArgs() || _func->maxArgs() < 0, "Too many args for function " + _name, error)) {
 
             const ExprFuncX* funcx = _func->funcx();
-            ExprType type = funcx->prep(this, wantScalar, env);
+            ExprType type = funcx->prep(this, wantScalar, envBuilder);
             setTypeWithChildLife(type);
         } else {                         // didn't match num args or function not found
-            ExprNode::prep(false, env);  // prep arguments anyways to catch as many errors as possible!
+            ExprNode::prep(false, envBuilder);  // prep arguments anyways to catch as many errors as possible!
             setTypeWithChildLife(ExprType().Error());
         }
     }
@@ -542,12 +578,8 @@ int ExprFuncNode::buildInterpreter(Interpreter* interpreter) const {
     return 0;
 }
 
-bool ExprFuncNode::checkArg(int arg, ExprType type, ExprVarEnv& env) {
-    ExprType childType = child(arg)->prep(type.isFP(1), env);
-#if 0
-    // debug
-    std::cerr<<"we have "<<childType.toString()<<" and want "<<type.toString()<<std::endl;
-#endif
+bool ExprFuncNode::checkArg(int arg, ExprType type, ExprVarEnvBuilder& envBuilder) {
+    ExprType childType = child(arg)->prep(type.isFP(1), envBuilder);
     _promote[arg] = 0;
     if (ExprType::valuesCompatible(type, childType) && type.isLifeCompatible(childType)) {
         if (type.isFP() && type.dim() > childType.dim()) {

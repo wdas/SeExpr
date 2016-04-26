@@ -20,7 +20,7 @@
 
 namespace SeExpr2 {
 
-ExprType ExprFuncStandard::prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnv& env) const {
+ExprType ExprFuncStandard::prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const {
     if (_funcType < VEC) {
         // scalar argumented functions returning scalars
         //   use promote protocol...
@@ -30,7 +30,7 @@ ExprType ExprFuncStandard::prep(ExprFuncNode* node, bool scalarWanted, ExprVarEn
         bool multiInvoke = !scalarWanted;
         ExprType retType;
         for (int c = 0; c < node->numChildren(); c++) {
-            ExprType childType = node->child(c)->prep(scalarWanted, env);
+            ExprType childType = node->child(c)->prep(scalarWanted, envBuilder);
             int childDim = childType.dim();
             node->child(c)->checkIsFP(childType, error);
             retType.setLifetime(childType);
@@ -49,7 +49,7 @@ ExprType ExprFuncStandard::prep(ExprFuncNode* node, bool scalarWanted, ExprVarEn
         bool error = false;
         ExprType retType;
         for (int c = 0; c < node->numChildren(); c++) {
-            ExprType childType = node->child(c)->prep(scalarWanted, env);
+            ExprType childType = node->child(c)->prep(scalarWanted, envBuilder);
             int childDim = childType.dim();
             node->child(c)->checkIsFP(childType, error);
             node->child(c)->checkCondition(childDim == 1 || childDim == 3, "Expected float or FP[3]", error);

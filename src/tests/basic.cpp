@@ -135,8 +135,82 @@ TEST(BasicTests, LogicalShortCircuiting) {
     testExpr("countInvocations(0)||countInvocations(0)||countInvocations(0)", 0, 3);
 }
 
+TEST(BasicTests,IfThenElse){
+    auto doTest=[](const std::string& eStr,ExprType desiredType,bool shouldBeValid,std::function<void(const double*)> check){
+        SimpleExpression e(eStr);
+        e.x.value=0;
+        if(Expression::debugging){
+            std::cerr<<"---------------------------------------------------------"<<std::endl;
+            std::cerr<<eStr<<std::endl;
+        }
+        e.setDesiredReturnType(desiredType);
+        bool valid=e.isValid();
+        if(!valid){
+            if(Expression::debugging){
+                std::cerr<<"***Failed expr***";
+                std::cerr<<e.parseError()<<std::endl;
+            }
+            if(shouldBeValid){
+                return false;
+            }
+        }else if(valid){
+            const double* f=e.evalFP();
+            check(f);
+        }
+        return true;
+    };
+
+    // Check that variables not assigned in both are eliminated!
+    doTest("if(x){a=3;b=a;} else {c=[1,2,3];b=c;d=c;} b+[9,8,2]",TypeVec(3),false,[](const double* f){
+        Vec<const double,3,true> val(f);
+        Vec<double,3> ref(10,10,5);
+        EXPECT_EQ(val,ref);
+    });
+
+    doTest("if(x){a=3;b=a;} else {c=[1,2,3];b=c;} c+[9,8,2]",TypeVec(3),false,[](const double*){});
+
+    // Check incompatible output types
+    doTest("if(x){a=3;b=a;} else {c=[1,2,3];b=c;} c+[9,8,2]",TypeVec(2),false,[](const double*){});
+
+    // Check incompatible output types
+    doTest("if(x){b=[1,2];} else {b=[1,2,3]} b[0]]",TypeVec(2),false,[](const double*){});
+
+    // Check same business but with empty if
+    doTest("a=[1,2];if(x){} else {a=[1,2,3];} a[0]",TypeVec(3),false,[](const double*){});
+
+    // Check same business but with empty if
+    doTest("a=[1,2];if(x){} else {a=[1,2,3];} a[0]",TypeVec(2),false,[](const double*){});
+
+    // Check same business but with empty if
+    doTest("a=[1,2];if(x){} else {a=[1,2,3];} [5,6]",TypeVec(2),true,[](const double* f){
+        Vec<const double,2,true> val(f);
+        Vec<double,2> ref(5,6);
+        EXPECT_EQ(val,ref);
+    });
+
+    // Check same business but with empty if
+    doTest("a=[1,2];if(x){a=[1,2,3,4];}else{a=[4,3,2,1];} c0=a[0]+a[1]+a[2]+a[3];if(x){a=5;} else {a=[1,2,3];} [c0,a[0]+a[1]+a[2],0]",
+        TypeVec(3),true,[](const double* f){
+        Vec<const double,3,true> val(f);
+        Vec<double,3> ref(10,6,0);
+        EXPECT_EQ(val,ref);
+    });
+
+    // Check same business but with empty if
+    doTest("if(x){a=3;b=a;} else {c=[1,2];b=c;} b+[9,9]",
+        TypeVec(2),true,[](const double* f){
+        Vec<const double,2,true> val(f);
+        Vec<double,2> ref(10,11);
+        EXPECT_EQ(val,ref);
+    });
+
+}
+
 TEST(BasicTests, NestedTernary) {
     SimpleExpression expr1("1?2:3?4:5");
+    if(!expr1.isValid()){
+        throw std::runtime_error("parse error:\n"+expr1.parseError());
+    }
     if (!expr1.isValid()) throw std::runtime_error(expr1.parseError());
     Vec<double, 1, true> val(const_cast<double*>(expr1.evalFP()));
     EXPECT_EQ(val[0], 2);

@@ -38,9 +38,9 @@ class RandFuncX : public ExprFuncSimple {
         std::string format;
     };
 
-    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnv& env) const {
+    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const {
         bool valid = true;
-        for (int i = 0; i < node->numChildren(); i++) valid &= node->checkArg(i, ExprType().FP(1).Varying(), env);
+        for (int i = 0; i < node->numChildren(); i++) valid &= node->checkArg(i, ExprType().FP(1).Varying(), envBuilder);
         return valid ? ExprType().FP(1).Varying() : ExprType().Error();
     }
 
@@ -65,10 +65,10 @@ class MapFuncX : public ExprFuncSimple {
         std::string format;
     };
 
-    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnv& env) const {
+    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const {
         bool valid = true;
-        valid &= node->checkArg(0, ExprType().String().Constant(), env);
-        for (int i = 1; i < node->numChildren(); i++) valid &= node->checkArg(i, ExprType().FP(1).Varying(), env);
+        valid &= node->checkArg(0, ExprType().String().Constant(), envBuilder);
+        for (int i = 1; i < node->numChildren(); i++) valid &= node->checkArg(i, ExprType().FP(1).Varying(), envBuilder);
         return valid ? ExprType().FP(3).Varying() : ExprType().Error();
     }
 
@@ -97,10 +97,10 @@ class TriplanarFuncX : public ExprFuncSimple {
         std::string format;
     };
 
-    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnv& env) const {
+    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const {
         bool valid = true;
-        valid &= node->checkArg(0, ExprType().String().Constant(), env);
-        for (int i = 1; i < node->numChildren(); i++) valid &= node->checkArg(i, ExprType().FP(1).Varying(), env);
+        valid &= node->checkArg(0, ExprType().String().Constant(), envBuilder);
+        for (int i = 1; i < node->numChildren(); i++) valid &= node->checkArg(i, ExprType().FP(1).Varying(), envBuilder);
         return valid ? ExprType().FP(3).Varying() : ExprType().Error();
     }
 

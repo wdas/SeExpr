@@ -42,6 +42,7 @@
 #include <llvm/IR/PassManager.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Function.h>
+#include "llvm/IR/Verifier.h"
 #include <llvm/Transforms/IPO/PassManagerBuilder.h>
 #include <llvm/LinkAllPasses.h>
 #include <llvm/Support/DynamicLibrary.h>

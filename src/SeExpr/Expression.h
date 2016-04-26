@@ -266,7 +266,7 @@ class Expression {
     mutable ExprType _desiredReturnType;
 
     /** Variable environment */
-    mutable ExprVarEnv* _varEnv;
+    mutable ExprVarEnvBuilder _envBuilder;
     /** Parse tree (null if syntax is bad). */
     mutable ExprNode* _parseTree;
 
@@ -310,7 +310,7 @@ class Expression {
     mutable LLVMEvaluator* _llvmEvaluator;
 
     // Var block creator
-    const VarBlockCreator* _varBlockCreator;
+    const VarBlockCreator* _varBlockCreator = 0;
 
     /* internal */ public:
 

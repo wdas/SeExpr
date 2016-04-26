@@ -31,8 +31,8 @@ class LLVMEvaluator {
     template <class T>
     class LLVMEvaluationContext {
       private:
-        typedef void (*FunctionPtr)(T *, char **, size_t);
-        typedef void (*FunctionPtrMultiple)(char **, int, size_t, size_t);
+        typedef void (*FunctionPtr)(T *, char **, uint32_t);
+        typedef void (*FunctionPtrMultiple)(char **, uint32_t, uint32_t, uint32_t);
         FunctionPtr functionPtr;
         FunctionPtrMultiple functionPtrMultiple;
         T *resultData;
@@ -58,7 +58,7 @@ class LLVMEvaluator {
             functionPtr(resultData, varBlock ? varBlock->data() : nullptr, varBlock ? varBlock->indirectIndex : 0);
             return resultData;
         }
-        const void operator()(VarBlock *varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) {
+        void operator()(VarBlock *varBlock, size_t outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) {
             assert(functionPtr && resultData);
             functionPtrMultiple(varBlock ? varBlock->data() : nullptr, outputVarBlockOffset, rangeStart, rangeEnd);
         }
@@ -75,7 +75,7 @@ class LLVMEvaluator {
     const char *evalStr(VarBlock *varBlock) { return *(*_llvmEvalStr)(varBlock); }
 
     const double *evalFP(VarBlock *varBlock) { return (*_llvmEvalFP)(varBlock); }
-    void evalMultiple(VarBlock *varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) {
+    void evalMultiple(VarBlock *varBlock, uint32_t outputVarBlockOffset, uint32_t rangeStart, uint32_t rangeEnd) {
         return (*_llvmEvalFP)(varBlock, outputVarBlockOffset, rangeStart, rangeEnd);
     }
 
@@ -83,7 +83,7 @@ class LLVMEvaluator {
         // TheModule->dump();
     }
 
-    void prepLLVM(ExprNode *parseTree, ExprType desiredReturnType) {
+    bool prepLLVM(ExprNode *parseTree, ExprType desiredReturnType) {
         using namespace llvm;
         InitializeNativeTarget();
         InitializeNativeTargetAsmPrinter();
@@ -100,7 +100,7 @@ class LLVMEvaluator {
         bool desireFP = desiredReturnType.isFP();
         Type *ParamTys[] = {desireFP ? Type::getDoublePtrTy(*_llvmContext)
                                      : PointerType::getUnqual(Type::getInt8PtrTy(*_llvmContext)),
-                            Type::getDoublePtrTy(*_llvmContext), Type::getInt64Ty(*_llvmContext), };
+                            PointerType::get(Type::getDoublePtrTy(*_llvmContext),0), Type::getInt32Ty(*_llvmContext), };
         FunctionType *FT = FunctionType::get(Type::getVoidTy(*_llvmContext), ParamTys, false);
         Function *F = Function::Create(FT, Function::ExternalLinkage, uniqueName + "_func", TheModule.get());
         F->addAttribute(llvm::AttributeSet::FunctionIndex, llvm::Attribute::AlwaysInline);
@@ -148,7 +148,7 @@ class LLVMEvaluator {
 
         // write a new function
         Type *LOOPParamTys[] = {Type::getInt8PtrTy(*_llvmContext), Type::getInt32Ty(*_llvmContext),
-                                Type::getInt64Ty(*_llvmContext),   Type::getInt64Ty(*_llvmContext), };
+                                Type::getInt32Ty(*_llvmContext),   Type::getInt32Ty(*_llvmContext), };
         FunctionType *FTLOOP = FunctionType::get(Type::getVoidTy(*_llvmContext), LOOPParamTys, false);
 
         Function *FLOOP =
@@ -163,8 +163,8 @@ class LLVMEvaluator {
         }
         {
             // Local variables
-            Value *dimValue = ConstantInt::get(Type::getInt64Ty(*_llvmContext), dimDesired);
-            Value *oneValue = ConstantInt::get(Type::getInt64Ty(*_llvmContext), 1);
+            Value *dimValue = ConstantInt::get(Type::getInt32Ty(*_llvmContext), dimDesired);
+            Value *oneValue = ConstantInt::get(Type::getInt32Ty(*_llvmContext), 1);
 
             // Basic blocks
             BasicBlock *entryBlock = BasicBlock::Create(*_llvmContext, "entry", FLOOP);
@@ -186,11 +186,11 @@ class LLVMEvaluator {
             ++argIterator;
 
             // Allocate Variables
-            Value *rangeStartVar = Builder.CreateAlloca(Type::getInt64Ty(*_llvmContext), oneValue, "rangeStartVar");
-            Value *rangeEndVar = Builder.CreateAlloca(Type::getInt64Ty(*_llvmContext), oneValue, "rangeEndVar");
-            Value *indexVar = Builder.CreateAlloca(Type::getInt64Ty(*_llvmContext), oneValue, "indexVar");
+            Value *rangeStartVar = Builder.CreateAlloca(Type::getInt32Ty(*_llvmContext), oneValue, "rangeStartVar");
+            Value *rangeEndVar = Builder.CreateAlloca(Type::getInt32Ty(*_llvmContext), oneValue, "rangeEndVar");
+            Value *indexVar = Builder.CreateAlloca(Type::getInt32Ty(*_llvmContext), oneValue, "indexVar");
             Value *outputVarBlockOffsetVar =
-                Builder.CreateAlloca(Type::getInt64Ty(*_llvmContext), oneValue, "outputVarBlockOffsetVar");
+                Builder.CreateAlloca(Type::getInt32Ty(*_llvmContext), oneValue, "outputVarBlockOffsetVar");
             Type *doublePtrPtrTy = llvm::PointerType::get(Type::getDoublePtrTy(*_llvmContext), 0);
             Value *varBlockDoublePtrPtrVar = Builder.CreateAlloca(doublePtrPtrTy, oneValue, "varBlockDoublePtrPtrVar");
             // Value*
@@ -257,6 +257,15 @@ class LLVMEvaluator {
                                      .create());
 
         altModule->setDataLayout(TheExecutionEngine->getDataLayout());
+
+        // [verify]
+        std::string errorStr;
+        llvm::raw_string_ostream raw(errorStr);
+        if(llvm::verifyModule(*altModule,&raw)){
+           parseTree->addError(raw.str());
+           return false;
+        }
+
         // Setup optimization
         llvm::PassManagerBuilder builder;
         llvm::legacy::PassManager *pm = new llvm::legacy::PassManager;
@@ -292,6 +301,8 @@ class LLVMEvaluator {
             std::cerr << "Pre verified LLVM byte code " << std::endl;
             altModule->dump();
         }
+
+        return true;
     }
 
     std::string getUniqueName() const {

@@ -87,7 +87,7 @@ class ExprNode {
 
     /// Prepare the node (for parser use only).  See the discussion at
     /// the start of SeExprNode.cpp for more info.
-    virtual ExprType prep(bool dontNeedScalar, ExprVarEnv& env);
+    virtual ExprType prep(bool dontNeedScalar, ExprVarEnvBuilder& envBuilder);
 
     /// builds an interpreter. Returns the location index for the evaluated data
     virtual int buildInterpreter(Interpreter* interpreter) const;
@@ -114,14 +114,14 @@ class ExprNode {
     int numChildren() const { return _children.size(); }
 
     /// Get 0 indexed child
-    const ExprNode* child(int i) const { return _children[i]; }
+    const ExprNode* child(size_t i) const { return _children[i]; }
 
     /// Get 0 indexed child
-    ExprNode* child(int i) { return _children[i]; }
+    ExprNode* child(size_t i) { return _children[i]; }
 
     /// Swap children, do not use unless you know what you are doing
-    void swapChildren(int i, int j) {
-        assert(i != j && i < _children.size() && j < _children.size() && i >= 0 && j >= 0);
+    void swapChildren(size_t i, size_t j) {
+        assert(i != j && i < _children.size() && j < _children.size());
         std::swap(_children[i], _children[j]);
     }
 
@@ -255,7 +255,7 @@ class ExprModuleNode : public ExprNode {
   public:
     ExprModuleNode(const Expression* expr) : ExprNode(expr) {}
 
-    virtual ExprType prep(bool wantScalar, ExprVarEnv& env);
+    virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
     virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 };
@@ -269,7 +269,7 @@ class ExprPrototypeNode : public ExprNode {
     ExprPrototypeNode(const Expression* expr, const std::string& name)
         : ExprNode(expr), _name(name), _retTypeSet(false), _argTypes() {}
 
-    virtual ExprType prep(bool wantScalar, ExprVarEnv& env);
+    virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
 
     void addArgTypes(ExprNode* surrogate);
     void addArgs(ExprNode* surrogate);
@@ -319,9 +319,9 @@ class ExprLocalFunctionNode : public ExprNode {
         : ExprNode(expr, prototype, block) {}
 
     /// Preps the definition of this site
-    virtual ExprType prep(bool wantScalar, ExprVarEnv& env);
+    virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     /// Preps a caller (i.e. we use callerNode to check arguments)
-    virtual ExprType prep(ExprFuncNode* callerNode, bool scalarWanted, ExprVarEnv& env) const;
+    virtual ExprType prep(ExprFuncNode* callerNode, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const;
     /// TODO: Accessor for prototype (probably not needed when we use prep right)
     const ExprPrototypeNode* prototype() const { return static_cast<const ExprPrototypeNode*>(child(0)); }
 
@@ -341,7 +341,7 @@ class ExprBlockNode : public ExprNode {
   public:
     ExprBlockNode(const Expression* expr, ExprNode* a, ExprNode* b) : ExprNode(expr, a, b) {}
 
-    virtual ExprType prep(bool wantScalar, ExprVarEnv& env);
+    virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
     virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 };
@@ -349,13 +349,14 @@ class ExprBlockNode : public ExprNode {
 /// Node that computes local variables before evaluating expression
 class ExprIfThenElseNode : public ExprNode {
   public:
-    ExprIfThenElseNode(const Expression* expr, ExprNode* a, ExprNode* b, ExprNode* c) : ExprNode(expr, a, b, c) {}
+    ExprIfThenElseNode(const Expression* expr, ExprNode* a, ExprNode* b, ExprNode* c) : ExprNode(expr, a, b, c), _varEnv(nullptr), _varEnvMergeIndex(0) {}
 
-    virtual ExprType prep(bool wantScalar, ExprVarEnv& env);
+    virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
     virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 
-    ExprVarEnv thenEnv, elseEnv;
+    ExprVarEnv* _varEnv;
+    size_t _varEnvMergeIndex;
 };
 
 /// Node that compute a local variable assignment
@@ -364,7 +365,7 @@ class ExprAssignNode : public ExprNode {
     ExprAssignNode(const Expression* expr, const char* name, ExprNode* e)
         : ExprNode(expr, e), _name(name), _localVar(0) {}
 
-    virtual ExprType prep(bool wantScalar, ExprVarEnv& env);
+    virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
     // virtual void eval(Vec3d& result) const;
     virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
@@ -391,7 +392,7 @@ class ExprVecNode : public ExprNode {
         addChildren_without_delete(surrogate);
     };
 
-    virtual ExprType prep(bool wantScalar, ExprVarEnv& env);
+    virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
     virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 
@@ -404,7 +405,7 @@ class ExprUnaryOpNode : public ExprNode {
     //! Construct with specific op ('!x' is logical negation, '~x' is 1-x, '-x' is -x)
     ExprUnaryOpNode(const Expression* expr, ExprNode* a, char op) : ExprNode(expr, a), _op(op) {}
 
-    virtual ExprType prep(bool wantScalar, ExprVarEnv& env);
+    virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
     virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 
@@ -416,7 +417,7 @@ class ExprCondNode : public ExprNode {
   public:
     ExprCondNode(const Expression* expr, ExprNode* a, ExprNode* b, ExprNode* c) : ExprNode(expr, a, b, c) {}
 
-    virtual ExprType prep(bool wantScalar, ExprVarEnv& env);
+    virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
     virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 };
@@ -426,7 +427,7 @@ class ExprSubscriptNode : public ExprNode {
   public:
     ExprSubscriptNode(const Expression* expr, ExprNode* a, ExprNode* b) : ExprNode(expr, a, b) {}
 
-    virtual ExprType prep(bool wantScalar, ExprVarEnv& env);
+    virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
     virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 };
@@ -436,7 +437,7 @@ class ExprCompareEqNode : public ExprNode {
   public:
     ExprCompareEqNode(const Expression* expr, ExprNode* a, ExprNode* b, char op) : ExprNode(expr, a, b), _op(op) {}
 
-    virtual ExprType prep(bool wantScalar, ExprVarEnv& env);
+    virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
     virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 
@@ -448,7 +449,7 @@ class ExprCompareNode : public ExprNode {
   public:
     ExprCompareNode(const Expression* expr, ExprNode* a, ExprNode* b, char op) : ExprNode(expr, a, b), _op(op) {}
 
-    virtual ExprType prep(bool wantScalar, ExprVarEnv& env);
+    virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
     virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 
@@ -461,7 +462,7 @@ class ExprBinaryOpNode : public ExprNode {
   public:
     ExprBinaryOpNode(const Expression* expr, ExprNode* a, ExprNode* b, char op) : ExprNode(expr, a, b), _op(op) {}
 
-    virtual ExprType prep(bool wantScalar, ExprVarEnv& env);
+    virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
     virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 
@@ -476,7 +477,7 @@ class ExprVarNode : public ExprNode {
     ExprVarNode(const Expression* expr, const char* name, const ExprType& type)
         : ExprNode(expr, type), _name(name), _localVar(0), _var(0) {}
 
-    virtual ExprType prep(bool wantScalar, ExprVarEnv& env);
+    virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
     virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
     const char* name() const { return _name.c_str(); }
@@ -494,7 +495,7 @@ class ExprNumNode : public ExprNode {
   public:
     ExprNumNode(const Expression* expr, double val) : ExprNode(expr), _val(val) {}
 
-    virtual ExprType prep(bool wantScalar, ExprVarEnv& env);
+    virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
     virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
     double value() const {
@@ -510,7 +511,7 @@ class ExprStrNode : public ExprNode {
   public:
     ExprStrNode(const Expression* expr, const char* str) : ExprNode(expr), _str(str) {}
 
-    virtual ExprType prep(bool wantScalar, ExprVarEnv& env);
+    virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
     virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
     const char* str() const { return _str.c_str(); }
@@ -530,12 +531,12 @@ class ExprFuncNode : public ExprNode {
     virtual ~ExprFuncNode() {/* TODO: fix delete _data;*/
     }
 
-    virtual ExprType prep(bool wantScalar, ExprVarEnv& env);
+    virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
     virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 
     const char* name() const { return _name.c_str(); }
-    bool checkArg(int argIndex, ExprType type, ExprVarEnv& env);
+    bool checkArg(int argIndex, ExprType type, ExprVarEnvBuilder& envBuilder);
 
 #if 0
     virtual void eval(Vec3d& result) const;

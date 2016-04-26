@@ -989,7 +989,7 @@ class CachedVoronoiFunc : public ExprFuncSimple {
     typedef Vec3d VoronoiFunc(VoronoiPointData& data, int n, const Vec3d* args);
     CachedVoronoiFunc(VoronoiFunc* vfunc) : ExprFuncSimple(true), _vfunc(vfunc) {}
 
-    virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnv& env) const {
+    virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const {
         // check number of arguments
         int nargs = node->numChildren();
         if (nargs < 1 || nargs > 7) {
@@ -998,8 +998,8 @@ class CachedVoronoiFunc : public ExprFuncSimple {
         }
 
         bool valid = true;
-        valid &= node->checkArg(0, ExprType().FP(3).Varying(), env);
-        for (int i = 1; i < nargs; i++) valid &= node->checkArg(i, ExprType().FP(1).Constant(), env);
+        valid &= node->checkArg(0, ExprType().FP(3).Varying(), envBuilder);
+        for (int i = 1; i < nargs; i++) valid &= node->checkArg(i, ExprType().FP(1).Constant(), envBuilder);
         return valid ? ExprType().FP(3).Varying() : ExprType().Error();
     }
 
@@ -1268,7 +1268,7 @@ class CurveFuncX : public ExprFuncSimple {
   public:
     CurveFuncX() : ExprFuncSimple(true) {}
 
-    virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnv& env) const {
+    virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const {
         // check number of arguments
         int nargs = node->numChildren();
         if ((nargs - 1) % 3) {
@@ -1277,11 +1277,11 @@ class CurveFuncX : public ExprFuncSimple {
         }
 
         bool valid = true;
-        valid &= node->checkArg(0, ExprType().FP(1).Varying(), env);
+        valid &= node->checkArg(0, ExprType().FP(1).Varying(), envBuilder);
         for (int i = 1; i < nargs; i += 3) {
-            valid &= node->checkArg(i, ExprType().FP(1).Constant(), env);
-            valid &= node->checkArg(i + 1, ExprType().FP(1).Constant(), env);
-            valid &= node->checkArg(i + 2, ExprType().FP(1).Constant(), env);
+            valid &= node->checkArg(i, ExprType().FP(1).Constant(), envBuilder);
+            valid &= node->checkArg(i + 1, ExprType().FP(1).Constant(), envBuilder);
+            valid &= node->checkArg(i + 2, ExprType().FP(1).Constant(), envBuilder);
         }
         return valid ? ExprType().FP(1).Varying() : ExprType().Error();
     }
@@ -1318,7 +1318,7 @@ static const char* curve_docstring =
     "4-monotone (non oscillating spline)";
 
 class CCurveFuncX : public ExprFuncSimple {
-    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnv& env) const {
+    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const {
         // check number of arguments
         int nargs = node->numChildren();
         if ((nargs - 1) % 3) {
@@ -1327,11 +1327,11 @@ class CCurveFuncX : public ExprFuncSimple {
         }
 
         bool valid = true;
-        valid &= node->checkArg(0, ExprType().FP(1).Varying(), env);
+        valid &= node->checkArg(0, ExprType().FP(1).Varying(), envBuilder);
         for (int i = 1; i < nargs; i += 3) {
-            valid &= node->checkArg(i, ExprType().FP(1).Constant(), env);
-            valid &= node->checkArg(i + 1, ExprType().FP(3).Constant(), env);
-            valid &= node->checkArg(i + 2, ExprType().FP(1).Constant(), env);
+            valid &= node->checkArg(i, ExprType().FP(1).Constant(), envBuilder);
+            valid &= node->checkArg(i + 1, ExprType().FP(3).Constant(), envBuilder);
+            valid &= node->checkArg(i + 2, ExprType().FP(1).Constant(), envBuilder);
         }
         return valid ? ExprType().FP(3).Varying() : ExprType().Error();
     }
@@ -1378,12 +1378,12 @@ class GetVar : public ExprFuncSimple {
         Data(const ExprType type) : type(type) {}
     };
 
-    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnv& env) const {
+    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const {
         bool valid = true;
-        valid &= node->checkArg(0, ExprType().String().Constant(), env);
+        valid &= node->checkArg(0, ExprType().String().Constant(), envBuilder);
         std::string varName = node->getStrArg(0);
         ExprVarNode* varNode = new ExprVarNode(node->expr(), varName.c_str());
-        ExprType varType = varNode->prep(wantScalar, env);
+        ExprType varType = varNode->prep(wantScalar, envBuilder);
         if (varType.isValid()) {
             node->removeLastChild();  // remove the useless default argument from the arugment list
             node->removeLastChild();  // remove the useless default argument from the arugment list
@@ -1391,7 +1391,7 @@ class GetVar : public ExprFuncSimple {
         } else {
             delete varNode;
             node->swapChildren(0, 1);  // move the default argument in the beginning
-            varType = node->child(0)->prep(wantScalar, env);
+            varType = node->child(0)->prep(wantScalar, envBuilder);
             node->removeLastChild();  // remove the useless string argument
         }
         return varType.isValid() ? varType : ExprType().Error();
@@ -1479,7 +1479,7 @@ class PrintFuncX : public ExprFuncSimple {
     };
 
   public:
-    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnv& env) const {
+    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const {
         int nargs = node->numChildren();
         if (nargs < 1) {
             node->addError("Wrong number of arguments, should be GE 1");
@@ -1487,9 +1487,9 @@ class PrintFuncX : public ExprFuncSimple {
         }
 
         bool valid = true;
-        valid &= node->checkArg(0, ExprType().String().Constant(), env);
+        valid &= node->checkArg(0, ExprType().String().Constant(), envBuilder);
         for (int i = 1; i < nargs; ++i)
-            valid &= (node->checkArg(i, ExprType().FP(1), env) || node->checkArg(i, ExprType().FP(3), env));
+            valid &= (node->checkArg(i, ExprType().FP(1), envBuilder) || node->checkArg(i, ExprType().FP(3), envBuilder));
         return ExprType().FP(1).Constant();
     }
 
@@ -1594,11 +1594,11 @@ public:
     TestFunc()
         :ExprFuncSimple(true)
     {}
-    virtual ExprType prep(ExprFuncNode* node,bool scalarWanted,ExprVarEnv& env) const
+    virtual ExprType prep(ExprFuncNode* node,bool scalarWanted,ExprVarEnvBuilder& envBuilder) const
     {
         bool valid=true;
-        valid &= node->checkArg(0,ExprType().FP(3).Varying(),env);
-        valid &= node->checkArg(1,ExprType().FP(1).Constant(),env);
+        valid &= node->checkArg(0,ExprType().FP(3).Varying(),envBuilder);
+        valid &= node->checkArg(1,ExprType().FP(1).Constant(),envBuilder);
         return valid ?ExprType().FP(3).Varying():ExprType().Error();
     }
     virtual ExprFuncNode::Data* evalConstant(ArgHandle args) const
