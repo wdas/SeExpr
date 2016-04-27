@@ -126,7 +126,7 @@ ENDIF(DEFINED ENV{RP_qdgui})
     FILE(COPY ${public_includes} DESTINATION ${CMAKE_BINARY_DIR}/include/SeExpr2/UI)
 
     # --- DISNEY INTERNAL ---
-    install(FILES ${CE_MOC_HDRS} DESTINATION include/CE)
+    install(FILES ${CE_MOC_HDRS} DESTINATION include/SeExpr2/UI/CE)
 
     # --- DISNEY INTERNAL --- Maya plugin files
     get_build_info(python-ver PYTHON_VERSION)
