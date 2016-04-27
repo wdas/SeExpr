@@ -37,30 +37,19 @@ struct Func:public ExprFuncSimple{
         valid &= node->checkArg(1, ExprType().String().Varying(), envBuilder);
         valid &= node->checkArg(2, ExprType().FP(2).Varying(), envBuilder);
         valid &= node->checkArg(3, ExprType().String().Constant(), envBuilder);
-        return valid ? ExprType().FP(3) :  ExprType().Error();
+        return valid ? ExprType().FP(4) :  ExprType().Error();
     }
     virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const {
         return nullptr;
     }
     virtual void eval(ArgHandle args) {
-        //args.outFpHandle<3>()=Vec3d(111,222,333);
-        #if 1
-        //std::cerr<<"data0 "<<Vec3dRef(args.inFp<3>(0))<<std::endl;;
-        //std::cerr<<"data1 "<<(args.inStr(1))<<std::endl;;
-        //std::cerr<<"data1 "<<Vec3dRef(args.inString<3>(1))<<std::endl;;
-        //std::cerr<<"data2 "<<Vec2dRef(args.inFp<2>(2))<<std::endl;;
-        //std::cerr<<"data3 "<<(args.inStr(3))<<std::endl;;
         const char* s1=args.inStr(1);
         const char* s2=args.inStr(3);
         double sum1=0;for(const char* p=s1;*p != 0; p++) sum1+=*p;
         double sum2=0;for(const char* p=s2;*p != 0; p++) sum2+=*p;
         Vec3dRef foo(args.inFp<3>(0));
         Vec2dRef bar(args.inFp<2>(2));
-        args.outFpHandle<3>()=Vec3d(foo[0]+foo[1]+foo[2],bar[0]+bar[1],sum1);
-        //args.outFpHandle<4>()=Vec4d(foo[0]+foo[1]+foo[2],bar[0]+bar[1],sum1,sum2);
-        //args.outFpHandle<2>()=Vec2d(foo[0]+foo[1]+foo[2],bar[0]+bar[1]);
-        //std::cerr<<"data3 "<<Vec3dRef(args.inFP<3>(0))<<std::endl;;
-        #endif
+        args.outFpHandle<4>()=Vec4d(foo[0]+foo[1]+foo[2],bar[0]+bar[1],sum1,sum2);
     }
 } testFuncSimple;
 ExprFunc testFunc(testFuncSimple,4,4);
@@ -272,14 +261,13 @@ Vec<double,d> run(const std::string& a){
     e.setDesiredReturnType(TypeVec(d));
     if(!e.isValid()) throw std::runtime_error(e.parseError());
     Vec<const double,d,true> crud(e.evalFP());
-    std::cerr<<"crud is "<<crud<<std::endl;
     return crud;
 }
 
 
 TEST(BasicTests, TestFunc) {
-    EXPECT_EQ(run<3>("testFunc([33,44,55],\"a\",[22,33],\"b\")"),Vec3d(33+44+55,22+33,int('a')));//,int('a'),int('b')));
-    //EXPECT_EQ(run<4>("testFunc(33,\"aa\",22,\"bc\")"),Vec4d(33*3,22*2,'a'+'a','b'+'c'));
+    EXPECT_EQ(run<4>("testFunc([33,44,55],\"a\",[22,33],\"b\")"),Vec4d(33+44+55,22+33,int('a'),int('b')));//,int('a'),int('b')));
+    EXPECT_EQ(run<4>("testFunc(33,\"aa\",22,\"bc\")"),Vec4d(33*3,22*2,'a'+'a','b'+'c'));
 }
 TEST(BasicTests, GetVar) {
     EXPECT_EQ(run<3>("getVar(\"a\",[11,22,33])"),Vec3d(11,22,33));

@@ -105,40 +105,19 @@ extern "C" {
 // opdata[2] points to return value
 // opdata[3] points to number of args
 // opdata[4] points to beginning of arguments in
-void resolveCustomFunction(const char *name,
-                           int *opDataArg,
-                           int nargs,
+void SeExpr2LLVMEvalCustomFunction(int *opDataArg,
                            double *fpArg,
-                           int fpArglen,
                            char **strArg,
-                           int strArglen,
                            void **funcdata,
-                           double *result,
-                           int retSize,
                            const SeExpr2::ExprFuncNode *node) {
     const SeExpr2::ExprFunc *func = node->func();
     SeExpr2::ExprFuncX *funcX = const_cast<SeExpr2::ExprFuncX *>(func->funcx());
     SeExpr2::ExprFuncSimple *funcSimple = static_cast<SeExpr2::ExprFuncSimple *>(funcX);
 
-    char *c[2 + strArglen];
-    c[0] = reinterpret_cast<char *>(funcSimple);
-    c[1] = 0;
-    for (int i = 0; i < strArglen; ++i) c[2 + i] = strArg[i];
-
-    double fp[1 + retSize + fpArglen];
-    fp[0] = (double)nargs;
-    for (int i = 0; i < retSize; ++i) fp[1 + i] = 0;
-    for (int i = 0; i < fpArglen; ++i) fp[1 + retSize + i] = fpArg[i];
-
-    int opData[4 + nargs];
-    opData[0] = 0;
-    opData[1] = 1;
-    opData[2] = 1;
-    opData[3] = 0;
-    for (int i = 0; i < nargs; ++i) opData[4 + i] = opDataArg[i];
+    strArg[0]= reinterpret_cast<char *>(funcSimple);
 
     std::vector<int> callStack;
-    SeExpr2::ExprFuncSimple::ArgHandle handle(opData, fp, c, callStack);
+    SeExpr2::ExprFuncSimple::ArgHandle handle(opDataArg, fpArg, strArg, callStack);
     if (!*funcdata) {
         handle.data = funcSimple->evalConstant(node, handle);
         *funcdata = reinterpret_cast<void *>(handle.data);
@@ -147,6 +126,6 @@ void resolveCustomFunction(const char *name,
     }
 
     funcSimple->eval(handle);
-    for (int i = 0; i < retSize; ++i) result[i] = fp[1 + i];
+    //for (int i = 0; i < retSize; ++i) result[i] = fp[1 + i];
 }
 }
