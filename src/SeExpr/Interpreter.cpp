@@ -667,9 +667,8 @@ int ExprAssignNode::buildInterpreter(Interpreter* interpreter) const {
 void copyVarToPromotedPosition(Interpreter* interpreter, ExprLocalVar* varSource, ExprLocalVar* varDest){
     if(varDest->type().isFP()){
         int destDim=varDest->type().dim();
-        int sourceDim=varSource->type().dim();
         if(destDim!=varSource->type().dim()){
-            assert(sourceDim==1);
+            assert(varSource->type().dim()==1);
             interpreter->addOp(getTemplatizedOp<Promote>(destDim));
         }else{
             interpreter->addOp(getTemplatizedOp<AssignOp>(destDim));

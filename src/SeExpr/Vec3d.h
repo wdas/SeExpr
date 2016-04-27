@@ -22,7 +22,10 @@
 #include <iostream>
 #include <math.h>
 #endif
+// TODO: delete this file!
 
+
+#if 0
 namespace SeExpr2 {
 /**
  * @brief A 3d point/vector class.
@@ -218,4 +221,5 @@ class Vec3d {
     double _vec[3];
 };
 }
+#endif
 #endif

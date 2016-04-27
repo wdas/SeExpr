@@ -306,7 +306,8 @@ const double* Expression::evalFP(VarBlock* varBlock) const {
             return _llvmEvaluator->evalFP(varBlock);
         }
     }
-    return SeExpr2::Vec3d(0, 0, 0);
+    static double noCrash[16]={};
+    return noCrash;
 }
 
 void Expression::evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd)

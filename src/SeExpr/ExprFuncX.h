@@ -88,6 +88,12 @@ class ExprFuncSimple : public ExprFuncX {
         char* inStr(int i) { return c[opData[i]]; }
         int nargs() const { return _nargs; }
 
+        /// Return a vector handle which is easier to assign to
+        template<int d>
+        Vec<double,d,true> outFpHandle(){
+            return Vec<double, d, true>(&outFp);
+        }
+
         double& outFp;
         char*& outStr;
         ExprFuncNode::Data* data;

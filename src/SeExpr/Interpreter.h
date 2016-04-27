@@ -123,8 +123,8 @@ class Interpreter {
 };
 
 //! Return the function f encapsulated in class T for the dynamic i converted to a static d.
-template <template <int d> class T>
-Interpreter::OpF getTemplatizedOp(int i) {
+template <template <int d> class T,class T_FUNCTYPE=Interpreter::OpF>
+T_FUNCTYPE getTemplatizedOp(int i) {
     switch (i) {
         case 1:
             return T<1>::f;
