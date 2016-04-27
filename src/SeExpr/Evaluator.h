@@ -311,7 +311,7 @@ class LLVMEvaluator {
         llvm::PassManagerBuilder builder;
         std::unique_ptr<llvm::legacy::PassManager> pm(new llvm::legacy::PassManager);
         std::unique_ptr<llvm::legacy::FunctionPassManager> fpm(new llvm::legacy::FunctionPassManager(altModule));
-        builder.OptLevel = 0;
+        builder.OptLevel = 3;
         builder.Inliner = llvm::createAlwaysInlinerPass();
         builder.populateModulePassManager(*pm);
         // fpm->add(new llvm::DataLayoutPass());

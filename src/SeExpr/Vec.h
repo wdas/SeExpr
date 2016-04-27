@@ -103,7 +103,7 @@ class Vec {
         for(int k=0;k<d;k++) ret[k]=static_cast<T>(raw[k]);
         return ret;
     }
-    
+
     //! Initialize vector to be reference to plain raw data
     explicit Vec(T* raw, INVALID_WITH_VECTOR_VALUE u = (typename my_enable_if<ref, INVALID_WITH_VECTOR_VALUE>::TYPE()))
         : x(raw) {}
@@ -311,10 +311,9 @@ class Vec {
     /** Inner product. */
     template <bool refother>
     T dot(const Vec<T, d, refother>& o) const {
-        T vals[d];
-        for (int k = 0; k < d; k++) vals[d] += x[k] * o[k];
-        T val = 0;
-        return val;
+        T data[d];
+        for (int k = 0; k < d; k++) data[k] = x[k] * o[k];
+        return Reducer<T, d>::sum(data);
     }
 
     /** Cross product. */
@@ -362,5 +361,22 @@ std::ostream& operator<<(std::ostream& out, const Vec<T, d, r>& val) {
     out << ")";
     return out;
 }
+
+using Vec1d=Vec<double,1,false>;
+using Vec2d=Vec<double,2,false>;
+using Vec3d=Vec<double,3,false>;
+using Vec4d=Vec<double,4,false>;
+using Vec1f=Vec<float,1,false>;
+using Vec2f=Vec<float,2,false>;
+using Vec3f=Vec<float,3,false>;
+using Vec4f=Vec<float,4,false>;
+using Vec1dRef=Vec<double,1,true>;
+using Vec2dRef=Vec<double,2,true>;
+using Vec3dRef=Vec<double,3,true>;
+using Vec4dRef=Vec<double,4,true>;
+using Vec1fRef=Vec<float,1,true>;
+using Vec2fRef=Vec<float,2,true>;
+using Vec3fRef=Vec<float,3,true>;
+using Vec4fRef=Vec<float,4,true>;
 }
 #endif

@@ -28,6 +28,7 @@
 #include "ExprBuiltins.h"
 #include "Platform.h"
 #include "Noise.h"
+#include "Interpreter.h"
 
 namespace SeExpr2 {
 
@@ -1340,7 +1341,7 @@ class CCurveFuncX : public ExprFuncSimple {
         CurveData<Vec3d>* data = new CurveData<Vec3d>;
         for (int i = 1; i < args.nargs() - 2; i += 3) {
             double pos = args.inFp<1>(i)[0];
-            Vec3d val(&args.inFp<3>(i + 1)[0]);
+            Vec3dRef val(&args.inFp<3>(i + 1)[0]);
             double interpDouble = args.inFp<1>(i + 2)[0];
             int interpInt = (int)interpDouble;
             Curve<Vec3d>::InterpType interpolant = (Curve<Vec3d>::InterpType)interpInt;
@@ -1374,8 +1375,11 @@ static const char* ccurve_docstring =
 
 class GetVar : public ExprFuncSimple {
     struct Data : public ExprFuncNode::Data {
-        ExprType type;
-        Data(const ExprType type) : type(type) {}
+        typedef void(*func)(double *in, double* out);
+        Data(func fIn,int dim) :f(fIn),dim(dim)
+        {}
+        int dim;
+        func f;
     };
 
     virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const {
@@ -1398,70 +1402,24 @@ class GetVar : public ExprFuncSimple {
     }
 
     virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const {
-        return new Data(node->type());
+        return new Data(node->type().isFP() ? getTemplatizedOp<Assign,Data::func>(node->type().dim()) : nullptr,node->type().dim());
     }
+
+    template<int d>
+    struct Assign{
+        static void f(double* out,double* in){
+            for(int k=0;k<d;k++) out[k]=in[k];
+        }
+    };
 
     virtual void eval(ArgHandle args) {
         Data* data = static_cast<Data*>(args.data);
         assert(data);
-        ExprType type = data->type;
-        if (type.isFP()) {
-            double* out = &args.outFp;
-            switch (type.dim()) {
-                case 1:
-                    out[0] = args.inFp<1>(0)[0];
-                    break;
-                case 2:
-                    for (int k = 0; k < 2; k++) out[k] = args.inFp<2>(0)[k];
-                    break;
-                case 3:
-                    for (int k = 0; k < 3; k++) out[k] = args.inFp<3>(0)[k];
-                    break;
-                case 4:
-                    for (int k = 0; k < 4; k++) out[k] = args.inFp<4>(0)[k];
-                    break;
-                case 5:
-                    for (int k = 0; k < 5; k++) out[k] = args.inFp<5>(0)[k];
-                    break;
-                case 6:
-                    for (int k = 0; k < 6; k++) out[k] = args.inFp<6>(0)[k];
-                    break;
-                case 7:
-                    for (int k = 0; k < 7; k++) out[k] = args.inFp<7>(0)[k];
-                    break;
-                case 8:
-                    for (int k = 0; k < 8; k++) out[k] = args.inFp<8>(0)[k];
-                    break;
-                case 9:
-                    for (int k = 0; k < 9; k++) out[k] = args.inFp<9>(0)[k];
-                    break;
-                case 10:
-                    for (int k = 0; k < 10; k++) out[k] = args.inFp<10>(0)[k];
-                    break;
-                case 11:
-                    for (int k = 0; k < 11; k++) out[k] = args.inFp<11>(0)[k];
-                    break;
-                case 12:
-                    for (int k = 0; k < 12; k++) out[k] = args.inFp<12>(0)[k];
-                    break;
-                case 13:
-                    for (int k = 0; k < 13; k++) out[k] = args.inFp<13>(0)[k];
-                    break;
-                case 14:
-                    for (int k = 0; k < 14; k++) out[k] = args.inFp<14>(0)[k];
-                    break;
-                case 15:
-                    for (int k = 0; k < 15; k++) out[k] = args.inFp<15>(0)[k];
-                    break;
-                case 16:
-                    for (int k = 0; k < 16; k++) out[k] = args.inFp<16>(0)[k];
-                    break;
-                default:
-                    throw std::runtime_error("Unsupported type in getVar " + type.toString());
-            }
-        } else {
-            throw std::runtime_error("getVar does not support non FP types right now got type " + type.toString());
-        }
+        double* out=&args.outFp;
+        //for(int i=0;i<data->dim;i++) std::cerr<<" "<<args.inFp<1>(0)[i];
+        //std::cerr<<std::endl;
+        if(data->f) data->f(out,&args.inFp<1>(0)[0]);
+        else throw std::runtime_error("getVar does not support non FP types right now got type");
     }
 
   public:

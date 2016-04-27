@@ -22,7 +22,6 @@
 #include "Platform.h"
 
 namespace SeExpr2 {
-class Vec3d;
 
 void initPerlin();
 

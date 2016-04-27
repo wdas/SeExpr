@@ -104,21 +104,21 @@ int FuncNOp(int* opData, double* fp, char** c, std::vector<int>& callStack) {
     return 1;
 }
 int Func1VOp(int* opData, double* fp, char** c, std::vector<int>& callStack) {
-    fp[opData[2]] = ((ExprFuncStandard::Func1v*)(c[opData[0]]))(Vec3d(&fp[opData[1]]));
+    fp[opData[2]] = ((ExprFuncStandard::Func1v*)(c[opData[0]]))(Vec3d::copy(&fp[opData[1]]));
     return 1;
 }
 int Func2VOp(int* opData, double* fp, char** c, std::vector<int>& callStack) {
-    fp[opData[3]] = ((ExprFuncStandard::Func2v*)(c[opData[0]]))(Vec3d(&fp[opData[1]]), Vec3d(&fp[opData[2]]));
+    fp[opData[3]] = ((ExprFuncStandard::Func2v*)(c[opData[0]]))(Vec3d::copy(&fp[opData[1]]), Vec3d::copy(&fp[opData[2]]));
     return 1;
 }
 int Func1VVOp(int* opData, double* fp, char** c, std::vector<int>& callStack) {
-    Vec3d v = ((ExprFuncStandard::Func1vv*)(c[opData[0]]))(Vec3d(&fp[opData[1]]));
+    Vec3d v = ((ExprFuncStandard::Func1vv*)(c[opData[0]]))(Vec3d::copy(&fp[opData[1]]));
     double* out = &fp[opData[2]];
     for (int k = 0; k < 3; k++) out[k] = v[k];
     return 1;
 }
 int Func2VVOp(int* opData, double* fp, char** c, std::vector<int>& callStack) {
-    Vec3d v = ((ExprFuncStandard::Func2vv*)(c[opData[0]]))(Vec3d(&fp[opData[1]]), Vec3d(&fp[opData[2]]));
+    Vec3d v = ((ExprFuncStandard::Func2vv*)(c[opData[0]]))(Vec3d::copy(&fp[opData[1]]), Vec3d::copy(&fp[opData[2]]));
     double* out = &fp[opData[3]];
     for (int k = 0; k < 3; k++) out[k] = v[k];
     return 1;
@@ -126,7 +126,7 @@ int Func2VVOp(int* opData, double* fp, char** c, std::vector<int>& callStack) {
 int FuncNVOp(int* opData, double* fp, char** c, std::vector<int>& callStack) {
     int n = opData[1];
     Vec3d* vals = static_cast<Vec3d*>(alloca(n * sizeof(Vec3d)));
-    for (int k = 0; k < n; k++) new (vals[k]) Vec3d(&fp[opData[k + 2]]);  // placement new!
+    for (int k = 0; k < n; k++) new (vals+k) Vec3d(Vec3dRef(&fp[opData[k + 2]]));  // placement new!
     double* out = &fp[opData[n + 2]];
     *out = ((ExprFuncStandard::Funcnv*)(c[opData[0]]))(n, vals);
     return 1;
@@ -134,7 +134,7 @@ int FuncNVOp(int* opData, double* fp, char** c, std::vector<int>& callStack) {
 int FuncNVVOp(int* opData, double* fp, char** c, std::vector<int>& callStack) {
     int n = opData[1];
     Vec3d* vals = static_cast<Vec3d*>(alloca(n * sizeof(Vec3d)));
-    for (int k = 0; k < n; k++) new (vals[k]) Vec3d(&fp[opData[k + 2]]);  // placement new!
+    for (int k = 0; k < n; k++) new (vals+k) Vec3d(Vec3dRef(&fp[opData[k + 2]]));  // placement new!
     double* out = &fp[opData[n + 2]];
     Vec3d val = ((ExprFuncStandard::Funcnvv*)(c[opData[0]]))(n, vals);
     for (int k = 0; k < 3; k++) out[k] = val[k];

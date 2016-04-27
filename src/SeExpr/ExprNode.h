@@ -32,7 +32,7 @@
 #include "Expression.h"
 #include "ExprType.h"
 #include "ExprEnv.h"
-#include "Vec3d.h"
+#include "Vec.h"
 #include "Interpreter.h"
 
 namespace SeExpr2 {
