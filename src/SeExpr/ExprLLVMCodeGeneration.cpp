@@ -254,40 +254,6 @@ LLVM_VALUE promoteOperand(LLVM_BUILDER Builder, const ExprType refType, LLVM_VAL
     }
 }
 
-Function *getOrCreateEvalVarDeclaration(LLVM_BUILDER Builder) {
-    LLVMContext &llvmContext = Builder.getContext();
-    Type *i8PtrTy = Type::getInt8PtrTy(llvmContext);
-    Type *doublePtrTy = Type::getDoublePtrTy(llvmContext);
-    Type *ParamTys[2] = {i8PtrTy, doublePtrTy};
-    FunctionType *FT = FunctionType::get(Type::getVoidTy(llvmContext), ParamTys, false);
-
-    Module *M = llvm_getModule(Builder);
-    Function *callback = M->getFunction("evaluateVarRef");
-    if (callback) return callback;
-
-    return Function::Create(FT, GlobalValue::ExternalLinkage, "evaluateVarRef", M);
-}
-
-Function *getOrCreateCustomFunctionWrapperDeclaration(LLVM_BUILDER Builder) {
-    LLVMContext &llvmContext = Builder.getContext();
-    Type *i8PtrTy = Type::getInt8PtrTy(llvmContext);
-    Type *i32PtrTy = Type::getInt32PtrTy(llvmContext);
-    Type *i32Ty = Type::getInt32Ty(llvmContext);
-    Type *i64Ty = Type::getInt64Ty(llvmContext);
-    Type *doublePtrTy = Type::getDoublePtrTy(llvmContext);
-    PointerType *i8PtrPtr = PointerType::getUnqual(i8PtrTy);
-    Type *ParamTys[] = {i8PtrTy,  i32PtrTy,    i32Ty, doublePtrTy, i32Ty,  // fp
-                        i8PtrPtr, i32Ty,                                   // str
-                        i8PtrPtr, doublePtrTy, i32Ty, i64Ty};
-    FunctionType *FT = FunctionType::get(Type::getVoidTy(llvmContext), ParamTys, false);
-
-    Module *M = llvm_getModule(Builder);
-    Function *callback = M->getFunction("resolveCustomFunction");
-    if (callback) return callback;
-
-    return Function::Create(FT, GlobalValue::ExternalLinkage, "resolveCustomFunction", M);
-}
-
 AllocaInst *storeVectorToDoublePtr(LLVM_BUILDER Builder, LLVM_VALUE vecVal) {
     LLVMContext &llvmContext = Builder.getContext();
     AllocaInst *doublePtr =
@@ -509,7 +475,7 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode *funcNode, LLVM_BUILDER Builder
     ConstantInt *ptrToExprNode = ConstantInt::get(Type::getInt64Ty(llvmContext), (uint64_t)funcNode);
     params.push_back(ptrToExprNode);
 
-    Function *callee = getOrCreateCustomFunctionWrapperDeclaration(Builder);
+    Function* callee = llvm_getModule(Builder)->getFunction("resolveCustomFunction");
     Builder.CreateCall(callee, params);
 
     if (sizeOfRet == 1) {
@@ -1012,7 +978,7 @@ struct VarCodeGeneration {
         Type *doubleTy = Type::getDoubleTy(llvmContext);
         ConstantInt *varAddr = ConstantInt::get(Type::getInt64Ty(llvmContext), (uint64_t)varRef);
         LLVM_VALUE addrVal = Builder.CreateIntToPtr(varAddr, voidPtrType);
-        Function *evalVarFunc = getOrCreateEvalVarDeclaration(Builder);
+        Function *evalVarFunc = llvm_getModule(Builder)->getFunction("evaluateVarRef");
 
         int dim = varRef->type().dim();
         AllocaInst *varAlloca = createAllocaInst(Builder, doubleTy, dim);
