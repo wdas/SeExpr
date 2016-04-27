@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <QtCore/QObject>
-#include <SeExpr2/Vec3d.h>
+#include <SeExpr2/Vec.h>
 #include <QtGui/QFrame>
 #include <QtGui/QWidget>
 

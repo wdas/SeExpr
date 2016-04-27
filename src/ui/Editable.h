@@ -20,7 +20,7 @@
 #ifndef __Editable__
 #define __Editable__
 #include <sstream>
-#include <SeExpr2/Vec3d.h>
+#include <SeExpr2/Vec.h>
 #include <SeExpr2/Curve.h>
 #include <cstdio>
 #include <cstring>

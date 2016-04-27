@@ -351,6 +351,7 @@ class Vec {
         double c = cos(angle), s = sin(angle);
         return c * (*this) + (1 - c) * dot(axis) * axis - s * cross(axis);
     }
+    
 };
 
 //! Output stream
@@ -378,5 +379,13 @@ using Vec1fRef=Vec<float,1,true>;
 using Vec2fRef=Vec<float,2,true>;
 using Vec3fRef=Vec<float,3,true>;
 using Vec4fRef=Vec<float,4,true>;
+using Vec1dConstRef=Vec<const double,1,true>;
+using Vec2dConstRef=Vec<const double,2,true>;
+using Vec3dConstRef=Vec<const double,3,true>;
+using Vec4dConstRef=Vec<const double,4,true>;
+using Vec1fConstRef=Vec<const float,1,true>;
+using Vec2fConstRef=Vec<const float,2,true>;
+using Vec3fConstRef=Vec<const float,3,true>;
+using Vec4fConstRef=Vec<const float,4,true>;
 }
 #endif

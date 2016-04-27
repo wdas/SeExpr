@@ -23,7 +23,7 @@
 #include <cfloat>
 #include "ExprFunc.h"
 #include "ExprNode.h"
-#include "Vec3d.h"
+#include "Vec.h"
 #include "Curve.h"
 #include "ExprBuiltins.h"
 #include "Platform.h"
@@ -1499,11 +1499,6 @@ class PrintFuncX : public ExprFuncSimple {
             // return ExprType().Error().Varying();
             // return false;
             assert(false);
-        }
-
-        for (unsigned int i = 0; i < data->ranges.size(); i++) {
-            const std::pair<int, int>& range = data->ranges[i];
-            std::cerr << "range " << range.first << "," << range.second << std::endl;
         }
 
         return data;

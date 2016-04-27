@@ -17,7 +17,7 @@
 #ifndef _CurveData_h_
 #define _CurveData_h_
 
-#include "Vec3d.h"
+#include "Vec.h"
 #include <vector>
 
 #include <cfloat>

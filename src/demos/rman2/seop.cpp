@@ -19,7 +19,7 @@
 #include <map>
 #include <list>
 #include <pthread.h>
-#include <SeVec3d.h>
+#include <SeVec.h>
 #include <SeExpression.h>
 #include <SeExprFunc.h>
 #include <RixInterfaces.h>

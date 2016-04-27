@@ -31,7 +31,7 @@
 #include <QtGui/QGraphicsView>
 #include <QtGui/QLineEdit>
 
-#include <SeExpr2/Vec3d.h>
+#include <SeExpr2/Vec.h>
 
 #include "ExprCurve.h"
 

@@ -19,7 +19,7 @@
 #include <math.h>
 #include <sstream>
 #endif
-#include "Vec3d.h"
+#include "Vec.h"
 #include "ExprType.h"
 #include "Expression.h"
 #include "ExprEnv.h"

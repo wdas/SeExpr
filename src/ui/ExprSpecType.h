@@ -17,7 +17,7 @@
 #ifndef _ExprSpecType_h_
 #define _ExprSpecType_h_
 
-#include <SeExpr2/Vec3d.h>
+#include <SeExpr2/Vec.h>
 #include <vector>
 #include <sstream>
 #include <SeExpr2/Curve.h>

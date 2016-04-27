@@ -19,7 +19,7 @@
 
 #include <SeExpr2/Expression.h>
 #include <SeExpr2/ExprFunc.h>
-#include <SeExpr2/Vec3d.h>
+#include <SeExpr2/Vec.h>
 using namespace SeExpr2;
 
 static int invocations = 0;

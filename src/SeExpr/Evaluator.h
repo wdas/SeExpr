@@ -109,14 +109,9 @@ class LLVMEvaluator {
         {
             Type *i8PtrTy = Type::getInt8PtrTy(*_llvmContext);
             Type *i32PtrTy = Type::getInt32PtrTy(*_llvmContext);
-            Type *i32Ty = Type::getInt32Ty(*_llvmContext);
             Type *i64Ty = Type::getInt64Ty(*_llvmContext);
             Type *doublePtrTy = Type::getDoublePtrTy(*_llvmContext);
             PointerType *i8PtrPtr = PointerType::getUnqual(i8PtrTy);
-            //Type *ParamTys[] = {i8PtrTy,  i32PtrTy,    i32Ty, doublePtrTy, i32Ty,  // fp
-            //                    i8PtrPtr, i32Ty,                                   // str
-            //                    i8PtrPtr, doublePtrTy, i32Ty, i64Ty};
-            // opDataArg, fpArg, strArg, funcdata, funcNode
             Type *ParamTys[] = {i32PtrTy, doublePtrTy, i8PtrPtr, i8PtrPtr, i64Ty};
             {
                 FunctionType *FT = FunctionType::get(Type::getVoidTy(*_llvmContext), ParamTys, false);

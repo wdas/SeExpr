@@ -17,7 +17,7 @@
 #ifndef ExprFunc_h
 #define ExprFunc_h
 
-#include "Vec3d.h"
+#include "Vec.h"
 #include <vector>
 
 #include "ExprType.h"

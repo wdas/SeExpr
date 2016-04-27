@@ -24,7 +24,7 @@
 #include <iomanip>
 #include <stdint.h>
 #include "ExprConfig.h"
-#include "Vec3d.h"
+#include "Vec.h"
 #include "Context.h"
 #include "ExprEnv.h"
 

@@ -17,7 +17,7 @@
 #ifndef _ExprFuncStandard_h_
 #define _ExprFuncStandard_h_
 
-#include "Vec3d.h"
+#include "Vec.h"
 #include "ExprFuncX.h"
 
 namespace SeExpr2 {
