@@ -165,7 +165,7 @@ class ExprNode {
     /// @}
 
     /// Register error. This will allow users and sophisticated editors to highlight where in code problem was
-    inline void addError(const std::string& error) { _expr->addError(error, _startPos, _endPos); }
+    inline void addError(const std::string& error) const { _expr->addError(error, _startPos, _endPos); }
 
   protected: /*protected functions*/
     //! Set type of parameter
