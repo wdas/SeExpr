@@ -31,6 +31,7 @@ versions={"v2-llvm": "SE_EXPR_EVAL=LLVM "+os.path.join(seexpr2,"share","test","S
 def run(filterString):
     "Run every version listed above outputting xml files in tmp/"
     exitCode=0
+    if not os.path.exists("tmp"): os.mkdir("tmp")
     fpLog=open("tmp/data.log","w")
 
     testCount=0
