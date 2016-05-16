@@ -44,12 +44,14 @@ print >> f, "void evalExpressionFile(const char *filepath);\n"
 for dir_name, sub_dirs, se_files in os.walk(rootdir):
     for se_file in se_files:
         fullpath = os.path.join(dir_name, se_file)
-        parent_dir = os.path.basename(dir_name).lstrip('.')
+        # use parent_dir and gparent_dir for test name to avoid duplicates
+        (head, parent_dir) = os.path.split(dir_name)
+        (head, gparent_dir) = os.path.split(head)
         (filename,ext) = os.path.splitext(se_file)
         # strip out invalid chars
         filename = filename.translate(None, " &.#")
         if(re.match('\.se$', ext)):
-            print >> f, "TEST(" + parent_dir + ", " + filename + ")"
+            print >> f, "TEST(" + parent_dir.lstrip('.') +'_' + gparent_dir.lstrip('.') + ", " + filename + ")"
             print >> f, "{"
             print >> f, "    evalExpressionFile(\"" + fullpath + "\");"
             print >> f, "}\n"
