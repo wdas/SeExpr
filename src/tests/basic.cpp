@@ -269,9 +269,19 @@ TEST(BasicTests, TestFunc) {
     EXPECT_EQ(run<4>("testFunc([33,44,55],\"a\",[22,33],\"b\")"),Vec4d(33+44+55,22+33,int('a'),int('b')));//,int('a'),int('b')));
     EXPECT_EQ(run<4>("testFunc(33,\"aa\",22,\"bc\")"),Vec4d(33*3,22*2,'a'+'a','b'+'c'));
 }
+
 TEST(BasicTests, GetVar) {
     EXPECT_EQ(run<3>("getVar(\"a\",[11,22,33])"),Vec3d(11,22,33));
     EXPECT_EQ(run<4>("a=[11,22,33,44];getVar(\"a\",[5,3,2])"),Vec4d(11,22,33,44));
     EXPECT_EQ(run<3>("a=[11,22,33,44];getVar(\"aa\",[5,3,2])"),Vec3d(5,3,2));
     EXPECT_EQ(run<4>("[11,22,33,44]"),Vec4d(11,22,33,44));
+}
+
+TEST(BasicTests, Modulo) {
+    Expression expr("-0.3%2");
+    EXPECT_TRUE(expr.isValid());
+    EXPECT_TRUE(!expr.isVec());
+    const double* val = expr.evalFP();
+    EXPECT_TRUE(expr.isConstant());
+    EXPECT_EQ(val[0], 1.7);
 }
