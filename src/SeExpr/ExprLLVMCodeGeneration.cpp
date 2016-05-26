@@ -572,8 +572,15 @@ LLVM_VALUE ExprBinaryOpNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
             return Builder.CreateFMul(op1, op2);
         case '/':
             return Builder.CreateFDiv(op1, op2);
-        case '%':
-            return Builder.CreateFRem(op1, op2);
+        case '%': {
+            // niceMod() from v1: b==0 ? 0 : a-floor(a/b)*b
+            LLVM_VALUE a = op1, b = op2;
+            LLVM_VALUE aOverB = Builder.CreateFDiv(a,b);
+            Function* floorFun = Intrinsic::getDeclaration(llvm_getModule(Builder), Intrinsic::floor, op1->getType());
+            LLVM_VALUE normal = Builder.CreateFSub(a, Builder.CreateFMul(Builder.CreateCall(floorFun, {aOverB}), b));
+            Constant* zero = ConstantFP::get(op1->getType(), 0.0);
+            return Builder.CreateSelect(Builder.CreateFCmpOEQ(zero, op1), zero, normal);
+        } 
         case '^': {
             // TODO: make external function reference work with interpreter, libffi
             // TODO: needed for MCJIT??
