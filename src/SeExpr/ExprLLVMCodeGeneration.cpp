@@ -580,7 +580,7 @@ LLVM_VALUE ExprBinaryOpNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
             LLVM_VALUE normal = Builder.CreateFSub(a, Builder.CreateFMul(Builder.CreateCall(floorFun, {aOverB}), b));
             Constant* zero = ConstantFP::get(op1->getType(), 0.0);
             return Builder.CreateSelect(Builder.CreateFCmpOEQ(zero, op1), zero, normal);
-        } break;
+        } 
         case '^': {
             // TODO: make external function reference work with interpreter, libffi
             // TODO: needed for MCJIT??
