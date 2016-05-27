@@ -14,8 +14,7 @@
 * You may obtain a copy of the License at
 * http://www.apache.org/licenses/LICENSE-2.0
 */
-#ifndef _CurveData_h_
-#define _CurveData_h_
+#pragma once
 
 #include "Vec.h"
 #include <vector>
@@ -94,4 +93,3 @@ class Curve {
     static double comp(const T& val, const int i);
 };
 }
-#endif
