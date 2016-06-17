@@ -265,8 +265,6 @@ void CENewKeyHandler::mouseDown()
     double snap = _view.pixelWidth();
     if (snap < 0) snap = 0;
     double _anchorTime = RoundNicely(_view.vx(_x), snap);
-    double _anchorValue = RoundNicely(_view.vy(_y), _view.pixelHeight());
-    int index=0;
     _ui->tool()->insertKey(_anchorTime);
 }
 
@@ -284,6 +282,7 @@ void CENewKeyHandler::mouseDown()
      _value=key->key().getValue();
  }
 
+#if 0
  static bool ClampBezHandle(double& x1, double x2, double seglen)
  {
      /* Clamp handle a against handle b:
@@ -315,6 +314,7 @@ void CENewKeyHandler::mouseDown()
      }
      return false; // not clamped
  }
+#endif
 
 void CEBezHandler::mouseDown(){
     // remember a reference point in view coordinates where the user started interacting

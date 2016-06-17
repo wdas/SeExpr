@@ -723,11 +723,10 @@ CETool::setSegmentFrame(double frame, int curve, int seg)
 {
     // prevent making key cross other keys
     animlib::AnimCurve& anim=*_curves[curve]->animCurve;
-    animlib::AnimKeyframe *prev=anim[seg-1],*curr=anim[seg],*next=anim[seg+1];
+    animlib::AnimKeyframe *prev=anim[seg-1],*next=anim[seg+1];
     // TODO: next ulp?
     if(prev && prev->getTime()>=frame) frame=prev->getTime()+.001;
     if(next && frame>=next->getTime()) frame=next->getTime()-.001;
-    //curr->setTime(frame);
     _curves[curve]->animCurve->setTime(seg,frame);
     keyUpdated(_curves[curve]->animCurve,seg);
     emit curveChanged(curve);
@@ -745,7 +744,7 @@ CETool::setSegmentValue(double value, int curve, int seg)
 void 
 CETool::setSelectedWeighted(bool val)
 {
-    int curve,seg;
+    int curve;
     if(getSelectedCurve(curve) == errSUCCESS)
         setWeighted(curve,val);
 }
@@ -753,7 +752,6 @@ CETool::setSelectedWeighted(bool val)
 void
 CETool::setWeighted(int curve, bool val)
 {
-    auto animCurve=_curves[curve]->animCurve;
     // now set all curves there had weights to 1.
     // if the curve changes from weighted to non, we set all weights to 1
     // if the curve changes from non-weighted to weighted, we set all weights to equivalent values to not change curve
@@ -773,7 +771,6 @@ CETool::setSelectedLocked(bool val)
 void
 CETool::setLocked(int curve, int segment, bool val)
 {
-    auto animCurve=_curves[curve]->animCurve;
     // now set all curves there had weights to 1.
     // if the curve changes from weighted to non, we set all weights to 1
     // if the curve changes from non-weighted to weighted, we set all weights to equivalent values to not change curve
@@ -978,7 +975,6 @@ CETool::frameSelection()
     }
 
     // find min/max time
-    bool initX=0;
     double minX=std::numeric_limits<double>::max(), 
         maxX=-std::numeric_limits<double>::max(); // TODO: should be lowest in c++11
 
@@ -1017,7 +1013,6 @@ CETool::frameSelection()
     }
 
     // find min/max value over min/max time range
-    bool initY=false;
     double minY=std::numeric_limits<double>::max(), 
         maxY=-std::numeric_limits<double>::max();// TODO: should be lowest in c++11
 

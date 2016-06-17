@@ -131,10 +131,10 @@ void
 CEGraphCurve::updateView()
 {
 
-    const CEGraphView& view = _ui->getView();
     _firstSegInView=0;
     _lastSegInView=numSegs()-1;
     // TODO: make this as adaptive as before
+    //const CEGraphView& view = _ui->getView();
     //if (!_expr.findSegment(_firstSegInView, view.left(), false).ok()) return;
     //if (!_expr.findSegment(_lastSegInView, view.right()).ok()) return;
 
