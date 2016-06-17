@@ -249,7 +249,6 @@ CEGraphUniformSeg::paintSeg()
     glGetFloatv(GL_CURRENT_COLOR, &color[0]);
 
     if(_unbounded || firstSeg()) glColor3f(.6f,.6f,.6f);
-    bool transitionedToRealSegment=false;
     // draw curve samples
     int sample=0;
     if(firstSeg()){
@@ -342,10 +341,6 @@ CEGraphUniformSeg::updateView()
 CEGraphBezSeg::CEGraphBezSeg(CEGraphCurve* curve,int index)
     : CEGraphUniformSeg(curve,index)
 {
-    double dxi = 0;
-    double dyi = 0;
-    double dxo = 0;
-    double dyo = 0;
 
     _numParams = 4;
     _params = new double[4];

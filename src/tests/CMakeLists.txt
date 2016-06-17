@@ -24,7 +24,7 @@ link_directories(${GTEST_DIR}/${CMAKE_INSTALL_LIBDIR})
 
 find_package(PNG)
 if(PNG_FOUND)
-    include_directories(${PNG_INCLUDE_DIR})
+    include_directories(SYSTEM ${PNG_INCLUDE_DIR})
     include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
     # generate test cases for dev example expressions
