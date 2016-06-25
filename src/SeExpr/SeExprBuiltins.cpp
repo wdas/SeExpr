@@ -36,7 +36,7 @@ static const char* fabs_docstring="float abs(float x)\nabsolute value of x";
 
 // angle conversion functions
 static const char* deg_docstring="float deg(float angle)\nradians to degrees";
-static const char* rad_docstring="float deg(float angle)\ndegrees to radians";
+static const char* rad_docstring="float rad(float angle)\ndegrees to radians";
 // trig in degrees
 static const char* cosd_docstring="float cosd(float angle)\ncosine in degrees";
 static const char* sind_docstring="float sind(float angle)\nsine in degrees";

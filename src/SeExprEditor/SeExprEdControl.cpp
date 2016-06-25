@@ -383,7 +383,7 @@ void SeExprEdNumberControl::setValue(float value)
 }
 
 SeExprEdVectorControl::SeExprEdVectorControl(int id,SeExprEdVectorEditable* editable)
-    :SeExprEdControl(id,editable,true),_numberEditable(editable)
+    :SeExprEdControl(id,editable,true),_numberEditable(editable),_swatch(0)
 {
 
     if(_numberEditable->isColor){
