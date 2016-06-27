@@ -22,10 +22,25 @@ link_directories(${GTEST_DIR}/${CMAKE_INSTALL_LIBDIR})
 # Uncomment below to print performance stats
 # add_definitions(-DSEEXPR_PERFORMANCE)
 
-find_package(PNG)
+if(DEFINED ENV{RP_libpng}) # use Disney libpng if available
+    set(PNG_PATH $ENV{RP_libpng})
+    MESSAGE("-- Found PNG: " ${PNG_PATH})
+    include_directories(${PNG_PATH}/include)
+    find_library(PNG_LIBRARIES png PATHS ${PNG_PATH}/${CMAKE_INSTALL_LIBDIR}
+                 NO_DEFAULT_PATH)
+    find_library(PNG_LIBRARIES png) # default if no other lib found
+    set(PNG_FOUND 1)
+else(DEFINED ENV{RP_libpng}) # use local libpng
+    find_package(PNG)
+    if(PNG_FOUND)
+        MESSAGE("-- Found PNG: " ${PNG_INCLUDE_DIR})
+        include_directories(SYSTEM ${PNG_INCLUDE_DIR})
+        include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+    endif(PNG_FOUND)
+endif(DEFINED ENV{RP_libpng})
+
 if(PNG_FOUND)
-    include_directories(SYSTEM ${PNG_INCLUDE_DIR})
-    include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+    MESSAGE("-- Found PNG library: " ${PNG_LIBRARIES})
 
     # generate test cases for dev example expressions
     ADD_CUSTOM_COMMAND(
@@ -54,10 +69,10 @@ if(PNG_FOUND)
     install(TARGETS testmain2 DESTINATION share/test/SeExpr2)
     install(PROGRAMS imagediff.py DESTINATION share/test/SeExpr2)
 else(PNG_FOUND)
-    message("Couldn't find PNG not doing tests")
+    message("Couldn't find PNG -- not doing tests")
 endif(PNG_FOUND)
 else()
-    message("Couldn't find gtest framework not building main tests")
+    message("Couldn't find gtest framework -- not building main tests")
 endif()
 
 ADD_EXECUTABLE(dirtSimple "dirtSimple.cpp")
