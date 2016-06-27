@@ -400,10 +400,7 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode *funcNode, LLVM_BUILDER Builder
 
     // TODO: string
     unsigned sizeOfRet = (unsigned)funcNode->type().dim();
-    //assert(sizeOfRet == 1 || sizeOfRet == 3);
-    AllocaInst *result = createAllocaInst(Builder, Type::getDoubleTy(llvmContext), sizeOfRet);
-    LLVM_VALUE varName = Builder.CreateGlobalString(funcNode->name());
-    LLVM_VALUE ptrToFirstChar = Builder.CreateConstGEP2_32(nullptr, varName, 0, 0);
+    createAllocaInst(Builder, Type::getDoubleTy(llvmContext), sizeOfRet);
 
     // calculate how much space for opData, fpArg and strArg
     unsigned sizeOfFpArgs = 1 + sizeOfRet; // first arg is nargs second arg is sizeOfRet

@@ -10,16 +10,17 @@ def animCallback(x):
 
 def initializePlugin(mobject):
     from SeExpr2 import expreditor2
-    expreditor2.ExprControlCollectionUI.setAnimCurveCallback(animCallback)
+    expreditor2.ExprControlCollection.setAnimCurveCallback(animCallback)
 
 
 def uninitializePlugin(mobject):
     from SeExpr2 import expreditor2
-    expreditor2.ExprControlCollectionUI.setAnimCurveCallback(None)
+    expreditor2.ExprControlCollection.setAnimCurveCallback(None)
 
 
 def test():
     global ed
-    ed=expreditor2.ExprDialogUI()
+    from SeExpr2.expreditor2 import ExprDialog
+    ed=ExprDialog()
     ed.setExpressionString('foo=animCurve(u,"constant","constant",0,"pSphere1_translateX");\nfoo')
     ed.show()

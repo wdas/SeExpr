@@ -1378,8 +1378,8 @@ class GetVar : public ExprFuncSimple {
         typedef void(*func)(double *in, double* out);
         Data(func fIn,int dim) :f(fIn),dim(dim)
         {}
-        int dim;
         func f;
+        int dim;
     };
 
     virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const {

@@ -34,7 +34,7 @@ if(QT4_FOUND AND PNG_FOUND)
     target_link_libraries(imageEditor2 ${SEEXPR_LIBRARIES})
     target_link_libraries(imageEditor2 ${SEEXPR_EDITOR_LIBRARIES})
 
-    INCLUDE_DIRECTORIES(${PNG_INCLUDE_DIR})
+    INCLUDE_DIRECTORIES(SYSTEM ${PNG_INCLUDE_DIR})
     TARGET_LINK_LIBRARIES(imageEditor2 ${PNG_LIBRARIES})
     install(TARGETS imageEditor2 DESTINATION bin)
 

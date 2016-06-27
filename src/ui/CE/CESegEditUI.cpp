@@ -379,7 +379,6 @@ CESegEditUI::disableControls()
 
 void CESegEditUI::enableTangType(QComboBox* combo,animlib::AnimKeyframe::tangentType type,bool enable)
 {
-    auto it=&TangTypes[0];
     int index=0;
     while(TangTypes[index].name != 0){
         if(TangTypes[index].type==type){
@@ -396,7 +395,6 @@ void CESegEditUI::enableTangType(QComboBox* combo,animlib::AnimKeyframe::tangent
 
 void CESegEditUI::enableInfinityType(QComboBox *combo,animlib::AnimCurve::infinityType type)
 {
-    auto it=&TangTypes[0];
     int index=0;
     while(InfinityTypes[index].name != 0){
         if(InfinityTypes[index].type==type){
@@ -417,18 +415,10 @@ namespace{
 void
 CESegEditUI::enableControls()
 {
-    double frame;
     msg::str expr;
     msg::str type;
     msg::list params;
     animlib::AnimKeyframe& key=*(_curve->getFirstKey()+_segIndex);
-
-    double val=key.getValue();
-    frame=key.getTime();
-    
-    //_curve.getSegment(frame, expr, type, params, _segIndex);
-    bool preseg = false; // _segIndex == 0;
-
 
     setTextAndEnable(_frame,key.getTime());
     setTextAndEnable(_value,key.getValue());
@@ -440,8 +430,6 @@ CESegEditUI::enableControls()
     _locked->setChecked(key.isLocked());
     enableTangType(_inType,key.getInTangentType(),!key.isLocked());
     enableTangType(_outType,key.getOutTangentType(),true);
-
-
 }
 
 void CESegEditUI::handleInfinityChanged(){

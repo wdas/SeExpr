@@ -43,7 +43,7 @@ message(${PYTHON_INCLUDE_DIR})
 #IF(PYTHONLIBS_FOUND)
 SET(PYTHON_DEST "${LIBDIR}/python${PYTHON_VERSION}/site-packages" CACHED)
 
-include_directories(${BOOST_DIR}/include/boost-disney)
+include_directories(SYSTEM ${BOOST_DIR}/include/boost-disney)
 include_directories(${PYTHON_INCLUDE_DIR})
 link_directories(${BOOST_DIR}/${LIBDIR})
 include_directories(../SeExpr/parser)
