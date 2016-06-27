@@ -19,9 +19,13 @@
 
 #include "SeVec3d.h"
 #include <vector>
+#include <map>
 
 class SeExpression;
 class SeExprFuncNode;
+
+/// SeStatistics
+typedef std::map<std::string,double> SeStatistics;
 
 //! Extension function spec, used for complicated argument custom functions.
 /** Provides the ability to handle all argument type checking and processing manually.
@@ -49,6 +53,13 @@ public:
     virtual ~SeExprFuncX(){}
 
     bool isThreadSafe() const {return _threadSafe;}
+
+    /// Return memory usage of a funcX in bytes.
+    virtual size_t sizeInBytes() const {return 0;}
+
+    /// Give this function a chance to populate its statistics
+    virtual void statistics(SeStatistics& /*statistics*/) const {}
+
 private:
     bool _threadSafe;
 };
@@ -95,6 +106,13 @@ public:
 
     //! Get doc string for a specific function
     static std::string getDocString(const char* functionName);
+
+    //! Get the total size estimate of all plugins
+    static size_t sizeInBytes();
+
+    //! Dump statistics
+    static SeStatistics statistics();
+
 
     typedef double Func0();
     typedef double Func1(double);
