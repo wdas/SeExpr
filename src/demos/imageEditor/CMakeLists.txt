@@ -26,21 +26,20 @@ if(QT4_FOUND AND PNG_FOUND)
     set(imageEditor_CPPS imageEditor.cpp)
     qt4_wrap_cpp(imageEditor_MOC_SRCS ${imageEditor_MOC_HDRS})
 
-    add_executable(imageEditor ${imageEditor_CPPS} ${imageEditor_MOC_SRCS})
+    add_executable(imageEditor2 ${imageEditor_CPPS} ${imageEditor_MOC_SRCS})
     include_directories(${QT_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
     include_directories(${SEEXPR_EDITOR_INCLUDES})
-    target_link_libraries(imageEditor ${QT_QTCORE_LIBRARY})
-    target_link_libraries(imageEditor ${QT_QTGUI_LIBRARY})
-    target_link_libraries(imageEditor ${SEEXPR_LIBRARIES})
-    target_link_libraries(imageEditor ${SEEXPR_EDITOR_LIBRARIES})
+    target_link_libraries(imageEditor2 ${QT_QTCORE_LIBRARY})
+    target_link_libraries(imageEditor2 ${QT_QTGUI_LIBRARY})
+    target_link_libraries(imageEditor2 ${SEEXPR_LIBRARIES})
+    target_link_libraries(imageEditor2 ${SEEXPR_EDITOR_LIBRARIES})
 
-    INCLUDE_DIRECTORIES(${PNG_INCLUDE_DIR})
-    TARGET_LINK_LIBRARIES(imageEditor ${PNG_LIBRARIES})
-    install(TARGETS imageEditor DESTINATION bin)
+    INCLUDE_DIRECTORIES(SYSTEM ${PNG_INCLUDE_DIR})
+    TARGET_LINK_LIBRARIES(imageEditor2 ${PNG_LIBRARIES})
+    install(TARGETS imageEditor2 DESTINATION bin)
 
 endif(QT4_FOUND AND PNG_FOUND)
 
-
 INSTALL( FILES fbm.se noisecolor1.se noisecolor2.se noise.se raytrace.se sinc.se
-         DESTINATION share/SeExpr/expressions/ )
+         DESTINATION share/SeExpr2/expressions/ )
 

@@ -1,0 +1,98 @@
+# Copyright Disney Enterprises, Inc.  All rights reserved.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License
+# and the following modification to it: Section 6 Trademarks.
+# deleted and replaced with:
+# 
+# 6. Trademarks. This License does not grant permission to use the
+# trade names, trademarks, service marks, or product names of the
+# Licensor and its affiliates, except as required for reproducing
+# the content of the NOTICE file.
+# 
+# You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0
+
+
+
+# Texture Tiler
+
+# Adrienne Othon  Dec 23, 2004
+
+# A user specified texture is mapped within each grid cell.
+# It's the user's job to provide a texture that is tileable 
+# for the results to look good.  The grid may be scaled and/or
+# rotated.
+# The pattern generated is projected along x axis onto the model.
+
+
+
+
+#------------------------------------------------------
+# grid xform params:
+$scale = 1;    #size of the grid
+$scaley = 1;     #scale the grid along y (vertical)
+$scalez = 1;     #scale the grid along z (horizontal)
+$angle = 0.000;   #0.0,360.0 degrees
+
+#scale (size) of the texture.  compute coordinate within this cell
+$scaletex = 1;
+$scaletexy = 1;
+$scaletexz = 1;
+$jitter = 0;
+
+$translatey = 0;  #-5.0,5.0
+$translatez = 0;  #-5.0,5.0
+####
+
+## noise (warp)
+$noiseamount =  0;
+$noisefreq = 2;
+
+
+$scale = max($scale,.001);
+$scaley = max($scaley,.001);
+$scalez = max($scalez,.001);
+$scaletex = max($scaletex,.001);
+$scaletexy = max($scaletexy,.001);
+$scaletexz = max($scaletexz,.001);
+
+#deg -> rad
+$angle=$angle*3.14159/180;
+
+$cos = cos($angle);
+$sin = sin($angle);
+
+$P1 = ($P + [0,-$translatey,$translatez])/[1,$scaley,$scalez]/$scale;
+
+#rotate, to create staggered, brick-type grid
+$P1 = [0, $cos*$P1[1] + $sin*$P1[2], -$sin*$P1[1]+$cos*$P1[2]];
+
+
+
+# add noise to P1 (add warp):
+$P1 = $P1 + $noiseamount*(cnoise($P1*$noisefreq)-.5);
+
+
+
+##............. translation jitter (no rotation jitter implemented here), scale the texture ..............
+
+$frac = $P1 - floor($P1);
+
+# i needa little function to do the following:
+$frac1 = ($frac - [.5,.5,.5])/$scaletex;
+$frac1y = [0,$cos,-$sin];   # get axes, [rot matrix] * [0,1,0]
+$frac1z = [0,$sin,$cos];   # get axes,   [rot matrix] * [0,0,1]
+$frac1y = dot($frac1y,$frac1)*$frac1y;   # project onto axes
+$frac1z = dot($frac1z,$frac1)*$frac1z;   # project onto axes
+$frac1y = $frac1y / $scaletexy;   #scale along axes
+$frac1z = $frac1z / $scaletexz;   #scale along axes
+$frac1 = $frac1y + $frac1z + [.5,.5,.5] + $jitter*(ccellnoise($P1)-[.5,.5,.5]);   #combine components, .5 center
+
+$y = $frac1[1];
+$z = $frac1[2];
+$test = ($y < 0 || $y > 1 || $z < 0 || $z > 1);
+
+map("/home/fahome/aothon/misc/fishscale_1.tif",$z,$y)
+
+

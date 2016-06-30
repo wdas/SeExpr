@@ -1,0 +1,22 @@
+# Copyright Disney Enterprises, Inc.  All rights reserved.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License
+# and the following modification to it: Section 6 Trademarks.
+# deleted and replaced with:
+# 
+# 6. Trademarks. This License does not grant permission to use the
+# trade names, trademarks, service marks, or product names of the
+# Licensor and its affiliates, except as required for reproducing
+# the content of the NOTICE file.
+# 
+# You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0
+
+$scale =3.000;  # 1, 100
+$blend =0.503; #.001, 1
+$rotate =[0.000, 0.000, 0.000]; #-180,180
+$trans =[0.000, 0.000, 0.000];#-10,10.
+$Strength=1.000; 
+$Cnew=triplanar('/jobs2/VDEV/scembali/paint3d/TEXTURES/tiled/freckles.tif', $scale, $blend, $rotate, $trans);
+mix($Cs,$Cnew,$Strength) 

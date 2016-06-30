@@ -1,0 +1,9 @@
+The regression tester in tests/TypeTester.cpp is designed to test the type check system within the preparation functions, prep() in the SeExprNode parse trees (in SeExprNode.cpp).
+
+The function, test, checks that the actual type of a single given SeExpr program matches what is expected.  (The parameters of test are poorly named.)  It's output to std::cout and std::cerr depend on the verbosity level and the results of the test.  If the test fails, regardless of the verbosity level, "Failed check." is given to std::cerr.  The higher the verbosity level (currently up to 3), the more information is given to std::cout and std::cerr.
+
+The functions, testSingle, testDouble, and testTriple, use the function test to run through many possiblities of types checking against a given function for the desired results.  The function testSingle changes the type of the variable $v.  The function testDouble changes the type of the variables, $x and $y.  The function testTriple changes the type of the variables, $x, $y, and $z.
+
+The functions, testSingle, testDouble, and testTriple, first test the primary types.  They use FLOAT, FLOAT[2], FLOAT[3], STRING, and ERROR to test the primary types.  A cross-product approach is used for testDouble and testTriple to test all possible combinations of types.  After testing all combinations of primary types, each function tests all possible lifetime qualifiers (constant, uniform, varying and error) with the primary type as FLOAT.
+
+The functions, testOne, testTwo, and testThree, provide syntactic sugar for testSingle, testDouble, and testTriple.  Each call to testOne ultimately calls the function test 9 (5^1 + 4^1) times.  Each call to testTwo ultimately calls the function test 41 (5^2 + 4^2) times.  Each call to testThree ultimately calls the function test 189 (5^3 + 4^3) times.

@@ -1,0 +1,56 @@
+# Copyright Disney Enterprises, Inc.  All rights reserved.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License
+# and the following modification to it: Section 6 Trademarks.
+# deleted and replaced with:
+# 
+# 6. Trademarks. This License does not grant permission to use the
+# trade names, trademarks, service marks, or product names of the
+# Licensor and its affiliates, except as required for reproducing
+# the content of the NOTICE file.
+# 
+# You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0
+
+$freq =0.904; # 0,10.00
+
+$amp =0.602; # 0,10.00
+
+$P = $P + (noise($P*$freq)-.5)*$amp;
+
+$x = $P[0]; $y = $P[2]; $z = $P[1];
+
+$rho = ($x > 0 && $y >= 0) ? atan($y/$x):
+
+($x > 0 && $y < 0) ? atan($y/$x) + 2*PI :
+
+($x <0) ? atan($y/$x) + PI :
+
+($x == 0 && $y > 0) ? PI/2:
+
+($x == 0 && $y < 0) ? 3*PI/2: 0;
+
+$rho = $rho/(PI*2);
+
+$theta = atan(sqrt( pow($x,2)+pow($y,2)) / $z);
+
+$theta = $theta/ (PI/2);
+
+$x = $rho; $y = ($P[1] - 7.048) / (18.072);
+
+$stripes =1.000; # 1,10
+
+$midpoint =0.289;
+
+$slope =5.060; #0,10.00
+
+$y = $y * $slope;
+
+$mask = (($x + $y)*$stripes) %1;
+
+$mask = $mask > $midpoint;
+
+$Cout =$mask;
+
+$Cout
