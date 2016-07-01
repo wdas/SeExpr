@@ -22,7 +22,7 @@
 #include <QtGui/QDialog>
 
 class QLabel;
-class SeExprEditor;
+class ExprEditor;
 class ImageSynthesizer;
 
 class ImageEditorDialog: public QDialog
@@ -32,7 +32,7 @@ public:
     ImageEditorDialog(QWidget *parent=0);
 private:
     QLabel *_imageLabel;
-    SeExprEditor *_editor;
+    ExprEditor *_editor;
     ImageSynthesizer *_imageSynthesizer;
 private slots:
     void applyExpression();

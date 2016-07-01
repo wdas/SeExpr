@@ -1,0 +1,13 @@
+In the directory, src/SeExprEditor/, the files SeControlSpec.h and SeControlSpec.cpp contain the SpecExaminer class, which is an examiner class, which uses the Walker class (in SeExprWalker.h) to find certain patterns with a SeExprNode parse tree.
+
+The patterns matched are:
+
+Scalar assignment.  Something of the form: $v = 0;
+Vector assignment.  Something of the form: $v = [1,2,3];
+Curve  assignment.  Something of the form: $v = curve($a, $x1, $y1, $z1, ..., $xn, $yn, $zn)
+Curve  assignment.  Something of the form: $v = ccurve($a, $x1, $y1, $z1, ..., $xn, $yn, $zn)
+Strings.            Something of the form: "filename or other string literal"
+
+The intended use of this examiner is to match comments to specific parts of a SeExpr program.  This allows a gui interface to change the program without the user directly interacting with the code of the program.
+
+An example for using this examiner can be found in tests/patterns.cpp.

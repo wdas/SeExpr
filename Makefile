@@ -1,35 +1,46 @@
-#!/usr/bin/env make
-SH ?= sh
-uname_S := $(shell $(SH) -c 'uname -s || echo system')
-uname_R := $(shell $(SH) -c 'uname -r | cut -d- -f1 || echo release')
-uname_M := $(shell $(SH) -c 'uname -m || echo cpu')
+-include Makefile.config
+
 FLAVOR ?= optimize
+prefix ?= $(shell pf-makevar --absolute root)
+libdir ?= $(shell pf-makevar lib)
 
-platformdir ?= $(uname_S)-$(uname_R)-$(uname_M)-$(FLAVOR)
-builddir ?= $(CURDIR)/build/$(platformdir)
+# TODO: when RHEL6 is fully retired remove th
+# Don't set CXX when native GCC version is 4.8.
+#SETCXX := $(shell expr `gcc -dumpversion` \< 4.8)
+#ifeq "$(SETCXX)" "1"
+#    CXX=/opt/rh/devtoolset-2/root/usr/bin/g++
+#endif
 
-prefix ?= $(CURDIR)/$(platformdir)
-#DESTDIR =
 
-CMAKE_FLAGS ?= -DCMAKE_INSTALL_PREFIX=$(prefix)
+## Temporary staging directory
+# DESTDIR =
 
-# The default target in this Makefile is...
-all::
+# Specified by `git make-pkg` when building .pkg files
+# mac_pkg =
+
+export prefix DESTDIR
+
+all:
+	mkdir -p build/${FLAVOR}
+	export CXX=${CXX}
+	cd build/${FLAVOR} &&  CXX=${CXX} cmake -DCMAKE_INSTALL_PREFIX=$(prefix) -DCMAKE_INSTALL_LIBDIR=$(libdir) ${EXTRA_CMAKE_ARGS}  ../../
+	$(MAKE) -C build/${FLAVOR} all
+clean:
+	rm -rf build/${FLAVOR} Linux-*
 
 install: all
-	$(MAKE) -C $(builddir) DESTDIR=$(DESTDIR) install
+	$(MAKE) -C build/${FLAVOR} install
+	pkgconfig-gen --name seexpr2 --desc 'SeExpr v2 Library' \
+	--generate --destdir '$(DESTDIR)' --prefix $(prefix) --libdir $(libdir)
 
-$(builddir)/stamp: $(CMAKE_FILES)
-	mkdir -p $(builddir)
-	cd $(builddir) && cmake $(CMAKE_FLAGS) ../..
-	touch $@
+test: install
+	python src/tests/imageTestsReportNew.py runall
 
-all:: $(builddir)/stamp
-	$(MAKE) -C $(builddir) $(MAKEARGS) all
+format:
+	find $(CURDIR)/src -name '*.cpp' | xargs clang-format -i
+	find $(CURDIR)/src -name '*.h' | xargs clang-format -i
 
-clean: $(builddir)/stamp
-	$(MAKE) -C $(builddir) $(MAKEARGS) clean
+basictest: install
+	$(prefix)/share/test/SeExpr2/testmain2 -- --gtest_filter="BasicTests.*"
 
-.PHONY: all
-.PHONY: clean
-.PHONY: install
+precommit: format

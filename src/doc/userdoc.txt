@@ -100,7 +100,7 @@ float <b>contrast</b> ( float x,
 float c ) <br>
 <div style="margin-left: 40px;">Adjust the contrast.&nbsp; For c from
 0 to 0.5, the contrast is decreased.&nbsp; For c &gt; 0.5, the contrast
-is increased. NOTE: internally contrast will clamp to [0,1] range.<br>
+is increased.<br>
 </div>
 float <b>invert</b> ( float x ) -
 Invert the value.&nbsp; Defined as 1-x.<br>
@@ -120,11 +120,6 @@ constants may be used:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;int <b>gaussian</b> = 2<br>
 </div>
 <br>
-color <b>saturate</b> ( color x, float amt ) <br>
-<div style="margin-left: 40px;">Scales saturation of color by amt.
-The color is scaled around the rec709 luminance vlue, and negative
-results are clamped at zero.<br>
-</div>
 color <b>hsi</b> ( color x, float h, float s, float i, float map=1 ) <br>
 <div style="margin-left: 40px;">The hsi function shifts the hue by h
 (in degrees) and scales the saturation and intensity by s and i
@@ -314,8 +309,6 @@ Voronoi types 1 through 5:<br>
 <img src="Se_voronoi_3.png">&nbsp;
 <img src="Se_voronoi_4.png">&nbsp;
 <img src="Se_voronoi_5.png">&nbsp;
-Note: There is no guarantee that values will be 0,1, so you may need to clamp if
-using a function like gamma() or contrast() which expect [0,1] input.
 </div>
 <br>
 <h4><a name="Texture_Lookup_Functions"></a>

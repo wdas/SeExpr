@@ -1,0 +1,25 @@
+The walker/examiner classes are a generalized way of visiting each node of an SeExprNode parse tree.
+
+To write a new examiner, simply write a class, T, that inherents publicly from the Examiner class in SeExprWalker.h and provide definitions for the abstract member functions, examine and reset.  The abstract base class Examiner and the class Walker have a template parameter, which is a boolean.  If the template parameter is true, any walk of a SeExprNode parse tree will only have constant access to the tree.  If the template parameter is false (the default), every walk of a SeExprNode parse tree will be able to modify the parse tree however it wants.
+
+The member function, reset(), clears any internal state in the new examiner class, T.  So if there is no state (data members that change throughout examining multiple nodes in the same parse tree), reset can be any empty function.  However, since the walk member function of Walker returns void, there must be some side effects somewhere (in the examiner, in the parse tree, or globally) for walk to do anything other than be an expensive no-op.
+
+The other member function, examine(SeExprNode * n), examines the given node, n, and does whatever is appropriate for this visit.  The return value of examine is a boolean: If the children of n are to be examined using the function examine, then examine(n) should return true.  If examine has internally examined n's children, or if n's children don't need to be examined at all, then examine(n) should return false.
+
+To use an examiner, T, first initialize an instance, e, of the examiner class, T.  Then initialize an instance, w, of the desired walker (const or nonconst) passing a pointer to the instance of the examiner, e. Finally, call the walk member function from the walker, w, passing the parse tree, t, to walk as the call's only parameter. In C++ pseudo-code:
+
+T e = T();
+Walker w = Walker(&e);
+w.walk(t);
+
+The current implementation of walker only does a pre-order traversal of a parse tree.  So the root node of the tree is examined first.  If the examine call returned true, each of its children are examined recursively.  For example, consider the tree:
+
+      a
+    / | \
+   b  c  d
+  / \    |
+ e  f    g
+
+An pre-order traversal of this tree examines a, b, e, f, c, d, and g, in that order.
+
+Other examination orders are possibly but currently pre-order traversal is the only one implemented.

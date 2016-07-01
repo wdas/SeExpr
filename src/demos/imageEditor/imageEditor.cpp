@@ -32,10 +32,10 @@
 #include <QtGui/QPushButton>
 #include <QtGui/QMessageBox>
 
-#include <SeExprEdControlCollection.h>
-#include <SeExprEditor.h>
-#include <SeExprEdBrowser.h>
-#include <SeExpression.h>
+#include <SeExpr2/UI/ExprControlCollection.h>
+#include <SeExpr2/UI/ExprEditor.h>
+#include <SeExpr2/UI/ExprBrowser.h>
+#include <SeExpr2/Expression.h>
 
 #include "ImageEditorDialog.h"
 
@@ -44,28 +44,30 @@
 double clamp(double x){return std::max(0.,std::min(255.,x));}
 
 // Simple image synthesizer expression class to support demo image editor
-class ImageSynthExpression:public SeExpression
+class ImageSynthExpression:public SeExpr2::Expression
 {
 public:
     // Constructor that takes the expression to parse
     ImageSynthExpression(const std::string& expr)
-        :SeExpression(expr)
+        :SeExpr2::Expression(expr)
     {}
 
     // Simple variable that just returns its internal value
-    struct Var:public SeExprScalarVarRef
+    struct Var:public SeExpr2::ExprVarRef
     {
-        Var(const double val):val(val){}
-        Var(){}
+        Var(const double val)
+            : SeExpr2::ExprVarRef(SeExpr2::ExprType().FP(1).Varying()), val(val) {}
+        Var()
+            : SeExpr2::ExprVarRef(SeExpr2::ExprType().FP(1).Varying()), val(0.0) {}
         double val; // independent variable
-        void eval(const SeExprVarNode* /*node*/,SeVec3d& result)
-        {result[0]=val;}
+        void eval(double* result){result[0]=val;}
+        void eval(const char** result){assert(false);}
     };
     // variable map
     mutable std::map<std::string,Var> vars;
 
     // resolve function that only supports one external variable 'x'
-    SeExprVarRef* resolveVar(const std::string& name) const
+    SeExpr2::ExprVarRef* resolveVar(const std::string& name) const
     {
         std::map<std::string,Var>::iterator i=vars.find(name);
         if(i != vars.end()) return &i->second;
@@ -118,7 +120,7 @@ unsigned char *ImageSynthesizer::evaluateExpression(const std::string &exprStr)
         for(int col=0;col<_width;col++){
             u=one_over_width*(col+.5);
             v=one_over_height*(row+.5);
-            SeVec3d result=expr.evaluate();
+            SeExpr2::Vec3d result=SeExpr2::Vec3dConstRef(expr.evalFP());
             pixel[0]=clamp(result[2]*256.);
             pixel[1]=clamp(result[1]*256.);
             pixel[2]=clamp(result[0]*256.);
@@ -145,7 +147,7 @@ ImageEditorDialog::ImageEditorDialog(QWidget *parent)
     _imageLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter );
 
     // Locate logo image relative to location of the app itself
-    QString imageFile = QCoreApplication::applicationDirPath() + "/../share/doc/SeExpr/seexprlogo.png";
+    QString imageFile = QCoreApplication::applicationDirPath() + "/../share/doc/SeExpr2/seexprlogo.png";
     QImage image(imageFile); // just a fun default
 
     QPixmap imagePixmap = QPixmap::fromImage(image);
@@ -158,7 +160,7 @@ ImageEditorDialog::ImageEditorDialog(QWidget *parent)
     imagePreviewLayout->addStretch();
 
     // Expression controls
-    SeExprEdControlCollection *controls = new SeExprEdControlCollection();
+    ExprControlCollection *controls = new ExprControlCollection();
     QScrollArea* scrollArea=new QScrollArea();
     scrollArea->setMinimumHeight(100);
     scrollArea->setFixedWidth(450);
@@ -166,16 +168,16 @@ ImageEditorDialog::ImageEditorDialog(QWidget *parent)
     scrollArea->setWidget(controls);
 
     // Expression editor
-    _editor = new SeExprEditor(this, controls);
+    _editor = new ExprEditor(this, controls);
 
     // Expression browser
-    SeExprEdBrowser *browser = new SeExprEdBrowser(0, _editor);
+    ExprBrowser *browser = new ExprBrowser(0, _editor);
 
     // Add user expressions, example expressions to browser list.
     browser->addUserExpressionPath("imageEditor");
 #ifdef IMAGE_EDITOR_ROOT
     std::string exPathStr = IMAGE_EDITOR_ROOT;
-    exPathStr += "/share/SeExpr/expressions";
+    exPathStr += "/share/SeExpr2/expressions";
     browser->addPath("Examples", exPathStr);
 #else
     browser->addPath("Examples", "./src/demos/imageEditor");
@@ -259,4 +261,3 @@ int main(int argc, char *argv[]){
     app.exec();
     return 0;
 }
-

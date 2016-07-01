@@ -18,6 +18,7 @@ def main():
     subp = parser.add_subparsers()
 
     callbacks = (
+        ('python-ver', python_ver),
         ('python-site', python_site),
         ('python-inc', python_inc),
         ('pyqt4-sip', pyqt4_sip),

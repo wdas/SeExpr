@@ -1,4 +1,3 @@
-
 # Copyright Disney Enterprises, Inc.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,8 +15,15 @@
 
 FIND_PACKAGE(PNG)
 IF(PNG_FOUND)
-    INCLUDE_DIRECTORIES(${PNG_INCLUDE_DIR})
-    ADD_EXECUTABLE(imageSynth "imageSynth.cpp")
-    TARGET_LINK_LIBRARIES(imageSynth ${PNG_LIBRARIES} ${SEEXPR_LIBRARIES})
-    install(TARGETS imageSynth DESTINATION bin)
+    INCLUDE_DIRECTORIES(SYSTEM ${PNG_INCLUDE_DIR})
+
+    ADD_EXECUTABLE(imageSynth2 "imageSynth.cpp")
+    TARGET_LINK_LIBRARIES(imageSynth2 ${PNG_LIBRARIES} ${SEEXPR_LIBRARIES})
+    install(TARGETS imageSynth2 DESTINATION bin)
+
+    ADD_EXECUTABLE(imageSynthPaint3d2 "imageSynthForPaint3d.cpp")
+    TARGET_LINK_LIBRARIES(imageSynthPaint3d2 ${PNG_LIBRARIES} ${SEEXPR_LIBRARIES})
+    install(TARGETS imageSynthPaint3d2 DESTINATION bin)
+
+    install(DIRECTORY examples DESTINATION share/SeExpr2/demos/imageSynth USE_SOURCE_PERMISSIONS)
 ENDIF(PNG_FOUND)

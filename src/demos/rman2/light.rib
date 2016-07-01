@@ -1,0 +1,32 @@
+# Copyright Disney Enterprises, Inc.  All rights reserved.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License
+# and the following modification to it: Section 6 Trademarks.
+# deleted and replaced with:
+# 
+# 6. Trademarks. This License does not grant permission to use the
+# trade names, trademarks, service marks, or product names of the
+# Licensor and its affiliates, except as required for reproducing
+# the content of the NOTICE file.
+# 
+# You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0
+
+
+TransformBegin
+Scale 1 1 -1 
+ConcatTransform [0.995755 -0.052756 0.075424 0.000000 0.000000 0.819438 0.573168 0.000000 -0.092043 -0.570735 0.815960 0.000000 -0.007945 -0.000000 -6.952593 1.000000 ]
+ConcatTransform [ -1 0 0 0 0 1 0 0 0 0 -1 0 0 0 0 1 ]
+LightSource "shadowdistant" "light" "uniform float intensity" [1] #"shadowname" "raytrace"
+TransformEnd
+LightSource "ambientlight" "light" "uniform float intensity" [.01]
+
+#  Attribute "trace" "bias" [.1]
+#Attribute "visibility" "trace" [1]
+#Attribute "shade" "transmissionhitmode" ["primitive"]
+#Attribute "visibility" "int transmission" [1]
+#  Attribute "visibility" "int diffuse" [1]
+#  Attribute "visibility" "int specular" [1]
+#  Attribute "visibility" "int transmission" [0]
+
