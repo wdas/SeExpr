@@ -174,6 +174,7 @@ IF(ENABLE_LLVM_BACKEND)
     #set(LLVM_LIB ${LLVM_AVAILABLE_LIBS} -lLLVMSupport -lLLVMCodeGen -lLLVMCore) #"-lLLVMCore -lLLVMMCJIT -lLLVMExecutionEngine -lLL")
     set(LLVM_LIB LLVM)
     message(STATUS "LLVM library " ${LLVM_LIB})
+    message(STATUS "LLVM version " ${LLVM_VERSION})
 ENDIF(ENABLE_LLVM_BACKEND)
 
 
