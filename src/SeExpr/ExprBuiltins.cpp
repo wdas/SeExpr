@@ -386,6 +386,25 @@ static const char* hsltorgb_docstring =
     "hsl value (except for negative s values), the conversion is\n"
     "well-defined and reversible.";
 
+static Vec3d saturate(const Vec3d& Cin, double amt) {
+    const Vec3d lum(.2126,.7152,.0722); // rec709 luminance
+    Vec3d result = Vec3d(Cin.dot(lum) * (1-amt)) + Cin * amt;
+    if (result[0] < 0) result[0] = 0;
+    if (result[1] < 0) result[1] = 0;
+    if (result[2] < 0) result[2] = 0;
+    return result;
+}
+
+Vec3d saturate(int n, const Vec3d* args) {
+    if (n < 2) return 0.0;
+    return saturate(args[0], args[1][0]);
+}
+static const char* saturate_docstring =
+    "color saturate(color val, float amt)\n"
+    "Scale saturation of color by amt.\n"
+    "The color is scaled around the rec709 luminance value,\n"
+    "and negative results are clamped at zero.\n";
+
 double hash(int n, double* args) {
     // combine args into a single seed
     uint32_t seed = 0;
@@ -1644,6 +1663,7 @@ void defineBuiltins(ExprFunc::Define define, ExprFunc::Define3 define3) {
     FUNCNDOC(midhsi, 5, 7);
     FUNCDOC(hsltorgb);
     FUNCDOC(rgbtohsl);
+    FUNCNDOC(saturate, 2, 2);
 
     // noise
     FUNCNDOC(hash, 1, -1);
