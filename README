@@ -1,5 +1,5 @@
 ===================================================================
-SeExr - An embeddable expression evaluation engine
+SeExpr - An embeddable expression evaluation engine
 ===================================================================
 
 
@@ -20,23 +20,25 @@ Getting started
 ---------------
 Examining the demo applications in src/demo is a great way to see
 some usage examples of the library. The basic strategy is to subclass
-the SeExpression class and implement the methods that describe what
+the Expression class and implement the methods that describe what
 extra functions and variables your expression evaluation will need
 
-Be sure to check out the doxygen pages for an API overview.
-
+Be sure to check out the doxygen pages for an API overview:
+http://wdas.github.io/SeExpr/doxygen/
 
 Source code overview
 ====================
 
 src/
    SeExpr/   Library code
+   ui/       User Interface components for editing
    demos/    Demo Applications
    tests/    Regression Tests
    doc/      Doxygen generation
 
 SeExpr Developers
 =================
+Janet Berlin
 Brent Burley
 Lawrence Chai
 Andrew Selle
