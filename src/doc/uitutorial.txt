@@ -31,9 +31,9 @@ We'd like to be able to use a GUI expression editor to preview resulting images 
 <pre style="padding-left: 5em;">
 $val=voronoi(5*[$u,$v,.5],4,.6,.2);
 $color=ccurve($val,
-    0.000, [0.141, 0.059, 0.051], 4, 
-    0.185, [0.302, 0.176, 0.122], 4, 
-    0.301, [0.651, 0.447, 0.165], 4,  
+    0.000, [0.141, 0.059, 0.051], 4,
+    0.185, [0.302, 0.176, 0.122], 4,
+    0.301, [0.651, 0.447, 0.165], 4,
     0.462, [0.976, 0.976, 0.976], 4);
 $color
 </pre>
@@ -90,29 +90,29 @@ int main(int argc, char *argv[]){
 
 <h2>Widget Controls and Text Editor</h2>
 
-Now let's add some controls and an expression editor.  The <a href="./classSeExprEdControlCollection.html">SeExprEdControlCollection</a> class provides the ability to add UI controls (sliders, ramps, etc.) for various types of variables (int, float, color, curves, etc.).  The <a href="./classSeExprEditor.html">SeExprEditor</a> class provides the ability to manually edit the expression script.
+Now let's add some controls and an expression editor.  The <a href="./classExprEdControlCollection.html">ExprEdControlCollection</a> class provides the ability to add UI controls (sliders, ramps, etc.) for various types of variables (int, float, color, curves, etc.).  The <a href="./classExprEditor.html">ExprEditor</a> class provides the ability to manually edit the expression script.
 <p>
 We will include two new header files, in addition to the needed Qt header files:
 
 <pre style="padding-left: 5em;">
 #include &lt;QtGui/QVBoxLayout&gt;
 #include &lt;QtGui/QScrollArea&gt;
-#include &lt;SeExprEdControlCollection.h&gt;
-#include &lt;SeExprEditor.h&gt;
+#include &lt;ExprEdControlCollection.h&gt;
+#include &lt;ExprEditor.h&gt;
 </pre>
 
 and add a private member to the ImageEditorDialog class definition for the editor (we will use the editor's contents later to generate the preview image):
 
 <pre style="padding-left: 5em;">
 private:
-    SeExprEditor *_editor;
+    ExprEditor *_editor;
 </pre>
 
-Next we'll add 2 new components in the constructor and lay them out.  The <a href="http://doc.qt.digia.com/4.7/qscrollarea.html">QScrollArea</a> has specific parameters to properly display the controls.  The SeExprEditor constructor takes a pointer to the SeExprEdControlCollection object, so it can connect signals between them:
+Next we'll add 2 new components in the constructor and lay them out.  The <a href="http://doc.qt.digia.com/4.7/qscrollarea.html">QScrollArea</a> has specific parameters to properly display the controls.  The ExprEditor constructor takes a pointer to the ExprEdControlCollection object, so it can connect signals between them:
 
 <pre style="padding-left: 5em;">
     // Expression controls
-    SeExprEdControlCollection *controls = new SeExprEdControlCollection();
+    ExprEdControlCollection *controls = new ExprEdControlCollection();
     QScrollArea* scrollArea=new QScrollArea();
     scrollArea->setMinimumHeight(100);
     scrollArea->setFixedWidth(450);
@@ -120,7 +120,7 @@ Next we'll add 2 new components in the constructor and lay them out.  The <a hre
     scrollArea->setWidget(controls);
 
     // Expression editor
-    _editor = new SeExprEditor(this, controls);
+    _editor = new ExprEditor(this, controls);
 
     // Layout widgets
     QVBoxLayout *rootLayout = new QVBoxLayout();
@@ -140,19 +140,19 @@ For example, adding a color widget creates 3 sliders for RGB values which we can
 <h2>Expression Library Browser</h2>
 
 <p>
-Next let's add an expression library browser so we can look at example expressions and add our own.  We will use the <a href="./classSeExprEdBrowser.html">SeExprEdBrowser</a> class and connect it to the editor.
+Next let's add an expression library browser so we can look at example expressions and add our own.  We will use the <a href="./classExprEdBrowser.html">ExprEdBrowser</a> class and connect it to the editor.
 
 <p>
 First, we will need an additional header:
 
 <pre style="padding-left: 5em;">
-#include &lt;SeExprEdBrowser.h&gt;
+#include &lt;ExprEdBrowser.h&gt;
 </pre>
 
 The browser reads from a config.txt file to locate expression files.  An example can be found in ./build/src/demos/imageEditor/config.txt.  We will create the browser in the ImageEditorDialog constructor:
 <pre style="padding-left: 5em;">
     // Expression browser
-    SeExprEdBrowser *browser = new SeExprEdBrowser(0, _editor);
+    ExprEdBrowser *browser = new ExprEdBrowser(0, _editor);
 
     // Add user expressions, example expressions to browser list.
     browser->addUserExpressionPath("imageEditor");
@@ -251,33 +251,39 @@ First, let's create some classes to handle the image synthesis.  This code is a 
 
 <pre style="padding-left: 5em;">
 #include &lt;png.h&gt;
-#include &lt;SeExpression.h&gt;
+#include &lt;Expression.h&gt;
 
 double clamp(double x){return std::max(0.,std::min(255.,x));}
 
 // Simple image synthesizer expression class to support demo image editor
-class ImageSynthExpression:public SeExpression
+class ImageSynthExpression:public Expression
 {
 public:
     // Constructor that takes the expression to parse
     ImageSynthExpression(const std::string& expr)
-        :SeExpression(expr)
+        :Expression(expr)
     {}
 
     // Simple variable that just returns its internal value
-    struct Var:public SeExprScalarVarRef
+    struct Var:public ExprVarRef
     {
-        Var(const double val):val(val){}
-        Var(){}
+        Var(const double val)
+            : SeExpr2::ExprVarRef(SeExpr2::ExprType().FP(1).Varying()),
+              val(val) {}
+        Var()
+            : SeExpr2::ExprVarRef(SeExpr2::ExprType().FP(1).Varying()),
+              val(0.0) {}
+
         double val; // independent variable
-        void eval(const SeExprVarNode* /*node*/,SeVec3d& result)
-        {result[0]=val;}
+        void eval(double* result){result[0]=val;}
+        void eval(const char** result){assert(false);}
     };
+
     // variable map
     mutable std::map&lt;std::string,Var&gt; vars;
 
     // resolve function that only supports one external variable 'x'
-    SeExprVarRef* resolveVar(const std::string& name) const
+    ExprVarRef* resolveVar(const std::string& name) const
     {
         std::map&lt;std::string,Var&gt;:iterator i=vars.find(name);
         if(i != vars.end()) return &i->second;
@@ -330,7 +336,7 @@ unsigned char *ImageSynthesizer::evaluateExpression(const std::string &exprStr)
         for(int col=0;col&lt;_width;col++){
             u=one_over_width*(col+.5);
             v=one_over_height*(row+.5);
-            SeVec3d result=expr.evaluate();
+            Vec3d result=expr.evaluate();
             pixel[0]=clamp(result[0]*256.);
             pixel[1]=clamp(result[1]*256.);
             pixel[2]=clamp(result[2]*256.);
@@ -422,7 +428,7 @@ Finally, we'll have to pull out the ImageEditorDialog class definition into its 
 #include &lt;QtGui/QDialog&gt;
 
 class QLabel;
-class SeExprEditor;
+class ExprEditor;
 class ImageSynthesizer;
 
 class ImageEditorDialog: public QDialog
@@ -432,7 +438,7 @@ public:
     ImageEditorDialog(QWidget *parent=0);
 private:
     QLabel *_imageLabel;
-    SeExprEditor *_editor;
+    ExprEditor *_editor;
     ImageSynthesizer *_imageSynthesizer;
 private slots:
     void applyExpression();
@@ -442,4 +448,4 @@ private slots:
 Now we can load expressions from a library, create new expressions manually as well as by creating new controls, and see all our changes in an image preview as we go:<br><br><img src="./ui_final.png">
 
 <p>
-A next simple step would be to add a <b>Save</b> button to save expressions from the editor to your own ~/imageEditor/expressions directory.  The library browser will pick these up automatically, based on the context (imageEditor) and the hard-coded directory (expressions).  This exercise is left to the reader to implement.  
+A next simple step would be to add a <b>Save</b> button to save expressions from the editor to your own ~/imageEditor/expressions directory.  The library browser will pick these up automatically, based on the context (imageEditor) and the hard-coded directory (expressions).  This exercise is left to the reader to implement.

@@ -22,25 +22,26 @@
  *  - \subpage plugins -  Custom Function Plugins
  * \section demos Demo Applications
  *     - \subpage mytut (code at asciiGraph.cpp)
- *     - \subpage uitut (code starting at imageEditor.cpp)
- *     - Image Synthesizer  (code at imageSynth.cpp)
- *     - SeGrapher Qt Grapher (code starting at segraph.cpp)
- *     - Renderman Shadeop (code at seop.cpp)
+ *     - \subpage uitut (code at imageEditor.cpp)
+ *     - Image Synthesizer  (at imageSynth.cpp)
+ *     - SeGrapher Qt Grapher (at demos/segraph)
+ *     - Renderman Shadeop (at demos/rman)
+ *     - \subpage varblocks
  * \section mainapi Main API pages
- *  - SeExpression - Main class to parse a single expression
- *  - SeExprVarRef - Binding of an external variable to an expression context.
- *  - SeExprFunc - Define a custom function that calls C++ code
- *  - SeExprFuncX - Manual argument parsing C++ code
- *  - SeExprFuncNode - Node that calls a function (needed for SeExprFuncX arg parsing)
+ *  - Expression - Main class to parse a single expression
+ *  - ExprVarRef - Binding of an external variable to an expression context.
+ *  - ExprFunc - Define a custom function that calls C++ code
+ *  - ExprFuncX - Manual argument parsing C++ code
+ *  - ExprFuncNode - Node that calls a function (needed for SeExprFuncX arg parsing)
  * \section useful Useful classes and functions
- *  - SeVec3d - Class to hold and manipulate 3-vectors
- *  - SeExprBuiltins.h - Useful builtin functions that are also available in C++
- *  - SeExpr::SeCurve - Hermite interpolation curve.
+ *  - Vec - Class to hold and manipulate n-dimensional vectors
+ *  - ExprBuiltins.h - Useful builtin functions that are also available in C++
+ *  - SeExpr2::Curve - Hermite interpolation curve.
  *
  * \section internals Internals
- *  - SeExprNode - Parse Tree Node
- *  - SeExprParser.h - Entry point to bison/flex parser
- * 
+ *  - ExprNode - Parse Tree Node
+ *  - ExprParser - Entry point to bison/flex parser
+ *
  * \section Other
  *  - \subpage license
  */
@@ -50,8 +51,12 @@
 \htmlinclude tutorial.txt
 */
 /**
-\page uitut Simple Image Editor UI Tutorial
+\page uitut Image Editor Tutorial
 \htmlinclude uitutorial.txt
+*/
+/**
+\page varblocks Using Variable Blocks
+\htmlinclude varblocks.txt
 */
 /**
 \page userdoc User Documentation
