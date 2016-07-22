@@ -21,7 +21,6 @@ http://www.apache.org/licenses/LICENSE-2.0
   <li><a href="#Color_Masking_and_Remapping_Functions">Color, Masking,
 and Remapping Functions</a></li>
   <li><a href="#Noise_Functions">Noise Functions</a></li>
-  <li><a href="#Texture_Lookup_Functions">Texture Lookup Functions</a></li>
   <li><a href="#Selection_Functions">Selection Functions</a><br>
   </li>
   <li><a href="#General_Math_Functions">General Math Functions and Constants</a></li>
@@ -309,20 +308,6 @@ Voronoi types 1 through 5:<br>
 <img src="Se_voronoi_3.png">&nbsp;
 <img src="Se_voronoi_4.png">&nbsp;
 <img src="Se_voronoi_5.png">&nbsp;
-</div>
-<br>
-<h4><a name="Texture_Lookup_Functions"></a>
-Texture Lookup Functions</h4>
-vector <b>map</b>( string filename, [float format-arg], [float u, float v], [int channel] )<br>
-<div style="margin-left: 40px;">Access a texture map.<br>
-<b>Note: strings must be enclosed in single or double quotes.</b><br>
-</div>
-<br>
-vector <b>projmap</b> ( string
-coordspace, string type, string
-filename, [float format-arg] ) <br>
-<div style="margin-left: 40px;">Projects a texture map from the given
-named coordinace space using the specified projection type.<br>
 </div>
 <br>
 <h4><a name="Selection_Functions"></a>Selection Functions</h4>

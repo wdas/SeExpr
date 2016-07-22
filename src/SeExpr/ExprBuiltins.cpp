@@ -729,7 +729,9 @@ static const char* ccellnoise_docstring =
 double pnoise(const Vec3d& p, const Vec3d& period) {
     double result;
     double args[3] = {p[0], p[1], p[2]};
-    int pargs[3] = {(int)period[0], (int)period[1], (int)period[2]};
+    int pargs[3] = {max(1,(int)period[0]),
+                    max(1,(int)period[1]),
+                    max(1,(int)period[2])};
     PNoise<3, 1>(args, pargs, &result);
     return result;
 }
