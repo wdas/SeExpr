@@ -1196,6 +1196,13 @@ static const char* pick_docstring =
     "to the supplied weights.&nbsp; Any weights not supplied are assumed to\n"
     "be 1.0.";
 
+double swatch(int n, double* params) {
+        return choose(n, params);
+    }
+static const char *swatch_docstring=
+    "color swatch(float index, color choice0, color choice1, color choice2, [...])\n"
+    "Chooses one of the supplied color choices based on the index (assumed to be in range [0..1]).";
+
 double choose(int n, double* params) {
     if (n < 3) return 0;
     double key = params[0];
@@ -1704,6 +1711,7 @@ void defineBuiltins(ExprFunc::Define define, ExprFunc::Define3 define3) {
     FUNCNDOC(pick, 3, -1);
     FUNCNDOC(choose, 3, -1);
     FUNCNDOC(wchoose, 4, -1);
+    FUNCNDOC(swatch, 3, -1);
     FUNCNDOC(spline, 5, -1);
 
     // FuncX interface
