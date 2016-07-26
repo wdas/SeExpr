@@ -30,22 +30,22 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef SeExprEdSpecYY_SEEXPREDSPEC_Y_TAB_H_INCLUDED
-# define SeExprEdSpecYY_SEEXPREDSPEC_Y_TAB_H_INCLUDED
+#ifndef ExprSpecYY_EXPRSPEC_Y_TAB_H_INCLUDED
+# define ExprSpecYY_EXPRSPEC_Y_TAB_H_INCLUDED
 /* Enabling traces.  */
-#ifndef SeExprEdSpecYYDEBUG
-# define SeExprEdSpecYYDEBUG 0
+#ifndef ExprSpecYYDEBUG
+# define ExprSpecYYDEBUG 0
 #endif
-#if SeExprEdSpecYYDEBUG
-extern int SeExprEdSpecdebug;
+#if ExprSpecYYDEBUG
+extern int ExprSpecdebug;
 #endif
 
 /* Tokens.  */
-#ifndef SeExprEdSpecYYTOKENTYPE
-# define SeExprEdSpecYYTOKENTYPE
+#ifndef ExprSpecYYTOKENTYPE
+# define ExprSpecYYTOKENTYPE
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
-   enum SeExprEdSpectokentype {
+   enum ExprSpectokentype {
      IF = 258,
      ELSE = 259,
      NAME = 260,
@@ -92,52 +92,52 @@ extern int SeExprEdSpecdebug;
 
 
 
-#if ! defined SeExprEdSpecYYSTYPE && ! defined SeExprEdSpecYYSTYPE_IS_DECLARED
-typedef union SeExprEdSpecYYSTYPE
+#if ! defined ExprSpecYYSTYPE && ! defined ExprSpecYYSTYPE_IS_DECLARED
+typedef union ExprSpecYYSTYPE
 {
 /* Line 2058 of yacc.c  */
-#line 271 "/disney/users/jberlin/projects/llvm-sandbox/seexpr/src/SeExprEditor/SeExprSpecParser.y"
+#line 271 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParser.y"
 
-    SeExprSpecNode* n;
+    ExprSpecNode* n;
     double d;      // return value for number tokens
     char* s;       /* return value for name tokens.  Note: UNLIKE the regular parser, this is not strdup()'dthe string */
 
 
 /* Line 2058 of yacc.c  */
 #line 108 "y.tab.h"
-} SeExprEdSpecYYSTYPE;
-# define SeExprEdSpecYYSTYPE_IS_TRIVIAL 1
-# define SeExprEdSpecstype SeExprEdSpecYYSTYPE /* obsolescent; will be withdrawn */
-# define SeExprEdSpecYYSTYPE_IS_DECLARED 1
+} ExprSpecYYSTYPE;
+# define ExprSpecYYSTYPE_IS_TRIVIAL 1
+# define ExprSpecstype ExprSpecYYSTYPE /* obsolescent; will be withdrawn */
+# define ExprSpecYYSTYPE_IS_DECLARED 1
 #endif
 
-#if ! defined SeExprEdSpecYYLTYPE && ! defined SeExprEdSpecYYLTYPE_IS_DECLARED
-typedef struct SeExprEdSpecYYLTYPE
+#if ! defined ExprSpecYYLTYPE && ! defined ExprSpecYYLTYPE_IS_DECLARED
+typedef struct ExprSpecYYLTYPE
 {
   int first_line;
   int first_column;
   int last_line;
   int last_column;
-} SeExprEdSpecYYLTYPE;
-# define SeExprEdSpecltype SeExprEdSpecYYLTYPE /* obsolescent; will be withdrawn */
-# define SeExprEdSpecYYLTYPE_IS_DECLARED 1
-# define SeExprEdSpecYYLTYPE_IS_TRIVIAL 1
+} ExprSpecYYLTYPE;
+# define ExprSpecltype ExprSpecYYLTYPE /* obsolescent; will be withdrawn */
+# define ExprSpecYYLTYPE_IS_DECLARED 1
+# define ExprSpecYYLTYPE_IS_TRIVIAL 1
 #endif
 
-extern SeExprEdSpecYYSTYPE SeExprEdSpeclval;
-extern SeExprEdSpecYYLTYPE SeExprEdSpeclloc;
-#ifdef SeExprEdSpecYYPARSE_PARAM
+extern ExprSpecYYSTYPE ExprSpeclval;
+extern ExprSpecYYLTYPE ExprSpeclloc;
+#ifdef ExprSpecYYPARSE_PARAM
 #if defined __STDC__ || defined __cplusplus
-int SeExprEdSpecparse (void *SeExprEdSpecYYPARSE_PARAM);
+int ExprSpecparse (void *ExprSpecYYPARSE_PARAM);
 #else
-int SeExprEdSpecparse ();
+int ExprSpecparse ();
 #endif
-#else /* ! SeExprEdSpecYYPARSE_PARAM */
+#else /* ! ExprSpecYYPARSE_PARAM */
 #if defined __STDC__ || defined __cplusplus
-int SeExprEdSpecparse (void);
+int ExprSpecparse (void);
 #else
-int SeExprEdSpecparse ();
+int ExprSpecparse ();
 #endif
-#endif /* ! SeExprEdSpecYYPARSE_PARAM */
+#endif /* ! ExprSpecYYPARSE_PARAM */
 
-#endif /* !SeExprEdSpecYY_SEEXPREDSPEC_Y_TAB_H_INCLUDED  */
+#endif /* !ExprSpecYY_EXPRSPEC_Y_TAB_H_INCLUDED  */
