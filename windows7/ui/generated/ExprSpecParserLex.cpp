@@ -543,7 +543,7 @@ int ExprSpec_flex_debug = 0;
 #define ExprSpecYY_MORE_ADJ 0
 #define ExprSpecYY_RESTORE_ExprSpecYY_MORE_OFFSET
 char *ExprSpectext;
-#line 1 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 1 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 /*
 * Copyright Disney Enterprises, Inc.  All rights reserved.
 *
@@ -563,7 +563,7 @@ char *ExprSpectext;
 /* Don't generate ExprSpecwrap since everything is in one string */
 /* Don't generate unput since it's unused and gcc complains... */
 /* Don't worry about interactive and using isatty(). Fixes Windows compile. */
-#line 26 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 26 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 #ifndef MAKEDEPEND
 #    include <ctype.h>
 #    include <string.h>
@@ -783,7 +783,7 @@ ExprSpecYY_DECL
 	register char *ExprSpec_cp, *ExprSpec_bp;
 	register int ExprSpec_act;
     
-#line 72 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 72 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 
 #line 789 "ExprSpecParserLexIn.cpp"
 
@@ -866,122 +866,122 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 ExprSpecYY_RULE_SETUP
-#line 73 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 73 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 
 	ExprSpecYY_BREAK
 case 2:
 ExprSpecYY_RULE_SETUP
-#line 75 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 75 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { return IF; }
 	ExprSpecYY_BREAK
 case 3:
 ExprSpecYY_RULE_SETUP
-#line 76 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 76 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { return ELSE; }
 	ExprSpecYY_BREAK
 case 4:
 ExprSpecYY_RULE_SETUP
-#line 78 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 78 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { return OR; }
 	ExprSpecYY_BREAK
 case 5:
 ExprSpecYY_RULE_SETUP
-#line 79 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 79 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { return AND; }
 	ExprSpecYY_BREAK
 case 6:
 ExprSpecYY_RULE_SETUP
-#line 80 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 80 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { return EQ; }
 	ExprSpecYY_BREAK
 case 7:
 ExprSpecYY_RULE_SETUP
-#line 81 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 81 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { return NE; }
 	ExprSpecYY_BREAK
 case 8:
 ExprSpecYY_RULE_SETUP
-#line 82 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 82 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { return LE; }
 	ExprSpecYY_BREAK
 case 9:
 ExprSpecYY_RULE_SETUP
-#line 83 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 83 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { return GE; }
 	ExprSpecYY_BREAK
 case 10:
 ExprSpecYY_RULE_SETUP
-#line 84 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 84 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { return ARROW; }
 	ExprSpecYY_BREAK
 case 11:
 ExprSpecYY_RULE_SETUP
-#line 85 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 85 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { return AddEq; }
 	ExprSpecYY_BREAK
 case 12:
 ExprSpecYY_RULE_SETUP
-#line 86 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 86 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { return SubEq; }
 	ExprSpecYY_BREAK
 case 13:
 ExprSpecYY_RULE_SETUP
-#line 87 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 87 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { return MultEq; }
 	ExprSpecYY_BREAK
 case 14:
 ExprSpecYY_RULE_SETUP
-#line 88 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 88 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { return DivEq; }
 	ExprSpecYY_BREAK
 case 15:
 ExprSpecYY_RULE_SETUP
-#line 89 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 89 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { return ModEq; }
 	ExprSpecYY_BREAK
 case 16:
 ExprSpecYY_RULE_SETUP
-#line 90 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 90 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { return ExpEq; }
 	ExprSpecYY_BREAK
 case 17:
 ExprSpecYY_RULE_SETUP
-#line 92 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 92 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { ExprSpeclval.d = M_PI; return NUMBER; }
 	ExprSpecYY_BREAK
 case 18:
 ExprSpecYY_RULE_SETUP
-#line 93 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 93 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { ExprSpeclval.d = M_E; return NUMBER; }
 	ExprSpecYY_BREAK
 case 19:
 ExprSpecYY_RULE_SETUP
-#line 94 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 94 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { ExprSpeclval.d = 0; return NUMBER; }
 	ExprSpecYY_BREAK
 case 20:
 ExprSpecYY_RULE_SETUP
-#line 95 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 95 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { ExprSpeclval.d = 1; return NUMBER; }
 	ExprSpecYY_BREAK
 case 21:
 ExprSpecYY_RULE_SETUP
-#line 96 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 96 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { ExprSpeclval.d = 2; return NUMBER; }
 	ExprSpecYY_BREAK
 case 22:
 ExprSpecYY_RULE_SETUP
-#line 97 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 97 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { ExprSpeclval.d = 3; return NUMBER; }
 	ExprSpecYY_BREAK
 case 23:
 ExprSpecYY_RULE_SETUP
-#line 99 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 99 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { ExprSpeclval.d = atof(ExprSpectext); return NUMBER; }
 	ExprSpecYY_BREAK
 case 24:
 ExprSpecYY_RULE_SETUP
-#line 100 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 100 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { /* match quoted string, allow embedded quote, \" */
 			  ExprSpeclval.s = specRegisterToken(&ExprSpectext[1]); 
 			  ExprSpeclval.s[strlen(ExprSpeclval.s)-1] = '\0';
@@ -989,7 +989,7 @@ ExprSpecYY_RULE_SETUP
 	ExprSpecYY_BREAK
 case 25:
 ExprSpecYY_RULE_SETUP
-#line 104 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 104 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { /* match quoted string, allow embedded quote, \' */
 			  ExprSpeclval.s = specRegisterToken(&ExprSpectext[1]); 
 			  ExprSpeclval.s[strlen(ExprSpeclval.s)-1] = '\0';
@@ -997,50 +997,50 @@ ExprSpecYY_RULE_SETUP
 	ExprSpecYY_BREAK
 case 26:
 ExprSpecYY_RULE_SETUP
-#line 108 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 108 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { ExprSpeclval.s = specRegisterToken(&ExprSpectext[1]); return VAR; }
 	ExprSpecYY_BREAK
 case 27:
 ExprSpecYY_RULE_SETUP
-#line 109 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 109 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { ExprSpeclval.s = specRegisterToken(&ExprSpectext[1]); return VAR; }
 	ExprSpecYY_BREAK
 case 28:
 ExprSpecYY_RULE_SETUP
-#line 110 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 110 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { ExprSpeclval.s = specRegisterToken(ExprSpectext); return NAME; }
 	ExprSpecYY_BREAK
 case 29:
 ExprSpecYY_RULE_SETUP
-#line 112 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 112 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 /* ignore quoted newline */;
 	ExprSpecYY_BREAK
 case 30:
 ExprSpecYY_RULE_SETUP
-#line 113 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 113 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 /* ignore quoted tab */;
 	ExprSpecYY_BREAK
 case 31:
 /* rule 31 can match eol */
 ExprSpecYY_RULE_SETUP
-#line 114 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 114 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 /* ignore whitespace */;
 	ExprSpecYY_BREAK
 case 32:
 ExprSpecYY_RULE_SETUP
-#line 115 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 115 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { /* match comment */ 
                          int startPos=ExprSpecpos(),endPos=ExprSpecpos()+strlen(&ExprSpectext[1])+1;
                           comments->push_back(std::pair<int,int>(startPos,endPos));}
 	ExprSpecYY_BREAK
 case 33:
 ExprSpecYY_RULE_SETUP
-#line 120 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 120 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 { return ExprSpectext[0]; }
 	ExprSpecYY_BREAK
 case 34:
 ExprSpecYY_RULE_SETUP
-#line 122 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 122 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 ECHO;
 	ExprSpecYY_BREAK
 #line 1047 "ExprSpecParserLexIn.cpp"
@@ -2001,7 +2001,7 @@ void ExprSpecfree (void * ptr )
 
 #define ExprSpecYYTABLES_NAME "ExprSpectables"
 
-#line 122 "/disney/home/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
+#line 122 "/disney/users/jberlin/projects/seexpr2/src/ui/ExprSpecParserLex.l"
 
 
 
