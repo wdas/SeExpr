@@ -22,7 +22,7 @@ Getting started with SeExpr is relatively easy.  SeExpr gives you a way to
 evaluate one or many evaluations of an expression. What changes between
 different applications of expressions is mainly the particular variables that
 are accessible (sometimes also the set of functions).  Each application of
-expressions generally has it's own subclass of SeExpression that gets
+expressions generally has it's own subclass of Expression that gets
 instantiated.  To get started we're going to go through a simple application
 that is an ascii graphing calculator. This is located in the
 src/demos/asciiGraph.cpp part of the source tree.
@@ -88,15 +88,15 @@ we'd get
 
 <h2>Implement the subclass</h2>
 
-First we subclass SeExpression and give it a constructor, typically one that
+First we subclass Expression and give it a constructor, typically one that
 takes an expression string.
 <pre>
-class GrapherExpr:public SeExpression
+class GrapherExpr:public SeExpr2::Expression
 {
 public:
     //! Constructor that takes the expression to parse
     GrapherExpr(const std::string& expr)
-        :SeExpression(expr)
+        :SeExpr2::Expression(expr)
     {}
 ...
 };
@@ -105,18 +105,19 @@ public:
 <h3>A simple variable reference</h3>
 This is not a very interesting subclass of expression until we add some
 additional variables.  Variables on some applications may be very dynamic. In
-this case, however, we only need 'x', so we make a SeExprScalarVarRef  subclass 
+this case, however, we only need 'x', so we make a ExprVarRef  subclass
 
 <pre>
-class GrapherExpr:public SeExpression
+class GrapherExpr:public SeExpr2::Expression
 {
 ...
     //! Simple variable that just returns its internal value
-    struct SimpleVar:public SeExprScalarVarRef
+    struct SimpleVar:public SeExpr2::ExprVarRef
     {
+        SimpleVar() : SeExpr2::ExprVarRef(SeExpr2::ExprType().FP(1).Varying()), val(0.0) {}
         double val; // independent variable
-        void eval(const SeExprVarNode* node,SeVec3d& result)
-        {result[0]=val;}
+        void eval(double* result) {result[0] = val;}
+        void eval(const char** result) {}
     }
 ...
 };
@@ -124,11 +125,11 @@ class GrapherExpr:public SeExpression
 Once we have this we need an instance to store our variable and provide a
 reference to that. We make it mutable, because resolveVar() is const. One does
 not need to store a variable reference in a given expression. In fact, it may be
-useful to use the same SeExprVarRef from multiple expressions!  For example, if
+useful to use the same ExprVarRef from multiple expressions!  For example, if
 you have 10 expressions that all have access to the same variables, this is
 an important optimization.
 <pre>
-class GrapherExpr:public SeExpression
+class GrapherExpr:public SeExpr2::Expression
 {
 ...
     mutable SimpleVar x;
@@ -141,7 +142,7 @@ expressions. To make it bindable we need to override the resolveVar() function
 as follows:
 <pre>
     //! resolve function that only supports one external variable 'x'
-    SeExprVarRef* resolveVar(const std::string& name) const
+    SeExpr2::ExprVarRef* resolveVar(const std::string& name) const
     {
         if(name == "x") return &x;
         return 0;
@@ -157,7 +158,7 @@ independent variables that are used and calling evaluate().  What it has to do
 depends very much on the application. In this case we only need to set the
 independent variable x as:
 <pre>
-class GrapherExpr:public SeExpression
+class GrapherExpr:public SeExpr2::Expression
 {
 ...
     void setX(double x_input)
@@ -197,7 +198,7 @@ value as follows:
             // prep the expression engine for evaluation
             expr.setX(x);
             // evaluate and pull scalar value
-            SeVec3d val=expr.evaluate();
+            Vec3d val=expr.evaluate();
             double y=val[0];
             // transform from logical to device coordinate
             int j=(y-ymin)/(ymax-ymin)*h;

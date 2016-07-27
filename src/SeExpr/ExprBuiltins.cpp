@@ -386,6 +386,25 @@ static const char* hsltorgb_docstring =
     "hsl value (except for negative s values), the conversion is\n"
     "well-defined and reversible.";
 
+static Vec3d saturate(const Vec3d& Cin, double amt) {
+    const Vec3d lum(.2126,.7152,.0722); // rec709 luminance
+    Vec3d result = Vec3d(Cin.dot(lum) * (1-amt)) + Cin * amt;
+    if (result[0] < 0) result[0] = 0;
+    if (result[1] < 0) result[1] = 0;
+    if (result[2] < 0) result[2] = 0;
+    return result;
+}
+
+Vec3d saturate(int n, const Vec3d* args) {
+    if (n < 2) return 0.0;
+    return saturate(args[0], args[1][0]);
+}
+static const char* saturate_docstring =
+    "color saturate(color val, float amt)\n"
+    "Scale saturation of color by amt.\n"
+    "The color is scaled around the rec709 luminance value,\n"
+    "and negative results are clamped at zero.\n";
+
 double hash(int n, double* args) {
     // combine args into a single seed
     uint32_t seed = 0;
@@ -729,7 +748,9 @@ static const char* ccellnoise_docstring =
 double pnoise(const Vec3d& p, const Vec3d& period) {
     double result;
     double args[3] = {p[0], p[1], p[2]};
-    int pargs[3] = {(int)period[0], (int)period[1], (int)period[2]};
+    int pargs[3] = {max(1,(int)period[0]),
+                    max(1,(int)period[1]),
+                    max(1,(int)period[2])};
     PNoise<3, 1>(args, pargs, &result);
     return result;
 }
@@ -1176,6 +1197,13 @@ static const char* pick_docstring =
     "automatically hashed).&nbsp; The values will be distributed according\n"
     "to the supplied weights.&nbsp; Any weights not supplied are assumed to\n"
     "be 1.0.";
+
+double swatch(int n, double* params) {
+        return choose(n, params);
+    }
+static const char *swatch_docstring=
+    "color swatch(float index, color choice0, color choice1, color choice2, [...])\n"
+    "Chooses one of the supplied color choices based on the index (assumed to be in range [0..1]).";
 
 double choose(int n, double* params) {
     if (n < 3) return 0;
@@ -1644,6 +1672,7 @@ void defineBuiltins(ExprFunc::Define define, ExprFunc::Define3 define3) {
     FUNCNDOC(midhsi, 5, 7);
     FUNCDOC(hsltorgb);
     FUNCDOC(rgbtohsl);
+    FUNCNDOC(saturate, 2, 2);
 
     // noise
     FUNCNDOC(hash, 1, -1);
@@ -1684,6 +1713,7 @@ void defineBuiltins(ExprFunc::Define define, ExprFunc::Define3 define3) {
     FUNCNDOC(pick, 3, -1);
     FUNCNDOC(choose, 3, -1);
     FUNCNDOC(wchoose, 4, -1);
+    FUNCNDOC(swatch, 3, -1);
     FUNCNDOC(spline, 5, -1);
 
     // FuncX interface

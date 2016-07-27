@@ -1,3 +1,20 @@
+<!--
+Copyright Disney Enterprises, Inc.  All rights reserved.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License
+ and the following modification to it: Section 6 Trademarks.
+ deleted and replaced with:
+
+ 6. Trademarks. This License does not grant permission to use the
+ trade names, trademarks, service marks, or product names of the
+ Licensor and its affiliates, except as required for reproducing
+ the content of the NOTICE file.
+
+ You may obtain a copy of the License at
+ http://www.apache.org/licenses/LICENSE-2.0
+-->
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <!--
 Copyright Disney Enterprises, Inc.  All rights reserved.
@@ -27,7 +44,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 The steps are:<br>
 <ol>
   <li>Create a ".cpp" source file with one or more functions.</li>
-  <li>Define an SeExprPluginInit function.</li>
+  <li>Define an SeExprPluginInitV2 function.</li>
   <li>Compile the plugin.</li>
   <li>Add the plugin to the $SE_EXPR_PLUGINS path.</li>
 </ol>
@@ -35,10 +52,10 @@ The steps are:<br>
 Here's a trivial example, myfunc.cpp:<br>
 <br>
 <div style="margin-left: 40px;"><tt><span
- style="font-family: monospace;">#include "SeExprFunc.h"</span></tt><br
+ style="font-family: monospace;">#include "SeExpr2/ExprFunc.h"</span></tt><br
  style="font-family: monospace;">
 <tt><span style="font-family: monospace;">
-#include "SeExprBuiltins.h"</span></tt><br
+#include "SeExpr2/ExprBuiltins.h"</span></tt><br
  style="font-family: monospace;">
 <br style="font-family: monospace;">
 <tt><span style="font-family: monospace;">double myfunc(double a,
@@ -52,12 +69,12 @@ double c)</span></tt><br style="font-family: monospace;">
 <tt><span style="font-family: monospace;">
 }</span></tt><br>
 </div>
-<h3>2. Define an SeExprPluginInit function.</h3>
+<h3>2. Define an ExprPluginInitV2 function.</h3>
 This is also in myfunc.cpp:<br>
 <br>
 <div style="margin-left: 40px;"><tt><span
  style="font-family: monospace;">extern "C" void
-SeExprPluginInit(SeExprFunc::Define define)<br>
+ExprPluginInitV2(ExprFunc::Define define)<br>
 {<br>
 &nbsp;&nbsp;&nbsp; define("myfunc", myfunc);<br>
 }</span></tt><br style="font-family: monospace;">
@@ -69,7 +86,7 @@ Here's a sample Makefile:<br>
 <div style="margin-left: 40px;"><tt><span
  style="font-family: monospace;">myf</span></tt><tt><span
  style="font-family: monospace;">unc.so : myfunc.cpp</span></tt><tt><span
- style="font-family: monospace;"> $(shell pathfinder find_first "lib64/libSeExpr.so")</span></tt><br>
+ style="font-family: monospace;"> $(shell pathfinder find_first "lib64/libSeExpr2.so")</span></tt><br>
 <tt><span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; $(CXX) -O2
 -I$(shell pathfinder find_package SeExpr)/include -shared -o $@ $^</span></tt><br>
 </div>
@@ -80,14 +97,14 @@ Or, you can just run the compiler directly:<br>
 -I$(shell pathfinder find_package SeExpr)/include -shared -o myfunc.so</span></tt><tt><span
  style="font-family: monospace;"> </span></tt><tt><span
  style="font-family: monospace;"> myfunc.cpp </span></tt><tt><span
- style="font-family: monospace;"> $(shell pathfinder find_first "lib64/libSeExpr.so")</span></tt><br>
+ style="font-family: monospace;"> $(shell pathfinder find_first "lib64/libSeExpr2.so")</span></tt><br>
 </div>
 <br>
 Note: there are both static (.a) and dynamic (.so) versions of the
 expression library available.&nbsp; If you link with the static
 version, your plugin will be slightly larger, but you'll be insulated
 from changes to the expression library.&nbsp; To use the static
-version, just change libSeExpr.so to libSeExpr.a on the command line
+version, just change libSeExpr2.so to libSeExpr2.a on the command line
 above.<br>
 <h3>4. Add the plugin to the $SE_EXPR_PLUGINS path.</h3>
 The $SE_EXPR_PLUGINS environment variable contains a colon-separated
@@ -159,25 +176,25 @@ double, double, double, double)<br>
     <tr>
       <td style="vertical-align: top;">scalar result, 1 vector arg<br>
       </td>
-      <td style="vertical-align: top;">double myfunc(const SeVec3d&amp;)<br>
+      <td style="vertical-align: top;">double myfunc(const Vec3d&amp;)<br>
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;">scalar result, 2 vector args</td>
       <td style="vertical-align: top;">double myfunc(const
-SeVec3d&amp;, const SeVec3d&amp;)<br>
+Vec3d&amp;, const Vec3d&amp;)<br>
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;">vector result, 1 vector arg</td>
-      <td style="vertical-align: top;">SeVec3d myfunc(const
-SeVec3d&amp;)<br>
+      <td style="vertical-align: top;">Vec3d myfunc(const
+Vec3d&amp;)<br>
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;">vector result, 2 vector args</td>
-      <td style="vertical-align: top;">SeVec3d myfunc(const
-SeVec3d&amp;, const SeVec3d&amp;)<br>
+      <td style="vertical-align: top;">Vec3d myfunc(const
+Vec3d&amp;, const Vec3d&amp;)<br>
       </td>
     </tr>
     <tr>
@@ -192,26 +209,26 @@ params)<br>
       <td style="vertical-align: top;">scalar result, variable number
 of vector args</td>
       <td style="vertical-align: top;">double myfunc(int n, const
-SeVec3d* params)<br>
+Vec3d* params)<br>
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;">vector result, variable number
 of vector args</td>
-      <td style="vertical-align: top;">SeVec3d myfunc(int n, const
-SeVec3d* params)<br>
+      <td style="vertical-align: top;">Vec3d myfunc(int n, const
+Vec3d* params)<br>
       </td>
     </tr>
     <tr>
       <td style="vertical-align: top;">Extension class (see note below)<br>
       </td>
       <td style="vertical-align: top;">class myfunc : public
-SeExprFuncX {...}</td>
+ExprFuncX {...}</td>
     </tr>
   </tbody>
 </table>
 <br>
-Note: the SeExprFuncX extension class can accept any type or number of
+Note: the ExprFuncX extension class can accept any type or number of
 args, including strings, and can produce a vector or scalar
 result.&nbsp; Also, the extension function has access to the internal
 expression objects for caching data, etc.<br>
@@ -221,7 +238,7 @@ argument count must be given when the function is registered:<br>
 <br>
 <div style="margin-left: 40px;"><tt><span
  style="font-family: monospace;">define("brick3d",
-SeExprFunc(brick3d, 1, 5)); // require 1..5 args</span></tt><br>
+ExprFunc(brick3d, 1, 5)); // require 1..5 args</span></tt><br>
 </div>
 <br>
 Note: the maxargs param can be set to -1 to allow an unlimited number
@@ -229,34 +246,34 @@ of arguments:<br>
 <br>
 <div style="margin-left: 40px;"><tt><span
  style="font-family: monospace;">define("foo",
-SeExprFunc(foo, 4, -1)); // require at least 4 args</span></tt><br>
+ExprFunc(foo, 4, -1)); // require at least 4 args</span></tt><br>
 </div>
 <h2>Detailed Example</h2>
-<tt><span style="font-family: monospace;">#include "SeExprFunc.h"<br>
-#include "SeExprBuiltins.h"<br>
+<tt><span style="font-family: monospace;">#include "SeExpr2/ExprFunc.h"<br>
+#include "SeExpr2/ExprBuiltins.h"<br>
 </span></tt><tt><span style="font-family: monospace;"><br>
 <span style="font-weight: bold;">// provide access to SeExpr built-in
 functions</span><br style="font-weight: bold;">
 </span></tt><tt><span style="font-family: monospace;">using namespace
-SeExpr; <br>
+SeExpr2; <br>
 <br>
 <span style="font-weight: bold;">// wrapper to allow calling noise with
 1 argument</span><br style="font-weight: bold;">
-double noise(const SeVec3d&amp; P)<br>
+double noise(const Vec3d&amp; P)<br>
 {<br>
 &nbsp;&nbsp;&nbsp; return noise(1, &amp;P);<br>
 }<br>
 <br>
 <span style="font-weight: bold;">// wood(vector P)</span><br
  style="font-weight: bold;">
-double wood(const SeVec3d&amp; P)<br>
+double wood(const Vec3d&amp; P)<br>
 {<br>
 &nbsp;&nbsp;&nbsp; double noiseP = noise(P)*4;<br>
 &nbsp;&nbsp;&nbsp; double noiseP15 = noise(P*15)/16;<br>
 &nbsp;&nbsp;&nbsp; double noiseP50 = noise(P*50);<br>
 <br>
 &nbsp;&nbsp;&nbsp; double L = length(P*10 + noiseP + noiseP15 +
-SeVec3d(40,60,20));<br>
+Vec3d(40,60,20));<br>
 &nbsp;&nbsp;&nbsp; double Lf = fmod(L, 1);<br>
 <br>
 &nbsp;&nbsp;&nbsp; return mix(pow(noise(P*60 + noiseP) + noiseP15, 2) *
@@ -273,9 +290,9 @@ smoothstep(.2, 1, invert(Lf)));<br>
 <br>
 <span style="font-weight: bold;">// brick3d(vector P, float type=1),
 type can be 1 or 2.</span><br style="font-weight: bold;">
-double brick3d(int nargs, const SeVec3d* args)<br>
+double brick3d(int nargs, const Vec3d* args)<br>
 {<br>
-&nbsp;&nbsp;&nbsp; SeVec3d p = 0.0;<br>
+&nbsp;&nbsp;&nbsp; Vec3d p = 0.0;<br>
 &nbsp;&nbsp;&nbsp; int type = 1;<br>
 &nbsp;&nbsp;&nbsp; switch (nargs) {<br>
 &nbsp;&nbsp;&nbsp; case 2: type = int(args[1][0]);<br>
@@ -307,7 +324,7 @@ fmod((invert(p2) + 100) * 3 + t2, 1)) *<br>
 &nbsp;&nbsp;&nbsp; else if (type==2)<br>
 &nbsp;&nbsp;&nbsp; {<br>
 &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; float result;<br>
-&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; SeVec3d cell;<br>
+&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; Vec3d cell;<br>
 &nbsp; &nbsp; &nbsp; &nbsp; cell[0] = (p0 + 100) * 3 + t1;<br>
 &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; cell[1] = (p1 + 100) * 7;<br>
 &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; cell[2] = (p2 + 100) * 3 + t2;<br>
@@ -316,12 +333,12 @@ fmod((invert(p2) + 100) * 3 + t2, 1)) *<br>
 &nbsp;&nbsp;&nbsp; return 0;<br>
 }<br>
 <br>
-extern "C" void SeExprPluginInit(</span></tt><tt><span
- style="font-family: monospace;">SeExprFunc::Define</span></tt><tt><span
+extern "C" void SeExprPluginInitV2(</span></tt><tt><span
+ style="font-family: monospace;">SeExpr2::ExprFunc::Define</span></tt><tt><span
  style="font-family: monospace;"> define)<br>
 {<br>
 &nbsp;&nbsp;&nbsp; define("wood", wood);<br>
-&nbsp;&nbsp;&nbsp; define("brick3d", SeExprFunc(brick3d, 1,
+&nbsp;&nbsp;&nbsp; define("brick3d", SeExpr2::ExprFunc(brick3d, 1,
 2));<br>
 }<br>
 <br>
