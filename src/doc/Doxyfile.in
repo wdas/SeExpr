@@ -120,7 +120,7 @@ FULL_PATH_NAMES        = YES
 # If left blank the directory from which doxygen is run is used as the 
 # path to strip.
 
-STRIP_FROM_PATH        = 
+STRIP_FROM_PATH        = @CMAKE_CURRENT_SOURCE_DIR@
 
 # The STRIP_FROM_INC_PATH tag can be used to strip a user-defined part of 
 # the path mentioned in the documentation of a class, which tells 
@@ -456,7 +456,7 @@ INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/../SeExpr \
 			 @CMAKE_CURRENT_SOURCE_DIR@/../demos \
 			 @CMAKE_CURRENT_SOURCE_DIR@/../demos/imageEditor \
 			 @CMAKE_CURRENT_SOURCE_DIR@/../demos/imageSynth \
-			 @CMAKE_CURRENT_SOURCE_DIR@/../demos/rman \
+			 @CMAKE_CURRENT_SOURCE_DIR@/../demos/rman2 \
 			 @CMAKE_CURRENT_SOURCE_DIR@/../demos/segraph \
                          @CMAKE_CURRENT_SOURCE_DIR@                       
                        

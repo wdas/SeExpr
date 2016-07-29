@@ -44,6 +44,7 @@
  *
  * \section Other
  *  - \subpage license
+ *  - <a href="./v1/index.html">Older Documentation (v1-v2)</a>
  */
 
 /**
