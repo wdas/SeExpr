@@ -26,6 +26,7 @@ extra functions and variables your expression evaluation will need
 
 Be sure to check out the doxygen pages for an API overview:
 http://wdas.github.io/SeExpr/doxygen/
+http://wdas.github.io/SeExpr/doxygen/v1 (for older documentation)
 
 Source code overview
 ====================
