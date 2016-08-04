@@ -1,0 +1,74 @@
+/**
+ * Custom styles to adjust how documents look per our users' desires
+ */
+
+/* US3029 - Update styles to suit a wider variety of tastes */
+
+.jive-rendered-content {
+  line-height: 1.3;
+  font-size: 15px;
+}
+
+.jive-rendered-content p {
+  margin-bottom: .5em;
+}
+
+.jive-content .jive-rendered-content h1 {
+  font-size: 22px;
+  font-weight: bold;
+  font-style: normal;
+  margin-bottom: .5em;
+}
+
+.jive-content .jive-rendered-content h2 {
+  font-size: 17px;
+  font-weight: bold;
+  font-style: normal;
+  margin-bottom: .5em;
+}
+
+.jive-content .jive-rendered-content h3 {
+  font-size: 17px;
+  font-weight: normal;
+  font-style: normal;
+  margin-bottom: .5em;
+}
+
+.jive-content .jive-rendered-content h4,
+.jive-content .jive-rendered-content h5,
+.jive-content .jive-rendered-content h6 {
+  font-size:ve 15px;
+  font-weight: normal;
+  font-style: italic;
+  margin-bottom: .5em;
+}
+
+.jive-rendered-content pre,
+.jive-rendered-content .dp-highlighter {
+  margin: 10px 20px !important;
+  padding: 10px;
+  border: 1px solid #eee;
+  border-left: 2px solid #ccc;
+  background: url('/images/quote-background-1.gif');
+}
+
+.jive-rendered-content pre,
+.jive-rendered-content .dp-highlighter ol li span {
+  font-family: monospace !important;
+  font-size: 13px !important;
+}
+
+.jive-rendered-content .dp-highlighter.no-numbers ol {
+  list-style: none;
+}
+
+.jive-rendered-content .dp-highlighter ol li {
+  border-left: none;
+}
+
+.jive-rendered-content .dp-highlighter ol,
+.jive-rendered-content .dp-highlighter ol li,
+.jive-rendered-content .dp-highlighter ol li.alt {
+  background: transparent !important;
+}
+
