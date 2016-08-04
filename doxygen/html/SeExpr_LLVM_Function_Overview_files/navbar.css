@@ -1,0 +1,246 @@
+/*
+   NAVBAR.CSS
+   ==============================
+   Description:
+   custom css applied for the navbar upgrade from jive5 to jive 6.
+
+   JIRA task:
+   http://jira/browse/TECHWB-458
+
+
+   NAVBAR CSS DIRECTORY
+   ==============================
+	> Header
+	> Logo
+	> Logo DropDown Arrow . . . previously Links
+	> Navigation
+	> Shows
+	> Workgroups
+	> Products
+	> Name or Login
+	> Avatar
+	> Number Bubble
+	> Create or Pencil Icon and DropDown Arrow
+	> Apps
+	> Search
+	> Space between navbar and content
+	> Body
+	> Content Headers
+*/
+
+
+/* Header
+=============================================== */
+#j-header, #j-compact-header {
+	padding: 0;
+	height: 26px;
+}
+
+#j-header-wrap {
+	margin: 0px -4px;
+}
+
+/* Logo
+=============================================== */
+#j-header .j-header-logo {
+	float: left;
+	margin: 0 0 0 10px;
+	min-height: 26px;
+	height: 26px;
+}
+
+/* Logo DropDown Arrow . . . previously Links
+=============================================== */
+#quicklinks-userbar-menu {
+	margin-left: 5px;
+}
+#quicklinks-userbar-menu .nav-link {
+    height: 20px;
+    padding: 7px 0 0 0;
+	text-indent: -9999px;
+	width: 15px;
+}
+
+#quicklinks-userbar-menu .nav-link .j-nav-more {
+	float: right;
+	margin: 0;
+}
+
+#quicklinks-userbar-menu-menu header.j-pop-desc{
+	background-color: #F7F7F7;
+    border-bottom: 1px solid #E8E8E8;
+	border-radius: 0;E8;
+    border-top: 1px solid #eee;
+    color: #7D7D7D;
+	font-size: 11px;
+    font-weight: bold;
+    margin: 5px 0;
+    padding: 8px 12px 4px;
+    text-transform: uppercase;
+    display: block;
+    height: 15px;
+}
+#quicklinks-userbar-menu-menu header.j-pop-desc div {
+	float: left;
+	display: inline-block;
+}
+#quicklinks-userbar-menu-menu header.j-pop-desc small {
+	margin-left: 20px;
+	float: right;
+	display: inline-block;
+}
+#quicklinks-userbar-menu-menu .quicklinks-nav-link-item {
+	clear:both;
+}
+
+/* Navigation
+=============================================== */
+#j-globalNav-bg {
+	float: none;
+	height: 26px;
+	position: static;
+    padding: 0 5px 0 15px;
+
+}
+.j-globalNavLink {
+	height: 20px;
+	padding: 0 15px 0;
+}
+
+.j-globalNav li {
+	height: 26px;
+	line-height: 14px;
+}
+
+#j-links .j-globalNavLink {
+	padding-top: 0;
+}
+
+#j-globalNav > li.active {
+	background-color: #444;
+}
+.j-globalNav li:hover {
+	background-color: #222;
+}
+
+#j-globalNav li.active .j-globalNavLink {
+	font-weight: bold;
+}
+
+/* Name or Login
+=============================================== */
+#j-satNav-wrap {
+    float: left;
+    font-size: 11px;
+    position: relative;
+    right: 0;
+    top: 0;
+}
+#custom-sat-wrap {
+	float: left;
+}
+#custom-sat-wrap #j-satNav,
+#j-satNav-wrap a.j-globalNavLink {
+	padding: 0;
+	font-size: 12px;
+	font-weight: bold;
+}
+#j-links #j-satNav {
+	height: auto;
+}
+#j-satNav span.nav-link,
+#custom-sat-wrap span.nav-link {
+	margin-right:14px; 
+}
+
+#j-satNav .j-user-name, 
+#j-satNav li:first-child em.guest {
+    font-style: normal;
+    font-weight: bold;
+}
+/* Avatar
+=============================================== */
+#j-satNav-wrap .jive-avatar,
+#custom-sat-wrap .jive-avatar {
+	display: none;
+}
+
+#j-satNav li.login {
+	margin-top: 5px;
+}
+
+#j-satNav-wrap .j-update-count {
+	position: relative;
+	top: 3px;
+	right: 0;
+	color: white;
+	line-height: 18px;
+	margin-right:10px;
+}
+
+/* Create or Pencil Icon and DropDown Arrow
+=============================================== */
+#j-globalNav #navCreate .j-navLabel,
+#j-globalNav #navCreate .j-ui-elem.j-nav-more,
+#j-links #navCreate .j-navLabel,
+#j-links #navCreate .j-ui-elem.j-nav-more,
+#navCreate .j-navLabel,
+#navCreate .j-ui-elem.j-nav-more {
+	display: none;
+}
+.j-globalNavLink span.nav-link {
+	padding-top: 6px; 
+}
+#j-links .j-globalNav {
+	float: left;
+}
+#j-links .j-nav-create .j-globalNavLink span.nav-link {
+	padding: 0 5px 0 10px;
+}
+.j-globalNav > li.j-nav-create a.j-globalNavLink {
+	height: 26px;
+}
+
+/* Apps
+=============================================== */
+#j-links .j-nav-create .j-globalNavLink span.nav-link {
+	height: 26px;
+}
+
+/* Search
+=============================================== */
+#j-links {
+	margin: 0;
+}
+#j-spotlight-search {
+	margin: 1px 0 0;
+}
+
+
+/* Space between navbar and content
+=============================================== */
+#j-main {
+	padding: 6px 0 25px;
+}
+
+
+/* Body
+=============================================== */
+html body {
+	padding: 0 4px;
+}
+
+
+/* Content Headers
+=============================================== */
+.j-body-place #jive-body > header.j-page-header {
+    margin: 0px 0 15px;
+}
+header h1, 
+header h2, 
+header h3, 
+header h4, 
+header h5, 
+header h6 {
+	padding: 4px 0;
+}
