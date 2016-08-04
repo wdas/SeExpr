@@ -1,0 +1,113 @@
+<body><p>To write a new expression function, you can start with an existing function that does something similar, or write one from scratch. You need to:</p>
+<ul>
+<li>name the function and define its return type, typically SeExpr2::Vec3d</li>
+<li>determine what arguments the function needs and their types</li>
+<li>determine whether you'll need any auxiliary data structure (an anim curve, a data cache, etc.)</li>
+</ul>
+<p>The following is a code example for reference.</p>
+<ul>
+<li>Replace<strong> FunctionName</strong> with your function</li>
+<li>You'll need 3 class methods: prep(), evalConstant(), and eval().</li>
+<li>Replace<strong> FuncType()</strong> and <strong>ArgType()</strong> with one of:</li>
+<ul>
+<li>FP(dim) for floating type of dimension dim</li>
+<li>String()</li>
+<li>Also, include lifetime of type: Constant(), Uniform(), Varying()</li>
+<li>eg, FP(3).Varying, String().Constant()</li>
+</ul>
+<li>Add details as described in the comments.</li>
+</ul>
+<h2>Write SeExprFunctionName.h</h2>
+<pre>
+#pragma once
+#include &lt;SeExpr2/ExprFunc.h&gt;
+#include &lt;SeExpr2/ExprNode.h&gt;
+
+class ExprFunctionNameSimple: public SeExpr2::ExprFuncSimple
+{
+public:
+    ExprFunctionNameSimple() : SeExpr2::ExprFuncSimple(true) {} // Thread Safe
+    virtual ~ExprFunctionNameSimple() {}
+
+    SeExpr2::ExprType prep(SeExpr2::ExprFuncNode* node, bool scalarWanted, SeExpr2::ExprVarEnvBuilder&amp; envBuilder) const;
+    SeExpr2::ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const;
+    void eval(ArgHandle args);
+};
+
+<pre>
+<h2>Write SeExprFunctionName.cpp</h2>
+<p>You may need to define a <strong>Data</strong> struct if you need to store any constant data. See evalConstant() method below.</p>
+<pre>
+&lt;typename DATA_TYPE&gt;
+struct Data:public DATA_TYPE
+{
+}
+
+</pre>
+<p>You will need a <strong>prep()</strong> method to check number of arguments and their types.</p>
+<pre>
+SeExpr2::ExprType ExprFunctionNameSimple::prep(SeExpr2::ExprFuncNode* node,bool scalarWanted,SeExpr2::ExprVarEnv&amp; env) const
+{
+    int nargs=node-&gt;numChildren();
+    // check if number of args is correction
+    // if not, return SeExpr2::ExprType().Error();
+
+    bool valid=true;
+   // check each arg for valid type
+    valid &amp;= node-&gt;checkArg(0,SeExpr2::ExprType().ArgType(),env);
+    valid &amp;= node-&gt;checkArg(1,SeExpr2::ExprType().ArgType(),env);
+
+    // Return appropriate type or error, eg, SeExpr2::ExprType().FP(3).Varying()
+    return valid ? SeExpr2::ExprType().FuncType() : SeExpr2::ExprType().Error();
+}
+
+</pre>
+<p>You will also need an <strong>evalConstant()</strong> method to evaluate the arguments with expected constant value.</p>
+<pre>
+SeExpr2::ExprFuncNode::Data* ExprFuncNameSimple::evalConstant(ArgHandle args) const
+{
+    Data&lt;SeExpr2::ExprFuncNode::Data&gt;* data=new Data&lt;SeExpr2::ExprFuncNode::Data&gt;;
+
+    // store any constant arg values in data
+
+    return data;
+}
+
+</pre>
+<p>If your function has no constant args, you can return an empty data struct.</p>
+<pre>
+SeExpr2::ExprFuncNode::Data*ExprFuncNameSimple::evalConstant(ArgHandle args) const
+{
+    return new Data&lt;SeExpr2::ExprFuncNode::Data&gt;();
+}
+
+</pre>
+<p>You will also need an <strong>eval()</strong> method to evaluate the rest of the arguments.</p>
+<pre>
+void ExprFuncNameSimple::eval(ArgHandle args)
+{
+    SeExpr2::Vec3d result;
+    // If you need access to constant data.
+    Data&lt;SeExpr2::ExprFuncNode::Data&gt;&amp; data=*static_cast&lt;Data&lt;SeExpr2::ExprFuncNode::Data&gt;*&gt;(args.data);
+
+    // Calculate result of function using in args and data struct.
+    // For example, to access the 0th input argument that is a vector value:
+    result[0] = argsHandle.inFp&lt;3&gt;(0)[0];
+    result[1] = argsHandle.inFp&lt;3&gt;{0}[1];
+    result[2] = argsHandle.inFp&lt;3&gt;(0)[2];
+
+    // Store result in ArgHandle output
+    double* out=&amp;args.outFp;
+    for(int i=0;i&lt;3;i++) out[i]=result[i];
+}
+
+</pre>
+<p>Finally, you'll need to register your function, where funcName is the name used in expressions, nArgsMin is number of minimum required args, nArgsMax is number of maximum args allowed. Make sure you provide inline documentation about the function args and what the function does.</p>
+<pre>
+static int registered=registerDelegate2([](SeExpr2::ExprFunc::Define3 define){
+    static ExprFuncNameSimple funcName(true);
+    define("funcName", SeExpr2::ExprFunc(funcName,nArgsMin,nArgsMax), "Vec3d funcName( arg1, arg2, ...) some short description here about what the function does");
+});
+
+</pre>
+<p></p></body>

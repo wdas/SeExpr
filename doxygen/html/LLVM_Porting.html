@@ -1,0 +1,134 @@
+<body>
+<p></p>
+<h1>Name and Namespace Changes</h1>
+<p>In order to allow both older and newer versions of SeExpr to coexist, we renamed all classes and added an 'SeExpr2' namespace. Refer to the table below for renaming the SeExpr classes in your code.</p>
+<table border="1" style="border: 1px solid #000000; width: 100%;">
+<tbody>
+<tr><th style="text-align: center; background-color: #6690bc; color: #ffffff; padding: 2px;" valign="middle"><strong>Was </strong></th><th style="text-align: center; background-color: #6690bc; color: #ffffff; padding: 2px;" valign="middle"><strong>Becomes</strong></th></tr>
+<tr>
+<td style="padding: 2px;">SeExpression</td>
+<td style="padding: 2px;">SeExpr2::Expression</td>
+</tr>
+<tr>
+<td style="padding: 2px;">SeExprEditor</td>
+<td style="padding: 2px;">ExprEditor</td>
+</tr>
+<tr>
+<td style="padding: 2px;">SeExprEd*Editable</td>
+<td style="padding: 2px;">*Editable</td>
+</tr>
+<tr>
+<td style="padding: 2px;">SeExprEdExpressionTextEdit</td>
+<td style="padding: 2px;">ExprTextEdit</td>
+</tr>
+<tr>
+<td style="padding: 2px;">SeExprEdPopupDocumentation</td>
+<td style="padding: 2px;">ExprPopupDoc</td>
+</tr>
+<tr>
+<td style="padding: 2px;">SeExprEd*</td>
+<td style="padding: 2px;">Expr*</td>
+</tr>
+<tr>
+<td style="padding: 2px;">SeExpr*</td>
+<td style="padding: 2px;">SeExpr2::Expr*</td>
+</tr>
+<tr>
+<td style="padding: 2px;">SeVec3d</td>
+<td style="padding: 2px;">
+<p>using Vec3d = SeExpr2::Vec&lt;double,3&gt;;</p>
+<p>using Vec3dRef= SeExpr2::Vec&lt;double,3,true&gt;;</p>
+</td>
+</tr>
+<tr>
+<td style="padding: 2px;">SeCurve</td>
+<td style="padding: 2px;">SeExpr2::Curve</td>
+</tr>
+<tr>
+<td style="padding: 2px;">#include &lt;SeExprEdEditable*.h&gt;</td>
+<td style="padding: 2px;">#include &lt;SeExpr2/ui/Editable*.h&gt;</td>
+</tr>
+<tr>
+<td style="padding: 2px;">#include &lt;SeExprEd*.h&gt;</td>
+<td style="padding: 2px;">#include &lt;SeExpr2/ui/Expr*.h&gt;</td>
+</tr>
+<tr>
+<td style="padding: 2px;">#include &lt;SeExpr*.h&gt;</td>
+<td style="padding: 2px;">#include &lt;SeExpr2/Expr*.h&gt;</td>
+</tr>
+<tr>
+<td colspan="1">prep()</td>
+<td colspan="1">prep() and also define new evalConstant() method, for custom functions</td>
+</tr>
+<tr>
+<td style="padding: 2px;">eval()</td>
+<td style="padding: 2px;">evalFP(), for custom functions</td>
+</tr>
+<tr>
+<td style="padding: 2px;">SeExpr::clamp</td>
+<td style="padding: 2px;">SeExpr2::clamp</td>
+</tr>
+<tr>
+<td style="padding: 2px;">expreditor // internal Disney Maya plugin</td>
+<td style="padding: 2px;">expreditor2</td>
+</tr>
+</tbody>
+</table>
+<h1><span style="line-height: 1.5em;">Checking Variable Typing in Custom Functions</span></h1>
+<p>If you've written any custom functions, you'll be checking variable types in your prep() method, eg:</p>
+<pre>
+bool valid=true;
+valid &amp;= node-&gt;checkArg(0, ExprType().FP(3).Constant(), envBuilder);
+
+</pre>
+<p>Variable types are defined in <span style="font-size: 10pt; line-height: 1.5em;">SeExpr2::ExprType():</span></p>
+<ul>
+<li>ExprType().FP(dim) for float type of dimension dim.</li>
+<ul>
+<li>Use FP(3) if either scalar or vector values are valid</li>
+<li>Use FP(1) if only scalar value is valid</li>
+<li>TypeVec(dim) shortcut for ExprType().FP(dim), eg TypeVec(3) for a 3-vector.</li>
+</ul>
+<li>ExprType().String()</li>
+<li>You will also need a <a href="./LLVM_Lifetime.html">Lifetime Qualifier</a>, one of Constant(), Uniform(), Varying(), eg: </li>
+<ul>
+<li>SeExpr2::TypeVec(3).Varying</li>
+<li>SeExpr2::ExprType().String().Constant()</li>
+</ul>
+</ul>
+<h1>Defining Variables in Derived Expression Classes</h1>
+<p style="font-size: 13.3333px;">If you've created a custom Expression class, and have defined your own variable struct within that class, you will want it to inherit from ExprVarRef. Some of the changes include:</p>
+<ul>
+<li>We've <span style="font-size: 13.3333px;"><strong>deprecated</strong></span><span style="font-size: 13.3333px;"> </span></li>
+<ul>
+<li><span style="font-size: 13.3333px;">SeExprVectorVarRef, SeExprScalarVarRef in favor of using ExprVarRef instead.</span></li>
+<li><span style="font-size: 13.3333px;">SeExprVarRef.isVec()<br /></span></li>
+</ul>
+<li><span style="font-size: 13.3333px; line-height: 1.5em;">The ExprVarRef constructor now takes a type argument. </span></li>
+<li><span style="font-size: 13.3333px; line-height: 1.5em;">SeExprVarRef::eval(SeExprNode node, SeVec3d result) arguments have changed to ExprVarRef::eval(double*) and eval(const char **).</span></li>
+</ul>
+<p><span style="font-size: 13.3333px; line-height: 1.5em;">Here is an example of a simple expression variable reference:<br /></span></p>
+<pre>
+struct MyVar : public ExprVarRef {
+    double value;
+    Var() : ExprVarRef(TypeVec(1).Varying()) {}
+    void eval(double* result) {result[0] = value;}
+    void eval(const char**) {}
+
+</pre>
+<h1>Using ExprFuncSimple to Write Custom Functions</h1>
+<p>See <a href="./LLVM_Function_Howto.html">How to Write an Expression Function and Plugin</a></p>
+<h1>Changes to Build Files</h1>
+<p>kida:</p>
+<ul>
+<li>incDirs =&gt; inc_dir('seexpr2')</li>
+<li>libDirs =&gt; lib_dir('seexpr2')</li>
+<li>libs =&gt; SeExpr2</li>
+<li>both v1 and v2 can coexist in same build</li>
+</ul>
+<p>cmake:</p>
+<ul>
+<li>require disney package(seexpr2)</li>
+<li>target_link_libraries(YOUR_TARGET SeExpr2)</li>
+<li>both v1 and v2 can coexist in same build</li>
+</ul></body>

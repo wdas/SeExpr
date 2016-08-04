@@ -1,0 +1,268 @@
+<body>
+<p>A SeExpr program describes computation on a single point of a larger domain that contains many such points, with the understanding that the compiler/interpreter will run that computation on every point of the domain.  In pseudo-code for some SeExpr program, prog, the whole computation becomes:</p>
+<p></p>
+<p>foreach($pt : all_points)</p>
+<p>  prog($pt)</p>
+<p></p>
+<p>This simple approach is easy to understand but ignores certain aspects of the computation.  Determining how often and in what circumstances variables and expressions change - determining the lifetime of variables and expressions - exposes these aspects.  The ideal time to determine these lifetimes is at compile-time during type checking.  So the lifetime qualifier is currently being added to the type system, so that these lifetimes will be determined during type checking and then be available to the compiler after the type check.  There are three reasons for determining these lifetimes.  First, there are certain optimizations the compiler can preform if it knows the the lifetimes of variables and expressions.  Second, there are certain computations that we want to restrict so that computation is reasonably fast. (Mainly, we wish to restrict string operations in certain contexts.) Third, there are certain functions that expect some (or all) of their arguments to have specific lifetimes.</p>
+<p></p>
+<p>The rest of this post outlines the different lifetimes and their uses.</p>
+<p></p>
+<p><span style="font-size: 12pt;"><strong>Constant</strong></span></p>
+<p>First we have values that never change, i.e.</p>
+<p></p>
+<p>$foo = [1,2,3] + 4;</p>
+<p>$bar = $foo / 2;</p>
+<p>$baz = $bar * $u;</p>
+<p></p>
+<p>This can be simplified down to:</p>
+<p></p>
+<p>$foo = [5,6,7];</p>
+<p>$bar = $foo / 2;</p>
+<p>$baz = $bar * $u;</p>
+<p></p>
+<p>Or even:</p>
+<p></p>
+<p>$foo = [5,6,7];</p>
+<p>$bar = [2.5,3,3.5];</p>
+<p>$baz = [2.5,3,3.5] * $u;</p>
+<p></p>
+<p>Most decent compilers will do these optimizations automatically.  However, there are functions that expect certain arguments to be constant.  Without including the constant lifetime qualifier, these arguments could not be checked during compilation.  Without such a check, wrong program behavior, such as segfaults and incorrect results, could unexpectedly happen when the program is run.</p>
+<p></p>
+<p><span style="font-size: 12pt;"><strong>Uniform</strong></span></p>
+<p>Next we have values that don't change within certain known bounds.  A simplistic example is shading hair.  Each hair can have a slightly different color, and so a $color variable will change over an individual hair but will over different hairs.</p>
+<p></p>
+<p>If we have a program:</p>
+<p></p>
+<p>foreach($pt : $hair : all_hairs)</p>
+<p>  $color = calculate_color($hair)</p>
+<p>  $result = use_color_and_point($color, $pt);</p>
+<p></p>
+<p>We can change our model of execution:</p>
+<p></p>
+<p>foreach($hair : all_hairs)</p>
+<p>  $color = calculate_color($hair)</p>
+<p>  foreach($pt : $hair)</p>
+<p>    $result = use_color_and_point($color, $pt);</p>
+<p></p>
+<p>This new model, while more complex, is more efficient since the color of a hair is only computed once per hair rather than for every point on every hair.  If calculate_color() is a time-intensive function, using this model can be significantly faster than the original simple model.  Uniform values and expressions are more difficult for compilers to recognize, and so it is less certain that compilers will automatically include these optimizations without some hints (or explicit declarations of uniform values and expressions) from the type system.  Also, like with constant values, there are certain functions that require uniform arguments, which can now be explicitly checked.</p>
+<p></p>
+<p><span style="font-size: 12pt;"><strong>Varying</strong></span></p>
+<p>Finally, we have values that change at every point.  In the example in the section above, the final variable, $result, is varying.  It depends directly on the current point, and so its value could change at every point.  Without the lifetime qualifier, every variable and expression is assumed to be varying.</p>
+<p></p>
+<p>Also, there are certain computation expressions (string operations) that we wish to ban from being varying.  These operations are useful but time-intensive.  By restricting them to constant or uniform lifetimes, we restrict how often they are computed.</p>
+<p></p>
+<p><span style="font-size: 14pt;"><strong>New Whole Computation Model</strong></span></p>
+<p>Instead of the simple model for the whole computation at the beginning of this post:</p>
+<p></p>
+<p>foreach($pt : all_points)</p>
+<p>  prog($pt)</p>
+<p></p>
+<p>We now compile a program, prog, into three distinct, yet interrelated, sections:</p>
+<ul>
+<li>A constant section, const-prog</li>
+<li>A uniform section, unif-prog</li>
+<li>A varying section, vary-prog</li>
+</ul>
+<p></p>
+<p>For a program, prog, its varying section, vary-prog, can depend on both its constant and uniform sections, const-prog and unif-prog.  Likewise, the uniform section, unif-prog can depend on the constant section, const-prog.</p>
+<p></p>
+<p>The new whole computation model in pseudo-code is:</p>
+<p></p>
+<p>$const_values = const-prog();</p>
+<p>foreach($section : all_sections)</p>
+<p>  $unif_values = unif-prog($section, $const_values);</p>
+<p>  foreach($pt : $section)</p>
+<p>    vary-prog($pt, $section, $unif_values, $const_values);</p>
+<p></p>
+<p>This model is much more complex, but in general most of these changes will not effect users.  Unless there is an error, users can continue to write their programs as if their programs will be computed within the original computation model.</p>
+<p></p>
+<p><span style="font-size: 12pt;"><strong>Lifetime Interactions</strong></span></p>
+<p>Lifetimes interact in a fairly intuitive manner:</p>
+<ul>
+<li>Where a varying value is expected, a uniform or constant value is acceptable.</li>
+<li>Where a uniform value is expected, a constant value is acceptable.</li>
+<li>A function or operator, with no side-effects*, that is passed only constant arguments returns a constant value.</li>
+<li>A function or operator, with no side-effects*, that is passed at least one uniform argument and no varying arguments returns a uniform value.</li>
+<li>A function or operator, with no side-effects*, that is passed at least one varying argument returns a varying value.</li>
+</ul>
+<p></p>
+<p>The general rule follows this restriction list:</p>
+<p>  Most restrictive</p>
+<ol><ol>
+<li>Constant Lifetime</li>
+<li>Uniform Lifetime</li>
+<li>Varying Lifetime</li>
+</ol></ol>
+<p>  Least restrictive</p>
+<p>A more restrictive lifetime can replace a less restrictive lifetime, but not the other way around.</p>
+<p></p>
+<p>* Currently, all functions have no side-effects.</p>
+<p></p>
+<p><span style="font-size: 12pt;"><strong>Errors Caused By Lifetimes</strong></span></p>
+<p>Lifetimes do introduce new restrictions to the SeExpr Language.  These new restrictions can appear in the form of errors.</p>
+<p></p>
+<p>Lifetime Error. Expected: Constant  Received: Uniform</p>
+<p>Lifetime Error. Expected: Constant  Received: Varying</p>
+<p>Lifetime Error. Expected: Uniform  Received: Varying</p>
+<p></p>
+<p>The above errors appear when functions or certain string operations expect a certain lifetime from their arguments and they arguments they have recieved do not have those lifetimes.</p>
+<p></p>
+<p><span style="font-size: 14pt;"><strong>If Statement Impact on Lifetimes</strong></span></p>
+<p>Possibly unintuitively, an if statement can change the lifetime of any variables assigned within its then and else blocks in three ways. All changes effect the lifetimes of the variables after the if statement.  The lifetimes of the variables within the then and/or else blocks are not effected under any circumstances.</p>
+<p></p>
+<p>The three different impacts can overlap.  See below for an explanation.  (Short version: The least restrictive lifetime is the result.)</p>
+<p></p>
+<p><span style="font-size: 12pt;"><strong>Conditional Value Impact</strong></span></p>
+<p>The first if statement impact happens when the lifetime of its conditional value is less restrictive than the assigned variables' lifetimes.  After the if statement, the lifetime becomes the same as the conditional value's lifetime.  There are three cases:</p>
+<ol>
+<li>The conditional value is constant.</li>
+<ul>
+<li>There is no effect on the lifetimes of assignmed variables.</li>
+</ul>
+<li>The conditional value is uniform.</li>
+<ul>
+<li>Any variables with constant lifetimes within the then or else block have uniform lifetimes after the if statement.</li>
+</ul>
+<li>The conditional value is varying.</li>
+<ul>
+<li>Any variables with constant lifetimes within the then or else block have varying lifetimes after the if statement.</li>
+<li>Any variables with uniform lifetimes within the then or else block have varying lifetimes after the if statement.</li>
+</ul>
+</ol>
+<p></p>
+<p><strong>E</strong><strong>xamples:</strong></p>
+<p>The following example causes an error:</p>
+<p></p>
+<p>if(&lt;uniform value&gt;) {</p>
+<p>  $foo = &lt;constant value&gt;;</p>
+<p>} else {</p>
+<p>  $foo = &lt;different constant value&gt;;</p>
+<p>}</p>
+<p>$bar = func_taking_constant($foo);     =&gt;    Lifetime Error. Expected: Constant  Received: Uniform</p>
+<p>$baz = func_taking_uniform($foo);</p>
+<p></p>
+<p>The following example does not cause an error:</p>
+<p></p>
+<p>if(&lt;uniform value&gt;) {</p>
+<p>  $foo = &lt;constant value&gt;;</p>
+<p>  $bar = func_taking_constant($foo);</p>
+<p>} else {</p>
+<p>  $foo = &lt;different constant value&gt;;</p>
+<p>  $bar = func_taking_constant($foo);</p>
+<p>}</p>
+<p>$baz = func_taking_uniform($foo);</p>
+<p></p>
+<p><span style="font-size: 12pt;"><strong>Different Lifetimes from Different Blocks Impact</strong></span></p>
+<p>The second if statement impact on lifetime happens when a variable is assigned in both the then and the else block with different lifetimes.  The lifetime of the variable after the if block is the less restrictive lifetime.  There are four cases:</p>
+<p></p>
+<ol>
+<li>The lifetimes in both blocks are the same.  (Both constant, both uniform, or both varying.)</li>
+<ul>
+<li>This case is the trivial one.  The common lifetime is the result.</li>
+</ul>
+<li>One lifetime is constant and the other is uniform.</li>
+<ul>
+<li>The resulting lifetime after both blocks is uniform.</li>
+</ul>
+<li>One lifetime is constant and the other is varying.</li>
+<ul>
+<li>The resulting lifetime after both blocks is varying.</li>
+</ul>
+<li>One lifetime is uniform and the other is varying.</li>
+<ul>
+<li>The resulting lifetime after both blocks is varying.</li>
+</ul>
+</ol>
+<p></p>
+<p><strong>Examples:</strong></p>
+<p>The following example causes an error:</p>
+<p></p>
+<p>if(&lt;constant value&gt;) {</p>
+<p>  $foo = &lt;constant value&gt;;</p>
+<p>  $bar = func_taking_constant($foo);</p>
+<p>} else {</p>
+<p>  $foo = &lt;uniform value&gt;;</p>
+<p>  $bar = func_taking_uniform($foo);</p>
+<p>}</p>
+<p>$baz = func_taking_constant($foo);     =&gt;    Lifetime Error. Expected: Constant  Received: Uniform</p>
+<p></p>
+<p>The following example does not cause an error:</p>
+<p></p>
+<p>if(&lt;constant value&gt;) {</p>
+<p>  $foo = &lt;constant value&gt;;</p>
+<p>  $bar = func_taking_constant($foo);</p>
+<p>} else {</p>
+<p>  $foo = &lt;uniform value&gt;;</p>
+<p>  $bar = func_taking_uniform($foo);</p>
+<p>}</p>
+<p>$baz = func_taking_uniform($foo);</p>
+<p></p>
+<p><span style="font-size: 12pt;"><strong>Different Lifetimes from before and within If Statement Impact</strong></span></p>
+<p>The third type of if statement impact happens when the lifetime of a variable before an if statement does not match the lifetime of the assignment of the same variable within the if statement.  The lifetime of the variable after the if block is the less restrictive lifetime.  There are four cases:</p>
+<p></p>
+<ol>
+<li>The lifetimes before and within the if statement are the same.  (Both constant, both uniform, or both varying.)</li>
+<ul>
+<li>This case is the trivial one.  The common lifetime is the result.</li>
+</ul>
+<li>One lifetime is constant and the other is uniform.</li>
+<ul>
+<li>The resulting lifetime after the if statement is uniform.</li>
+</ul>
+<li>One lifetime is constant and the other is varying.</li>
+<ul>
+<li>The resulting lifetime after the if statement is varying.</li>
+</ul>
+<li>One lifetime is uniform and the other is varying.</li>
+<ul>
+<li>The resulting lifetime after the if statement is varying.</li>
+</ul>
+</ol>
+<p></p>
+<p><strong>Examples:</strong></p>
+<p>The following example causes an error:</p>
+<p></p>
+<p>$foo = &lt;varying value&gt;;</p>
+<p>if(&lt;constant value&gt;) {</p>
+<p>  $foo = &lt;constant value&gt;;</p>
+<p>  $bar = func_taking_constant($foo);</p>
+<p>}</p>
+<p>$baz = func_taking_constant($foo);     =&gt;    Lifetime Error. Expected: Constant  Received: Varying</p>
+<p></p>
+<p>The following example does not cause an error:</p>
+<p></p>
+<p>$foo = &lt;varying value&gt;;</p>
+<p>if(&lt;constant value&gt;) {</p>
+<p>  $foo = &lt;constant value&gt;;</p>
+<p>  $bar = func_taking_constant($foo);</p>
+<p>}</p>
+<p>$baz = func_taking_varying($foo);</p>
+<p></p>
+<p><span style="font-size: 12pt;"><strong>If Statement Impact Interactions</strong></span></p>
+<p>There are too many different ways for the various if statement impacts on lifetimes to interact to list here.  The general rule still applies, however:  The least restrictive impact is the result.</p>
+<p></p>
+<p>Examples:</p>
+<p>The following examples cause errors:</p>
+<p></p>
+<p>$foo = &lt;varying value&gt;;</p>
+<p>if(&lt;uniform value&gt;) {</p>
+<p>  $foo = &lt;constant value&gt;;</p>
+<p>}</p>
+<p>$bar = func_taking_constant($foo);     =&gt;    Lifetime Error. Expected: Constant  Received: Varying</p>
+<p></p>
+<p>if(&lt;varying value&gt;) {</p>
+<p>  $foo = &lt;uniform value&gt;;</p>
+<p>} else {</p>
+<p>  $foo = &lt;constant value&gt;;</p>
+<p>}</p>
+<p>$bar = func_taking_uniform($foo);     =&gt;    Lifetime Error. Expected: Uniform  Received: Varying</p>
+<p></p>
+<p>The following example does not cause an error:</p>
+<p></p>
+<p>$foo = &lt;constant value&gt;;</p>
+<p>if(&lt;uniform value&gt;) {</p>
+<p>  $foo = &lt;varying value&gt;;</p>
+<p>}</p>
+<p>$bar = func_taking_varying($foo);</p>
+</body>
