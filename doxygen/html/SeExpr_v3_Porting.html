@@ -1,4 +1,5 @@
 <body>
+<title>Porting your code to SeExpr v3Generation</title>
 <p></p>
 <h1>Name and Namespace Changes</h1>
 <p>In order to allow both older and newer versions of SeExpr to coexist, we renamed all classes and added an 'SeExpr2' namespace. Refer to the table below for renaming the SeExpr classes in your code.</p>
@@ -90,7 +91,7 @@ valid &amp;= node-&gt;checkArg(0, ExprType().FP(3).Constant(), envBuilder);
 <li>TypeVec(dim) shortcut for ExprType().FP(dim), eg TypeVec(3) for a 3-vector.</li>
 </ul>
 <li>ExprType().String()</li>
-<li>You will also need a <a href="./LLVM_Lifetime.html">Lifetime Qualifier</a>, one of Constant(), Uniform(), Varying(), eg: </li>
+<li>You will also need a <a href="./SeExpr_Lifetime.html">Lifetime Qualifier</a>, one of Constant(), Uniform(), Varying(), eg: </li>
 <ul>
 <li>SeExpr2::TypeVec(3).Varying</li>
 <li>SeExpr2::ExprType().String().Constant()</li>
@@ -117,7 +118,7 @@ struct MyVar : public ExprVarRef {
 
 </pre>
 <h1>Using ExprFuncSimple to Write Custom Functions</h1>
-<p>See <a href="./LLVM_Function_Howto.html">How to Write an Expression Function and Plugin</a></p>
+<p>See <a href="./SeExpr_Function_Howto.html">How to Write an Expression Function and Plugin</a></p>
 <h1>Changes to Build Files</h1>
 <p>kida:</p>
 <ul>
