@@ -30,7 +30,7 @@
 <p>Most decent compilers will do these optimizations automatically.  However, there are functions that expect certain arguments to be constant.  Without including the constant lifetime qualifier, these arguments could not be checked during compilation.  Without such a check, wrong program behavior, such as segfaults and incorrect results, could unexpectedly happen when the program is run.</p>
 <p></p>
 <p><span style="font-size: 12pt;"><strong>Uniform</strong></span></p>
-<p>Next we have values that don't change within certain known bounds.  A simplistic example is shading hair.  Each hair can have a slightly different color, and so a $color variable will change over an individual hair but will over different hairs.</p>
+<p>Next we have values that don't change within certain known bounds.  A simplistic example is shading hair.  Each hair can have a slightly different color, and so a $color variable does not change over an individual hair, but will change over different hairs.</p>
 <p></p>
 <p>If we have a program:</p>
 <p></p>
