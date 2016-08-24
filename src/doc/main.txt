@@ -18,9 +18,9 @@
  * \mainpage SeExpr
  * \image html seexprlogo.png
  * \section maindoc User and Programmer Tutorials
- *  - \subpage userdoc -  User Documentation
+ *  - \subpage userdoc
  *  - \subpage plugins -  Custom Function Plugins
- *  - <a href="./html/SeExpr_FAQ.html">New v3 FAQ</a>
+ *  - <a class="el" href="./html/SeExpr_FAQ.html">New v3 FAQ</a>
  * \section demos Demo Applications
  *     - \subpage mytut (code at asciiGraph.cpp)
  *     - \subpage uitut (code at imageEditor.cpp)
@@ -45,7 +45,7 @@
  *
  * \section Other
  *  - \subpage license
- *  - <a href="./v1/index.html">Older Documentation (v1-v2)</a>
+ *  - <a class="el" href="./v1/index.html">Older Documentation (v1-v2)</a>
  */
 
 /**
