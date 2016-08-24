@@ -1,14 +1,21 @@
+
+===================================================================
+   For info on using new v3 features and porting your code, see:
+
+     http://wdas.github.io/SeExpr/doxygen/html/SeExpr_FAQ.html
+===================================================================
+
+
 ===================================================================
 SeExpr - An embeddable expression evaluation engine
 ===================================================================
-
 
 Super impatient CMake building and installing guide
 ===================================================
 $ git clone https://github.com/wdas/SeExpr
 $ cd SeExpr
 $ mkdir build
-$ cd build 
+$ cd build
 $ cmake ../
 $ make doc      # optional make documentation
 $ make install
