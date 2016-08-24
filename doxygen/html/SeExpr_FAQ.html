@@ -1,4 +1,6 @@
 <body>
+<title>SeExpr v3 FAQ</title>
+<h1>SeExpr v3 FAQ</h1>
 <a href="#whatsnew">What's new in SeExpr?</a>
 <div style="margin-left: 1em;">
 <p><a href="#typing">Variable Typing</a>
@@ -21,8 +23,8 @@
 <p><a href="#classdocs">Class docs</a>
 </div>
 
-<a name="whatsnew"><h1>What's new in SeExpr?</h1></a>
-<a name="typing"><h2>Variable Typing</h2></a>
+<a name="whatsnew"><h2>What's new in SeExpr?</h2></a>
+<a name="typing"><h3>Variable Typing</h3></a>
 <p>Statically typed variables and support for up to 16-dimensional vectors:</p>
 <ul>
 <li>Floating point, FP[n], where n is 1..16:</li>
@@ -46,7 +48,7 @@
 <li><a href="./SeExpr_Typing.html">SeExpr Type System Overview</a></li>
 <li><a href="./SeExpr_Lifetime.html">Type System for SeExpr: Lifetime Qualifier Overview</a></li>
 <p></p>
-<a name="eval"><h2>Expression Evaluation</h2></a>
+<a name="eval"><h3>Expression Evaluation</h3></a>
 <p>Faster expression evaluation using interpreter or using LLVM compiler</p>
 <p>The default is set to LLVM evaluation. To set explicitly:</p>
 <pre>setenv SE_EXPR_EVAL LLVM</pre>
@@ -54,19 +56,19 @@
 <p>While LLVM is faster to evaluate, there is more overhead during prep().</p>
 <p>See updated tutorials at <a href="http://wdas.github.io/SeExpr/doxygen/">http://wdas.github.io/SeExpr/doxygen/</a></p>
 <p></p>
-<a name="varblock"><h2>Variable Blocks</h2></a>
+<a name="varblock"><h3>Variable Blocks</h3></a>
 <p>Shared variable blocks for evaluating multiple expressions at once.</p>
 <p>Threading with variable blocks: each thread could have it's own variable block to operate on independently.</p>
 <p>More details on using variable blocks is documented at <a href="http://wdas.github.io/SeExpr/doxygen/varblocks.html">http://wdas.github.io/SeExpr/doxygen/varblocks.html</a></p>
 <p></p>
-<a name="misc"><h2>Miscellaneous</h2></a>
+<a name="misc"><h3>Miscellaneous</h3></a>
 <p>New recursive descent parser, only used for the Python AST Tools.</p>
 <p></p>
-<a name="versions"><h1>Which versions have these features?</h1></a>
+<a name="versions"><h2>Which versions have these features?</h2></a>
 <p>Open source version 3.0 and above on <a href="https://github.com/wdas/SeExpr">https://github.com/wdas/SeExpr</a></p>
-<a name="port"><h1>What do I have to change in my code to use this version?</h1></a>
+<a name="port"><h2>What do I have to change in my code to use this version?</h2></a>
 <p>See <a href="./SeExpr_v3_Porting.html">Porting your code to SeExpr v3</a></p>
-<a name="llvm"><h1>What is LLVM? Can I switch it off?</h1></a>
+<a name="llvm"><h2>What is LLVM? Can I switch it off?</h2></a>
 <p>From <a href="http://llvm.org/">http://llvm.org/</a>: "The LLVM Project is a collection of modular and reusable compiler and toolchain technologies." SeExpr uses LLVM under the hood for generating IR (intermediate representation) code from our expression language, to more efficiently evaluate the expressions. For more information, refer to <a href="http://llvm.org/docs/">http://llvm.org/docs/</a>; for a useful tutorial example, see <a href="http://llvm.org/docs/tutorial/index.html">http://llvm.org/docs/tutorial/index.html</a>.</p>
 <p>By default, expression evaluation will use LLVM if it's available; otherwise it will use our own internal interpreter. To switch off LLVM compilation and explicitly use the interpreter, set this environment variable:<p>
 <pre>setenv SE_EXPR_EVAL INTERPRETER</pre>
@@ -74,33 +76,33 @@
 <pre>setenv SE_EXPR_EVAL LLVM</pre>
 <p>For default behavior:
 <pre>unsetenv SE_EXPR_EVAL</pre>
-<a name="why"><h1>Why did we make these changes?</h1></a>
+<a name="why"><h2>Why did we make these changes?</h2></a>
 <p>We use our expression language heavily in creating textures and particle effects, in everything from growing fur to growing vegetation. We have over 2,000 expressions in our shared library, in addition to innumerable other uses of expressions throughout our pipeline. And in most cases, each expression is re-computed many times across points on a surface or frames in an animation.  If we can improve the performance of expression evaluation, it has the potential to ripple out to many areas of the production pipeline.</p>
 <p></p>
 <p>More robust variable typing allows us to better identify expression errors during prep, which happens only once, rather than during evaluation, which repeats multiple times. This allows the expression author to more quickly resolve errors and iterate towards a correct solution faster.</p>
 <p></p>
 <p>Using LLVM to compile expressions prior to evaluation significantly speeds up the evaluation. The overhead of code generation happens once during the prep process, while the performance improvements are reaped multiple times during evaluation for a noticeable overall speed improvement.</p>
-<a name="perform"><h1>What are the performance impacts -- any testing metrics?</h1></a>
+<a name="perform"><h2>What are the performance impacts -- any testing metrics?</h2></a>
 <p>Overall, expression evaluation is faster, whether you enable LLVM evaluation or use the native SeExpr interpreter for evaluation.</p>
 <p>The following chart shows the percent decrease (or increase) in ms for evaluation of expressions in our our internal shared library, as compared to the previous version of SeExpr.</p>
 <p>The blue line shows evaluation time increase or decrease comparing v1 and v2 using the native interpreter. The red line shows the comparison between v1 and v2 using LLVM compilation. (Note: These are older metrics from April, and I'll be re-running for a more current view.)</p>
 <p><img alt="expr-performance-chart.jpg" src="./expr-performance-chart.jpg" style="height: 334px; width: 620px;" /></p>
 <p>Because of the overhead involved in code generation, running a very simple example expression only once will actually be slower using LLVM. However, our typical use case involves many repetitions of the same expression across the points on a surface or frames in an animation.</p>
-<a name="plugins"><h1>How do I write expression functions or plugins now?</h1></a>
+<a name="plugins"><h2>How do I write expression functions or plugins now?</h2></a>
 <p>See <a href="./SeExpr_Function_Howto.html">How to Write an Expression Function and Plugin</a></p>
-<a name="examples"><h1>What are some examples?</h1></a>
+<a name="examples"><h2>What are some examples?</h2></a>
 <p>For subclassing an expression, see the CalculatorExpr class in <a href="http://wdas.github.io/SeExpr/doxygen/asciiCalculator_8cpp_source.html">asciiCalculator.cpp</a></p>
 <p>For writing a custom expression function, see the CurveFuncX class in <a href="http://wdas.github.io/SeExpr/doxygen/ExprBuiltins_8cpp_source.html#l01296">ExprBuiltins.cpp</a></p>
-<a name="varblockex"><h1>How do I use variable blocks?</h1></a>
+<a name="varblockex"><h2>How do I use variable blocks?</h2></a>
 <p>See <a href="http://wdas.github.io/SeExpr/doxygen/varblocks.html">http://wdas.github.io/SeExpr/doxygen/varblocks.html</a></p>
-<a name="contrib"><h1>How can I contribute to the code?</h1></a>
+<a name="contrib"><h2>How can I contribute to the code?</h2></a>
 <p>Glad you asked! We've defined a list of github issues with the label "<a href="https://github.com/wdas/SeExpr/issues?q=is%3Aissue+is%3Aopen+label%3Awishlist">wishlist</a>." These are issues we would love to have the community contribute solutions for. Guidelines for contributing will be published.</p>
-<a name="devdocs"><h1>Where can I find some developer docs?</h1></a>
-<a name="designdocs"><h2>Design docs</h2></a>
+<a name="devdocs"><h2>Where can I find some developer docs?</h2></a>
+<a name="designdocs"><h3>Design docs</h3></a>
 <ul>
 <li><a href="./SeExpr_Typing.html">SeExpr Type System Overview</a></li>
 <li><a href="./SeExpr_Lifetime.html">Type System for SeExpr: Lifetime Qualifier Overview</a></li>
 <li><a href="./SeExpr_Function_Overview.html">SeExpr User-Defined Function Overview</a></li>
 </ul>
-<a name="classdocs"><h2>Class docs</h2></a>
+<a name="classdocs"><h3>Class docs</h3></a>
 <p>See our <a href="http://wdas.github.io/SeExpr/doxygen/">SeExpr Doxygen</a> page.</p></body>
