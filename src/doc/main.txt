@@ -20,6 +20,7 @@
  * \section maindoc User and Programmer Tutorials
  *  - \subpage userdoc -  User Documentation
  *  - \subpage plugins -  Custom Function Plugins
+ *  - <a href="./html/SeExpr_FAQ.html">New v3 FAQ</a>
  * \section demos Demo Applications
  *     - \subpage mytut (code at asciiGraph.cpp)
  *     - \subpage uitut (code at imageEditor.cpp)
