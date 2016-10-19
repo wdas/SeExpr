@@ -10,6 +10,7 @@
 SeExpr - An embeddable expression evaluation engine
 ===================================================================
 
+
 Super impatient CMake building and installing guide
 ===================================================
 
@@ -30,7 +31,7 @@ function grapher... e.g.
 ```
 
 # Getting started
----------------
+
 Examining the demo applications in src/demo is a great way to see
 some usage examples of the library. The basic strategy is to subclass
 the Expression class and implement the methods that describe what
@@ -41,7 +42,7 @@ http://wdas.github.io/SeExpr/doxygen/
 http://wdas.github.io/SeExpr/doxygen/v1 (for older documentation)
 
 # Source code overview
-====================
+
 ```
 src/
    SeExpr/   Library code
@@ -52,7 +53,7 @@ src/
 ```
 
 # SeExpr Developers
-=================
+
  * Janet Berlin
  * Brent Burley
  * Lawrence Chai
