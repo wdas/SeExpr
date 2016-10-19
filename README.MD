@@ -6,12 +6,10 @@
 ===================================================================
 
 
-SeExpr - An embeddable expression evaluation engine
-===================================================================
+# SeExpr - An embeddable expression evaluation engine
 
 
-Super impatient CMake building and installing guide
-===================================================
+## Super impatient CMake building and installing guide
 
 ```bash
 $ git clone https://github.com/wdas/SeExpr
@@ -29,7 +27,7 @@ function grapher... e.g.
 ./asciiGraph "x^3-8*x"
 ```
 
-# Getting started
+## Getting started
 
 Examining the demo applications in src/demo is a great way to see
 some usage examples of the library. The basic strategy is to subclass
@@ -40,7 +38,7 @@ Be sure to check out the doxygen pages for an API overview:
 http://wdas.github.io/SeExpr/doxygen/
 http://wdas.github.io/SeExpr/doxygen/v1 (for older documentation)
 
-# Source code overview
+## Source code overview
 
 ```
 src/
@@ -51,7 +49,7 @@ src/
    doc/      Doxygen generation
 ```
 
-# SeExpr Developers
+## SeExpr Developers
 
  * Janet Berlin
  * Brent Burley
