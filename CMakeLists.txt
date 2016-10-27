@@ -31,7 +31,9 @@ SET (BOOST_DIR $ENV{RP_boost_disney} CACHE PATH "where boost is located")
 if(PYTHON_VERSION_MAJOR LESS 3)
   SET (BOOST_PYTHON_LIBNAME boost_python CACHE STRING "what library name for boost python") # TODO: check python version
 else(PYTHON_VERSION_MAJOR LESS 3)
-  SET (BOOST_PYTHON_LIBNAME boost_python3 CACHE STRING "what library name for boost python") # TODO: check python version
+  # try to find boost_python3 in a way compatible with most distributions
+  find_library(BOOST_PYTHON3_LIB NAMES "boost_python3" "boost_python3${PYTHON_VERSION_MINOR}")
+  SET (BOOST_PYTHON_LIBNAME ${BOOST_PYTHON3_LIB} CACHE STRING "what library name for boost python") # TODO: check python version
 endif(PYTHON_VERSION_MAJOR LESS 3)
 SET (GTEST_DIR /usr/include CACHE PATH "Where to find GTEST") # /usr/include/gtest)
 SET (ENABLE_LLVM_BACKEND ON CACHE BOOL "Whether to build with LLVM backend")
