@@ -25,8 +25,16 @@ SET ( CMAKE_VERBOSE_MAKEFILE TRUE )
 # Configuration options
 # TODO: find GTEST and boost and python the proper ways
 SET (LIBDIR ${CMAKE_INSTALL_LIBDIR} CACHE PATH "lib or lib64") # defaults to lib but if it s lib64 ok
+find_package(PythonInterp)
 SET (BOOST_DIR $ENV{RP_boost_disney} CACHE PATH "where boost is located")
-SET (BOOST_PYTHON_LIBNAME boost_python CACHE STRING "what library name for boost python")
+
+if(PYTHON_VERSION_MAJOR LESS 3)
+  SET (BOOST_PYTHON_LIBNAME boost_python CACHE STRING "what library name for boost python") # TODO: check python version
+else(PYTHON_VERSION_MAJOR LESS 3)
+  # try to find boost_python3 in a way compatible with most distributions
+  find_library(BOOST_PYTHON3_LIB NAMES "boost_python3" "boost_python3${PYTHON_VERSION_MINOR}")
+  SET (BOOST_PYTHON_LIBNAME ${BOOST_PYTHON3_LIB} CACHE STRING "what library name for boost python") # TODO: check python version
+endif(PYTHON_VERSION_MAJOR LESS 3)
 SET (GTEST_DIR /usr/include CACHE PATH "Where to find GTEST") # /usr/include/gtest)
 SET (ENABLE_LLVM_BACKEND ON CACHE BOOL "Whether to build with LLVM backend")
 SET (USE_PYTHON ON CACHE BOOL "Whether to compile python libraries")
@@ -93,7 +101,7 @@ ELSE(WIN32)
 
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -g -std=c++11 -msse4.1")
   if(NOT APPLE)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -rdynamic")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -rdynamic  -Wno-date-time")
   else()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-date-time")
   endif()
