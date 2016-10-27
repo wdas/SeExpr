@@ -28,7 +28,15 @@ endmacro()
 get_build_info(python-site PYTHON_SITE)
 get_build_info(python-inc PYTHON_INCLUDE_DIR)
 get_build_info(sip-inc SIP_INCLUDE_DIR)
-get_build_info(pyqt4-sip PYQT4_SIP)
+
+list(APPEND CMAKE_MODULE_PATH "/usr/share/apps/cmake/modules/") # needed for e.g Arch Linux as new versions of CMake only search a version-specific module path. Should be no problem if the path does not exist.
+find_package(PyQt4)
+set(PYQT4_SIP ${PYQT4_SIP_DIR})
+if(PYQT4_FOUND)
+
+else()
+  get_build_info(pyqt4-sip PYQT4_SIP)
+endif()
 
 set(CMAKE_INSTALL_PYTHON "${PYTHON_SITE}/SeExpr2" )
 
