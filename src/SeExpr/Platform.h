@@ -62,7 +62,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <assert.h>
-#include <sys/time.h>
+//#include <sys/time.h>
 
 // missing functions on Windows
 #ifdef WINDOWS
@@ -130,6 +130,7 @@ class Timer {
 
     void start() { std::cerr << "timer not implemented on Windows" << std::endl; }
     long elapsedTime() { return 0; }
+    bool started;
 };
 #endif
 
