@@ -21,7 +21,7 @@
 #ifndef CETool_h
 #define CETool_h
 
-rinclude <vector>
+#include <vector>
 #include <set>
 #include <DMsg/DMsg.h>
 //#include <iTool.h>
