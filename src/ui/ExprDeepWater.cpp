@@ -31,98 +31,81 @@
 
 #include "ExprDeepWater.h"
 
-void DeepWaterGraphicsView::resizeEvent(QResizeEvent *event)
-{
+void DeepWaterGraphicsView::resizeEvent(QResizeEvent *event) {
     emit resizeSignal(event->size().width(), event->size().height());
 }
 
-
-DeepWaterScene::DeepWaterScene() :  _curve(new T_CURVE),_width(320), _height(170), _curvePoly(0), _baseRect(0), _gridRect(0)
-{
+DeepWaterScene::DeepWaterScene()
+    : _curve(new T_CURVE), _width(320), _height(170), _curvePoly(0), _baseRect(0), _gridRect(0) {
     resize(_width, _height);
 }
 
-DeepWaterScene::~DeepWaterScene()
-{
-    delete _curve;
-}
+DeepWaterScene::~DeepWaterScene() { delete _curve; }
 
-void DeepWaterScene::resize(const int width, const int height)
-{
+void DeepWaterScene::resize(const int width, const int height) {
     // width and height already have the 8 px padding factored in
-    _width = width-16;
-    _height = height-16;
+    _width = width - 16;
+    _height = height - 16;
     setSceneRect(-9, -7, width, height);
     drawRect();
     drawPoly();
     drawGrid();
 }
 
-void DeepWaterScene::resolutionChanged(int val)
-{
+void DeepWaterScene::resolutionChanged(int val) {
     params.resolution = val;
     setParams(params);
 }
 
-void DeepWaterScene::tileSizeChanged(double val)
-{
+void DeepWaterScene::tileSizeChanged(double val) {
     params.tileSize = val;
     setParams(params);
 }
 
-void DeepWaterScene::lengthCutoffChanged(double val)
-{
+void DeepWaterScene::lengthCutoffChanged(double val) {
     params.lengthCutoff = val;
     setParams(params);
 }
 
-void DeepWaterScene::amplitudeChanged(double val)
-{
+void DeepWaterScene::amplitudeChanged(double val) {
     params.amplitude = val;
     setParams(params);
 }
 
-void DeepWaterScene::windAngleChanged(double val)
-{
+void DeepWaterScene::windAngleChanged(double val) {
     params.windAngle = val;
     setParams(params);
 }
 
-void DeepWaterScene::windSpeedChanged(double val)
-{
+void DeepWaterScene::windSpeedChanged(double val) {
     params.windSpeed = val;
     setParams(params);
 }
 
-void DeepWaterScene::flowDirectionChanged(QString val)
-{
-    QString flowDirection = val.remove(0,1);
-    flowDirection = flowDirection.remove(flowDirection.size()-1,1);
+void DeepWaterScene::flowDirectionChanged(QString val) {
+    QString flowDirection = val.remove(0, 1);
+    flowDirection = flowDirection.remove(flowDirection.size() - 1, 1);
     QStringList components = flowDirection.split(",");
-    params.flowDirection = SeExpr2::Vec3d(components[0].toDouble(),components[1].toDouble(),components[2].toDouble());
+    params.flowDirection = SeExpr2::Vec3d(components[0].toDouble(), components[1].toDouble(), components[2].toDouble());
     setParams(params);
 }
 
-void DeepWaterScene::directionalFactorExponentChanged(double val)
-{
+void DeepWaterScene::directionalFactorExponentChanged(double val) {
     params.directionalFactorExponent = val;
     setParams(params);
 }
 
-void DeepWaterScene::directionalReflectionDampingChanged(double val)
-{
+void DeepWaterScene::directionalReflectionDampingChanged(double val) {
     params.directionalReflectionDamping = val;
     setParams(params);
 }
 
-void DeepWaterScene::sharpenChanged(double val)
-{
+void DeepWaterScene::sharpenChanged(double val) {
     params.sharpen = val;
     setParams(params);
 }
 
-void DeepWaterScene::setParams(const SeDeepWaterParams& paramsIn)
-{
+void DeepWaterScene::setParams(const SeDeepWaterParams &paramsIn) {
     params = paramsIn;
     rebuildDeepWater();
     drawPoly();
@@ -130,23 +113,18 @@ void DeepWaterScene::setParams(const SeDeepWaterParams& paramsIn)
     emitDeepWaterChanged();
 }
 
-void DeepWaterScene::rebuildDeepWater()
-{
+void DeepWaterScene::rebuildDeepWater() {
     delete _curve;
-    _curve=new T_CURVE;
+    _curve = new T_CURVE;
     _curve->setParams(params);
     _curve->generateSpectrum();
 }
 
 // return points in reverse order in order to use same parsing in editor
-void DeepWaterScene::emitDeepWaterChanged()
-{
-    emit deepWaterChanged();
-}
+void DeepWaterScene::emitDeepWaterChanged() { emit deepWaterChanged(); }
 
 // draws the base gray outline rectangle
-void DeepWaterScene::drawRect()
-{
+void DeepWaterScene::drawRect() {
     if (_baseRect == 0) {
         _baseRect = addRect(0, 0, _width, _height, QPen(Qt::black, 1.0), QBrush(Qt::gray));
     }
@@ -154,10 +132,8 @@ void DeepWaterScene::drawRect()
     _baseRect->setZValue(0);
 }
 
-
 // draws the poly curve representation
-void DeepWaterScene::drawPoly()
-{
+void DeepWaterScene::drawPoly() {
     if (_curvePoly == 0) {
         _curvePoly = addPolygon(QPolygonF(), QPen(Qt::black, 1.0), QBrush(Qt::darkGray));
     }
@@ -166,8 +142,8 @@ void DeepWaterScene::drawPoly()
     poly.append(QPointF(_width, 0));
     poly.append(QPointF(0, 0));
     for (int i = 0; i < 1000; i++) {
-        double x = i/1000.0;
-        poly.append(QPointF(_width*x, _height*_curve->getValue(x)));
+        double x = i / 1000.0;
+        poly.append(QPointF(_width * x, _height * _curve->getValue(x)));
     }
     poly.append(QPointF(_width, 0));
     _curvePoly->setPolygon(poly);
@@ -175,19 +151,21 @@ void DeepWaterScene::drawPoly()
 }
 
 // draws the base gray outline rectangle
-void DeepWaterScene::drawGrid()
-{
+void DeepWaterScene::drawGrid() {
     if (_gridRect == 0) {
         _gridRect = addRect(0, 0, _width, _height, QPen(Qt::black, 1.0), QBrush(Qt::gray));
     }
-    _gridRect->setRect(_width*_curve->getKLow(), 0, _width*_curve->getKHigh()-_width*_curve->getKLow(), _height);
-    _gridRect->setBrush(QBrush(_curve->inGrid()?Qt::green:Qt::cyan));
+    _gridRect->setRect(
+        _width * _curve->getKLow(), 0, _width * _curve->getKHigh() - _width * _curve->getKLow(), _height);
+    _gridRect->setBrush(QBrush(_curve->inGrid() ? Qt::green : Qt::cyan));
     _gridRect->setZValue(2);
     _gridRect->setOpacity(0.25);
 }
 
-ExprDeepWater::ExprDeepWater(QWidget* parent) : QWidget(parent), _scene(0), _resolutionEdit(0), _tileSizeEdit(0), _lengthCutoffEdit(0), _amplitudeEdit(0), _windAngleEdit(0), _windSpeedEdit(0), _flowDirectionEdit(0), _directionalFactorExponentEdit(0), _directionalReflectionDampingEdit(0), _sharpenEdit(0)
-{
+ExprDeepWater::ExprDeepWater(QWidget *parent)
+    : QWidget(parent), _scene(0), _resolutionEdit(0), _tileSizeEdit(0), _lengthCutoffEdit(0), _amplitudeEdit(0),
+      _windAngleEdit(0), _windSpeedEdit(0), _flowDirectionEdit(0), _directionalFactorExponentEdit(0),
+      _directionalReflectionDampingEdit(0), _sharpenEdit(0) {
     QHBoxLayout *mainLayout = new QHBoxLayout();
     mainLayout->setSpacing(2);
     mainLayout->setMargin(4);
@@ -199,7 +177,7 @@ ExprDeepWater::ExprDeepWater(QWidget* parent) : QWidget(parent), _scene(0), _res
     editsLayout->setMargin(0);
     edits->setLayout(editsLayout);
 
-    int editWidth = QFontMetrics(font()).width("[0,0,0]")+8;
+    int editWidth = QFontMetrics(font()).width("[0,0,0]") + 8;
 
     QWidget *resolution = new QWidget;
     QHBoxLayout *resolutionLayout = new QHBoxLayout;
@@ -369,7 +347,7 @@ ExprDeepWater::ExprDeepWater(QWidget* parent) : QWidget(parent), _scene(0), _res
     editsLayout->addWidget(amplitude);
     editsLayout->addWidget(windSpeed);
     editsLayout->addWidget(directionalFactorExponent);
-    QFrame* line = new QFrame();
+    QFrame *line = new QFrame();
     line->setToolTip("Parameters below this do not affect spectrum");
     line->setFrameShape(QFrame::HLine);
     line->setFrameShadow(QFrame::Sunken);
@@ -381,7 +359,7 @@ ExprDeepWater::ExprDeepWater(QWidget* parent) : QWidget(parent), _scene(0), _res
 
     mainLayout->addWidget(edits);
     mainLayout->addWidget(curveFrame);
-    mainLayout->setStretchFactor(curveFrame,100);
+    mainLayout->setStretchFactor(curveFrame, 100);
     setLayout(mainLayout);
 
     // SIGNALS
@@ -409,10 +387,17 @@ ExprDeepWater::ExprDeepWater(QWidget* parent) : QWidget(parent), _scene(0), _res
     connect(this, SIGNAL(flowDirectionChangedSignal(QString)), _scene, SLOT(flowDirectionChanged(QString)));
     connect(_directionalFactorExponentEdit, SIGNAL(returnPressed()), this, SLOT(directionalFactorExponentChanged()));
     connect(_directionalFactorExponentEdit, SIGNAL(focusOut()), this, SLOT(directionalFactorExponentChanged()));
-    connect(this, SIGNAL(directionalFactorExponentChangedSignal(double)), _scene, SLOT(directionalFactorExponentChanged(double)));
-    connect(_directionalReflectionDampingEdit, SIGNAL(returnPressed()), this, SLOT(directionalReflectionDampingChanged()));
+    connect(this,
+            SIGNAL(directionalFactorExponentChangedSignal(double)),
+            _scene,
+            SLOT(directionalFactorExponentChanged(double)));
+    connect(
+        _directionalReflectionDampingEdit, SIGNAL(returnPressed()), this, SLOT(directionalReflectionDampingChanged()));
     connect(_directionalReflectionDampingEdit, SIGNAL(focusOut()), this, SLOT(directionalReflectionDampingChanged()));
-    connect(this, SIGNAL(directionalReflectionDampingChangedSignal(double)), _scene, SLOT(directionalReflectionDampingChanged(double)));
+    connect(this,
+            SIGNAL(directionalReflectionDampingChangedSignal(double)),
+            _scene,
+            SLOT(directionalReflectionDampingChanged(double)));
     connect(_sharpenEdit, SIGNAL(returnPressed()), this, SLOT(sharpenChanged()));
     connect(_sharpenEdit, SIGNAL(focusOut()), this, SLOT(sharpenChanged()));
     connect(this, SIGNAL(sharpenChangedSignal(double)), _scene, SLOT(sharpenChanged(double)));
@@ -421,67 +406,54 @@ ExprDeepWater::ExprDeepWater(QWidget* parent) : QWidget(parent), _scene(0), _res
     connect(curveView, SIGNAL(resizeSignal(int, int)), _scene, SLOT(resize(int, int)));
 }
 
-void ExprDeepWater::resolutionChanged()
-{
+void ExprDeepWater::resolutionChanged() {
     int val = QString(_resolutionEdit->text()).toInt();
     emit resolutionChangedSignal(val);
 }
 
-void ExprDeepWater::tileSizeChanged()
-{
+void ExprDeepWater::tileSizeChanged() {
     double val = QString(_tileSizeEdit->text()).toDouble();
     emit tileSizeChangedSignal(val);
 }
 
-void ExprDeepWater::lengthCutoffChanged()
-{
+void ExprDeepWater::lengthCutoffChanged() {
     double val = QString(_lengthCutoffEdit->text()).toDouble();
     emit lengthCutoffChangedSignal(val);
 }
 
-void ExprDeepWater::amplitudeChanged()
-{
+void ExprDeepWater::amplitudeChanged() {
     double val = QString(_amplitudeEdit->text()).toDouble();
     emit amplitudeChangedSignal(val);
 }
 
-void ExprDeepWater::windAngleChanged()
-{
+void ExprDeepWater::windAngleChanged() {
     double val = QString(_windAngleEdit->text()).toDouble();
     emit windAngleChangedSignal(val);
 }
 
-void ExprDeepWater::windSpeedChanged()
-{
+void ExprDeepWater::windSpeedChanged() {
     double val = QString(_windSpeedEdit->text()).toDouble();
     emit windSpeedChangedSignal(val);
 }
 
-void ExprDeepWater::flowDirectionChanged()
-{
-    emit flowDirectionChangedSignal(_flowDirectionEdit->text());
-}
+void ExprDeepWater::flowDirectionChanged() { emit flowDirectionChangedSignal(_flowDirectionEdit->text()); }
 
-void ExprDeepWater::directionalFactorExponentChanged()
-{
+void ExprDeepWater::directionalFactorExponentChanged() {
     double val = QString(_directionalFactorExponentEdit->text()).toDouble();
     emit directionalFactorExponentChangedSignal(val);
 }
 
-void ExprDeepWater::directionalReflectionDampingChanged()
-{
+void ExprDeepWater::directionalReflectionDampingChanged() {
     double val = QString(_directionalReflectionDampingEdit->text()).toDouble();
     emit directionalReflectionDampingChangedSignal(val);
 }
 
-void ExprDeepWater::sharpenChanged()
-{
+void ExprDeepWater::sharpenChanged() {
     double val = QString(_sharpenEdit->text()).toDouble();
     emit sharpenChangedSignal(val);
 }
 
-void ExprDeepWater::setParams(const SeDeepWaterParams& params)
-{
+void ExprDeepWater::setParams(const SeDeepWaterParams &params) {
     _scene->setParams(params);
     _resolutionEdit->setText(QString::number(params.resolution));
     _tileSizeEdit->setText(QString::number(params.tileSize));
@@ -490,9 +462,8 @@ void ExprDeepWater::setParams(const SeDeepWaterParams& params)
     _windAngleEdit->setText(QString::number(params.windAngle));
     _windSpeedEdit->setText(QString::number(params.windSpeed));
     QString flowDirection = "[";
-    flowDirection += QString::number(params.flowDirection[0]) + ","
-        + QString::number(params.flowDirection[1]) + ","
-        + QString::number(params.flowDirection[2]) + "]";
+    flowDirection += QString::number(params.flowDirection[0]) + "," + QString::number(params.flowDirection[1]) + "," +
+                     QString::number(params.flowDirection[2]) + "]";
     _flowDirectionEdit->setText(flowDirection);
     _directionalFactorExponentEdit->setText(QString::number(params.directionalFactorExponent));
     _directionalReflectionDampingEdit->setText(QString::number(params.directionalReflectionDamping));

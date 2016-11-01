@@ -16,19 +16,15 @@
 */
 #include "SeContext.h"
 
-SeContext::SeContext(const SeContext* parent)
-	:_parent(parent)
-{}
+SeContext::SeContext(const SeContext* parent) : _parent(parent) {}
 
-void SeContext::setParameter(const std::string& parameterName,const std::string& value){
-	_parameters[parameterName] = value;
+void SeContext::setParameter(const std::string& parameterName, const std::string& value) {
+    _parameters[parameterName] = value;
 }
 
-SeContext* SeContext::createChildContext() const{
-	return new SeContext(this);
-}
+SeContext* SeContext::createChildContext() const { return new SeContext(this); }
 
-SeContext& SeContext::global(){
-	static SeContext context(0);
-	return context;
+SeContext& SeContext::global() {
+    static SeContext context(0);
+    return context;
 }

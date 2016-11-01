@@ -19,40 +19,34 @@
 #include <SeExpression.h>
 
 //! Simple variable that just returns its internal value
-struct SimpleVar:public SeExprScalarVarRef
-{
-    double val; // independent variable
-        void eval(const SeExprVarNode* /*node*/,SeVec3d& result)
-    {result[0]=val;}
+struct SimpleVar : public SeExprScalarVarRef {
+    double val;  // independent variable
+    void eval(const SeExprVarNode* /*node*/, SeVec3d& result) { result[0] = val; }
 };
 
-
 //! Simple expression class to support our function grapher
-class GrapherExpr:public SeExpression
-{
-    const std::map<std::string,SimpleVar>& vars;
-public:
+class GrapherExpr : public SeExpression {
+    const std::map<std::string, SimpleVar>& vars;
+
+  public:
     //! Constructor that takes the expression to parse
-    GrapherExpr(const std::string& expr,const std::map<std::string,SimpleVar>& vars)
-        :SeExpression(expr),vars(vars)
-    {}
+    GrapherExpr(const std::string& expr, const std::map<std::string, SimpleVar>& vars)
+        : SeExpression(expr), vars(vars) {}
 
     //! set the independent variable
-    void setX(double x_input)
-    {x.val=x_input;}
+    void setX(double x_input) { x.val = x_input; }
 
-private:
+  private:
     //! independent variable
     mutable SimpleVar x;
 
     //! resolve function that only supports one external variable 'x'
-    SeExprVarRef* resolveVar(const std::string& name) const
-    {
+    SeExprVarRef* resolveVar(const std::string& name) const {
         // check my internal variable
-        if(name == "x") return &x;
+        if (name == "x") return &x;
         // check external variable table
-        std::map<std::string,SimpleVar>::const_iterator i=vars.find(name);
-        if(i!=vars.end()) return const_cast<SimpleVar*>(&i->second);
+        std::map<std::string, SimpleVar>::const_iterator i = vars.find(name);
+        if (i != vars.end()) return const_cast<SimpleVar*>(&i->second);
         // nothing found
         return 0;
     }

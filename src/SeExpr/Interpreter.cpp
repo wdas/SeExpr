@@ -603,10 +603,12 @@ int ExprSubscriptNode::buildInterpreter(Interpreter* interpreter) const {
 
 int ExprVarNode::buildInterpreter(Interpreter* interpreter) const {
     if (const ExprLocalVar* var = _localVar) {
-        //if (const ExprLocalVar* phi = var->getPhi()) var = phi;
+        // if (const ExprLocalVar* phi = var->getPhi()) var = phi;
         Interpreter::VarToLoc::iterator i = interpreter->varToLoc.find(var);
-        if (i != interpreter->varToLoc.end()) return i->second;
-        else throw std::runtime_error("Unallocated variable encountered.");
+        if (i != interpreter->varToLoc.end())
+            return i->second;
+        else
+            throw std::runtime_error("Unallocated variable encountered.");
     } else if (const ExprVarRef* var = _var) {
         ExprType type = var->type();
         int destLoc = -1;
@@ -639,9 +641,8 @@ int ExprVarNode::buildInterpreter(Interpreter* interpreter) const {
 }
 
 int ExprLocalVar::buildInterpreter(Interpreter* interpreter) const {
-    return interpreter->varToLoc[this] = _type.isFP() ? interpreter->allocFP(_type.dim()) :
-                                        _type.isString() ? interpreter->allocPtr()
-                                            : -1;
+    return interpreter->varToLoc[this] =
+               _type.isFP() ? interpreter->allocFP(_type.dim()) : _type.isString() ? interpreter->allocPtr() : -1;
 }
 
 int ExprAssignNode::buildInterpreter(Interpreter* interpreter) const {
@@ -652,9 +653,9 @@ int ExprAssignNode::buildInterpreter(Interpreter* interpreter) const {
     int op0 = child(0)->buildInterpreter(interpreter);
     if (child0Type.isFP()) {
         interpreter->addOp(getTemplatizedOp<AssignOp>(child0Type.dim()));
-    }else if(child0Type.isString()){
+    } else if (child0Type.isString()) {
         interpreter->addOp(AssignStrOp::f);
-    }else{
+    } else {
         assert(false && "Invalid desired assign type");
         return -1;
     }
@@ -664,24 +665,24 @@ int ExprAssignNode::buildInterpreter(Interpreter* interpreter) const {
     return loc;
 }
 
-void copyVarToPromotedPosition(Interpreter* interpreter, ExprLocalVar* varSource, ExprLocalVar* varDest){
-    if(varDest->type().isFP()){
-        int destDim=varDest->type().dim();
-        if(destDim!=varSource->type().dim()){
-            assert(varSource->type().dim()==1);
+void copyVarToPromotedPosition(Interpreter* interpreter, ExprLocalVar* varSource, ExprLocalVar* varDest) {
+    if (varDest->type().isFP()) {
+        int destDim = varDest->type().dim();
+        if (destDim != varSource->type().dim()) {
+            assert(varSource->type().dim() == 1);
             interpreter->addOp(getTemplatizedOp<Promote>(destDim));
-        }else{
+        } else {
             interpreter->addOp(getTemplatizedOp<AssignOp>(destDim));
         }
         interpreter->addOperand(interpreter->varToLoc[varSource]);
         interpreter->addOperand(interpreter->varToLoc[varDest]);
         interpreter->endOp();
-    }else if(varDest->type().isString()){
+    } else if (varDest->type().isString()) {
         interpreter->addOp(AssignStrOp::f);
         interpreter->addOperand(interpreter->varToLoc[varSource]);
         interpreter->addOperand(interpreter->varToLoc[varDest]);
         interpreter->endOp();
-    }else{
+    } else {
         assert(false && "failed to promote invalid type");
     }
 }
@@ -690,13 +691,13 @@ int ExprIfThenElseNode::buildInterpreter(Interpreter* interpreter) const {
     int condop = child(0)->buildInterpreter(interpreter);
     int basePC = interpreter->nextPC();
 
-    const auto& merges=_varEnv->merge(_varEnvMergeIndex);
+    const auto& merges = _varEnv->merge(_varEnvMergeIndex);
     // Allocate spots for all the join variables
     // they are before in the sequence of operands, but it doesn't matter
     // NOTE: at this point the variables thenVar and elseVar have not been codegen'd
-    for(auto& it:merges){
+    for (auto& it : merges) {
         ExprLocalVarPhi* finalVar = it.second;
-        if(finalVar->valid()){
+        if (finalVar->valid()) {
             finalVar->buildInterpreter(interpreter);
         }
     }
@@ -709,10 +710,10 @@ int ExprIfThenElseNode::buildInterpreter(Interpreter* interpreter) const {
 
     // Then block (build interpreter and copy variables out then jump to end)
     child(1)->buildInterpreter(interpreter);
-    for(auto& it:merges){
+    for (auto& it : merges) {
         ExprLocalVarPhi* finalVar = it.second;
-        if(finalVar->valid()){
-            copyVarToPromotedPosition(interpreter,finalVar->_thenVar,finalVar);
+        if (finalVar->valid()) {
+            copyVarToPromotedPosition(interpreter, finalVar->_thenVar, finalVar);
         }
     }
     interpreter->addOp(JmpRelative::f);
@@ -722,10 +723,10 @@ int ExprIfThenElseNode::buildInterpreter(Interpreter* interpreter) const {
     // Else block (build interpreter, copy variables out and then we're at end)
     int child2PC = interpreter->nextPC();
     child(2)->buildInterpreter(interpreter);
-    for(auto& it:merges){
+    for (auto& it : merges) {
         ExprLocalVarPhi* finalVar = it.second;
-        if(finalVar->valid()){
-            copyVarToPromotedPosition(interpreter,finalVar->_elseVar,finalVar);
+        if (finalVar->valid()) {
+            copyVarToPromotedPosition(interpreter, finalVar->_elseVar, finalVar);
         }
     }
 

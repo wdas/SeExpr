@@ -26,12 +26,13 @@
 class Editable;
 
 /// Factors a SeExpr into an editable expression with controls (i.e. value boxes, curve boxes)
-class EditableExpression{
-    std::string _expr; // original full expression
+class EditableExpression {
+    std::string _expr;  // original full expression
     typedef std::vector<Editable*> Editables;
-    std::vector<Editable*> _editables; // control that can edit the expression
+    std::vector<Editable*> _editables;  // control that can edit the expression
     std::vector<std::string> _variables;
-public:
+
+  public:
     EditableExpression();
     ~EditableExpression();
 
@@ -48,14 +49,15 @@ public:
     void updateString(const EditableExpression& other);
 
     /// Access an editable parameter
-    Editable* operator[](const int i){return _editables[i];}
+    Editable* operator[](const int i) { return _editables[i]; }
 
     /// Return the count of editable parameters
-    size_t size() const{return _editables.size();}
+    size_t size() const { return _editables.size(); }
 
     /// Get list of commentsø
-    const std::vector<std::string>& getVariables() const{return _variables;}
-private:
+    const std::vector<std::string>& getVariables() const { return _variables; }
+
+  private:
     /// clean memeory
     void cleanup();
 };

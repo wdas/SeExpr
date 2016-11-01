@@ -25,15 +25,16 @@ class QLabel;
 class ExprEditor;
 class ImageSynthesizer;
 
-class ImageEditorDialog: public QDialog
-{
+class ImageEditorDialog : public QDialog {
     Q_OBJECT
-public:
-    ImageEditorDialog(QWidget *parent=0);
-private:
+  public:
+    ImageEditorDialog(QWidget *parent = 0);
+
+  private:
     QLabel *_imageLabel;
     ExprEditor *_editor;
     ImageSynthesizer *_imageSynthesizer;
-private slots:
+  private
+slots:
     void applyExpression();
 };

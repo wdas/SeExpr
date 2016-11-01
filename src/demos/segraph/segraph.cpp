@@ -20,12 +20,11 @@
 #include <cfloat>
 #include <iostream>
 
-int main(int argc,char *argv[])
-{
-    QApplication app(argc,argv);
-    GraphWindow* graph=new GraphWindow;
+int main(int argc, char* argv[]) {
+    QApplication app(argc, argv);
+    GraphWindow* graph = new GraphWindow;
     graph->show();
     app.exec();
-    
+
     return 0;
 }
