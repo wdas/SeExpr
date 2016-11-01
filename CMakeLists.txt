@@ -32,9 +32,6 @@ SET (LLVM_DIR /usr/share/llvm/cmake CACHE PATH "Where to search for LLVM i.e. ")
 SET (ENABLE_LLVM_BACKEND ON CACHE BOOL "Whether to build with LLVM backend")
 SET (USE_PYTHON ON CACHE BOOL "Whether to compile python libraries")
 
-#SET (LLVM_DIR /Users/aselle/code/llvm-inst/share/llvm/cmake CACHE)
-#SET (LLVM_DIR /jobs2/soft/users/aselle/soft/cmake-3.8.0/share/llvm/cmake)
-
 if (ENABLE_LLVM_BACKEND)
    set(SEEXPR_ENABLE_LLVM_BACKEND 1)
 
