@@ -28,7 +28,7 @@ SET (LIBDIR ${CMAKE_INSTALL_LIBDIR} CACHE PATH "lib or lib64") # defaults to lib
 SET (BOOST_DIR $ENV{RP_boost_disney} CACHE PATH "where boost is located")
 SET (BOOST_PYTHON_LIBNAME boost_python CACHE STRING "what library name for boost python")
 SET (GTEST_DIR /usr/include CACHE PATH "Where to find GTEST") # /usr/include/gtest)
-SET (LLVM_DIR $ENV{RP_llvm_disney} CACHE PATH "Where to search for LLVM i.e. ")
+SET (LLVM_DIR /usr/share/llvm/cmake CACHE PATH "Where to search for LLVM i.e. ")
 SET (ENABLE_LLVM_BACKEND ON CACHE BOOL "Whether to build with LLVM backend")
 SET (USE_PYTHON ON CACHE BOOL "Whether to compile python libraries")
 

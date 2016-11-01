@@ -11,6 +11,9 @@ libdir ?= $(shell pf-makevar lib)
 #    CXX=/opt/rh/devtoolset-2/root/usr/bin/g++
 #endif
 
+ifdef RP_llvm_disney
+    CMAKE_ARGS += -DLLVM_DIR=$(RP_llvm_disney)/share/llvm/cmake
+endif
 
 ## Temporary staging directory
 # DESTDIR =
