@@ -55,7 +55,8 @@ class RandFuncX : public ExprFuncSimple {
 
     virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const {
         bool valid = true;
-        for (int i = 0; i < node->numChildren(); i++) valid &= node->checkArg(i, ExprType().FP(1).Varying(), envBuilder);
+        for (int i = 0; i < node->numChildren(); i++)
+            valid &= node->checkArg(i, ExprType().FP(1).Varying(), envBuilder);
         return valid ? ExprType().FP(1).Varying() : ExprType().Error();
     }
 
@@ -87,7 +88,8 @@ class MapFunc : public ExprFuncSimple {
     virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const {
         bool valid = true;
         valid &= node->checkArg(0, ExprType().String().Constant(), envBuilder);
-        for (int i = 1; i < node->numChildren(); i++) valid &= node->checkArg(i, ExprType().FP(1).Varying(), envBuilder);
+        for (int i = 1; i < node->numChildren(); i++)
+            valid &= node->checkArg(i, ExprType().FP(1).Varying(), envBuilder);
         return valid ? ExprType().FP(3).Varying() : ExprType().Error();
     }
 
@@ -113,7 +115,8 @@ class TriplanarFuncX : public ExprFuncSimple {
     virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const {
         bool valid = true;
         valid &= node->checkArg(0, ExprType().String().Constant(), envBuilder);
-        for (int i = 1; i < node->numChildren(); i++) valid &= node->checkArg(i, ExprType().FP(3).Varying(), envBuilder);
+        for (int i = 1; i < node->numChildren(); i++)
+            valid &= node->checkArg(i, ExprType().FP(3).Varying(), envBuilder);
         return valid ? ExprType().FP(3).Varying() : ExprType().Error();
     }
 
@@ -377,14 +380,14 @@ bool TestImage::generateImage(const std::string& exprStr) {
     double widthDouble = _width, heightDouble = _height;
     varBlock.Pointer(wH) = &widthDouble;
     varBlock.Pointer(hH) = &heightDouble;
-    double u,v,faceId;
-    Vec<double,3> P,Cs,Ci;
-    varBlock.Pointer(uH)=&u;
-    varBlock.Pointer(vH)=&v;
-    varBlock.Pointer(faceIdH)=&faceId;
-    varBlock.Pointer(PH)=&P[0];
-    varBlock.Pointer(CsH)=&Cs[0];
-    varBlock.Pointer(CiH)=&Ci[0];
+    double u, v, faceId;
+    Vec<double, 3> P, Cs, Ci;
+    varBlock.Pointer(uH) = &u;
+    varBlock.Pointer(vH) = &v;
+    varBlock.Pointer(faceIdH) = &faceId;
+    varBlock.Pointer(PH) = &P[0];
+    varBlock.Pointer(CsH) = &Cs[0];
+    varBlock.Pointer(CiH) = &Ci[0];
 #endif
     unsigned char* pixel = image.data();
 

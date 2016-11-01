@@ -106,15 +106,15 @@ extern "C" {
 // opdata[3] points to number of args
 // opdata[4] points to beginning of arguments in
 void SeExpr2LLVMEvalCustomFunction(int *opDataArg,
-                           double *fpArg,
-                           char **strArg,
-                           void **funcdata,
-                           const SeExpr2::ExprFuncNode *node) {
+                                   double *fpArg,
+                                   char **strArg,
+                                   void **funcdata,
+                                   const SeExpr2::ExprFuncNode *node) {
     const SeExpr2::ExprFunc *func = node->func();
     SeExpr2::ExprFuncX *funcX = const_cast<SeExpr2::ExprFuncX *>(func->funcx());
     SeExpr2::ExprFuncSimple *funcSimple = static_cast<SeExpr2::ExprFuncSimple *>(funcX);
 
-    strArg[0]= reinterpret_cast<char *>(funcSimple);
+    strArg[0] = reinterpret_cast<char *>(funcSimple);
 
     std::vector<int> callStack;
     SeExpr2::ExprFuncSimple::ArgHandle handle(opDataArg, fpArg, strArg, callStack);
@@ -126,6 +126,6 @@ void SeExpr2LLVMEvalCustomFunction(int *opDataArg,
     }
 
     funcSimple->eval(handle);
-    //for (int i = 0; i < retSize; ++i) result[i] = fp[1 + i];
+    // for (int i = 0; i < retSize; ++i) result[i] = fp[1 + i];
 }
 }

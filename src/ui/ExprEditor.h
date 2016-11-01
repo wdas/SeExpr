@@ -46,113 +46,112 @@ class ExprCompletionModel;
 class ExprControl;
 class ExprControlCollection;
 
-
 class ExprEditor;
 class ExprCompletionModel;
 class ExprHighlighter;
 class ExprPopupDoc;
 
-class ExprTextEdit : public QTextEdit
-{
+class ExprTextEdit : public QTextEdit {
     Q_OBJECT
 
-        QToolTip* functionTip;
-        std::map<std::string,std::string> functionTooltips;
-        ExprHighlighter* highlighter;
-        QStyle* lastStyleForHighlighter;
-        ExprPopupDoc* _tip;
-        QAction* _popupEnabledAction;
-    public:
-        QCompleter* completer;
-        ExprCompletionModel* completionModel;
-   
+    QToolTip* functionTip;
+    std::map<std::string, std::string> functionTooltips;
+    ExprHighlighter* highlighter;
+    QStyle* lastStyleForHighlighter;
+    ExprPopupDoc* _tip;
+    QAction* _popupEnabledAction;
 
-    public:
-        ExprTextEdit(QWidget* parent = 0);
-        ~ExprTextEdit();
-        void updateStyle();
+  public:
+    QCompleter* completer;
+    ExprCompletionModel* completionModel;
 
-    protected:
-        void showTip(const QString& string);
-        void hideTip();
+  public:
+    ExprTextEdit(QWidget* parent = 0);
+    ~ExprTextEdit();
+    void updateStyle();
 
-        virtual void keyPressEvent(QKeyEvent* e);
-        void focusInEvent(QFocusEvent* e);
-        void focusOutEvent(QFocusEvent* e);
-        void mousePressEvent(QMouseEvent* event);
-        void mouseDoubleClickEvent(QMouseEvent* event);
-        void paintEvent(QPaintEvent* e);
-        void wheelEvent(QWheelEvent* e);                                       
-        void contextMenuEvent(QContextMenuEvent* event);
+  protected:
+    void showTip(const QString& string);
+    void hideTip();
 
-    private slots:
-        void insertCompletion(const QString& completion);
-    signals:
-        void applyShortcut();
-        void nextError();
+    virtual void keyPressEvent(QKeyEvent* e);
+    void focusInEvent(QFocusEvent* e);
+    void focusOutEvent(QFocusEvent* e);
+    void mousePressEvent(QMouseEvent* event);
+    void mouseDoubleClickEvent(QMouseEvent* event);
+    void paintEvent(QPaintEvent* e);
+    void wheelEvent(QWheelEvent* e);
+    void contextMenuEvent(QContextMenuEvent* event);
 
+  private
+slots:
+    void insertCompletion(const QString& completion);
+signals:
+    void applyShortcut();
+    void nextError();
 };
 
-
-class ExprEditor : public QWidget
-{
+class ExprEditor : public QWidget {
     Q_OBJECT
 
-    public:
-        ExprEditor(QWidget* parent,ExprControlCollection* controls);
-        virtual ~ExprEditor();
+  public:
+    ExprEditor(QWidget* parent, ExprControlCollection* controls);
+    virtual ~ExprEditor();
 
-    public slots:
-        void exprChanged();
-        void rebuildControls();
-        void controlChanged(int id);
-        void nextError();
-        void selectError();
-        void sendApply();
-        void sendPreview();
-        //void handlePreviewTimer();
-    signals:
-        void apply();
-        void preview();
-    public:
-        // Get the expression that is in the editor
-        std::string getExpr();
-        // Sets the expression that is in the editor
-        void setExpr(const std::string& expression,const bool apply=false);
-        // Append string
-        void appendStr(const std::string& str);
-    public slots:
-        // Insert string
-        void insertStr(const std::string& str);
-    public:
-        // Adds an error and its associated position
-        void addError(const int startPos,const int endPos,const std::string& error);
-        // Removes all errors and hides the completion widget   
-        void clearErrors();
-        // Removes all extra completion symbols
-        void clearExtraCompleters();
-        // Registers an extra function and associated do cstring
-        void registerExtraFunction(const std::string& name,const std::string& docString);
-        // Register an extra variable (i.e. $P, or $u, something provided by resolveVar)
-        void registerExtraVariable(const std::string& name,const std::string& docString);
-        // Replace extras
-        void replaceExtras(const ExprCompletionModel& completer);
-        // Updates the completion widget, must call after registering any new functions/variables
-        void updateCompleter();
-        // Updates style
-        void updateStyle();
-    private:
-        ExprTextEdit* exprTe;
-        ExprControlCollection* controls;
-        QListWidget* errorWidget;
+  public
+slots:
+    void exprChanged();
+    void rebuildControls();
+    void controlChanged(int id);
+    void nextError();
+    void selectError();
+    void sendApply();
+    void sendPreview();
+// void handlePreviewTimer();
+signals:
+    void apply();
+    void preview();
 
-        QTimer* controlRebuildTimer;
-        QTimer* previewTimer;
+  public:
+    // Get the expression that is in the editor
+    std::string getExpr();
+    // Sets the expression that is in the editor
+    void setExpr(const std::string& expression, const bool apply = false);
+    // Append string
+    void appendStr(const std::string& str);
+  public
+slots:
+    // Insert string
+    void insertStr(const std::string& str);
 
+  public:
+    // Adds an error and its associated position
+    void addError(const int startPos, const int endPos, const std::string& error);
+    // Removes all errors and hides the completion widget
+    void clearErrors();
+    // Removes all extra completion symbols
+    void clearExtraCompleters();
+    // Registers an extra function and associated do cstring
+    void registerExtraFunction(const std::string& name, const std::string& docString);
+    // Register an extra variable (i.e. $P, or $u, something provided by resolveVar)
+    void registerExtraVariable(const std::string& name, const std::string& docString);
+    // Replace extras
+    void replaceExtras(const ExprCompletionModel& completer);
+    // Updates the completion widget, must call after registering any new functions/variables
+    void updateCompleter();
+    // Updates style
+    void updateStyle();
 
-        bool _updatingText;
-        int errorHeight;
+  private:
+    ExprTextEdit* exprTe;
+    ExprControlCollection* controls;
+    QListWidget* errorWidget;
 
+    QTimer* controlRebuildTimer;
+    QTimer* previewTimer;
+
+    bool _updatingText;
+    int errorHeight;
 };
 
 #endif

@@ -21,54 +21,50 @@
 
 #include "BasicExpression.h"
 
-BasicExpression::BasicExpression(const std::string& expr,
-                                 const SeExpr2::ExprType& type)
-    :Expression(expr,type),dummyFunc(dummyFuncX,0,16)
-{}
+BasicExpression::BasicExpression(const std::string& expr, const SeExpr2::ExprType& type)
+    : Expression(expr, type), dummyFunc(dummyFuncX, 0, 16) {}
 
-BasicExpression::~BasicExpression()
-{
-    clearVars();
-}
+BasicExpression::~BasicExpression() { clearVars(); }
 
-template<class T_MAP> void deleteAndClear(T_MAP& map){
-    for(typename T_MAP::iterator i=map.begin();i!=map.end();++i) delete i->second;
+template <class T_MAP>
+void deleteAndClear(T_MAP& map) {
+    for (typename T_MAP::iterator i = map.begin(); i != map.end(); ++i) delete i->second;
     map.clear();
 }
 
-void BasicExpression::clearVars()
-{
+void BasicExpression::clearVars() {
     deleteAndClear(varmap);
     funcmap.clear();
 }
 
-void BasicExpression::setExpr(const std::string& str)
-{
+void BasicExpression::setExpr(const std::string& str) {
     clearVars();
     Expression::setExpr(str);
 }
 
-SeExpr2::ExprVarRef* BasicExpression::resolveVar(const std::string& name) const
-{
-    if(name=="u") return &u;
-    else if(name=="v") return &v;
-    else if(name=="P") return &P;
-    else{
+SeExpr2::ExprVarRef* BasicExpression::resolveVar(const std::string& name) const {
+    if (name == "u")
+        return &u;
+    else if (name == "v")
+        return &v;
+    else if (name == "P")
+        return &P;
+    else {
         // make a variable to resolve any unknown
-        VARMAP::iterator i=varmap.find(name);
-        if(i!=varmap.end()) return i->second;
-        else{
-            varmap[name]=new VectorRef();
+        VARMAP::iterator i = varmap.find(name);
+        if (i != varmap.end())
+            return i->second;
+        else {
+            varmap[name] = new VectorRef();
             return varmap[name];
         }
     }
 }
 
-SeExpr2::ExprFunc* BasicExpression::resolveFunc(const std::string& name) const
-{
+SeExpr2::ExprFunc* BasicExpression::resolveFunc(const std::string& name) const {
     // check if it is builtin so we get proper behavior
-    if(SeExpr2::ExprFunc::lookup(name)) return 0;
+    if (SeExpr2::ExprFunc::lookup(name)) return 0;
 
-    funcmap[name]=true;
+    funcmap[name] = true;
     return &dummyFunc;
 }

@@ -31,62 +31,59 @@
 class ExprGrapherWidget;
 class QLineEdit;
 
-class ExprGrapherView : public QGLWidget
-{
+class ExprGrapherView : public QGLWidget {
     Q_OBJECT;
     ExprGrapherWidget& widget;
-public:
-        ExprGrapherView(ExprGrapherWidget& widget,QWidget* parent, int width, int height);
-        virtual ~ExprGrapherView();
 
-        void update();
-        void setWindow(float xmin,float xmax,float ymin,float ymax,float z);
-        void getWindow(float &xmin,float& xmax,float& ymin,float &ymax,float &z);
+  public:
+    ExprGrapherView(ExprGrapherWidget& widget, QWidget* parent, int width, int height);
+    virtual ~ExprGrapherView();
 
-    protected:
-        void clear();
-        void paintGL();
-        void mousePressEvent(QMouseEvent* event);
-        void mouseReleaseEvent(QMouseEvent* event);
-        void mouseMoveEvent(QMouseEvent* event);
-        int event_oldx,event_oldy;
+    void update();
+    void setWindow(float xmin, float xmax, float ymin, float ymax, float z);
+    void getWindow(float& xmin, float& xmax, float& ymin, float& ymax, float& z);
 
-    signals:
-        void scaleValueManipulated();
-        void clicked();
+  protected:
+    void clear();
+    void paintGL();
+    void mousePressEvent(QMouseEvent* event);
+    void mouseReleaseEvent(QMouseEvent* event);
+    void mouseMoveEvent(QMouseEvent* event);
+    int event_oldx, event_oldy;
 
-    private:
-        float * _image;
-        int _width;
-        int _height;
+signals:
+    void scaleValueManipulated();
+    void clicked();
 
-        float xmin,xmax,ymin,ymax,z;
-        float dx,dy;
+  private:
+    float* _image;
+    int _width;
+    int _height;
 
+    float xmin, xmax, ymin, ymax, z;
+    float dx, dy;
 
-    bool scaling,translating;
-
+    bool scaling, translating;
 };
 
-class ExprGrapherWidget : public QWidget
-{
+class ExprGrapherWidget : public QWidget {
     Q_OBJECT
-         QLineEdit* scale;
+    QLineEdit* scale;
 
-    public:
-        ExprGrapherView* view;
-        BasicExpression expr;
+  public:
+    ExprGrapherView* view;
+    BasicExpression expr;
 
-        ExprGrapherWidget(QWidget* parent, int width, int height);
+    ExprGrapherWidget(QWidget* parent, int width, int height);
 
-        void update();
+    void update();
 signals:
-        void preview();
-private slots:
-        void scaleValueEdited();
-        void scaleValueManipulated();
-        void forwardPreview();
-
+    void preview();
+  private
+slots:
+    void scaleValueEdited();
+    void scaleValueManipulated();
+    void forwardPreview();
 };
 
 #endif

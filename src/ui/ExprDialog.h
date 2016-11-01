@@ -32,7 +32,6 @@
 #include <QtGui/QSpacerItem>
 #include <QtGui/QSizePolicy>
 
-
 #include <iostream>
 #include <fstream>
 
@@ -42,38 +41,35 @@ class ExprGrapherWidget;
 class ExprBrowser;
 class QTabWidget;
 
-class ExprDialog:public QDialog
-{
+class ExprDialog : public QDialog {
     Q_OBJECT
 
-public:
+  public:
     ExprEditor* editor;
     ExprBrowser* browser;
-private:
+
+  private:
     ExprGrapherWidget* grapher;
     QLabel* previewCommentLabel;
     QPushButton* acceptButton;
     QPushButton* cancelButton;
     ExprControlCollection* controls;
 
-    QPushButton *applyButton,*previewButton,*saveButton,*saveAsButton;
-    QPushButton *saveLocalButton,*clearButton;
+    QPushButton* applyButton, *previewButton, *saveButton, *saveAsButton;
+    QPushButton* saveLocalButton, *clearButton;
     QLineEdit* helpFindBox;
     QTimer* showEditorTimer;
     QTextBrowser* helpBrowser;
     QTextCursor cursor;
     QString prevFind;
     int _currentEditorIdx;
-public:
+
+  public:
     ExprDialog(QWidget* parent);
 
-    std::string getExpressionString()
-    {
-        return editor->getExpr();
-    }
+    std::string getExpressionString() { return editor->getExpr(); }
 
-    void setExpressionString(const std::string& str)
-    {
+    void setExpressionString(const std::string& str) {
         clearExpression();
         editor->setExpr(str, /*apply*/ true);
     }
@@ -84,10 +80,10 @@ public:
     // Show the Nth editor dialog
     void showEditor(int idx);
 
-private:
+  private:
     void setupHelp(QTabWidget* tab);
 
-protected:
+  protected:
     void keyPressEvent(QKeyEvent* event);
     void findHelper(QTextDocument::FindFlags flags);
     void closeEvent(QCloseEvent* event);
@@ -96,14 +92,16 @@ signals:
     void preview();
     void expressionApplied();
     void dialogClosed();
-private slots:
+  private
+slots:
     void previewExpression();
     void verifiedApply();
     void verifiedAccept();
     void findNextInHelp();
     void findPrevInHelp();
     void _showEditor();
-public slots:
+  public
+slots:
 
     void applyExpression();
 

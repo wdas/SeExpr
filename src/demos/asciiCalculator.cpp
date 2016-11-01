@@ -129,7 +129,7 @@ int main(int argc, char* argv[]) {
             str = "q";
         };
 
-        if(str == "quit" || str == "q") break;
+        if (str == "quit" || str == "q") break;
         expr.setDesiredReturnType(ExprType().FP(3));
         expr.setExpr(str);
 

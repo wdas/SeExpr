@@ -69,13 +69,13 @@ class VarBlock {
 // This does not register actual data only types of the data. It can create
 // a VarBlock which allows registering actual variable data
 class VarBlockCreator {
-public:
+  public:
     /// Internally implemented var ref used by SeExpr
     class Ref : public ExprVarRef {
         uint32_t _offset;
         uint32_t _stride;
 
-    public:
+      public:
         uint32_t offset() const { return _offset; }
         uint32_t stride() const { return _stride; }
         Ref(const ExprType& type, uint32_t offset, uint32_t stride)

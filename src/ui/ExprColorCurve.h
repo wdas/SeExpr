@@ -22,7 +22,6 @@
 #ifndef _ExprColorCurve_h_
 #define _ExprColorCurve_h_
 
-
 #include <vector>
 
 #include <QtCore/QObject>
@@ -39,18 +38,17 @@
   This class overrides QGraphicsScene so we can handle mouse
   press, drag and keyboard events
 */
-class CCurveScene : public QGraphicsScene
-{
+class CCurveScene : public QGraphicsScene {
     Q_OBJECT
 
     typedef SeExpr2::Curve<SeExpr2::Vec3d> T_CURVE;
-    typedef T_CURVE::InterpType T_INTERP ;
+    typedef T_CURVE::InterpType T_INTERP;
 
-public:
+  public:
     CCurveScene();
     ~CCurveScene();
 
-    void addPoint(double x, const SeExpr2::Vec3d y, const T_INTERP interp, const bool select=true);
+    void addPoint(double x, const SeExpr2::Vec3d y, const T_INTERP interp, const bool select = true);
 
     void removePoint(const int index);
     void removeAll();
@@ -65,27 +63,29 @@ public:
 
     void drawPoints();
 
-    QPixmap& getPixmap();
+    QPixmap &getPixmap();
     void emitCurveChanged();
 
     void rebuildCurve();
 
-    std::vector<T_CURVE::CV> _cvs; // unsorted cvs
+    std::vector<T_CURVE::CV> _cvs;  // unsorted cvs
 
     friend class ExprColorCurve;
-private:
-    T_CURVE* _curve;
-public slots:
+
+  private:
+    T_CURVE *_curve;
+  public
+slots:
     void interpChanged(const int interp);
     void selPosChanged(double pos);
-    void selValChanged(const SeExpr2::Vec3d& val);
+    void selValChanged(const SeExpr2::Vec3d &val);
     void resize(const int width, const int height);
 
 signals:
     void cvSelected(double x, const SeExpr2::Vec3d y, const T_INTERP interp);
     void curveChanged();
 
-private:
+  private:
     QByteArray getCPixmap();
 
     int _width;
@@ -101,70 +101,69 @@ private:
     bool _lmb;
 };
 
-
-class ExprCBoxWidget : public QWidget
-{
+class ExprCBoxWidget : public QWidget {
     Q_OBJECT
-public:
-    ExprCBoxWidget(CCurveScene* curveScene, QWidget* parent = 0) : QWidget(parent), _curveScene(curveScene) {}
+  public:
+    ExprCBoxWidget(CCurveScene *curveScene, QWidget *parent = 0) : QWidget(parent), _curveScene(curveScene) {}
     ~ExprCBoxWidget() {}
 
-protected:
-    virtual void paintEvent(QPaintEvent* event);
+  protected:
+    virtual void paintEvent(QPaintEvent *event);
 
-private:
-    CCurveScene* _curveScene;
+  private:
+    CCurveScene *_curveScene;
 };
 
-
-class ExprCSwatchFrame : public QFrame
-{
+class ExprCSwatchFrame : public QFrame {
     Q_OBJECT
-public:
-    ExprCSwatchFrame(SeExpr2::Vec3d value, QWidget* parent = 0);
+  public:
+    ExprCSwatchFrame(SeExpr2::Vec3d value, QWidget *parent = 0);
     ~ExprCSwatchFrame() {}
 
     void setValue(const SeExpr2::Vec3d &value);
     SeExpr2::Vec3d getValue() const;
 
-protected:
-    virtual void paintEvent(QPaintEvent* event);
-    virtual void mousePressEvent(QMouseEvent* event);
+  protected:
+    virtual void paintEvent(QPaintEvent *event);
+    virtual void mousePressEvent(QMouseEvent *event);
 
 signals:
     void selValChangedSignal(SeExpr2::Vec3d value);
     void swatchChanged(QColor color);
 
-private:
+  private:
     SeExpr2::Vec3d _value;
     QColor _color;
 };
 
-
-class ExprColorCurve : public QWidget
-{
+class ExprColorCurve : public QWidget {
     Q_OBJECT
 
     typedef SeExpr2::Curve<SeExpr2::Vec3d> T_CURVE;
-    typedef T_CURVE::InterpType T_INTERP ;
+    typedef T_CURVE::InterpType T_INTERP;
 
-public:
-    ExprColorCurve(QWidget* parent = 0, QString pLabel = "", QString vLabel = "", QString iLabel = "",
-        bool expandable=true);
+  public:
+    ExprColorCurve(QWidget *parent = 0,
+                   QString pLabel = "",
+                   QString vLabel = "",
+                   QString iLabel = "",
+                   bool expandable = true);
     ~ExprColorCurve() {}
 
     // Convenience Functions
-    void addPoint(const double x, const SeExpr2::Vec3d y, const T_INTERP interp, bool select=false);
+    void addPoint(const double x, const SeExpr2::Vec3d y, const T_INTERP interp, bool select = false);
     void setSwatchColor(QColor color);
     QColor getSwatchColor();
 
     CCurveScene *_scene;
 
-public slots:
+  public
+slots:
     void cvSelectedSlot(const double pos, const SeExpr2::Vec3d val, const T_INTERP interp);
     void selPosChanged();
     void openDetail();
-private slots:
+  private
+slots:
     void internalSwatchChanged(QColor color);
 
 signals:
@@ -172,11 +171,9 @@ signals:
     void selValChangedSignal(SeExpr2::Vec3d val);
     void swatchChanged(QColor color);
 
-
-private:
+  private:
     QLineEdit *_selPosEdit;
     ExprCSwatchFrame *_selValEdit;
     QComboBox *_interpComboBox;
 };
 #endif
-

@@ -387,8 +387,8 @@ static const char* hsltorgb_docstring =
     "well-defined and reversible.";
 
 static Vec3d saturate(const Vec3d& Cin, double amt) {
-    const Vec3d lum(.2126,.7152,.0722); // rec709 luminance
-    Vec3d result = Vec3d(Cin.dot(lum) * (1-amt)) + Cin * amt;
+    const Vec3d lum(.2126, .7152, .0722);  // rec709 luminance
+    Vec3d result = Vec3d(Cin.dot(lum) * (1 - amt)) + Cin * amt;
     if (result[0] < 0) result[0] = 0;
     if (result[1] < 0) result[1] = 0;
     if (result[2] < 0) result[2] = 0;
@@ -748,9 +748,7 @@ static const char* ccellnoise_docstring =
 double pnoise(const Vec3d& p, const Vec3d& period) {
     double result;
     double args[3] = {p[0], p[1], p[2]};
-    int pargs[3] = {max(1,(int)period[0]),
-                    max(1,(int)period[1]),
-                    max(1,(int)period[2])};
+    int pargs[3] = {max(1, (int)period[0]), max(1, (int)period[1]), max(1, (int)period[2])};
     PNoise<3, 1>(args, pargs, &result);
     return result;
 }
@@ -1198,10 +1196,8 @@ static const char* pick_docstring =
     "to the supplied weights.&nbsp; Any weights not supplied are assumed to\n"
     "be 1.0.";
 
-double swatch(int n, double* params) {
-        return choose(n, params);
-    }
-static const char *swatch_docstring=
+double swatch(int n, double* params) { return choose(n, params); }
+static const char* swatch_docstring =
     "color swatch(float index, color choice0, color choice1, color choice2, [...])\n"
     "Chooses one of the supplied color choices based on the index (assumed to be in range [0..1]).";
 
@@ -1403,9 +1399,8 @@ static const char* ccurve_docstring =
 
 class GetVar : public ExprFuncSimple {
     struct Data : public ExprFuncNode::Data {
-        typedef void(*func)(double *in, double* out);
-        Data(func fIn,int dim) :f(fIn),dim(dim)
-        {}
+        typedef void (*func)(double* in, double* out);
+        Data(func fIn, int dim) : f(fIn), dim(dim) {}
         func f;
         int dim;
     };
@@ -1430,24 +1425,27 @@ class GetVar : public ExprFuncSimple {
     }
 
     virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const {
-        return new Data(node->type().isFP() ? getTemplatizedOp<Assign,Data::func>(node->type().dim()) : nullptr,node->type().dim());
+        return new Data(node->type().isFP() ? getTemplatizedOp<Assign, Data::func>(node->type().dim()) : nullptr,
+                        node->type().dim());
     }
 
-    template<int d>
-    struct Assign{
-        static void f(double* out,double* in){
-            for(int k=0;k<d;k++) out[k]=in[k];
+    template <int d>
+    struct Assign {
+        static void f(double* out, double* in) {
+            for (int k = 0; k < d; k++) out[k] = in[k];
         }
     };
 
     virtual void eval(ArgHandle args) {
         Data* data = static_cast<Data*>(args.data);
         assert(data);
-        double* out=&args.outFp;
-        //for(int i=0;i<data->dim;i++) std::cerr<<" "<<args.inFp<1>(0)[i];
-        //std::cerr<<std::endl;
-        if(data->f) data->f(out,&args.inFp<1>(0)[0]);
-        else throw std::runtime_error("getVar does not support non FP types right now got type");
+        double* out = &args.outFp;
+        // for(int i=0;i<data->dim;i++) std::cerr<<" "<<args.inFp<1>(0)[i];
+        // std::cerr<<std::endl;
+        if (data->f)
+            data->f(out, &args.inFp<1>(0)[0]);
+        else
+            throw std::runtime_error("getVar does not support non FP types right now got type");
     }
 
   public:
@@ -1475,7 +1473,8 @@ class PrintFuncX : public ExprFuncSimple {
         bool valid = true;
         valid &= node->checkArg(0, ExprType().String().Constant(), envBuilder);
         for (int i = 1; i < nargs; ++i)
-            valid &= (node->checkArg(i, ExprType().FP(1), envBuilder) || node->checkArg(i, ExprType().FP(3), envBuilder));
+            valid &=
+                (node->checkArg(i, ExprType().FP(1), envBuilder) || node->checkArg(i, ExprType().FP(3), envBuilder));
         return ExprType().FP(1).Constant();
     }
 

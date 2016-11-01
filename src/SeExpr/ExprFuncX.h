@@ -89,8 +89,8 @@ class ExprFuncSimple : public ExprFuncX {
         int nargs() const { return _nargs; }
 
         /// Return a vector handle which is easier to assign to
-        template<int d>
-        Vec<double,d,true> outFpHandle(){
+        template <int d>
+        Vec<double, d, true> outFpHandle() {
             return Vec<double, d, true>(&outFp);
         }
 

@@ -21,9 +21,8 @@
 #include <QtGui/QApplication>
 #include "ExprDialog.h"
 
-int main(int argc, char *argv[])
-{
-    QApplication app(argc, argv); 
+int main(int argc, char *argv[]) {
+    QApplication app(argc, argv);
     ExprDialog dialog(0);
     dialog.setWindowTitle("Expression Editor 2");
     dialog.show();
@@ -34,7 +33,7 @@ int main(int argc, char *argv[])
     } else {
         std::string str = "$u + $v";
         dialog.setExpressionString(str);
-        if (dialog.getExpressionString() != str ) {
+        if (dialog.getExpressionString() != str) {
             std::cerr << "test failed: " << dialog.getExpressionString() << " != " << str << std::endl;
             return 1;
         }
@@ -42,4 +41,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
