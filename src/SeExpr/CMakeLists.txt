@@ -100,7 +100,6 @@ FILE(GLOB public_includes "*.h")
 FILE(COPY ${public_includes} DESTINATION ${CMAKE_BINARY_DIR}/include/SeExpr2)
 
 configure_file(ExprConfig.h.in ExprConfig.h)
-FILE(COPY ${CMAKE_CURRENT_BINARY_DIR}/ExprConfig.h DESTINATION ${CMAKE_BINARY_DIR}/include/SeExpr2)
 INSTALL (FILES ${CMAKE_CURRENT_BINARY_DIR}/ExprConfig.h DESTINATION include/SeExpr2)
 
 configure_file(seexpr2.pc.in seexpr2.pc @ONLY)
