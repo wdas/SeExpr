@@ -14,7 +14,7 @@
 # http://www.apache.org/licenses/LICENSE-2.0
 
 foreach(item eval listVar)
-    ADD_EXECUTABLE("${item}" "${item}.cpp")
+    add_executable("${item}" "${item}.cpp")
     target_link_libraries("${item}" ${SEEXPR_LIBRARIES})
     install(TARGETS "${item}" DESTINATION share/SeExpr2/utils)
-endforeach(item)
+endforeach()

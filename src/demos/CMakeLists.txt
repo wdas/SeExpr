@@ -15,22 +15,22 @@
 
 include_directories(${CMAKE_BINARY_DIR}/src/SeExpr)
 
-ADD_EXECUTABLE(asciiGraph2 "asciiGraph.cpp")
+add_executable(asciiGraph2 "asciiGraph.cpp")
 target_link_libraries(asciiGraph2 SeExpr2)
-install(TARGETS asciiGraph2 DESTINATION bin)
+install(TARGETS asciiGraph2 DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-ADD_EXECUTABLE(asciiCalc2 "asciiCalculator.cpp")
+add_executable(asciiCalc2 "asciiCalculator.cpp")
 target_link_libraries(asciiCalc2 SeExpr2)
-install(TARGETS asciiCalc2 DESTINATION bin)
+install(TARGETS asciiCalc2 DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-#todo re-enable
-ADD_SUBDIRECTORY (imageSynth)
-ADD_SUBDIRECTORY (imageEditor)
-#ADD_SUBDIRECTORY (segraph)
-#ADD_SUBDIRECTORY (rman)
+# TODO re-enable
+add_subdirectory(imageSynth)
+add_subdirectory(imageEditor)
+#add_subdirectory(segraph)
+#add_subdirectory(rman)
 
-# if(ENABLE_LLVM_BACKEND)
-  # ADD_EXECUTABLE(llvmtest "llvmtest.cpp")
-  # target_link_libraries(llvmtest ${SEEXPR_LIBRARIES})
-  # install(TARGETS llvmtest DESTINATION bin)
-# endif()
+#if (ENABLE_LLVM_BACKEND)
+#     add_executable(llvmtest "llvmtest.cpp")
+#     target_link_libraries(llvmtest ${SEEXPR_LIBRARIES})
+#     install(TARGETS llvmtest DESTINATION ${CMAKE_INSTALL_BINDIR})
+#endif()

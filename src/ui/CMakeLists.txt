@@ -33,9 +33,7 @@ get_build_info(pyqt4-sip PYQT4_SIP)
 set(CMAKE_INSTALL_PYTHON "${PYTHON_SITE}/SeExpr2" )
 
 # Other package dependencies...
-
 find_package(OpenGL)
-find_package(Qt4 COMPONENTS QtCore QtGui QtOpenGL)
 
 if(QT4_FOUND)
 
@@ -58,7 +56,7 @@ if(QT4_FOUND)
 
     qt4_wrap_cpp(EDITOR_MOC_SRCS ${EDITOR_MOC_HDRS})
 
-    if(DEFINED ANIMLIB_DIR)
+    if (DEFINED ANIMLIB_DIR)
         set(CE_MOC_HDRS CE/CECurveListUI.h CE/CEDragHandlers.h CE/CEGraphCurve.h
             CE/CEGraphKey.h CE/CEGraphSeg.h CE/CEGraphUI.h CE/CEMainUI.h
             CE/CESegEditUI.h CE/CETool.h)
@@ -70,20 +68,20 @@ if(QT4_FOUND)
         qt4_wrap_cpp(CE_MOC_SRCS ${CE_MOC_HDRS})
     endif()
 
-IF(WIN32)
-    add_library(SeExpr2Editor ${EDITOR_CPPS} ${EDITOR_MOC_SRCS}
-                ${CE_CPPS} ${CE_MOC_SRCS}
-                ${editor_parser_cpp})
-    GENERATE_EXPORT_HEADER(SeExpr2Editor
-                           BASE_NAME SeExpr2Editor
-                           EXPORT_MACRO_NAME SeExpr2Editor
-                           EXPORT_FILE_NAME SeExpr2Editor_Export.h
-                           STATIC_DEFINE SeExpr2Editor_BUILT_AS_STATIC )
-ELSE()
-    add_library(SeExpr2Editor SHARED ${EDITOR_CPPS} ${EDITOR_MOC_SRCS}
-                ${CE_CPPS} ${CE_MOC_SRCS}
-                ${editor_parser_cpp})
-ENDIF(WIN32)
+    if (WIN32)
+        add_library(SeExpr2Editor ${EDITOR_CPPS} ${EDITOR_MOC_SRCS}
+                    ${CE_CPPS} ${CE_MOC_SRCS}
+                    ${editor_parser_cpp})
+        generate_export_header(SeExpr2Editor
+                               BASE_NAME SeExpr2Editor
+                               EXPORT_MACRO_NAME SeExpr2Editor
+                               EXPORT_FILE_NAME SeExpr2Editor_Export.h
+                               STATIC_DEFINE SeExpr2Editor_BUILT_AS_STATIC )
+    else()
+        add_library(SeExpr2Editor SHARED ${EDITOR_CPPS} ${EDITOR_MOC_SRCS}
+                    ${CE_CPPS} ${CE_MOC_SRCS}
+                    ${editor_parser_cpp})
+    endif()
 
     include_directories(${QT_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
                         ${CMAKE_CURRENT_SOURCE_DIR}/CE)
@@ -93,31 +91,31 @@ ENDIF(WIN32)
     target_link_libraries(SeExpr2Editor ${QT_QTOPENGL_LIBRARY})
     target_link_libraries(SeExpr2Editor ${GLUT_LIBRARY} ${OPENGL_LIBRARY})
 
-    if(DEFINED ANIMLIB_DIR)
+    if (DEFINED ANIMLIB_DIR)
         target_link_libraries(SeExpr2Editor animlib)
     endif()
 
-    if(DEFINED DERR_DIR)
+    if (DEFINED DERR_DIR)
         target_link_libraries(SeExpr2Editor DErr)
     endif()
 
-    if(DEFINED DMSG_DIR)
+    if (DEFINED DMSG_DIR)
         target_link_libraries(SeExpr2Editor DMsg)
     endif()
 
-    if(DEFINED QDGUI_DIR)
+    if (DEFINED QDGUI_DIR)
         target_link_libraries(SeExpr2Editor qdcolorwidgets)
     endif()
 
-IF(WIN32)
-    target_link_libraries(SeExpr2Editor opengl32)
-ENDIF(WIN32)
+    if (WIN32)
+        target_link_libraries(SeExpr2Editor opengl32)
+    endif()
 
     install(TARGETS SeExpr2Editor DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
     # Setup header files
-    FILE(GLOB public_includes "*.h")
-    FILE(COPY ${public_includes} DESTINATION ${CMAKE_BINARY_DIR}/include/SeExpr2/UI)
+    file(GLOB public_includes "*.h")
+    file(COPY ${public_includes} DESTINATION ${CMAKE_BINARY_DIR}/include/SeExpr2/UI)
 
     # Generate python module expreditor2, using sip
     find_program(SIP_EXEC sip)
@@ -150,5 +148,4 @@ ENDIF(WIN32)
     install(TARGETS expreditor2 DESTINATION ${CMAKE_INSTALL_PYTHON})
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
             DESTINATION ${CMAKE_INSTALL_PYTHON})
-
-endif(QT4_FOUND)
+endif()

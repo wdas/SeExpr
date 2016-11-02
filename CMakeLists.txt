@@ -14,69 +14,73 @@
 # http://www.apache.org/licenses/LICENSE-2.0
 
 ## CMake compatibility issues: don't modify this, please!
-CMAKE_MINIMUM_REQUIRED( VERSION 2.4.6 )
+cmake_minimum_required(VERSION 2.4.6)
 
 ## project name & version
-PROJECT (SeExpr2)
-SET( ${PROJECT_NAME}_MAJOR_VERSION 0 )
-SET( ${PROJECT_NAME}_MINOR_VERSION 1 )
-SET( ${PROJECT_NAME}_PATCH_LEVEL 0 )
+project(SeExpr2)
+set(${PROJECT_NAME}_MAJOR_VERSION 0)
+set(${PROJECT_NAME}_MINOR_VERSION 1)
+set(${PROJECT_NAME}_PATCH_LEVEL 0)
 
-MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
+mark_as_advanced(CMAKE_BACKWARDS_COMPATIBILITY)
+
 ## allow more human readable "if then else" constructs
-SET( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE )
+set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
+
 ## Use verbose make file
-SET ( CMAKE_VERBOSE_MAKEFILE TRUE )
+set(CMAKE_VERBOSE_MAKEFILE true)
 
 ## policies
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
-endif(COMMAND cmake_policy)
+    cmake_policy(SET CMP0005 NEW)
+endif()
 
 # macros
 include(GNUInstallDirs)
 include(src/build/macros.cmake)
 
 # Default installation prefix
-IF(NOT DEFINED FLAVOR)
-    SET(FLAVOR "optimize" CACHE STRING "Build flavor")
-ENDIF()
+if (NOT DEFINED FLAVOR)
+    set(FLAVOR "optimize" CACHE STRING "Build flavor")
+endif()
 
 ## Choose build options
 # Disney specific method of choosing variant
-IF(${FLAVOR} STREQUAL "optimize")
-    SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "type of build" FORCE)
-ENDIF(${FLAVOR} STREQUAL "optimize")
+if (${FLAVOR} STREQUAL "optimize")
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "type of build" FORCE)
+endif()
 
-IF(${FLAVOR} STREQUAL "debug")
-    SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "type of build" FORCE)
-ENDIF(${FLAVOR} STREQUAL "debug")
+if (${FLAVOR} STREQUAL "debug")
+    set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "type of build" FORCE)
+endif()
 
-IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    EXECUTE_PROCESS(
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    execute_process(
         COMMAND sh -c "echo `uname -s`-`uname -r | cut -d- -f1`-`uname -m`"
         OUTPUT_VARIABLE VARIANT_DIRECTORY OUTPUT_STRIP_TRAILING_WHITESPACE)
-    SET(CMAKE_INSTALL_PREFIX
+    set(CMAKE_INSTALL_PREFIX
         "${CMAKE_SOURCE_DIR}/${VARIANT_DIRECTORY}-${FLAVOR}"
         CACHE PATH "Installation prefix" FORCE)
-ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+endif()
 
-MESSAGE(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
-MESSAGE(STATUS "CMAKE_INSTALL_LIBDIR = ${CMAKE_INSTALL_LIBDIR}")
+message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "CMAKE_INSTALL_LIBDIR = ${CMAKE_INSTALL_LIBDIR}")
 
 # Configuration options
 # TODO: find GTEST and boost and python the proper ways
-SET (BOOST_DIR /usr CACHE PATH "where boost is located")
-SET (BOOST_PYTHON_LIBNAME boost_python CACHE STRING "what library name for boost python")
-SET (GTEST_DIR /usr CACHE PATH "Where to find GTEST") # /usr/include/gtest)
-SET (ENABLE_LLVM_BACKEND ON CACHE BOOL "Whether to build with LLVM backend")
-SET (USE_PYTHON ON CACHE BOOL "Whether to compile python libraries")
+set(BOOST_DIR /usr CACHE PATH "where boost is located")
+set(BOOST_PYTHON_LIBNAME boost_python CACHE STRING "what library name for boost python")
+set(GTEST_DIR /usr CACHE PATH "Where to find GTEST") # /usr/include/gtest)
+set(ENABLE_LLVM_BACKEND ON CACHE BOOL "Whether to build with LLVM backend")
+set(USE_PYTHON ON CACHE BOOL "Whether to compile python libraries")
 
+set(LLVM_LIB "")
 if (ENABLE_LLVM_BACKEND)
-    SET (LLVM_DIR /usr/share/llvm/cmake CACHE PATH "Where to search for LLVM i.e. ")
+    set(LLVM_DIR /usr/share/llvm/cmake CACHE PATH "Where to search for LLVM i.e. ")
 
-    FIND_PACKAGE(LLVM CONFIG NAMES LLVM CONFIGS LLVM-Config.cmake)
-    if(LLVM_FOUND)
+    find_package(LLVM CONFIG NAMES LLVM CONFIGS LLVM-Config.cmake)
+    if (LLVM_FOUND)
         set(SEEXPR_ENABLE_LLVM_BACKEND 1)
         message(STATUS "Using LLVM-Config.cmake in: ${LLVM_DIR}")
         find_program(LLVM_CONFIG_EXECUTABLE NAMES llvm-config-3.8 llvm-config)
@@ -104,106 +108,104 @@ if (ENABLE_LLVM_BACKEND)
         message(STATUS "LLVM_LIBRARY_DIR =" ${LLVM_LIBRARY_DIR})
         link_directories(${LLVM_LIBRARY_DIR})
 
-    else(LLVM_FOUND)
+        #todo infinite loop in this?
+        #llvm_map_components_to_libraries(REQ_LLVM_LIBRARIES jit native)
+
+        # construct library name
+        execute_process(
+            COMMAND ${LLVM_CONFIG_EXECUTABLE} --version
+            OUTPUT_VARIABLE LLVM_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+        message(STATUS "LLVM_VERSION = ${LLVM_VERSION}")
+
+        set(LLVM_LIB LLVM)
+        message(STATUS "LLVM_LIB = ${LLVM_LIB}")
+
+        if (LLVM_VERSION VERSION_LESS 3.8.0)
+            set(ENABLE_LLVM_BACKEND false)
+            set(SEEXPR_ENABLE_LLVM_BACKEND false)
+            message(STATUS "Not building with LLVM, version must be >= 3.8.0")
+        endif()
+
+    else()
          set(ENABLE_LLVM_BACKEND off)
          set(SEEXPR_ENABLE_LLVM_BACKEND 0)
-    endif(LLVM_FOUND)
-endif(ENABLE_LLVM_BACKEND)
+    endif()
+endif()
 
 ## Setup platform specific helper defines build variants
-IF(WIN32)
-  include (GenerateExportHeader)
-  ADD_DEFINITIONS (-DSEEXPR_WIN32)
-ELSE(WIN32)
-  ADD_DEFINITIONS (-Wall -Wextra -Wno-unused-parameter)
-  ADD_DEFINITIONS (-pthread)
+if (WIN32)
+    include (GenerateExportHeader)
+    add_definitions(-DSEEXPR_WIN32)
+else()
+    add_definitions(-Wall -Wextra -Wno-unused-parameter)
+    add_definitions(-pthread)
 
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -g -std=c++11 -msse4.1")
-  if(NOT APPLE)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -rdynamic")
-  else()
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-date-time")
-  endif()
-ENDIF(WIN32)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -g -std=c++11 -msse4.1")
+    if (NOT APPLE)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -rdynamic")
+    else()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-date-time")
+    endif()
+endif()
 
 # Set to release if nothing else defined
-IF(NOT CMAKE_BUILD_TYPE)
-  SET(CMAKE_BUILD_TYPE "Release" CACHE STRING
+if (NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING
       "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
       FORCE)
-ENDIF(NOT CMAKE_BUILD_TYPE)
+endif()
 
-IF(DEFINED ANIMLIB_DIR)
-    MESSAGE(STATUS "ANIMLIB_DIR = ${ANIMLIB_DIR}")
-    ADD_DEFINITIONS (-DSEEXPR_USE_ANIMLIB)
-    INCLUDE_DIRECTORIES(${ANIMLIB_DIR}/include)
-    LINK_DIRECTORIES(${ANIMLIB_DIR}/${CMAKE_INSTALL_LIBDIR})
-ENDIF(DEFINED ANIMLIB_DIR)
+find_package(Qt4 COMPONENTS QtCore QtGui QtOpenGL)
+if (QT4_FOUND)
+    include_directories(${QT_INCLUDE_DIR})
+endif()
 
-IF(DEFINED DERR_DIR)
-    MESSAGE(STATUS "DERR_DIR = ${DMSG_DIR}")
-    INCLUDE_DIRECTORIES(${DERR_DIR}/include)
-    LINK_DIRECTORIES(${DERR_DIR}/${CMAKE_INSTALL_LIBDIR})
-ENDIF(DEFINED DERR_DIR)
+if (DEFINED ANIMLIB_DIR)
+    message(STATUS "ANIMLIB_DIR = ${ANIMLIB_DIR}")
+    add_definitions(-DSEEXPR_USE_ANIMLIB)
+    include_directories(${ANIMLIB_DIR}/include)
+    link_directories(${ANIMLIB_DIR}/${CMAKE_INSTALL_LIBDIR})
+endif()
 
-IF(DEFINED DMSG_DIR)
-    MESSAGE(STATUS "DMSG_DIR = ${DMSG_DIR}")
-    INCLUDE_DIRECTORIES(${DMSG_DIR}/include)
-    LINK_DIRECTORIES(${DMSG_DIR}/${CMAKE_INSTALL_LIBDIR})
-ENDIF(DEFINED DMSG_DIR)
+if (DEFINED DERR_DIR)
+    message(STATUS "DERR_DIR = ${DMSG_DIR}")
+    include_directories(${DERR_DIR}/include)
+    link_directories(${DERR_DIR}/${CMAKE_INSTALL_LIBDIR})
+endif()
 
-IF(DEFINED QDGUI_DIR)
-    MESSAGE(STATUS "QDGUI_DIR = ${QDGUI_DIR}")
-    ADD_DEFINITIONS (-DSEEXPR_USE_QDGUI)
-    INCLUDE_DIRECTORIES(${QDGUI_DIR}/include)
-    LINK_DIRECTORIES(${QDGUI_DIR}/${CMAKE_INSTALL_LIBDIR})
-ENDIF(DEFINED QDGUI_DIR)
+if (DEFINED DMSG_DIR)
+    message(STATUS "DMSG_DIR = ${DMSG_DIR}")
+    include_directories(${DMSG_DIR}/include)
+    link_directories(${DMSG_DIR}/${CMAKE_INSTALL_LIBDIR})
+endif()
+
+if (DEFINED QDGUI_DIR)
+    message(STATUS "QDGUI_DIR = ${QDGUI_DIR}")
+    add_definitions(-DSEEXPR_USE_QDGUI)
+    include_directories(${QDGUI_DIR}/include)
+    link_directories(${QDGUI_DIR}/${CMAKE_INSTALL_LIBDIR})
+endif()
 
 ## Install location for html documentation
-SET( SEEXPR_HTML_DOC_PATH "share/doc/SeExpr" )
+set(SEEXPR_HTML_DOC_PATH "share/doc/SeExpr2")
 
 ## Make modules able to see seexpr library
 # Setup environment variable to link seexpr
-SET( SEEXPR_LIBRARIES SeExpr2 )
-SET( SEEXPR_LLVM_LIBRARIES SeExpr2LLVM )
-SET( SEEXPR_EDITOR_LIBRARIES SeExpr2Editor )
+set(SEEXPR_LIBRARIES SeExpr2)
+set(SEEXPR_LLVM_LIBRARIES SeExpr2LLVM)
+set(SEEXPR_EDITOR_LIBRARIES SeExpr2Editor)
 
 # make it so seexpr can be found
-INCLUDE_DIRECTORIES(BEFORE ${CMAKE_BINARY_DIR}/include )
-INCLUDE_DIRECTORIES(BEFORE ${CMAKE_BINARY_DIR}/src/SeExpr )
-INCLUDE_DIRECTORIES(BEFORE ${CMAKE_SOURCE_DIR}/src/SeExpr )
-INCLUDE_DIRECTORIES(BEFORE ${CMAKE_SOURCE_DIR}/src/EditorUI )
-
-
-set(LLVM_LIB "")
-IF(ENABLE_LLVM_BACKEND AND LLVM_FOUND)
-    #todo infinite loop in this?
-    #llvm_map_components_to_libraries(REQ_LLVM_LIBRARIES jit native)
-
-    # construct library name
-    execute_process(
-        COMMAND ${LLVM_CONFIG_EXECUTABLE} --version
-        OUTPUT_VARIABLE LLVM_VERSION
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-    #set(LLVM_LIB "-lLLVM-${LLVM_VERSION}")
-    link_directories(${LLVM_LIBRARY_DIRS})
-    #set(LLVM_LIB ${LLVM_AVAILABLE_LIBS} -lLLVMSupport -lLLVMCodeGen -lLLVMCore) #"-lLLVMCore -lLLVMMCJIT -lLLVMExecutionEngine -lLL")
-    set(LLVM_LIB LLVM)
-    message(STATUS "LLVM library = " ${LLVM_LIB})
-    message(STATUS "LLVM version = " ${LLVM_VERSION})
-    if(LLVM_VERSION VERSION_LESS 3.8.0)
-        set(ENABLE_LLVM_BACKEND off)
-        set(SEEXPR_ENABLE_LLVM_BACKEND 0)
-        message(STATUS "Not building with LLVM, version must be >= 3.8.0")
-    endif(LLVM_VERSION VERSION_LESS 3.8.0)
-ENDIF(ENABLE_LLVM_BACKEND AND LLVM_FOUND)
+include_directories(BEFORE ${CMAKE_BINARY_DIR}/include)
+include_directories(BEFORE ${CMAKE_BINARY_DIR}/src/SeExpr)
+include_directories(BEFORE ${CMAKE_SOURCE_DIR}/src/SeExpr)
+include_directories(BEFORE ${CMAKE_SOURCE_DIR}/src/EditorUI)
 
 ## Traverse subdirectories
-ADD_SUBDIRECTORY (src/SeExpr)
-ADD_SUBDIRECTORY (src/ui)
-ADD_SUBDIRECTORY (src/tests)
-ADD_SUBDIRECTORY (src/py)
-ADD_SUBDIRECTORY (src/utils)
-ADD_SUBDIRECTORY (src/demos)
-ADD_SUBDIRECTORY (src/doc)
+add_subdirectory(src/SeExpr)
+add_subdirectory(src/ui)
+add_subdirectory(src/tests)
+add_subdirectory(src/py)
+add_subdirectory(src/utils)
+add_subdirectory(src/demos)
+add_subdirectory(src/doc)
