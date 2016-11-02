@@ -92,7 +92,7 @@ ENDIF(WIN32)
     find_program(SIP_EXEC sip)
     set(SIP_QT_TAG -t Qt_4_8_0)
 
-    set(CMAKE_CXX_FLAGS "-std=c++0x")
+    set(CMAKE_CXX_FLAGS "-std=c++11")
     include_directories(${SIP_INCLUDE_DIR} ${PYQT4_SIP}
                         ${PYTHON_INCLUDE_DIR} ${QT_INCLUDE_DIR}/QtCore
                         ${QT_INCLUDE_DIR}/QtGui)
