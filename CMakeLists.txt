@@ -15,16 +15,57 @@
 
 ## CMake compatibility issues: don't modify this, please!
 CMAKE_MINIMUM_REQUIRED( VERSION 2.4.6 )
+
+## project name & version
 PROJECT (SeExpr2)
+SET( ${PROJECT_NAME}_MAJOR_VERSION 0 )
+SET( ${PROJECT_NAME}_MINOR_VERSION 1 )
+SET( ${PROJECT_NAME}_PATCH_LEVEL 0 )
+
 MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
 ## allow more human readable "if then else" constructs
 SET( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE )
 ## Use verbose make file
 SET ( CMAKE_VERBOSE_MAKEFILE TRUE )
 
+## policies
+if(COMMAND cmake_policy)
+    cmake_policy(SET CMP0003 NEW)
+endif(COMMAND cmake_policy)
+
+# macros
+include(GNUInstallDirs)
+include(src/build/macros.cmake)
+
+# Default installation prefix
+IF(NOT DEFINED FLAVOR)
+    SET(FLAVOR "optimize" CACHE STRING "Build flavor")
+ENDIF()
+
+## Choose build options
+# Disney specific method of choosing variant
+IF(${FLAVOR} STREQUAL "optimize")
+    SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "type of build" FORCE)
+ENDIF(${FLAVOR} STREQUAL "optimize")
+
+IF(${FLAVOR} STREQUAL "debug")
+    SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "type of build" FORCE)
+ENDIF(${FLAVOR} STREQUAL "debug")
+
+IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    EXECUTE_PROCESS(
+        COMMAND sh -c "echo `uname -s`-`uname -r | cut -d- -f1`-`uname -m`"
+        OUTPUT_VARIABLE VARIANT_DIRECTORY OUTPUT_STRIP_TRAILING_WHITESPACE)
+    SET(CMAKE_INSTALL_PREFIX
+        "${CMAKE_SOURCE_DIR}/${VARIANT_DIRECTORY}-${FLAVOR}"
+        CACHE PATH "Installation prefix" FORCE)
+ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+
+MESSAGE(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
+MESSAGE(STATUS "CMAKE_INSTALL_LIBDIR = ${CMAKE_INSTALL_LIBDIR}")
+
 # Configuration options
 # TODO: find GTEST and boost and python the proper ways
-SET (LIBDIR ${CMAKE_INSTALL_LIBDIR} CACHE PATH "lib or lib64") # defaults to lib but if it s lib64 ok
 SET (BOOST_DIR /usr CACHE PATH "where boost is located")
 SET (BOOST_PYTHON_LIBNAME boost_python CACHE STRING "what library name for boost python")
 SET (GTEST_DIR /usr CACHE PATH "Where to find GTEST") # /usr/include/gtest)
@@ -48,43 +89,26 @@ if (ENABLE_LLVM_BACKEND)
         include(LLVM-Config)
         include(HandleLLVMOptions)
 
-        add_definitions( ${LLVM_DEFINITIONS} )
         message(STATUS "LLVM_DEFINITIONS =" ${LLVM_DEFINITIONS})
+        add_definitions(${LLVM_DEFINITIONS})
 
         execute_process(
-            COMMAND ${LLVM_CONFIG_EXECUTABLE} --ldflags
-            OUTPUT_VARIABLE LLVM_LDFLAGS
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-        message(STATUS "LLVM_LDFLAGS = " ${LLVM_LDFLAGS})
+            COMMAND ${LLVM_CONFIG_EXECUTABLE} --includedir
+            OUTPUT_VARIABLE LLVM_INCLUDE_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+        message(STATUS "LLVM_INCLUDE_DIR =" ${LLVM_INCLUDE_DIR})
+        include_directories(${LLVM_INCLUDE_DIR})
 
-        message(STATUS "LLVM_INCLUDE_DIRS=" ${LLVM_INCLUDE_DIRS})
-        include_directories(${LLVM_INCLUDE_DIRS})
-
-        message(STATUS "LLVM_LIBRARY_DIR=" ${LLVM_LIBRARY_DIRS})
+        execute_process(
+            COMMAND ${LLVM_CONFIG_EXECUTABLE} --libdir
+            OUTPUT_VARIABLE LLVM_LIBRARY_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+        message(STATUS "LLVM_LIBRARY_DIR =" ${LLVM_LIBRARY_DIR})
         link_directories(${LLVM_LIBRARY_DIR})
 
-        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${LLVM_LDFLAGS}")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LLVM_LDFLAGS}")
     else(LLVM_FOUND)
          set(ENABLE_LLVM_BACKEND off)
          set(SEEXPR_ENABLE_LLVM_BACKEND 0)
     endif(LLVM_FOUND)
 endif(ENABLE_LLVM_BACKEND)
-
-## project name & version
-PROJECT( SeExpr )
-SET( ${PROJECT_NAME}_MAJOR_VERSION 0 )
-SET( ${PROJECT_NAME}_MINOR_VERSION 1 )
-SET( ${PROJECT_NAME}_PATCH_LEVEL 0 )
-
-## policies
-if(COMMAND cmake_policy)
-      cmake_policy(SET CMP0003 NEW)
-    endif(COMMAND cmake_policy)
-
-# macros
-include(src/build/macros.cmake)
 
 ## Setup platform specific helper defines build variants
 IF(WIN32)
@@ -101,15 +125,6 @@ ELSE(WIN32)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-date-time")
   endif()
 ENDIF(WIN32)
-
-## Choose build options
-# Disney specific method of choosing variant
-IF("$ENV{FLAVOR}" STREQUAL "optimize")
-    SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "type of build" FORCE)
-ENDIF("$ENV{FLAVOR}" STREQUAL "optimize")
-IF("$ENV{FLAVOR}" STREQUAL "debug")
-    SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "type of build" FORCE)
-ENDIF("$ENV{FLAVOR}" STREQUAL "debug")
 
 # Set to release if nothing else defined
 IF(NOT CMAKE_BUILD_TYPE)
@@ -144,20 +159,6 @@ IF(DEFINED QDGUI_DIR)
     LINK_DIRECTORIES(${QDGUI_DIR}/${CMAKE_INSTALL_LIBDIR})
 ENDIF(DEFINED QDGUI_DIR)
 
-IF(CMAKE_BUILD_TYPE STREQUAL "Release")
-   SET(FLAVORDIR "optimize")
-ELSE(CMAKE_BUILD_TYPE STREQUAL "Release")
-   SET(FLAVORDIR "debug")
-ENDIF(CMAKE_BUILD_TYPE STREQUAL "Release")
-
-
-## Set install location
-IF (NOT DEFINED CMAKE_INSTALL_PREFIX)
-   EXECUTE_PROCESS(COMMAND sh -c "echo `uname`-`uname -r | cut -d'-' -f1`-`uname -m`" OUTPUT_VARIABLE VARIANT_DIRECTORY OUTPUT_STRIP_TRAILING_WHITESPACE)
-   #EXECUTE_PROCESS(COMMAND uname OUTPUT_VARIABLE VARIANT_DIRECTORY OUTPUT_STRIP_TRAILING_WHITESPACE)
-   SET(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/${VARIANT_DIRECTORY}-${FLAVORDIR}")
-ENDIF(NOT DEFINED CMAKE_INSTALL_PREFIX)
-
 ## Install location for html documentation
 SET( SEEXPR_HTML_DOC_PATH "share/doc/SeExpr" )
 
@@ -173,10 +174,6 @@ INCLUDE_DIRECTORIES(BEFORE ${CMAKE_BINARY_DIR}/src/SeExpr )
 INCLUDE_DIRECTORIES(BEFORE ${CMAKE_SOURCE_DIR}/src/SeExpr )
 INCLUDE_DIRECTORIES(BEFORE ${CMAKE_SOURCE_DIR}/src/EditorUI )
 
-# Allowing to use lib64
-IF (NOT DEFINED CMAKE_INSTALL_LIBDIR)
-    SET(CMAKE_INSTALL_LIBDIR "lib")
-ENDIF()
 
 set(LLVM_LIB "")
 IF(ENABLE_LLVM_BACKEND AND LLVM_FOUND)
@@ -193,15 +190,14 @@ IF(ENABLE_LLVM_BACKEND AND LLVM_FOUND)
     link_directories(${LLVM_LIBRARY_DIRS})
     #set(LLVM_LIB ${LLVM_AVAILABLE_LIBS} -lLLVMSupport -lLLVMCodeGen -lLLVMCore) #"-lLLVMCore -lLLVMMCJIT -lLLVMExecutionEngine -lLL")
     set(LLVM_LIB LLVM)
-    message(STATUS "LLVM library " ${LLVM_LIB})
-    message(STATUS "LLVM version " ${LLVM_VERSION})
+    message(STATUS "LLVM library = " ${LLVM_LIB})
+    message(STATUS "LLVM version = " ${LLVM_VERSION})
     if(LLVM_VERSION VERSION_LESS 3.8.0)
         set(ENABLE_LLVM_BACKEND off)
         set(SEEXPR_ENABLE_LLVM_BACKEND 0)
         message(STATUS "Not building with LLVM, version must be >= 3.8.0")
     endif(LLVM_VERSION VERSION_LESS 3.8.0)
 ENDIF(ENABLE_LLVM_BACKEND AND LLVM_FOUND)
-
 
 ## Traverse subdirectories
 ADD_SUBDIRECTORY (src/SeExpr)
