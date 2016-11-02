@@ -58,25 +58,56 @@ if(QT4_FOUND)
 
     qt4_wrap_cpp(EDITOR_MOC_SRCS ${EDITOR_MOC_HDRS})
 
-    add_library(SeExpr2Editor SHARED ${EDITOR_CPPS} ${EDITOR_MOC_SRCS}
-                ${editor_parser_cpp})
+    if(DEFINED ANIMLIB_DIR)
+        set(CE_MOC_HDRS CE/CECurveListUI.h CE/CEDragHandlers.h CE/CEGraphCurve.h
+            CE/CEGraphKey.h CE/CEGraphSeg.h CE/CEGraphUI.h CE/CEMainUI.h
+            CE/CESegEditUI.h CE/CETool.h)
+
+        set(CE_CPPS CE/CECurveListUI.cpp CE/CEDragHandlers.cpp CE/CEGraphCurve.cpp
+            CE/CEGraphKey.cpp CE/CEGraphSeg.cpp CE/CEGraphUI.cpp CE/CEMainUI.cpp
+            CE/CESegEditUI.cpp CE/CETool.cpp)
+
+        qt4_wrap_cpp(CE_MOC_SRCS ${CE_MOC_HDRS})
+    endif()
 
 IF(WIN32)
     add_library(SeExpr2Editor ${EDITOR_CPPS} ${EDITOR_MOC_SRCS}
+                ${CE_CPPS} ${CE_MOC_SRCS}
                 ${editor_parser_cpp})
     GENERATE_EXPORT_HEADER(SeExpr2Editor
                            BASE_NAME SeExpr2Editor
                            EXPORT_MACRO_NAME SeExpr2Editor
                            EXPORT_FILE_NAME SeExpr2Editor_Export.h
                            STATIC_DEFINE SeExpr2Editor_BUILT_AS_STATIC )
+ELSE()
+    add_library(SeExpr2Editor SHARED ${EDITOR_CPPS} ${EDITOR_MOC_SRCS}
+                ${CE_CPPS} ${CE_MOC_SRCS}
+                ${editor_parser_cpp})
 ENDIF(WIN32)
 
     include_directories(${QT_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
                         ${CMAKE_CURRENT_SOURCE_DIR}/CE)
+    target_link_libraries(SeExpr2Editor SeExpr2)
     target_link_libraries(SeExpr2Editor ${QT_QTCORE_LIBRARY})
     target_link_libraries(SeExpr2Editor ${QT_QTGUI_LIBRARY})
     target_link_libraries(SeExpr2Editor ${QT_QTOPENGL_LIBRARY})
     target_link_libraries(SeExpr2Editor ${GLUT_LIBRARY} ${OPENGL_LIBRARY})
+
+    if(DEFINED ANIMLIB_DIR)
+        target_link_libraries(SeExpr2Editor animlib)
+    endif()
+
+    if(DEFINED DERR_DIR)
+        target_link_libraries(SeExpr2Editor DErr)
+    endif()
+
+    if(DEFINED DMSG_DIR)
+        target_link_libraries(SeExpr2Editor DMsg)
+    endif()
+
+    if(DEFINED QDGUI_DIR)
+        target_link_libraries(SeExpr2Editor qdcolorwidgets)
+    endif()
 
 IF(WIN32)
     target_link_libraries(SeExpr2Editor opengl32)

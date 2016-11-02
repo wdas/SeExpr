@@ -22,22 +22,18 @@ link_directories(${GTEST_DIR}/${CMAKE_INSTALL_LIBDIR})
 # Uncomment below to print performance stats
 # add_definitions(-DSEEXPR_PERFORMANCE)
 
-if(DEFINED ENV{RP_libpng}) # use Disney libpng if available
-    set(PNG_PATH $ENV{RP_libpng})
-    MESSAGE("-- Found PNG: " ${PNG_PATH})
-    include_directories(${PNG_PATH}/include)
-    find_library(PNG_LIBRARIES png PATHS ${PNG_PATH}/${CMAKE_INSTALL_LIBDIR}
+if(DEFINED PNG_DIR)
+    MESSAGE(STATUS "PNG_DIR = ${PNG_DIR}")
+    include_directories(${PNG_DIR}/include)
+    find_library(PNG_LIBRARIES png PATHS ${PNG_DIR}/${CMAKE_INSTALL_LIBDIR}
                  NO_DEFAULT_PATH)
-    find_library(PNG_LIBRARIES png) # default if no other lib found
     set(PNG_FOUND 1)
-else(DEFINED ENV{RP_libpng}) # use local libpng
-    find_package(PNG)
-    if(PNG_FOUND)
-        MESSAGE("-- Found PNG: " ${PNG_INCLUDE_DIR})
-        include_directories(SYSTEM ${PNG_INCLUDE_DIR})
-        include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-    endif(PNG_FOUND)
-endif(DEFINED ENV{RP_libpng})
+endif(DEFINED PNG_DIR)
+
+if(PNG_FOUND)
+    include_directories(SYSTEM ${PNG_INCLUDE_DIR})
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+endif(PNG_FOUND)
 
 if(PNG_FOUND)
     MESSAGE("-- Found PNG library: " ${PNG_LIBRARIES})
