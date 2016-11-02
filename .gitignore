@@ -7,3 +7,4 @@
 *~
 CMakeCache.txt
 src/SeExpr/parser
+src/SeExprEditor/generated
