@@ -1,6 +1,6 @@
 -include Makefile.config
 
-# Commands
+# External commands
 CMAKE ?= cmake
 CLANG_FORMAT ?= clang-format
 FIND ?= find
@@ -8,10 +8,11 @@ MKDIR ?= mkdir -p
 PYTHON ?= python
 RM_R ?= rm -fr
 
-# Paths and flags
+## Path and build flags
 FLAVOR ?= optimize
-prefix ?= $(shell pf-makevar --absolute root)
-libdir ?= $(shell pf-makevar lib)
+#prefix ?= /usr/local
+#libdir ?= lib
+
 ## Temporary staging directory
 # DESTDIR =
 ## Specified by `git make-pkg` when building .pkg files
@@ -23,6 +24,9 @@ endif
 ifdef libdir
     CMAKE_ARGS += -DCMAKE_INSTALL_LIBDIR=$(libdir)
 endif
+ifdef FLAVOR
+    CMAKE_ARGS += -DFLAVOR=$(FLAVOR)
+endif
 
 export CXX
 export DESTDIR
@@ -30,8 +34,9 @@ export prefix
 
 all:
 	$(MKDIR) build/$(FLAVOR)
-	cd build/${FLAVOR} && $(CMAKE) $(CMAKE_ARGS) $(EXTRA_CMAKE_ARGS) ../../
+	cd build/$(FLAVOR) && $(CMAKE) $(CMAKE_ARGS) $(EXTRA_CMAKE_ARGS) ../..
 	$(MAKE) -C build/$(FLAVOR) all
+
 clean:
 	$(RM_R) build/$(FLAVOR) Linux-*
 
