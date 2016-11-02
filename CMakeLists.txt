@@ -38,7 +38,7 @@ if (ENABLE_LLVM_BACKEND)
     if(LLVM_FOUND)
         set(SEEXPR_ENABLE_LLVM_BACKEND 1)
         message(STATUS "Using LLVM-Config.cmake in: ${LLVM_DIR}")
-        find_program(LLVM_CONFIG_EXECUTABLE NAMES llvm-config)
+        find_program(LLVM_CONFIG_EXECUTABLE NAMES llvm-config-3.8 llvm-config)
 
         # Uncomment to use clang++
         #set(CMAKE_CXX_COMPILER clang++)
