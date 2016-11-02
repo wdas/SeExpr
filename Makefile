@@ -7,6 +7,7 @@ FIND ?= find
 MKDIR ?= mkdir -p
 PYTHON ?= python
 RM_R ?= rm -fr
+XARGS ?= xargs
 
 ## Path and build flags
 FLAVOR ?= optimize
@@ -47,8 +48,8 @@ test: install
 	$(PYTHON) src/tests/imageTestsReportNew.py runall
 
 format:
-	$(FIND) $(CURDIR)/src -name '*.cpp' | xargs $(CLANG_FORMAT) -i
-	$(FIND) $(CURDIR)/src -name '*.h' | xargs $(CLANG_FORMAT) -i
+	$(FIND) $(CURDIR)/src -name '*.cpp' | $(XARGS) $(CLANG_FORMAT) -i
+	$(FIND) $(CURDIR)/src -name '*.h' | $(XARGS) $(CLANG_FORMAT) -i
 
 basictest: install
 	$(prefix)/share/test/SeExpr2/testmain2 -- --gtest_filter="BasicTests.*"
