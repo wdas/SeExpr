@@ -13,6 +13,7 @@ ifeq ($(uname_S),Linux)
 
     ifdef RP_boost_disney
         EXTRA_CMAKE_ARGS += -DBOOST_DIR=$(RP_boost_disney)
+        EXTRA_CMAKE_ARGS += -DBOOST_INCLUDE_DIR=$(RP_boost_disney)/include/boost-disney
     endif
 
     ifdef RP_derr

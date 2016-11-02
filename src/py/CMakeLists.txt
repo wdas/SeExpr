@@ -44,9 +44,19 @@ message(${PYTHON_INCLUDE_DIR})
 SET(PYTHON_DEST "${CMAKE_INSTALL_LIBDIR}/python${PYTHON_VERSION}/site-packages" CACHED)
 message(STATUS "PYTHON_DEST = ${PYTHON_DEST}")
 
-include_directories(SYSTEM ${BOOST_DIR}/include/boost-disney)
+IF(NOT DEFINED BOOST_INCLUDE_DIR)
+    SET(BOOST_INCLUDE_DIR ${BOOST_DIR}/include)
+ENDIF(NOT DEFINED BOOST_INCLUDE_DIR)
+include_directories(SYSTEM ${BOOST_INCLUDE_DIR})
+
+IF(NOT DEFINED BOOST_LIB_DIR)
+    SET(BOOST_LIB_DIR ${BOOST_DIR}/${CMAKE_INSTALL_LIBDIR})
+ENDIF(NOT DEFINED BOOST_LIB_DIR)
+link_directories(${BOOST_LIB_DIR})
+
 include_directories(${PYTHON_INCLUDE_DIR})
-link_directories(${BOOST_DIR}/${LIBDIR})
+link_directories(${PYTHON_LIB_DIRS})
+
 include_directories(../SeExpr/parser)
 add_library(core SHARED SeExprPy.cpp ../SeExpr/parser/SeExprParse.cpp ../SeExpr/parser/SeExprLex.cpp)
 
@@ -57,10 +67,9 @@ else()
 endif()
 target_link_libraries(core ${BOOST_PYTHON_LIBNAME})
 
-#target_link_libraries(core python${PYTHON_VERSION})
 set_target_properties(core PROPERTIES PREFIX "")
 SET(PYTHON_DEST "${CMAKE_INSTALL_LIBDIR}/python${PYTHON_VERSION}/site-packages/SeExprPy" )
-#INSTALL (FESTINATION include)
+
 INSTALL (TARGETS core DESTINATION ${PYTHON_DEST})
 INSTALL (FILES utils.py DESTINATION ${PYTHON_DEST})
 INSTALL (FILES __init__.py DESTINATION ${PYTHON_DEST})
