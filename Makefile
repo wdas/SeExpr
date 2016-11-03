@@ -44,14 +44,15 @@ clean:
 install: all
 	$(MAKE) -C build/$(FLAVOR) install
 
-test: install
-	$(PYTHON) src/tests/imageTestsReportNew.py runall
-
 format:
 	$(FIND) $(CURDIR)/src -name '*.cpp' | $(XARGS) $(CLANG_FORMAT) -i
 	$(FIND) $(CURDIR)/src -name '*.h' | $(XARGS) $(CLANG_FORMAT) -i
 
-basictest: install
-	$(prefix)/share/test/SeExpr2/testmain2 -- --gtest_filter="BasicTests.*"
+test: install
+	$(MAKE) -C build/$(FLAVOR) test
+
+# TODO: run this via cmake
+imagetest: install
+	$(PYTHON) src/tests/imageTestsReportNew.py runall
 
 precommit: format

@@ -22,6 +22,8 @@ set(${PROJECT_NAME}_MAJOR_VERSION 0)
 set(${PROJECT_NAME}_MINOR_VERSION 1)
 set(${PROJECT_NAME}_PATCH_LEVEL 0)
 
+enable_testing()
+
 mark_as_advanced(CMAKE_BACKWARDS_COMPATIBILITY)
 
 ## allow more human readable "if then else" constructs
