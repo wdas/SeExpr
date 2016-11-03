@@ -15,13 +15,12 @@
 # http://www.apache.org/licenses/LICENSE-2.0
 
 # Set application root dir for use inside the source code.
-cmake_policy(SET CMP0005 NEW)
 add_definitions(-DIMAGE_EDITOR_ROOT="${CMAKE_INSTALL_PREFIX}")
 
-find_package(Qt4 COMPONENTS QtCore QtGui) # find and setup Qt4 for this project
+find_package(Qt4 COMPONENTS QtCore QtGui)
 find_package(PNG)
 
-if(QT4_FOUND AND PNG_FOUND)
+if (QT4_FOUND AND PNG_FOUND)
     set(imageEditor_MOC_HDRS ImageEditorDialog.h)
     set(imageEditor_CPPS imageEditor.cpp)
     qt4_wrap_cpp(imageEditor_MOC_SRCS ${imageEditor_MOC_HDRS})
@@ -34,12 +33,10 @@ if(QT4_FOUND AND PNG_FOUND)
     target_link_libraries(imageEditor2 ${SEEXPR_LIBRARIES})
     target_link_libraries(imageEditor2 ${SEEXPR_EDITOR_LIBRARIES})
 
-    INCLUDE_DIRECTORIES(SYSTEM ${PNG_INCLUDE_DIR})
-    TARGET_LINK_LIBRARIES(imageEditor2 ${PNG_LIBRARIES})
-    install(TARGETS imageEditor2 DESTINATION bin)
+    include_directories(SYSTEM ${PNG_INCLUDE_DIR})
+    target_link_libraries(imageEditor2 ${PNG_LIBRARIES})
+    install(TARGETS imageEditor2 DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
 
-endif(QT4_FOUND AND PNG_FOUND)
-
-INSTALL( FILES fbm.se noisecolor1.se noisecolor2.se noise.se raytrace.se sinc.se
-         DESTINATION share/SeExpr2/expressions/ )
-
+install(FILES fbm.se noisecolor1.se noisecolor2.se noise.se raytrace.se sinc.se
+        DESTINATION share/SeExpr2/expressions)

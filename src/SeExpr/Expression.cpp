@@ -45,7 +45,7 @@ bool Expression::debugging = getenv("SE_EXPR_DEBUG") != 0;
 // And the environment variables SE_EXPR_DEBUG
 static Expression::EvaluationStrategy chooseDefaultEvaluationStrategy() {
     if (Expression::debugging) {
-        std::cerr << "SeExpr2 Debug Mode Enabled " << __VERSION__ << " built " << __DATE__ << " " << __TIME__
+        std::cerr << "SeExpr2 Debug Mode Enabled " << __VERSION__
                   << std::endl;
     }
 #ifdef SEEXPR_ENABLE_LLVM
