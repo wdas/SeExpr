@@ -21,8 +21,7 @@
 #ifndef CESegEditUI_h
 #define CESegEditUI_h
 
-
-//qt3 #include <qhbox.h>
+// qt3 #include <qhbox.h>
 #include <QtGui/QWidget>
 #include <QtGui/QTextEdit>
 #include <animlib/AnimKeyframe.h>
@@ -33,19 +32,17 @@ class QLineEdit;
 class QGridLayout;
 class QCheckBox;
 
-namespace animlib{
+namespace animlib {
 class AnimCurve;
 }
 
-class MyTextEdit:public QTextEdit
-{
+class MyTextEdit : public QTextEdit {
     Q_OBJECT;
-
 
     bool editing;
     QString savedText;
 
-public:
+  public:
     MyTextEdit(QWidget* parent);
 
     virtual void keyPressEvent(QKeyEvent* e);
@@ -55,10 +52,7 @@ public:
     void finishEdit();
 signals:
     void editingFinished();
-
-
 };
-
 
 //****************************************************************************
 /**
@@ -71,19 +65,19 @@ signals:
  *
  * @version <B>1.0 brentb 11/20/2001:</B> Initial version of class CESegEditUI.
  *
- */  
+ */
 
-class CESegEditUI : public QWidget
-{   
+class CESegEditUI : public QWidget {
     Q_OBJECT
 
-public:
+  public:
     /// Constructor
     CESegEditUI(QWidget* parent, CETool* tool);
     /// Destructor
     virtual ~CESegEditUI();
 
-private slots:
+  private
+slots:
     /// Notification methods
     void invalidateCurve(int index);
     void invalidate();
@@ -91,44 +85,44 @@ private slots:
     void handleInfinityChanged();
     void weightedChanged(int val);
     void lockedChanged(int val);
-    //void handle
-    //void handleFrameChanged();
-    //void handleValueChanged();
-    //void handleTypeChanged();
-    //void handleParamChanged();
+    // void handle
+    // void handleFrameChanged();
+    // void handleValueChanged();
+    // void handleTypeChanged();
+    // void handleParamChanged();
 
-private:
+  private:
     /// No definition by design, so accidental copying is prevented.
-    CESegEditUI(const CESegEditUI&);     
+    CESegEditUI(const CESegEditUI&);
     /// No definition by design, so accidental assignment is prevented.
-    CESegEditUI& operator=(const CESegEditUI&);  
-    
+    CESegEditUI& operator=(const CESegEditUI&);
+
     /// QWidget override
-    virtual void paintEvent (QPaintEvent* event); 
+    virtual void paintEvent(QPaintEvent* event);
 
     /// Update state from tool/curve data
     void doUpdate();
     void disableControls();
     void enableControls();
 
-    MyTextEdit* addEdit(QGridLayout* layout,int row,int col,const QString& label);
-    QComboBox* addCombo(QGridLayout* grid,int row,int col,const QString& label);
-    QComboBox* addComboInfinity(QGridLayout* grid,int row,int col,const QString& label);
-    void enableTangType(QComboBox* combo,animlib::AnimKeyframe::tangentType type,bool eanble);
-    void enableInfinityType(QComboBox* combo,animlib::AnimCurve::infinityType type);
+    MyTextEdit* addEdit(QGridLayout* layout, int row, int col, const QString& label);
+    QComboBox* addCombo(QGridLayout* grid, int row, int col, const QString& label);
+    QComboBox* addComboInfinity(QGridLayout* grid, int row, int col, const QString& label);
+    void enableTangType(QComboBox* combo, animlib::AnimKeyframe::tangentType type, bool eanble);
+    void enableInfinityType(QComboBox* combo, animlib::AnimCurve::infinityType type);
 
     CETool* _tool;
     QCheckBox* _weighted;
-    QComboBox *_preInfinity,*_postInfinity;
-    MyTextEdit *_frame;
-    MyTextEdit *_value;
-    MyTextEdit *_inAngle,*_outAngle;
-    MyTextEdit *_inWeight,*_outWeight;
-    QComboBox *_inType,*_outType;
-    QCheckBox *_locked;
-    //QComboBox* _type;
-    //QLineEdit* _typeEntry;
-    //QLineEdit** _params;
+    QComboBox* _preInfinity, *_postInfinity;
+    MyTextEdit* _frame;
+    MyTextEdit* _value;
+    MyTextEdit* _inAngle, *_outAngle;
+    MyTextEdit* _inWeight, *_outWeight;
+    QComboBox* _inType, *_outType;
+    QCheckBox* _locked;
+    // QComboBox* _type;
+    // QLineEdit* _typeEntry;
+    // QLineEdit** _params;
     bool _valid;
     bool _updating;
     int _curveIndex;
@@ -137,4 +131,4 @@ private:
     int _numParams;
 };
 
-#endif //CESegEditUI_h
+#endif  // CESegEditUI_h

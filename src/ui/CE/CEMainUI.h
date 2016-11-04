@@ -22,7 +22,7 @@
 #define CEMainUI_h
 
 // Base Class Includes
-//qt3 #include <qvbox.h>
+// qt3 #include <qvbox.h>
 #include <QtGui/QWidget>
 
 class QLabel;
@@ -42,29 +42,26 @@ class CESegEditUI;
  *
  * @version <B>1.0 brentb 11/20/2001:</B> Initial version of class CEMainUI.
  *
- */  
+ */
 
-class CEMainUI : public QWidget
-{
-public:
-
+class CEMainUI : public QWidget {
+  public:
     /// Constructor
     CEMainUI(QWidget* parent, CETool* tool);
     /// Destructor
     virtual ~CEMainUI();
 
-protected:
-
+  protected:
     /// No definition by design, so accidental copying is prevented.
-    CEMainUI ( const CEMainUI& );     
+    CEMainUI(const CEMainUI&);
     /// No definition by design, so accidental assignment is prevented.
-    CEMainUI& operator=( const CEMainUI& );  
-    
-private:
-    CETool*        _tool;
-    CEGraphUI*     _graphUI;
+    CEMainUI& operator=(const CEMainUI&);
+
+  private:
+    CETool* _tool;
+    CEGraphUI* _graphUI;
     CECurveListUI* _curveListUI;
-    CESegEditUI*   _segEditUI;
+    CESegEditUI* _segEditUI;
 };
 
-#endif //CEMainUI_h
+#endif  // CEMainUI_h

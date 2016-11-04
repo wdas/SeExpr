@@ -20,11 +20,11 @@
 #include <vector>
 #include <map>
 #include <cassert>
+#include <memory>
 
 #include "ExprType.h"
 #include "ExprLLVM.h"
 #include <iostream>
-
 
 namespace SeExpr2 {
 class ExprVarRef;
@@ -39,6 +39,7 @@ class ExprLocalVar {
     ExprType _type;
     ExprLocalVar* _phi;
     mutable LLVM_VALUE _varPtr;
+
   public:
     ExprLocalVar(const ExprType& type) : _type(type), _phi(0), _varPtr(nullptr) {}
 
@@ -52,14 +53,13 @@ class ExprLocalVar {
     virtual void setPhi(ExprLocalVar* phi) { _phi = phi; }
 
     //! LLVM value that has been allocated
-    virtual LLVM_VALUE codegen(LLVM_BUILDER,const std::string& name,LLVM_VALUE referenceType) LLVM_BODY;
+    virtual LLVM_VALUE codegen(LLVM_BUILDER, const std::string& name, LLVM_VALUE referenceType) LLVM_BODY;
 
     //! LLVM value that has been pre-done
-    virtual LLVM_VALUE varPtr() {return _varPtr;}
+    virtual LLVM_VALUE varPtr() { return _varPtr; }
 
     //! Allocates variable for interpreter
     int buildInterpreter(Interpreter* interpreter) const;
-
 };
 
 //! ExprLocalVar join (merge) references. Remembers which variables are possible assigners to this
@@ -69,18 +69,16 @@ class ExprLocalVarPhi : public ExprLocalVar {
     ExprLocalVarPhi(ExprType condLife, ExprLocalVar* thenVar, ExprLocalVar* elseVar)
         : ExprLocalVar(ExprType()), _thenVar(thenVar), _elseVar(elseVar) {
         // find the compatible common-denominator lifetime
-        ExprType firstType=_thenVar->type(),secondType=_elseVar->type();
-        if(ExprType::valuesCompatible(_thenVar->type(),_elseVar->type())){
-            _type=((firstType.isFP(1) ? secondType : firstType).setLifetime(firstType, secondType));
+        ExprType firstType = _thenVar->type(), secondType = _elseVar->type();
+        if (ExprType::valuesCompatible(_thenVar->type(), _elseVar->type())) {
+            _type = ((firstType.isFP(1) ? secondType : firstType).setLifetime(firstType, secondType));
         }
         // lifetime should be the minimum (error=0,varying=1,uniform=2,constant=3).
         // i.e. you can only guarantee something is constant if the condition, ifvar, and else var are the same
-        _type.setLifetime(firstType,secondType,condLife);
+        _type.setLifetime(firstType, secondType, condLife);
     }
 
-    bool valid() const{
-        return !_type.isError();
-    }
+    bool valid() const { return !_type.isError(); }
 
     void setPhi(ExprLocalVar* phi) {
         _phi = phi;
@@ -105,7 +103,7 @@ class ExprVarEnv {
     std::vector<std::unique_ptr<ExprLocalVar>> shadowedVariables;
 
     //! Keep track of all merged variables in
-    std::vector<std::vector<std::pair<std::string,ExprLocalVarPhi*>>> _mergedVariables;
+    std::vector<std::vector<std::pair<std::string, ExprLocalVarPhi*>>> _mergedVariables;
 
     //! Parent variable environment has all variablesf rom previou scope (for lookup)
     ExprVarEnv* _parent;
@@ -139,39 +137,37 @@ class ExprVarEnv {
     // static bool branchesMatch(const ExprVarEnv & env1, const ExprVarEnv & env2);
     size_t mergeBranches(const ExprType& type, ExprVarEnv& env1, ExprVarEnv& env2);
     // Code generate merges.
-    void codegenMerges(LLVM_BUILDER builder,int mergeIndex) LLVM_BODY;
+    LLVM_VALUE codegenMerges(LLVM_BUILDER builder, int mergeIndex) LLVM_BODY;
     // Query merges
-    std::vector<std::pair<std::string,ExprLocalVarPhi*>>& merge(size_t index){
-        return _mergedVariables[index];
-    }
+    std::vector<std::pair<std::string, ExprLocalVarPhi*>>& merge(size_t index) { return _mergedVariables[index]; }
 };
 
-//! Variable scope builder is used by the type checking and code gen to track visiblity of variables and changing of scopes
+//! Variable scope builder is used by the type checking and code gen to track visiblity of variables and changing of
+//scopes
 // It is inspired by IRBuilder's notion of a basic block insertion point
-class ExprVarEnvBuilder{
-public:
+class ExprVarEnvBuilder {
+  public:
     //! Creates an empty builder with one current scope entry
-    ExprVarEnvBuilder(){
-        reset();
-    }
+    ExprVarEnvBuilder() { reset(); }
     //! Reset to factory state (one empty environment that is current)
-    void reset(){
+    void reset() {
         std::unique_ptr<ExprVarEnv> newEnv(new ExprVarEnv);
-        _currentEnv=newEnv.get();
+        _currentEnv = newEnv.get();
         all.emplace_back(std::move(newEnv));
     }
     //! Return the current variable scope
-    ExprVarEnv* current(){return _currentEnv;}
+    ExprVarEnv* current() { return _currentEnv; }
     //! Set a new current variable scope
-    void setCurrent(ExprVarEnv* env){_currentEnv=env;}
+    void setCurrent(ExprVarEnv* env) { _currentEnv = env; }
     //! Create a descendant scope from the provided parent, does not clobber current
-    ExprVarEnv* createDescendant(ExprVarEnv* parent){
+    ExprVarEnv* createDescendant(ExprVarEnv* parent) {
         std::unique_ptr<ExprVarEnv> newEnv(new ExprVarEnv);
         newEnv->resetAndSetParent(parent);
         all.emplace_back(std::move(newEnv));
         return all.back().get();
     }
-private:
+
+  private:
     //! All owned symbol tables
     std::vector<std::unique_ptr<ExprVarEnv>> all;
     //! The current symbol table (should be a pointer owned by all)

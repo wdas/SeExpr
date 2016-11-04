@@ -14,27 +14,34 @@
 # http://www.apache.org/licenses/LICENSE-2.0
 
 # Non optimal, can't figure out better way right now
-SET(RMANTREE_TEST $ENV{RMANTREE} CACHE STRING stuff FORCE)
-STRING(COMPARE EQUAL "${RMANTREE_TEST}" "" RMAN_SET)
+set(RMANTREE_TEST $ENV{RMANTREE} CACHE STRING stuff FORCE)
+string(COMPARE EQUAL "${RMANTREE_TEST}" "" RMAN_SET)
 
-IF(NOT ${RMAN_SET})
-include_directories($ENV{RMANTREE}/include)
-link_directories($ENV{RMANTREE}/lib)
-add_library(SeExprOp2 SHARED seop.cpp)
-target_link_libraries(SeExprOp2 prman ${SEEXPR_LIBRARIES})
-FILE(GLOB ribs "*.rib")
-install (TARGETS SeExprOp2 DESTINATION prman)
+if (NOT ${RMAN_SET})
+    include_directories($ENV{RMANTREE}/include)
+    link_directories($ENV{RMANTREE}/lib)
 
-foreach (SHADERSOURCE testdisp testse)
-    ADD_CUSTOM_COMMAND(
-      SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/${SHADERSOURCE}.sl
-      COMMAND "shader"
-      ARGS -o ${CMAKE_CURRENT_BINARY_DIR}/${SHADERSOURCE}.slo ${CMAKE_CURRENT_SOURCE_DIR}/${SHADERSOURCE}.sl 
-      OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${SHADERSOURCE}.slo
-      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${SHADERSOURCE}.sl SeExprOp2
-    )
-    add_custom_target(shader-${SHADERSOURCE} ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${SHADERSOURCE}.slo)
-    INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/${SHADERSOURCE}.slo DESTINATION prman)
-endforeach(SHADERSOURCE)
-install (FILES ${ribs} DESTINATION prman)
-endif(NOT ${RMAN_SET})
+    add_library(SeExprOp2 SHARED seop.cpp)
+    target_link_libraries(SeExprOp2 prman ${SEEXPR_LIBRARIES})
+    install(TARGETS SeExprOp2 DESTINATION prman)
+
+    foreach (SHADER_BASENAME testdisp testse)
+        set(SHADER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${SHADERSOURCE})
+        add_custom_command(
+            SOURCE ${SHADER_FILE}.sl
+            COMMAND shader
+            ARGS -o ${SHADER_FILE}.slo ${SHADER_FILE}.sl
+            OUTPUT ${SHADER_FILE}.slo
+            DEPENDS ${SHADER_FILE}.sl SeExprOp2)
+
+        add_custom_target(
+            shader-${SHADER_BASENAME} ALL
+            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${SHADER_BASENAME}.slo)
+
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${SHADER_BASENAME}.slo
+                DESTINATION prman)
+    endforeach()
+
+    file(GLOB ribs "*.rib")
+    install(FILES ${ribs} DESTINATION prman)
+endif()

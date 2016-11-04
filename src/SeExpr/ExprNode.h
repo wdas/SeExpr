@@ -340,7 +340,8 @@ class ExprBlockNode : public ExprNode {
 /// Node that computes local variables before evaluating expression
 class ExprIfThenElseNode : public ExprNode {
   public:
-    ExprIfThenElseNode(const Expression* expr, ExprNode* a, ExprNode* b, ExprNode* c) : ExprNode(expr, a, b, c), _varEnv(nullptr), _varEnvMergeIndex(0) {}
+    ExprIfThenElseNode(const Expression* expr, ExprNode* a, ExprNode* b, ExprNode* c)
+        : ExprNode(expr, a, b, c), _varEnv(nullptr), _varEnvMergeIndex(0) {}
 
     virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;

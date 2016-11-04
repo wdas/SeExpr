@@ -1,49 +1,58 @@
 -include Makefile.config
 
+# External commands
+CMAKE ?= cmake
+CLANG_FORMAT ?= clang-format
+FIND ?= find
+MKDIR ?= mkdir -p
+PYTHON ?= python
+RM_R ?= rm -fr
+XARGS ?= xargs
+
+## Path and build flags
 FLAVOR ?= optimize
-prefix ?= $(shell pf-makevar --absolute root)
-libdir ?= $(shell pf-makevar lib)
-
-# TODO: when RHEL6 is fully retired remove th
-# Don't set CXX when native GCC version is 4.8.
-#SETCXX := $(shell expr `gcc -dumpversion` \< 4.8)
-#ifeq "$(SETCXX)" "1"
-#    CXX=/opt/rh/devtoolset-2/root/usr/bin/g++
-#endif
-
-ifdef RP_llvm_disney
-    CMAKE_ARGS += -DLLVM_DIR=$(RP_llvm_disney)/share/llvm/cmake
-endif
+#prefix ?= /usr/local
+#libdir ?= lib
 
 ## Temporary staging directory
 # DESTDIR =
-
-# Specified by `git make-pkg` when building .pkg files
+## Specified by `git make-pkg` when building .pkg files
 # mac_pkg =
 
-export prefix DESTDIR
+ifdef prefix
+    CMAKE_ARGS += -DCMAKE_INSTALL_PREFIX=$(prefix)
+endif
+ifdef libdir
+    CMAKE_ARGS += -DCMAKE_INSTALL_LIBDIR=$(libdir)
+endif
+ifdef FLAVOR
+    CMAKE_ARGS += -DFLAVOR=$(FLAVOR)
+endif
+
+export CXX
+export DESTDIR
+export prefix
 
 all:
-	mkdir -p build/${FLAVOR}
-	export CXX=${CXX}
-	cd build/${FLAVOR} &&  CXX=${CXX} cmake -DCMAKE_INSTALL_PREFIX=$(prefix) -DCMAKE_INSTALL_LIBDIR=$(libdir) ${EXTRA_CMAKE_ARGS}  ../../
-	$(MAKE) -C build/${FLAVOR} all
+	$(MKDIR) build/$(FLAVOR)
+	cd build/$(FLAVOR) && $(CMAKE) $(CMAKE_ARGS) $(EXTRA_CMAKE_ARGS) ../..
+	$(MAKE) -C build/$(FLAVOR) all
+
 clean:
-	rm -rf build/${FLAVOR} Linux-*
+	$(RM_R) build/$(FLAVOR) Linux-*
 
 install: all
-	$(MAKE) -C build/${FLAVOR} install
-	pkgconfig-gen --name seexpr2 --desc 'SeExpr v2 Library' \
-	--generate --destdir '$(DESTDIR)' --prefix $(prefix) --libdir $(libdir)
-
-test: install
-	python src/tests/imageTestsReportNew.py runall
+	$(MAKE) -C build/$(FLAVOR) install
 
 format:
-	find $(CURDIR)/src -name '*.cpp' | xargs clang-format -i
-	find $(CURDIR)/src -name '*.h' | xargs clang-format -i
+	$(FIND) $(CURDIR)/src -name '*.cpp' | $(XARGS) $(CLANG_FORMAT) -i
+	$(FIND) $(CURDIR)/src -name '*.h' | $(XARGS) $(CLANG_FORMAT) -i
 
-basictest: install
-	$(prefix)/share/test/SeExpr2/testmain2 -- --gtest_filter="BasicTests.*"
+test: install
+	$(MAKE) -C build/$(FLAVOR) test
+
+# TODO: run this via cmake
+imagetest: install
+	$(PYTHON) src/tests/imageTestsReportNew.py runall
 
 precommit: format

@@ -24,109 +24,69 @@
 #include <cstdio>
 
 /// Mini parse tree node... Only represents literals, and lists of literals
-struct ExprSpecNode
-{
-    int startPos,endPos;
+struct ExprSpecNode {
+    int startPos, endPos;
 
+    ExprSpecNode(int startPos, int endPos) : startPos(startPos), endPos(endPos) {}
 
-    ExprSpecNode(int startPos,int endPos)
-        :startPos(startPos),endPos(endPos)
-    {}
-    
-    virtual ~ExprSpecNode()
-    {}
+    virtual ~ExprSpecNode() {}
 };
 
-struct ExprSpecScalarNode:public ExprSpecNode
-{
+struct ExprSpecScalarNode : public ExprSpecNode {
     double v;
 
-    ExprSpecScalarNode(int startPos,int endPos,double scalar)
-        :ExprSpecNode(startPos,endPos),v(scalar)
-    {}
+    ExprSpecScalarNode(int startPos, int endPos, double scalar) : ExprSpecNode(startPos, endPos), v(scalar) {}
 };
 
-struct ExprSpecVectorNode:public ExprSpecNode
-{
+struct ExprSpecVectorNode : public ExprSpecNode {
     SeExpr2::Vec3d v;
-    ExprSpecVectorNode(int startPos,int endPos,ExprSpecNode* x,ExprSpecNode* y,ExprSpecNode* z)
-        :ExprSpecNode(startPos,endPos)
-    {
-        v=SeExpr2::Vec3d(static_cast<ExprSpecScalarNode*>(x)->v,static_cast<ExprSpecScalarNode*>(y)->v,static_cast<ExprSpecScalarNode*>(z)->v);
+    ExprSpecVectorNode(int startPos, int endPos, ExprSpecNode* x, ExprSpecNode* y, ExprSpecNode* z)
+        : ExprSpecNode(startPos, endPos) {
+        v = SeExpr2::Vec3d(static_cast<ExprSpecScalarNode*>(x)->v,
+                           static_cast<ExprSpecScalarNode*>(y)->v,
+                           static_cast<ExprSpecScalarNode*>(z)->v);
     }
-
 };
 
-struct ExprSpecListNode:public ExprSpecNode
-{
+struct ExprSpecListNode : public ExprSpecNode {
     std::vector<ExprSpecNode*> nodes;
-    ExprSpecListNode(int startPos,int endPos)
-        :ExprSpecNode(startPos,endPos)
-    {}
+    ExprSpecListNode(int startPos, int endPos) : ExprSpecNode(startPos, endPos) {}
 
-    void add(ExprSpecNode* node){
-        startPos=std::min(node->startPos,startPos);
-        endPos=std::max(node->endPos,endPos);
+    void add(ExprSpecNode* node) {
+        startPos = std::min(node->startPos, startPos);
+        endPos = std::max(node->endPos, endPos);
         nodes.push_back(node);
     }
 };
 
-struct ExprSpecStringNode:public ExprSpecNode
-{
+struct ExprSpecStringNode : public ExprSpecNode {
     std::string v;
-    ExprSpecStringNode(int startPos,int endPos,const char* s)
-        :ExprSpecNode(startPos,endPos),v(s)
-    {}
+    ExprSpecStringNode(int startPos, int endPos, const char* s) : ExprSpecNode(startPos, endPos), v(s) {}
 };
 
-struct ExprSpecCurveNode:public ExprSpecNode
-{
+struct ExprSpecCurveNode : public ExprSpecNode {
     ExprSpecNode* args;
-    ExprSpecCurveNode(ExprSpecNode* args)
-        :ExprSpecNode(args->startPos,args->endPos),args(args)
-    {}
+    ExprSpecCurveNode(ExprSpecNode* args) : ExprSpecNode(args->startPos, args->endPos), args(args) {}
 };
 
-struct ExprSpecCCurveNode:public ExprSpecNode
-{
+struct ExprSpecCCurveNode : public ExprSpecNode {
     ExprSpecNode* args;
-    ExprSpecCCurveNode(ExprSpecNode* args)
-        :ExprSpecNode(args->startPos,args->endPos),args(args)
-    {}
+    ExprSpecCCurveNode(ExprSpecNode* args) : ExprSpecNode(args->startPos, args->endPos), args(args) {}
 };
 
-struct ExprSpecAnimCurveNode:public ExprSpecNode
-{
+struct ExprSpecAnimCurveNode : public ExprSpecNode {
     ExprSpecNode* args;
-    ExprSpecAnimCurveNode(ExprSpecNode* args)
-        :ExprSpecNode(args->startPos,args->endPos),args(args)
-    {}
+    ExprSpecAnimCurveNode(ExprSpecNode* args) : ExprSpecNode(args->startPos, args->endPos), args(args) {}
 };
 
-struct ExprSpecColorSwatchNode:public ExprSpecNode
-{
+struct ExprSpecColorSwatchNode : public ExprSpecNode {
     ExprSpecNode* args;
-    ExprSpecColorSwatchNode(ExprSpecNode* args)
-        :ExprSpecNode(args->startPos,args->endPos),args(args)
-    {}
+    ExprSpecColorSwatchNode(ExprSpecNode* args) : ExprSpecNode(args->startPos, args->endPos), args(args) {}
 };
 
-struct ExprSpecDeepWaterNode:public ExprSpecNode
-{
+struct ExprSpecDeepWaterNode : public ExprSpecNode {
     ExprSpecNode* args;
-    ExprSpecDeepWaterNode(ExprSpecNode* args)
-        :ExprSpecNode(args->startPos,args->endPos),args(args)
-    {}
+    ExprSpecDeepWaterNode(ExprSpecNode* args) : ExprSpecNode(args->startPos, args->endPos), args(args) {}
 };
 
 #endif
-
-
-
-
-
-
-
-
-
-

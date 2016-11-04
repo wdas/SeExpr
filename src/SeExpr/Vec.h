@@ -97,10 +97,12 @@ class Vec {
     typedef Vec<T, d, true> T_VEC_REF;
 
     //! Initialize vector value using raw memory
-    template<class T2>
-    static Vec<T,d,false> copy(T2* raw, INVALID_WITH_VECTOR_REFERENCE u = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())){
-        Vec<T,d,false> ret;
-        for(int k=0;k<d;k++) ret[k]=static_cast<T>(raw[k]);
+    template <class T2>
+    static Vec<T, d, false> copy(T2* raw,
+                                 INVALID_WITH_VECTOR_REFERENCE u =
+                                     (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
+        Vec<T, d, false> ret;
+        for (int k = 0; k < d; k++) ret[k] = static_cast<T>(raw[k]);
         return ret;
     }
 
@@ -155,27 +157,30 @@ class Vec {
     //{typename static_assert<!ref,INVALID_WITH_VECTOR_REFERENCE>::TYPE();}
 
     //! Copy construct. Only valid if we are not going to be reference data!
-    template <class T2,bool refother>
+    template <class T2, bool refother>
     Vec(const Vec<T2, d, refother>& other,
         INVALID_WITH_VECTOR_REFERENCE u =
             (typename my_enable_if<!ref && refother != ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
         *this = other;
     }
 
-    template <class T2,bool refother>
+    template <class T2, bool refother>
     Vec& operator=(const Vec<T2, d, refother>& other) {
         for (int k = 0; k < d; k++) x[k] = other[k];
         return *this;
     }
 
-    template<class Tother,bool refother>
-    bool operator==(const Vec<Tother, d, refother>& other) const{
-        for(int k=0;k<d;k++) if(x[k] != other[k]) return false;
+    template <class Tother, bool refother>
+    bool operator==(const Vec<Tother, d, refother>& other) const {
+        for (int k = 0; k < d; k++)
+            if (x[k] != other[k]) return false;
         return true;
     }
 
-    template<class Tother,bool refother>
-    bool operator!=(const Vec<Tother, d, refother>& other) const {return !(*this != other);}
+    template <class Tother, bool refother>
+    bool operator!=(const Vec<Tother, d, refother>& other) const {
+        return !(*this != other);
+    }
 
     // non-const element access
     T& operator[](const int i) { return x[i]; }
@@ -351,7 +356,6 @@ class Vec {
         double c = cos(angle), s = sin(angle);
         return c * (*this) + (1 - c) * dot(axis) * axis - s * cross(axis);
     }
-    
 };
 
 //! Output stream
@@ -363,29 +367,29 @@ std::ostream& operator<<(std::ostream& out, const Vec<T, d, r>& val) {
     return out;
 }
 
-using Vec1d=Vec<double,1,false>;
-using Vec2d=Vec<double,2,false>;
-using Vec3d=Vec<double,3,false>;
-using Vec4d=Vec<double,4,false>;
-using Vec1f=Vec<float,1,false>;
-using Vec2f=Vec<float,2,false>;
-using Vec3f=Vec<float,3,false>;
-using Vec4f=Vec<float,4,false>;
-using Vec1dRef=Vec<double,1,true>;
-using Vec2dRef=Vec<double,2,true>;
-using Vec3dRef=Vec<double,3,true>;
-using Vec4dRef=Vec<double,4,true>;
-using Vec1fRef=Vec<float,1,true>;
-using Vec2fRef=Vec<float,2,true>;
-using Vec3fRef=Vec<float,3,true>;
-using Vec4fRef=Vec<float,4,true>;
-using Vec1dConstRef=Vec<const double,1,true>;
-using Vec2dConstRef=Vec<const double,2,true>;
-using Vec3dConstRef=Vec<const double,3,true>;
-using Vec4dConstRef=Vec<const double,4,true>;
-using Vec1fConstRef=Vec<const float,1,true>;
-using Vec2fConstRef=Vec<const float,2,true>;
-using Vec3fConstRef=Vec<const float,3,true>;
-using Vec4fConstRef=Vec<const float,4,true>;
+using Vec1d = Vec<double, 1, false>;
+using Vec2d = Vec<double, 2, false>;
+using Vec3d = Vec<double, 3, false>;
+using Vec4d = Vec<double, 4, false>;
+using Vec1f = Vec<float, 1, false>;
+using Vec2f = Vec<float, 2, false>;
+using Vec3f = Vec<float, 3, false>;
+using Vec4f = Vec<float, 4, false>;
+using Vec1dRef = Vec<double, 1, true>;
+using Vec2dRef = Vec<double, 2, true>;
+using Vec3dRef = Vec<double, 3, true>;
+using Vec4dRef = Vec<double, 4, true>;
+using Vec1fRef = Vec<float, 1, true>;
+using Vec2fRef = Vec<float, 2, true>;
+using Vec3fRef = Vec<float, 3, true>;
+using Vec4fRef = Vec<float, 4, true>;
+using Vec1dConstRef = Vec<const double, 1, true>;
+using Vec2dConstRef = Vec<const double, 2, true>;
+using Vec3dConstRef = Vec<const double, 3, true>;
+using Vec4dConstRef = Vec<const double, 4, true>;
+using Vec1fConstRef = Vec<const float, 1, true>;
+using Vec2fConstRef = Vec<const float, 2, true>;
+using Vec3fConstRef = Vec<const float, 3, true>;
+using Vec4fConstRef = Vec<const float, 4, true>;
 }
 #endif

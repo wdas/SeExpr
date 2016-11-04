@@ -1,25 +1,26 @@
-<!--
-Copyright Disney Enterprises, Inc.  All rights reserved.
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License
- and the following modification to it: Section 6 Trademarks.
- deleted and replaced with:
-
- 6. Trademarks. This License does not grant permission to use the
- trade names, trademarks, service marks, or product names of the
- Licensor and its affiliates, except as required for reproducing
- the content of the NOTICE file.
-
- You may obtain a copy of the License at
- http://www.apache.org/licenses/LICENSE-2.0
--->
-
-/*! \mainpage SeExpr
+/*! 
+ * \cond
+ * Copyright Disney Enterprises, Inc.  All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License
+ * and the following modification to it: Section 6 Trademarks.
+ * deleted and replaced with:
+ *
+ * 6. Trademarks. This License does not grant permission to use the
+ * trade names, trademarks, service marks, or product names of the
+ * Licensor and its affiliates, except as required for reproducing
+ * the content of the NOTICE file.
+ *
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * \endcond
+ * \mainpage SeExpr
  * \image html seexprlogo.png
  * \section maindoc User and Programmer Tutorials
- *  - \subpage userdoc -  User Documentation
+ *  - \subpage userdoc
  *  - \subpage plugins -  Custom Function Plugins
+ *  - <a class="el" href="./html/SeExpr_FAQ.html">New v3 FAQ</a>
  * \section demos Demo Applications
  *     - \subpage mytut (code at asciiGraph.cpp)
  *     - \subpage uitut (code at imageEditor.cpp)
@@ -44,6 +45,7 @@ Copyright Disney Enterprises, Inc.  All rights reserved.
  *
  * \section Other
  *  - \subpage license
+ *  - <a class="el" href="./v1/index.html">Older Documentation (v1-v2)</a>
  */
 
 /**

@@ -45,7 +45,7 @@ bool Expression::debugging = getenv("SE_EXPR_DEBUG") != 0;
 // And the environment variables SE_EXPR_DEBUG
 static Expression::EvaluationStrategy chooseDefaultEvaluationStrategy() {
     if (Expression::debugging) {
-        std::cerr << "SeExpr2 Debug Mode Enabled " << __VERSION__ << " built " << __DATE__ << " " << __TIME__
+        std::cerr << "SeExpr2 Debug Mode Enabled " << __VERSION__
                   << std::endl;
     }
 #ifdef SEEXPR_ENABLE_LLVM
@@ -246,8 +246,8 @@ void Expression::prep() const {
                 std::cerr << "Eval strategy is llvm" << std::endl;
                 debugPrintParseTree();
             }
-            if(!_llvmEvaluator->prepLLVM(_parseTree, _desiredReturnType)){
-                error=true;
+            if (!_llvmEvaluator->prepLLVM(_parseTree, _desiredReturnType)) {
+                error = true;
             }
         }
 
@@ -273,16 +273,16 @@ void Expression::prep() const {
         for (unsigned int i = 0; i < _errors.size(); i++) {
             int* bound = std::lower_bound(&*lines.begin(), &*lines.end(), _errors[i].startPos);
             int line = bound - &*lines.begin() + 1;
-            int lineStart = line == 1 ? 0 : lines[line-1];
+            int lineStart = line == 1 ? 0 : lines[line - 1];
             int col = _errors[i].startPos - lineStart;
             sstream << "  Line " << line << " Col " << col << _errors[i].error << std::endl;
         }
         _parseError = std::string(sstream.str());
     }
 
-    if (debugging){
+    if (debugging) {
         std::cerr << "ending with isValid " << _isValid << std::endl;
-        std::cerr << "parse error \n" << parseError()<<std::endl;
+        std::cerr << "parse error \n" << parseError() << std::endl;
     }
 }
 
@@ -306,12 +306,11 @@ const double* Expression::evalFP(VarBlock* varBlock) const {
             return _llvmEvaluator->evalFP(varBlock);
         }
     }
-    static double noCrash[16]={};
+    static double noCrash[16] = {};
     return noCrash;
 }
 
-void Expression::evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd)
-    const {
+void Expression::evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) const {
     prepIfNeeded();
     if (_isValid) {
         if (_evaluationStrategy == UseInterpreter) {

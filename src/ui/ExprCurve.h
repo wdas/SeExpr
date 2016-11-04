@@ -22,7 +22,6 @@
 #ifndef _ExprCurve_h_
 #define _ExprCurve_h_
 
-
 #include <vector>
 
 #include <QtCore/QObject>
@@ -36,10 +35,9 @@
 /*
   This class overrides QGraphicsView so we can get resize events
 */
-class CurveGraphicsView : public QGraphicsView
-{
+class CurveGraphicsView : public QGraphicsView {
     Q_OBJECT
-public:
+  public:
     CurveGraphicsView() {
         setTransformationAnchor(QGraphicsView::NoAnchor);
         setResizeAnchor(QGraphicsView::NoAnchor);
@@ -56,17 +54,17 @@ signals:
   This class overrides QGraphicsScene so we can handle mouse
   press, drag and keyboard events
 */
-class CurveScene : public QGraphicsScene
-{
+class CurveScene : public QGraphicsScene {
     Q_OBJECT
 
     typedef SeExpr2::Curve<double> T_CURVE;
-    typedef T_CURVE::InterpType T_INTERP ;
-public:
+    typedef T_CURVE::InterpType T_INTERP;
+
+  public:
     CurveScene();
     ~CurveScene();
 
-    void addPoint(double x, double y, const T_INTERP interp, const bool select=true);
+    void addPoint(double x, double y, const T_INTERP interp, const bool select = true);
 
     void removePoint(const int index);
     void removeAll();
@@ -87,13 +85,14 @@ public:
 
     void rebuildCurve();
 
-    std::vector<T_CURVE::CV> _cvs; // unsorted cvs
+    std::vector<T_CURVE::CV> _cvs;  // unsorted cvs
 
     friend class ExprCurve;
 
-private:
-    T_CURVE* _curve;
-public slots:
+  private:
+    T_CURVE *_curve;
+  public
+slots:
     void interpChanged(const int interp);
     void selPosChanged(double pos);
     void selValChanged(double val);
@@ -103,8 +102,7 @@ signals:
     void cvSelected(double x, double y, T_INTERP interp);
     void curveChanged();
 
-private:
-
+  private:
     int _width;
     int _height;
     T_INTERP _interp;
@@ -115,24 +113,27 @@ private:
     bool _lmb;
 };
 
-class ExprCurve : public QWidget
-{
-    Q_OBJECT 
+class ExprCurve : public QWidget {
+    Q_OBJECT
 
     typedef SeExpr2::Curve<double> T_CURVE;
-    typedef T_CURVE::InterpType T_INTERP ;
+    typedef T_CURVE::InterpType T_INTERP;
 
-public:
-    ExprCurve(QWidget* parent = 0, QString pLabel = "", QString vLabel = "", QString iLabel = "",
-        bool expandable=true);
+  public:
+    ExprCurve(QWidget *parent = 0,
+              QString pLabel = "",
+              QString vLabel = "",
+              QString iLabel = "",
+              bool expandable = true);
     ~ExprCurve() {}
 
     // Convenience Functions
-    void addPoint(const double x, const double y, const T_INTERP interp, bool select=false);
+    void addPoint(const double x, const double y, const T_INTERP interp, bool select = false);
 
     CurveScene *_scene;
 
-public slots:
+  public
+slots:
     void cvSelectedSlot(double pos, double val, T_INTERP interp);
     void selPosChanged();
     void selValChanged();
@@ -142,7 +143,7 @@ signals:
     void selPosChangedSignal(double pos);
     void selValChangedSignal(double val);
 
-private:
+  private:
     QLineEdit *_selPosEdit;
     QLineEdit *_selValEdit;
     QComboBox *_interpComboBox;

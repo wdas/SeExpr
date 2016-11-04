@@ -16,7 +16,7 @@
 *
 * @file CETool.h
 * @brief Contains the declaration of class CETool.
-*/ 
+*/
 
 #ifndef CETool_h
 #define CETool_h
@@ -26,7 +26,7 @@
 #include <DMsg/DMsg.h>
 //#include <iTool.h>
 //#include <iSgExpr.h>
-//qt3 #include <qobject.h>
+// qt3 #include <qobject.h>
 #include <QtCore/QObject>
 
 #include <animlib/AnimCurve.h>
@@ -44,14 +44,12 @@ class CEMainUI;
  *
  * @version <B>1.0 brentb 11/20/2001:</B> Initial version of class CETool.
  *
- */  
+ */
 
-class CETool :
-    public QObject
-{   
+class CETool : public QObject {
     Q_OBJECT
 
-public:
+  public:
     /// Constructor
     CETool();
 
@@ -59,7 +57,6 @@ public:
     virtual ~CETool();
 
     typedef std::vector<animlib::AnimCurve*> AnimCurveList;
-
 
     /// from iCurveEditor
     virtual err::Result newCurve(msg::cstr name);
@@ -83,32 +80,41 @@ public:
     virtual err::Result getSelection(msg::list& selections);
     virtual err::Result getSelectedCurve(int& curve);
     virtual err::Result getSelectedSegment(int& curve, int& seg);
-    virtual err::Result isSegmentSelected(bool& selected,
-					  int curveIndex, int segIndex);
-    int  insertKey(double frame);
-    void setKeyIn(int curve,int seg,double ang,double weight);
-    void setKeyOut(int curve,int seg,double ang,double weight);
-    void setSelectedInfinity(animlib::AnimCurve::infinityType preType,animlib::AnimCurve::infinityType postType);
-    void setInfinity(int curve,animlib::AnimCurve::infinityType preType,animlib::AnimCurve::infinityType postType);
+    virtual err::Result isSegmentSelected(bool& selected, int curveIndex, int segIndex);
+    int insertKey(double frame);
+    void setKeyIn(int curve, int seg, double ang, double weight);
+    void setKeyOut(int curve, int seg, double ang, double weight);
+    void setSelectedInfinity(animlib::AnimCurve::infinityType preType, animlib::AnimCurve::infinityType postType);
+    void setInfinity(int curve, animlib::AnimCurve::infinityType preType, animlib::AnimCurve::infinityType postType);
     void setSelectedSegmentFrame(double frame);
     void setSelectedSegmentValue(double value);
     void setSegmentFrame(double frame, int curve, int segment);
     void setSegmentValue(double value, int curve, int segment);
-    void setWeighted(int curve,bool val);
+    void setWeighted(int curve, bool val);
     void setSelectedWeighted(bool val);
-    void setLocked(int curve,int segment,bool val);
+    void setLocked(int curve, int segment, bool val);
     void setSelectedLocked(bool val);
 
     void setSegmentStr(msg::cstr str);
-    void setSelectedSegment(double frame,double value,
-        double inAngle,double outAngle,double inWeight,double outWeight,
-        animlib::AnimKeyframe::tangentType inType,
-        animlib::AnimKeyframe::tangentType outType);
+    void setSelectedSegment(double frame,
+                            double value,
+                            double inAngle,
+                            double outAngle,
+                            double inWeight,
+                            double outWeight,
+                            animlib::AnimKeyframe::tangentType inType,
+                            animlib::AnimKeyframe::tangentType outType);
 
-    void setSegment(int curve,int segment,double frame,double value,
-        double inAngle,double outAngle,double inWeight,double outWeight,
-        animlib::AnimKeyframe::tangentType inType,
-        animlib::AnimKeyframe::tangentType outType);
+    void setSegment(int curve,
+                    int segment,
+                    double frame,
+                    double value,
+                    double inAngle,
+                    double outAngle,
+                    double inWeight,
+                    double outWeight,
+                    animlib::AnimKeyframe::tangentType inType,
+                    animlib::AnimKeyframe::tangentType outType);
 
     void deleteSegments();
 
@@ -116,15 +122,12 @@ public:
     virtual err::Result changeSegmentType(msg::cstr newtype);
     virtual err::Result pan(double x, double y);
     virtual err::Result zoom(double zoomX, double zoomY);
-    virtual err::Result zoomAroundPoint(double zoomX, double zoomY,
-					double x, double y);
+    virtual err::Result zoomAroundPoint(double zoomX, double zoomY, double x, double y);
     virtual err::Result setView(double x, double y, double w, double h);
-    virtual err::Result setCurveOffset(int curveIndex,
-				       double yPan, double yZoom);
+    virtual err::Result setCurveOffset(int curveIndex, double yPan, double yZoom);
     virtual err::Result frameSelection();
     virtual err::Result getView(double& x, double& y, double& w, double& h);
-    virtual err::Result getCurveOffset(double& yPan, double& yZoom, 
-				       int curveIndex);
+    virtual err::Result getCurveOffset(double& yPan, double& yZoom, int curveIndex);
     virtual err::Result setTimeMode(int mode);
     virtual err::Result getTimeMode(int& mode);
 
@@ -141,9 +144,9 @@ public:
     err::Result postUnmapNotify();
 
     /// public methods
-    int numCurves() const { return (int) _curves.size(); }
+    int numCurves() const { return (int)_curves.size(); }
 
-    CEMainUI* ui(){return _ui;}
+    CEMainUI* ui() { return _ui; }
 
 signals:
     void curveChanged(int index);
@@ -153,11 +156,11 @@ signals:
     void viewChanged();
     void timeModeChanged();
 
-private:
+  private:
     /// No definition by design, this is so accidental copying is prevented.
-    CETool ( const CETool& );     
+    CETool(const CETool&);
     /// No definition by design, this is so accidental assignment is prevented.
-    CETool& operator=( const CETool& );  
+    CETool& operator=(const CETool&);
 
     /// Called by msg code when tool is unregistered
     virtual void release() { delete this; }
@@ -169,23 +172,20 @@ private:
     class CurveData;
     msg::RcvrId _rcvrid;
     CEMainUI* _ui;
-    double _vx, _vy, _vw, _vh; // view rectangle
+    double _vx, _vy, _vw, _vh;  // view rectangle
     int _timeMode;
 
     // per-curve data in curve list
     struct CurveData {
         animlib::AnimCurve* animCurve;
-	std::string name;
-	double ypan;
-	double yzoom;
-	bool selected;
-	int numSegs;
-	std::set<int> segsSelected;
+        std::string name;
+        double ypan;
+        double yzoom;
+        bool selected;
+        int numSegs;
+        std::set<int> segsSelected;
 
-        ~CurveData()
-        {
-            delete animCurve;
-        }
+        ~CurveData() { delete animCurve; }
     };
     typedef std::vector<CurveData*> CurveList;
     CurveList _curves;
@@ -196,4 +196,4 @@ private:
     bool _selListValid;
 };
 
-#endif //CETool_h
+#endif  // CETool_h

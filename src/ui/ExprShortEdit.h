@@ -19,7 +19,6 @@
 * @author  aselle
 */
 
-
 #ifndef ExprShortEditUI_h
 #define ExprShortEditUI_h
 
@@ -43,11 +42,10 @@ class QLabel;
 class ExprPopupDoc;
 class ExprDialog;
 
-class ExprShortEdit : public QWidget
-{
+class ExprShortEdit : public QWidget {
     Q_OBJECT
-    
-protected:
+
+  protected:
     QTimer* controlRebuildTimer;
     QToolButton* editDetail;
     ExprControlCollection* controls;
@@ -58,10 +56,11 @@ protected:
     std::string _context;
     std::string _searchPath;
     bool _applyOnSelect;
-public:
+
+  public:
     ExprShortEdit(QWidget* parent, bool expanded = true, bool applyOnSelect = true);
     virtual ~ExprShortEdit();
-    
+
     // Gets the string that is in the edit widget
     std::string getExpressionString() const;
     QString getExpression() const;
@@ -70,15 +69,15 @@ public:
     // Removes all extra completion symbols
     void clearExtraCompleters();
     // Registers an extra function and associated do cstring
-    void registerExtraFunction(const std::string& name,const std::string& docString);
+    void registerExtraFunction(const std::string& name, const std::string& docString);
     // Register an extra variable (i.e. $P, or $u, something provided by resolveVar)
-    void registerExtraVariable(const std::string& name,const std::string& docString);
+    void registerExtraVariable(const std::string& name, const std::string& docString);
     // Updates the completion widget, must call after registering any new functions/variables
     void updateCompleter();
     // Hides the expression part of the interface
     void setSimple(bool enabled);
     // Set a menu on the "details" button
-    void setDetailsMenu(QMenu *menu);
+    void setDetailsMenu(QMenu* menu);
     // Set a colon-delimited path variable for finding expressions
     void setSearchPath(const QString& context, const QString& path);
     // Set line wrap mode on the text edit
@@ -93,17 +92,18 @@ public:
     //  Pass -1 to not show the editor
     void showDetails(int idx);
 
-    virtual QSize sizeHint() const{return QSize(400, 50);}
-    virtual void hideErrors(bool hidden, const std::string &err);
+    virtual QSize sizeHint() const { return QSize(400, 50); }
+    virtual void hideErrors(bool hidden, const std::string& err);
 
     // Exposed via Python
     QToolButton* expandButton;
     ExprShortTextEdit* edit;
 
-protected:
+  protected:
     void checkErrors();
 
-protected slots:
+  protected
+slots:
     virtual void detailPressed();
     virtual void expandPressed();
     virtual void textFinished();
@@ -117,25 +117,23 @@ signals:
     void exprChanged();
 };
 
-
-class ExprShortTextEdit:public QTextEdit
-{
+class ExprShortTextEdit : public QTextEdit {
     Q_OBJECT;
 
     ExprHighlighter* highlighter;
-    
+
     bool editing;
     QString savedText;
     ExprPopupDoc* _tip;
     QStyle* lastStyleForHighlighter;
 
-public:
+  public:
     QCompleter* completer;
     ExprCompletionModel* completionModel;
 
-
     ExprShortTextEdit(QWidget* parent);
-protected:
+
+  protected:
     void showTip(const QString& string);
     void hideTip();
 
@@ -151,9 +149,9 @@ protected:
     void finishEdit();
 signals:
     void editingFinished();
-private slots:
+  private
+slots:
     void insertCompletion(const QString& completion);
-
 };
 
 #endif

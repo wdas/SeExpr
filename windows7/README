@@ -1,8 +1,8 @@
-Because there are some known problems with building bison / flex files 
-on Windows, this directory contains needed files built on Linux that 
-work with a Windows 7 / Visual Studio 2010 build.  
+Because there are some known problems with building bison / flex files
+on Windows, this directory contains needed files built on Linux that
+work with a Windows 7 / Visual Studio 2010 build.
 
-Copy the files in SeExpr\generated\* and ui\generated\* to 
+Copy the files in SeExpr\generated\* and ui\generated\* to
 their respective "src" sub-directories.
 
 Here is a tree listing of what's in this sub-directory:

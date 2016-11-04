@@ -136,10 +136,10 @@ ExprType ExprModuleNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
 
 ExprType ExprPrototypeNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     // TODO: implement prototype
-    bool error=false;
-    checkCondition(false, "Prototypes are currently not supported",error);
+    bool error = false;
+    checkCondition(false, "Prototypes are currently not supported", error);
     return ExprType().Error();
-    #if 0
+#if 0
     bool error = false;
 
     if (_retTypeSet) checkCondition(returnType().isValid(), "Function has bad return type", error);
@@ -161,8 +161,7 @@ ExprType ExprPrototypeNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder)
         setType(ExprType().None().Varying());
 
     return _type;
-    #endif
-
+#endif
 }
 
 void ExprPrototypeNode::addArgTypes(ExprNode* surrogate) {
@@ -188,7 +187,7 @@ void ExprPrototypeNode::addArgs(ExprNode* surrogate) {
 }
 
 ExprType ExprLocalFunctionNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
-    #if 0 // TODO: no local functions for now
+#if 0  // TODO: no local functions for now
     bool error = false;
 
     // prep prototype and check for errors
@@ -224,11 +223,11 @@ ExprType ExprLocalFunctionNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuil
         error = true;
     }
     return _type = error ? ExprType().Error() : ExprType().None().Varying();
-    #else
-    bool error=false;
-    checkCondition(false,"Local functions are currently not supported.",error);
+#else
+    bool error = false;
+    checkCondition(false, "Local functions are currently not supported.", error);
     return ExprType().Error();
-    #endif
+#endif
 }
 
 // TODO: write buildInterpreter for local function node
@@ -246,8 +245,8 @@ ExprType ExprLocalFunctionNode::prep(ExprFuncNode* callerNode, bool scalarWanted
     }
     return error ? ExprType().Error() : prototype()->returnType();
 #else
-    bool error=false;
-    callerNode->checkCondition(false,"Local functions are currently not supported.",error);
+    bool error = false;
+    callerNode->checkCondition(false, "Local functions are currently not supported.", error);
     return ExprType().Error();
 #endif
 }
@@ -272,27 +271,26 @@ ExprType ExprIfThenElseNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder
     condType = child(0)->prep(true, envBuilder);
     checkIsFP(condType, error);
 
-    ExprVarEnv* parentEnv=envBuilder.current();
-    ExprVarEnv* thenEnv=envBuilder.createDescendant(parentEnv);
-    ExprVarEnv* elseEnv=envBuilder.createDescendant(parentEnv);
+    ExprVarEnv* parentEnv = envBuilder.current();
+    ExprVarEnv* thenEnv = envBuilder.createDescendant(parentEnv);
+    ExprVarEnv* elseEnv = envBuilder.createDescendant(parentEnv);
     envBuilder.setCurrent(thenEnv);
     thenType = child(1)->prep(false, envBuilder);
-    thenEnv=envBuilder.current();
+    thenEnv = envBuilder.current();
     envBuilder.setCurrent(elseEnv);
     elseType = child(2)->prep(false, envBuilder);
-    elseEnv=envBuilder.current();
+    elseEnv = envBuilder.current();
 
     if (!error && thenType.isValid() && elseType.isValid()) {
-        ExprVarEnv* newEnv=envBuilder.createDescendant(parentEnv);
-        _varEnvMergeIndex=newEnv->mergeBranches(condType, *thenEnv, *elseEnv);
+        ExprVarEnv* newEnv = envBuilder.createDescendant(parentEnv);
+        _varEnvMergeIndex = newEnv->mergeBranches(condType, *thenEnv, *elseEnv);
         envBuilder.setCurrent(newEnv);
         // TODO: aselle insert the phi nodes!
-    } else{
-        envBuilder.setCurrent(parentEnv); // since the conditionals broke don't include them in new environment
+    } else {
+        envBuilder.setCurrent(parentEnv);  // since the conditionals broke don't include them in new environment
         error = true;
     }
-    _varEnv=envBuilder.current();
-
+    _varEnv = envBuilder.current();
 
     if (error)
         setType(ExprType().Error());
@@ -483,11 +481,11 @@ ExprType ExprVarNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     // ask expression to resolve var
     bool error = false;
     if ((_localVar = envBuilder.current()->find(name()))) {
-        if(_localVar->type().isError()){
+        if (_localVar->type().isError()) {
             /// Some friendlier error suggestions
-            if(ExprLocalVarPhi* phi=dynamic_cast<ExprLocalVarPhi*>(_localVar)){
-                if(!phi->_thenVar->type().isError() && !phi->_elseVar->type().isError()){
-                    addError(std::string("Variable ")+name()+" defined in conditionals inconsistently.");
+            if (ExprLocalVarPhi* phi = dynamic_cast<ExprLocalVarPhi*>(_localVar)) {
+                if (!phi->_thenVar->type().isError() && !phi->_elseVar->type().isError()) {
+                    addError(std::string("Variable ") + name() + " defined in conditionals inconsistently.");
                 }
             }
         }
@@ -550,7 +548,7 @@ ExprType ExprFuncNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
             const ExprFuncX* funcx = _func->funcx();
             ExprType type = funcx->prep(this, wantScalar, envBuilder);
             setTypeWithChildLife(type);
-        } else {                         // didn't match num args or function not found
+        } else {                                // didn't match num args or function not found
             ExprNode::prep(false, envBuilder);  // prep arguments anyways to catch as many errors as possible!
             setTypeWithChildLife(ExprType().Error());
         }

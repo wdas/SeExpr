@@ -21,10 +21,10 @@
 
 extern "C" void SeExpr2LLVMEvalVarRef(SeExpr2::ExprVarRef *seVR, double *result);
 extern "C" void SeExpr2LLVMEvalCustomFunction(int *opDataArg,
-                           double *fpArg,
-                           char **strArg,
-                           void **funcdata,
-                           const SeExpr2::ExprFuncNode *node);
+                                              double *fpArg,
+                                              char **strArg,
+                                              void **funcdata,
+                                              const SeExpr2::ExprFuncNode *node);
 
 namespace SeExpr2 {
 #ifdef SEEXPR_ENABLE_LLVM
@@ -47,7 +47,7 @@ class LLVMEvaluator {
       public:
         LLVMEvaluationContext(const LLVMEvaluationContext &) = delete;
         LLVMEvaluationContext &operator=(const LLVMEvaluationContext &) = delete;
-        ~LLVMEvaluationContext() {delete [] resultData;}
+        ~LLVMEvaluationContext() { delete[] resultData; }
         LLVMEvaluationContext() : functionPtr(nullptr), resultData(nullptr) {}
         void init(void *fp, void *fpLoop, int dim) {
             reset();
@@ -103,9 +103,8 @@ class LLVMEvaluator {
 
         std::unique_ptr<Module> TheModule(new Module(uniqueName + "_module", *_llvmContext));
 
-
         // create bindings to helper functions for variables and fucntions
-        Function *SeExpr2LLVMEvalCustomFunctionFunc=nullptr,*SeExpr2LLVMEvalVarRefFunc=nullptr;
+        Function *SeExpr2LLVMEvalCustomFunctionFunc = nullptr, *SeExpr2LLVMEvalVarRefFunc = nullptr;
         {
             Type *i8PtrTy = Type::getInt8PtrTy(*_llvmContext);
             Type *i32PtrTy = Type::getInt32PtrTy(*_llvmContext);
@@ -115,19 +114,23 @@ class LLVMEvaluator {
             Type *ParamTys[] = {i32PtrTy, doublePtrTy, i8PtrPtr, i8PtrPtr, i64Ty};
             {
                 FunctionType *FT = FunctionType::get(Type::getVoidTy(*_llvmContext), ParamTys, false);
-                SeExpr2LLVMEvalCustomFunctionFunc=Function::Create(FT, GlobalValue::ExternalLinkage, "SeExpr2LLVMEvalCustomFunction", TheModule.get());
-            }{
+                SeExpr2LLVMEvalCustomFunctionFunc = Function::Create(
+                    FT, GlobalValue::ExternalLinkage, "SeExpr2LLVMEvalCustomFunction", TheModule.get());
+            }
+            {
                 Type *ParamTys[2] = {i8PtrTy, doublePtrTy};
                 FunctionType *FT = FunctionType::get(Type::getVoidTy(*_llvmContext), ParamTys, false);
-                SeExpr2LLVMEvalVarRefFunc=Function::Create(FT, GlobalValue::ExternalLinkage, "SeExpr2LLVMEvalVarRef", TheModule.get());
+                SeExpr2LLVMEvalVarRefFunc =
+                    Function::Create(FT, GlobalValue::ExternalLinkage, "SeExpr2LLVMEvalVarRef", TheModule.get());
             }
         }
 
         // create function and entry BB
         bool desireFP = desiredReturnType.isFP();
-        Type *ParamTys[] = {desireFP ? Type::getDoublePtrTy(*_llvmContext)
-                                     : PointerType::getUnqual(Type::getInt8PtrTy(*_llvmContext)),
-                            PointerType::get(Type::getDoublePtrTy(*_llvmContext),0), Type::getInt32Ty(*_llvmContext), };
+        Type *ParamTys[] = {
+            desireFP ? Type::getDoublePtrTy(*_llvmContext) : PointerType::getUnqual(Type::getInt8PtrTy(*_llvmContext)),
+            PointerType::get(Type::getDoublePtrTy(*_llvmContext), 0),
+            Type::getInt32Ty(*_llvmContext), };
         FunctionType *FT = FunctionType::get(Type::getVoidTy(*_llvmContext), ParamTys, false);
         Function *F = Function::Create(FT, Function::ExternalLinkage, uniqueName + "_func", TheModule.get());
         F->addAttribute(llvm::AttributeSet::FunctionIndex, llvm::Attribute::AlwaysInline);
@@ -286,16 +289,15 @@ class LLVMEvaluator {
         altModule->setDataLayout(TheExecutionEngine->getDataLayout());
 
         // Add bindings to C linkage helper functions
-        TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalVarRefFunc, (void*)SeExpr2LLVMEvalVarRef);
-        TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalCustomFunctionFunc, (void*)SeExpr2LLVMEvalCustomFunction);
-
+        TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalVarRefFunc, (void *)SeExpr2LLVMEvalVarRef);
+        TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalCustomFunctionFunc, (void *)SeExpr2LLVMEvalCustomFunction);
 
         // [verify]
         std::string errorStr;
         llvm::raw_string_ostream raw(errorStr);
-        if(llvm::verifyModule(*altModule,&raw)){
-           parseTree->addError(raw.str());
-           return false;
+        if (llvm::verifyModule(*altModule, &raw)) {
+            parseTree->addError(raw.str());
+            return false;
         }
 
         // Setup optimization
@@ -348,13 +350,19 @@ class LLVMEvaluator {
 class LLVMEvaluator {
   public:
     void unsupported() { throw std::runtime_error("LLVM is not enabled in build"); }
-    const char* evalStr(VarBlock* varBlock) {
+    const char *evalStr(VarBlock *varBlock) {
         unsupported();
         return "";
     }
-    const double* evalFP(VarBlock* varBlock) { unsupported(); }
-    void prepLLVM(ExprNode* parseTree, ExprType desiredReturnType) { unsupported(); }
-    void evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) {
+    const double *evalFP(VarBlock *varBlock) {
+        unsupported();
+        return 0;
+    }
+    bool prepLLVM(ExprNode *parseTree, ExprType desiredReturnType) {
+        unsupported();
+        return false;
+    }
+    void evalMultiple(VarBlock *varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) {
         unsupported();
     }
     void debugPrint() {}

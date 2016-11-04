@@ -20,28 +20,34 @@
 
 class CEGraphCurve;
 class CEDragHandler;
-class CEGraphKey{
-public:
-    CEGraphKey(CEGraphCurve* curve,int index);
+class CEGraphKey {
+  public:
+    CEGraphKey(CEGraphCurve* curve, int index);
     ~CEGraphKey();
     void paint(bool selected);
 
     enum Part {
-	// these are listed in increasing grab priority
-	NoPart, Seg, HandleBase=100, KnobBase=200, KeyTime=300, Key, 
+        // these are listed in increasing grab priority
+        NoPart,
+        Seg,
+        HandleBase = 100,
+        KnobBase = 200,
+        KeyTime = 300,
+        Key,
     };
 
-    CEDragHandler* getDragHandler(int part,int keystate);
-    CEGraphCurve* curve(){return _curve;}
-    int index(){return _index;}
-    const animlib::AnimKeyframe& key() const{return _key;}
-    bool weighted() const{return _weighted;}
-private:
+    CEDragHandler* getDragHandler(int part, int keystate);
+    CEGraphCurve* curve() { return _curve; }
+    int index() { return _index; }
+    const animlib::AnimKeyframe& key() const { return _key; }
+    bool weighted() const { return _weighted; }
+
+  private:
     bool beginPart(Part part);
     void endPart();
     void paintHandles();
-    void paintHandle(int num,double x,double y,double dx,double dy,bool fixedHandle);
-    
+    void paintHandle(int num, double x, double y, double dx, double dy, bool fixedHandle);
+
     bool _selected;
     CEGraphCurve* _curve;
     int _index;
@@ -51,15 +57,4 @@ private:
     double _handleAnchorY[2];
 };
 
-
 #endif
-
-
-
-
-
-
-
-
-
-

@@ -19,22 +19,20 @@
 #include "CETool.h"
 #include "CEMainUI.h"
 
-
 #include <fenv.h>
 
-int main(int argc,char *argv[])
-{ 
+int main(int argc, char* argv[]) {
     fp();
-    QApplication app(argc,argv);
-    CETool* tool=new CETool();
-    //tool->ui()->show();
-    animlib::AnimCurve& anim=*new animlib::AnimCurve((animlib::AnimAttrID()));
+    QApplication app(argc, argv);
+    CETool* tool = new CETool();
+    // tool->ui()->show();
+    animlib::AnimCurve& anim = *new animlib::AnimCurve((animlib::AnimAttrID()));
     anim.setPreInfinity(animlib::AnimCurve::kInfinityOscillate);
-    typedef animlib:: AnimKeyframe  Key;
-    Key key1(0.,0.);
-    Key key2(2.,2.);
-    Key key3(4.,0.);
-    Key key4(5.,-2.);
+    typedef animlib::AnimKeyframe Key;
+    Key key1(0., 0.);
+    Key key2(2., 2.);
+    Key key3(4., 0.);
+    Key key4(5., -2.);
     key1.setInTangentType(animlib::AnimKeyframe::kTangentFixed);
     key1.setInAngle(30);
     key1.setOutTangentType(animlib::AnimKeyframe::kTangentFixed);
@@ -56,12 +54,11 @@ int main(int argc,char *argv[])
 
     anim.setWeighted(true);
     QWidget* widg;
-    tool->map(widg,0);
+    tool->map(widg, 0);
     tool->addCurve(&anim);
     widg->setMinimumWidth(512);
     widg->show();
-    //tool->disableControls();
+    // tool->disableControls();
     app.exec();
     return 0;
 }
-

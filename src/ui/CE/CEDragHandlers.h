@@ -26,11 +26,9 @@ class CEGraphUI;
 class CETool;
 class CEGraphSeg;
 
-class CEDragHandler
-{
-public:
-    CEDragHandler() : _moved(false), _anchorX(0), _anchorY(0), _x(0), _y(0),
-		      _dx(0), _dy(0), _ui(0) {}
+class CEDragHandler {
+  public:
+    CEDragHandler() : _moved(false), _anchorX(0), _anchorY(0), _x(0), _y(0), _dx(0), _dy(0), _ui(0) {}
     virtual ~CEDragHandler() {}
 
     virtual void mouseDown() {}
@@ -38,58 +36,56 @@ public:
     virtual void mouseUp() {}
     virtual bool showCrossHairs() { return 0; }
     virtual void setMultiDrag(std::vector<CEGraphKey*> graph_segments) {}
-    
+
     void setAnchor(CEGraphUI* ui, int anchorX, int anchorY);
     void movePoint(int x, int y);
 
-protected:
+  protected:
     bool _moved;
-    int _anchorX, _anchorY;	// mouse down x,y pos
-    int _x, _y;			// current x,y pos
-    int _dx, _dy;		// delta x,y (current-anchor) for convenience
-    CEGraphView _view;		// view at mouse down
-    CEGraphUI* _ui;		// graph ui
+    int _anchorX, _anchorY;  // mouse down x,y pos
+    int _x, _y;              // current x,y pos
+    int _dx, _dy;            // delta x,y (current-anchor) for convenience
+    CEGraphView _view;       // view at mouse down
+    CEGraphUI* _ui;          // graph ui
 };
 
-
-class CEPanHandler : public CEDragHandler
-{
-public:
+class CEPanHandler : public CEDragHandler {
+  public:
     virtual void mouseMove() { pan(false); }
-    virtual void mouseUp() { if (_moved) pan(true); }
-private:
+    virtual void mouseUp() {
+        if (_moved) pan(true);
+    }
+
+  private:
     void pan(bool useCommand);
 };
 
-
-class CEZoomHandler : public CEDragHandler
-{
-public:
+class CEZoomHandler : public CEDragHandler {
+  public:
     CEZoomHandler(bool x, bool y) : _zoomX(x), _zoomY(y) {}
     virtual void mouseMove() { zoom(false); }
-    virtual void mouseUp() { if (_moved) zoom(true); }
-private:
+    virtual void mouseUp() {
+        if (_moved) zoom(true);
+    }
+
+  private:
     void zoom(bool useCommand);
-    bool _zoomX;		// flag enabling x zooming
-    bool _zoomY;		// flag enabling y zooming
+    bool _zoomX;  // flag enabling x zooming
+    bool _zoomY;  // flag enabling y zooming
 };
 
-
-class CESelBoxHandler : public CEDragHandler
-{
-public:
+class CESelBoxHandler : public CEDragHandler {
+  public:
     CESelBoxHandler(bool toggle) : _toggle(toggle) {}
     virtual void mouseMove();
     virtual void mouseUp();
-private:
+
+  private:
     bool _toggle;
-    struct Seg { 
-        Seg(int curveIndex, int segIndex)
-            : curveIndex(curveIndex), segIndex(segIndex) {}
-        bool operator==(const Seg& seg) const
-           { return curveIndex==seg.curveIndex && segIndex==seg.segIndex; }
-        bool operator!=(const Seg& seg) const
-           { return curveIndex!=seg.curveIndex || segIndex!=seg.segIndex; }
+    struct Seg {
+        Seg(int curveIndex, int segIndex) : curveIndex(curveIndex), segIndex(segIndex) {}
+        bool operator==(const Seg& seg) const { return curveIndex == seg.curveIndex && segIndex == seg.segIndex; }
+        bool operator!=(const Seg& seg) const { return curveIndex != seg.curveIndex || segIndex != seg.segIndex; }
         int curveIndex;
         int segIndex;
     };
@@ -97,72 +93,65 @@ private:
     std::vector<Seg> _segs;
 };
 
-
-class CEKeyHandler : public CEDragHandler
-{
-public:
+class CEKeyHandler : public CEDragHandler {
+  public:
     CEKeyHandler(CEGraphKey* seg);
     virtual bool showCrossHairs() { return 1; }
 
-protected:
+  protected:
     animlib::AnimCurve* _animCurve;
-    int _curve;			// curve index
-    int _seg;			// segment index
-
+    int _curve;  // curve index
+    int _seg;    // segment index
 };
 
-
-class CEKeyMoveHandler : public CEKeyHandler
-{
-public:
-    CEKeyMoveHandler(CEGraphKey* key, bool dragTime, bool dragValue,
-		 double hSnap=0, double vSnap=0);
+class CEKeyMoveHandler : public CEKeyHandler {
+  public:
+    CEKeyMoveHandler(CEGraphKey* key, bool dragTime, bool dragValue, double hSnap = 0, double vSnap = 0);
     virtual void mouseMove() { moveKey(false); }
-    virtual void mouseUp() { if (_moved) moveKey(true); }
+    virtual void mouseUp() {
+        if (_moved) moveKey(true);
+    }
     virtual void setMultiDrag(std::vector<CEGraphKey*> graph_segments);
-protected:
+
+  protected:
     void moveKey(bool useCommand);
     bool _dragTime;
     bool _dragValue;
     double _anchorTime;
     double _anchorValue;
-    std::vector<double> _anchorTimes;    //Mutiple segments only
-    std::vector<double> _anchorValues;   //Mutiple segments only
-    std::vector<int> _curves;      //Mutiple segments only
-    std::vector<int> _segs;        //Mutiple segments only
+    std::vector<double> _anchorTimes;  // Mutiple segments only
+    std::vector<double> _anchorValues;  // Mutiple segments only
+    std::vector<int> _curves;  // Mutiple segments only
+    std::vector<int> _segs;  // Mutiple segments only
     double _hSnap;
     double _vSnap;
 };
 
-
-class CENewKeyHandler :public CEDragHandler
-{
-public:
-    CENewKeyHandler(CEGraphSeg* key)
-        :_key(key)
-    {}
+class CENewKeyHandler : public CEDragHandler {
+  public:
+    CENewKeyHandler(CEGraphSeg* key) : _key(key) {}
     virtual void mouseDown();
 
-private:
+  private:
     CEGraphSeg* _key;
 };
 
-
-class CEBezHandler : public CEKeyHandler
-{
-public:
+class CEBezHandler : public CEKeyHandler {
+  public:
     CEBezHandler(CEGraphKey* key, int handle, bool dragAngle, bool dragLength, bool weighted);
     virtual void mouseMove() { dragHandle(false); }
-    virtual void mouseUp() { if (_moved) dragHandle(true); }
+    virtual void mouseUp() {
+        if (_moved) dragHandle(true);
+    }
     virtual void mouseDown();
     void dragHandle(bool useCommand);
 
-protected:
+  protected:
     int _handle;
     bool _dragAngle, _dragLength;
     bool _weighted;
-    double _refX, _refY; // reference point where we started dragging from
-    double _originalWeightIn,_originalWeightOut; // original weights
-    double _time,_value;
+    double _refX, _refY;                           // reference point where we started dragging from
+    double _originalWeightIn, _originalWeightOut;  // original weights
+    double _time, _value;
 };
 #endif

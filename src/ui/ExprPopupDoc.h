@@ -20,16 +20,15 @@
 #include <QtGui/QWidget>
 
 class QLabel;
-class ExprPopupDoc:public QWidget
-{
+class ExprPopupDoc : public QWidget {
     Q_OBJECT;
 
-public:
+  public:
     QLabel* label;
-    ExprPopupDoc(QWidget* parent,const QPoint& cr,const QString& msg);
+    ExprPopupDoc(QWidget* parent, const QPoint& cr, const QString& msg);
 
-protected:
-    void	mousePressEvent ( QMouseEvent * event );
+  protected:
+    void mousePressEvent(QMouseEvent* event);
 };
 
 #endif

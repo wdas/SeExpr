@@ -25,12 +25,11 @@
 class CETool;
 class CEGraphUI;
 class CEGraphSeg;
-class CEGraphKey;;
+class CEGraphKey;
+;
 
-
-class CEGraphCurve
-{
-public:
+class CEGraphCurve {
+  public:
     CEGraphCurve(CEGraphUI* ui, animlib::AnimCurve* data, int index);
     ~CEGraphCurve();
     CEGraphUI* ui() { return _ui; }
@@ -40,27 +39,27 @@ public:
     void invalidate();
     void invalidateView();
     int numSegs();
-    void getSegAndKey(int segIndex,CEGraphSeg*& seg,CEGraphKey*& key);
+    void getSegAndKey(int segIndex, CEGraphSeg*& seg, CEGraphKey*& key);
     int firstSegInView() { return _firstSegInView; }
     int lastSegInView() { return _lastSegInView; }
 
-private:
+  private:
     void clearSegs();
     void buildSegPtrs();
     void buildSeg(int n);
     void updateView();
     CEGraphUI* _ui;
     animlib::AnimCurve* _animCurve;
-    //iSgExpr _expr;
-    int _index; // curve index within graph ui
-    
+    // iSgExpr _expr;
+    int _index;  // curve index within graph ui
+
     bool _segsValid;
     bool _viewValid;
 
     struct SegPtr {
-	SegPtr() : seg(0),key(0) {}
-	CEGraphSeg* seg; // segment built lazily in getSeg()
-	CEGraphKey* key; // segment built lazily in getSeg()
+        SegPtr() : seg(0), key(0) {}
+        CEGraphSeg* seg;  // segment built lazily in getSeg()
+        CEGraphKey* key;  // segment built lazily in getSeg()
     };
     std::vector<SegPtr> _segs;
     int _firstSegInView;

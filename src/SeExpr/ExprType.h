@@ -227,11 +227,9 @@ class ExprType {
 };
 
 /// Quick way to get a vector type i.e. 3 vec is TypeVec(3)
-inline ExprType TypeVec(int n){
-    return ExprType().FP(n).Varying();
-}
+inline ExprType TypeVec(int n) { return ExprType().FP(n).Varying(); }
 
-} // namespace
+}  // namespace
 
 #pragma pop_macro("None")
 

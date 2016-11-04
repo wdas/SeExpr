@@ -36,15 +36,13 @@
 /**
  * Constructor.
  */
-CECurveListUI::CECurveListUI(QWidget* parent, CETool* tool) :
-    QWidget(parent), _tool(tool),
-    _listValid(0), _selValid(0), _updating(0)
-{
+CECurveListUI::CECurveListUI(QWidget* parent, CETool* tool)
+    : QWidget(parent), _tool(tool), _listValid(0), _selValid(0), _updating(0) {
     setObjectName("CurveList");
 
     QVBoxLayout* layout = new QVBoxLayout(this);
-//qt3    layout->setAutoAdd(true);
-    
+    // qt3    layout->setAutoAdd(true);
+
     QLabel* label = new QLabel("Curves", this);
     _list = new QListWidget(this);
     _list->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -62,14 +60,9 @@ CECurveListUI::CECurveListUI(QWidget* parent, CETool* tool) :
 /**
  * Destructor.
  */
-CECurveListUI::~CECurveListUI()
-{
-}
+CECurveListUI::~CECurveListUI() {}
 
-    
-void
-CECurveListUI::invalidateCurveList()
-{
+void CECurveListUI::invalidateCurveList() {
     if (_listValid || _selValid) {
         _listValid = 0;
         _selValid = 0;
@@ -77,37 +70,25 @@ CECurveListUI::invalidateCurveList()
     }
 }
 
-
-void
-CECurveListUI::invalidateSelection()
-{
-    if (_updating) return; // prevent circular update!
+void CECurveListUI::invalidateSelection() {
+    if (_updating) return;  // prevent circular update!
     if (_selValid) {
         _selValid = 0;
         update();
     }
 }
 
-
-void
-CECurveListUI::paintEvent(QPaintEvent* event)
-{
+void CECurveListUI::paintEvent(QPaintEvent* event) {
     if (!_listValid || !_selValid) doUpdate();
     QWidget::paintEvent(event);
 }
 
-
-void
-CECurveListUI::showEvent(QShowEvent* event)
-{
+void CECurveListUI::showEvent(QShowEvent* event) {
     if (!_listValid || !_selValid) doUpdate();
     QWidget::showEvent(event);
 }
 
-
-void
-CECurveListUI::doUpdate()
-{
+void CECurveListUI::doUpdate() {
     _updating = 1;
 
     if (!_listValid) {
@@ -117,64 +98,59 @@ CECurveListUI::doUpdate()
         int i;
         for (i = 0; i < (int)names.size(); i++) {
             const char* name = names[i].c_str();
-            if (i >= (int) _list->count())
-                _list->addItem(name);
-//qt3            else if (_list->text(i) != name)
-            else if (_list->currentItem() && 
-                     _list->currentItem()->text() != name)
-            {
-//qt3                _list->changeItem(name, i);
+            if (i >= (int)_list->count()) _list->addItem(name);
+            // qt3            else if (_list->text(i) != name)
+            else if (_list->currentItem() && _list->currentItem()->text() != name) {
+                // qt3                _list->changeItem(name, i);
                 QListWidgetItem* curItem = _list->currentItem();
                 curItem->setText(name);
             }
         }
-        while ((int) _list->count() > i)
-//qt3            _list->removeItem(_list->count()-1);
-            _list->takeItem( _list->count()-1 );
-
+        while ((int)_list->count() > i)
+            // qt3            _list->removeItem(_list->count()-1);
+            _list->takeItem(_list->count() - 1);
     }
     if (!_listValid || !_selValid) {
         // update listbox's selection from tool
         msg::list sel;
         _tool->getSelection(sel);
-        _list->clearSelection(); // TODO: will this emit selectionChanged() like the Qt3 version?
-        for (int i = 0; i < sel.size(); i+=2)
-//qt3            _list->setSelected(sel[i], true);
-            _list->setCurrentRow(sel[i]); // TODO: I'm pretty sure sel[i] will be an int
+        _list->clearSelection();  // TODO: will this emit selectionChanged() like the Qt3 version?
+        for (int i = 0; i < sel.size(); i += 2)
+            // qt3            _list->setSelected(sel[i], true);
+            _list->setCurrentRow(sel[i]);  // TODO: I'm pretty sure sel[i] will be an int
     }
     _selValid = 1;
     _listValid = 1;
     _updating = 0;
 }
 
-void
-CECurveListUI::handleSelectionChanged()
-{
-    if (_updating) return; // prevent circular update!
+void CECurveListUI::handleSelectionChanged() {
+    if (_updating) return;  // prevent circular update!
     _updating = 1;
 
     // first count selections
     int num = 0;
-    int curve=0;
+    int curve = 0;
     int i;
-    for (i = 0; i < (int) _list->count(); i++)
-    {
+    for (i = 0; i < (int)_list->count(); i++) {
         QListWidgetItem* curItem = _list->item(i);
-//qt3        if (_list->isSelected(i)) { num++; curve = i; }
-        if ( curItem && curItem->isSelected() ) { num++; curve = i; }
+        // qt3        if (_list->isSelected(i)) { num++; curve = i; }
+        if (curItem && curItem->isSelected()) {
+            num++;
+            curve = i;
+        }
     }
 
     // update tool's selection list from listbox
-    if (num == 0) 
+    if (num == 0)
         _tool->clearSelection();
     else if (num == 1)
         _tool->selectCurve(curve);
     else {
         msg::list selections(num);
         int n = 0;
-        for (i = 0; i < (int) _list->count(); i++)
-        {    
-//qt3            if (_list->isSelected(i))
+        for (i = 0; i < (int)_list->count(); i++) {
+            // qt3            if (_list->isSelected(i))
             QListWidgetItem* curItem = _list->item(i);
             if (curItem->isSelected()) selections.set(n++, i);
         }

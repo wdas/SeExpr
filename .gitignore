@@ -3,6 +3,8 @@
 /build
 /Linux-*
 /Darwin-*
-kbuild*
 *#*#
+*~
 CMakeCache.txt
+src/SeExpr/parser
+src/SeExprEditor/generated

@@ -25,7 +25,7 @@
 
 #include <GL/gl.h>
 #include <vector>
-//qt3 #include <qgl.h>
+// qt3 #include <qgl.h>
 #include "CEGraphView.h"
 
 class CETool;
@@ -40,7 +40,6 @@ class QEvent;
 class QResizeEvent;
 class QMouseEvent;
 
-
 //****************************************************************************
 /**
  * @class CEGraphUI
@@ -53,14 +52,12 @@ class QMouseEvent;
  * @version <B>1.0 brentb 2001.11.20:</B> Initial version of class CEGraphUI.
  * @version <b>2.0 bsilva 2001.10.11:</b> Ported to Qt4.
  *
- */  
+ */
 
-class CEGraphUI :
-    public QGLWidget
-{   
+class CEGraphUI : public QGLWidget {
     Q_OBJECT
 
-public:
+  public:
     /// Constructor
     CEGraphUI(QWidget* parent, CETool* tool);
     /// Destructor
@@ -73,22 +70,34 @@ public:
     void moveSelBox(int x1, int y1, int x2, int y2);
     void hideSelBox();
     enum ColorType {
-        BgColor, ScaleBgColor, ScaleColor, GridColor, TimebarColor,
-        OverlayColor, SelectedColor, HiSelectedColor, 
-        CurveColor, HiCurveColor, NumColors };
+        BgColor,
+        ScaleBgColor,
+        ScaleColor,
+        GridColor,
+        TimebarColor,
+        OverlayColor,
+        SelectedColor,
+        HiSelectedColor,
+        CurveColor,
+        HiCurveColor,
+        NumColors
+    };
     void setColor(ColorType color);
     const QColor& getColor(ColorType color);
-    void getActivePart(int& curve, int& seg, int& part)
-      { curve = _activeCurve; seg = _activeSeg; part = _activePart; }
+    void getActivePart(int& curve, int& seg, int& part) {
+        curve = _activeCurve;
+        seg = _activeSeg;
+        part = _activePart;
+    }
     CEGraphCurve* getCurve(int curve);
     CEGraphSeg* getSeg(int curve, int seg);
     CEGraphKey* getKey(int curve, int seg);
-    int doSelectModeRender(int x1, int x2, int y1, int y2,
-			   GLuint* buffer, int bufsize);
+    int doSelectModeRender(int x1, int x2, int y1, int y2, GLuint* buffer, int bufsize);
 
     virtual QSize minimumSizeHint() const { return QSize(200, 200); }
 
-public slots:
+  public
+slots:
 
     /// Notification methods (from CETool)
     void invalidateCurve(int index);
@@ -97,9 +106,9 @@ public slots:
     void invalidateView();
     void invalidateTimeMode();
 
-//    void show();
+    //    void show();
 
-protected:
+  protected:
     /// overrides of QGLWidget methods
     virtual void initializeGL();
     virtual void resizeGL(int w, int h);
@@ -107,31 +116,28 @@ protected:
     virtual void paintGL();
     virtual void paintOverlayGL();
 
-    virtual void resizeEvent(QResizeEvent *e);
+    virtual void resizeEvent(QResizeEvent* e);
     virtual void mousePressEvent(QMouseEvent* e);
     virtual void mouseDoubleClickEvent(QMouseEvent* e);
     virtual void mouseMoveEvent(QMouseEvent* e);
     virtual void mouseReleaseEvent(QMouseEvent* e);
     virtual void enterEvent(QEvent* e);
     virtual void leaveEvent(QEvent* e);
-    virtual void keyPressEvent(QKeyEvent *event);
-
+    virtual void keyPressEvent(QKeyEvent* event);
 
     void printStringAt(double x, double y, const char* str);
 
-private:
+  private:
     /// No definition by design, so accidental copying is prevented.
-    CEGraphUI ( const CEGraphUI& );     
+    CEGraphUI(const CEGraphUI&);
     /// No definition by design, so accidental assignment is prevented.
-    CEGraphUI& operator=( const CEGraphUI& );  
+    CEGraphUI& operator=(const CEGraphUI&);
 
-    void getNextIncrement(double min, int timeMode,
-			  double& increment, int& numDecimalPlaces);
-    void getNextTickIncrement(double increment, int timeMode,
-			      double& tickIncrement);
+    void getNextIncrement(double min, int timeMode, double& increment, int& numDecimalPlaces);
+    void getNextTickIncrement(double increment, int timeMode, double& tickIncrement);
     void paintScales();
     void paintCurves();
-    void paintOverlay(bool erase=0);
+    void paintOverlay(bool erase = 0);
     void paintCrossHairs();
     void paintSelBox();
     void paintTimeBar(double frame);
@@ -147,7 +153,7 @@ private:
 
     CETool* _tool;
     QColor _colors[NumColors];
-    
+
     QFont _font;
     int _fontListBase;
     int _fontListCount;
@@ -157,7 +163,7 @@ private:
     int _scalesHeight;
 
     // current view
-    CEGraphView _view; 
+    CEGraphView _view;
     bool _viewValid;
 
     // crosshair data
@@ -181,4 +187,4 @@ private:
     CEDragHandler* _dragHandler;
 };
 
-#endif //CEGraphUI_h
+#endif  // CEGraphUI_h

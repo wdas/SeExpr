@@ -21,12 +21,11 @@
 #ifndef CECurveListUI_h
 #define CECurveListUI_h
 
-//qt3 #include <qwidget.h>
+// qt3 #include <qwidget.h>
 #include <QtGui/QWidget>
 
 class CETool;
 class QListWidget;
-
 
 //****************************************************************************
 /**
@@ -39,35 +38,35 @@ class QListWidget;
  *
  * @version <B>1.0 brentb 11/20/2001:</B> Initial version of class CECurveListUI.
  *
- */  
+ */
 
-class CECurveListUI : public QWidget
-{   
+class CECurveListUI : public QWidget {
     Q_OBJECT
-    
-public:
+
+  public:
     /// Constructor
     CECurveListUI(QWidget* parent, CETool* tool);
     /// Destructor
     virtual ~CECurveListUI();
 
     /// override of minimumSizeHint
-    virtual QSize minimumSizeHint () const { return QSize(0,0); }
+    virtual QSize minimumSizeHint() const { return QSize(0, 0); }
 
-private slots:
+  private
+slots:
 
     void invalidateCurveList();
     void invalidateSelection();
     void handleSelectionChanged();
 
-private:
+  private:
     /// No definition by design, so accidental copying is prevented.
-    CECurveListUI ( const CECurveListUI& );     
+    CECurveListUI(const CECurveListUI&);
     /// No definition by design, so accidental assignment is prevented.
-    CECurveListUI& operator=( const CECurveListUI& );  
+    CECurveListUI& operator=(const CECurveListUI&);
     /// QWidget override
-    virtual void paintEvent (QPaintEvent* event); 
-    virtual void showEvent (QShowEvent* event);
+    virtual void paintEvent(QPaintEvent* event);
+    virtual void showEvent(QShowEvent* event);
 
     /// Update state from tool/curve data
     void doUpdate();
@@ -79,4 +78,4 @@ private:
     bool _updating;
 };
 
-#endif //CECurveListUI_h
+#endif  // CECurveListUI_h
