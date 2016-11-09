@@ -20,8 +20,8 @@
 */
 #ifndef _ExprHighlighter_h_
 #define _ExprHighlighter_h_
-#include <QtGui/QSyntaxHighlighter>
-#include <QtGui/QPalette>
+#include <QSyntaxHighlighter>
+#include <QPalette>
 #include <iostream>
 
 class ExprHighlighter : public QSyntaxHighlighter {

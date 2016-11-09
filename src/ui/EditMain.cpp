@@ -18,7 +18,7 @@
 #include <iostream>
 #include <string>
 
-#include <QtGui/QApplication>
+#include <QApplication>
 #include "SeExprEdDialog.h"
 
 int main(int argc, char *argv[]) {

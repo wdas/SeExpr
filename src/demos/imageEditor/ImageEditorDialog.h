@@ -19,7 +19,7 @@
    @file ImageEditorDialog.h
 */
 
-#include <QtGui/QDialog>
+#include <QDialog>
 
 class QLabel;
 class ExprEditor;

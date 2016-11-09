@@ -24,11 +24,11 @@
 
 #include <vector>
 
-#include <QtCore/QObject>
-#include <QtGui/QComboBox>
-#include <QtGui/QGraphicsProxyWidget>
-#include <QtGui/QGraphicsView>
-#include <QtGui/QLineEdit>
+#include <QObject>
+#include <QComboBox>
+#include <QGraphicsProxyWidget>
+#include <QGraphicsView>
+#include <QLineEdit>
 
 #include <SeExpr2/Vec.h>
 

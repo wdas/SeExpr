@@ -24,11 +24,11 @@
 #include <qlayout.h>
 */
 
-#include <QtGui/QWidget>
-#include <QtGui/QLabel>
-#include <QtGui/QListWidget>
-#include <QtGui/QListWidgetItem>
-#include <QtGui/QLayout>
+#include <QWidget>
+#include <QLabel>
+#include <QListWidget>
+#include <QListWidgetItem>
+#include <QLayout>
 
 #include "CETool.h"
 #include "CECurveListUI.h"

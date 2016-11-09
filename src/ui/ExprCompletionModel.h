@@ -43,7 +43,7 @@ class ExprCompletionModel : public QAbstractItemModel  // ItemModel
 
     ExprCompletionModel(QObject* parent = 0);
 
-    QModelIndex index(int row, int column, const QModelIndex&) const { return createIndex(row, column, 0); }
+    QModelIndex index(int row, int column, const QModelIndex&) const { return createIndex(row, column, nullptr); }
 
     QModelIndex parent(const QModelIndex&) const { return QModelIndex(); }
 

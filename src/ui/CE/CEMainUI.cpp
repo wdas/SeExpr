@@ -21,19 +21,19 @@
 // qt3 #include <qsplitter.h>
 // qt3 #include <qlayout.h>
 
-#include <QtCore/QList>
-#include <QtGui/QSplitter>
-#include <QtGui/QLayout>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QLabel>
-
-#include <QtGui/QPushButton>
+#include <QList>
+#include <QSplitter>
+#include <QLayout>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QPushButton>
 
 #include "CECurveListUI.h"
 #include "CEGraphUI.h"
 #include "CESegEditUI.h"
-#include <animlib/AnimCurve.h>
 #include "CEMainUI.h"
+
+#include <animlib/AnimCurve.h>
 
 /**
  * Constructor.

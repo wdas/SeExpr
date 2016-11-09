@@ -22,16 +22,16 @@
 #include <iostream>
 #include <algorithm>
 
-#include <QtGui/QColorDialog>
-#include <QtGui/QDoubleValidator>
-#include <QtGui/QGraphicsSceneMouseEvent>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QResizeEvent>
-#include <QtGui/QPushButton>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QMenu>
+#include <QColorDialog>
+#include <QDoubleValidator>
+#include <QGraphicsSceneMouseEvent>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QVBoxLayout>
+#include <QResizeEvent>
+#include <QPushButton>
+#include <QDialogButtonBox>
+#include <QMenu>
 
 #include <SeExpr2/ExprBuiltins.h>
 #ifdef SEEXPR_USE_QDGUI

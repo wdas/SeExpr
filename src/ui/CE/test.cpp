@@ -15,7 +15,7 @@
 * http://www.apache.org/licenses/LICENSE-2.0
 */
 #include <animlib/AnimCurve.h>
-#include <QtGui/QApplication>
+#include <QApplication>
 #include "CETool.h"
 #include "CEMainUI.h"
 
