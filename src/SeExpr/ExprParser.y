@@ -198,11 +198,11 @@ typeListOptional:
 typeList:
       typeDeclare               { $$ = NODE(@$.first_column, @$.last_column, Node);
                                   SeExpr2::ExprType type = SeExpr2::ExprType($1.type, $1.dim, $1.lifetime);
-                                  SeExpr2::ExprNode* varNode = NODE2(@$.first_column, @$.last_column, VarNode, 0, type);
+                                  SeExpr2::ExprNode* varNode = NODE2(@$.first_column, @$.last_column, VarNode, "", type);
                                   $$->addChild(varNode); }
     | typeList ',' typeDeclare  { $$ = $1;
                                   SeExpr2::ExprType type = SeExpr2::ExprType($3.type, $3.dim, $3.lifetime);
-                                  SeExpr2::ExprNode* varNode = NODE2(@3.first_column, @3.last_column, VarNode, 0, type);
+                                  SeExpr2::ExprNode* varNode = NODE2(@3.first_column, @3.last_column, VarNode, "", type);
                                   $$->addChild(varNode); }
     ;
 
