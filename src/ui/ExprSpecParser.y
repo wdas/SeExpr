@@ -504,7 +504,9 @@ static void yyerror(const char* /*msg*/)
     if (e != end) ParseError += "...";
 }
 
+namespace SeExpr2 {
 extern void specResetCounters(std::vector<std::pair<int,int> >& comments);
+}
 
 
 /* CallParser - This is our entrypoint from the rest of the expr library. 
@@ -529,7 +531,7 @@ bool ExprSpecParse(std::vector<Editable*>& outputEditables,
     ParseStr=str;
 
     // setup and startup parser
-    specResetCounters(comments); // reset lineNumber and columnNumber in scanner
+    SeExpr2::specResetCounters(comments); // reset lineNumber and columnNumber in scanner
     yy_buffer_state* buffer = yy_scan_string(str); // setup lexer
     ParseResult = 0;
     int resultCode = yyparse(); // parser (don't care if it is a parse error)

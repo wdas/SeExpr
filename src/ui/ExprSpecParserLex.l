@@ -45,13 +45,14 @@
 // TODO: make this thread safe
 static int columnNumber=0; // really buffer position
 static int lineNumber=0; // not used
-
 static std::vector<std::pair<int,int> >* comments=0;
 
 extern char* specRegisterToken(char* tok);
+namespace SeExpr2 {
 void specResetCounters(std::vector<std::pair<int,int> >& commentsIn){
-   columnNumber=lineNumber=0;
-   comments=&commentsIn;
+    columnNumber=lineNumber=0;
+    comments=&commentsIn;
+}
 }
 
 int yypos(); // forward declare
