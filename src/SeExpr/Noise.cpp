@@ -104,6 +104,9 @@ T noiseHelper(const T* X, const int* period = 0) {
         for (int k = 0; k < d; k++) {
             offset[k] = ((dummy & (1 << k)) != 0);
             latticeIndex[k] = index[k] + offset[k];
+            if (periodic) {
+                latticeIndex[k] %= period[k];
+            }
         }
         // hash to get representative gradient vector
         int lookup = hashReduceChar<d>(latticeIndex);
