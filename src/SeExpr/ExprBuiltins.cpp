@@ -65,8 +65,8 @@ static const char* atanh_docstring = "float atanh(float angle)\nhyperbolic arc t
 // clamping/rounding
 static const char* clamp_docstring = "float clamp(float x,float lo,float hi)\nconstrain x to range [lo,hi]";
 static const char* round_docstring = "float round(float x)\nconstrain x to range [lo,hi]";
-static const char* max_docstring = "float max(float a,float b)\ngreater of a and b";
-static const char* min_docstring = "float min(float a,float b)\nlesser of a and b";
+static const char* max_docstring = "float max(float a,float b,...)\ngreater of all inputs";
+static const char* min_docstring = "float min(float a,float b,...)\nlesser of all inputs";
 static const char* trunc_docstring = "float trunc(float a)\nnearest integer towards zero";
 static const char* floor_docstring = "float floor(float a)\nnext lower integer";
 static const char* ceil_docstring = "float ceil(float a)\nnext higher integer";
@@ -212,6 +212,21 @@ static const char* remap_docstring =
 
 double mix(double x, double y, double alpha) { return x * (1 - alpha) + y * alpha; }
 static const char* mix_docstring = "mix(float a,float b,float alpha)\nBlend of a and b according to alpha.";
+
+double max(int n, double* args) {
+    double value = args[0];
+    for (unsigned int i = 1; i < n; i++) {
+        value = args[i] > value ? args[i] : value;
+    }
+    return value;
+}
+double min(int n, double* args) {
+    double value = args[0];
+    for (unsigned int i = 1; i < n; i++) {
+        value = args[i] < value ? args[i] : value;
+    }
+    return value;
+}
 
 Vec3d hsiAdjust(const Vec3d& rgb, double h, double s, double i) {
     Vec3d hsl = rgbtohsl(rgb);
@@ -1653,8 +1668,8 @@ void defineBuiltins(ExprFunc::Define define, ExprFunc::Define3 define3) {
     // clamping
     FUNCDOC(clamp);
     FUNCDOC(round);
-    FUNCDOC(max);
-    FUNCDOC(min);
+    FUNCNDOC(max, 2, 50);
+    FUNCNDOC(min, 2, 50);
 
     // blending / remapping
     FUNCDOC(invert);
