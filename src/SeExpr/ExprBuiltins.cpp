@@ -1229,8 +1229,7 @@ double cycle(double index, double loRange, double hiRange) {
 static const char* cycle_docstring =
     "int cycle(int index, int loRange, int hiRange )\n"
     "Cycles through values between loRange and hiRange based on supplied index.\n"
-    "This is an offset \"mod\" function. The result is rotates v such that the\n"
-    "Y axis points in the given up direction";
+    "This is an offset \"mod\" function.";
 
 double pick(int n, double* params) {
     if (n < 3) return 0;
