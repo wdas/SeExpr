@@ -1083,7 +1083,30 @@ class CachedVoronoiFunc : public ExprFuncSimple {
     VoronoiFunc* _vfunc;
 } voronoi(voronoiFn), cvoronoi(cvoronoiFn), pvoronoi(pvoronoiFn);
 
-double dist(double ax, double ay, double az, double bx, double by, double bz) {
+double dist(int n, const Vec3d* args) {
+    double ax = 0.0, ay = 0.0, az = 0.0, bx = 0.0, by = 0.0, bz = 0.0;
+    if (n == 2) {
+        ax = args[0][0];
+        ay = args[0][1];
+        az = args[0][2];
+        bx = args[1][0];
+        by = args[1][1];
+        bz = args[1][2];
+    } else if (n==4) {
+        ax = args[0][0];
+        ay = args[1][0];
+        az = 0;
+        bx = args[2][0];
+        by = args[3][0];
+        bz = 0;
+    } else if (n == 6) {
+        ax = args[0][0];
+        ay = args[1][0];
+        az = args[2][0];
+        bx = args[3][0];
+        by = args[4][0];
+        bz = args[5][0];
+    } else return 0.0;
     double x = ax - bx;
     double y = ay - by;
     double z = az - bz;
@@ -1091,7 +1114,10 @@ double dist(double ax, double ay, double az, double bx, double by, double bz) {
 }
 static const char* dist_docstring =
     "float dist(vector a, vector b)\n"
-    "distance between two points";
+    "float dist(double ax, double ay, double bx, double by)\n"
+    "float dist(double ax, double ay, double az, double bx, double by, double bz)\n"
+    "distance between two points.\n"
+    "Can be specifed as two vectors, or four or six vector components ";
 
 double length(const Vec3d& v) { return sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]); }
 static const char* length_docstring =
@@ -1735,7 +1761,7 @@ void defineBuiltins(ExprFunc::Define define, ExprFunc::Define3 define3) {
     FUNCNDOC(cfbm4, 2, 5);
 
     // vectors
-    FUNCDOC(dist);
+    FUNCNDOC(dist, 2, 6);
     FUNCDOC(length);
     FUNCDOC(hypot);
     FUNCDOC(dot);

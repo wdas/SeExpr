@@ -80,7 +80,7 @@ Vec3d ccellnoise(const Vec3d& p);
 double pnoise(const Vec3d& p, const Vec3d& period);
 
 // vectors
-double dist(double ax, double ay, double az, double bx, double by, double bz);
+double dist(int n, const Vec3d* args);
 double length(const Vec3d& v);
 double hypot(double x, double y);
 double dot(const Vec3d& a, const Vec3d& b);
