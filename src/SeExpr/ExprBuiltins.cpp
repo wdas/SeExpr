@@ -228,6 +228,16 @@ double min(int n, double* args) {
     return value;
 }
 
+double average(int n, double* args) {
+    double sum = 0.0;
+    for (unsigned int i = 0; i < n; i++) {
+        sum += args[i];
+    }
+    double div = (double)n;
+    return sum/div;
+}
+static const char* average_docstring = "average(a,b,c,...)\nAverage all inputs.";
+
 Vec3d hsiAdjust(const Vec3d& rgb, double h, double s, double i) {
     Vec3d hsl = rgbtohsl(rgb);
     hsl[0] += h * (1.0 / 360);
@@ -1685,6 +1695,7 @@ void defineBuiltins(ExprFunc::Define define, ExprFunc::Define3 define3) {
     FUNCDOC(gaussstep);
     FUNCDOC(remap);
     FUNCDOC(mix);
+    FUNCNDOC(average, 2, 50);
     FUNCNDOC(hsi, 4, 5);
     FUNCNDOC(midhsi, 5, 7);
     FUNCDOC(hsltorgb);

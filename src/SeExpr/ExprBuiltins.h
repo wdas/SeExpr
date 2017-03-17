@@ -56,6 +56,7 @@ double smoothstep(double x, double a, double b);
 double gaussstep(double x, double a, double b);
 double remap(double x, double s, double r, double f, double interp);
 double mix(double x, double y, double alpha);
+double average(int n, double* args);
 Vec3d hsi(int n, const Vec3d* args);
 Vec3d midhsi(int n, const Vec3d* args);
 Vec3d rgbtohsl(const Vec3d& rgb);
