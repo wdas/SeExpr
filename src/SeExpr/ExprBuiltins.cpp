@@ -787,7 +787,7 @@ double pnoise(const Vec3d& p, const Vec3d& period) {
                     std::max((int)1, (int)period[1]),
                     std::max((int)1, (int)period[2])};
     PNoise<3, 1>(args, pargs, &result);
-    return result;
+    return result *.5 + .5;
 }
 static const char* pnoise_docstring =
     "float pnoise ( vector v, vector period )\n"
