@@ -431,6 +431,15 @@ static const char* saturate_docstring =
     "The color is scaled around the rec709 luminance value,\n"
     "and negative results are clamped at zero.\n";
 
+Vec3d hue(int n, const Vec3d* args) {
+    if (n < 2) return 0.0;
+    if (args[1][0] == 0) return args[0];
+    return hsiAdjust(args[0], args[1][0], 1, 1);
+}
+static const char* hue_docstring =
+    "color hue(color val, float amt)\n"
+    "Shift the hue of color by amt in degrees.\n";
+
 double hash(int n, double* args) {
     // combine args into a single seed
     uint32_t seed = 0;
@@ -1697,6 +1706,7 @@ void defineBuiltins(ExprFunc::Define define, ExprFunc::Define3 define3) {
     FUNCDOC(mix);
     FUNCNDOC(average, 2, 50);
     FUNCNDOC(hsi, 4, 5);
+    FUNCNDOC(hue, 2, 2);
     FUNCNDOC(midhsi, 5, 7);
     FUNCDOC(hsltorgb);
     FUNCDOC(rgbtohsl);
