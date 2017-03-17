@@ -1276,6 +1276,18 @@ static const char* choose_docstring =
     "float choose(float index,float choice1, float choice2, [...])\n"
     "Chooses one of the supplied choices based on the index (assumed to be in range [0..1]).";
 
+double chooseIndex(int n, double* params) {
+    if (n < 2) return 0;
+    int key = params[0];
+    // NaN protection
+    if (key != key) return 0;
+    int nvals = n - 1;
+    return params[int(cycle(key,1,nvals))];
+}
+static const char* chooseIndex_docstring =
+    "float chooseIndex(int index,float choice1, float choice2, [...])\n"
+    "Cycles through the supplied choices based on the index (assumed to be in integer).";
+
 double wchoose(int n, double* params) {
     if (n < 5) return 0;
     double key = params[0];
@@ -1776,6 +1788,7 @@ void defineBuiltins(ExprFunc::Define define, ExprFunc::Define3 define3) {
     FUNCDOC(cycle);
     FUNCNDOC(pick, 3, -1);
     FUNCNDOC(choose, 3, -1);
+    FUNCNDOC(chooseIndex, 3, -1);
     FUNCNDOC(wchoose, 4, -1);
     FUNCNDOC(swatch, 3, -1);
     FUNCNDOC(spline, 5, -1);

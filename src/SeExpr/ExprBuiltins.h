@@ -94,6 +94,7 @@ Vec3d up(const Vec3d& vec, const Vec3d& upvec);
 double cycle(double index, double loRange, double hiRange);
 double pick(int n, double* params);
 double choose(int n, double* params);
+double chooseIndex(int n, double* params);
 double wchoose(int n, double* params);
 double spline(int n, double* params);
 
