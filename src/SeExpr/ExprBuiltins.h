@@ -39,8 +39,8 @@ inline double atan2d(double y, double x) { return deg(atan2(y, x)); }
 // clamping
 inline double clamp(double x, double lo, double hi) { return x < lo ? lo : x > hi ? hi : x; }
 inline double round(double x) { return x < 0 ? ceil(x - 0.5) : floor(x + 0.5); }
-inline double max(double x, double y) { return x > y ? x : y; }
-inline double min(double x, double y) { return x < y ? x : y; }
+double max(int n, double* args);
+double min(int n, double* args);
 
 // blending / remapping
 inline double invert(double x) { return 1 - x; }
