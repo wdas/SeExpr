@@ -58,6 +58,7 @@ double remap(double x, double s, double r, double f, double interp);
 double mix(double x, double y, double alpha);
 double average(int n, double* args);
 Vec3d hsi(int n, const Vec3d* args);
+Vec3d hue(int n, const Vec3d* args);
 Vec3d midhsi(int n, const Vec3d* args);
 Vec3d rgbtohsl(const Vec3d& rgb);
 Vec3d hsltorgb(const Vec3d& hsl);
