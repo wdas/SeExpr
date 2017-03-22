@@ -58,7 +58,7 @@ class ExprShortEdit : public QWidget {
     bool _applyOnSelect;
 
   public:
-    ExprShortEdit(QWidget* parent, bool expanded = true, bool applyOnSelect = true);
+    ExprShortEdit(QWidget* parent, bool expanded = true, bool applyOnSelect = false);
     virtual ~ExprShortEdit();
 
     // Gets the string that is in the edit widget
