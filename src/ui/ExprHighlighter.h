@@ -68,7 +68,7 @@ class ExprHighlighter : public QSyntaxHighlighter {
 
         variableFormat.setForeground(QColor::fromHsv(200, 153, lightness));
         // variableFormat.setFontWeight(QFont::Bold);
-        rule.pattern = QRegExp("\\$[A-Za-z][A-Za-z0-9]*\\b");
+        rule.pattern = QRegExp("\\$?[A-Za-z][A-Za-z0-9]*\\b(?!\\()");
         rule.format = variableFormat;
         highlightingRules.append(rule);
 
