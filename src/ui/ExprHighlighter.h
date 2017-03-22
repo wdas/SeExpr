@@ -72,7 +72,7 @@ class ExprHighlighter : public QSyntaxHighlighter {
         rule.format = variableFormat;
         highlightingRules.append(rule);
 
-        singleLineCommentFormat.setForeground(QColor::fromHsv(210, 128, lightness));
+        singleLineCommentFormat.setForeground(QColor::fromHsv(210, 64, lightness*.5));
         rule.pattern = QRegExp("#[^\n]*");
         rule.format = singleLineCommentFormat;
         highlightingRules.append(rule);
