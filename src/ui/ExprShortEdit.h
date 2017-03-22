@@ -92,7 +92,7 @@ class ExprShortEdit : public QWidget {
     //  Pass -1 to not show the editor
     void showDetails(int idx);
 
-    virtual QSize sizeHint() const { return QSize(400, 50); }
+    virtual QSize sizeHint() const { return QSize(400, 25); }
     virtual void hideErrors(bool hidden, const std::string& err);
 
     // Exposed via Python
