@@ -58,16 +58,6 @@
 #include "ExprControl.h"
 #include "ExprPopupDoc.h"
 
-ExprLineEdit::ExprLineEdit(int id, QWidget* parent) : QLineEdit(parent), _id(id), _signaling(0) {
-    connect(this, SIGNAL(textChanged(const QString&)), SLOT(textChangedCB(const QString&)));
-}
-
-void ExprLineEdit::textChangedCB(const QString& text) {
-    _signaling = 1;
-    emit textChanged(_id, text);
-    _signaling = 0;
-}
-
 void ExprEditor::controlChanged(int id) {
     QString newText = exprTe->toPlainText();
     controls->updateText(id, newText);

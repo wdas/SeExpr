@@ -90,6 +90,16 @@ static const char* fileXPM[] = {
     "....#aaaaaaaaaa#....", "....#accaccacca#....", "....#accaccacca#....", "....#aaaaaaaaaa#....",
     "....############....", "...................."};
 
+ExprLineEdit::ExprLineEdit(int id, QWidget* parent) : QLineEdit(parent), _id(id), _signaling(0) {
+    connect(this, SIGNAL(textChanged(const QString&)), SLOT(textChangedCB(const QString&)));
+}
+
+void ExprLineEdit::textChangedCB(const QString& text) {
+    _signaling = 1;
+    emit textChanged(_id, text);
+    _signaling = 0;
+}
+
 void ExprSlider::mousePressEvent(QMouseEvent* e) { mouseMoveEvent(e); }
 
 void ExprSlider::mouseMoveEvent(QMouseEvent* e) {
