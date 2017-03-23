@@ -73,15 +73,16 @@ class ExprHighlighter : public QSyntaxHighlighter {
         rule.format = variableFormat;
         highlightingRules.append(rule);
 
+        functionFormat.setForeground(QColor::fromHsv(140, 153, lightness));
+        rule.pattern = QRegExp("[A-Za-z][A-Za-z0-9]*\\b(?=\\()");
+        rule.format = functionFormat;
+        highlightingRules.append(rule);
+
         singleLineCommentFormat.setForeground(QColor::fromHsv(210, 64, lightness*.5));
         rule.pattern = QRegExp("#[^\n]*");
         rule.format = singleLineCommentFormat;
         highlightingRules.append(rule);
 
-        functionFormat.setForeground(QColor::fromHsv(140, 153, lightness));
-        rule.pattern = QRegExp("[A-Za-z][A-Za-z0-9]*\\b(?=\\()");
-        rule.format = functionFormat;
-        highlightingRules.append(rule);
     }
 
     void highlightBlock(const QString& text) {
