@@ -110,7 +110,7 @@ void ExprShortEdit::setSearchPath(const QString& context, const QString& path) {
 void ExprShortEdit::detailPressed() { showDetails(-1); }
 
 void ExprShortEdit::showDetails(int idx) {
-    _dialog = new ExprDialog(0);
+    _dialog = new ExprDialog(this);
     _dialog->editor->replaceExtras(*edit->completionModel);
 
     _dialog->browser->setApplyOnSelect(_applyOnSelect);
@@ -125,6 +125,7 @@ void ExprShortEdit::showDetails(int idx) {
     connect(_dialog, SIGNAL(dialogClosed()), SLOT(dialogClosed()));
     _dialog->show();
     setEnabled(false);
+    _dialog->setEnabled(true);
 }
 
 void ExprShortEdit::expressionApplied() { setExpressionString(_dialog->getExpressionString()); }
