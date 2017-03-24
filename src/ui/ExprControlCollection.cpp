@@ -39,10 +39,25 @@
 
 ExprControlCollection::ExprControlCollection(QWidget* parent, bool showAddButton)
     : QWidget(parent), count(0), showAddButton(showAddButton), editableExpression(0) {
+    QVBoxLayout* mainlayout = new QVBoxLayout();
+    mainlayout->setMargin(0);
+    mainlayout->setSpacing(0);
+
+    QWidget* scrollWidget = new QWidget();
+    QScrollArea* scrollArea = new QScrollArea();
+
+    scrollArea->setFocusPolicy(Qt::NoFocus);
+    scrollArea->setMinimumHeight(100);
+    scrollArea->setWidgetResizable(true);
+
     controlLayout = new QVBoxLayout();
     controlLayout->setMargin(0);
     controlLayout->setSpacing(0);
     controlLayout->insertStretch(-1, 100);
+
+    scrollWidget->setLayout(controlLayout);
+    scrollArea->setWidget(scrollWidget);
+    mainlayout->addWidget(scrollArea);
 
     if (showAddButton) {
         QPushButton* button = new QPushButton("Add Widget");
@@ -50,20 +65,21 @@ ExprControlCollection::ExprControlCollection(QWidget* parent, bool showAddButton
         QHBoxLayout* buttonLayout = new QHBoxLayout();
         buttonLayout->insertStretch(-1, 100);
         buttonLayout->addWidget(button, 0);
-        controlLayout->addLayout(buttonLayout);
+        mainlayout->addLayout(buttonLayout);
         connect(button, SIGNAL(clicked()), SLOT(addControlDialog()));
     }
-    setLayout(controlLayout);
+    setLayout(mainlayout);
 }
 
 ExprControlCollection::~ExprControlCollection() { delete editableExpression; }
 
 ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent) {
+    QHBoxLayout* mainLayout = new QHBoxLayout();
     QVBoxLayout* verticalLayout;
     verticalLayout = new QVBoxLayout();
     verticalLayout->setSpacing(3);
     verticalLayout->setMargin(3);
-    setLayout(verticalLayout);
+
     QHBoxLayout* horizontalLayout = new QHBoxLayout();
 
     horizontalLayout->addWidget(new QLabel("Variable"));
@@ -73,7 +89,8 @@ ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent) {
     horizontalLayout->addWidget(variableName);
     verticalLayout->addLayout(horizontalLayout);
 
-    tabWidget = new QTabWidget();
+    stackWidget = new QStackedWidget();
+    listWidget = new QListWidget();
 
     // Curve
     {
@@ -82,7 +99,8 @@ ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent) {
         curveLayout->setWidget(0, QFormLayout::LabelRole, new QLabel("Lookup"));
         curveLookup = new QLineEdit("$u");
         curveLayout->setWidget(0, QFormLayout::FieldRole, curveLookup);
-        tabWidget->addTab(curveTab, QString("Curve"));
+        stackWidget->addWidget(curveTab);
+        listWidget->addItem(QString("Curve"));
     }
 
     // Color Curve
@@ -92,7 +110,8 @@ ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent) {
         colorCurveLayout->setWidget(0, QFormLayout::LabelRole, new QLabel("Lookup"));
         colorCurveLookup = new QLineEdit("$u");
         colorCurveLayout->setWidget(0, QFormLayout::FieldRole, colorCurveLookup);
-        tabWidget->addTab(colorCurveTab, QString("Color Curve"));
+        stackWidget->addWidget(colorCurveTab);
+        listWidget->addItem(QString("Color Curve"));
     }
 
     // Integer
@@ -108,7 +127,8 @@ ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent) {
         intFormLayout->setWidget(1, QFormLayout::FieldRole, intMin);
         intMax = new QLineEdit("10");
         intFormLayout->setWidget(2, QFormLayout::FieldRole, intMax);
-        tabWidget->addTab(intTab, QString("Int"));
+        stackWidget->addWidget(intTab);
+        listWidget->addItem(QString("Int"));
     }
 
     // Float
@@ -125,7 +145,8 @@ ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent) {
         floatMax = new QLineEdit("1");
         floatFormLayout->setWidget(2, QFormLayout::FieldRole, floatMax);
 
-        tabWidget->addTab(floatTab, QString("Float"));
+        stackWidget->addWidget(floatTab);
+        listWidget->addItem(QString("Float"));
     }
 
     // Vector
@@ -148,7 +169,8 @@ ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent) {
         vectorMax = new QLineEdit("1");
         vectorFormLayout->setWidget(2, QFormLayout::FieldRole, vectorMax);
 
-        tabWidget->addTab(vectorTab, QString("Vector"));
+        stackWidget->addWidget(vectorTab);
+        listWidget->addItem(QString("Vector"));
     }
 
     // Color
@@ -164,7 +186,8 @@ ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent) {
         QPixmap colorPix(30, 30);
         colorPix.fill(color);
         colorWidget->setIcon(QIcon(colorPix));
-        tabWidget->addTab(colorTab, QString("Color"));
+        stackWidget->addWidget(colorTab);
+        listWidget->addItem(QString("Color"));
 
         connect(colorWidget, SIGNAL(clicked()), this, SLOT(colorChooseClicked()));
     }
@@ -183,7 +206,8 @@ ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent) {
         swatchLayout->setWidget(1, QFormLayout::FieldRole, rainbowPaletteBtn);
         swatchLayout->setWidget(2, QFormLayout::LabelRole, new QLabel(""));
         swatchLayout->setWidget(2, QFormLayout::FieldRole, grayPaletteBtn);
-        tabWidget->addTab(swatchTab, QString("Swatch"));
+        stackWidget->addWidget(swatchTab);
+        listWidget->addItem(QString("Swatch"));
     }
 
     // String literal
@@ -202,9 +226,10 @@ ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent) {
         stringLayout->setWidget(1, QFormLayout::LabelRole, new QLabel("String Type"));
         stringLayout->setWidget(1, QFormLayout::FieldRole, stringTypeWidget);
         stringLayout->setWidget(2, QFormLayout::LabelRole, new QLabel("String Default"));
-        stringLayout->setWidget(3, QFormLayout::FieldRole, stringDefaultWidget);
+        stringLayout->setWidget(2, QFormLayout::FieldRole, stringDefaultWidget);
 
-        tabWidget->addTab(stringTab, QString("String"));
+        stackWidget->addWidget(stringTab);
+        listWidget->addItem(QString("String"));
     }
 
     // Anim Curve
@@ -217,7 +242,8 @@ ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent) {
         animCurveLink = new QLineEdit("");
         curveLayout->setWidget(0, QFormLayout::FieldRole, animCurveLookup);
         curveLayout->setWidget(1, QFormLayout::FieldRole, animCurveLink);
-        tabWidget->addTab(curveTab, QString("AnimCurve"));
+        stackWidget->addWidget(curveTab);
+        listWidget->addItem(QString("AnimCurve"));
     }
 
     // DeepWater
@@ -227,21 +253,29 @@ ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent) {
         deepWaterLayout->setWidget(0, QFormLayout::LabelRole, new QLabel("Lookup"));
         deepWaterLookup = new QLineEdit("$u");
         deepWaterLayout->setWidget(0, QFormLayout::FieldRole, deepWaterLookup);
-        tabWidget->addTab(deepWaterTab, QString("Deep Water"));
+        stackWidget->addWidget(deepWaterTab);
+        listWidget->addItem(QString("Deep Water"));
     }
-
-    verticalLayout->addWidget(tabWidget);
 
     QDialogButtonBox* buttonBox = new QDialogButtonBox();
     buttonBox->setOrientation(Qt::Horizontal);
     buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
 
+    verticalLayout->addWidget(stackWidget);
     verticalLayout->addWidget(buttonBox);
-
+    mainLayout->addWidget(listWidget);
+    mainLayout->addLayout(verticalLayout);
+    setLayout(mainLayout);
+    QObject::connect(listWidget, SIGNAL(currentRowChanged(int)), this, SLOT(listIndexChanged(int)));
     QObject::connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
     QObject::connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
-    tabWidget->setCurrentIndex(0);
+    stackWidget->setCurrentIndex(0);
+    resize(500, 200);
+}
+
+void ExprAddDialog::listIndexChanged(int index) {
+    stackWidget->setCurrentIndex(index);
 }
 
 void ExprAddDialog::colorChooseClicked() {
@@ -267,7 +301,7 @@ void ExprControlCollection::addControlDialog() {
     ExprAddDialog* dialog = new ExprAddDialog(count, this);
     if (dialog->exec()) {
         QString s;
-        switch (dialog->tabWidget->currentIndex()) {
+        switch (dialog->listWidget->currentRow()) {
             case 0:
                 s = QString("%1 = curve(%2,0,0,4,1,1,4);\n").arg(dialog->variableName->text()).arg(
                     dialog->curveLookup->text());
@@ -396,7 +430,6 @@ bool ExprControlCollection::rebuildControls(const QString& expressionText, std::
             if (widget) {
                 // successfully made widget
                 int insertPoint = controlLayout->count() - 1;
-                if (showAddButton) insertPoint--;
                 controlLayout->insertWidget(insertPoint, widget);
                 _controls.push_back(widget);
                 connect(widget, SIGNAL(controlChanged(int)), SLOT(singleControlChanged(int)));
