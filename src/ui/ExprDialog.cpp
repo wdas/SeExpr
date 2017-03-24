@@ -122,6 +122,7 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0),
     grapher = new ExprGrapherWidget(this, 200, 200);
     previewLayout->addWidget(grapher, 0);
     previewCommentLabel = new QLabel();
+    previewCommentLabel->setWordWrap(true);
     previewLayout->addWidget(previewCommentLabel, 1, Qt::AlignLeft | Qt::AlignTop);
     leftLayout->addLayout(previewLayout);
     previewLibraryLayout->addWidget(leftWidget);
@@ -373,36 +374,30 @@ void ExprDialog::applyExpression() {
     grapher->expr.setExpr(editor->getExpr());
     grapher->update();
 
-    // set the label widget to mention that variables will not be previewed
+    // set the label widget to mention that functions and variables will not be previewed
     bool empty = true;
-    if (grapher->expr.varmap.size() > 0) {
-        std::stringstream s;
-        s << "<b>Variables not supported in preview (assumed zero):</b><br>";
-        int count = 0;
-        for (BasicExpression::VARMAP::iterator i = grapher->expr.varmap.begin(); i != grapher->expr.varmap.end(); ++i) {
-            count++;
-            s << "$" << i->first << " ";
-            if (count % 4 == 0) s << "<br>";
+    std::stringstream s;
+    if (grapher->expr.varmap.size() > 0 || grapher->expr.funcmap.size() > 0){
+        s << "<b>Variables/Functions not supported in preview (assumed zero):</b><br>";
+        if (grapher->expr.varmap.size() > 0) {
+            for (BasicExpression::VARMAP::iterator i = grapher->expr.varmap.begin(); i != grapher->expr.varmap.end(); ++i) {
+                s << "$" << i->first << " ";
+            }
+            empty = false;
         }
-        previewCommentLabel->setText(s.str().c_str());
-        empty = false;
-    } else
-        previewCommentLabel->setText("");
-    // set the label widget to mention that variables will not be previewed
-    if (grapher->expr.funcmap.size() > 0) {
-        std::stringstream s;
-        s << "<b>Functions not supported in preview (assumed zero):</b><br>";
-        int count = 0;
-        for (BasicExpression::FUNCMAP::iterator i = grapher->expr.funcmap.begin(); i != grapher->expr.funcmap.end();
-             ++i) {
-            count++;
-            s << "" << i->first << "() ";
-            if (count % 4 == 0) s << "<br>";
+        if (grapher->expr.funcmap.size() > 0) {
+            for (BasicExpression::FUNCMAP::iterator i = grapher->expr.funcmap.begin(); i != grapher->expr.funcmap.end();
+                 ++i) {
+                s << "" << i->first << "() ";
+            }
+            empty = false;
         }
-        previewCommentLabel->setText(s.str().c_str());
-        empty = false;
     }
-    if (empty) previewCommentLabel->setText("");
+    if (empty) {
+        previewCommentLabel->setText("");
+    } else {
+        previewCommentLabel->setText(s.str().c_str());
+    }
 
     // put errors into editor module
     bool valid = grapher->expr.isValid();
