@@ -453,6 +453,7 @@ void ExprDialog::selectionChanged(const QString& str) {
 
     currentexprfile = str;
     histAdd();
+    previewExpression();
 }
 
 
