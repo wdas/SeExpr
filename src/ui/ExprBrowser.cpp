@@ -240,7 +240,7 @@ class ExprTreeFilterModel : public QSortFilterProxyModel {
 ExprBrowser::~ExprBrowser() { delete treeModel; }
 
 ExprBrowser::ExprBrowser(QWidget* parent, ExprEditor* editor)
-    : QWidget(parent), editor(editor), _context(""), _searchPath(""), _applyOnSelect(true) {
+    : QWidget(parent), editor(editor), _context(""), _searchPath(""), _applyOnSelect(false) {
     QVBoxLayout* rootLayout = new QVBoxLayout;
     rootLayout->setMargin(0);
     this->setLayout(rootLayout);
