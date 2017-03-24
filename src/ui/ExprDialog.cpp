@@ -152,6 +152,12 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0),
             SLOT(setEnabled(bool)));
     connect(this, SIGNAL(forwardAvailable(bool)), histForw,
             SLOT(setEnabled(bool)));
+    QPushButton* reloadExprPb = new QPushButton("Reload");
+    reloadExprPb->setFixedHeight(24);
+    reloadExprPb->setToolTip("Reload current expression");
+    buttonBarLayout->addWidget(reloadExprPb);
+    connect(reloadExprPb, SIGNAL(clicked()), this, SLOT(reloadExpression()));
+
     saveButton = new QPushButton("Save");
     buttonBarLayout->addWidget(saveButton);
     saveAsButton = new QPushButton("Save As");
@@ -287,6 +293,16 @@ void ExprDialog::verifiedAccept() {
             accept();
         }
     }
+}
+
+void ExprDialog::reloadExpression()
+{
+    if (currentexprfile=="") return;
+
+    std::ifstream file(currentexprfile.toStdString().c_str());
+    std::string fileContents((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    editor->setExpr(fileContents, false);
+    histAdd();
 }
 
 void ExprDialog::setupHelp(QTabWidget* tab) {

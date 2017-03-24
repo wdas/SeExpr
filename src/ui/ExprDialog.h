@@ -103,6 +103,7 @@ slots:
     void previewExpression();
     void verifiedApply();
     void verifiedAccept();
+    void reloadExpression();
     void findNextInHelp();
     void findPrevInHelp();
     void _showEditor();
