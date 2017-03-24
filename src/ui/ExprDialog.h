@@ -74,7 +74,7 @@ class ExprDialog : public QDialog {
 
     void setExpressionString(const std::string& str) {
         clearExpression();
-        editor->setExpr(str, /*apply*/ true);
+        editor->setExpr(str, /*apply*/ false);
     }
 
     void show();
