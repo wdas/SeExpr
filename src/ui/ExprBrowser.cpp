@@ -252,6 +252,11 @@ ExprBrowser::ExprBrowser(QWidget* parent, ExprEditor* editor)
     QPushButton* clearFilterButton = new QPushButton("X");
     clearFilterButton->setFixedWidth(24);
     searchAndClearLayout->addWidget(clearFilterButton, 1);
+    // TODO: use icon for reload button
+    QPushButton* refreshButton = new QPushButton("reload");
+    refreshButton->setFixedHeight(20);
+    refreshButton->setFocusPolicy(Qt::NoFocus);
+    searchAndClearLayout->addWidget(refreshButton);
     rootLayout->addLayout(searchAndClearLayout);
     connect(clearFilterButton, SIGNAL(clicked()), SLOT(clearFilter()));
     // model of tree
@@ -266,6 +271,7 @@ ExprBrowser::ExprBrowser(QWidget* parent, ExprEditor* editor)
     rootLayout->addWidget(treeNew);
     // selection mode and signal
     treeNew->setSelectionMode(QAbstractItemView::SingleSelection);
+    connect(refreshButton, SIGNAL(clicked()), SLOT(reload()));
     connect(treeNew->selectionModel(),
             SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)),
             SLOT(handleSelection(const QModelIndex&, const QModelIndex&)));
@@ -405,6 +411,11 @@ void ExprBrowser::addUserExpressionPath(const std::string& context) {
             addPath("My Expressions", path);
         }
     }
+}
+
+void ExprBrowser::reload() {
+    getExpressionDirs();
+    expandAll();
 }
 
 /*
