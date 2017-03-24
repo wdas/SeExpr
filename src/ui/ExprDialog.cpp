@@ -413,8 +413,7 @@ void ExprDialog::applyExpression() {
 void ExprDialog::clearExpression() {
     browser->clearSelection();
     editor->setExpr("", false);
-    grapher->expr.setExpr("");
-    grapher->update();
+    applyExpression();
 }
 
 void removeDuplicates(QStringList& strlist)
