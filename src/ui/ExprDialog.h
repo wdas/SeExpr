@@ -63,6 +63,9 @@ class ExprDialog : public QDialog {
     QTextCursor cursor;
     QString prevFind;
     int _currentEditorIdx;
+    QStringList history;
+    int currhistitem;
+    QString currentexprfile;
 
   public:
     ExprDialog(QWidget* parent);
@@ -82,6 +85,7 @@ class ExprDialog : public QDialog {
 
   private:
     void setupHelp(QTabWidget* tab);
+    void enableBackForwards();
 
   protected:
     void keyPressEvent(QKeyEvent* event);
@@ -92,6 +96,8 @@ signals:
     void preview();
     void expressionApplied();
     void dialogClosed();
+    void forwardAvailable(bool);
+    void backwardAvailable(bool);
   private
 slots:
     void previewExpression();
@@ -100,6 +106,10 @@ slots:
     void findNextInHelp();
     void findPrevInHelp();
     void _showEditor();
+    void selectionChanged(const QString& str);
+    void histBackward();
+    void histForward();
+    void histAdd();
   public
 slots:
 
