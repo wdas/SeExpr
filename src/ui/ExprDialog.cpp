@@ -90,6 +90,7 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0),
     this->setMinimumWidth(600);
     QVBoxLayout* rootLayout = new QVBoxLayout(0);
     rootLayout->setMargin(2);
+    rootLayout->setSpacing(2);
     this->setLayout(rootLayout);
 
     showEditorTimer = new QTimer();
@@ -103,6 +104,8 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0),
 
     QWidget* previewLibraryWidget = new QWidget();
     QHBoxLayout* previewLibraryLayout = new QHBoxLayout();
+    previewLibraryLayout->setSpacing(2);
+    previewLibraryLayout->setMargin(2);
     previewLibraryWidget->setLayout(previewLibraryLayout);
     topTabWidget->addTab(previewLibraryWidget, "Preview / Library");
 
@@ -117,9 +120,10 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0),
     leftWidget->setFixedWidth(450);
     QVBoxLayout* leftLayout = new QVBoxLayout();
     leftLayout->setMargin(0);
+    leftLayout->setSpacing(2);
     leftWidget->setLayout(leftLayout);
     QHBoxLayout* previewLayout = new QHBoxLayout();
-    grapher = new ExprGrapherWidget(this, 200, 200);
+    grapher = new ExprGrapherWidget(this, 256, 256);
     previewLayout->addWidget(grapher, 0);
     previewCommentLabel = new QLabel();
     previewCommentLabel->setWordWrap(true);

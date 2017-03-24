@@ -32,6 +32,7 @@ ExprGrapherWidget::ExprGrapherWidget(QWidget* parent, int width, int height)
     setFixedSize(width, height + 30);
     QVBoxLayout* vbox = new QVBoxLayout;
     vbox->setMargin(0);
+    vbox->setMargin(2);
     setLayout(vbox);
     vbox->addWidget(view, 0, Qt::AlignLeft | Qt::AlignTop);
     QHBoxLayout* hbox = new QHBoxLayout;
