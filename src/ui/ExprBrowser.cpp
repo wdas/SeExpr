@@ -318,6 +318,7 @@ void ExprBrowser::handleSelection(const QModelIndex& current, const QModelIndex&
             std::ifstream file(path.toStdString().c_str());
             std::string fileContents((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
             editor->setExpr(fileContents, _applyOnSelect);
+            emit selectionChanged(path);
         }
     }
 }
