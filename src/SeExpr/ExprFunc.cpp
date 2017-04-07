@@ -146,7 +146,7 @@ void ExprFunc::initInternal() {
     if (Functions) return;
     Functions = new FuncTable;
     SeExpr2::defineBuiltins(defineInternal, defineInternal3);
-    const char* path = getenv("SE_EXPR_PLUGINS");
+    const char* path = getenv("SE_EXPR2_PLUGINS");
     if (path) loadPlugins(path);
 }
 
@@ -258,15 +258,11 @@ void ExprFunc::loadPlugin(const char* path) {
     if (init_v3)
         init_v3(defineInternal3);
     else {
-        void* init_v2 = dlsym(handle, "SeExprPluginInitV2");
-        void* init_v1 = dlsym(handle, "SeExprPluginInit");
-        if (!init_v1 && !init_v2) {
-            std::cerr << "Error reading expression plugin: " << path << std::endl;
-            std::cerr << "No functions named SeExprPluginInit and SeExprPluginInitV2 called" << std::endl;
-        }
-        dlclose(handle);
-        return;
+        std::cerr << "Error reading expression plugin: " << path << std::endl;
+        std::cerr << "No function named SeExpr2PluginInit defined" << std::endl;
     }
+    dlclose(handle);
+    return;
 #endif
 }
 }
