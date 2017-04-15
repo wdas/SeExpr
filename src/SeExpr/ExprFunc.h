@@ -129,6 +129,7 @@ class ExprFunc {
     ExprFuncX* _func;
     int _minargs;
     int _maxargs;
+    static std::vector<void*> dynlib;
 };
 }
 
