@@ -155,7 +155,7 @@ void ExprFunc::initInternal() {
     if (Functions) return;
     Functions = new FuncTable;
     SeExpr2::defineBuiltins(defineInternal, defineInternal3);
-    const char* path = getenv("SE_EXPR2_PLUGINS");
+    const char* path = getenv("SE_EXPR_PLUGINS");
     if (path) loadPlugins(path);
 }
 
