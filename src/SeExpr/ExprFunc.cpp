@@ -105,6 +105,8 @@ FuncTable* Functions = 0;
 
 namespace SeExpr2 {
 
+std::vector<void*> ExprFunc::dynlib;
+
 static SeExprInternal2::Mutex mutex;
 
 void ExprFunc::init() {
@@ -116,6 +118,13 @@ void ExprFunc::cleanup() {
     SeExprInternal2::AutoMutex locker(mutex);
     delete Functions;
     Functions = nullptr;
+#ifdef SEEXPR_WIN32
+#else
+    for(size_t i=0; i<dynlib.size(); i++){
+        dlclose(dynlib[i]);
+    }
+#endif
+
 }
 
 const ExprFunc* ExprFunc::lookup(const std::string& name) {
@@ -255,18 +264,15 @@ void ExprFunc::loadPlugin(const char* path) {
     typedef void (*initfn_v3)(ExprFunc::Define3);
     initfn_v3 init_v3 = (initfn_v3)dlsym(handle, "SeExpr2PluginInit");
 
-    if (init_v3)
+    if (init_v3) {
         init_v3(defineInternal3);
-    else {
-        void* init_v2 = dlsym(handle, "SeExprPluginInitV2");
-        void* init_v1 = dlsym(handle, "SeExprPluginInit");
-        if (!init_v1 && !init_v2) {
-            std::cerr << "Error reading expression plugin: " << path << std::endl;
-            std::cerr << "No functions named SeExprPluginInit and SeExprPluginInitV2 called" << std::endl;
-        }
+        dynlib.push_back(handle);
+    } else {
+        std::cerr << "Error reading expression plugin: " << path << std::endl;
+        std::cerr << "No function named SeExpr2PluginInit defined" << std::endl;
         dlclose(handle);
-        return;
     }
+    return;
 #endif
 }
 }
