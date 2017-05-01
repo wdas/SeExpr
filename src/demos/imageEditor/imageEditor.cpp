@@ -32,10 +32,10 @@
 #include <QPushButton>
 #include <QMessageBox>
 
-#include <SeExpr2/UI/ExprControlCollection.h>
-#include <SeExpr2/UI/ExprEditor.h>
-#include <SeExpr2/UI/ExprBrowser.h>
-#include <SeExpr2/Expression.h>
+#include <ExprControlCollection.h>
+#include <ExprEditor.h>
+#include <ExprBrowser.h>
+#include <Expression.h>
 
 #include "ImageEditorDialog.h"
 

@@ -136,7 +136,10 @@ if(Qt5_FOUND OR QT4_FOUND)
         target_link_libraries(SeExpr2Editor opengl32)
     endif()
 
+    ## Install library and includes
     install(TARGETS SeExpr2Editor DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ DESTINATION include/SeExpr2/UI
+            FILES_MATCHING PATTERN "*.h")
 
     # Setup header files
     file(GLOB public_includes "*.h")

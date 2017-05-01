@@ -20,7 +20,8 @@ add_definitions(-DIMAGE_EDITOR_ROOT="${CMAKE_INSTALL_PREFIX}")
 find_package(Qt4 COMPONENTS QtCore QtGui)
 find_package(PNG)
 
-if (QT4_FOUND AND PNG_FOUND)
+if(Qt5_FOUND OR QT4_FOUND)
+if(PNG_FOUND)
     set(imageEditor_MOC_HDRS ImageEditorDialog.h)
     set(imageEditor_CPPS imageEditor.cpp)
     qt4_wrap_cpp(imageEditor_MOC_SRCS ${imageEditor_MOC_HDRS})
@@ -36,6 +37,7 @@ if (QT4_FOUND AND PNG_FOUND)
     include_directories(SYSTEM ${PNG_INCLUDE_DIR})
     target_link_libraries(imageEditor2 ${PNG_LIBRARIES})
     install(TARGETS imageEditor2 DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
 endif()
 
 install(FILES fbm.se noisecolor1.se noisecolor2.se noise.se raytrace.se sinc.se
