@@ -30,35 +30,38 @@ if(EXISTS ${GTEST_DIR}/include)
     endif()
 
     if (PNG_FOUND)
-        include_directories(SYSTEM ${PNG_INCLUDE_DIR})
-        include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-    endif()
-
-    if(PNG_FOUND)
         message("-- Found PNG library: " ${PNG_LIBRARIES})
 
-        # generate test cases for dev example expressions
-        add_custom_command(
-            SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/../demos/imageSynth/examples
-            COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/genImageTestFile.py"
-            ARGS "${CMAKE_CURRENT_SOURCE_DIR}/../demos/imageSynth/examples" "testSeExprExamples.cpp"
-            OUTPUT testSeExprExamples.cpp
-            DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/genImageTestFile.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/../demos/imageSynth/examples)
+        include_directories(SYSTEM ${PNG_INCLUDE_DIR})
+        include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-        # generate test cases for paint3d show examples
-        if (EXISTS /disney/shows/default/rel/global/expressions)
-            set (PAINT3D_SRC  "testPaint3dExamples.cpp")
+        # generate test cases for example developer expressions
+        set (GENERATE_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/genImageTestFile.py")
+        set (EXAMPLE_DIR ${CMAKE_INSTALL_PREFIX}/share/SeExpr2/demos/imageSynth/examples)
+        if (EXISTS ${EXAMPLE_DIR})
+            set (EXAMPLE_TESTS "testSeExprExamples.cpp")
             add_custom_command(
-                SOURCE /disney/shows/default/rel/global/expressions
-                COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/genImageTestFile.py"
-                ARGS "/disney/shows/default/rel/global/expressions" "testPaint3dExamples.cpp"
-                OUTPUT testPaint3dExamples.cpp
-                DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/genImageTestFile.py
-                /disney/shows/default/rel/global/expressions)
+                SOURCE ${EXAMPLE_DIR}
+                COMMAND ${GENERATE_SCRIPT}
+                ARGS "${EXAMPLE_DIR}" "${EXAMPLE_TESTS}"
+                OUTPUT ${EXAMPLE_TESTS}
+                DEPENDS ${GENERATE_SCRIPT} ${EXAMPLE_DIR})
         endif()
 
-        add_executable(testmain2 "testmain.cpp" "imageTests.cpp" "testSeExprExamples.cpp" ${PAINT3D_SRC} "basic.cpp" "string.cpp")
+        # generate test cases for paint3d show examples
+        set (PAINT3D_DIR /disney/shows/default/rel/global/expressions)
+        if (EXISTS ${PAINT3D_DIR})
+            set (PAINT3D_TESTS "testPaint3dExamples.cpp")
+            add_custom_command(
+                SOURCE ${PAINT3D_DIR}
+                COMMAND ${GENERATE_SCRIPT}
+                ARGS "${PAINT3D_DIR}" "${PAINT3D_TESTS}"
+                OUTPUT ${PAINT3D_TESTS}
+                DEPENDS ${GENERATE_SCRIPT} ${PAINT3D_DIR})
+        endif()
+
+        add_executable(testmain2 "testmain.cpp" "imageTests.cpp" ${EXAMPLE_TESTS} ${PAINT3D_TESTS} "basic.cpp" "string.cpp")
+        add_dependencies(testmain2 imageSynth2)
         target_link_libraries(testmain2 SeExpr2 gtest ${PNG_LIBRARIES})
         install(TARGETS testmain2 DESTINATION share/test/SeExpr2)
         install(PROGRAMS imagediff.py DESTINATION share/test/SeExpr2)
