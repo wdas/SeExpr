@@ -16,14 +16,14 @@
 */
 #ifndef _ExprControl_h_
 #define _ExprControl_h_
-#include <QtGui/QTextBrowser>
-#include <QtGui/QPlainTextEdit>
-#include <QtGui/QDialog>
-#include <QtCore/QTimer>
-#include <QtCore/QRegExp>
-#include <QtGui/QLineEdit>
-#include <QtGui/QCheckBox>
-#include <QtGui/QSlider>
+#include <QTextBrowser>
+#include <QPlainTextEdit>
+#include <QDialog>
+#include <QTimer>
+#include <QRegExp>
+#include <QLineEdit>
+#include <QCheckBox>
+#include <QSlider>
 
 #include "ExprCurve.h"
 #include "ExprColorCurve.h"

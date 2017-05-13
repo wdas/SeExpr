@@ -23,19 +23,19 @@
 #include <string>
 #include <png.h>
 
-#include <QtGui/QApplication>
-#include <QtGui/QDialog>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QScrollArea>
-#include <QtGui/QLabel>
-#include <QtGui/QImage>
-#include <QtGui/QPushButton>
-#include <QtGui/QMessageBox>
+#include <QApplication>
+#include <QDialog>
+#include <QVBoxLayout>
+#include <QScrollArea>
+#include <QLabel>
+#include <QImage>
+#include <QPushButton>
+#include <QMessageBox>
 
-#include <SeExpr2/UI/ExprControlCollection.h>
-#include <SeExpr2/UI/ExprEditor.h>
-#include <SeExpr2/UI/ExprBrowser.h>
-#include <SeExpr2/Expression.h>
+#include <ExprControlCollection.h>
+#include <ExprEditor.h>
+#include <ExprBrowser.h>
+#include <Expression.h>
 
 #include "ImageEditorDialog.h"
 

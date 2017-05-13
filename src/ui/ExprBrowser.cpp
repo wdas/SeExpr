@@ -18,21 +18,22 @@
 * @brief Qt browser widget for list of expressions
 * @author  aselle
 */
-#include <QtGui/QTreeWidget>
-#include <QtGui/QTreeWidgetItem>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QTabWidget>
-#include <QtGui/QHeaderView>
-#include <QtGui/QLabel>
-#include <QtGui/QTextBrowser>
-#include <QtGui/QPushButton>
-#include <QtGui/QSpacerItem>
-#include <QtGui/QSizePolicy>
-#include <QtGui/QSortFilterProxyModel>
-#include <QtCore/QDir>
-#include <QtCore/QFileInfo>
-#include <QtGui/QFileDialog>
-#include <QtGui/QMessageBox>
+#include <QDir>
+#include <QFileInfo>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
+#include <QVBoxLayout>
+#include <QTabWidget>
+#include <QHeaderView>
+#include <QLabel>
+#include <QTextBrowser>
+#include <QPushButton>
+#include <QSpacerItem>
+#include <QSizePolicy>
+#include <QSortFilterProxyModel>
+#include <QFileDialog>
+#include <QMessageBox>
+
 #include <cassert>
 #include "ExprEditor.h"
 #include "ExprBrowser.h"
@@ -133,11 +134,16 @@ class ExprTreeModel : public QAbstractItemModel {
 
     ~ExprTreeModel() { delete root; }
 
-    void update() { reset(); }
+    void update()
+    {
+        beginResetModel();
+        endResetModel();
+    }
 
     void clear() {
+        beginResetModel();
         root->clear();
-        update();
+        endResetModel();
     }
 
     void addPath(const char* label, const char* path) { root->addChild(new ExprTreeItem(root, label, path)); }
@@ -193,8 +199,9 @@ class ExprTreeModel : public QAbstractItemModel {
     QModelIndex find(QString path) {
         ExprTreeItem* item = root->find(path);
         if (!item) {
+            beginResetModel();
             root->regen();
-            reset();
+            endResetModel();
             item = root->find(path);
         }
         if (item) {
@@ -210,7 +217,11 @@ class ExprTreeFilterModel : public QSortFilterProxyModel {
   public:
     ExprTreeFilterModel(QWidget* parent = 0) : QSortFilterProxyModel(parent) {}
 
-    void update() { reset(); }
+    void update()
+    {
+        beginResetModel();
+        endResetModel();
+    }
 
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const {
         if (sourceParent.isValid() && sourceModel()->data(sourceParent).toString().contains(filterRegExp()))

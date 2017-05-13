@@ -2,10 +2,10 @@
 #define _ExprColorSwatch_h_
 
 #include <vector>
-#include <QtCore/QObject>
+#include <QObject>
+#include <QFrame>
+#include <QWidget>
 #include <SeExpr2/Vec.h>
-#include <QtGui/QFrame>
-#include <QtGui/QWidget>
 
 class QGridLayout;
 

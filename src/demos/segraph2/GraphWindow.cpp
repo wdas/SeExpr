@@ -15,8 +15,8 @@
  http://www.apache.org/licenses/LICENSE-2.0
 */
 #include "GraphWindow.h"
-#include <QtCore/QTimer>
-#include <QtGui/QFormLayout>
+#include <QTimer>
+#include <QFormLayout>
 
 GraphWindow::GraphWindow(QWidget* parent) : QFrame(parent), time(0) {
     //#########################################

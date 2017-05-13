@@ -35,8 +35,8 @@
 #include <iostream>
 using namespace std;
 
-#include <QtCore/Qt>
-#include <QtGui/QMouseEvent>
+#include <Qt>
+#include <QMouseEvent>
 
 // #include <GL/glx.h> conflicts w/ Qt!  Just declare what we need.
 extern "C" void glXUseXFont(Qt::HANDLE, int, int, int);

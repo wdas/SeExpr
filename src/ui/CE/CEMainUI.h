@@ -22,8 +22,7 @@
 #define CEMainUI_h
 
 // Base Class Includes
-// qt3 #include <qvbox.h>
-#include <QtGui/QWidget>
+#include <QWidget>
 
 class QLabel;
 

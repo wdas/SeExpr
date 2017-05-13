@@ -21,11 +21,11 @@
 #ifndef CESegEditUI_h
 #define CESegEditUI_h
 
-// qt3 #include <qhbox.h>
-#include <QtGui/QWidget>
-#include <QtGui/QTextEdit>
+#include <QWidget>
+#include <QTextEdit>
 #include <animlib/AnimKeyframe.h>
 #include <animlib/AnimCurve.h>
+
 class CETool;
 class QComboBox;
 class QLineEdit;
