@@ -395,59 +395,65 @@ LLVM_VALUE callPrintf(const ExprFuncNode *seFunc, LLVM_BUILDER Builder, Function
 LLVM_VALUE callCustomFunction(const ExprFuncNode *funcNode, LLVM_BUILDER Builder) {
     LLVMContext &llvmContext = Builder.getContext();
 
-    int nargs = funcNode->numChildren();
+    // get the function's arguments
     std::vector<LLVM_VALUE> args = codegenFuncCallArgs(Builder, funcNode);
+    int nargs = funcNode->numChildren();
+    assert(nargs == (int)args.size());
 
-    // TODO: string
+    // get the number of items that the function returns
     unsigned sizeOfRet = (unsigned)funcNode->type().dim();
+    assert(sizeOfRet == 1 || funcNode->type().isFP());
+
+    // TODO: is this necessary ? Doesn't seem to be used :/
     createAllocaInst(Builder, Type::getDoubleTy(llvmContext), sizeOfRet);
 
     // calculate how much space for opData, fpArg and strArg
-    unsigned sizeOfFpArgs = 1 + sizeOfRet;  // first arg is nargs second arg is sizeOfRet
-    unsigned sizeOfStrArgs = 2;             // string return type
+    unsigned sizeOfFpArgs = 1 + sizeOfRet;
+    unsigned sizeOfStrArgs = 2;
     for (int i = 0; i < nargs; ++i) {
         ExprType argType = funcNode->child(i)->type();
         if (argType.isFP()) {
             sizeOfFpArgs += std::max(funcNode->promote(i), argType.dim());
         } else if (argType.isString()) {
             sizeOfStrArgs += 1;
-        } else
+        } else {
             assert(false && "invalid type encountered");
+        }
     }
 
-    // allocate opData
-    // opDataArg will be [functionIndex, returnIndex, ]
-    AllocaInst *opDataArg =
-        createAllocaInst(Builder, Type::getInt32Ty(llvmContext), (unsigned)nargs + 4, "opDataArgPtr");
-    AllocaInst *fpArg = createAllocaInst(Builder, Type::getDoubleTy(llvmContext), sizeOfFpArgs, "fpArgPtr");
-    AllocaInst *strArg = createAllocaInst(Builder, Type::getInt8PtrTy(llvmContext), sizeOfStrArgs, "strArgPtr");
-    // TODO:MEME
-    Builder.CreateStore(ConstantFP::get(Type::getDoubleTy(llvmContext), nargs), fpArg);
-    LLVM_VALUE opDataPtr0 = Builder.CreateConstGEP1_32(opDataArg, 0);
-    Builder.CreateStore(ConstantInt::get(Type::getInt32Ty(llvmContext), 0), opDataPtr0);  // function index (s[0])
-    LLVM_VALUE opDataPtr1 = Builder.CreateConstGEP1_32(opDataArg, 1);
-    Builder.CreateStore(ConstantInt::get(Type::getInt32Ty(llvmContext), 1),
-                        opDataPtr1);  // data ptr! doesn't matter because the binding overrites it
-    LLVM_VALUE opDataPtr2 = Builder.CreateConstGEP1_32(opDataArg, 2);
-    Builder.CreateStore(ConstantInt::get(Type::getInt32Ty(llvmContext), 1),
-                        opDataPtr2);  // return slot index (either fp[1] ors s[1])
-    LLVM_VALUE opDataPtr3 = Builder.CreateConstGEP1_32(opDataArg, 3);
-    Builder.CreateStore(ConstantInt::get(Type::getInt32Ty(llvmContext), 0), opDataPtr3);  // nargs i.e. fp[0]
+    // a few types that are reused throughout this function
+    Type*           int32Ty     = Type::getInt32Ty(llvmContext);        // int
+    Type*           doubleTy    = Type::getDoubleTy(llvmContext);       // double
+    PointerType*    int8PtrTy   = Type::getInt8PtrTy(llvmContext);      // char*
+    Type*           int64Ty     = Type::getInt64Ty(llvmContext);        // int64_t
+
+
+    // allocate data that we will feed to SeExpr2LLVMEvalCustomFunction on the stack
+    AllocaInst *opDataArg = createAllocaInst(Builder, int32Ty, (unsigned)nargs + 4, "opDataArgPtr");
+    AllocaInst *fpArg = createAllocaInst(Builder, doubleTy, sizeOfFpArgs, "fpArgPtr");
+    AllocaInst *strArg = createAllocaInst(Builder, int8PtrTy, sizeOfStrArgs, "strArgPtr");
+
+    // fill fpArgPtr's first value
+    Builder.CreateStore(ConstantFP::get(doubleTy, nargs), fpArg);
+
+    // fill opDataArgPtr
+    Builder.CreateStore(ConstantInt::get(int32Ty, 0), Builder.CreateConstGEP1_32(opDataArg, 0));
+    Builder.CreateStore(ConstantInt::get(int32Ty, 1), Builder.CreateConstGEP1_32(opDataArg, 1));
+    Builder.CreateStore(ConstantInt::get(int32Ty, 1), Builder.CreateConstGEP1_32(opDataArg, 2));
+    Builder.CreateStore(ConstantInt::get(int32Ty, 0), Builder.CreateConstGEP1_32(opDataArg, 3));
 
     // Load arguments into the pseudo interpreter data structure
-    unsigned fpIdx = 1 + sizeOfRet;  // skip nargs and return val
-    unsigned strIdx = 1 + 1;         // skip functionptr and stirng ret val (which we always allocate)
+    unsigned fpIdx = 1 + sizeOfRet;
+    unsigned strIdx = 2;
     for (int argIndex = 0; argIndex < nargs; ++argIndex) {
         int opIndex = argIndex + 4;
         ExprType argType = funcNode->child(argIndex)->type();
         if (argType.isFP()) {
-            unsigned operand = fpIdx;
-            LLVM_VALUE operandVal = ConstantInt::get(Type::getInt32Ty(llvmContext), operand);
-            LLVM_VALUE opDataPtr = Builder.CreateConstGEP1_32(opDataArg, opIndex);
-            Builder.CreateStore(operandVal, opDataPtr);
+            // store the fpArgPtr indirection index
+            Builder.CreateStore(ConstantInt::get(int32Ty, fpIdx), Builder.CreateConstGEP1_32(opDataArg, opIndex));
             if (argType.dim() > 1) {
                 for (int comp = 0; comp < argType.dim(); comp++) {
-                    LLVM_VALUE compIndex = ConstantInt::get(Type::getInt32Ty(llvmContext), comp);
+                    LLVM_VALUE compIndex = ConstantInt::get(int32Ty, comp);
                     LLVM_VALUE val = Builder.CreateExtractElement(args[argIndex], compIndex);
                     LLVM_VALUE fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx + comp);
                     Builder.CreateStore(val, fpArgPtr);
@@ -464,54 +470,52 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode *funcNode, LLVM_BUILDER Builder
                     }
                     fpIdx += promote;
                 } else {
-                    LLVM_VALUE fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx);
-                    Builder.CreateStore(args[argIndex], fpArgPtr);
+                    Builder.CreateStore(args[argIndex], Builder.CreateConstGEP1_32(fpArg, fpIdx));
                     fpIdx++;
                 }
             }
         } else if (argType.isString()) {
-            unsigned operand = strIdx;
-            LLVM_VALUE operandVal = ConstantInt::get(Type::getInt32Ty(llvmContext), operand);
-            LLVM_VALUE opDataPtr = Builder.CreateConstGEP1_32(opDataArg, opIndex);
-            Builder.CreateStore(operandVal, opDataPtr);
-            LLVM_VALUE strArgPtr = Builder.CreateConstGEP1_32(strArg, strIdx);
-            Builder.CreateStore(args[argIndex], strArgPtr);
+            // store the strArgPtr indirection index
+            Builder.CreateStore(ConstantInt::get(int32Ty, strIdx), Builder.CreateConstGEP1_32(opDataArg, opIndex));
+            Builder.CreateStore(args[argIndex], Builder.CreateConstGEP1_32(strArg, strIdx));
             strIdx++;
-            // TODO: string
         }
     }
 
-    // Call the function
+    // get the module from the builder
+    Module* module = llvm_getModule(Builder);
+
     // TODO: thread safety?
-    ConstantPointerNull *nullPtrVal = ConstantPointerNull::get(Type::getInt8PtrTy(llvmContext));
-    Module *M = llvm_getModule(Builder);
     // TODO: This leaks!
-    GlobalVariable *dataGV =
-        new GlobalVariable(*M, Type::getInt8PtrTy(llvmContext), false, GlobalValue::InternalLinkage, nullPtrVal);
+    GlobalVariable *dataGV = new GlobalVariable(*module, int8PtrTy, false, GlobalValue::InternalLinkage, ConstantPointerNull::get(int8PtrTy));
 
-    std::vector<LLVM_VALUE> params;
-    params.push_back(opDataArg);
-    params.push_back(fpArg);
-    params.push_back(strArg);
-    params.push_back(dataGV);
-    ConstantInt *ptrToExprNode = ConstantInt::get(Type::getInt64Ty(llvmContext), (uint64_t)funcNode);
-    params.push_back(ptrToExprNode);
-
-    Function *callee = llvm_getModule(Builder)->getFunction("SeExpr2LLVMEvalCustomFunction");
-    Builder.CreateCall(callee, params);
-
-    // TODO: allow string arguments here
-    int resultOffset = 1;  // index 0 is nargs, index 1 is resultOffset
-    if (sizeOfRet == 1) {
-        LLVM_VALUE ptr = Builder.CreateConstGEP1_32(fpArg, resultOffset);  // skip nargs
-        return Builder.CreateLoad(ptr);
-    } else if (sizeOfRet > 1) {
-        std::vector<LLVM_VALUE> resultArray;
-        for (unsigned int comp = 0; comp < sizeOfRet; comp++) {
-            LLVM_VALUE ptr = Builder.CreateConstGEP1_32(fpArg, resultOffset + comp);  // skip nargs
-            resultArray.push_back(Builder.CreateLoad(ptr));
+    // call the function
+    Builder.CreateCall(
+        module->getFunction("SeExpr2LLVMEvalCustomFunction"),
+        {
+            opDataArg,
+            fpArg,
+            strArg,
+            dataGV,
+            ConstantInt::get(int64Ty, (uint64_t)funcNode)
         }
-        return createVecVal(Builder, resultArray);
+    );
+
+    // read the result from memory
+    int resultOffset = 1;
+    if (funcNode->type().isFP()) {
+        if (sizeOfRet == 1) {
+            return Builder.CreateLoad(Builder.CreateConstGEP1_32(fpArg, resultOffset));
+        } else if (sizeOfRet > 1) {
+            std::vector<LLVM_VALUE> resultArray;
+            for (unsigned int comp = 0; comp < sizeOfRet; comp++) {
+                LLVM_VALUE ptr = Builder.CreateConstGEP1_32(fpArg, resultOffset + comp);  // skip nargs
+                resultArray.push_back(Builder.CreateLoad(ptr));
+            }
+            return createVecVal(Builder, resultArray);
+        }
+    } else {
+        return Builder.CreateLoad(Builder.CreateConstGEP1_32(strArg, 1));
     }
 
     assert(false);
@@ -519,7 +523,8 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode *funcNode, LLVM_BUILDER Builder
 }
 }
 
-extern "C" void SeExpr2LLVMEvalVarRef(ExprVarRef *seVR, double *result) { seVR->eval(result); }
+extern "C" void SeExpr2LLVMEvalFPVarRef(ExprVarRef *seVR, double *result) { seVR->eval(result); }
+extern "C" void SeExpr2LLVMEvalStrVarRef(ExprVarRef *seVR, char **result) { seVR->eval((const char **)result); }
 
 namespace SeExpr2 {
 
@@ -1005,24 +1010,34 @@ LLVM_VALUE ExprUnaryOpNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
 struct VarCodeGeneration {
     static LLVM_VALUE codegen(ExprVarRef *varRef, const std::string &varName, LLVM_BUILDER Builder) {
         LLVMContext &llvmContext = Builder.getContext();
-        Type *voidPtrType = Type::getInt8PtrTy(llvmContext);
-        Type *doubleTy = Type::getDoubleTy(llvmContext);
-        ConstantInt *varAddr = ConstantInt::get(Type::getInt64Ty(llvmContext), (uint64_t)varRef);
-        LLVM_VALUE addrVal = Builder.CreateIntToPtr(varAddr, voidPtrType);
-        Function *evalVarFunc = llvm_getModule(Builder)->getFunction("SeExpr2LLVMEvalVarRef");
 
+        // a few types
+        Type *int64Ty           = Type::getInt64Ty(llvmContext);    // int64_t
+        Type *doubleTy          = Type::getDoubleTy(llvmContext);   // double
+        PointerType *int8PtrTy  = Type::getInt8PtrTy(llvmContext);  // char *
+
+        // get var informations
+        bool isDouble = varRef->type().isFP();
         int dim = varRef->type().dim();
-        AllocaInst *varAlloca = createAllocaInst(Builder, doubleTy, dim);
-        LLVM_VALUE params[2] = {addrVal, varAlloca};
-        Builder.CreateCall(evalVarFunc, params);
 
+        // create the return value on the stack
+        AllocaInst *returnValue = createAllocaInst(Builder, isDouble ? doubleTy : int8PtrTy, dim);
+
+        // get our eval var function, and call it with a pointer to our var ref and a ref to the return value
+        Function *evalVarFunc = llvm_getModule(Builder)->getFunction(isDouble == true ? "SeExpr2LLVMEvalFPVarRef" : "SeExpr2LLVMEvalStrVarRef");
+        Builder.CreateCall(evalVarFunc, {
+           Builder.CreateIntToPtr(ConstantInt::get(int64Ty, (uint64_t)varRef), int8PtrTy),
+           returnValue
+        });
+
+        // load our return value
         LLVM_VALUE ret = 0;
         if (dim == 1) {
-            ret = Builder.CreateLoad(varAlloca);
+            ret = Builder.CreateLoad(returnValue);
         } else {
             // TODO: I don't really see how this requires dim==3... this assert should be removable
             assert(dim == 3 && "future work.");
-            ret = createVecValFromAlloca(Builder, varAlloca, dim);
+            ret = createVecValFromAlloca(Builder, returnValue, dim);
         }
 
         AllocaInst *thisvar = createAllocaInst(Builder, ret->getType(), 1, varName);

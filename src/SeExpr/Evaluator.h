@@ -19,7 +19,8 @@
 #include "ExprLLVMAll.h"
 #include "VarBlock.h"
 
-extern "C" void SeExpr2LLVMEvalVarRef(SeExpr2::ExprVarRef *seVR, double *result);
+extern "C" void SeExpr2LLVMEvalFPVarRef(SeExpr2::ExprVarRef *seVR, double *result);
+extern "C" void SeExpr2LLVMEvalStrVarRef(SeExpr2::ExprVarRef *seVR, double *result);
 extern "C" void SeExpr2LLVMEvalCustomFunction(int *opDataArg,
                                               double *fpArg,
                                               char **strArg,
@@ -80,8 +81,8 @@ class LLVMEvaluator {
     LLVMEvaluator() {}
 
     const char *evalStr(VarBlock *varBlock) { return *(*_llvmEvalStr)(varBlock); }
-
     const double *evalFP(VarBlock *varBlock) { return (*_llvmEvalFP)(varBlock); }
+
     void evalMultiple(VarBlock *varBlock, uint32_t outputVarBlockOffset, uint32_t rangeStart, uint32_t rangeEnd) {
         return (*_llvmEvalFP)(varBlock, outputVarBlockOffset, rangeStart, rangeEnd);
     }
@@ -103,35 +104,44 @@ class LLVMEvaluator {
 
         std::unique_ptr<Module> TheModule(new Module(uniqueName + "_module", *_llvmContext));
 
+        // create all needed types
+        Type        *i8PtrTy        = Type::getInt8PtrTy(*_llvmContext);        // char *
+        PointerType *i8PtrPtrTy     = PointerType::getUnqual(i8PtrTy);          // char **
+        PointerType *i8PtrPtrPtrTy  = PointerType::getUnqual(i8PtrPtrTy);       // char ***
+        Type        *i32Ty          = Type::getInt32Ty(*_llvmContext);          // int
+        Type        *i32PtrTy       = Type::getInt32PtrTy(*_llvmContext);       // int *
+        Type        *i64Ty          = Type::getInt64Ty(*_llvmContext);          // int64 *
+        Type        *doublePtrTy    = Type::getDoublePtrTy(*_llvmContext);      // double *
+        PointerType *doublePtrPtrTy = PointerType::getUnqual(doublePtrTy);      // double **
+        Type        *voidTy         = Type::getVoidTy(*_llvmContext);           // void
+
         // create bindings to helper functions for variables and fucntions
-        Function *SeExpr2LLVMEvalCustomFunctionFunc = nullptr, *SeExpr2LLVMEvalVarRefFunc = nullptr;
+        Function *SeExpr2LLVMEvalCustomFunctionFunc = nullptr;
+        Function *SeExpr2LLVMEvalFPVarRefFunc = nullptr;
+        Function *SeExpr2LLVMEvalStrVarRefFunc = nullptr;
         {
-            Type *i8PtrTy = Type::getInt8PtrTy(*_llvmContext);
-            Type *i32PtrTy = Type::getInt32PtrTy(*_llvmContext);
-            Type *i64Ty = Type::getInt64Ty(*_llvmContext);
-            Type *doublePtrTy = Type::getDoublePtrTy(*_llvmContext);
-            PointerType *i8PtrPtr = PointerType::getUnqual(i8PtrTy);
-            Type *ParamTys[] = {i32PtrTy, doublePtrTy, i8PtrPtr, i8PtrPtr, i64Ty};
             {
-                FunctionType *FT = FunctionType::get(Type::getVoidTy(*_llvmContext), ParamTys, false);
-                SeExpr2LLVMEvalCustomFunctionFunc = Function::Create(
-                    FT, GlobalValue::ExternalLinkage, "SeExpr2LLVMEvalCustomFunction", TheModule.get());
+                FunctionType *FT = FunctionType::get(voidTy, {i32PtrTy, doublePtrTy, i8PtrPtrTy, i8PtrPtrTy, i64Ty}, false);
+                SeExpr2LLVMEvalCustomFunctionFunc = Function::Create(FT, GlobalValue::ExternalLinkage, "SeExpr2LLVMEvalCustomFunction", TheModule.get());
             }
             {
-                Type *ParamTys[2] = {i8PtrTy, doublePtrTy};
-                FunctionType *FT = FunctionType::get(Type::getVoidTy(*_llvmContext), ParamTys, false);
-                SeExpr2LLVMEvalVarRefFunc =
-                    Function::Create(FT, GlobalValue::ExternalLinkage, "SeExpr2LLVMEvalVarRef", TheModule.get());
+                FunctionType *FT = FunctionType::get(voidTy, {i8PtrTy, doublePtrTy}, false);
+                SeExpr2LLVMEvalFPVarRefFunc = Function::Create(FT, GlobalValue::ExternalLinkage, "SeExpr2LLVMEvalFPVarRef", TheModule.get());
+            }
+            {
+                FunctionType *FT = FunctionType::get(voidTy, {i8PtrTy, i8PtrPtrTy}, false);
+                SeExpr2LLVMEvalStrVarRefFunc = Function::Create(FT, GlobalValue::ExternalLinkage, "SeExpr2LLVMEvalStrVarRef", TheModule.get());
             }
         }
 
         // create function and entry BB
         bool desireFP = desiredReturnType.isFP();
         Type *ParamTys[] = {
-            desireFP ? Type::getDoublePtrTy(*_llvmContext) : PointerType::getUnqual(Type::getInt8PtrTy(*_llvmContext)),
-            PointerType::get(Type::getDoublePtrTy(*_llvmContext), 0),
-            Type::getInt32Ty(*_llvmContext), };
-        FunctionType *FT = FunctionType::get(Type::getVoidTy(*_llvmContext), ParamTys, false);
+            desireFP ? doublePtrTy : i8PtrPtrTy,
+            doublePtrPtrTy,
+            i32Ty
+        };
+        FunctionType *FT = FunctionType::get(voidTy, ParamTys, false);
         Function *F = Function::Create(FT, Function::ExternalLinkage, uniqueName + "_func", TheModule.get());
         F->addAttribute(llvm::AttributeSet::FunctionIndex, llvm::Attribute::AlwaysInline);
         {
@@ -173,16 +183,13 @@ class LLVMEvaluator {
             } else {
                 Builder.CreateStore(lastVal, firstArg);
             }
+
             Builder.CreateRetVoid();
         }
 
         // write a new function
-        Type *LOOPParamTys[] = {Type::getInt8PtrTy(*_llvmContext), Type::getInt32Ty(*_llvmContext),
-                                Type::getInt32Ty(*_llvmContext),   Type::getInt32Ty(*_llvmContext), };
-        FunctionType *FTLOOP = FunctionType::get(Type::getVoidTy(*_llvmContext), LOOPParamTys, false);
-
-        Function *FLOOP =
-            Function::Create(FTLOOP, Function::ExternalLinkage, uniqueName + "_loopfunc", TheModule.get());
+        FunctionType *FTLOOP = FunctionType::get(voidTy, {i8PtrTy, i32Ty, i32Ty, i32Ty}, false);
+        Function *FLOOP = Function::Create(FTLOOP, Function::ExternalLinkage, uniqueName + "_loopfunc", TheModule.get());
         {
             // label the function with names
             const char *names[] = {"dataBlock", "outputVarBlockOffset", "rangeStart", "rangeEnd"};
@@ -193,8 +200,8 @@ class LLVMEvaluator {
         }
         {
             // Local variables
-            Value *dimValue = ConstantInt::get(Type::getInt32Ty(*_llvmContext), dimDesired);
-            Value *oneValue = ConstantInt::get(Type::getInt32Ty(*_llvmContext), 1);
+            Value *dimValue = ConstantInt::get(i32Ty, dimDesired);
+            Value *oneValue = ConstantInt::get(i32Ty, 1);
 
             // Basic blocks
             BasicBlock *entryBlock = BasicBlock::Create(*_llvmContext, "entry", FLOOP);
@@ -204,64 +211,47 @@ class LLVMEvaluator {
             BasicBlock *loopEndBlock = BasicBlock::Create(*_llvmContext, "loopEnd", FLOOP);
             IRBuilder<> Builder(entryBlock);
             Builder.SetInsertPoint(entryBlock);
+
+            // Get arguments
             Function::arg_iterator argIterator = FLOOP->arg_begin();
-            // Value* outputDoublePtr=&*argIterator;++argIterator;
-            Value *varBlockCharPtrPtrArg = &*argIterator;
-            ++argIterator;
-            Value *outputVarBlockOffsetArg = &*argIterator;
-            ++argIterator;
-            Value *rangeStartArg = &*argIterator;
-            ++argIterator;
-            Value *rangeEndArg = &*argIterator;
-            ++argIterator;
+            Value *varBlockCharPtrPtrArg = &*argIterator;       ++argIterator;
+            Value *outputVarBlockOffsetArg = &*argIterator;     ++argIterator;
+            Value *rangeStartArg = &*argIterator;                ++argIterator;
+            Value *rangeEndArg = &*argIterator;                    ++argIterator;
 
             // Allocate Variables
             Value *rangeStartVar = Builder.CreateAlloca(Type::getInt32Ty(*_llvmContext), oneValue, "rangeStartVar");
             Value *rangeEndVar = Builder.CreateAlloca(Type::getInt32Ty(*_llvmContext), oneValue, "rangeEndVar");
             Value *indexVar = Builder.CreateAlloca(Type::getInt32Ty(*_llvmContext), oneValue, "indexVar");
-            Value *outputVarBlockOffsetVar =
-                Builder.CreateAlloca(Type::getInt32Ty(*_llvmContext), oneValue, "outputVarBlockOffsetVar");
-            Type *doublePtrPtrTy = llvm::PointerType::get(Type::getDoublePtrTy(*_llvmContext), 0);
+            Value *outputVarBlockOffsetVar = Builder.CreateAlloca(Type::getInt32Ty(*_llvmContext), oneValue, "outputVarBlockOffsetVar");
             Value *varBlockDoublePtrPtrVar = Builder.CreateAlloca(doublePtrPtrTy, oneValue, "varBlockDoublePtrPtrVar");
-            // Value*
-            // currentOutputVar=Builder.CreateAlloca(Type::getDoublePtrTy(*_llvmContext),oneValue,"currentOutputVar");
+            Value *varBlockTPtrPtrVar = Builder.CreateAlloca(desireFP == true ? doublePtrPtrTy : i8PtrPtrPtrTy, oneValue, "varBlockTPtrPtrVar");
+
             // Copy variables from args
-            Value *varBlockDoublePtrPtr =
-                Builder.CreatePointerCast(varBlockCharPtrPtrArg, doublePtrPtrTy, "varBlockAsDoublePtrPtr");
-            Builder.CreateStore(varBlockDoublePtrPtr, varBlockDoublePtrPtrVar);
+            Builder.CreateStore(Builder.CreatePointerCast(varBlockCharPtrPtrArg, doublePtrPtrTy, "varBlockAsDoublePtrPtr"), varBlockDoublePtrPtrVar);
+            Builder.CreateStore(Builder.CreatePointerCast(varBlockCharPtrPtrArg, desireFP ? doublePtrPtrTy : i8PtrPtrPtrTy, "varBlockAsTPtrPtr"), varBlockTPtrPtrVar);
             Builder.CreateStore(rangeStartArg, rangeStartVar);
             Builder.CreateStore(rangeEndArg, rangeEndVar);
             Builder.CreateStore(outputVarBlockOffsetArg, outputVarBlockOffsetVar);
 
-            // TODO: we need char* support right here
-            Value *outputBasePtrPtr = Builder.CreateGEP(
-                nullptr, Builder.CreateLoad(varBlockDoublePtrPtrVar), outputVarBlockOffsetArg, "outputBasePtrPtr");
+            // Set output pointer
+            Value *outputBasePtrPtr = Builder.CreateGEP(nullptr, Builder.CreateLoad(varBlockTPtrPtrVar), outputVarBlockOffsetArg, "outputBasePtrPtr");
             Value *outputBasePtr = Builder.CreateLoad(outputBasePtrPtr, "outputBasePtr");
-            // Value*
-            // outputBasePtrOffset=Builder.CreateGEP(nullptr,outputBasePtr,Builder.CreateMul(dimValue,Builder.CreateLoad(rangeStartVar)),"outputPtr");
-            // Builder.CreateStore(outputBasePtrOffset,currentOutputVar);
             Builder.CreateStore(Builder.CreateLoad(rangeStartVar), indexVar);
 
             Builder.CreateBr(loopCmpBlock);
-
             Builder.SetInsertPoint(loopCmpBlock);
             Value *cond = Builder.CreateICmpULT(Builder.CreateLoad(indexVar), Builder.CreateLoad(rangeEndVar));
             Builder.CreateCondBr(cond, loopRepeatBlock, loopEndBlock);
 
             Builder.SetInsertPoint(loopRepeatBlock);
-            Value *myOutputPtr =
-                Builder.CreateGEP(nullptr, outputBasePtr, Builder.CreateMul(dimValue, Builder.CreateLoad(indexVar)));
-            Builder.CreateCall(
-                F, {myOutputPtr, Builder.CreateLoad(varBlockDoublePtrPtrVar), Builder.CreateLoad(indexVar)});
-            // Builder.CreateStore(ConstantFP::get(Type::getDoubleTy(*_llvmContext),
-            // 3.14),Builder.CreateLoad(ptrVariable));
+            Value *myOutputPtr = Builder.CreateGEP(nullptr, outputBasePtr, Builder.CreateMul(dimValue, Builder.CreateLoad(indexVar)));
+            Builder.CreateCall(F, {myOutputPtr, Builder.CreateLoad(varBlockDoublePtrPtrVar), Builder.CreateLoad(indexVar)});
 
             Builder.CreateBr(loopIncBlock);
 
             Builder.SetInsertPoint(loopIncBlock);
-            Builder.CreateStore(Builder.CreateAdd(Builder.CreateLoad(indexVar), oneValue), indexVar);  // i++
-            // Builder.CreateStore(Builder.CreateGEP(Builder.CreateLoad(currentOutputVar),dimValue),currentOutputVar);
-            // // currentOutput+=dim
+            Builder.CreateStore(Builder.CreateAdd(Builder.CreateLoad(indexVar), oneValue), indexVar);
             Builder.CreateBr(loopCmpBlock);
 
             Builder.SetInsertPoint(loopEndBlock);
@@ -289,7 +279,8 @@ class LLVMEvaluator {
         altModule->setDataLayout(TheExecutionEngine->getDataLayout());
 
         // Add bindings to C linkage helper functions
-        TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalVarRefFunc, (void *)SeExpr2LLVMEvalVarRef);
+        TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalFPVarRefFunc, (void *)SeExpr2LLVMEvalFPVarRef);
+        TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalStrVarRefFunc, (void *)SeExpr2LLVMEvalStrVarRef);
         TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalCustomFunctionFunc, (void *)SeExpr2LLVMEvalCustomFunction);
 
         // [verify]
