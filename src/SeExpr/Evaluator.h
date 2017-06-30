@@ -19,6 +19,10 @@
 #include "ExprLLVMAll.h"
 #include "VarBlock.h"
 
+#ifdef SEEXPR_ENABLE_LLVM
+#include <llvm/Support/Compiler.h>
+#endif
+
 extern "C" void SeExpr2LLVMEvalFPVarRef(SeExpr2::ExprVarRef *seVR, double *result);
 extern "C" void SeExpr2LLVMEvalStrVarRef(SeExpr2::ExprVarRef *seVR, double *result);
 extern "C" void SeExpr2LLVMEvalCustomFunction(int *opDataArg,
@@ -296,7 +300,11 @@ class LLVMEvaluator {
         std::unique_ptr<llvm::legacy::PassManager> pm(new llvm::legacy::PassManager);
         std::unique_ptr<llvm::legacy::FunctionPassManager> fpm(new llvm::legacy::FunctionPassManager(altModule));
         builder.OptLevel = 3;
+#if (LLVM_VERSION_MAJOR >= 4)
+        builder.Inliner = llvm::createAlwaysInlinerLegacyPass();
+#else
         builder.Inliner = llvm::createAlwaysInlinerPass();
+#endif
         builder.populateModulePassManager(*pm);
         // fpm->add(new llvm::DataLayoutPass());
         builder.populateFunctionPassManager(*fpm);
