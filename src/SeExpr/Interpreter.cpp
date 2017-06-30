@@ -299,7 +299,11 @@ struct JmpRelative {
 struct EvalVar {
     static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
         ExprVarRef* ref = reinterpret_cast<ExprVarRef*>(c[opData[0]]);
-        ref->eval(fp + opData[1]);  // ,c+opData[1]);
+        if (ref->type().isFP()) {
+            ref->eval(fp + opData[1]);
+        } else {
+            ref->eval(const_cast<const char**>(c + opData[1]));
+        }
         return 1;
     }
 };
@@ -462,7 +466,7 @@ int ExprLocalFunctionNode::buildInterpreterForCall(const ExprFuncNode* callerNod
     int returnAddress = interpreter->addOperand(0);
     interpreter->addOperand(_procedurePC - basePC);
     interpreter->endOp(false);
-    // set return address
+    // set return address
     interpreter->opData[returnAddress] = interpreter->nextPC();
 
     // TODO: copy result back and string

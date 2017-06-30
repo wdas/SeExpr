@@ -81,11 +81,11 @@ set(LLVM_LIB "")
 if (ENABLE_LLVM_BACKEND)
     set(LLVM_DIR /usr/share/llvm/cmake CACHE PATH "Where to search for LLVM i.e. ")
 
-    find_package(LLVM CONFIG NAMES LLVM CONFIGS LLVM-Config.cmake)
+    find_package(LLVM CONFIG NAMES LLVM CONFIGS LLVMConfig.cmake)
     if (LLVM_FOUND)
         set(SEEXPR_ENABLE_LLVM_BACKEND 1)
-        message(STATUS "Using LLVM-Config.cmake in: ${LLVM_DIR}")
-        find_program(LLVM_CONFIG_EXECUTABLE NAMES llvm-config-3.8 llvm-config)
+        message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+        find_program(LLVM_CONFIG_EXECUTABLE NAMES ${LLVM_TOOLS_BINARY_DIR}/llvm-config)
 
         # Uncomment to use clang++
         #set(CMAKE_CXX_COMPILER clang++)
