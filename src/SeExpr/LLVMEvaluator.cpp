@@ -17,6 +17,10 @@
 
 #include "LLVMEvaluator.h"
 
+#ifdef SEEXPR_ENABLE_LLVM
+#include <llvm/Support/Compiler.h>
+#endif
+
 namespace SeExpr2 {
 #ifdef SEEXPR_ENABLE_LLVM
 bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType)
@@ -246,7 +250,11 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType)
     std::unique_ptr<llvm::legacy::PassManager> pm(new llvm::legacy::PassManager);
     std::unique_ptr<llvm::legacy::FunctionPassManager> fpm(new llvm::legacy::FunctionPassManager(altModule));
     builder.OptLevel = 3;
+#if LLVM_VERSION_MAJOR >= 4
+    builder.Inliner = llvm::createAlwaysInlinerLegacyPass();
+#else
     builder.Inliner = llvm::createAlwaysInlinerPass();
+#endif
     builder.populateModulePassManager(*pm);
     // fpm->add(new llvm::DataLayoutPass());
     builder.populateFunctionPassManager(*fpm);
