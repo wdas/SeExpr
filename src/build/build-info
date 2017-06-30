@@ -11,7 +11,6 @@ if 'MACOSX_DEPLOYMENT_TARGET' in os.environ:
 from distutils import sysconfig as sc
 
 import sipconfig
-from PyQt4 import pyqtconfig
 
 def main():
     parser = argparse.ArgumentParser()
@@ -56,6 +55,7 @@ def python_site(args):
 
 
 def pyqt4_sip(args):
+    from PyQt4 import pyqtconfig
     pkg_cfg = pyqtconfig._pkg_config
     return pkg_cfg['pyqt_sip_dir']
 
