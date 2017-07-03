@@ -128,6 +128,40 @@ static Interpreter::OpF getTemplatizedOp2(int i) {
 
 namespace {
 
+//! Binary operator for strings. Currently only handle '+'
+struct BinaryStringOp {
+    static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+        // get the operand data
+        char*& out = *(char**)c[opData[0]];
+        char* in1 = c[opData[1]];
+        char* in2 = c[opData[2]];
+
+        // delete previous data and allocate a new buffer, only if needed
+        // NOTE: this is more efficient, but might consume more memory...
+        // Maybe make this behaviour configurable ?
+        int len1 = strlen(in1);
+        int len2 = strlen(in2);
+        if (out == 0 || len1 + len2 + 1 > strlen(out))
+        {
+            delete [] out;
+            out = new char [len1 + len2 + 1];
+        }
+
+        // clear previous evaluation content
+        memset(out, 0, len1 + len2 + 1);
+
+        // concatenate strings
+        strcat(out, in1);
+        strcat(out + len1, in2);
+        out[len1 + len2] = '\0';
+
+        // copy to the output
+        c[opData[3]] = out;
+
+        return 1;
+    }
+};
+
 //! Computes a binary op of vector dimension d
 template <char op, int d>
 struct BinaryOp {
@@ -533,33 +567,67 @@ int ExprBinaryOpNode::buildInterpreter(Interpreter* interpreter) const {
         }
     }
 
-    switch (_op) {
-        case '+':
-            interpreter->addOp(getTemplatizedOp2<'+', BinaryOp>(dimout));
-            break;
-        case '-':
-            interpreter->addOp(getTemplatizedOp2<'-', BinaryOp>(dimout));
-            break;
-        case '*':
-            interpreter->addOp(getTemplatizedOp2<'*', BinaryOp>(dimout));
-            break;
-        case '/':
-            interpreter->addOp(getTemplatizedOp2<'/', BinaryOp>(dimout));
-            break;
-        case '^':
-            interpreter->addOp(getTemplatizedOp2<'^', BinaryOp>(dimout));
-            break;
-        case '%':
-            interpreter->addOp(getTemplatizedOp2<'%', BinaryOp>(dimout));
-            break;
-        default:
-            assert(false);
+    // check if the node will output a string of numerical value
+    bool isString = child0->type().isString() || child1->type().isString();
+
+    // add the operator
+    if (isString == false) {
+        switch (_op) {
+            case '+':
+                interpreter->addOp(getTemplatizedOp2<'+', BinaryOp>(dimout));
+                break;
+            case '-':
+                interpreter->addOp(getTemplatizedOp2<'-', BinaryOp>(dimout));
+                break;
+            case '*':
+                interpreter->addOp(getTemplatizedOp2<'*', BinaryOp>(dimout));
+                break;
+            case '/':
+                interpreter->addOp(getTemplatizedOp2<'/', BinaryOp>(dimout));
+                break;
+            case '^':
+                interpreter->addOp(getTemplatizedOp2<'^', BinaryOp>(dimout));
+                break;
+            case '%':
+                interpreter->addOp(getTemplatizedOp2<'%', BinaryOp>(dimout));
+                break;
+            default:
+                assert(false);
+        }
+    } else {
+        switch (_op) {
+            case '+': {
+                interpreter->addOp(BinaryStringOp::f);
+                int intermediateOp = interpreter->allocPtr();
+                interpreter->s[intermediateOp] = (char*)(&_out);
+                interpreter->addOperand(intermediateOp);
+                break;
+            }
+            default:
+                assert(false);
+        }
     }
-    int op2 = interpreter->allocFP(dimout);
+
+    // allocate the output
+    int op2 = -1;
+    if (isString == false) {
+        op2 = interpreter->allocFP(dimout);
+    } else {
+        op2 = interpreter->allocPtr();
+    }
+
     interpreter->addOperand(op0);
     interpreter->addOperand(op1);
     interpreter->addOperand(op2);
-    interpreter->endOp();
+
+    // NOTE: one of the operand can be a function. If it's the case for
+    // strings, since functions are not immediately executed (they have
+    // endOp(false)) using endOp() here would result in a nullptr
+    // input operand during eval, thus the following arg to endOp.
+    //
+    // TODO: only stop execution if one of the operand is either a
+    // function of a var ref.
+    interpreter->endOp(isString == false);
 
     return op2;
 }
