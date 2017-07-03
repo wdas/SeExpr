@@ -75,7 +75,9 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode *node, Interpreter *inte
     int *opCurr = (&interpreter->opData[0]) + interpreter->ops[pc].second;
 
     ArgHandle args(opCurr, &interpreter->d[0], &interpreter->s[0], interpreter->callStack);
-    interpreter->s[ptrDataLoc] = reinterpret_cast<char *>(evalConstant(node, args));
+    ExprFuncNode::Data* data = evalConstant(node, args);
+    node->setData(data);
+    interpreter->s[ptrDataLoc] = reinterpret_cast<char *>(data);
 
     return outoperand;
 }
@@ -121,6 +123,7 @@ void SeExpr2LLVMEvalCustomFunction(int *opDataArg,
     if (!*funcdata) {
         handle.data = funcSimple->evalConstant(node, handle);
         *funcdata = reinterpret_cast<void *>(handle.data);
+        node->setData(handle.data);
     } else {
         handle.data = reinterpret_cast<SeExpr2::ExprFuncNode::Data *>(*funcdata);
     }
