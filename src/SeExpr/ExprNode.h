@@ -451,7 +451,7 @@ class ExprCompareNode : public ExprNode {
 class ExprBinaryOpNode : public ExprNode {
   public:
     ExprBinaryOpNode(const Expression* expr, ExprNode* a, ExprNode* b, char op) : ExprNode(expr, a, b), _op(op), _out(0) {}
-    virtual ~ExprBinaryOpNode() { delete [] _out; }
+    virtual ~ExprBinaryOpNode() { free(_out); }
 
     virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;

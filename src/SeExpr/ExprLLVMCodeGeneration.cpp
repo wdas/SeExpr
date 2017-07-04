@@ -600,24 +600,40 @@ LLVM_VALUE ExprBinaryOpNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
         }
     } else {
         // precompute a few things
-        Type        *i32Ty      = Type::getInt32Ty(Builder.getContext());
+        LLVMContext &context    = Builder.getContext();
         Module      *module     = llvm_getModule(Builder);
+        PointerType *i8PtrPtrTy = PointerType::getUnqual(Type::getInt8PtrTy(context));
+        Type        *i32Ty      = Type::getInt32Ty(context);
         Function    *strlen     = module->getFunction("strlen");
         Function    *malloc     = module->getFunction("malloc");
+        Function    *free       = module->getFunction("free");
         Function    *memset     = module->getFunction("memset");
         Function    *strcat     = module->getFunction("strcat");
 
         // do magic (see the pseudo C code on the comments at the end
         // of each LLVM instruction)
-        LLVM_VALUE len1 = Builder.CreateCall(strlen, { op1 });          // len1 = strlen(op1);
-        LLVM_VALUE len2 = Builder.CreateCall(strlen, { op2 });          // len2 = strlen(op2);
-        LLVM_VALUE len = Builder.CreateAdd(len1, len2);                 // len = len1 + len2;
-        LLVM_VALUE alloc = Builder.CreateCall(malloc, { len });         // alloc = malloc(len1 + len2);
-        LLVM_VALUE zero = ConstantInt::get(i32Ty, 0);                   // zero = 0;
-        Builder.CreateCall(memset, { alloc, zero, len });               // memset(alloc, zero, len);
-        Builder.CreateCall(strcat, { alloc, op1 });                     // strcat(alloc, op1);
-        LLVM_VALUE newAlloc = Builder.CreateGEP(nullptr, alloc, len1);  // newAlloc = alloc + len1
-        Builder.CreateCall(strcat, { newAlloc, op2 });                  // strcat(alloc, op2);
+
+        // compute the length of the operand strings
+        LLVM_VALUE len1 = Builder.CreateCall(strlen, { op1 });              // len1 = strlen(op1);
+        LLVM_VALUE len2 = Builder.CreateCall(strlen, { op2 });              // len2 = strlen(op2);
+        LLVM_VALUE len = Builder.CreateAdd(len1, len2);                     // len = len1 + len2;
+
+        // allocate and clear memory
+        LLVM_VALUE alloc = Builder.CreateCall(malloc, { len });             // alloc = malloc(len1 + len2);
+        LLVM_VALUE zero = ConstantInt::get(i32Ty, 0);                       // zero = 0;
+        Builder.CreateCall(memset, { alloc, zero, len });                   // memset(alloc, zero, len);
+
+        // concatenate operand strings into output string
+        Builder.CreateCall(strcat, { alloc, op1 });                         // strcat(alloc, op1);
+        LLVM_VALUE newAlloc = Builder.CreateGEP(nullptr, alloc, len1);      // newAlloc = alloc + len1
+        Builder.CreateCall(strcat, { newAlloc, op2 });                      // strcat(alloc, op2);
+
+        // store the address in the node's _out member so that it will be
+        // cleaned up when the expression is destroyed.
+        APInt outAddr = APInt(64, (uint64_t)&_out);
+        LLVM_VALUE out = Constant::getIntegerValue(i8PtrPtrTy, outAddr);    // out = &_out;
+        Builder.CreateCall(free, { Builder.CreateLoad(out) });              // free(*out);
+        Builder.CreateStore(alloc, out);                                    // *out = alloc
         return alloc;
     }
 
