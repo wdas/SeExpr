@@ -541,7 +541,7 @@ ExprType ExprFuncNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
 
         // check that function exists and that the function has the right number of arguments
         if (checkCondition(_func, "Function " + _name + " has no definition", error) &&
-            checkCondition(nargs >= _func->minArgs(), "Too few args for function" + _name, error) &&
+            checkCondition(nargs >= _func->minArgs(), "Too few args for function " + _name, error) &&
             checkCondition(
                 nargs <= _func->maxArgs() || _func->maxArgs() < 0, "Too many args for function " + _name, error)) {
 
