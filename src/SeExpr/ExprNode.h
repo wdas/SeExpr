@@ -584,7 +584,7 @@ class ExprFuncNode : public ExprNode {
     */
     void setData(Data* data, bool cleanupData = false) const {
         _data = data;
-        _cleanupData = cleanupData
+        _cleanupData = cleanupData;
     }
 
     //! get associated blind data (returns 0 if none)
