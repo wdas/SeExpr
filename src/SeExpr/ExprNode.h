@@ -519,7 +519,9 @@ class ExprFuncNode : public ExprNode {
         expr->addFunc(name);
     }
     virtual ~ExprFuncNode() {
-        delete _data;
+        if (_cleanupData == true) {
+            delete _data;
+        }
     }
 
     virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
@@ -574,8 +576,16 @@ class ExprFuncNode : public ExprNode {
         Examples would be tokenized values,
         sorted lists for binary searches in curve evaluation, etc. This should be done
         in ExprFuncX::prep().
+
+        If you're setting allocated data (through new only) then use cleanupData as
+        true so that the data will be correctly deleted when the node is destroyed.
+        By default cleanupData is false to prevent the node accidentally cleaning
+        things that it shouldn't.
     */
-    void setData(Data* data) const { _data = data; }
+    void setData(Data* data, bool cleanupData = false) const {
+        _data = data;
+        _cleanupData = cleanupData
+    }
 
     //! get associated blind data (returns 0 if none)
     /***
@@ -594,6 +604,7 @@ class ExprFuncNode : public ExprNode {
                                               //    mutable std::vector<double> _scalarArgs;
                                               //    mutable std::vector<Vec3d> _vecArgs;
     mutable std::vector<int> _promote;
+    mutable bool _cleanupData;
     mutable Data* _data;
 };
 
