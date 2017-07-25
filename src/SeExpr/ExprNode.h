@@ -518,7 +518,10 @@ class ExprFuncNode : public ExprNode {
         : ExprNode(expr), _name(name), _func(0), _localFunc(0), _data(0) {
         expr->addFunc(name);
     }
-    virtual ~ExprFuncNode() {/* TODO: fix delete _data;*/
+    virtual ~ExprFuncNode() {
+        if (_data != nullptr && _data->_cleanup == true) {
+            delete _data;
+        }
     }
 
     virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
@@ -563,7 +566,9 @@ class ExprFuncNode : public ExprNode {
 
     //! base class for custom instance data
     struct Data {
+        Data(bool cleanup = false) : _cleanup(cleanup) {}
         virtual ~Data() {}
+        bool _cleanup;
     };
 
     //! associate blind data with this node (subsequently owned by this object)
