@@ -2,6 +2,14 @@
 
 %Module expreditor2
 
+%Import QtCore/QtCoremod.sip
+
+%If (Qt_5_0_0 -)
+%Import QtWidgets/QtWidgetsmod.sip
+%End
+
+%Import QtGui/QtGuimod.sip
+
 %MappedType std::string
 {
 %TypeHeaderCode
@@ -59,8 +67,6 @@
     return 0;
 %End
 };
-
-%Import QtGui/QtGuimod.sip
 
 class ExprDialog:QDialog{
 %TypeHeaderCode

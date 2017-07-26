@@ -16,7 +16,7 @@
 */ #ifndef _Functions_h_
 #define _Functions_h_
 
-#include <QtGui/QTableView>
+#include <QTableView>
 #include <iostream>
 #include <cfloat>
 

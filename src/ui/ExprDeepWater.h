@@ -20,10 +20,10 @@
 
 #include <vector>
 
-#include <QtCore/QObject>
-#include <QtGui/QGraphicsPolygonItem>
-#include <QtGui/QGraphicsView>
-#include <QtGui/QLineEdit>
+#include <QObject>
+#include <QGraphicsPolygonItem>
+#include <QGraphicsView>
+#include <QLineEdit>
 
 #include <cmath>
 #include <iostream>

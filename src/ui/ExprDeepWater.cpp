@@ -19,12 +19,12 @@
 #include <iostream>
 #include <algorithm>
 
-#include <QtGui/QDialog>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QResizeEvent>
-#include <QtGui/QIntValidator>
+#include <QDialog>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QVBoxLayout>
+#include <QResizeEvent>
+#include <QIntValidator>
 
 #include <SeExpr2/ExprBuiltins.h>
 #include <cfloat>
