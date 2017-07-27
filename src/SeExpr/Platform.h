@@ -51,6 +51,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <inttypes.h>
+#include <sys/time.h>
 // OS for spinlock
 #ifdef __APPLE__
 #include <libkern/OSAtomic.h>
@@ -62,7 +63,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <assert.h>
-#include <sys/time.h>
 
 // missing functions on Windows
 #ifdef WINDOWS
@@ -125,11 +125,33 @@ class Timer {
 };
 #else  // Windows
 class Timer {
-  public:
-    Timer() : started(false) {}
+    __int64 ticksPerSeconds;
+    __int64 startTime, stopTime;
+    bool started;
 
-    void start() { std::cerr << "timer not implemented on Windows" << std::endl; }
-    long elapsedTime() { return 0; }
+    __int64 time() {
+        LARGE_INTEGER perfCounter;
+        QueryPerformanceCounter(&perfCounter);
+        return perfCounter.QuadPart;
+    }
+
+  public:
+    Timer() : started(false) {
+        // get the timer frequency
+        LARGE_INTEGER frequency;
+        QueryPerformanceFrequency(&frequency);
+        ticksPerSeconds = frequency.QuadPart;
+    }
+
+    void start() {
+        started = true;
+        startTime = this->time();
+    }
+
+    long elapsedTime() {
+        stopTime = this->time();
+        return ((stopTime - startTime) * 1000000) / ticksPerSeconds;
+    }
 };
 #endif
 
