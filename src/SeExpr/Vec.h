@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <iostream>
+#include "Platform.h"
 
 //#############################################################################
 // Template Metaprogramming Helpers
@@ -40,7 +41,11 @@ struct my_enable_if {
 };
 //! Enable_if failure case (substitution failure is not an error)
 template <class T>
-struct my_enable_if<false, T> {};
+struct my_enable_if<false, T> {
+#if defined(WINDOWS)
+    typedef T TYPE;
+#endif
+};
 
 //! Static conditional type true case
 template <bool c, class T1, class T2>
