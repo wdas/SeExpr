@@ -17,9 +17,12 @@
 #include "ExprNode.h"
 #include "Interpreter.h"
 #include "VarBlock.h"
+#include "Platform.h"
 #include <iostream>
 #include <cstdio>
+#if !defined(WINDOWS)
 #include <dlfcn.h>
+#endif
 
 // TODO: optimize to write to location directly on a CondNode
 namespace SeExpr2 {
@@ -48,9 +51,11 @@ void Interpreter::eval(VarBlock* block, bool debug) {
 void Interpreter::print(int pc) const {
     std::cerr << "---- ops     ----------------------" << std::endl;
     for (size_t i = 0; i < ops.size(); i++) {
-        Dl_info info;
         const char* name = "";
+#if !defined(WINDOWS)
+        Dl_info info;
         if (dladdr((void*)ops[i].first, &info)) name = info.dli_sname;
+#endif
         fprintf(stderr, "%s %s %p (", pc == (int)i ? "-->" : "   ", name, ops[i].first);
         int nextGuy = (i == ops.size() - 1 ? opData.size() : ops[i + 1].second);
         for (int k = ops[i].second; k < nextGuy; k++) {
