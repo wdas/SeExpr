@@ -20,6 +20,7 @@
 #include "Platform.h"
 #include <iostream>
 #include <cstdio>
+#include <algorithm>
 #if !defined(WINDOWS)
 #include <dlfcn.h>
 #endif
