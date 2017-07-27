@@ -18,6 +18,7 @@
 #ifndef MAKEDEPEND
 #include <math.h>
 #include <sstream>
+#include <algorithm>
 #endif
 #include "Vec.h"
 #include "ExprType.h"
