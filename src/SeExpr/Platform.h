@@ -150,7 +150,7 @@ class Timer {
 
     long elapsedTime() {
         stopTime = this->time();
-        return ((stopTime - startTime) * 1000000) / ticksPerSeconds;
+        return static_cast<long>(((stopTime - startTime) * 1000000) / ticksPerSeconds);
     }
 };
 #endif
@@ -159,7 +159,8 @@ class PrintTiming {
   public:
     PrintTiming(const std::string& s) : _s(s) { _timer.start(); }
 
-    ~PrintTiming() { std::cout << _s << " (" << _timer.elapsedTime() << " ms)" << std::endl; }
+    ~PrintTiming() { std::cout << _s.c_str() << " (" << _timer.elapsedTime() << " ms)" << std::endl; }
+
 
   private:
     Timer _timer;
