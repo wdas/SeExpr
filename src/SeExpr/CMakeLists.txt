@@ -79,9 +79,11 @@ endif()
 
 ## Make the SeExpr library with and without LLVM support
 file(GLOB llvm_cpp "*.cpp")
-add_library(SeExpr2 SHARED ${io_cpp} ${core_cpp} ${parser_cpp} ${llvm_cpp})
 if (NOT WIN32)
+    add_library(SeExpr2 SHARED ${io_cpp} ${core_cpp} ${parser_cpp} ${llvm_cpp})
     target_link_libraries(SeExpr2 "dl" "pthread")
+else()
+    add_library(SeExpr2 STATIC ${io_cpp} ${core_cpp} ${parser_cpp} ${llvm_cpp})
 endif()
 
 ## Install binary and includes
