@@ -8,3 +8,7 @@
 CMakeCache.txt
 src/SeExpr/parser
 src/SeExprEditor/generated
+.vs
+.vscode
+CMakeLists.txt.user
+CMakeSettings.json
