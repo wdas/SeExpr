@@ -519,7 +519,7 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode *funcNode, LLVM_BUILDER Builder
 }
 }
 
-extern "C" void SeExpr2LLVMEvalVarRef(ExprVarRef *seVR, double *result) { seVR->eval(result); }
+extern "C" void SeExpr2LLVMEvalVarRef(SeExpr2::ExprVarRef *seVR, double *result) { seVR->eval(result); }
 
 namespace SeExpr2 {
 
