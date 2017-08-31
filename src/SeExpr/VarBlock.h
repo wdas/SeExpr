@@ -26,8 +26,6 @@ namespace SeExpr2 {
 class ExprNode;
 class ExprVarNode;
 class ExprFunc;
-class Expression;
-class Interpreter;
 
 class VarBlockCreator;
 
@@ -35,13 +33,19 @@ class VarBlockCreator;
 class VarBlock {
   private:
     /// Allocate an VarBlock
-    VarBlock(int size) : indirectIndex(0) { _dataPtrs.resize(size); }
+    VarBlock(int size, bool makeThreadSafe) : indirectIndex(0), threadSafe(makeThreadSafe), _dataPtrs(size) {}
 
   public:
     friend class VarBlockCreator;
 
     /// Move semantics is the only allowed way to change the structure
-    VarBlock(VarBlock&& other) { _dataPtrs = std::move(other._dataPtrs); }
+    VarBlock(VarBlock&& other) {
+        threadSafe = other.threadSafe;
+        d = std::move(other.d);
+        s = std::move(other.s);
+        _dataPtrs = std::move(other._dataPtrs);
+        indirectIndex = other.indirectIndex;
+    }
 
     ~VarBlock() {}
 
@@ -57,11 +61,20 @@ class VarBlock {
     // i.e.  _dataPtrs[someAttributeOffset][indirectIndex]
     int indirectIndex;
 
+    /// if true, interpreter's data will be copied to this instance before evaluation.
+    bool threadSafe;
+
+    /// copy of Interpreter's double data
+    std::vector<double> d;
+
+    /// copy of Interpreter's str data
+    std::vector<char*> s;
+
     /// Raw data of the data block pointer (used by compiler)
     char** data() { return _dataPtrs.data(); }
 
   private:
-    /// This stores double* or char** ptrs
+    /// This stores double* or char** ptrs to variables
     std::vector<char*> _dataPtrs;
 };
 
@@ -97,7 +110,17 @@ class VarBlockCreator {
     }
 
     /// Get an evaluation handle (one needed per thread)
-    VarBlock create() { return VarBlock(_nextOffset); }
+    /// \param makeThreadSafe
+    ///     If true, right before evaluating the expression, all data used
+    ///     by the interpreter will be copied to the var block, to make the
+    ///     evaluation thread safe (assuming there's one var block instead
+    ///     per thread)
+    ///     If false or not specified, the old behavior occurs (var block
+    ///     will only hold variables sources and optionally output data,
+    ///     and the interpreter will work on its internal data)
+    VarBlock create(bool makeThreadSafe = false) {
+        return VarBlock(_nextOffset, makeThreadSafe);
+    }
 
     /// Resolve the variable using anything in the data block (call from resolveVar in Expr subclass)
     ExprVarRef* resolveVar(const std::string& name) const {
