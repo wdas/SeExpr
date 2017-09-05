@@ -306,7 +306,7 @@ const double* Expression::evalFP(VarBlock* varBlock) const {
     if (_isValid) {
         if (_evaluationStrategy == UseInterpreter) {
             _interpreter->eval(varBlock);
-            return &_interpreter->d[_returnSlot];
+            return (varBlock && varBlock->threadSafe) ? &(varBlock->d[_returnSlot]) : &_interpreter->d[_returnSlot];
         } else {  // useLLVM
             return _llvmEvaluator->evalFP(varBlock);
         }
@@ -341,7 +341,7 @@ const char* Expression::evalStr(VarBlock* varBlock) const {
     if (_isValid) {
         if (_evaluationStrategy == UseInterpreter) {
             _interpreter->eval(varBlock);
-            return _interpreter->s[_returnSlot];
+            return (varBlock && varBlock->threadSafe) ? varBlock->s[_returnSlot] : _interpreter->s[_returnSlot];
         } else {  // useLLVM
             return _llvmEvaluator->evalStr(varBlock);
         }

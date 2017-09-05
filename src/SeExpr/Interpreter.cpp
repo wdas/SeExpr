@@ -29,13 +29,30 @@
 namespace SeExpr2 {
 
 void Interpreter::eval(VarBlock* block, bool debug) {
+    // get pointers to the working data
+    double* fp = d.data();
+    char** str = s.data();
+
+    // if we have a VarBlock instance, we need to update the working data
     if (block) {
-        static_assert(sizeof(char*) == sizeof(size_t), "Expect to fit size_t in char*");
-        s[0] = reinterpret_cast<char*>(block->data());
-        s[1] = reinterpret_cast<char*>(block->indirectIndex);
+        // if the VarBlock is flagged as thread safe, copy the interpreter's data to it.
+        if (block->threadSafe == true) {
+            // copy double data
+            block->d.resize(d.size());
+            fp = block->d.data();
+            memcpy(fp, d.data(), d.size() * sizeof(double));
+
+            // copy string data
+            block->s.resize(s.size());
+            str = block->s.data();
+            memcpy(str, s.data(), s.size() * sizeof(char*));
+        }
+
+        // set the variable evaluation data
+        str[0] = reinterpret_cast<char*>(block->data());
+        str[1] = reinterpret_cast<char*>(block->indirectIndex);
     }
-    double* fp = &d[0];
-    char** str = &s[0];
+
     int pc = _pcStart;
     int end = ops.size();
     while (pc < end) {
