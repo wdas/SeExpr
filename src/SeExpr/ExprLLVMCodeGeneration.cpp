@@ -566,34 +566,75 @@ LLVM_VALUE ExprBinaryOpNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     LLVM_VALUE op1 = pv.first;
     LLVM_VALUE op2 = pv.second;
 
-    switch (_op) {
-        case '+':
-            return Builder.CreateFAdd(op1, op2);
-        case '-':
-            return Builder.CreateFSub(op1, op2);
-        case '*':
-            return Builder.CreateFMul(op1, op2);
-        case '/':
-            return Builder.CreateFDiv(op1, op2);
-        case '%': {
-            // niceMod() from v1: b==0 ? 0 : a-floor(a/b)*b
-            LLVM_VALUE a = op1, b = op2;
-            LLVM_VALUE aOverB = Builder.CreateFDiv(a, b);
-            Function *floorFun = Intrinsic::getDeclaration(llvm_getModule(Builder), Intrinsic::floor, op1->getType());
-            LLVM_VALUE normal = Builder.CreateFSub(a, Builder.CreateFMul(Builder.CreateCall(floorFun, {aOverB}), b));
-            Constant *zero = ConstantFP::get(op1->getType(), 0.0);
-            return Builder.CreateSelect(Builder.CreateFCmpOEQ(zero, op1), zero, normal);
+    const bool isString = child(0)->type().isString();
+
+    if (isString == false) {
+        switch (_op) {
+            case '+':
+                return Builder.CreateFAdd(op1, op2);
+            case '-':
+                return Builder.CreateFSub(op1, op2);
+            case '*':
+                return Builder.CreateFMul(op1, op2);
+            case '/':
+                return Builder.CreateFDiv(op1, op2);
+            case '%': {
+                // niceMod() from v1: b==0 ? 0 : a-floor(a/b)*b
+                LLVM_VALUE a = op1, b = op2;
+                LLVM_VALUE aOverB = Builder.CreateFDiv(a, b);
+                Function *floorFun = Intrinsic::getDeclaration(llvm_getModule(Builder), Intrinsic::floor, op1->getType());
+                LLVM_VALUE normal = Builder.CreateFSub(a, Builder.CreateFMul(Builder.CreateCall(floorFun, {aOverB}), b));
+                Constant *zero = ConstantFP::get(op1->getType(), 0.0);
+                return Builder.CreateSelect(Builder.CreateFCmpOEQ(zero, op1), zero, normal);
+            }
+            case '^': {
+                // TODO: make external function reference work with interpreter, libffi
+                // TODO: needed for MCJIT??
+                // TODO: is the above not already done?!
+                std::vector<Type *> arg_type;
+                arg_type.push_back(op1->getType());
+                Function *fun = Intrinsic::getDeclaration(llvm_getModule(Builder), Intrinsic::pow, arg_type);
+                std::vector<LLVM_VALUE> ops = {op1, op2};
+                return Builder.CreateCall(fun, ops);
+            }
         }
-        case '^': {
-            // TODO: make external function reference work with interpreter, libffi
-            // TODO: needed for MCJIT??
-            // TODO: is the above not already done?!
-            std::vector<Type *> arg_type;
-            arg_type.push_back(op1->getType());
-            Function *fun = Intrinsic::getDeclaration(llvm_getModule(Builder), Intrinsic::pow, arg_type);
-            std::vector<LLVM_VALUE> ops = {op1, op2};
-            return Builder.CreateCall(fun, ops);
-        }
+    } else {
+        // precompute a few things
+        LLVMContext &context    = Builder.getContext();
+        Module      *module     = llvm_getModule(Builder);
+        PointerType *i8PtrPtrTy = PointerType::getUnqual(Type::getInt8PtrTy(context));
+        Type        *i32Ty      = Type::getInt32Ty(context);
+        Function    *strlen     = module->getFunction("strlen");
+        Function    *malloc     = module->getFunction("malloc");
+        Function    *free       = module->getFunction("free");
+        Function    *memset     = module->getFunction("memset");
+        Function    *strcat     = module->getFunction("strcat");
+
+        // do magic (see the pseudo C code on the comments at the end
+        // of each LLVM instruction)
+
+        // compute the length of the operand strings
+        LLVM_VALUE len1 = Builder.CreateCall(strlen, { op1 });              // len1 = strlen(op1);
+        LLVM_VALUE len2 = Builder.CreateCall(strlen, { op2 });              // len2 = strlen(op2);
+        LLVM_VALUE len = Builder.CreateAdd(len1, len2);                     // len = len1 + len2;
+
+        // allocate and clear memory
+        LLVM_VALUE alloc = Builder.CreateCall(malloc, { len });             // alloc = malloc(len1 + len2);
+        LLVM_VALUE zero = ConstantInt::get(i32Ty, 0);                       // zero = 0;
+        Builder.CreateCall(memset, { alloc, zero, len });                   // memset(alloc, zero, len);
+
+        // concatenate operand strings into output string
+        Builder.CreateCall(strcat, { alloc, op1 });                         // strcat(alloc, op1);
+        LLVM_VALUE newAlloc = Builder.CreateGEP(nullptr, alloc, len1);      // newAlloc = alloc + len1
+        Builder.CreateCall(strcat, { newAlloc, op2 });                      // strcat(alloc, op2);
+
+        // store the address in the node's _out member so that it will be
+        // cleaned up when the expression is destroyed.
+        APInt outAddr = APInt(64, (uint64_t)&_out);
+        LLVM_VALUE out = Constant::getIntegerValue(i8PtrPtrTy, outAddr);    // out = &_out;
+        Builder.CreateCall(free, { Builder.CreateLoad(out) });              // free(*out);
+        Builder.CreateStore(alloc, out);                                    // *out = alloc
+        return alloc;
     }
 
     assert(false && "unexpected op");

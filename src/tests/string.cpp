@@ -24,12 +24,11 @@ using namespace SeExpr2;
 
 
 struct StringFunc : public ExprFuncSimple {
-    StringFunc() : ExprFuncSimple(true) {}
+    StringFunc() : ExprFuncSimple(true) {
+    }
 
-    struct StringData : public SeExpr2::ExprFuncNode::Data
+    struct StringData : public SeExpr2::ExprFuncNode::Data, public std::string
     {
-        std::string str;
-        int numArgs;
     };
 
     virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const {
@@ -45,21 +44,21 @@ struct StringFunc : public ExprFuncSimple {
         }
         return constant == true ? SeExpr2::ExprType().String().Constant() : SeExpr2::ExprType().String().Varying();
     }
+
     virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const {
-        StringData* data = new StringData();
-        data->numArgs = node->numChildren();
-        return data;
+        return new StringData();
     }
+
     virtual void eval(ArgHandle args) {
-        StringData* data = reinterpret_cast<StringData*>(args.data);
-        data->str.clear();
-        for (int i = 0; i < data->numArgs; ++i) {
-            data->str += args.inStr(i);
-            if (i != data->numArgs - 1) {
-                data->str += "/";
+        StringData& data = *reinterpret_cast<StringData*>(args.data);
+        data.clear();
+        for (int i = 0, iend = args.nargs(); i < iend; ++i) {
+            data += args.inStr(i);
+            if (i != iend - 1) {
+                data += "/";
             }
         }
-        args.outStr = const_cast<char*>(data->str.c_str());
+        args.outStr = const_cast<char*>(data.c_str());
     }
 } joinPath;
 ExprFunc joinPathFunc(joinPath, 2, 100);
@@ -125,4 +124,32 @@ TEST(StringTests, FunctionVarying) {
     EXPECT_TRUE(expr.returnType().isString() == true);
     EXPECT_TRUE(expr.isConstant() == false);
     EXPECT_STREQ(expr.evalStr(), "/home/foo/some/relative/path");
+}
+
+TEST(StringTests, BinaryOp) {
+    StringExpression expr1("\"hello \" + \"world!\"");
+    EXPECT_TRUE(expr1.isValid() == true);
+    EXPECT_TRUE(expr1.returnType().isString() == true);
+    EXPECT_TRUE(expr1.isConstant() == true);
+    EXPECT_STREQ(expr1.evalStr(), "hello world!");
+
+    StringExpression expr2("\"hello \" + \"world\" + \"!\"");
+    EXPECT_TRUE(expr2.isValid() == true);
+    EXPECT_TRUE(expr2.returnType().isString() == true);
+    EXPECT_TRUE(expr2.isConstant() == true);
+    EXPECT_STREQ(expr2.evalStr(), "hello world!");
+
+    StringExpression expr3("stringVar + \"world!\"");
+    expr3.stringVar = "hello ";
+    EXPECT_TRUE(expr3.isValid() == true);
+    EXPECT_TRUE(expr3.returnType().isString() == true);
+    EXPECT_TRUE(expr3.isConstant() == false);
+    EXPECT_STREQ(expr3.evalStr(), "hello world!");
+
+    StringExpression expr4("join_path(\"a\", \"b\") + \"/c/\" + stringVar");
+    expr4.stringVar = "d";
+    EXPECT_TRUE(expr4.isValid() == true);
+    EXPECT_TRUE(expr4.returnType().isString() == true);
+    EXPECT_TRUE(expr4.isConstant() == false);
+    EXPECT_STREQ(expr4.evalStr(), "a/b/c/d");
 }

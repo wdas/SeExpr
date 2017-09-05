@@ -123,6 +123,11 @@ class LLVMEvaluator {
         Function *SeExpr2LLVMEvalCustomFunctionFunc = nullptr;
         Function *SeExpr2LLVMEvalFPVarRefFunc = nullptr;
         Function *SeExpr2LLVMEvalStrVarRefFunc = nullptr;
+        Function *SeExpr2LLVMEvalstrlenFunc = nullptr;
+        Function *SeExpr2LLVMEvalmallocFunc = nullptr;
+        Function *SeExpr2LLVMEvalfreeFunc = nullptr;
+        Function *SeExpr2LLVMEvalmemsetFunc = nullptr;
+        Function *SeExpr2LLVMEvalstrcatFunc = nullptr;
         {
             {
                 FunctionType *FT = FunctionType::get(voidTy, {i32PtrTy, doublePtrTy, i8PtrPtrTy, i8PtrPtrTy, i64Ty}, false);
@@ -135,6 +140,26 @@ class LLVMEvaluator {
             {
                 FunctionType *FT = FunctionType::get(voidTy, {i8PtrTy, i8PtrPtrTy}, false);
                 SeExpr2LLVMEvalStrVarRefFunc = Function::Create(FT, GlobalValue::ExternalLinkage, "SeExpr2LLVMEvalStrVarRef", TheModule.get());
+            }
+            {
+                FunctionType *FT = FunctionType::get(i32Ty, { i8PtrTy }, false);
+                SeExpr2LLVMEvalstrlenFunc = Function::Create(FT, Function::ExternalLinkage, "strlen", TheModule.get());
+            }
+            {
+                FunctionType *FT = FunctionType::get(i8PtrTy, { i32Ty }, false);
+                SeExpr2LLVMEvalmallocFunc = Function::Create(FT, Function::ExternalLinkage, "malloc", TheModule.get());
+            }
+            {
+                FunctionType *FT = FunctionType::get(voidTy, { i8PtrTy }, false);
+                SeExpr2LLVMEvalfreeFunc = Function::Create(FT, Function::ExternalLinkage, "free", TheModule.get());
+            }
+            {
+                FunctionType *FT = FunctionType::get(voidTy, { i8PtrTy, i32Ty, i32Ty }, false);
+                SeExpr2LLVMEvalmemsetFunc = Function::Create(FT, Function::ExternalLinkage, "memset", TheModule.get());
+            }
+            {
+                FunctionType *FT = FunctionType::get(i8PtrTy, { i8PtrTy, i8PtrTy }, false);
+                SeExpr2LLVMEvalstrcatFunc = Function::Create(FT, Function::ExternalLinkage, "strcat", TheModule.get());
             }
         }
 
@@ -286,6 +311,11 @@ class LLVMEvaluator {
         TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalFPVarRefFunc, (void *)SeExpr2LLVMEvalFPVarRef);
         TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalStrVarRefFunc, (void *)SeExpr2LLVMEvalStrVarRef);
         TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalCustomFunctionFunc, (void *)SeExpr2LLVMEvalCustomFunction);
+        TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalstrlenFunc, (void *)strlen);
+        TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalstrcatFunc, (void *)strcat);
+        TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalmemsetFunc, (void *)memset);
+        TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalmallocFunc, (void *)malloc);
+        TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalfreeFunc, (void *)free);
 
         // [verify]
         std::string errorStr;

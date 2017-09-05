@@ -17,10 +17,17 @@
 
 #include <stdio.h>
 #include <gtest/gtest.h>
+#include <SeExpr2/ExprFunc.h>
 
 using ::testing::InitGoogleTest;
 
 int main(int argc, char **argv) {
-    InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    int result = 0;
+
+    {
+        InitGoogleTest(&argc, argv);
+        result = RUN_ALL_TESTS();
+        SeExpr2::ExprFunc::cleanup();
+    }
+    return result;
 }

@@ -464,12 +464,13 @@ ExprType ExprBinaryOpNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) 
 
     bool error = false;
 
+    // prep children and get their types
     firstType = child(0)->prep(false, envBuilder);
-    checkIsFP(firstType, error);
     secondType = child(1)->prep(false, envBuilder);
-    checkIsFP(secondType, error);
-    checkTypesCompatible(firstType, secondType, error);
 
+    // check compatibility and get return type
+    // TODO: handle string + fp or fp + string, the same as in Python or equivalent
+    checkTypesCompatible(firstType, secondType, error);
     if (error)
         setType(ExprType().Error());
     else
