@@ -105,15 +105,23 @@ if (ENABLE_LLVM_BACKEND)
         message(STATUS "LLVM_DEFINITIONS =" ${LLVM_DEFINITIONS})
         add_definitions(${LLVM_DEFINITIONS})
 
-        execute_process(
-            COMMAND ${LLVM_CONFIG_EXECUTABLE} --includedir
-            OUTPUT_VARIABLE LLVM_INCLUDE_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if (NOT LLVM_CONFIG_EXECUTABLE STREQUAL "LLVM_CONFIG_EXECUTABLE-NOTFOUND")
+            execute_process(
+                COMMAND ${LLVM_CONFIG_EXECUTABLE} --includedir
+                OUTPUT_VARIABLE LLVM_INCLUDE_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+        else ()
+            set(LLVM_INCLUDE_DIR ${LLVM_INCLUDE_DIRS})
+        endif ()
         message(STATUS "LLVM_INCLUDE_DIR =" ${LLVM_INCLUDE_DIR})
         include_directories(${LLVM_INCLUDE_DIR})
 
-        execute_process(
-            COMMAND ${LLVM_CONFIG_EXECUTABLE} --libdir
-            OUTPUT_VARIABLE LLVM_LIBRARY_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if (NOT LLVM_CONFIG_EXECUTABLE STREQUAL "LLVM_CONFIG_EXECUTABLE-NOTFOUND")
+            execute_process(
+                COMMAND ${LLVM_CONFIG_EXECUTABLE} --libdir
+                OUTPUT_VARIABLE LLVM_LIBRARY_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+        else ()
+            set(LLVM_LIBRARY_DIR ${LLVM_LIBRARY_DIRS})
+        endif ()
         message(STATUS "LLVM_LIBRARY_DIR =" ${LLVM_LIBRARY_DIR})
         link_directories(${LLVM_LIBRARY_DIR})
 
@@ -121,9 +129,13 @@ if (ENABLE_LLVM_BACKEND)
         #llvm_map_components_to_libraries(REQ_LLVM_LIBRARIES jit native)
 
         # construct library name
-        execute_process(
-            COMMAND ${LLVM_CONFIG_EXECUTABLE} --version
-            OUTPUT_VARIABLE LLVM_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if (NOT LLVM_CONFIG_EXECUTABLE STREQUAL "LLVM_CONFIG_EXECUTABLE-NOTFOUND")
+            execute_process(
+                COMMAND ${LLVM_CONFIG_EXECUTABLE} --version
+                OUTPUT_VARIABLE LLVM_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+        else ()
+            set(LLVM_VERSION ${LLVM_PACKAGE_VERSION})
+        endif ()
         message(STATUS "LLVM_VERSION = ${LLVM_VERSION}")
 
         set(LLVM_LIB LLVM)
