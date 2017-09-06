@@ -30,7 +30,7 @@ mark_as_advanced(CMAKE_BACKWARDS_COMPATIBILITY)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
 
 ## Use verbose make file
-set(CMAKE_VERBOSE_MAKEFILE true)
+#set(CMAKE_VERBOSE_MAKEFILE true)
 
 ## policies
 if(COMMAND cmake_policy)

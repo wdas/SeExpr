@@ -196,10 +196,10 @@ class Expression {
     void reset();
 
     /** override resolveVar to add external variables */
-    virtual ExprVarRef* resolveVar(const std::string& name) const { return 0; }
+    virtual ExprVarRef* resolveVar(const std::string& /*name*/) const { return 0; }
 
     /** override resolveFunc to add external functions */
-    virtual ExprFunc* resolveFunc(const std::string& name) const { return 0; }
+    virtual ExprFunc* resolveFunc(const std::string& /*name*/) const { return 0; }
 
     /** records an error in prep or parse stage */
     void addError(const std::string& error, const int startPos, const int endPos) const {

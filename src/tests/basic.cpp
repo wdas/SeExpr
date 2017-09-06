@@ -89,6 +89,81 @@ struct SimpleExpression : public Expression {
         : Expression(str), customFunc(customFuncHelper), countInvocationsFunc(countInvocations) {}
 };
 
+TEST(BasicTests, AddConstant) {
+    Expression expr("8+4");
+    EXPECT_TRUE(expr.isValid());
+    EXPECT_TRUE(!expr.isVec());
+    const double* val = expr.evalFP();
+    EXPECT_TRUE(expr.isConstant());
+    EXPECT_EQ(val[0], 12);
+}
+
+TEST(BasicTests, SubtractConstant) {
+    Expression expr("8-4");
+    EXPECT_TRUE(expr.isValid());
+    EXPECT_TRUE(!expr.isVec());
+    const double* val = expr.evalFP();
+    EXPECT_TRUE(expr.isConstant());
+    EXPECT_EQ(val[0], 4);
+}
+
+TEST(BasicTests, MultiplyConstant) {
+    Expression expr("8*4");
+    EXPECT_TRUE(expr.isValid());
+    EXPECT_TRUE(!expr.isVec());
+    const double* val = expr.evalFP();
+    EXPECT_TRUE(expr.isConstant());
+    EXPECT_EQ(val[0], 32);
+}
+
+TEST(BasicTests, DivideConstant) {
+    Expression expr("8/4");
+    EXPECT_TRUE(expr.isValid());
+    EXPECT_TRUE(!expr.isVec());
+    const double* val = expr.evalFP();
+    EXPECT_TRUE(expr.isConstant());
+    EXPECT_EQ(val[0], 2);
+}
+
+TEST(BasicTests, ModConstant) {
+    Expression expr("8%4");
+    EXPECT_TRUE(expr.isValid());
+    EXPECT_TRUE(!expr.isVec());
+    const double* val = expr.evalFP();
+    EXPECT_TRUE(expr.isConstant());
+    EXPECT_EQ(val[0], 0);
+}
+
+TEST(BasicTests, ExponentConstant) {
+    Expression expr("3^2");
+    EXPECT_TRUE(expr.isValid());
+    EXPECT_TRUE(!expr.isVec());
+    const double* val = expr.evalFP();
+    EXPECT_TRUE(expr.isConstant());
+    EXPECT_EQ(val[0], 9);
+}
+
+TEST(BasicTests, ParensConstant) {
+    Expression expr("(3+4)");
+    EXPECT_TRUE(expr.isValid());
+    EXPECT_TRUE(!expr.isVec());
+    const double* val = expr.evalFP();
+    EXPECT_TRUE(expr.isConstant());
+    EXPECT_EQ(val[0], 7);
+}
+
+TEST(BasicTests, VecValueConstant) {
+    Expression expr("[7+4,7*4,9-4]");
+    EXPECT_TRUE(expr.isValid());
+    EXPECT_TRUE(!expr.isVec());
+    const double* val = expr.evalFP();
+    EXPECT_TRUE(expr.isConstant());
+    const double res[3] = {11,28,5};
+    EXPECT_EQ(val[0], res[0]);
+    EXPECT_EQ(val[1], res[1]);
+    EXPECT_EQ(val[2], res[2]);
+}
+
 TEST(BasicTests, Vec) {
     Vec3d a(1, 2, 3), b(2, 3, 4);
     ASSERT_EQ(a.dot(b), 20);
@@ -96,15 +171,6 @@ TEST(BasicTests, Vec) {
     Vec3d foo = Vec3d::copy(&b[0]);
     Vec3dRef aRef(&b[0]);
     ASSERT_EQ(foo, aRef);
-}
-
-TEST(BasicTests, Constant) {
-    Expression expr("3+4");
-    EXPECT_TRUE(expr.isValid());
-    EXPECT_TRUE(!expr.isVec());
-    const double* val = expr.evalFP();
-    EXPECT_TRUE(expr.isConstant());
-    EXPECT_EQ(val[0], 7);
 }
 
 TEST(BasicTests, Variables) {

@@ -75,7 +75,7 @@ class ExprFuncSimple : public ExprFuncX {
 
     class ArgHandle {
       public:
-        ArgHandle(int* opData, double* fp, char** c, std::vector<int>& callStack)
+        ArgHandle(int* opData, double* fp, char** c, std::vector<int>& /*callStack*/)
             : outFp(fp[opData[2]]), outStr(c[opData[2]]), data(reinterpret_cast<ExprFuncNode::Data*>(c[opData[1]])),
               // TODO: put the value in opData rather than fp
               _nargs((int)fp[opData[3]]),  // TODO: would be good not to have to convert to int!
