@@ -58,6 +58,7 @@ class LLVMEvaluator {
         void reset() {
             if (resultData) delete[] resultData;
             functionPtr = nullptr;
+            functionPtrMultiple = nullptr;
             resultData = nullptr;
         }
         const T *operator()(VarBlock *varBlock) {
@@ -66,7 +67,7 @@ class LLVMEvaluator {
             return resultData;
         }
         void operator()(VarBlock *varBlock, size_t outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) {
-            assert(functionPtr && resultData);
+            assert(functionPtrMultiple && resultData);
             functionPtrMultiple(varBlock ? varBlock->data() : nullptr, outputVarBlockOffset, rangeStart, rangeEnd);
         }
     };
@@ -103,7 +104,7 @@ class LLVMEvaluator {
 
         std::unique_ptr<Module> TheModule(new Module(uniqueName + "_module", *_llvmContext));
 
-        // create bindings to helper functions for variables and fucntions
+        // create bindings to helper functions for variables and functions
         Function *SeExpr2LLVMEvalCustomFunctionFunc = nullptr, *SeExpr2LLVMEvalVarRefFunc = nullptr;
         {
             Type *i8PtrTy = Type::getInt8PtrTy(*_llvmContext);
