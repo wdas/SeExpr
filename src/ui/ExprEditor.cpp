@@ -43,6 +43,7 @@
 #include <QTreeView>
 #include <QAction>
 #include <QMenu>
+#include <QMimeData>
 
 #include <SeExpr2/Expression.h>
 #include <SeExpr2/ExprNode.h>
