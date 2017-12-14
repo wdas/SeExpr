@@ -24,7 +24,7 @@
 
 #include "ExprConfig.h"
 #include "ExprNode.h"
-#include "ExprParser.h"
+#include "ExprParseAction.h"
 #include "ExprFunc.h"
 #include "Expression.h"
 #include "ExprType.h"
@@ -190,7 +190,7 @@ void Expression::parse() const {
     if (_parsed) return;
     _parsed = true;
     int tempStartPos, tempEndPos;
-    ExprParse(_parseTree, _parseError, tempStartPos, tempEndPos, _comments, this, _expression.c_str(), _wantVec);
+    ExprParseAction(_parseTree, _parseError, tempStartPos, tempEndPos, _comments, this, _expression.c_str(), _wantVec);
     if (!_parseTree) {
         addError(_parseError, tempStartPos, tempEndPos);
     }
