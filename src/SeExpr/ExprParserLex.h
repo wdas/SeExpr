@@ -39,15 +39,14 @@ struct ParseData {
 
     inline SeExpr2::ExprNode* Remember(SeExpr2::ExprNode* n,const int startPos,const int endPos)
     { 
-        //std::cerr <<"Remember: " << (void*)n << std::endl; 
         ParseNodes.push_back(n); 
         n->setPosition(startPos,endPos); 
         return n; 
     }
 
+    // Remove node from list -- but DON'T delete; it's been added elsewhere in parsetree
     inline void Forget(SeExpr2::ExprNode* n)
     { 
-        //std::cerr <<"Forget: " << (void*)n << std::endl; 
         ParseNodes.erase(std::find(ParseNodes.begin(), ParseNodes.end(), n)); 
     }
 };
