@@ -24,13 +24,14 @@
 namespace SeExpr2 {
 class ExprNode;
 class Expression;
+
 bool ExprParseAction(SeExpr2::ExprNode*& parseTree,
                      std::string& error,
                      int& errorStart,
                      int& errorEnd,
-                     std::vector<std::pair<int, int> >& _comments,
+                     std::vector<std::pair<int, int> >& comments,
                      const SeExpr2::Expression* expr,
-                     const char* str,
+                     const char* exprStr,
                      bool wantVec = true);
 }
 

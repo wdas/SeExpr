@@ -144,8 +144,6 @@ char* getText(yyscan_t scanner)
    along.
  */
 
-static SeExprInternal2::Mutex mutex;
-
 namespace SeExpr2 {
 
 bool ExprParseAction(SeExpr2::ExprNode*& parseTree,
@@ -153,14 +151,12 @@ bool ExprParseAction(SeExpr2::ExprNode*& parseTree,
                      std::vector<std::pair<int,int> >& comments,
                      const SeExpr2::Expression* expr, const char* exprStr, bool wantVec)
 {
-    SeExprInternal2::AutoMutex locker(mutex);
-
     // set up parse data
     SeExpr2::ParseState state;
     SeExpr2::ParseData *parseData = new ParseData();
     parseData->Expr = expr;
     parseData->ParseStr = exprStr;
-    parseData->ParseResult = 0;
+    parseData->ParseResult = nullptr;
 
     yyscan_t scanner(nullptr);
     if (yylex_init_extra(&state, &scanner)!=0)
