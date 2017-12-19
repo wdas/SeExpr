@@ -142,8 +142,8 @@ declarationList:
 declaration:
       EXTERN typeDeclare NAME '(' typeListOptional       ')'
                                 { SeExpr2::ExprType type = SeExpr2::ExprType($2.type, $2.dim, $2.lifetime);
-                                    SeExpr2::ExprPrototypeNode * prototype =
-                                        (SeExpr2::ExprPrototypeNode*)NODE2(@$.first_column, @$.last_column, PrototypeNode, $3, type);
+                                  SeExpr2::ExprPrototypeNode * prototype =
+                                      (SeExpr2::ExprPrototypeNode*)NODE2(@$.first_column, @$.last_column, PrototypeNode, $3, type);
                                   prototype->addArgTypes($5);
                                   parseData->Forget($5);
                                   $$ = prototype;
@@ -158,7 +158,7 @@ declaration:
                                   free($3); }
     | DEF                NAME '(' formalTypeListOptional ')' '{' block '}'
                                 { SeExpr2::ExprPrototypeNode * prototype =
-                                        (SeExpr2::ExprPrototypeNode*)NODE1(@$.first_column, @5.last_column, PrototypeNode, $2);
+                                      (SeExpr2::ExprPrototypeNode*)NODE1(@$.first_column, @5.last_column, PrototypeNode, $2);
                                   prototype->addArgs($4);
                                   parseData->Forget($4);
                                   $$ = NODE2(@$.first_column, @$.last_column, LocalFunctionNode, prototype, $7);
@@ -174,8 +174,8 @@ lifetimeOptional:
     ;
 
 typeDeclare:
-      FLOATPOINT lifetimeOptional{$$.type     = SeExpr2::ExprType::tFP;
-                                  $$.dim      = 1;
+      FLOATPOINT lifetimeOptional{$$.type = SeExpr2::ExprType::tFP;
+                                  $$.dim = 1;
                                   $$.lifetime = $2; }
     | FLOATPOINT '[' NUMBER ']' lifetimeOptional
                                 { $$.type = ($3 > 0 ? SeExpr2::ExprType::tFP : SeExpr2::ExprType::tERROR);
@@ -209,7 +209,7 @@ formalTypeListOptional:
     ;
 
 formalTypeList:
-      typeDeclare NAME           { $$ = NODE(@$.first_column, @$.last_column, Node);
+      typeDeclare NAME          { $$ = NODE(@$.first_column, @$.last_column, Node);
                                   SeExpr2::ExprType type = SeExpr2::ExprType($1.type, $1.dim, $1.lifetime);
                                   SeExpr2::ExprNode* varNode = NODE2(@$.first_column, @$.last_column, VarNode, $2, type);
                                   $$->addChild(varNode);
@@ -229,106 +229,106 @@ block:
 
 /* local variable assignments */
 optassigns:
-      /* empty */		{ $$ = NODE(@$.first_column,@$.last_column,Node); /* create empty node */; }
-    | assigns			{ $$ = $1; }
+      /* empty */               { $$ = NODE(@$.first_column,@$.last_column,Node); /* create empty node */; }
+    | assigns                   { $$ = $1; }
     ;
 
 assigns:
-      assign  		        { $$ = NODE1(@$.first_column,@$.last_column,Node, $1); /* create var list */}
-    | assigns assign    	{ $$ = $1; $1->addChild($2); /* add to list */}
+      assign                    { $$ = NODE1(@$.first_column,@$.last_column,Node, $1); /* create var list */}
+    | assigns assign            { $$ = $1; $1->addChild($2); /* add to list */}
     ;
 
 assign:
-      ifthenelse		           { $$ = $1; }
-    | VAR '=' e ';'		           { $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, $3); free($1); }
-    | VAR AddEq e ';'              { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                     SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'+');
-                                     $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | VAR SubEq e ';'              { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                     SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'-');
-                                     $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | VAR MultEq e ';'             { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                     SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'*');
-                                     $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | VAR DivEq e ';'              { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                     SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'/');
-                                     $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | VAR ExpEq e ';'              { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                     SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'^');
-                                     $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | VAR ModEq e ';'              { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                     SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'%');
-                                     $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | NAME '=' e ';'		       { $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, $3); free($1); }
-    | NAME AddEq e ';'             { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                     SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'+');
-                                     $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | NAME SubEq e ';'             { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                     SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'-');
-                                     $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | NAME MultEq e ';'            { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                     SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'*');
-                                     $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | NAME DivEq e ';'             { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                     SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'/');
-                                     $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | NAME ExpEq e ';'             { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                     SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'^');
-                                     $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
-    | NAME ModEq e ';'             { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
-                                     SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'%');
-                                     $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+      ifthenelse                { $$ = $1; }
+    | VAR '=' e ';'             { $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, $3); free($1); }
+    | VAR AddEq e ';'           { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                                  SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'+');
+                                  $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+    | VAR SubEq e ';'           { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                                  SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'-');
+                                  $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+    | VAR MultEq e ';'          { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                                  SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'*');
+                                  $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+    | VAR DivEq e ';'           { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                                  SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'/');
+                                  $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+    | VAR ExpEq e ';'           { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                                  SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'^');
+                                  $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+    | VAR ModEq e ';'           { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                                  SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'%');
+                                  $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+    | NAME '=' e ';'            { $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, $3); free($1); }
+    | NAME AddEq e ';'          { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                                  SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'+');
+                                  $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+    | NAME SubEq e ';'          { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                                  SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'-');
+                                  $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+    | NAME MultEq e ';'         { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                                  SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'*');
+                                  $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+    | NAME DivEq e ';'          { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                                  SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'/');
+                                  $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+    | NAME ExpEq e ';'          { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                                  SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'^');
+                                  $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
+    | NAME ModEq e ';'          { SeExpr2::ExprNode* varNode=NODE1(@1.first_column,@1.first_column,VarNode, $1);
+                                  SeExpr2::ExprNode* opNode=NODE3(@3.first_column,@3.first_column,BinaryOpNode,varNode,$3,'%');
+                                  $$ = NODE2(@$.first_column,@$.last_column,AssignNode, $1, opNode);free($1);}
     ;
 
 ifthenelse:
       IF '(' e ')' '{' optassigns '}' optelse
-				                   { $$ = NODE3(@$.first_column,@$.last_column,IfThenElseNode, $3, $6, $8); }
+                                   { $$ = NODE3(@$.first_column,@$.last_column,IfThenElseNode, $3, $6, $8); }
     ;
 
 optelse:
-      /* empty */		           { $$ = NODE(@$.first_column,@$.last_column,Node); /* create empty node */ }
+      /* empty */                  { $$ = NODE(@$.first_column,@$.last_column,Node); /* create empty node */ }
     | ELSE '{' optassigns '}'      { $$ = $3; }
-    | ELSE ifthenelse		       { $$ = $2; }
+    | ELSE ifthenelse              { $$ = $2; }
     ;
 
 /* An expression or sub-expression */
 e:
-      '(' e ')'			    { $$ = $2; }
+      '(' e ')'             { $$ = $2; }
     | '[' exprlist ']'      { SeExpr2::ExprNode* newNode = NODE(@$.first_column,@$.last_column,VecNode); newNode->addChildren($2); parseData->Forget($2); $$=newNode;}
     | e '[' e ']'           { $$ = NODE2(@$.first_column,@$.last_column,SubscriptNode, $1, $3); }
-    | e '?' e ':' e		    { $$ = NODE3(@$.first_column,@$.last_column,CondNode, $1, $3, $5); }
-    | e OR e			    { $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3, '|'); }
-    | e AND e			    { $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3, '&'); }
-    | e EQ e			    { $$ = NODE3(@$.first_column,@$.last_column,CompareEqNode, $1, $3,'='); }
-    | e NE e			    { $$ = NODE3(@$.first_column,@$.last_column,CompareEqNode, $1, $3,'!'); }
-    | e '<' e		    	{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'<'); }
-    | e '>' e			    { $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'>'); }
-    | e SEEXPR_LE e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'l'); }
-    | e SEEXPR_GE e			{ $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'g'); }
-    | '+' e %prec UNARY		{ $$ = $2; }
-    | '-' e %prec UNARY		{ $$ = NODE2(@$.first_column,@$.last_column,UnaryOpNode, $2, '-'); }
-    | '!' e			        { $$ = NODE2(@$.first_column,@$.last_column,UnaryOpNode, $2, '!'); }
-    | '~' e			        { $$ = NODE2(@$.first_column,@$.last_column,UnaryOpNode, $2, '~'); }
-    | e '+' e		   	    { $$ = NODE3(@$.first_column,@$.last_column,BinaryOpNode, $1, $3, '+'); }
-    | e '-' e			    { $$ = NODE3(@$.first_column,@$.last_column,BinaryOpNode, $1, $3, '-'); }
-    | e '*' e			    { $$ = NODE3(@$.first_column,@$.last_column,BinaryOpNode, $1, $3, '*'); }
-    | e '/' e			    { $$ = NODE3(@$.first_column,@$.last_column,BinaryOpNode, $1, $3, '/'); }
-    | e '%' e			    { $$ = NODE3(@$.first_column,@$.last_column,BinaryOpNode, $1, $3, '%'); }
-    | e '^' e			    { $$ = NODE3(@$.first_column,@$.last_column,BinaryOpNode, $1, $3, '^'); }
-    | NAME '(' optargs ')'	{ $$ = NODE1(@$.first_column,@$.last_column,FuncNode, $1);
-				              free($1); // free name string
+    | e '?' e ':' e         { $$ = NODE3(@$.first_column,@$.last_column,CondNode, $1, $3, $5); }
+    | e OR e                { $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3, '|'); }
+    | e AND e               { $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3, '&'); }
+    | e EQ e                { $$ = NODE3(@$.first_column,@$.last_column,CompareEqNode, $1, $3,'='); }
+    | e NE e                { $$ = NODE3(@$.first_column,@$.last_column,CompareEqNode, $1, $3,'!'); }
+    | e '<' e               { $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'<'); }
+    | e '>' e               { $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'>'); }
+    | e SEEXPR_LE e         { $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'l'); }
+    | e SEEXPR_GE e         { $$ = NODE3(@$.first_column,@$.last_column,CompareNode, $1, $3,'g'); }
+    | '+' e %prec UNARY     { $$ = $2; }
+    | '-' e %prec UNARY     { $$ = NODE2(@$.first_column,@$.last_column,UnaryOpNode, $2, '-'); }
+    | '!' e                 { $$ = NODE2(@$.first_column,@$.last_column,UnaryOpNode, $2, '!'); }
+    | '~' e                 { $$ = NODE2(@$.first_column,@$.last_column,UnaryOpNode, $2, '~'); }
+    | e '+' e               { $$ = NODE3(@$.first_column,@$.last_column,BinaryOpNode, $1, $3, '+'); }
+    | e '-' e               { $$ = NODE3(@$.first_column,@$.last_column,BinaryOpNode, $1, $3, '-'); }
+    | e '*' e               { $$ = NODE3(@$.first_column,@$.last_column,BinaryOpNode, $1, $3, '*'); }
+    | e '/' e               { $$ = NODE3(@$.first_column,@$.last_column,BinaryOpNode, $1, $3, '/'); }
+    | e '%' e               { $$ = NODE3(@$.first_column,@$.last_column,BinaryOpNode, $1, $3, '%'); }
+    | e '^' e               { $$ = NODE3(@$.first_column,@$.last_column,BinaryOpNode, $1, $3, '^'); }
+    | NAME '(' optargs ')'  { $$ = NODE1(@$.first_column,@$.last_column,FuncNode, $1);
+                              free($1); // free name string
                               // add args directly and discard arg list node
                               $$->addChildren($3); parseData->Forget($3); }
     | e ARROW NAME '(' optargs ')'
-    				        { $$ = NODE1(@$.first_column,@$.last_column,FuncNode, $3);
-				              free($3); // free name string
+                            { $$ = NODE1(@$.first_column,@$.last_column,FuncNode, $3);
+                              free($3); // free name string
                               $$->addChild($1);
                               // add args directly and discard arg list node
                               $$->addChildren($5); parseData->Forget($5); }
-    | VAR			        { $$ = NODE1(@$.first_column,@$.last_column,VarNode, $1); free($1); /* free name string */ }
-    | NAME			        { $$ = NODE1(@$.first_column,@$.last_column,VarNode, $1); free($1); /* free name string */ }
-    | NUMBER			    { $$ = NODE1(@$.first_column,@$.last_column,NumNode, $1); /*printf("line %d",@$.last_column);*/}
-    | STR			        { $$ = NODE1(@$.first_column,@$.last_column,StrNode, $1); free($1); /* free string */}
+    | VAR                   { $$ = NODE1(@$.first_column,@$.last_column,VarNode, $1); free($1); /* free name string */ }
+    | NAME                  { $$ = NODE1(@$.first_column,@$.last_column,VarNode, $1); free($1); /* free name string */ }
+    | NUMBER                { $$ = NODE1(@$.first_column,@$.last_column,NumNode, $1); /*printf("line %d",@$.last_column);*/}
+    | STR                   { $$ = NODE1(@$.first_column,@$.last_column,StrNode, $1); free($1); /* free string */}
     ;
 
 exprlist:
@@ -339,18 +339,18 @@ exprlist:
 
 /* An optional argument list */
 optargs:
-      /* empty */		    { $$ = NODE(@$.first_column,@$.last_column,Node); /* create empty node */}
-    | args			        { $$ = $1; }
+      /* empty */           { $$ = NODE(@$.first_column,@$.last_column,Node); /* create empty node */}
+    | args                  { $$ = $1; }
     ;
 
 /* Argument list (comma-separated expression list) */
 args:
-      arg			        { $$ = NODE1(@$.first_column,@$.last_column,Node, $1); /* create arg list */}
-    | args ',' arg		    { $$ = $1; $1->addChild($3); /* add to list */}
+      arg                   { $$ = NODE1(@$.first_column,@$.last_column,Node, $1); /* create arg list */}
+    | args ',' arg          { $$ = $1; $1->addChild($3); /* add to list */}
     ;
 
 arg:
-      e				        { $$ = $1; }
+      e                     { $$ = $1; }
     ;
 
 %%
@@ -379,7 +379,7 @@ void SeExpr2error(YYLTYPE* yyloc,
 
     // find end of line containing error
     for (int i = end; i > pos; i--)
-	if (parseData->ParseStr[i] == '\n') { 
+    if (parseData->ParseStr[i] == '\n') { 
         end = i - 1; 
         multiline=1; 
     }

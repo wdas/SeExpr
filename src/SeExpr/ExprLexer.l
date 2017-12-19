@@ -26,7 +26,7 @@
 
 // If c++11 don't use register designator, lex and yacc need to go...
 #if __cplusplus > 199711L
-#    define register      // Deprecated in C++11.
+#define register          // Deprecated in C++11.
 #endif                    // #if __cplusplus > 199711L
 
 #include "Platform.h"
@@ -42,12 +42,12 @@
 #define YYLEX_PARAM &yylval_param, &yylloc
 
 #ifdef SEEXPR_WIN32
-#    define YY_NO_UNISTD_H
-#    define YY_SKIP_YYWRAP
+#define YY_NO_UNISTD_H
+#define YY_SKIP_YYWRAP
 #endif
 
 #ifndef MAKEDEPEND
-#    include "ExprParser.tab.h"
+#include "ExprParser.tab.h"
 #endif
 
 int yyparse(void* yyscanner, SeExpr2::ParseState *state, SeExpr2::ParseData *parseData);
@@ -80,8 +80,8 @@ UNIFORM                 { return LIFETIME_UNIFORM; }
 VARYING                 { return LIFETIME_VARYING; }
 ERROR                   { return LIFETIME_ERROR; }
 
-if			            { return IF; }
-else			        { return ELSE; }
+if                      { return IF; }
+else                    { return ELSE; }
 
 "||"                    { return OR; }
 "&&"                    { return AND; }
@@ -89,7 +89,7 @@ else			        { return ELSE; }
 "!="                    { return NE; }
 "<="                    { return SEEXPR_LE; }
 ">="                    { return SEEXPR_GE; }
-"->"			        { return ARROW; }
+"->"                    { return ARROW; }
 "+="                    { return AddEq; }
 "-="                    { return SubEq; }
 "*="                    { return MultEq; }
@@ -97,37 +97,37 @@ else			        { return ELSE; }
 "%="                    { return ModEq; }
 "^="                    { return ExpEq; }
 
-PI			    { yylval->d = M_PI; return NUMBER; }
-E			    { yylval->d = M_E; return NUMBER; }
-linear			{ yylval->d = 0; return NUMBER; }
-smooth			{ yylval->d = 1; return NUMBER; }
-gaussian		{ yylval->d = 2; return NUMBER; }
-box			    { yylval->d = 3; return NUMBER; }
+PI              { yylval->d = M_PI; return NUMBER; }
+E               { yylval->d = M_E; return NUMBER; }
+linear          { yylval->d = 0; return NUMBER; }
+smooth          { yylval->d = 1; return NUMBER; }
+gaussian        { yylval->d = 2; return NUMBER; }
+box             { yylval->d = 3; return NUMBER; }
 
-{REAL}			{ yylval->d = atof(yytext); return NUMBER; }
+{REAL}          { yylval->d = atof(yytext); return NUMBER; }
 
-\"(\\\"|[^"\n])*\"	{ /* match quoted string, allow embedded quote, \" */
-			          yylval->s = strdup(&yytext[1]);
-			          yylval->s[strlen(yylval->s)-1] = '\0';
+\"(\\\"|[^"\n])*\"  { /* match quoted string, allow embedded quote, \" */
+                      yylval->s = strdup(&yytext[1]);
+                      yylval->s[strlen(yylval->s)-1] = '\0';
                       return STR; }
-\'(\\\'|[^'\n])*\'	{ /* match quoted string, allow embedded quote, \' */
-			          yylval->s = strdup(&yytext[1]);
-			          yylval->s[strlen(yylval->s)-1] = '\0';
+\'(\\\'|[^'\n])*\'  { /* match quoted string, allow embedded quote, \' */
+                      yylval->s = strdup(&yytext[1]);
+                      yylval->s[strlen(yylval->s)-1] = '\0';
                       return STR; }
-${IDENT}		    { yylval->s = strdup(&yytext[1]); return VAR; }
-${IDENT}"::"{IDENT}	{ yylval->s = strdup(&yytext[1]); return VAR; }
-{IDENT}			    { yylval->s = strdup(yytext); return NAME; }
+${IDENT}            { yylval->s = strdup(&yytext[1]); return VAR; }
+${IDENT}"::"{IDENT} { yylval->s = strdup(&yytext[1]); return VAR; }
+{IDENT}             { yylval->s = strdup(yytext); return NAME; }
 
-"\\n"			/* ignore quoted newline */;
-"\\t"			/* ignore quoted tab */;
-[ \t\n]			/* ignore whitespace */;
+"\\n"           /* ignore quoted newline */;
+"\\t"           /* ignore quoted tab */;
+[ \t\n]         /* ignore whitespace */;
 
-\#([^\\\n]|\\[^n\n])*	{ /* match comment */
+\#([^\\\n]|\\[^n\n])*   { /* match comment */
                           int startPos=YY_CURRENT_BUFFER->yy_bs_column;
                           int endPos=startPos+strlen(&yytext[1])+1;
-			              yyextra->comments->push_back(std::pair<int,int>(startPos,endPos));}
+                          yyextra->comments->push_back(std::pair<int,int>(startPos,endPos));}
 
-<*>.			        { return yytext[0]; }
+<*>.                    { return yytext[0]; }
 
 %%
 
@@ -138,13 +138,13 @@ char* getText(yyscan_t scanner)
     return yyget_text(scanner);
 }
 
+namespace SeExpr2 {
+
 /* ExprParseAction - This is our entrypoint from the rest of the expr library.
-   A string is passed in and a parse tree is returned.	If the tree is null,
+   A string is passed in and a parse tree is returned.  If the tree is null,
    an error string is returned.  Any flags set during parsing are passed
    along.
  */
-
-namespace SeExpr2 {
 
 bool ExprParseAction(SeExpr2::ExprNode*& parseTree,
                      std::string& error, int& errorStart, int& errorEnd,
