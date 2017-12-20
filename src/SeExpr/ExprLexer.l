@@ -152,7 +152,7 @@ bool ExprParseAction(SeExpr2::ExprNode*& parseTree,
                      const SeExpr2::Expression* expr, const char* exprStr, bool wantVec)
 {
     // set up parse data
-    SeExpr2::ParseState state;
+    SeExpr2::ParseState state(&comments);
     SeExpr2::ParseData *parseData = new ParseData();
     parseData->Expr = expr;
     parseData->ParseStr = exprStr;
