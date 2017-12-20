@@ -52,6 +52,7 @@ struct ParseData {
 };
 
 struct ParseState {
+    ParseState( std::vector<std::pair<int,int> >* comments ) : comments(comments) {}
     int columnNumber=0; // really buffer position
     int lineNumber=0;   // not used
     std::vector<std::pair<int,int> >* comments=0;
