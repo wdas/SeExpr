@@ -34,6 +34,7 @@
 #include "ExprEnv.h"
 #include "Vec.h"
 #include "Interpreter.h"
+#include "IndentedStreamBuf.h"
 
 namespace SeExpr2 {
 class ExprFunc;
@@ -220,6 +221,22 @@ class ExprNode {
             return false;
     }
     /// @}
+
+    inline void dump() const {
+        if (_children.empty()) {
+            std::cout << _type.toString() << std::endl;
+        } else {
+            std::cout << "(" << _type.toString() << std::endl;
+            {
+                IndentedStreamBuf indent_os(std::cout);
+                for (const auto& child : _children) {
+                    child->dump();
+                }
+            }
+            std::cout << ")" << std::endl;
+        }
+    }
+
   protected: /*protected data members*/
     /// Owning expression (node can't modify)
     const Expression* _expr;
