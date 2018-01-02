@@ -500,7 +500,9 @@ class ExprVarNode : public ExprNode {
 /// Node that stores a numeric constant
 class ExprNumNode : public ExprNode {
   public:
-    ExprNumNode(const Expression* expr, double val) : ExprNode(expr), _val(val) {}
+    ExprNumNode(const Expression* expr, double val) : ExprNode(expr), _val(val) {
+    _type = ExprType().FP(1).Constant();
+    }
 
     virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
@@ -516,7 +518,9 @@ class ExprNumNode : public ExprNode {
 /// Node that stores a string
 class ExprStrNode : public ExprNode {
   public:
-    ExprStrNode(const Expression* expr, const char* str) : ExprNode(expr), _str(str) {}
+    ExprStrNode(const Expression* expr, const char* str) : ExprNode(expr), _str(str) {
+    _type = ExprType().String().Constant();
+    }
 
     virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;

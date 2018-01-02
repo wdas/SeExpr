@@ -82,20 +82,38 @@ bool TypePrintExaminer::examine(const ExprNode* examinee) {
     return true;
 };
 
-Expression::Expression(Expression::EvaluationStrategy evaluationStrategy)
-    : _wantVec(true), _expression(""), _evaluationStrategy(evaluationStrategy), _context(&Context::global()),
-      _desiredReturnType(ExprType().FP(3).Varying()), _parseTree(0), _isValid(0), _parsed(0), _prepped(0),
-      _interpreter(0), _llvmEvaluator(new LLVMEvaluator()) {
+Expression::Expression(Expression::EvaluationStrategy evaluationStrategyHint)
+    : _wantVec(true)
+    , _expression("")
+    , _evaluationStrategyHint(evaluationStrategyHint)
+    , _evaluationStrategy(EvaluationStrategy::Undefined)
+    , _context(&Context::global())
+    , _desiredReturnType(ExprType().FP(3).Varying())
+    , _parseTree(0)
+    , _isValid(0)
+    , _parsed(0)
+    , _prepped(0)
+    , _interpreter(0)
+    , _llvmEvaluator(new LLVMEvaluator()) {
     ExprFunc::init();
 }
 
 Expression::Expression(const std::string& e,
                        const ExprType& type,
-                       EvaluationStrategy evaluationStrategy,
+                       EvaluationStrategy evaluationStrategyHint,
                        const Context& context)
-    : _wantVec(true), _expression(e), _evaluationStrategy(evaluationStrategy), _context(&context),
-      _desiredReturnType(type), _parseTree(0), _isValid(0), _parsed(0), _prepped(0), _interpreter(0),
-      _llvmEvaluator(new LLVMEvaluator()) {
+    : _wantVec(true)
+    , _expression(e)
+    , _evaluationStrategyHint(evaluationStrategyHint)
+    , _evaluationStrategy(EvaluationStrategy::Undefined)
+    , _context(&context)
+    , _desiredReturnType(type)
+    , _parseTree(0)
+    , _isValid(0)
+    , _parsed(0)
+    , _prepped(0)
+    , _interpreter(0)
+    , _llvmEvaluator(new LLVMEvaluator()) {
     ExprFunc::init();
 }
 
@@ -133,6 +151,7 @@ void Expression::reset() {
         delete _interpreter;
         _interpreter = 0;
     }
+    _evaluationStrategy = EvaluationStrategy::Undefined;
     _isValid = 0;
     _parsed = 0;
     _prepped = 0;
@@ -219,6 +238,15 @@ void Expression::prep() const {
                              " incompatible with desired type " + _desiredReturnType.toString());
     } else {
         _isValid = true;
+
+        // optimize for constant values - if we have a module of just one constant float, avoid using LLVM.
+        //   Querying typing information during prep()-time is a bit difficult. For the most part, our type
+        //   information is uninitialized until after prep()-time. The only exception is for constant,
+        //   single floating point values.
+        //
+        // TODO: separate Object Representation (ExprNode) from ParseTree (which should just be cheap tokens)
+        bool isConstant_ = isConstant() || (_parseTree && _parseTree->numChildren() == 1 && _parseTree->child(0)->type().isLifetimeConstant());
+        _evaluationStrategy = isConstant_ ? EvaluationStrategy::UseInterpreter : _evaluationStrategyHint;
 
         if (_evaluationStrategy == UseInterpreter) {
             if (debugging) {

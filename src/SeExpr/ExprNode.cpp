@@ -515,12 +515,10 @@ ExprType ExprVarNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
 }
 
 ExprType ExprNumNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
-    _type = ExprType().FP(1).Constant();
     return _type;
 }
 
 ExprType ExprStrNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
-    _type = ExprType().String().Constant();
     return _type;
 }
 

@@ -77,6 +77,7 @@ class Expression {
   public:
     //! Types of evaluation strategies that are available
     enum EvaluationStrategy {
+        Undefined,
         UseInterpreter,
         UseLLVM
     };
@@ -102,10 +103,10 @@ class Expression {
             : error(errorIn), startPos(startPosIn), endPos(endPosIn) {}
     };
 
-    Expression(EvaluationStrategy be = Expression::defaultEvaluationStrategy);
+    Expression(EvaluationStrategy hint = Expression::defaultEvaluationStrategy);
     Expression(const std::string& e,
                const ExprType& type = ExprType().FP(3),
-               EvaluationStrategy be = Expression::defaultEvaluationStrategy,
+               EvaluationStrategy hint = Expression::defaultEvaluationStrategy,
                const Context& context = Context::global());
 
     virtual ~Expression();
@@ -261,7 +262,8 @@ class Expression {
     /** The expression. */
     std::string _expression;
 
-    EvaluationStrategy _evaluationStrategy;
+    EvaluationStrategy _evaluationStrategyHint;
+    mutable EvaluationStrategy _evaluationStrategy;
 
     /** Context for out of band function parameters */
     const Context* _context;
