@@ -135,6 +135,11 @@ class Expression {
         return _isValid;
     }
 
+    const ExprNode* parseTree() const {
+        parseIfNeeded();
+        return _parseTree;
+    }
+
     /** Get parse error (if any).  First call syntaxOK or isValid
         to parse (and optionally bind) the expression. */
     const std::string& parseError() const { return _parseError; }
