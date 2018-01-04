@@ -34,6 +34,7 @@
 #include "ExprEnv.h"
 #include "Vec.h"
 #include "Interpreter.h"
+#include "IndentedStreamBuf.h"
 
 namespace SeExpr2 {
 class ExprFunc;
@@ -220,6 +221,22 @@ class ExprNode {
             return false;
     }
     /// @}
+
+    inline void dump() const {
+        if (_children.empty()) {
+            std::cout << _type.toString() << std::endl;
+        } else {
+            std::cout << "(" << _type.toString() << std::endl;
+            {
+                IndentedStreamBuf indent_os(std::cout);
+                for (const auto& child : _children) {
+                    child->dump();
+                }
+            }
+            std::cout << ")" << std::endl;
+        }
+    }
+
   protected: /*protected data members*/
     /// Owning expression (node can't modify)
     const Expression* _expr;
@@ -483,7 +500,9 @@ class ExprVarNode : public ExprNode {
 /// Node that stores a numeric constant
 class ExprNumNode : public ExprNode {
   public:
-    ExprNumNode(const Expression* expr, double val) : ExprNode(expr), _val(val) {}
+    ExprNumNode(const Expression* expr, double val) : ExprNode(expr), _val(val) {
+    _type = ExprType().FP(1).Constant();
+    }
 
     virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
@@ -499,7 +518,9 @@ class ExprNumNode : public ExprNode {
 /// Node that stores a string
 class ExprStrNode : public ExprNode {
   public:
-    ExprStrNode(const Expression* expr, const char* str) : ExprNode(expr), _str(str) {}
+    ExprStrNode(const Expression* expr, const char* str) : ExprNode(expr), _str(str) {
+    _type = ExprType().String().Constant();
+    }
 
     virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
