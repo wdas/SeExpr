@@ -221,7 +221,7 @@ Vec3d hsiAdjust(const Vec3d& rgb, double h, double s, double i) {
 }
 
 Vec3d hsi(int n, const Vec3d* args) {
-    if (n < 4) return 0.0;
+    if (n < 4) return Vec3d(0.0);
 
     double h = args[1][0];
     double s = args[2][0];
@@ -245,7 +245,7 @@ static const char* hsi_docstring =
     "values between zero and one.";
 
 Vec3d midhsi(int n, const Vec3d* args) {
-    if (n < 4) return 0.0;
+    if (n < 4) return Vec3d(0.0);
 
     double h = args[1][0];
     double s = args[2][0];
@@ -397,7 +397,7 @@ static Vec3d saturate(const Vec3d& Cin, double amt) {
 }
 
 Vec3d saturate(int n, const Vec3d* args) {
-    if (n < 2) return 0.0;
+    if (n < 2) return Vec3d(0.0);
     return saturate(args[0], args[1][0]);
 }
 static const char* saturate_docstring =
@@ -553,7 +553,7 @@ double turbulence(int n, const Vec3d* args) {
     int octaves = 6;
     double lacunarity = 2;
     double gain = 0.5;
-    Vec3d p = 0.0;
+    Vec3d p(0.0);
 
     switch (n) {
         case 4:
@@ -577,7 +577,7 @@ Vec3d vturbulence(int n, const Vec3d* args) {
     int octaves = 6;
     double lacunarity = 2;
     double gain = 0.5;
-    Vec3d p = 0.0;
+    Vec3d p(0.0);
 
     switch (n) {
         case 4:
@@ -603,7 +603,7 @@ double fbm(int n, const Vec3d* args) {
     int octaves = 6;
     double lacunarity = 2;
     double gain = 0.5;
-    Vec3d p = 0.0;
+    Vec3d p(0.0);
 
     switch (n) {
         case 4:
@@ -635,7 +635,7 @@ Vec3d vfbm(int n, const Vec3d* args) {
     int octaves = 6;
     double lacunarity = 2;
     double gain = 0.5;
-    Vec3d p = 0.0;
+    Vec3d p(0.0);
 
     switch (n) {
         case 4:
@@ -648,7 +648,7 @@ Vec3d vfbm(int n, const Vec3d* args) {
             p = args[0];
     }
 
-    Vec3d result = 0.0;
+    Vec3d result(0.0);
     double P[3] = {p[0], p[1], p[2]};
     FBM<3, 3, false>(P, &result[0], octaves, lacunarity, gain);
     return result;
@@ -660,7 +660,7 @@ double fbm4(int n, const Vec3d* args) {
     int octaves = 6;
     double lacunarity = 2;
     double gain = 0.5;
-    Vec3d p = 0.0;
+    Vec3d p(0.0);
     float time = 0.0;
 
     switch (n) {
@@ -695,7 +695,7 @@ Vec3d vfbm4(int n, const Vec3d* args) {
     int octaves = 6;
     double lacunarity = 2;
     double gain = 0.5;
-    Vec3d p = 0.0;
+    Vec3d p(0.0);
     float time = 0.0;
 
     switch (n) {
@@ -711,7 +711,7 @@ Vec3d vfbm4(int n, const Vec3d* args) {
             p = args[0];
     }
 
-    Vec3d result = 0.0;
+    Vec3d result(0.0);
     double P[4] = {p[0], p[1], p[2], time};
     FBM<4, 3, false>(P, &result[0], octaves, lacunarity, gain);
     return result;
@@ -860,37 +860,39 @@ Vec3d voronoiFn(VoronoiPointData& data, int n, const Vec3d* args) {
 
     if (fbmScale > 0) {
         Vec3d fbmArgs[4];
-        fbmArgs[0] = 2 * p;
-        fbmArgs[1] = fbmOctaves;
-        fbmArgs[2] = fbmLacunarity;
-        fbmArgs[3] = fbmGain;
+        fbmArgs[0] = 2.0 * p;
+        fbmArgs[1] = Vec3d(fbmOctaves);
+        fbmArgs[2] = Vec3d(fbmLacunarity);
+        fbmArgs[3] = Vec3d(fbmGain);
         p += fbmScale * vfbm(4, fbmArgs);
     }
 
     double f1, f2;
     Vec3d pos1, pos2;
-    if (type >= 3)
+    if (type >= 3) {
         voronoi_f1f2_3d(data, p, jitter, f1, pos1, f2, pos2);
-    else
+    } else {
         voronoi_f1_3d(data, p, jitter, f1, pos1);
+        f2 = 0.0;
+    }
 
     switch (type) {
         case 1:
-            pos1[0] += 10;
-            return cellnoise(pos1);
+            pos1[0] += 10.0;
+            return Vec3d(cellnoise(pos1));
         case 2:
-            return f1;
+            return Vec3d(f1);
         case 3:
-            return f2;
+            return Vec3d(f2);
         case 4:
-            return f2 - f1;
+            return Vec3d(f2 - f1);
         case 5: {
             float scalefactor = (pos2 - pos1).length() / ((pos1 - p).length() + (pos2 - p).length());
-            return smoothstep(f2 - f1, 0, 0.1 * scalefactor);
+            return Vec3d(smoothstep(f2 - f1, 0, 0.1 * scalefactor));
         }
     }
 
-    return 0.0;
+    return Vec3d(0.0);
 }
 const static char* voronoi_docstring =
     "float voronoi(vector v, int type=1,float jitter=0.5, float fbmScale=0, int fbmOctaves=4,float fbmLacunarity=2, "
@@ -926,19 +928,21 @@ Vec3d cvoronoiFn(VoronoiPointData& data, int n, const Vec3d* args) {
 
     if (fbmScale > 0) {
         Vec3d fbmArgs[4];
-        fbmArgs[0] = 2 * p;
-        fbmArgs[1] = fbmOctaves;
-        fbmArgs[2] = fbmLacunarity;
-        fbmArgs[3] = fbmGain;
+        fbmArgs[0] = 2.0 * p;
+        fbmArgs[1] = Vec3d(fbmOctaves);
+        fbmArgs[2] = Vec3d(fbmLacunarity);
+        fbmArgs[3] = Vec3d(fbmGain);
         p += fbmScale * vfbm(4, fbmArgs);
     }
 
     double f1, f2;
     Vec3d pos1, pos2;
-    if (type >= 3)
+    if (type >= 3) {
         voronoi_f1f2_3d(data, p, jitter, f1, pos1, f2, pos2);
-    else
+    } else {
         voronoi_f1_3d(data, p, jitter, f1, pos1);
+        f2 = 0.0;
+    }
 
     Vec3d color = ccellnoise(pos1);
     switch (type) {
@@ -953,11 +957,11 @@ Vec3d cvoronoiFn(VoronoiPointData& data, int n, const Vec3d* args) {
             return (f2 - f1) * color;
         case 5: {
             float scalefactor = (pos2 - pos1).length() / ((pos1 - p).length() + (pos2 - p).length());
-            return smoothstep(f2 - f1, 0, 0.1 * scalefactor) * color;
+            return Vec3d(smoothstep(f2 - f1, 0, 0.1 * scalefactor) * color);
         }
     }
 
-    return 0.0;
+    return Vec3d(0.0);
 }
 const static char* cvoronoi_docstring =
     "color cvoronoi(vector v, int type=1,float jitter=0.5, float fbmScale=0, int fbmOctaves=4,float fbmLacunarity=2, "
@@ -990,10 +994,10 @@ Vec3d pvoronoiFn(VoronoiPointData& data, int n, const Vec3d* args) {
 
     if (fbmScale > 0) {
         Vec3d fbmArgs[4];
-        fbmArgs[0] = 2 * p;
-        fbmArgs[1] = fbmOctaves;
-        fbmArgs[2] = fbmLacunarity;
-        fbmArgs[3] = fbmGain;
+        fbmArgs[0] = 2.0 * p;
+        fbmArgs[1] = Vec3d(fbmOctaves);
+        fbmArgs[2] = Vec3d(fbmLacunarity);
+        fbmArgs[3] = Vec3d(fbmGain);
         p += fbmScale * vfbm(4, fbmArgs);
     }
 
@@ -1036,7 +1040,7 @@ class CachedVoronoiFunc : public ExprFuncSimple {
         Vec3d* sevArgs = (Vec3d*)alloca(sizeof(Vec3d) * nargs);
 
         for (int i = 0; i < nargs; i++)
-            for (int j = 0; j < 3; j++) sevArgs[i][j] = args.inFp<3>(i)[j];
+            for (int j = 0; j < 3; j++) sevArgs[i][j] = args.inFp(i)[j];
 
         Vec3d result = _vfunc(*data, nargs, sevArgs);
         double* out = &args.outFp;
@@ -1077,7 +1081,7 @@ static const char* dot_docstring =
 Vec3d norm(const Vec3d& a) {
     double len = length(a);
     if (len == 0)
-        return 0.0;
+        return Vec3d(0.0);
     else
         return a / len;
 }
@@ -1106,14 +1110,20 @@ static const char* ortho_docstring =
     "vector angle(vector a,vector b)\n"
     "normalized vector orthogonal to a and b scaled to unit length";
 
+template <typename VEC_TYPE>
+VEC_TYPE rotateBy(const VEC_TYPE& point, const VEC_TYPE& axis, double angle) {
+    double c = cos(angle), s = sin(angle);
+    return c * point + (1.0 - c) * point.dot(axis) * axis - s * point.cross(axis);
+}
+
 Vec3d rotate(int n, const Vec3d* args) {
-    if (n != 3) return 0.0;
+    if (n != 3) return Vec3d(0.0);
     const Vec3d& P = args[0];
     const Vec3d& axis = args[1];
     float angle = args[2][0];
     double len = axis.length();
     if (!len) return P;
-    return P.rotateBy(axis / len, angle);
+    return rotateBy(P, axis / len, angle);
 }
 static const char* rotate_docstring =
     "vector rotate(vector v,vector axis,float angle)\n"
@@ -1122,7 +1132,7 @@ static const char* rotate_docstring =
 Vec3d up(const Vec3d& P, const Vec3d& upvec) {
     // rotate vec so y-axis points to upvec
     Vec3d yAxis(0, 1, 0);
-    return P.rotateBy(ortho(upvec, yAxis), angle(upvec, yAxis));
+    return rotateBy(P, ortho(upvec, yAxis), angle(upvec, yAxis));
 }
 static const char* up_docstring =
     "vector up(vector P,vector upvec)\n"
@@ -1317,9 +1327,9 @@ class CurveFuncX : public ExprFuncSimple {
     virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const {
         CurveData<double>* data = new CurveData<double>;
         for (int i = 1; i < args.nargs() - 2; i += 3) {
-            double pos = args.inFp<1>(i)[0];
-            double val = args.inFp<1>(i + 1)[0];
-            double interpDouble = args.inFp<1>(i + 2)[0];
+            double pos = args.inFp(i)[0];
+            double val = args.inFp(i + 1)[0];
+            double interpDouble = args.inFp(i + 2)[0];
             int interpInt = (int)interpDouble;
             Curve<double>::InterpType interpolant = (Curve<double>::InterpType)interpInt;
             if (!Curve<double>::interpTypeValid(interpolant)) {
@@ -1333,7 +1343,7 @@ class CurveFuncX : public ExprFuncSimple {
 
     virtual void eval(ArgHandle args) {
         CurveData<double>* data = static_cast<CurveData<double>*>(args.data);
-        double param = args.inFp<1>(0)[0];
+        double param = args.inFp(0)[0];
         args.outFp = data->curve.getValue(param);
     }
 
@@ -1367,15 +1377,15 @@ class CCurveFuncX : public ExprFuncSimple {
     virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const {
         CurveData<Vec3d>* data = new CurveData<Vec3d>;
         for (int i = 1; i < args.nargs() - 2; i += 3) {
-            double pos = args.inFp<1>(i)[0];
-            Vec3dRef val(&args.inFp<3>(i + 1)[0]);
-            double interpDouble = args.inFp<1>(i + 2)[0];
+            double pos = args.inFp(i)[0];
+            double* val = &args.inFp(i + 1)[0];
+            double interpDouble = args.inFp(i + 2)[0];
             int interpInt = (int)interpDouble;
             Curve<Vec3d>::InterpType interpolant = (Curve<Vec3d>::InterpType)interpInt;
             if (!Curve<Vec3d>::interpTypeValid(interpolant)) {
                 // TODO: fix error checking!
             }
-            data->curve.addPoint(pos, val, interpolant);
+            data->curve.addPoint(pos, Vec3d(val[0], val[1], val[2]), interpolant);
         }
         data->curve.preparePoints();
         return data;
@@ -1383,7 +1393,7 @@ class CCurveFuncX : public ExprFuncSimple {
 
     virtual void eval(ArgHandle args) {
         CurveData<Vec3d>* data = static_cast<CurveData<Vec3d>*>(args.data);
-        double param = args.inFp<1>(0)[0];
+        double param = args.inFp(0)[0];
         Vec3d result = data->curve.getValue(param);
         double* out = &args.outFp;
         for (int k = 0; k < 3; k++) out[k] = result[k];
@@ -1443,10 +1453,10 @@ class GetVar : public ExprFuncSimple {
         Data* data = static_cast<Data*>(args.data);
         assert(data);
         double* out = &args.outFp;
-        // for(int i=0;i<data->dim;i++) std::cerr<<" "<<args.inFp<1>(0)[i];
+        // for(int i=0;i<data->dim;i++) std::cerr<<" "<<args.inFp(0)[i];
         // std::cerr<<std::endl;
         if (data->f)
-            data->f(out, &args.inFp<1>(0)[0]);
+            data->f(out, &args.inFp(0)[0]);
         else
             throw std::runtime_error("getVar does not support non FP types right now got type");
     }
@@ -1540,11 +1550,11 @@ class PrintFuncX : public ExprFuncSimple {
         for (unsigned int i = 0; i < data->ranges.size(); i++) {
             const std::pair<int, int>& range = data->ranges[i];
             if (range.first == -2) {
-                std::cerr << args.inFp<1>(item)[0];
+                std::cerr << args.inFp(item)[0];
                 item++;
             } else if (range.first == -1) {
-                std::cerr << "[" << args.inFp<3>(item)[0] << "," << args.inFp<3>(item)[1] << ","
-                          << args.inFp<3>(item)[2] << "]";
+                std::cerr << "[" << args.inFp(item)[0] << "," << args.inFp(item)[1] << ","
+                          << args.inFp(item)[2] << "]";
                 item++;
             } else {
                 std::cerr << data->format.substr(range.first, range.second - range.first);
@@ -1586,14 +1596,14 @@ public:
     }
     virtual ExprFuncNode::Data* evalConstant(ArgHandle args) const
     {
-        //std::cerr<<"evalling const "<<args.inFp<1>(1)<<std::endl;
-        return new MyData(args.inFp<1>(1)[0]);
+        //std::cerr<<"evalling const "<<args.inFp(1)<<std::endl;
+        return new MyData(args.inFp(1)[0]);
     }
     virtual void eval(ArgHandle args)
     {
         MyData* data=static_cast<MyData*>(args.data);
 
-        Vec<double,3,true>(&args.outFp)=args.inFp<3>(0)+Vec<double,3,false>(data->foo);
+        Vec<double,3,true>(&args.outFp)=args.inFp(0)+Vec<double,3,false>(data->foo);
     }
 } testfunc;
 static const char* testfunc_docstring="fdsA";

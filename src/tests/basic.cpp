@@ -47,9 +47,9 @@ struct Func : public ExprFuncSimple {
         for (const char* p = s1; *p != 0; p++) sum1 += *p;
         double sum2 = 0;
         for (const char* p = s2; *p != 0; p++) sum2 += *p;
-        Vec3dRef foo(args.inFp<3>(0));
-        Vec2dRef bar(args.inFp<2>(2));
-        args.outFpHandle<4>() = Vec4d(foo[0] + foo[1] + foo[2], bar[0] + bar[1], sum1, sum2);
+        const double* foo = args.inFp(0);
+        const double* bar = args.inFp(2);
+        *(Vec4d*)args.outFpHandle() = Vec4d(foo[0] + foo[1] + foo[2], bar[0] + bar[1], sum1, sum2);
     }
 } testFuncSimple;
 ExprFunc testFunc(testFuncSimple, 4, 4);
@@ -168,9 +168,9 @@ TEST(BasicTests, Vec) {
     Vec3d a(1, 2, 3), b(2, 3, 4);
     ASSERT_EQ(a.dot(b), 20);
     ASSERT_EQ(a.length2(), a.dot(a));
-    Vec3d foo = Vec3d::copy(&b[0]);
-    Vec3dRef aRef(&b[0]);
-    ASSERT_EQ(foo, aRef);
+    Vec3d foo = copyRawVec3<double>(&b[0]);
+    Vec3d* aRef = (Vec3d*)&b[0];
+    ASSERT_EQ(foo, *aRef);
 }
 
 TEST(BasicTests, Variables) {
@@ -210,9 +210,9 @@ TEST(BasicTests, VectorAssignment) {
 
     SimpleExpression expr3("$foo=3; $foo=[0,1,2]; $foo");
     SimpleExpression expr4("[0,1,2]");
-    Vec<double, 3, true> val3(const_cast<double*>(expr3.evalFP()));
-    Vec<double, 3, true> val4(const_cast<double*>(expr4.evalFP()));
-    EXPECT_EQ(val3, val4);
+    Vec3d* val3 = (Vec3d*)expr3.evalFP();
+    Vec3d* val4 = (Vec3d*)expr4.evalFP();
+    EXPECT_EQ(*val3, *val4);
 }
 
 TEST(BasicTests, LogicalShortCircuiting) {
@@ -220,7 +220,7 @@ TEST(BasicTests, LogicalShortCircuiting) {
         SimpleExpression expr1(expr);
         if (!expr1.isValid()) throw std::runtime_error(expr1.parseError());
         invocations = 0;
-        Vec<double, 1, true> val(const_cast<double*>(expr1.evalFP()));
+        const double* val = expr1.evalFP();
         EXPECT_EQ(val[0], expectedOutput);
         EXPECT_EQ(invocations, invocationsExpected);
     };
@@ -265,9 +265,9 @@ TEST(BasicTests, IfThenElse) {
 
     // Check that variables not assigned in both are eliminated!
     doTest("if(x){a=3;b=a;} else {c=[1,2,3];b=c;d=c;} b+[9,8,2]", TypeVec(3), false, [](const double* f) {
-        Vec<const double, 3, true> val(f);
-        Vec<double, 3> ref(10, 10, 5);
-        EXPECT_EQ(val, ref);
+        Vec3d* ref = (Vec3d*)f;
+        Vec3d val(10, 10, 5);
+        EXPECT_EQ(val, *ref);
     });
 
     doTest("if(x){a=3;b=a;} else {c=[1,2,3];b=c;} c+[9,8,2]", TypeVec(3), false, [](const double*) {});
@@ -286,9 +286,9 @@ TEST(BasicTests, IfThenElse) {
 
     // Check same business but with empty if
     doTest("a=[1,2];if(x){} else {a=[1,2,3];} [5,6]", TypeVec(2), true, [](const double* f) {
-        Vec<const double, 2, true> val(f);
-        Vec<double, 2> ref(5, 6);
-        EXPECT_EQ(val, ref);
+        Vec2d* ref = (Vec2d*)f;
+        Vec2d val(5, 6);
+        EXPECT_EQ(val, *ref);
     });
 
     // Check same business but with empty if
@@ -298,16 +298,16 @@ TEST(BasicTests, IfThenElse) {
         TypeVec(3),
         true,
         [](const double* f) {
-            Vec<const double, 3, true> val(f);
-            Vec<double, 3> ref(10, 6, 0);
-            EXPECT_EQ(val, ref);
+            Vec3d* ref = (Vec3d*)f;
+            Vec3d val(10, 6, 5);
+            EXPECT_EQ(val, *ref);
         });
 
     // Check same business but with empty if
     doTest("if(x){a=3;b=a;} else {c=[1,2];b=c;} b+[9,9]", TypeVec(2), true, [](const double* f) {
-        Vec<const double, 2, true> val(f);
-        Vec<double, 2> ref(10, 11);
-        EXPECT_EQ(val, ref);
+        Vec2d* ref = (Vec2d*)f;
+        Vec2d val(10, 11);
+        EXPECT_EQ(val, *ref);
     });
 }
 
@@ -317,31 +317,30 @@ TEST(BasicTests, NestedTernary) {
         throw std::runtime_error("parse error:\n" + expr1.parseError());
     }
     if (!expr1.isValid()) throw std::runtime_error(expr1.parseError());
-    Vec<double, 1, true> val(const_cast<double*>(expr1.evalFP()));
+    const double* val = expr1.evalFP();
     EXPECT_EQ(val[0], 2);
     // TODO: put this expr in foo=3?1:2;Cs*foo
 }
 
 template <int d>
-Vec<double, d> run(const std::string& a) {
+const double* run(const std::string& a) {
     SimpleExpression e(a);
     e.setDesiredReturnType(TypeVec(d));
     if (!e.isValid()) throw std::runtime_error(e.parseError());
-    Vec<const double, d, true> crud(e.evalFP());
-    return crud;
+    return e.evalFP();
 }
 
 TEST(BasicTests, TestFunc) {
-    EXPECT_EQ(run<4>("testFunc([33,44,55],\"a\",[22,33],\"b\")"),
+    EXPECT_EQ(*(const Vec4d*)run<4>("testFunc([33,44,55],\"a\",[22,33],\"b\")"),
               Vec4d(33 + 44 + 55, 22 + 33, int('a'), int('b')));  //,int('a'),int('b')));
-    EXPECT_EQ(run<4>("testFunc(33,\"aa\",22,\"bc\")"), Vec4d(33 * 3, 22 * 2, 'a' + 'a', 'b' + 'c'));
+    EXPECT_EQ(*(const Vec4d*)run<4>("testFunc(33,\"aa\",22,\"bc\")"), Vec4d(33 * 3, 22 * 2, 'a' + 'a', 'b' + 'c'));
 }
 
 TEST(BasicTests, GetVar) {
-    EXPECT_EQ(run<3>("getVar(\"a\",[11,22,33])"), Vec3d(11, 22, 33));
-    EXPECT_EQ(run<4>("a=[11,22,33,44];getVar(\"a\",[5,3,2])"), Vec4d(11, 22, 33, 44));
-    EXPECT_EQ(run<3>("a=[11,22,33,44];getVar(\"aa\",[5,3,2])"), Vec3d(5, 3, 2));
-    EXPECT_EQ(run<4>("[11,22,33,44]"), Vec4d(11, 22, 33, 44));
+    EXPECT_EQ(*(const Vec3d*)run<3>("getVar(\"a\",[11,22,33])"), Vec3d(11, 22, 33));
+    EXPECT_EQ(*(const Vec4d*)run<4>("a=[11,22,33,44];getVar(\"a\",[5,3,2])"), Vec4d(11, 22, 33, 44));
+    EXPECT_EQ(*(const Vec3d*)run<3>("a=[11,22,33,44];getVar(\"aa\",[5,3,2])"), Vec3d(5, 3, 2));
+    EXPECT_EQ(*(const Vec4d*)run<4>("[11,22,33,44]"), Vec4d(11, 22, 33, 44));
 }
 
 TEST(BasicTests, Modulo) {

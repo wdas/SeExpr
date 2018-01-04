@@ -35,7 +35,7 @@ class CalculatorExpr : public Expression {
     //! Constructor that takes the expression to parse
     CalculatorExpr(const std::string& expr) : Expression(expr), _count(0) {
         for (int i = 0; i < STACK_DEPTH; i++) {
-            stack[i].val = Vec<double, 3, false>(0.0);
+            stack[i].val = Vec3d(0.0);
             fail_stack[i] = false;
         }
     };
@@ -55,11 +55,11 @@ class CalculatorExpr : public Expression {
             for (int k = 0; k < 3; k++) std::cerr << val[k] << " ";
             std::cerr << std::endl;
             if (dim == 1)
-                stack[_count].val = Vec<double, 3, false>(val[0]);
+                stack[_count].val = Vec3d(val[0]);
             else if (dim == 2)
-                stack[_count].val = Vec<double, 3, false>(val[0], val[1], 0);
+                stack[_count].val = Vec3d(val[0], val[1], 0);
             else if (dim == 3)
-                stack[_count].val = Vec<double, 3, true>(const_cast<double*>(&val[0]));
+                copyRawVec3(stack[_count].val, &val[0]);
             else {
                 std::cerr << "Return type FP(" << dim << ") ignoring" << std::endl;
             }
@@ -71,11 +71,11 @@ class CalculatorExpr : public Expression {
     //! Failed attempt; push 0 on stack
     void fail_push() {
         fail_stack[_count] = true;
-        stack[_count].val = Vec<double, 3, false>(0.0);
+        stack[_count].val = Vec3d(0.0);
         _count++;
     };
 
-    Vec<double, 3, false> peek() { return stack[_count - 1].val; }
+    Vec3d peek() { return stack[_count - 1].val; }
 
     int count() const {
         return _count;
@@ -86,7 +86,7 @@ class CalculatorExpr : public Expression {
     struct SimpleVar : public ExprVarRef {
         SimpleVar() : ExprVarRef(ExprType().FP(3).Varying()), val(0.0) {}
 
-        Vec<double, 3, false> val;  // independent variable
+        Vec3d val;  // independent variable
 
         void eval(double* result) {
             for (int k = 0; k < 3; k++) result[k] = val[k];

@@ -81,18 +81,11 @@ class ExprFuncSimple : public ExprFuncX {
               _nargs((int)fp[opData[3]]),  // TODO: would be good not to have to convert to int!
               opData(opData + 4), fp(fp), c(c) {}
 
-        template <int d>
-        Vec<double, d, true> inFp(int i) {
-            return Vec<double, d, true>(&fp[opData[i]]);
-        }
+        double* inFp(int i) { return &fp[opData[i]]; }
+        double* outFpHandle() { return &outFp; }
+
         char* inStr(int i) { return c[opData[i]]; }
         int nargs() const { return _nargs; }
-
-        /// Return a vector handle which is easier to assign to
-        template <int d>
-        Vec<double, d, true> outFpHandle() {
-            return Vec<double, d, true>(&outFp);
-        }
 
         double& outFp;
         char*& outStr;

@@ -49,7 +49,7 @@ class RandFuncX : public ExprFuncSimple {
 
     virtual void eval(ArgHandle args) {
         if (args.nargs() >= 2) {
-            args.outFp = (args.inFp<1>(0)[0] - args.inFp<1>(1)[0]) / 2.0;
+            args.outFp = (args.inFp(0)[0] - args.inFp(1)[0]) / 2.0;
         } else
             args.outFp = 0.5;
     }
@@ -82,7 +82,7 @@ class MapFuncX : public ExprFuncSimple {
         double val = 0.5;
         int num = args.nargs();
         if (num > 2)
-            for (int k = 2; k < num; k++) val += args.inFp<1>(k)[0];
+            for (int k = 2; k < num; k++) val += args.inFp(k)[0];
 
         for (int k = 0; k < 3; k++) out[k] = val;
     }
@@ -115,7 +115,7 @@ class TriplanarFuncX : public ExprFuncSimple {
         double val = 0.5;
         int num = args.nargs();
         if (num > 1)
-            for (int k = 1; k < num; k++) val += (args.inFp<3>(k)[0] + args.inFp<3>(k)[1] + args.inFp<3>(k)[2]);
+            for (int k = 1; k < num; k++) val += (args.inFp(k)[0] + args.inFp(k)[1] + args.inFp(k)[2]);
 
         for (int k = 0; k < 3; k++) out[k] = val;
     }
@@ -153,7 +153,7 @@ class ImageSynthExpr : public Expression {
     struct VecVar : public ExprVarRef {
         VecVar() : ExprVarRef(ExprType().FP(3).Varying()), val(0.0) {}
 
-        Vec<double, 3, false> val;  // independent variable
+        Vec3d val;  // independent variable
 
         void eval(double* result) {
             for (int k = 0; k < 3; k++) result[k] = val[k];
@@ -240,9 +240,9 @@ int main(int argc, char* argv[]) {
     double& v = expr.vars["v"].val;
 
     double& faceId = expr.vars["faceId"].val;
-    Vec<double, 3, false>& P = expr.vecvars["P"].val;
-    Vec<double, 3, false>& Cs = expr.vecvars["Cs"].val;
-    Vec<double, 3, false>& Ci = expr.vecvars["Ci"].val;
+    Vec3d& P = expr.vecvars["P"].val;
+    Vec3d& Cs = expr.vecvars["Cs"].val;
+    Vec3d& Ci = expr.vecvars["Ci"].val;
 
     unsigned char* pixel = image;
 

@@ -64,7 +64,7 @@ class RandFuncX : public ExprFuncSimple {
 
     virtual void eval(ArgHandle args) {
         if (args.nargs() >= 2) {
-            args.outFp = (args.inFp<1>(0)[0] - args.inFp<1>(1)[0]) / 2.0;
+            args.outFp = (args.inFp(0)[0] - args.inFp(1)[0]) / 2.0;
         } else
             args.outFp = 0.5;
     }
@@ -101,7 +101,7 @@ class MapFunc : public ExprFuncSimple {
         double val = 0.5;
         int num = args.nargs();
         if (num > 2)
-            for (int k = 2; k < num; k++) val += args.inFp<1>(k)[0];
+            for (int k = 2; k < num; k++) val += args.inFp(k)[0];
 
         for (int k = 0; k < 3; k++) out[k] = val;
     }
@@ -128,7 +128,7 @@ class TriplanarFuncX : public ExprFuncSimple {
         double val = 0.5;
         int num = args.nargs();
         if (num > 1)
-            for (int k = 1; k < num; k++) val += (args.inFp<3>(k)[0] + args.inFp<3>(k)[1] + args.inFp<3>(k)[2]);
+            for (int k = 1; k < num; k++) val += (args.inFp(k)[0] + args.inFp(k)[1] + args.inFp(k)[2]);
 
         for (int k = 0; k < 3; k++) out[k] = val;
     }
@@ -165,7 +165,7 @@ class ImageSynthExpr : public Expression {
     struct VecVar : public ExprVarRef {
         VecVar() : ExprVarRef(ExprType().FP(3).Varying()), val(0.0) {}
 
-        Vec<double, 3, false> val;  // independent variable
+        Vec3d val;  // independent variable
 
         void eval(double* result) {
             for (int k = 0; k < 3; k++) result[k] = val[k];
@@ -242,10 +242,10 @@ bool TestImage::generateImageWithoutExpression(TFUNC func) {
     double one_over_width = 1. / _width, one_over_height = 1. / _height;
     double u = 0;
     double v = 0;
-    Vec<double, 3, false> P;
-    Vec<double, 3, false> Cs;
-    Vec<double, 3, false> Ci;
-    Vec<double, 3, false> result;
+    Vec3d P;
+    Vec3d Cs;
+    Vec3d Ci;
+    Vec3d result;
     double faceId;
 
     unsigned char* pixel = image.data();
@@ -371,17 +371,17 @@ bool TestImage::generateImage(const std::string& exprStr) {
     double& u = expr.vars["u"].val;
     double& v = expr.vars["v"].val;
     double& faceId = expr.vars["faceId"].val;
-    Vec<double, 3, false>& P = expr.vecvars["P"].val;
-    Vec<double, 3, false>& Cs = expr.vecvars["Cs"].val;
-    Vec<double, 3, false>& Ci = expr.vecvars["Ci"].val;
+    Vec3d& P = expr.vecvars["P"].val;
+    Vec3d& Cs = expr.vecvars["Cs"].val;
+    Vec3d& Ci = expr.vecvars["Ci"].val;
 #else
-    Vec<double, 3> dummy(0.);
+    Vec3d dummy(0.);
     varBlock.Pointer(dummyH) = &dummy[0];
     double widthDouble = _width, heightDouble = _height;
     varBlock.Pointer(wH) = &widthDouble;
     varBlock.Pointer(hH) = &heightDouble;
     double u, v, faceId;
-    Vec<double, 3> P, Cs, Ci;
+    Vec3d P, Cs, Ci;
     varBlock.Pointer(uH) = &u;
     varBlock.Pointer(vH) = &v;
     varBlock.Pointer(faceIdH) = &faceId;
@@ -465,12 +465,11 @@ TEST(perf, noexpr) {
     Timer prepareTime;
     prepareTime.start();
     TestImage foo;
-    typedef Vec<double, 3, false> VecT;
     float prept = prepareTime.elapsedTime();
 
-    auto func = [](double u, double v, const VecT& P, const VecT& Cs, const VecT& Ci, double faceId, VecT& result) {
-        VecT foo(u * u + v * v), bar = foo * foo;
-        bar += VecT(u * v);
+    auto func = [](double u, double v, const Vec3d& P, const Vec3d& Cs, const Vec3d& Ci, double faceId, Vec3d& result) {
+        Vec3d foo(u * u + v * v), bar = foo * foo;
+        bar += Vec3d(u * v);
         result = bar;
     };
 
@@ -479,7 +478,7 @@ TEST(perf, noexpr) {
     if (true) {
         foo.generateImageWithoutExpression(func);
     } else {
-        std::function<void(double, double, const VecT&, const VecT&, const VecT&, double, VecT&)> slowFunction = func;
+        std::function<void(double, double, const Vec3d&, const Vec3d&, const Vec3d&, double, Vec3d&)> slowFunction = func;
         foo.generateImageWithoutExpression(slowFunction);
     }
     float evalt = evalTiming.elapsedTime();

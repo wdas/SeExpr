@@ -77,6 +77,15 @@ set(GTEST_DIR /usr CACHE PATH "Where to find GTEST") # /usr/include/gtest)
 set(ENABLE_LLVM_BACKEND ON CACHE BOOL "Whether to build with LLVM backend")
 set(USE_PYTHON ON CACHE BOOL "Whether to compile python libraries")
 
+
+if (DEFINED OPENEXR2_DIR)
+    message(STATUS "OPENEXR2_DIR = ${OPENEXR2_DIR}")
+    include_directories(SYSTEM ${OPENEXR2_DIR}/include)
+    link_directories(${OPENEXR2_DIR}/${CMAKE_INSTALL_LIBDIR})
+else ()
+    message(FATAL "NOT Found: OPENEXR2_DIR")
+endif()
+
 set(LLVM_LIB "")
 if (ENABLE_LLVM_BACKEND)
     set(LLVM_DIR /usr/share/llvm/cmake CACHE PATH "Where to search for LLVM i.e. ")

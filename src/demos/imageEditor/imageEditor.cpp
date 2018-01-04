@@ -111,7 +111,7 @@ unsigned char *ImageSynthesizer::evaluateExpression(const std::string &exprStr) 
         for (int col = 0; col < _width; col++) {
             u = one_over_width * (col + .5);
             v = one_over_height * (row + .5);
-            SeExpr2::Vec3d result = SeExpr2::Vec3dConstRef(expr.evalFP());
+            const double* result = expr.evalFP();
             pixel[0] = clamp(result[2] * 256.);
             pixel[1] = clamp(result[1] * 256.);
             pixel[2] = clamp(result[0] * 256.);
