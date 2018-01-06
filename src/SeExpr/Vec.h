@@ -165,41 +165,41 @@ class Vec {
     }
 
     template <class T2, bool refother>
-    Vec& operator=(const Vec<T2, d, refother>& other) {
+    inline Vec& operator=(const Vec<T2, d, refother>& other) {
         for (int k = 0; k < d; k++) x[k] = other[k];
         return *this;
     }
 
     template <class Tother, bool refother>
-    bool operator==(const Vec<Tother, d, refother>& other) const {
+    inline bool operator==(const Vec<Tother, d, refother>& other) const {
         for (int k = 0; k < d; k++)
             if (x[k] != other[k]) return false;
         return true;
     }
 
     template <class Tother, bool refother>
-    bool operator!=(const Vec<Tother, d, refother>& other) const {
+    inline bool operator!=(const Vec<Tother, d, refother>& other) const {
         return !(*this != other);
     }
 
     // non-const element access
-    T& operator[](const int i) { return x[i]; }
+    inline T& operator[](const int i) { return x[i]; }
 
     // const element access
-    const T& operator[](const int i) const { return x[i]; }
+    inline const T& operator[](const int i) const { return x[i]; }
 
     //! Square of euclidean (2) norm
-    T length2() const {
+    inline T length2() const {
         T data[d];
         for (int k = 0; k < d; k++) data[k] = x[k] * x[k];
         return Reducer<T, d>::sum(data);
     }
 
     //! Euclidean (2) norm
-    T length() const { return sqrt(length2()); }
+    inline T length() const { return sqrt(length2()); }
 
     //! Normalize in place and return the 2-norm before normalization
-    T normalize() {
+    inline T normalize() {
         T l = length2();
         if (l) {
             l = sqrt(l);
@@ -212,110 +212,110 @@ class Vec {
     }
 
     //! Return a copy of the vector that is normalized
-    Vec<T, d, false> normalized() const {
+    inline Vec<T, d, false> normalized() const {
         Vec<T, d, false> other(*this);
         other.normalize();
         return other;
     }
 
-    Vec& operator/=(const T val) {
+    inline Vec& operator/=(const T val) {
         T one_over_val = T(1) / val;
         for (int k = 0; k < d; k++) x[k] *= one_over_val;
         return *this;
     }
 
-    Vec& operator*=(const T val) {
+    inline Vec& operator*=(const T val) {
         for (int k = 0; k < d; k++) x[k] *= val;
         return *this;
     }
 
     template <bool refother>
-    Vec& operator+=(const Vec<T, d, refother>& other) {
+    inline Vec& operator+=(const Vec<T, d, refother>& other) {
         for (int k = 0; k < d; k++) x[k] += other[k];
         return *this;
     }
 
     template <bool refother>
-    Vec& operator-=(const Vec<T, d, refother>& other) {
+    inline Vec& operator-=(const Vec<T, d, refother>& other) {
         for (int k = 0; k < d; k++) x[k] -= other[k];
         return *this;
     }
 
     template <bool refother>
-    Vec& operator*=(const Vec<T, d, refother>& other) {
+    inline Vec& operator*=(const Vec<T, d, refother>& other) {
         for (int k = 0; k < d; k++) x[k] *= other[k];
         return *this;
     }
 
     template <bool refother>
-    Vec& operator/=(const Vec<T, d, refother>& other) {
+    inline Vec& operator/=(const Vec<T, d, refother>& other) {
         for (int k = 0; k < d; k++) x[k] /= other[k];
         return *this;
     }
 
-    T_VEC_VALUE operator-() const {
+    inline T_VEC_VALUE operator-() const {
         T_VEC_VALUE val(*this);
         for (int k = 0; k < d; k++) val[k] = -val[k];
         return val;
     }
 
     template <bool refother>
-    bool operator==(const Vec<T, d, refother>& other) const {
+    inline bool operator==(const Vec<T, d, refother>& other) const {
         bool equal = true;
         for (int k = 0; k < d; k++) equal &= (x[k] == other[k]);
         return equal;
     }
 
     template <bool refother>
-    bool operator!=(const Vec<T, d, refother>& other) const {
+    inline bool operator!=(const Vec<T, d, refother>& other) const {
         return !(*this == other);
     }
 
-    T_VEC_VALUE operator*(T s) const {
+    inline T_VEC_VALUE operator*(T s) const {
         T_VEC_VALUE val(*this);
         val *= s;
         return val;
     }
 
-    T_VEC_VALUE operator/(T s) const {
+    inline T_VEC_VALUE operator/(T s) const {
         T_VEC_VALUE val(*this);
         val /= s;
         return val;
     }
 
     template <bool refother>
-    T_VEC_VALUE operator+(const Vec<T, d, refother>& other) const {
+    inline T_VEC_VALUE operator+(const Vec<T, d, refother>& other) const {
         T_VEC_VALUE val(*this);
         val += other;
         return val;
     }
 
     template <bool refother>
-    T_VEC_VALUE operator-(const Vec<T, d, refother>& other) const {
+    inline T_VEC_VALUE operator-(const Vec<T, d, refother>& other) const {
         T_VEC_VALUE val(*this);
         val -= other;
         return val;
     }
 
     template <bool refother>
-    T_VEC_VALUE operator*(const Vec<T, d, refother>& other) const {
+    inline T_VEC_VALUE operator*(const Vec<T, d, refother>& other) const {
         T_VEC_VALUE val(*this);
         val *= other;
         return val;
     }
 
     template <bool refother>
-    T_VEC_VALUE operator/(const Vec<T, d, refother>& other) const {
+    inline T_VEC_VALUE operator/(const Vec<T, d, refother>& other) const {
         T_VEC_VALUE val(*this);
         val /= other;
         return val;
     }
 
-    friend T_VEC_VALUE operator*(T s, const Vec& v) { return v * s; }
+    friend inline T_VEC_VALUE operator*(T s, const Vec& v) { return v * s; }
 
     /** Inner product. */
     template <bool refother>
-    T dot(const Vec<T, d, refother>& o) const {
+    inline T dot(const Vec<T, d, refother>& o) const {
         T data[d];
         for (int k = 0; k < d; k++) data[k] = x[k] * o[k];
         return Reducer<T, d>::sum(data);
@@ -323,13 +323,13 @@ class Vec {
 
     /** Cross product. */
     template <bool refother>
-    T_VEC_VALUE cross(const Vec<T, 3, refother>& o) const {
+    inline T_VEC_VALUE cross(const Vec<T, 3, refother>& o) const {
         typename seexpr_static_assert<d == 3, INVALID_WITH_DIMENSION>::TYPE();
         return T_VEC_VALUE(x[1] * o[2] - x[2] * o[1], x[2] * o[0] - x[0] * o[2], x[0] * o[1] - x[1] * o[0]);
     }
 
     /** Return a vector orthogonal to the current vector. */
-    T_VEC_VALUE orthogonal() const {
+    inline T_VEC_VALUE orthogonal() const {
         typename seexpr_static_assert<d == 3, INVALID_WITH_DIMENSION>::TYPE();
         return T_VEC_VALUE(x[1] + x[2], x[2] - x[0], -x[0] - x[1]);
     }
@@ -339,7 +339,7 @@ class Vec {
      * passed in vector.
      */
     template <bool refother>
-    T angle(const Vec<T, 3, refother>& o) const {
+    inline T angle(const Vec<T, 3, refother>& o) const {
         typename seexpr_static_assert<d == 3, INVALID_WITH_DIMENSION>::TYPE();
         T l = length() * o.length();
         if (l == 0) return 0;
@@ -351,7 +351,7 @@ class Vec {
      * the given axis. (Axis must be normalized)
      */
     template <bool refother>
-    T_VEC_VALUE rotateBy(const Vec<T, 3, refother>& axis, T angle) const {
+    inline T_VEC_VALUE rotateBy(const Vec<T, 3, refother>& axis, T angle) const {
         typename seexpr_static_assert<d == 3, INVALID_WITH_DIMENSION>::TYPE();
         double c = cos(angle), s = sin(angle);
         return c * (*this) + (1 - c) * dot(axis) * axis - s * cross(axis);
