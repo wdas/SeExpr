@@ -177,6 +177,18 @@ class Vec {
         return true;
     }
 
+    template <bool refother>
+    inline bool operator==(const Vec<T, d, refother>& other) const {
+        bool equal = true;
+        for (int k = 0; k < d; k++) equal &= (x[k] == other[k]);
+        return equal;
+    }
+
+    template <bool refother>
+    inline bool operator!=(const Vec<T, d, refother>& other) const {
+        return !(*this == other);
+    }
+
     template <class Tother, bool refother>
     inline bool operator!=(const Vec<Tother, d, refother>& other) const {
         return !(*this != other);
@@ -188,34 +200,50 @@ class Vec {
     // const element access
     inline const T& operator[](const int i) const { return x[i]; }
 
-    //! Square of euclidean (2) norm
-    inline T length2() const {
-        T data[d];
-        for (int k = 0; k < d; k++) data[k] = x[k] * x[k];
-        return Reducer<T, d>::sum(data);
+    inline T_VEC_VALUE operator-() const {
+        T_VEC_VALUE val(*this);
+        for (int k = 0; k < d; k++) val[k] = -val[k];
+        return val;
     }
 
-    //! Euclidean (2) norm
-    inline T length() const { return sqrt(length2()); }
-
-    //! Normalize in place and return the 2-norm before normalization
-    inline T normalize() {
-        T l = length2();
-        if (l) {
-            l = sqrt(l);
-            *this /= l;
-        } else {
-            *this = T_VEC_VALUE((T)0);
-            x[0] = 1;
-        }
-        return l;
+    template <bool refother>
+    inline T_VEC_VALUE operator+(const Vec<T, d, refother>& other) const {
+        T_VEC_VALUE val(*this);
+        val += other;
+        return val;
     }
 
-    //! Return a copy of the vector that is normalized
-    inline Vec<T, d, false> normalized() const {
-        Vec<T, d, false> other(*this);
-        other.normalize();
-        return other;
+    template <bool refother>
+    inline T_VEC_VALUE operator-(const Vec<T, d, refother>& other) const {
+        T_VEC_VALUE val(*this);
+        val -= other;
+        return val;
+    }
+
+    template <bool refother>
+    inline T_VEC_VALUE operator*(const Vec<T, d, refother>& other) const {
+        T_VEC_VALUE val(*this);
+        val *= other;
+        return val;
+    }
+
+    template <bool refother>
+    inline T_VEC_VALUE operator/(const Vec<T, d, refother>& other) const {
+        T_VEC_VALUE val(*this);
+        val /= other;
+        return val;
+    }
+
+    inline T_VEC_VALUE operator*(T s) const {
+        T_VEC_VALUE val(*this);
+        val *= s;
+        return val;
+    }
+
+    inline T_VEC_VALUE operator/(T s) const {
+        T_VEC_VALUE val(*this);
+        val /= s;
+        return val;
     }
 
     inline Vec& operator/=(const T val) {
@@ -253,65 +281,37 @@ class Vec {
         return *this;
     }
 
-    inline T_VEC_VALUE operator-() const {
-        T_VEC_VALUE val(*this);
-        for (int k = 0; k < d; k++) val[k] = -val[k];
-        return val;
-    }
-
-    template <bool refother>
-    inline bool operator==(const Vec<T, d, refother>& other) const {
-        bool equal = true;
-        for (int k = 0; k < d; k++) equal &= (x[k] == other[k]);
-        return equal;
-    }
-
-    template <bool refother>
-    inline bool operator!=(const Vec<T, d, refother>& other) const {
-        return !(*this == other);
-    }
-
-    inline T_VEC_VALUE operator*(T s) const {
-        T_VEC_VALUE val(*this);
-        val *= s;
-        return val;
-    }
-
-    inline T_VEC_VALUE operator/(T s) const {
-        T_VEC_VALUE val(*this);
-        val /= s;
-        return val;
-    }
-
-    template <bool refother>
-    inline T_VEC_VALUE operator+(const Vec<T, d, refother>& other) const {
-        T_VEC_VALUE val(*this);
-        val += other;
-        return val;
-    }
-
-    template <bool refother>
-    inline T_VEC_VALUE operator-(const Vec<T, d, refother>& other) const {
-        T_VEC_VALUE val(*this);
-        val -= other;
-        return val;
-    }
-
-    template <bool refother>
-    inline T_VEC_VALUE operator*(const Vec<T, d, refother>& other) const {
-        T_VEC_VALUE val(*this);
-        val *= other;
-        return val;
-    }
-
-    template <bool refother>
-    inline T_VEC_VALUE operator/(const Vec<T, d, refother>& other) const {
-        T_VEC_VALUE val(*this);
-        val /= other;
-        return val;
-    }
-
     friend inline T_VEC_VALUE operator*(T s, const Vec& v) { return v * s; }
+
+    //! Square of euclidean (2) norm
+    inline T length2() const {
+        T data[d];
+        for (int k = 0; k < d; k++) data[k] = x[k] * x[k];
+        return Reducer<T, d>::sum(data);
+    }
+
+    //! Euclidean (2) norm
+    inline T length() const { return sqrt(length2()); }
+
+    //! Normalize in place and return the 2-norm before normalization
+    inline T normalize() {
+        T l = length2();
+        if (l) {
+            l = sqrt(l);
+            *this /= l;
+        } else {
+            *this = T_VEC_VALUE((T)0);
+            x[0] = 1;
+        }
+        return l;
+    }
+
+    //! Return a copy of the vector that is normalized
+    inline Vec<T, d, false> normalized() const {
+        Vec<T, d, false> other(*this);
+        other.normalize();
+        return other;
+    }
 
     /** Inner product. */
     template <bool refother>
