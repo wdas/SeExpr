@@ -201,87 +201,60 @@ class Vec {
     inline const T& operator[](const int i) const { return x[i]; }
 
     inline T_VEC_VALUE operator-() const {
-        T_VEC_VALUE val(*this);
-        for (int k = 0; k < d; k++) val[k] = -val[k];
-        return val;
+        T_VEC_VALUE result;
+        for (int k = 0; k < d; k++) result[k] = -x[k];
+        return result;
     }
 
     template <bool refother>
     inline T_VEC_VALUE operator+(const Vec<T, d, refother>& other) const {
-        T_VEC_VALUE val(*this);
-        val += other;
-        return val;
+        T_VEC_VALUE result;
+        for (int k = 0; k < d; k++) result[k] = x[k] + other[k];
+        return result;
     }
 
     template <bool refother>
     inline T_VEC_VALUE operator-(const Vec<T, d, refother>& other) const {
-        T_VEC_VALUE val(*this);
-        val -= other;
-        return val;
+        T_VEC_VALUE result;
+        for (int k = 0; k < d; k++) result[k] = x[k] - other[k];
+        return result;
     }
 
     template <bool refother>
     inline T_VEC_VALUE operator*(const Vec<T, d, refother>& other) const {
-        T_VEC_VALUE val(*this);
-        val *= other;
-        return val;
+        T_VEC_VALUE result;
+        for (int k = 0; k < d; k++) result[k] = x[k] * other[k];
+        return result;
     }
 
     template <bool refother>
     inline T_VEC_VALUE operator/(const Vec<T, d, refother>& other) const {
-        T_VEC_VALUE val(*this);
-        val /= other;
-        return val;
+        T_VEC_VALUE result;
+        for (int k = 0; k < d; k++) result[k] = x[k] / other[k];
+        return result;
     }
 
-    inline T_VEC_VALUE operator*(T s) const {
-        T_VEC_VALUE val(*this);
-        val *= s;
-        return val;
-    }
-
-    inline T_VEC_VALUE operator/(T s) const {
-        T_VEC_VALUE val(*this);
-        val /= s;
-        return val;
-    }
-
-    inline Vec& operator/=(const T val) {
-        T one_over_val = T(1) / val;
-        for (int k = 0; k < d; k++) x[k] *= one_over_val;
-        return *this;
-    }
-
-    inline Vec& operator*=(const T val) {
-        for (int k = 0; k < d; k++) x[k] *= val;
-        return *this;
-    }
+    inline T_VEC_VALUE operator+(const T& s) const { return (*this) + T_VEC_VALUE(s); }
+    inline T_VEC_VALUE operator-(const T& s) const { return (*this) - T_VEC_VALUE(s); }
+    inline T_VEC_VALUE operator*(const T& s) const { return (*this) * T_VEC_VALUE(s); }
+    inline T_VEC_VALUE operator/(const T& s) const { return (*this) / T_VEC_VALUE(s); }
 
     template <bool refother>
-    inline Vec& operator+=(const Vec<T, d, refother>& other) {
-        for (int k = 0; k < d; k++) x[k] += other[k];
-        return *this;
-    }
+    inline Vec& operator+=(const Vec<T, d, refother>& other) { return (*this) = (*this) + other; }
 
     template <bool refother>
-    inline Vec& operator-=(const Vec<T, d, refother>& other) {
-        for (int k = 0; k < d; k++) x[k] -= other[k];
-        return *this;
-    }
+    inline Vec& operator-=(const Vec<T, d, refother>& other) { return (*this) = (*this) - other; }
 
     template <bool refother>
-    inline Vec& operator*=(const Vec<T, d, refother>& other) {
-        for (int k = 0; k < d; k++) x[k] *= other[k];
-        return *this;
-    }
+    inline Vec& operator*=(const Vec<T, d, refother>& other) { return (*this) = (*this) * other; }
 
     template <bool refother>
-    inline Vec& operator/=(const Vec<T, d, refother>& other) {
-        for (int k = 0; k < d; k++) x[k] /= other[k];
-        return *this;
-    }
+    inline Vec& operator/=(const Vec<T, d, refother>& other) { return (*this) = (*this) / other; }
 
-    friend inline T_VEC_VALUE operator*(T s, const Vec& v) { return v * s; }
+    friend inline T_VEC_VALUE operator+(const T& s, const Vec& v) { return T_VEC_VALUE(s) + v; }
+    friend inline T_VEC_VALUE operator-(const T& s, const Vec& v) { return T_VEC_VALUE(s) - v; }
+    friend inline T_VEC_VALUE operator*(const T& s, const Vec& v) { return T_VEC_VALUE(s) * v; }
+    friend inline T_VEC_VALUE operator/(const T& s, const Vec& v) { return T_VEC_VALUE(s) / v; }
 
     //! Square of euclidean (2) norm
     inline T length2() const {
