@@ -324,9 +324,9 @@ class Vec {
      * the given axis. (Axis must be normalized)
      */
     template <bool refother>
-    inline T_VEC_VALUE rotateBy(const Vec<T, 3, refother>& axis, T angle) const {
+    inline T_VEC_VALUE rotateBy(const Vec<T, 3, refother>& axis, T angle_) const {
         typename seexpr_static_assert<d == 3, INVALID_WITH_DIMENSION>::TYPE();
-        double c = cos(angle), s = sin(angle);
+        double c = cos(angle_), s = sin(angle_);
         return c * (*this) + (1 - c) * dot(axis) * axis - s * cross(axis);
     }
 };
