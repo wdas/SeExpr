@@ -235,6 +235,7 @@ void ExprFunc::loadPlugins(const char* path) {
                 fullpath += "/";
                 fullpath += matches[i]->d_name;
                 loadPlugin(fullpath.c_str());
+                free(matches[i]);
             }
             if (matches)
                 free(matches);
