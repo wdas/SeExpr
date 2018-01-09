@@ -185,6 +185,7 @@ bool ExprParseAction(SeExpr2::ExprNode*& parseTree,
             delete *iter;
     }
     parseData->ParseNodes.clear();
+    delete parseData;
     yylex_destroy(scanner);
 
     return parseTree != 0;

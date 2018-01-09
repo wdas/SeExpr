@@ -177,9 +177,9 @@ class ExprVarEnvBuilder {
 //! Evaluation result.
 struct ExprEvalResult {
     ExprEvalResult() : n(0), fp(0), str(0) {}
-    ExprEvalResult(int n, double* fp) : n(n), fp(fp), str(0) {}
-    ExprEvalResult(const char** c) : n(1), fp(0), str(c) {}
-    ExprEvalResult(int n, double* fp, const char** c) : n(n), fp(fp), str(c) {}
+    ExprEvalResult(int n_, double* fp_) : n(n_), fp(fp_), str(0) {}
+    ExprEvalResult(const char** c_) : n(1), fp(0), str(c_) {}
+    ExprEvalResult(int n_, double* fp_, const char** c_) : n(n_), fp(fp_), str(c_) {}
 
     int n;
     double* fp;
