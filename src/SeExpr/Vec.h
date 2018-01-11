@@ -239,6 +239,11 @@ class Vec {
     inline T_VEC_VALUE operator*(const T& s) const { return (*this) * T_VEC_VALUE(s); }
     inline T_VEC_VALUE operator/(const T& s) const { return (*this) / T_VEC_VALUE(s); }
 
+    inline Vec& operator+=(const T& s) { return (*this) = (*this) + T_VEC_VALUE(s); }
+    inline Vec& operator-=(const T& s) { return (*this) = (*this) - T_VEC_VALUE(s); }
+    inline Vec& operator*=(const T& s) { return (*this) = (*this) * T_VEC_VALUE(s); }
+    inline Vec& operator/=(const T& s) { return (*this) = (*this) / T_VEC_VALUE(s); }
+
     template <bool refother>
     inline Vec& operator+=(const Vec<T, d, refother>& other) { return (*this) = (*this) + other; }
 
