@@ -85,7 +85,6 @@ public:
         static void setAnimCurveCallback(SIP_PYCALLABLE /AllowNone/);
 %MethodCode
         {
-            std::string (*old)(const std::string&);
             ExprControlCollection::setAnimCurveCallback((a0!=Py_None) ? animCurveCallbackPyWrapper : 0);
             Py_XDECREF(animCurveCallbackPy);
             animCurveCallbackPy=a0;
@@ -103,7 +102,6 @@ void animCurveCallbackPyWrapper(const std::string& arg,animlib::AnimCurve& curve
     PyObject* res;
     SIP_BLOCK_THREADS;
     res=sipCallMethod(0,animCurveCallbackPy,"s",arg.c_str());
-    char* buf;
     if(res != NULL){
         const int argsPerItem=9;
         if(!PyTuple_Check(res))
