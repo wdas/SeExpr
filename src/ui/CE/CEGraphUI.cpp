@@ -578,8 +578,8 @@ void CEGraphUI::pickActive(int x, int y) {
 
     while (numHits--) {
         GLuint numNames = *p++;
-        *p++;  // GLuint zmin =
-        *p++;  // GLuint zmax =
+        p++;  // GLuint zmin =
+        p++;  // GLuint zmax =
         if (numNames >= 3) {
             int curve = p[0];
             int seg = p[1];

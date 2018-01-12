@@ -171,18 +171,24 @@ void Expression::setContext(const Context& context) {
 }
 
 void Expression::setDesiredReturnType(const ExprType& type) {
-    reset();
-    _desiredReturnType = type;
+    if (_desiredReturnType != type) {
+        reset();
+        _desiredReturnType = type;
+    }
 }
 
 void Expression::setVarBlockCreator(const VarBlockCreator* creator) {
-    reset();
-    _varBlockCreator = creator;
+    if (_varBlockCreator != creator) {
+        reset();
+        _varBlockCreator = creator;
+    }
 }
 
 void Expression::setExpr(const std::string& e) {
-    if (_expression != "") reset();
-    _expression = e;
+    if (_expression != e) {
+        if (!_expression.empty()) reset();
+        _expression = e;
+    }
 }
 
 bool Expression::syntaxOK() const {
