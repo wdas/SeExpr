@@ -24,7 +24,7 @@ if(EXISTS ${GTEST_DIR}/include)
 
     if (DEFINED PNG_DIR)
         message(STATUS "PNG_DIR = ${PNG_DIR}")
-        include_directories(${PNG_DIR}/include)
+        include_directories(SYSTEM ${PNG_DIR}/include)
         find_library(PNG_LIBRARIES png PATHS ${PNG_DIR}/${CMAKE_INSTALL_LIBDIR}
                      NO_DEFAULT_PATH)
         set(PNG_FOUND 1)
