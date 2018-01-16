@@ -103,8 +103,9 @@ Expression::Expression(Expression::EvaluationStrategy evaluationStrategyHint)
     , _evaluationStrategyHint(evaluationStrategyHint)
     , _context(&Context::global())
     , _desiredReturnType(ExprType().FP(3).Varying())
-    , _parseTree(0)
-    , _evaluator(nullptr) {
+    , _parseTree(nullptr)
+    , _evaluator(nullptr)
+    , _varBlockCreator(nullptr) {
     ExprFunc::init();
 }
 
@@ -117,8 +118,9 @@ Expression::Expression(const std::string& e,
     , _evaluationStrategyHint(evaluationStrategyHint)
     , _context(&context)
     , _desiredReturnType(type)
-    , _parseTree(0)
-    , _evaluator(nullptr) {
+    , _parseTree(nullptr)
+    , _evaluator(nullptr)
+    , _varBlockCreator(nullptr) {
     ExprFunc::init();
 }
 
