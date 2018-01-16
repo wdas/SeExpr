@@ -132,12 +132,12 @@ class Expression {
     returns false, the error message can be accessed via
     parseError() */
     bool isValid() const {
-        prepIfNeeded();
+        prep();
         return _isValid;
     }
 
     const ExprNode* parseTree() const {
-        parseIfNeeded();
+        parse();
         return _parseTree;
     }
 
@@ -244,15 +244,6 @@ class Expression {
     /** Parse, and remember parse error if any */
     void parse() const;
 
-    /** Parse, but only if not yet parsed */
-    void parseIfNeeded() const {
-        if (!_parsed) parse();
-    }
-
-    /** Prepare expression (bind vars/functions, etc.)
-    and remember error if any */
-    void prep() const;
-
     /** True if the expression wants a vector */
     bool _wantVec;
 
@@ -277,10 +268,9 @@ class Expression {
     /** Parse tree (null if syntax is bad). */
     mutable ExprNode* _parseTree;
 
-    /** Prepare, but only if not yet prepped */
-    void prepIfNeeded() const {
-        if (!_prepped) prep();
-    }
+    /** Prepare expression (bind vars/functions, etc.)
+    and remember error if any */
+    void prep() const;
 
   private:
     /** Flag if we are valid or not */

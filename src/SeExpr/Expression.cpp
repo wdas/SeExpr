@@ -192,22 +192,22 @@ void Expression::setExpr(const std::string& e) {
 }
 
 bool Expression::syntaxOK() const {
-    parseIfNeeded();
+    parse();
     return _isValid;
 }
 
 bool Expression::isConstant() const {
-    parseIfNeeded();
+    parse();
     return returnType().isLifetimeConstant();
 }
 
 bool Expression::usesVar(const std::string& name) const {
-    parseIfNeeded();
+    parse();
     return _vars.find(name) != _vars.end();
 }
 
 bool Expression::usesFunc(const std::string& name) const {
-    parseIfNeeded();
+    parse();
     return _funcs.find(name) != _funcs.end();
 }
 
@@ -227,7 +227,7 @@ void Expression::prep() const {
     PrintTiming timer("[ PREP     ] v2 prep time: ");
 #endif
     _prepped = true;
-    parseIfNeeded();
+    parse();
 
     bool error = false;
 
@@ -321,17 +321,17 @@ void Expression::prep() const {
 }
 
 bool Expression::isVec() const {
-    prepIfNeeded();
+    prep();
     return _isValid ? _parseTree->isVec() : _wantVec;
 }
 
 const ExprType& Expression::returnType() const {
-    prepIfNeeded();
+    prep();
     return _returnType;
 }
 
 const double* Expression::evalFP(VarBlock* varBlock) const {
-    prepIfNeeded();
+    prep();
     if (_isValid) {
         if (_evaluationStrategy == UseInterpreter) {
             _interpreter->evalFP(varBlock);
@@ -345,7 +345,7 @@ const double* Expression::evalFP(VarBlock* varBlock) const {
 }
 
 void Expression::evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) const {
-    prepIfNeeded();
+    prep();
     if (_isValid) {
         if (_evaluationStrategy == UseInterpreter) {
             // TODO: need strings to work
@@ -366,7 +366,7 @@ void Expression::evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size
 }
 
 const char* Expression::evalStr(VarBlock* varBlock) const {
-    prepIfNeeded();
+    prep();
     if (_isValid) {
         if (_evaluationStrategy == UseInterpreter) {
             _interpreter->evalStr(varBlock);
