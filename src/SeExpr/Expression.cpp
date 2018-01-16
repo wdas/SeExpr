@@ -265,13 +265,6 @@ void Expression::prep() const {
     assert(_evaluator);
 }
 
-bool Expression::isVec() const {
-    prep();
-    return isValid() ? _parseTree->isVec() : _wantVec;
-}
-
-const ExprType& Expression::returnType() const {
-    prep();
-    return _returnType;
-}
+bool Expression::isVec() const { return syntaxOK() ? _parseTree->isVec() : _wantVec; }
+const ExprType& Expression::returnType() const { return syntaxOK() ? _returnType : ExprType().Error(); }
 }  // end namespace SeExpr2/
