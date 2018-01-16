@@ -20,6 +20,10 @@
 #include <vector>
 #include <stack>
 
+#include "Evaluator.h"
+#include "ExprNode.h"
+#include "VarBlock.h"
+
 namespace SeExpr2 {
 class ExprLocalVar;
 
@@ -37,7 +41,7 @@ struct Promote {
 
 /// Non-LLVM manual interpreter. This is a simple computation machine. There are no dynamic activation records
 /// just fixed locations, because we have no recursion!
-class Interpreter {
+class Interpreter : public Evaluator {
   public:
     /// Double data (constants and evaluated)
     std::vector<double> d;
@@ -57,11 +61,14 @@ class Interpreter {
     std::vector<int> callStack;
 
   private:
+    bool _debugging;
+    int _returnSlot;
+    ExprType _desiredReturnType;
     bool _startedOp;
     int _pcStart;
 
   public:
-    Interpreter() : _startedOp(false) {
+    Interpreter() : _debugging(false), _returnSlot(0), _desiredReturnType(), _startedOp(false), _pcStart(0) {
         s.push_back(nullptr);  // reserved for double** of variable block
         s.push_back(nullptr);  // reserved for double** of variable block
     }
@@ -114,12 +121,45 @@ class Interpreter {
         return ret;
     }
 
-    /// Evaluate program
-    void eval(VarBlock* varBlock, bool debug = false);
+    virtual void setDebugging(bool debugging) override { _debugging = debugging; }
+
+    virtual bool prep(ExprNode* parseTree, ExprType desiredReturnType) override;
+
+    virtual inline const char* evalStr(VarBlock* varBlock) override {
+        eval(varBlock);
+        return s[_returnSlot];
+    }
+
+    virtual inline const double* evalFP(VarBlock* varBlock) override {
+        eval(varBlock);
+        return &d[_returnSlot];
+    }
+
+    virtual inline void evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) override {
+        // TODO: need strings to work
+        int dim = _desiredReturnType.dim();
+        // double* iHack=reinterpret_cast<double**>(varBlock->data())[outputVarBlockOffset];
+        double* destBase = reinterpret_cast<double**>(varBlock->data())[outputVarBlockOffset];
+        for (size_t i = rangeStart; i < rangeEnd; i++) {
+            varBlock->indirectIndex = i;
+            const double* f = evalFP(varBlock);
+            for (int k = 0; k < dim; k++) {
+                destBase[dim * i + k] = f[k];
+            }
+        }
+    }
+
+    virtual bool isValid() const override { return true; }
+
+    virtual inline void dump() const override { print(); }
+
     /// Debug by printing program
     void print(int pc = -1) const;
 
     void setPCStart(int pcStart) { _pcStart = pcStart; }
+
+  private:
+    void eval(VarBlock* varBlock, bool debug = false);
 };
 
 //! Return the function f encapsulated in class T for the dynamic i converted to a static d.

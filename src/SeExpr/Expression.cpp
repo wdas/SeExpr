@@ -280,7 +280,7 @@ void Expression::prep() const {
                 std::cerr << "Eval strategy is llvm" << std::endl;
                 debugPrintParseTree();
             }
-            if (!_llvmEvaluator->prepLLVM(_parseTree, _desiredReturnType)) {
+            if (!_llvmEvaluator->prep(_parseTree, _desiredReturnType)) {
                 error = true;
             }
         }
@@ -334,7 +334,7 @@ const double* Expression::evalFP(VarBlock* varBlock) const {
     prepIfNeeded();
     if (_isValid) {
         if (_evaluationStrategy == UseInterpreter) {
-            _interpreter->eval(varBlock);
+            _interpreter->evalFP(varBlock);
             return &_interpreter->d[_returnSlot];
         } else {  // useLLVM
             return _llvmEvaluator->evalFP(varBlock);
@@ -369,7 +369,7 @@ const char* Expression::evalStr(VarBlock* varBlock) const {
     prepIfNeeded();
     if (_isValid) {
         if (_evaluationStrategy == UseInterpreter) {
-            _interpreter->eval(varBlock);
+            _interpreter->evalStr(varBlock);
             return _interpreter->s[_returnSlot];
         } else {  // useLLVM
             _llvmEvaluator->evalStr(varBlock);
