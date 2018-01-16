@@ -31,7 +31,7 @@
 #include "ExprEnv.h"
 #include "Platform.h"
 
-#include "Evaluator.h"
+#include "LLVMEvaluator.h"
 
 #include <cstdio>
 #include <typeinfo>
