@@ -26,6 +26,7 @@
 #include "ExprConfig.h"
 #include "Vec.h"
 #include "Context.h"
+#include "Evaluator.h"
 #include "ExprEnv.h"
 
 namespace llvm {
@@ -39,7 +40,6 @@ class ExprNode;
 class ExprVarNode;
 class ExprFunc;
 class Expression;
-class Interpreter;
 
 //! abstract class for implementing variable references
 class ExprVarRef {
@@ -77,7 +77,6 @@ class Expression {
   public:
     //! Types of evaluation strategies that are available
     enum EvaluationStrategy {
-        Undefined,
         UseInterpreter,
         UseLLVM
     };
@@ -141,6 +140,12 @@ class Expression {
         return _parseTree;
     }
 
+    Evaluator* evaluator() const {
+        if (_evaluator) return _evaluator;
+        prep();
+        return _evaluator;
+    }
+
     /** Get parse error (if any).  First call syntaxOK or isValid
         to parse (and optionally bind) the expression. */
     const std::string& parseError() const { return _parseError; }
@@ -188,15 +193,17 @@ class Expression {
     const ExprType& returnType() const;
 
     /// Evaluate multiple blocks
-    void evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) const;
+    inline void evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) const {
+        evaluator()->evalMultiple(varBlock, outputVarBlockOffset, rangeStart, rangeEnd);
+    }
 
     // TODO: make this deprecated
     /** Evaluates and returns float (check returnType()!) */
-    const double* evalFP(VarBlock* varBlock = nullptr) const;
+    inline const double* evalFP(VarBlock* varBlock = nullptr) const { return evaluator()->evalFP(varBlock); }
 
     // TODO: make this deprecated
     /** Evaluates and returns string (check returnType()!) */
-    const char* evalStr(VarBlock* varBlock = nullptr) const;
+    inline const char* evalStr(VarBlock* varBlock = nullptr) const { return evaluator()->evalStr(varBlock); }
 
     /** Reset expr - force reparse/rebind */
     void reset();
@@ -222,15 +229,6 @@ class Expression {
     const Context& context() const { return *_context; }
     void setContext(const Context& context);
 
-    /** Debug printout of parse tree */
-    void debugPrintParseTree() const;
-
-    /** Debug printout of interpreter evaluation program  **/
-    void debugPrintInterpreter() const;
-
-    /** Debug printout of LLVM evaluation  **/
-    void debugPrintLLVM() const;
-
     /** Set variable block creator (lifetime of expression must be <= block) **/
     void setVarBlockCreator(const VarBlockCreator* varBlockCreator);
 
@@ -254,7 +252,6 @@ class Expression {
     std::string _expression;
 
     EvaluationStrategy _evaluationStrategyHint;
-    mutable EvaluationStrategy _evaluationStrategy;
 
     /** Context for out of band function parameters */
     const Context* _context;
@@ -275,8 +272,9 @@ class Expression {
   private:
     /** Flag if we are valid or not */
     mutable bool _isValid;
-    /** Flag set once expr is parsed/prepped (parsing is automatic and lazy) */
-    mutable bool _parsed, _prepped;
+
+    /** Flag set once expr is parsed (parsing is automatic and lazy) */
+    mutable bool _parsed;
 
     /** Cached parse error (returned by isValid) */
     mutable std::string _parseError;
@@ -299,12 +297,7 @@ class Expression {
     /** Whether or not we have unsafe functions */
     mutable std::vector<std::string> _threadUnsafeFunctionCalls;
 
-    /** Interpreter */
-    mutable Interpreter* _interpreter;
-    mutable int _returnSlot;
-
-    // LLVM evaluation layer
-    mutable LLVMEvaluator* _llvmEvaluator;
+    mutable Evaluator* _evaluator;
 
     // Var block creator
     const VarBlockCreator* _varBlockCreator = 0;

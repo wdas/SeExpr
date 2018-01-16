@@ -29,8 +29,7 @@ int main() {
     if (!e.isValid()) {
         throw std::runtime_error(e.parseError());
     }
-    e.debugPrintParseTree();
-    e.debugPrintLLVM();
+    e.evaluator()->dump();
     const double* val = e.evalFP();
     std::cout << "val is " << val[0] << std::endl;
 
