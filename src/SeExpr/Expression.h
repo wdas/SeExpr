@@ -20,6 +20,7 @@
 #include <string>
 #include <map>
 #include <set>
+#include <mutex>
 #include <vector>
 #include <iomanip>
 #include <stdint.h>
@@ -267,6 +268,8 @@ class Expression {
     void prep() const;
 
   private:
+    mutable std::mutex _prepMutex;
+
     /** Cached parse error (returned by isValid) */
     mutable std::string _parseError;
 

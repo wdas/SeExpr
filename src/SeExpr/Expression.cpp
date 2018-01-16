@@ -127,6 +127,7 @@ Expression::~Expression() {
 }
 
 void Expression::reset() {
+    std::lock_guard<std::mutex> guard(_prepMutex);
     delete _evaluator;
     delete _parseTree;
     _parseError = "";
@@ -194,6 +195,7 @@ void Expression::parse() const {
 }
 
 void Expression::prep() const {
+    std::lock_guard<std::mutex> guard(_prepMutex);
     if (_evaluator) return;
 #ifdef SEEXPR_PERFORMANCE
     PrintTiming timer("[ PREP     ] v2 prep time: ");
