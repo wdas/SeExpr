@@ -124,16 +124,13 @@ class Expression {
     /** Check expression syntax.  Expr will be parsed if needed.  If
         this returns false, the error message can be accessed via
         parseError() */
-    bool syntaxOK() const;
+    inline bool syntaxOK() const { return (bool)parseTree(); }
 
     /** Check if expression is valid.  Expr will be parsed if
     needed. Variables and functions will also be bound.  If this
     returns false, the error message can be accessed via
     parseError() */
-    bool isValid() const {
-        prep();
-        return _isValid;
-    }
+    inline bool isValid() const { return evaluator()->isValid(); }
 
     const ExprNode* parseTree() const {
         parse();
@@ -270,12 +267,6 @@ class Expression {
     void prep() const;
 
   private:
-    /** Flag if we are valid or not */
-    mutable bool _isValid;
-
-    /** Flag set once expr is parsed (parsing is automatic and lazy) */
-    mutable bool _parsed;
-
     /** Cached parse error (returned by isValid) */
     mutable std::string _parseError;
 

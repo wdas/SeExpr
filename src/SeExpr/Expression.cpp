@@ -104,8 +104,6 @@ Expression::Expression(Expression::EvaluationStrategy evaluationStrategyHint)
     , _context(&Context::global())
     , _desiredReturnType(ExprType().FP(3).Varying())
     , _parseTree(0)
-    , _isValid(0)
-    , _parsed(0)
     , _evaluator(nullptr) {
     ExprFunc::init();
 }
@@ -120,8 +118,6 @@ Expression::Expression(const std::string& e,
     , _context(&context)
     , _desiredReturnType(type)
     , _parseTree(0)
-    , _isValid(0)
-    , _parsed(0)
     , _evaluator(nullptr) {
     ExprFunc::init();
 }
@@ -133,8 +129,6 @@ Expression::~Expression() {
 void Expression::reset() {
     delete _evaluator;
     delete _parseTree;
-    _isValid = 0;
-    _parsed = 0;
     _parseError = "";
     _vars.clear();
     _funcs.clear();
@@ -171,11 +165,6 @@ void Expression::setExpr(const std::string& e) {
     }
 }
 
-bool Expression::syntaxOK() const {
-    parse();
-    return _isValid;
-}
-
 bool Expression::isConstant() const {
     parse();
     return returnType().isLifetimeConstant();
@@ -192,12 +181,12 @@ bool Expression::usesFunc(const std::string& name) const {
 }
 
 void Expression::parse() const {
-    if (_parsed) return;
-    _parsed = true;
+    if (_parseTree) return;
     int tempStartPos, tempEndPos;
     ExprParseAction(_parseTree, _parseError, tempStartPos, tempEndPos, _comments, this, _expression.c_str(), _wantVec);
     if (!_parseTree) {
         addError(_parseError, tempStartPos, tempEndPos);
+        delete _parseTree;
     } else {
         // TODO: need promote
         _returnType = _parseTree->type();
@@ -226,8 +215,6 @@ void Expression::prep() const {
         _parseTree->addError("Expression generated type " + _parseTree->type().toString() +
                              " incompatible with desired type " + _desiredReturnType.toString());
     } else {
-        _isValid = true;
-
         // optimize for constant values - if we have a module of just one constant float, avoid using LLVM.
         //   Querying typing information during prep()-time is a bit difficult. For the most part, our type
         //   information is uninitialized until after prep()-time. The only exception is for constant,
@@ -244,7 +231,6 @@ void Expression::prep() const {
 
     if (error) {
         if (evaluator) delete evaluator;
-        _isValid = false;
         _returnType = ExprType().Error();
 
         // build line lookup table
@@ -269,7 +255,6 @@ void Expression::prep() const {
     }
 
     if (debugging) {
-        std::cerr << "ending with isValid " << _isValid << std::endl;
         std::cerr << "parse error \n" << parseError() << std::endl;
     }
 
@@ -280,7 +265,7 @@ void Expression::prep() const {
 
 bool Expression::isVec() const {
     prep();
-    return _isValid ? _parseTree->isVec() : _wantVec;
+    return isValid() ? _parseTree->isVec() : _wantVec;
 }
 
 const ExprType& Expression::returnType() const {

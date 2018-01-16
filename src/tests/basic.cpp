@@ -352,3 +352,14 @@ TEST(BasicTests, Modulo) {
     EXPECT_TRUE(expr.isConstant());
     EXPECT_EQ(val[0], 1.7);
 }
+
+TEST(BasicTests, BadSyntax) {
+    Expression expr("!@#$%^)");
+    EXPECT_FALSE(expr.syntaxOK());
+}
+
+TEST(BasicTests, InvalidEvaluator) {
+    Expression expr("unregisteredVar");
+    EXPECT_TRUE(expr.syntaxOK());
+    EXPECT_FALSE(expr.isValid());
+}
