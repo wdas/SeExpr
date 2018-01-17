@@ -101,7 +101,7 @@ DExpression::DExpression(const std::string &varName,
 
     operandExprs = context.AllExprs;
     operandVars = context.AllExternalVars;
-    prepIfNeeded();
+    prep();
     operandExprs = tmpOperandExprs;
     operandVars = tmpOperandVars;
 }

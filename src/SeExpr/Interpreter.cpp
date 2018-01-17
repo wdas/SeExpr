@@ -24,6 +24,29 @@
 // TODO: optimize to write to location directly on a CondNode
 namespace SeExpr2 {
 
+bool Interpreter::prep(ExprNode* parseTree, ExprType desiredReturnType) {
+    if (_debugging) {
+        parseTree->dump();
+        std::cerr << "Eval strategy is interpreter" << std::endl;
+    }
+    _desiredReturnType = desiredReturnType;
+    _returnSlot = parseTree->buildInterpreter(this);
+    if (_desiredReturnType.isFP()) {
+        int dimWanted = _desiredReturnType.dim();
+        int dimHave = parseTree->type().dim();
+        if (dimWanted > dimHave) {
+            addOp(getTemplatizedOp<Promote>(dimWanted));
+            int finalOp = allocFP(dimWanted);
+            addOperand(_returnSlot);
+            addOperand(finalOp);
+            _returnSlot = finalOp;
+            endOp();
+        }
+    }
+    if (_debugging) print();
+    return true;
+}
+
 void Interpreter::eval(VarBlock* block, bool debug) {
     if (block) {
         static_assert(sizeof(char*) == sizeof(size_t), "Expect to fit size_t in char*");
@@ -76,6 +99,8 @@ void Interpreter::print(int pc) const {
         if (s[k]) std::cerr << " '" << s[k][0] << s[k][1] << s[k][2] << s[k][3] << "...'";
         std::cerr << std::endl;
     }
+
+    std::cerr << "-- return slot: " << _returnSlot << std::endl;
 }
 
 // template Interpreter::OpF* getTemplatizedOp<Promote<1> >(int);

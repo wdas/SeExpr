@@ -20,12 +20,14 @@
 #include <string>
 #include <map>
 #include <set>
+#include <mutex>
 #include <vector>
 #include <iomanip>
 #include <stdint.h>
 #include "ExprConfig.h"
 #include "Vec.h"
 #include "Context.h"
+#include "Evaluator.h"
 #include "ExprEnv.h"
 
 namespace llvm {
@@ -39,7 +41,6 @@ class ExprNode;
 class ExprVarNode;
 class ExprFunc;
 class Expression;
-class Interpreter;
 
 //! abstract class for implementing variable references
 class ExprVarRef {
@@ -77,7 +78,6 @@ class Expression {
   public:
     //! Types of evaluation strategies that are available
     enum EvaluationStrategy {
-        Undefined,
         UseInterpreter,
         UseLLVM
     };
@@ -125,20 +125,23 @@ class Expression {
     /** Check expression syntax.  Expr will be parsed if needed.  If
         this returns false, the error message can be accessed via
         parseError() */
-    bool syntaxOK() const;
+    inline bool syntaxOK() const { return (bool)parseTree(); }
 
     /** Check if expression is valid.  Expr will be parsed if
     needed. Variables and functions will also be bound.  If this
     returns false, the error message can be accessed via
     parseError() */
-    bool isValid() const {
-        prepIfNeeded();
-        return _isValid;
-    }
+    inline bool isValid() const { return evaluator()->isValid(); }
 
     const ExprNode* parseTree() const {
-        parseIfNeeded();
+        parse();
         return _parseTree;
+    }
+
+    Evaluator* evaluator() const {
+        if (_evaluator) return _evaluator;
+        prep();
+        return _evaluator;
     }
 
     /** Get parse error (if any).  First call syntaxOK or isValid
@@ -188,15 +191,17 @@ class Expression {
     const ExprType& returnType() const;
 
     /// Evaluate multiple blocks
-    void evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) const;
+    inline void evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) const {
+        evaluator()->evalMultiple(varBlock, outputVarBlockOffset, rangeStart, rangeEnd);
+    }
 
     // TODO: make this deprecated
     /** Evaluates and returns float (check returnType()!) */
-    const double* evalFP(VarBlock* varBlock = nullptr) const;
+    inline const double* evalFP(VarBlock* varBlock = nullptr) const { return evaluator()->evalFP(varBlock); }
 
     // TODO: make this deprecated
     /** Evaluates and returns string (check returnType()!) */
-    const char* evalStr(VarBlock* varBlock = nullptr) const;
+    inline const char* evalStr(VarBlock* varBlock = nullptr) const { return evaluator()->evalStr(varBlock); }
 
     /** Reset expr - force reparse/rebind */
     void reset();
@@ -222,15 +227,6 @@ class Expression {
     const Context& context() const { return *_context; }
     void setContext(const Context& context);
 
-    /** Debug printout of parse tree */
-    void debugPrintParseTree() const;
-
-    /** Debug printout of interpreter evaluation program  **/
-    void debugPrintInterpreter() const;
-
-    /** Debug printout of LLVM evaluation  **/
-    void debugPrintLLVM() const;
-
     /** Set variable block creator (lifetime of expression must be <= block) **/
     void setVarBlockCreator(const VarBlockCreator* varBlockCreator);
 
@@ -244,15 +240,6 @@ class Expression {
     /** Parse, and remember parse error if any */
     void parse() const;
 
-    /** Parse, but only if not yet parsed */
-    void parseIfNeeded() const {
-        if (!_parsed) parse();
-    }
-
-    /** Prepare expression (bind vars/functions, etc.)
-    and remember error if any */
-    void prep() const;
-
     /** True if the expression wants a vector */
     bool _wantVec;
 
@@ -263,7 +250,6 @@ class Expression {
     std::string _expression;
 
     EvaluationStrategy _evaluationStrategyHint;
-    mutable EvaluationStrategy _evaluationStrategy;
 
     /** Context for out of band function parameters */
     const Context* _context;
@@ -277,16 +263,12 @@ class Expression {
     /** Parse tree (null if syntax is bad). */
     mutable ExprNode* _parseTree;
 
-    /** Prepare, but only if not yet prepped */
-    void prepIfNeeded() const {
-        if (!_prepped) prep();
-    }
+    /** Prepare expression (bind vars/functions, etc.)
+    and remember error if any */
+    void prep() const;
 
   private:
-    /** Flag if we are valid or not */
-    mutable bool _isValid;
-    /** Flag set once expr is parsed/prepped (parsing is automatic and lazy) */
-    mutable bool _parsed, _prepped;
+    mutable std::mutex _prepMutex;
 
     /** Cached parse error (returned by isValid) */
     mutable std::string _parseError;
@@ -309,12 +291,7 @@ class Expression {
     /** Whether or not we have unsafe functions */
     mutable std::vector<std::string> _threadUnsafeFunctionCalls;
 
-    /** Interpreter */
-    mutable Interpreter* _interpreter;
-    mutable int _returnSlot;
-
-    // LLVM evaluation layer
-    mutable LLVMEvaluator* _llvmEvaluator;
+    mutable Evaluator* _evaluator;
 
     // Var block creator
     const VarBlockCreator* _varBlockCreator = 0;
