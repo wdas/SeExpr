@@ -32,6 +32,7 @@ class ExprHighlighter : public QSyntaxHighlighter {
     QVector<HighlightingRule> highlightingRules;
     QTextCharFormat singleLineCommentFormat;
     QTextCharFormat variableFormat;
+    QTextCharFormat functionFormat;
     QTextCharFormat numberFormat;
     QTextCharFormat operatorFormat;
 
@@ -68,14 +69,20 @@ class ExprHighlighter : public QSyntaxHighlighter {
 
         variableFormat.setForeground(QColor::fromHsv(200, 153, lightness));
         // variableFormat.setFontWeight(QFont::Bold);
-        rule.pattern = QRegExp("\\$[A-Za-z][A-Za-z0-9]*\\b");
+        rule.pattern = QRegExp("\\$?[A-Za-z][A-Za-z0-9]*\\b(?!\\()");
         rule.format = variableFormat;
         highlightingRules.append(rule);
 
-        singleLineCommentFormat.setForeground(QColor::fromHsv(210, 128, lightness));
+        functionFormat.setForeground(QColor::fromHsv(140, 153, lightness));
+        rule.pattern = QRegExp("[A-Za-z][A-Za-z0-9]*\\b(?=\\()");
+        rule.format = functionFormat;
+        highlightingRules.append(rule);
+
+        singleLineCommentFormat.setForeground(QColor::fromHsv(210, 64, lightness*.5));
         rule.pattern = QRegExp("#[^\n]*");
         rule.format = singleLineCommentFormat;
         highlightingRules.append(rule);
+
     }
 
     void highlightBlock(const QString& text) {
