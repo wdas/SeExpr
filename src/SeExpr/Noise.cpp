@@ -129,8 +129,7 @@ T noiseHelper(const T* X, const int* period = 0) {
             offset[k] = ((dummy & (1 << k)) != 0);
             latticeIndex[k] = index[k] + offset[k];
             if (periodic) {
-                latticeIndex[k] =
-                    latticeIndex[k] >= period_[k] ? 0 : latticeIndex[k] < 0 ? period_[k] - 1 : latticeIndex[k];
+                latticeIndex[k] %= period_[k];
             }
         }
         // hash to get representative gradient vector
