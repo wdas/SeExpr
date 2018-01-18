@@ -79,9 +79,33 @@ uint32_t hashReduce(uint32_t index[d]) {
     return u2.i;
 }
 
+template<class T>
+const T& min(const T& a, const T& b)
+{
+    return (b < a) ? b : a;
+}
+
+template<class T>
+const T& max(const T& a, const T& b)
+{
+    return (b > a) ? b : a;
+}
+
+template <class T>
+constexpr const T& clamp(const T& v, const T& lo, const T& hi) {
+    return max(lo, min(v, hi));
+}
+
 //! Noise with d_in dimensional domain, 1 dimensional abcissa
 template <int d, class T, bool periodic>
 T noiseHelper(const T* X, const int* period = 0) {
+    int period_[d];
+    if (periodic) {
+        for (int k = 0; k < d; k++) {
+            period_[k] = clamp(period[k], 1, std::numeric_limits<int>::max());
+        }
+    }
+
     // find lattice index
     T weights[2][d];  // lower and upper weights
     int index[d];
@@ -89,8 +113,8 @@ T noiseHelper(const T* X, const int* period = 0) {
         T f = floorSSE(X[k]);
         index[k] = (int)f;
         if (periodic) {
-            index[k] %= period[k];
-            if (index[k] < 0) index[k] += period[k];
+            index[k] %= period_[k];
+            if (index[k] < 0) index[k] += period_[k];
         }
         weights[0][k] = X[k] - f;
         weights[1][k] = weights[0][k] - 1;  // dist to cell with index one above
@@ -104,6 +128,10 @@ T noiseHelper(const T* X, const int* period = 0) {
         for (int k = 0; k < d; k++) {
             offset[k] = ((dummy & (1 << k)) != 0);
             latticeIndex[k] = index[k] + offset[k];
+            if (periodic) {
+                latticeIndex[k] =
+                    latticeIndex[k] >= period_[k] ? 0 : latticeIndex[k] < 0 ? period_[k] - 1 : latticeIndex[k];
+            }
         }
         // hash to get representative gradient vector
         int lookup = hashReduceChar<d>(latticeIndex);
