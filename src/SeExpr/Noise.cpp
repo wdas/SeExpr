@@ -200,7 +200,7 @@ void PNoise(const T* in, const int* period, T* out) {
 
     int i = 0;
     while (1) {
-        out[i] = noiseHelper<d_in, T, true>(P, period);
+        out[i] = noiseHelper<d_in, T, true>(P, period) + 0.5;
         if (++i >= d_out) break;
         for (int k = 0; k < d_out; k++) P[k] += (T)1000;
     }
