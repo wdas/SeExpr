@@ -88,7 +88,6 @@ class Lexer {
     };
 
     struct Buffer {
-
         Buffer(const std::string& bufIn) : text(bufIn), buf(text.c_str()), curr(buf) {}
         // read current character
         char operator()() const { return *curr; }
@@ -134,7 +133,7 @@ class Lexer {
             // assert(position[1] > 0 && position[1] < bufLen);
             position[0] = std::max(0, position[0]);
             position[1] = std::min(bufLen - 1, position[1]);
-            const char* startLine = buf + position[0], *endLine = buf + position[1];
+            const char *startLine = buf + position[0], *endLine = buf + position[1];
             int offset = 0;
             for (; startLine > buf && *startLine != '\n'; startLine--, offset++) {
                 if (*startLine == '\n') {
@@ -319,39 +318,17 @@ class Lexer {
                 } else
                     return POWER;
                 break;
-            case '~':
-                return TWIDLE;
-                break;
-            case '[':
-                return BRACKET_OPEN;
-                break;
-            case ']':
-                return BRACKET_CLOSE;
-                break;
-            case '{':
-                return BRACE_OPEN;
-                break;
-            case '}':
-                return BRACE_CLOSE;
-                break;
-            case '(':
-                return PAREN_OPEN;
-                break;
-            case ')':
-                return PAREN_CLOSE;
-                break;
-            case '?':
-                return QUESTION;
-                break;
-            case ':':
-                return COLON;
-                break;
-            case ';':
-                return SEMICOLON;
-                break;
-            case ',':
-                return COMMA;
-                break;
+            case '~': return TWIDLE; break;
+            case '[': return BRACKET_OPEN; break;
+            case ']': return BRACKET_CLOSE; break;
+            case '{': return BRACE_OPEN; break;
+            case '}': return BRACE_CLOSE; break;
+            case '(': return PAREN_OPEN; break;
+            case ')': return PAREN_CLOSE; break;
+            case '?': return QUESTION; break;
+            case ':': return COLON; break;
+            case ';': return SEMICOLON; break;
+            case ',': return COMMA; break;
         }
 
         if (buffer() == '\0') return END_OF_BUFFER;

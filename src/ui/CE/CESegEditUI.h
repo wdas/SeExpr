@@ -50,7 +50,7 @@ class MyTextEdit : public QTextEdit {
 
     void setColor(bool editing);
     void finishEdit();
-signals:
+  signals:
     void editingFinished();
 };
 
@@ -76,8 +76,7 @@ class CESegEditUI : public QWidget {
     /// Destructor
     virtual ~CESegEditUI();
 
-  private
-slots:
+  private slots:
     /// Notification methods
     void invalidateCurve(int index);
     void invalidate();
@@ -113,12 +112,12 @@ slots:
 
     CETool* _tool;
     QCheckBox* _weighted;
-    QComboBox* _preInfinity, *_postInfinity;
+    QComboBox *_preInfinity, *_postInfinity;
     MyTextEdit* _frame;
     MyTextEdit* _value;
-    MyTextEdit* _inAngle, *_outAngle;
-    MyTextEdit* _inWeight, *_outWeight;
-    QComboBox* _inType, *_outType;
+    MyTextEdit *_inAngle, *_outAngle;
+    MyTextEdit *_inWeight, *_outWeight;
+    QComboBox *_inType, *_outType;
     QCheckBox* _locked;
     // QComboBox* _type;
     // QLineEdit* _typeEntry;

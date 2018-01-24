@@ -176,7 +176,6 @@ void ExprGrapherView::mouseMoveEvent(QMouseEvent* event) {
 }
 
 void ExprGrapherView::update() {
-
     if (!widget.expr.isValid()) {
         clear();
         updateGL();

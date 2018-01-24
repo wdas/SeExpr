@@ -98,9 +98,9 @@ class Vec {
 
     //! Initialize vector value using raw memory
     template <class T2>
-    static Vec<T, d, false> copy(T2* raw,
-                                 INVALID_WITH_VECTOR_REFERENCE u =
-                                     (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
+    static Vec<T, d, false> copy(
+        T2* raw,
+        INVALID_WITH_VECTOR_REFERENCE u = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
         Vec<T, d, false> ret;
         for (int k = 0; k < d; k++) ret[k] = static_cast<T>(raw[k]);
         return ret;
@@ -245,16 +245,24 @@ class Vec {
     inline Vec& operator/=(const T& s) { return (*this) = (*this) / T_VEC_VALUE(s); }
 
     template <bool refother>
-    inline Vec& operator+=(const Vec<T, d, refother>& other) { return (*this) = (*this) + other; }
+    inline Vec& operator+=(const Vec<T, d, refother>& other) {
+        return (*this) = (*this) + other;
+    }
 
     template <bool refother>
-    inline Vec& operator-=(const Vec<T, d, refother>& other) { return (*this) = (*this) - other; }
+    inline Vec& operator-=(const Vec<T, d, refother>& other) {
+        return (*this) = (*this) - other;
+    }
 
     template <bool refother>
-    inline Vec& operator*=(const Vec<T, d, refother>& other) { return (*this) = (*this) * other; }
+    inline Vec& operator*=(const Vec<T, d, refother>& other) {
+        return (*this) = (*this) * other;
+    }
 
     template <bool refother>
-    inline Vec& operator/=(const Vec<T, d, refother>& other) { return (*this) = (*this) / other; }
+    inline Vec& operator/=(const Vec<T, d, refother>& other) {
+        return (*this) = (*this) / other;
+    }
 
     friend inline T_VEC_VALUE operator+(const T& s, const Vec& v) { return T_VEC_VALUE(s) + v; }
     friend inline T_VEC_VALUE operator-(const T& s, const Vec& v) { return T_VEC_VALUE(s) - v; }

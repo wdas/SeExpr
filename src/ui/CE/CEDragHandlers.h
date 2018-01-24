@@ -119,10 +119,10 @@ class CEKeyMoveHandler : public CEKeyHandler {
     bool _dragValue;
     double _anchorTime;
     double _anchorValue;
-    std::vector<double> _anchorTimes;  // Mutiple segments only
+    std::vector<double> _anchorTimes;   // Mutiple segments only
     std::vector<double> _anchorValues;  // Mutiple segments only
-    std::vector<int> _curves;  // Mutiple segments only
-    std::vector<int> _segs;  // Mutiple segments only
+    std::vector<int> _curves;           // Mutiple segments only
+    std::vector<int> _segs;             // Mutiple segments only
     double _hSnap;
     double _vSnap;
 };

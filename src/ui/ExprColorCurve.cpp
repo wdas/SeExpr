@@ -97,18 +97,18 @@ void CCurveScene::removePoint(const int index) {
 
 void CCurveScene::removeAll() { _cvs.clear(); }
 
-void CCurveScene::keyPressEvent(QKeyEvent *event) {
+void CCurveScene::keyPressEvent(QKeyEvent* event) {
     if (((event->key() == Qt::Key_Backspace) || (event->key() == Qt::Key_Delete)) && (_selectedItem >= 0)) {
         // user hit delete with cv selected
         removePoint(_selectedItem);
     }
 }
 
-void CCurveScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) {
+void CCurveScene::mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent) {
     _lmb = true;
     QPointF pos = mouseEvent->scenePos();
     // get items under mouse click
-    QList<QGraphicsItem *> itemList = items(pos);
+    QList<QGraphicsItem*> itemList = items(pos);
     if (itemList.empty()) {
         _selectedItem = -1;
         emit cvSelected(-1, SeExpr2::Vec3d(0.0), _interp);
@@ -117,7 +117,7 @@ void CCurveScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) {
         // getting here means we've selected a current point
         const int numCircle = _circleObjects.size();
         for (int i = 0; i < numCircle; i++) {
-            QGraphicsItem *obj = _circleObjects[i];
+            QGraphicsItem* obj = _circleObjects[i];
             if (obj == itemList[0]) {
                 _selectedItem = i;
                 _color = _cvs[i]._val;
@@ -141,7 +141,7 @@ void CCurveScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) {
     }
 }
 
-void CCurveScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent) {
+void CCurveScene::mouseMoveEvent(QGraphicsSceneMouseEvent* mouseEvent) {
     if (_lmb) {
         QPointF point = mouseEvent->scenePos();
         if (_selectedItem >= 0) {
@@ -158,16 +158,16 @@ void CCurveScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent) {
     }
 }
 
-void CCurveScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *event) {
+void CCurveScene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     if (_selectedItem >= 0) {
-        QMenu *menu = new QMenu(event->widget());
-        QAction *deleteAction = menu->addAction("Delete Point");
-        QAction *action = menu->exec(event->screenPos());
+        QMenu* menu = new QMenu(event->widget());
+        QAction* deleteAction = menu->addAction("Delete Point");
+        QAction* action = menu->exec(event->screenPos());
         if (action == deleteAction) removePoint(_selectedItem);
     }
 }
 
-void CCurveScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) {
+void CCurveScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* mouseEvent) {
     Q_UNUSED(mouseEvent);
     _lmb = false;
 }
@@ -198,7 +198,7 @@ void CCurveScene::selPosChanged(double pos) {
 }
 
 // user entered a different point value, redraw
-void CCurveScene::selValChanged(const SeExpr2::Vec3d &val) {
+void CCurveScene::selValChanged(const SeExpr2::Vec3d& val) {
     _color = val;
     if (_selectedItem >= 0) {
         _cvs[_selectedItem]._val = val;
@@ -213,7 +213,7 @@ void CCurveScene::selValChanged(const SeExpr2::Vec3d &val) {
 // return points in reverse order in order to use same parsing in editor
 void CCurveScene::emitCurveChanged() { emit curveChanged(); }
 
-QPixmap &CCurveScene::getPixmap() {
+QPixmap& CCurveScene::getPixmap() {
     if (_pixmapDirty) {
         QByteArray buf;
         buf.append(QString("P6\n%1 %2\n255\n").arg(_width).arg(_height));
@@ -232,7 +232,7 @@ QByteArray CCurveScene::getCPixmap() {
     double paramInc = 1.0 / (_width - 2);
     double param = 0.5 * paramInc;  // start at pixel center
     // add black lines to left
-    char *ptr = pixmap.data();
+    char* ptr = pixmap.data();
     *ptr++ = 0;
     *ptr++ = 0;
     *ptr++ = 0;
@@ -280,7 +280,7 @@ void CCurveScene::drawPoints() {
     }
     const int numCV = _cvs.size();
     for (int i = 0; i < numCV; i++) {
-        const T_CURVE::CV &pt = _cvs[i];
+        const T_CURVE::CV& pt = _cvs[i];
         QPen pen;
         if (i == _selectedItem) {
             pen = QPen(QColor(255, 170, 0), 1.0);
@@ -288,35 +288,31 @@ void CCurveScene::drawPoints() {
             pen = QPen(Qt::black, 1.0);
         }
         _circleObjects.push_back(addEllipse(
-            pt._pos * _width - 4,
-            _height + 3,
-            8,
-            8,
-            pen,
+            pt._pos * _width - 4, _height + 3, 8, 8, pen,
             QBrush(QColor(int(255 * pt._val[0] + 0.5), int(255 * pt._val[1] + 0.5), int(255 * pt._val[2] + 0.5)))));
-        QGraphicsEllipseItem *circle = _circleObjects.back();
+        QGraphicsEllipseItem* circle = _circleObjects.back();
         circle->setFlag(QGraphicsItem::ItemIsMovable, true);
         circle->setZValue(2);
     }
 }
 
-void ExprCBoxWidget::paintEvent(QPaintEvent *event) {
+void ExprCBoxWidget::paintEvent(QPaintEvent* event) {
     Q_UNUSED(event);
     QPainter p(this);
     p.drawPixmap(0, 0, _curveScene->getPixmap());
 }
 
-void ExprCSwatchFrame::paintEvent(QPaintEvent *event) {
+void ExprCSwatchFrame::paintEvent(QPaintEvent* event) {
     Q_UNUSED(event);
     QPainter p(this);
     p.fillRect(contentsRect(), _color);
 }
 
-ExprCSwatchFrame::ExprCSwatchFrame(SeExpr2::Vec3d value, QWidget *parent) : QFrame(parent), _value(value) {
+ExprCSwatchFrame::ExprCSwatchFrame(SeExpr2::Vec3d value, QWidget* parent) : QFrame(parent), _value(value) {
     _color = QColor(int(255 * _value[0] + 0.5), int(255 * _value[1] + 0.5), int(255 * _value[2] + 0.5));
 }
 
-void ExprCSwatchFrame::setValue(const SeExpr2::Vec3d &value) {
+void ExprCSwatchFrame::setValue(const SeExpr2::Vec3d& value) {
     _color = QColor(int(255 * value[0] + 0.5), int(255 * value[1] + 0.5), int(255 * value[2] + 0.5));
     // setPalette(QPalette(_color));
     _value = value;
@@ -325,7 +321,7 @@ void ExprCSwatchFrame::setValue(const SeExpr2::Vec3d &value) {
 
 SeExpr2::Vec3d ExprCSwatchFrame::getValue() const { return _value; }
 
-void ExprCSwatchFrame::mousePressEvent(QMouseEvent *event) {
+void ExprCSwatchFrame::mousePressEvent(QMouseEvent* event) {
     Q_UNUSED(event);
 #ifdef SEEXPR_USE_QDGUI
     QColor color = QdColorPickerDialog::chooseColorFromDialog(_color, this);
@@ -343,32 +339,32 @@ void ExprCSwatchFrame::mousePressEvent(QMouseEvent *event) {
     }
 }
 
-ExprColorCurve::ExprColorCurve(QWidget *parent, QString pLabel, QString vLabel, QString iLabel, bool expandable)
+ExprColorCurve::ExprColorCurve(QWidget* parent, QString pLabel, QString vLabel, QString iLabel, bool expandable)
     : QWidget(parent), _scene(0), _selPosEdit(0), _selValEdit(0), _interpComboBox(0) {
     Q_UNUSED(iLabel);
-    QHBoxLayout *mainLayout = new QHBoxLayout();
+    QHBoxLayout* mainLayout = new QHBoxLayout();
     mainLayout->setSpacing(2);
     mainLayout->setMargin(5);
 
-    QWidget *edits = new QWidget;
-    QVBoxLayout *editsLayout = new QVBoxLayout;
+    QWidget* edits = new QWidget;
+    QVBoxLayout* editsLayout = new QVBoxLayout;
     editsLayout->setAlignment(Qt::AlignTop);
     editsLayout->setSpacing(0);
     editsLayout->setMargin(0);
     edits->setLayout(editsLayout);
 
-    QWidget *selPos = new QWidget;
-    QHBoxLayout *selPosLayout = new QHBoxLayout;
+    QWidget* selPos = new QWidget;
+    QHBoxLayout* selPosLayout = new QHBoxLayout;
     selPosLayout->setSpacing(1);
     selPosLayout->setMargin(1);
     selPos->setLayout(selPosLayout);
     _selPosEdit = new QLineEdit;
-    QDoubleValidator *posValidator = new QDoubleValidator(0.0, 1.0, 6, _selPosEdit);
+    QDoubleValidator* posValidator = new QDoubleValidator(0.0, 1.0, 6, _selPosEdit);
     _selPosEdit->setValidator(posValidator);
     _selPosEdit->setFixedWidth(38);
     _selPosEdit->setFixedHeight(20);
     selPosLayout->addStretch(50);
-    QLabel *posLabel;
+    QLabel* posLabel;
     if (pLabel.isEmpty()) {
         posLabel = new QLabel("Selected Position:  ");
     } else {
@@ -377,8 +373,8 @@ ExprColorCurve::ExprColorCurve(QWidget *parent, QString pLabel, QString vLabel, 
     selPosLayout->addWidget(posLabel);
     selPosLayout->addWidget(_selPosEdit);
 
-    QWidget *selVal = new QWidget;
-    QBoxLayout *selValLayout = new QHBoxLayout;
+    QWidget* selVal = new QWidget;
+    QBoxLayout* selValLayout = new QHBoxLayout;
     selValLayout->setSpacing(1);
     selValLayout->setMargin(1);
     selVal->setLayout(selValLayout);
@@ -386,7 +382,7 @@ ExprColorCurve::ExprColorCurve(QWidget *parent, QString pLabel, QString vLabel, 
     _selValEdit->setFixedWidth(38);
     _selValEdit->setFixedHeight(20);
     selValLayout->addStretch(50);
-    QLabel *valLabel;
+    QLabel* valLabel;
     if (vLabel.isEmpty()) {
         valLabel = new QLabel("Selected Color:  ");
     } else {
@@ -409,13 +405,13 @@ ExprColorCurve::ExprColorCurve(QWidget *parent, QString pLabel, QString vLabel, 
     editsLayout->addWidget(selVal);
     editsLayout->addWidget(_interpComboBox);
 
-    QFrame *curveFrame = new QFrame;
+    QFrame* curveFrame = new QFrame;
     curveFrame->setFrameShape(QFrame::Panel);
     curveFrame->setFrameShadow(QFrame::Sunken);
     curveFrame->setLineWidth(1);
-    QHBoxLayout *curveFrameLayout = new QHBoxLayout;
+    QHBoxLayout* curveFrameLayout = new QHBoxLayout;
     curveFrameLayout->setMargin(0);
-    CurveGraphicsView *curveView = new CurveGraphicsView;
+    CurveGraphicsView* curveView = new CurveGraphicsView;
     curveView->setFrameShape(QFrame::Panel);
     curveView->setFrameShadow(QFrame::Sunken);
     curveView->setLineWidth(1);
@@ -431,7 +427,7 @@ ExprColorCurve::ExprColorCurve(QWidget *parent, QString pLabel, QString vLabel, 
     mainLayout->addWidget(edits);
     mainLayout->addWidget(curveFrame);
     if (expandable) {
-        QPushButton *expandButton = new QPushButton(">");
+        QPushButton* expandButton = new QPushButton(">");
         expandButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
         expandButton->setFixedWidth(15);
         mainLayout->addWidget(expandButton);
@@ -444,9 +440,7 @@ ExprColorCurve::ExprColorCurve(QWidget *parent, QString pLabel, QString vLabel, 
     // SIGNALS
 
     // when a user selects a cv, update the fields on left
-    connect(_scene,
-            SIGNAL(cvSelected(double, SeExpr2::Vec3d, T_INTERP)),
-            this,
+    connect(_scene, SIGNAL(cvSelected(double, SeExpr2::Vec3d, T_INTERP)), this,
             SLOT(cvSelectedSlot(double, SeExpr2::Vec3d, T_INTERP)));
     // when a user selects a different interp, the curve has to redraw
     connect(_interpComboBox, SIGNAL(activated(int)), _scene, SLOT(interpChanged(int)));
@@ -454,10 +448,7 @@ ExprColorCurve::ExprColorCurve(QWidget *parent, QString pLabel, QString vLabel, 
     connect(_selPosEdit, SIGNAL(returnPressed()), this, SLOT(selPosChanged()));
     connect(this, SIGNAL(selPosChangedSignal(double)), _scene, SLOT(selPosChanged(double)));
     // when a user selects a different color, the ramp has to redraw
-    connect(_selValEdit,
-            SIGNAL(selValChangedSignal(SeExpr2::Vec3d)),
-            _scene,
-            SLOT(selValChanged(SeExpr2::Vec3d)));
+    connect(_selValEdit, SIGNAL(selValChangedSignal(SeExpr2::Vec3d)), _scene, SLOT(selValChanged(SeExpr2::Vec3d)));
     connect(_selValEdit, SIGNAL(swatchChanged(QColor)), this, SLOT(internalSwatchChanged(QColor)));
     // when the widget is resized, resize the curve widget
     connect(curveView, SIGNAL(resizeSignal(int, int)), _scene, SLOT(resize(int, int)));
@@ -500,23 +491,23 @@ QColor ExprColorCurve::getSwatchColor() {
 void ExprColorCurve::internalSwatchChanged(QColor color) { emit swatchChanged(color); }
 
 void ExprColorCurve::openDetail() {
-    QDialog *dialog = new QDialog();
+    QDialog* dialog = new QDialog();
     dialog->setMinimumWidth(1024);
     dialog->setMinimumHeight(400);
-    ExprColorCurve *curve = new ExprColorCurve(0, "", "", "", false);
+    ExprColorCurve* curve = new ExprColorCurve(0, "", "", "", false);
 
     // copy points into new data
-    const std::vector<T_CURVE::CV> &data = _scene->_cvs;
+    const std::vector<T_CURVE::CV>& data = _scene->_cvs;
     typedef std::vector<T_CURVE::CV>::const_iterator ITERATOR;
     for (ITERATOR i = data.begin(); i != data.end(); ++i) curve->addPoint(i->_pos, i->_val, i->_interp);
 
-    QVBoxLayout *layout = new QVBoxLayout();
+    QVBoxLayout* layout = new QVBoxLayout();
     dialog->setLayout(layout);
     layout->addWidget(curve);
 
     dialog->setLayout(layout);
     layout->addWidget(curve);
-    QDialogButtonBox *buttonbar = new QDialogButtonBox();
+    QDialogButtonBox* buttonbar = new QDialogButtonBox();
     buttonbar->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
     connect(buttonbar, SIGNAL(accepted()), dialog, SLOT(accept()));
     connect(buttonbar, SIGNAL(rejected()), dialog, SLOT(reject()));
@@ -525,7 +516,7 @@ void ExprColorCurve::openDetail() {
     if (dialog->exec() == QDialog::Accepted) {
         // copy points back from child
         _scene->removeAll();
-        const std::vector<T_CURVE::CV> &dataNew = curve->_scene->_cvs;
+        const std::vector<T_CURVE::CV>& dataNew = curve->_scene->_cvs;
         typedef std::vector<T_CURVE::CV>::const_iterator ITERATOR;
         for (ITERATOR i = dataNew.begin(); i != dataNew.end(); ++i) addPoint(i->_pos, i->_val, i->_interp);
         _scene->emitCurveChanged();

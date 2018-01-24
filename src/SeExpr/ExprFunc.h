@@ -81,10 +81,10 @@ class ExprFunc {
 
     // bool isScalar() const { return _scalar; };
 
-    ExprFunc() : _func(0), _minargs(0), _maxargs(0) {};
+    ExprFunc() : _func(0), _minargs(0), _maxargs(0){};
 
     //! User defined function with custom argument parsing
-    ExprFunc(ExprFuncX& f, int min = 1, int max = 1) : _func(&f), _minargs(min), _maxargs(max) {};
+    ExprFunc(ExprFuncX& f, int min = 1, int max = 1) : _func(&f), _minargs(min), _maxargs(max){};
 
     ExprFunc(ExprFuncStandard::Func0* f)
         : _standardFunc(ExprFuncStandard::FUNC0, (void*)f), _func(0), _minargs(0), _maxargs(0) {}

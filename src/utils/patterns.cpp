@@ -32,7 +32,7 @@ using namespace SeExpr2;
 class PatternExpr : public Expression {
   public:
     struct DummyFuncX : ExprFuncX {
-        DummyFuncX() : ExprFuncX(false) {};
+        DummyFuncX() : ExprFuncX(false){};
 
         ExprType prep(ExprFuncNode* node, ExprType wanted, ExprVarEnv& env) {
             bool valid = true;
@@ -42,12 +42,8 @@ class PatternExpr : public Expression {
             return wanted;
         }
 
-        virtual bool isScalar() const {
-            return true;
-        };
-        virtual ExprType retType() const {
-            return ExprType().FP(1).Varying();
-        };
+        virtual bool isScalar() const { return true; };
+        virtual ExprType retType() const { return ExprType().FP(1).Varying(); };
 
         void eval(const ExprFuncNode* node, Vec3d& result) const { result = Vec3d(); }
     } dummyFuncX;
@@ -55,14 +51,12 @@ class PatternExpr : public Expression {
 
     //! Constructor that takes the expression to parse
     PatternExpr(const std::string& expr)
-        : Expression(expr), dummyFunc(dummyFuncX, 0, 16), _examiner(), _walker(&_examiner) {};
+        : Expression(expr), dummyFunc(dummyFuncX, 0, 16), _examiner(), _walker(&_examiner){};
 
     //! Empty constructor
-    PatternExpr() : Expression(), dummyFunc(dummyFuncX, 0, 16), _examiner(), _walker(&_examiner) {};
+    PatternExpr() : Expression(), dummyFunc(dummyFuncX, 0, 16), _examiner(), _walker(&_examiner){};
 
-    inline void walk() {
-        _walker.walk(_parseTree);
-    };
+    inline void walk() { _walker.walk(_parseTree); };
     void specs() {
         if (isValid()) {
             walk();
@@ -82,9 +76,7 @@ class PatternExpr : public Expression {
     };
 
     //! resolve function that only supports one external variable 'x'
-    ExprVarRef* resolveVar(const std::string& name) const {
-        return 0;
-    };
+    ExprVarRef* resolveVar(const std::string& name) const { return 0; };
 
     ExprFunc* resolveFunc(const std::string& name) const { return &dummyFunc; }
 };

@@ -337,18 +337,10 @@ void CEGraphUI::paintScales() {
     setColor(ScaleColor);
     const char* modeText;
     switch (timeMode) {
-        case 0:
-            modeText = "f";
-            break;
-        case 1:
-            modeText = "f-f";
-            break;
-        case 2:
-            modeText = "s:f";
-            break;
-        default:
-            modeText = "?";
-            break;
+        case 0: modeText = "f"; break;
+        case 1: modeText = "f-f"; break;
+        case 2: modeText = "s:f"; break;
+        default: modeText = "?"; break;
     }
 
     // draw box around time mode to indicate button
@@ -751,16 +743,8 @@ void CEGraphUI::mousePressEvent(QMouseEvent* e) {
                     double _anchorTime = _view.vx(x);
                     double _anchorValue = _view.vy(y);
                     int loc = _tool->insertKey(_anchorTime);
-                    _tool->setSegment(curve,
-                                      loc,
-                                      _anchorTime,
-                                      _anchorValue,
-                                      0.,
-                                      0.,
-                                      1.,
-                                      1.,
-                                      animlib::AnimKeyframe::kTangentAuto,
-                                      animlib::AnimKeyframe::kTangentAuto);
+                    _tool->setSegment(curve, loc, _anchorTime, _anchorValue, 0., 0., 1., 1.,
+                                      animlib::AnimKeyframe::kTangentAuto, animlib::AnimKeyframe::kTangentAuto);
                 }
 
             } else {
@@ -771,16 +755,13 @@ void CEGraphUI::mousePressEvent(QMouseEvent* e) {
     } else if (e->button() == Qt::MidButton) {
         // pan/zoom
         switch (e->modifiers()) {
-            case 0:
-                _dragHandler = new CEPanHandler;
-                break;
+            case 0: _dragHandler = new CEPanHandler; break;
             case Qt::ControlModifier: {
                 bool zoomX = 1;  // TODO: zoomX = 0 if over y scale
                 bool zoomY = 1;  // TODO: zoomY = 0 if over x scale
                 _dragHandler = new CEZoomHandler(zoomX, zoomY);
             } break;
-            default:
-                break;
+            default: break;
         }
     }
 
@@ -838,16 +819,8 @@ void CEGraphUI::mouseDoubleClickEvent(QMouseEvent* e) {
                     double _anchorTime = _view.vx(x);
                     double _anchorValue = _view.vy(y);
                     int loc = _tool->insertKey(_anchorTime);
-                    _tool->setSegment(curve,
-                                      loc,
-                                      _anchorTime,
-                                      _anchorValue,
-                                      0.,
-                                      0.,
-                                      1.,
-                                      1.,
-                                      animlib::AnimKeyframe::kTangentAuto,
-                                      animlib::AnimKeyframe::kTangentAuto);
+                    _tool->setSegment(curve, loc, _anchorTime, _anchorValue, 0., 0., 1., 1.,
+                                      animlib::AnimKeyframe::kTangentAuto, animlib::AnimKeyframe::kTangentAuto);
                 }
             }
         }

@@ -52,9 +52,6 @@ class Evaluator {
     virtual const char* evalStr(VarBlock* varBlock) = 0;
 
     // Evaluate multiple blocks
-    virtual void evalMultiple(VarBlock* varBlock,
-                              int outputVarBlockOffset,
-                              size_t rangeStart,
-                              size_t rangeEnd) = 0;
+    virtual void evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) = 0;
 };
 }

@@ -45,8 +45,7 @@ bool Expression::debugging = getenv("SE_EXPR_DEBUG") != 0;
 // And the environment variables SE_EXPR_DEBUG
 static Expression::EvaluationStrategy chooseDefaultEvaluationStrategy() {
     if (Expression::debugging) {
-        std::cerr << "SeExpr2 Debug Mode Enabled " << __VERSION__
-                  << std::endl;
+        std::cerr << "SeExpr2 Debug Mode Enabled " << __VERSION__ << std::endl;
     }
 #ifdef SEEXPR_ENABLE_LLVM
     if (char* env = getenv("SE_EXPR_EVAL")) {
@@ -64,7 +63,7 @@ Expression::EvaluationStrategy Expression::defaultEvaluationStrategy = chooseDef
 class TypePrintExaminer : public SeExpr2::Examiner<true> {
   public:
     virtual bool examine(const SeExpr2::ExprNode* examinee);
-    virtual void reset() {};
+    virtual void reset(){};
 };
 
 bool TypePrintExaminer::examine(const ExprNode* examinee) {
@@ -86,7 +85,8 @@ class NullEvaluator : public Evaluator {
   public:
     virtual ~NullEvaluator() {}
 
-    virtual void setDebugging(bool) override { /* do nothing */ }
+    virtual void setDebugging(bool) override { /* do nothing */
+    }
     virtual void dump() const override {}
 
     virtual bool prep(ExprNode* parseTree, ExprType desiredReturnType) { return false; }
@@ -101,14 +101,9 @@ class NullEvaluator : public Evaluator {
 };
 
 Expression::Expression(Expression::EvaluationStrategy evaluationStrategyHint)
-    : _wantVec(true)
-    , _expression("")
-    , _evaluationStrategyHint(evaluationStrategyHint)
-    , _context(&Context::global())
-    , _desiredReturnType(ExprType().FP(3).Varying())
-    , _parseTree(nullptr)
-    , _evaluator(nullptr)
-    , _varBlockCreator(nullptr) {
+    : _wantVec(true), _expression(""), _evaluationStrategyHint(evaluationStrategyHint), _context(&Context::global()),
+      _desiredReturnType(ExprType().FP(3).Varying()), _parseTree(nullptr), _evaluator(nullptr),
+      _varBlockCreator(nullptr) {
     ExprFunc::init();
 }
 
@@ -116,20 +111,12 @@ Expression::Expression(const std::string& e,
                        const ExprType& type,
                        EvaluationStrategy evaluationStrategyHint,
                        const Context& context)
-    : _wantVec(true)
-    , _expression(e)
-    , _evaluationStrategyHint(evaluationStrategyHint)
-    , _context(&context)
-    , _desiredReturnType(type)
-    , _parseTree(nullptr)
-    , _evaluator(nullptr)
-    , _varBlockCreator(nullptr) {
+    : _wantVec(true), _expression(e), _evaluationStrategyHint(evaluationStrategyHint), _context(&context),
+      _desiredReturnType(type), _parseTree(nullptr), _evaluator(nullptr), _varBlockCreator(nullptr) {
     ExprFunc::init();
 }
 
-Expression::~Expression() {
-    reset();
-}
+Expression::~Expression() { reset(); }
 
 void Expression::reset() {
     std::lock_guard<std::mutex> guard(_prepMutex);
@@ -226,7 +213,8 @@ void Expression::prep() const {
         //   single floating point values.
         //
         // TODO: separate Object Representation (ExprNode) from ParseTree (which should just be cheap tokens)
-        bool isConstant_ = _returnType.isLifetimeConstant() || (_parseTree && _parseTree->numChildren() == 1 && _parseTree->child(0)->type().isLifetimeConstant());
+        bool isConstant_ = _returnType.isLifetimeConstant() || (_parseTree && _parseTree->numChildren() == 1 &&
+                                                                _parseTree->child(0)->type().isLifetimeConstant());
         EvaluationStrategy strategy = isConstant_ ? EvaluationStrategy::UseInterpreter : _evaluationStrategyHint;
 
         evaluator = (strategy == UseInterpreter) ? (Evaluator*)new Interpreter() : (Evaluator*)new LLVMEvaluator();

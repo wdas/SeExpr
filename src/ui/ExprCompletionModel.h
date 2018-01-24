@@ -28,7 +28,7 @@
 #include <vector>
 
 class ExprCompletionModel : public QAbstractItemModel  // ItemModel
-                            {
+{
   public:
     // clear/add functions (these are ones that will be resolved with resolveFunc()
     void clearFunctions();

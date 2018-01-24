@@ -158,7 +158,7 @@ TEST(BasicTests, VecValueConstant) {
     EXPECT_TRUE(!expr.isVec());
     const double* val = expr.evalFP();
     EXPECT_TRUE(expr.isConstant());
-    const double res[3] = {11,28,5};
+    const double res[3] = {11, 28, 5};
     EXPECT_EQ(val[0], res[0]);
     EXPECT_EQ(val[1], res[1]);
     EXPECT_EQ(val[2], res[2]);
@@ -238,8 +238,8 @@ TEST(BasicTests, LogicalShortCircuiting) {
 }
 
 TEST(BasicTests, IfThenElse) {
-    auto doTest = [](
-        const std::string& eStr, ExprType desiredType, bool shouldBeValid, std::function<void(const double*)> check) {
+    auto doTest = [](const std::string& eStr, ExprType desiredType, bool shouldBeValid,
+                     std::function<void(const double*)> check) {
         SimpleExpression e(eStr);
         e.x.value = 0;
         if (Expression::debugging) {
@@ -295,9 +295,7 @@ TEST(BasicTests, IfThenElse) {
     doTest(
         "a=[1,2];if(x){a=[1,2,3,4];}else{a=[4,3,2,1];} c0=a[0]+a[1]+a[2]+a[3];if(x){a=5;} else {a=[1,2,3];} "
         "[c0,a[0]+a[1]+a[2],0]",
-        TypeVec(3),
-        true,
-        [](const double* f) {
+        TypeVec(3), true, [](const double* f) {
             Vec<const double, 3, true> val(f);
             Vec<double, 3> ref(10, 6, 0);
             EXPECT_EQ(val, ref);

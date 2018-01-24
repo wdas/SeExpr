@@ -51,7 +51,7 @@ class ExprGrapherView : public QGLWidget {
     void mouseMoveEvent(QMouseEvent* event);
     int event_oldx, event_oldy;
 
-signals:
+  signals:
     void scaleValueManipulated();
     void clicked();
 
@@ -77,10 +77,9 @@ class ExprGrapherWidget : public QWidget {
     ExprGrapherWidget(QWidget* parent, int width, int height);
 
     void update();
-signals:
+  signals:
     void preview();
-  private
-slots:
+  private slots:
     void scaleValueEdited();
     void scaleValueManipulated();
     void forwardPreview();

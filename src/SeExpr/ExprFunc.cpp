@@ -120,11 +120,10 @@ void ExprFunc::cleanup() {
     Functions = nullptr;
 #ifdef SEEXPR_WIN32
 #else
-    for(size_t i=0; i<dynlib.size(); i++){
+    for (size_t i = 0; i < dynlib.size(); i++) {
         dlclose(dynlib[i]);
     }
 #endif
-
 }
 
 const ExprFunc* ExprFunc::lookup(const std::string& name) {

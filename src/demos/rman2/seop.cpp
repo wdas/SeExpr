@@ -78,7 +78,6 @@ class SeRmanExpr;
 
 //! Store per thread caches of expressions and the variable bindings
 struct ThreadData {
-
     // rix message interface
     RixMessages* msgs;
 

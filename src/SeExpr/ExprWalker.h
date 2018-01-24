@@ -35,7 +35,7 @@ class Examiner {
     typedef typename ADD_CONST<ExprNode, constnode>::TYPE T_NODE;
 
     virtual bool examine(T_NODE* examinee) = 0;
-    virtual void post(T_NODE* examinee) {};  // TODO: make this pure virt
+    virtual void post(T_NODE* examinee){};  // TODO: make this pure virt
     virtual void reset() = 0;
 };
 
@@ -45,9 +45,7 @@ class Walker {
     typedef Examiner<constnode> T_EXAMINER;
     typedef typename T_EXAMINER::T_NODE T_NODE;
 
-    Walker(T_EXAMINER* examiner) : _examiner(examiner) {
-        _examiner->reset();
-    };
+    Walker(T_EXAMINER* examiner) : _examiner(examiner) { _examiner->reset(); };
 
     /// Preorder walk
     void walk(T_NODE* examinee);

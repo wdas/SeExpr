@@ -40,8 +40,7 @@ bool Curve<T>::cvLessThan(const CV& cv1, const CV& cv2) {
 }
 
 template <class T>
-Curve<T>::Curve()
-    : cacheCV(0), prepared(false) {
+Curve<T>::Curve() : cacheCV(0), prepared(false) {
     _cvData.push_back(CV(-FLT_MAX, T(), kNone));
     _cvData.push_back(CV(FLT_MAX, T(), kNone));
 }
@@ -116,9 +115,7 @@ T Curve<T>::getValue(const double param) const {
     const float t1 = _cvData[index]._pos;
     const T k1 = _cvData[index]._val;
     switch (interp) {
-        case kNone:
-            return k0;
-            break;
+        case kNone: return k0; break;
         case kLinear: {
             double u = (param - t0) / (t1 - t0);
             return k0 + u * (k1 - k0);
@@ -162,9 +159,7 @@ double Curve<T>::getChannelValue(const double param, int channel) const {
     const float t1 = _cvData[index]._pos;
     const double k1 = comp(_cvData[index]._val, channel);
     switch (interp) {
-        case kNone:
-            return k0;
-            break;
+        case kNone: return k0; break;
         case kLinear: {
             double u = (param - t0) / (t1 - t0);
             return k0 + u * (k1 - k0);

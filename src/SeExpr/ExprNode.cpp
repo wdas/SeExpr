@@ -137,7 +137,7 @@ ExprType ExprModuleNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
 ExprType ExprPrototypeNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     bool error = false;
 
-#if 0 // TODO: implement prototype
+#if 0  // TODO: implement prototype
     if (_retTypeSet) checkCondition(returnType().isValid(), "Function has bad return type", error);
 
     _argTypes.clear();
@@ -309,8 +309,8 @@ ExprType ExprAssignNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     _localVar = localVar.get();
     envBuilder.current()->add(_name, std::move(localVar));
     bool error = false;
-    checkCondition(
-        _assignedType.isValid(), std::string("Assignment operation has bad type: ") + _type.toString(), error);
+    checkCondition(_assignedType.isValid(), std::string("Assignment operation has bad type: ") + _type.toString(),
+                   error);
 
     if (error)
         setType(ExprType().Error());
@@ -514,13 +514,9 @@ ExprType ExprVarNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-ExprType ExprNumNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
-    return _type;
-}
+ExprType ExprNumNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) { return _type; }
 
-ExprType ExprStrNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
-    return _type;
-}
+ExprType ExprStrNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) { return _type; }
 
 ExprType ExprFuncNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     bool error = false;
@@ -542,9 +538,8 @@ ExprType ExprFuncNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
         // check that function exists and that the function has the right number of arguments
         if (checkCondition(_func, "Function " + _name + " has no definition", error) &&
             checkCondition(nargs >= _func->minArgs(), "Too few args for function" + _name, error) &&
-            checkCondition(
-                nargs <= _func->maxArgs() || _func->maxArgs() < 0, "Too many args for function " + _name, error)) {
-
+            checkCondition(nargs <= _func->maxArgs() || _func->maxArgs() < 0, "Too many args for function " + _name,
+                           error)) {
             const ExprFuncX* funcx = _func->funcx();
             ExprType type = funcx->prep(this, wantScalar, envBuilder);
             setTypeWithChildLife(type);

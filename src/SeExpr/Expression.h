@@ -44,22 +44,18 @@ class Expression;
 
 //! abstract class for implementing variable references
 class ExprVarRef {
-    ExprVarRef() : _type(ExprType().Error().Varying()) {};
+    ExprVarRef() : _type(ExprType().Error().Varying()){};
 
   public:
-    ExprVarRef(const ExprType& type) : _type(type) {};
+    ExprVarRef(const ExprType& type) : _type(type){};
 
     virtual ~ExprVarRef() {}
 
     //! sets (current) type to given type
-    virtual void setType(const ExprType& type) {
-        _type = type;
-    };
+    virtual void setType(const ExprType& type) { _type = type; };
 
     //! returns (current) type
-    virtual ExprType type() const {
-        return _type;
-    };
+    virtual ExprType type() const { return _type; };
 
     //! returns this variable's value by setting result
     virtual void eval(double* result) = 0;
@@ -77,10 +73,7 @@ class VarBlockCreator;
 class Expression {
   public:
     //! Types of evaluation strategies that are available
-    enum EvaluationStrategy {
-        UseInterpreter,
-        UseLLVM
-    };
+    enum EvaluationStrategy { UseInterpreter, UseLLVM };
     //! What evaluation strategy to use by default
     static EvaluationStrategy defaultEvaluationStrategy;
     //! Whether to debug expressions

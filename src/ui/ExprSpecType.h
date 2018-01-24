@@ -42,8 +42,7 @@ struct ExprSpecVectorNode : public ExprSpecNode {
     SeExpr2::Vec3d v;
     ExprSpecVectorNode(int startPos, int endPos, ExprSpecNode* x, ExprSpecNode* y, ExprSpecNode* z)
         : ExprSpecNode(startPos, endPos) {
-        v = SeExpr2::Vec3d(static_cast<ExprSpecScalarNode*>(x)->v,
-                           static_cast<ExprSpecScalarNode*>(y)->v,
+        v = SeExpr2::Vec3d(static_cast<ExprSpecScalarNode*>(x)->v, static_cast<ExprSpecScalarNode*>(y)->v,
                            static_cast<ExprSpecScalarNode*>(z)->v);
     }
 };

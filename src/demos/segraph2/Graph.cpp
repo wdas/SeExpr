@@ -260,17 +260,10 @@ void Graph::mouseReleaseEvent(QMouseEvent* event) {
         float x, y;
         xforminv(event->x(), event->y(), x, y);
         switch (operationCode) {
-            case NONE:
-                break;
-            case FIND_ROOT:
-                solveRoot(functionIndex, x);
-                break;
-            case FIND_MIN:
-                solveMin(functionIndex, boundStart, x);
-                break;
-            case FIND_MAX:
-                solveMax(functionIndex, boundStart, x);
-                break;
+            case NONE: break;
+            case FIND_ROOT: solveRoot(functionIndex, x); break;
+            case FIND_MIN: solveMin(functionIndex, boundStart, x); break;
+            case FIND_MAX: solveMax(functionIndex, boundStart, x); break;
         }
         status->showMessage("");
         operationCode = NONE;

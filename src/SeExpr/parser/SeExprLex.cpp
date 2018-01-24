@@ -15,38 +15,53 @@
  http://www.apache.org/licenses/LICENSE-2.0
 */
 #include "SeExprLex.h"
-static const char* tokenNames[] = {"END_OF_BUFFER", "NUM",     "IDENT",     "EXTERN", "DEF", "FLOAT", "STRING",
-                                   "CONSTANT",      "UNIFORM", "VARYING",   "ERROR",  "IF",  "ELSE",  "NOT",  // !
-                                   "OR",                                                                      // ||
-                                   "AND",                                                                     // &&
-                                   "EQUALS",                                                                  // ==
-                                   "NOT_EQUALS",                                                              // !=
-                                   "ASSIGN",                                                                  // =
-                                   "GREATER",                                                                 // >
-                                   "LESS",                                                                    // <
-                                   "GREATER_EQUAL",                                                           // >=
-                                   "LESS_EQUAL",                                                              // <=
-                                   "PLUS",                                                                    //+
-                                   "PLUS_EQUAL",                                                              //+=
-                                   "MINUS",                                                                   //-
-                                   "MINUS_EQUAL",                                                             //-=
-                                   "TIMES",                                                                   //*
-                                   "TIMES_EQUAL",                                                             //*=
-                                   "DIVIDE",                                                                  //*
-                                   "DIVIDE_EQUAL",                                                            // /=
-                                   "MOD",                                                                     //^
-                                   "MOD_EQUAL",                                                               // ^=
-                                   "POWER",                                                                   //^
-                                   "POWER_EQUAL",                                                             // ^=
-                                   "ARROW",                                                                   //->
-                                   "TWIDLE",                                                                  //~
-                                   "BRACKET_OPEN",                                                            //[
-                                   "BRACKET_CLOSE",                                                           //]
-                                   "BRACE_OPEN",                                                              //{
-                                   "BRACE_CLOSE",                                                             //}
-                                   "PAREN_OPEN",                                                              //(
-                                   "PAREN_CLOSE",                                                             //)
-                                   "QUESTION",      "COLON",   "SEMICOLON", "COMMA"};
+static const char* tokenNames[] = {"END_OF_BUFFER",
+                                   "NUM",
+                                   "IDENT",
+                                   "EXTERN",
+                                   "DEF",
+                                   "FLOAT",
+                                   "STRING",
+                                   "CONSTANT",
+                                   "UNIFORM",
+                                   "VARYING",
+                                   "ERROR",
+                                   "IF",
+                                   "ELSE",
+                                   "NOT",            // !
+                                   "OR",             // ||
+                                   "AND",            // &&
+                                   "EQUALS",         // ==
+                                   "NOT_EQUALS",     // !=
+                                   "ASSIGN",         // =
+                                   "GREATER",        // >
+                                   "LESS",           // <
+                                   "GREATER_EQUAL",  // >=
+                                   "LESS_EQUAL",     // <=
+                                   "PLUS",           //+
+                                   "PLUS_EQUAL",     //+=
+                                   "MINUS",          //-
+                                   "MINUS_EQUAL",    //-=
+                                   "TIMES",          //*
+                                   "TIMES_EQUAL",    //*=
+                                   "DIVIDE",         //*
+                                   "DIVIDE_EQUAL",   // /=
+                                   "MOD",            //^
+                                   "MOD_EQUAL",      // ^=
+                                   "POWER",          //^
+                                   "POWER_EQUAL",    // ^=
+                                   "ARROW",          //->
+                                   "TWIDLE",         //~
+                                   "BRACKET_OPEN",   //[
+                                   "BRACKET_CLOSE",  //]
+                                   "BRACE_OPEN",     //{
+                                   "BRACE_CLOSE",    //}
+                                   "PAREN_OPEN",     //(
+                                   "PAREN_CLOSE",    //)
+                                   "QUESTION",
+                                   "COLON",
+                                   "SEMICOLON",
+                                   "COMMA"};
 
 std::string Lexer::getTokenName(Token tok) { return tokenNames[tok]; }
 

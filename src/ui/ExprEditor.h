@@ -83,10 +83,9 @@ class ExprTextEdit : public QTextEdit {
     void wheelEvent(QWheelEvent* e);
     void contextMenuEvent(QContextMenuEvent* event);
 
-  private
-slots:
+  private slots:
     void insertCompletion(const QString& completion);
-signals:
+  signals:
     void applyShortcut();
     void nextError();
 };
@@ -98,8 +97,7 @@ class ExprEditor : public QWidget {
     ExprEditor(QWidget* parent, ExprControlCollection* controls);
     virtual ~ExprEditor();
 
-  public
-slots:
+  public slots:
     void exprChanged();
     void rebuildControls();
     void controlChanged(int id);
@@ -107,8 +105,8 @@ slots:
     void selectError();
     void sendApply();
     void sendPreview();
-// void handlePreviewTimer();
-signals:
+    // void handlePreviewTimer();
+  signals:
     void apply();
     void preview();
 
@@ -119,8 +117,7 @@ signals:
     void setExpr(const std::string& expression, const bool apply = false);
     // Append string
     void appendStr(const std::string& str);
-  public
-slots:
+  public slots:
     // Insert string
     void insertStr(const std::string& str);
 

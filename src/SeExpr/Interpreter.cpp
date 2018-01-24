@@ -112,41 +112,23 @@ void Interpreter::print(int pc) const {
 template <char c, template <char c1, int d> class T>
 static Interpreter::OpF getTemplatizedOp2(int i) {
     switch (i) {
-        case 1:
-            return T<c, 1>::f;
-        case 2:
-            return T<c, 2>::f;
-        case 3:
-            return T<c, 3>::f;
-        case 4:
-            return T<c, 4>::f;
-        case 5:
-            return T<c, 5>::f;
-        case 6:
-            return T<c, 6>::f;
-        case 7:
-            return T<c, 7>::f;
-        case 8:
-            return T<c, 8>::f;
-        case 9:
-            return T<c, 9>::f;
-        case 10:
-            return T<c, 10>::f;
-        case 11:
-            return T<c, 11>::f;
-        case 12:
-            return T<c, 12>::f;
-        case 13:
-            return T<c, 13>::f;
-        case 14:
-            return T<c, 14>::f;
-        case 15:
-            return T<c, 15>::f;
-        case 16:
-            return T<c, 16>::f;
-        default:
-            assert(false && "Invalid dynamic parameter (not supported template)");
-            break;
+        case 1: return T<c, 1>::f;
+        case 2: return T<c, 2>::f;
+        case 3: return T<c, 3>::f;
+        case 4: return T<c, 4>::f;
+        case 5: return T<c, 5>::f;
+        case 6: return T<c, 6>::f;
+        case 7: return T<c, 7>::f;
+        case 8: return T<c, 8>::f;
+        case 9: return T<c, 9>::f;
+        case 10: return T<c, 10>::f;
+        case 11: return T<c, 11>::f;
+        case 12: return T<c, 12>::f;
+        case 13: return T<c, 13>::f;
+        case 14: return T<c, 14>::f;
+        case 15: return T<c, 15>::f;
+        case 16: return T<c, 16>::f;
+        default: assert(false && "Invalid dynamic parameter (not supported template)"); break;
     }
     return 0;
 }
@@ -168,45 +150,22 @@ struct BinaryOp {
 
         for (int k = 0; k < d; k++) {
             switch (op) {
-                case '+':
-                    *out = (*in1) + (*in2);
-                    break;
-                case '-':
-                    *out = (*in1) - (*in2);
-                    break;
-                case '*':
-                    *out = (*in1) * (*in2);
-                    break;
-                case '/':
-                    *out = (*in1) / (*in2);
-                    break;
-                case '%':
-                    *out = niceMod(*in1, *in2);
-                    break;
+                case '+': *out = (*in1) + (*in2); break;
+                case '-': *out = (*in1) - (*in2); break;
+                case '*': *out = (*in1) * (*in2); break;
+                case '/': *out = (*in1) / (*in2); break;
+                case '%': *out = niceMod(*in1, *in2); break;
                 case '^':
                     *out = pow(*in1, *in2);
                     break;
                 // these only make sense with d==1
-                case '<':
-                    *out = (*in1) < (*in2);
-                    break;
-                case '>':
-                    *out = (*in1) > (*in2);
-                    break;
-                case 'l':
-                    *out = (*in1) <= (*in2);
-                    break;
-                case 'g':
-                    *out = (*in1) >= (*in2);
-                    break;
-                case '&':
-                    *out = (*in1) && (*in2);
-                    break;
-                case '|':
-                    *out = (*in1) || (*in2);
-                    break;
-                default:
-                    assert(false);
+                case '<': *out = (*in1) < (*in2); break;
+                case '>': *out = (*in1) > (*in2); break;
+                case 'l': *out = (*in1) <= (*in2); break;
+                case 'g': *out = (*in1) >= (*in2); break;
+                case '&': *out = (*in1) && (*in2); break;
+                case '|': *out = (*in1) || (*in2); break;
+                default: assert(false);
             }
             in1++;
             in2++;
@@ -224,17 +183,10 @@ struct UnaryOp {
         double* out = fp + opData[1];
         for (int k = 0; k < d; k++) {
             switch (op) {
-                case '-':
-                    *out = -(*in);
-                    break;
-                case '~':
-                    *out = 1 - (*in);
-                    break;
-                case '!':
-                    *out = !*in;
-                    break;
-                default:
-                    assert(false);
+                case '-': *out = -(*in); break;
+                case '~': *out = 1 - (*in); break;
+                case '!': *out = !*in; break;
+                default: assert(false);
             }
             in++;
             out++;
@@ -373,14 +325,9 @@ struct CompareEqOp {
         double* out = fp + opData[2];
         for (int k = 0; k < d; k++) {
             switch (op) {
-                case '=':
-                    result &= (*in0) == (*in1);
-                    break;
-                case '!':
-                    result &= (*in0) != (*in1);
-                    break;
-                default:
-                    assert(false);
+                case '=': result &= (*in0) == (*in1); break;
+                case '!': result &= (*in0) != (*in1); break;
+                default: assert(false);
             }
             in0++;
             in1++;
@@ -406,12 +353,8 @@ struct StrCompareEqOp {
     // TODO: this should rely on tokenization and not use strcmp
     static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
         switch (op) {
-            case '=':
-                fp[opData[2]] = strcmp(c[opData[0]], c[opData[1]]) == 0;
-                break;
-            case '!':
-                fp[opData[2]] = strcmp(c[opData[0]], c[opData[1]]) == 0;
-                break;
+            case '=': fp[opData[2]] = strcmp(c[opData[0]], c[opData[1]]) == 0; break;
+            case '!': fp[opData[2]] = strcmp(c[opData[0]], c[opData[1]]) == 0; break;
         }
         return 1;
     }
@@ -531,7 +474,7 @@ int ExprVecNode::buildInterpreter(Interpreter* interpreter) const {
 }
 
 int ExprBinaryOpNode::buildInterpreter(Interpreter* interpreter) const {
-    const ExprNode* child0 = child(0), *child1 = child(1);
+    const ExprNode *child0 = child(0), *child1 = child(1);
     int dim0 = child0->type().dim(), dim1 = child1->type().dim(), dimout = type().dim();
     int op0 = child0->buildInterpreter(interpreter);
     int op1 = child1->buildInterpreter(interpreter);
@@ -555,26 +498,13 @@ int ExprBinaryOpNode::buildInterpreter(Interpreter* interpreter) const {
     }
 
     switch (_op) {
-        case '+':
-            interpreter->addOp(getTemplatizedOp2<'+', BinaryOp>(dimout));
-            break;
-        case '-':
-            interpreter->addOp(getTemplatizedOp2<'-', BinaryOp>(dimout));
-            break;
-        case '*':
-            interpreter->addOp(getTemplatizedOp2<'*', BinaryOp>(dimout));
-            break;
-        case '/':
-            interpreter->addOp(getTemplatizedOp2<'/', BinaryOp>(dimout));
-            break;
-        case '^':
-            interpreter->addOp(getTemplatizedOp2<'^', BinaryOp>(dimout));
-            break;
-        case '%':
-            interpreter->addOp(getTemplatizedOp2<'%', BinaryOp>(dimout));
-            break;
-        default:
-            assert(false);
+        case '+': interpreter->addOp(getTemplatizedOp2<'+', BinaryOp>(dimout)); break;
+        case '-': interpreter->addOp(getTemplatizedOp2<'-', BinaryOp>(dimout)); break;
+        case '*': interpreter->addOp(getTemplatizedOp2<'*', BinaryOp>(dimout)); break;
+        case '/': interpreter->addOp(getTemplatizedOp2<'/', BinaryOp>(dimout)); break;
+        case '^': interpreter->addOp(getTemplatizedOp2<'^', BinaryOp>(dimout)); break;
+        case '%': interpreter->addOp(getTemplatizedOp2<'%', BinaryOp>(dimout)); break;
+        default: assert(false);
     }
     int op2 = interpreter->allocFP(dimout);
     interpreter->addOperand(op0);
@@ -591,17 +521,10 @@ int ExprUnaryOpNode::buildInterpreter(Interpreter* interpreter) const {
     int op0 = child0->buildInterpreter(interpreter);
 
     switch (_op) {
-        case '-':
-            interpreter->addOp(getTemplatizedOp2<'-', UnaryOp>(dimout));
-            break;
-        case '~':
-            interpreter->addOp(getTemplatizedOp2<'~', UnaryOp>(dimout));
-            break;
-        case '!':
-            interpreter->addOp(getTemplatizedOp2<'!', UnaryOp>(dimout));
-            break;
-        default:
-            assert(false);
+        case '-': interpreter->addOp(getTemplatizedOp2<'-', UnaryOp>(dimout)); break;
+        case '~': interpreter->addOp(getTemplatizedOp2<'~', UnaryOp>(dimout)); break;
+        case '!': interpreter->addOp(getTemplatizedOp2<'!', UnaryOp>(dimout)); break;
+        default: assert(false);
     }
     int op1 = interpreter->allocFP(dimout);
     interpreter->addOperand(op0);
@@ -612,7 +535,7 @@ int ExprUnaryOpNode::buildInterpreter(Interpreter* interpreter) const {
 }
 
 int ExprSubscriptNode::buildInterpreter(Interpreter* interpreter) const {
-    const ExprNode* child0 = child(0), *child1 = child(1);
+    const ExprNode *child0 = child(0), *child1 = child(1);
     int dimin = child0->type().dim();
     int op0 = child0->buildInterpreter(interpreter);
     int op1 = child1->buildInterpreter(interpreter);
@@ -763,7 +686,7 @@ int ExprIfThenElseNode::buildInterpreter(Interpreter* interpreter) const {
 }
 
 int ExprCompareNode::buildInterpreter(Interpreter* interpreter) const {
-    const ExprNode* child0 = child(0), *child1 = child(1);
+    const ExprNode *child0 = child(0), *child1 = child(1);
     assert(type().dim() == 1 && type().isFP());
 
     if (_op == '&' || _op == '|') {
@@ -809,24 +732,15 @@ int ExprCompareNode::buildInterpreter(Interpreter* interpreter) const {
         int op0 = child0->buildInterpreter(interpreter);
         int op1 = child1->buildInterpreter(interpreter);
         switch (_op) {
-            case '<':
-                interpreter->addOp(getTemplatizedOp2<'<', BinaryOp>(1));
-                break;
-            case '>':
-                interpreter->addOp(getTemplatizedOp2<'>', BinaryOp>(1));
-                break;
-            case 'l':
-                interpreter->addOp(getTemplatizedOp2<'l', BinaryOp>(1));
-                break;
-            case 'g':
-                interpreter->addOp(getTemplatizedOp2<'g', BinaryOp>(1));
-                break;
+            case '<': interpreter->addOp(getTemplatizedOp2<'<', BinaryOp>(1)); break;
+            case '>': interpreter->addOp(getTemplatizedOp2<'>', BinaryOp>(1)); break;
+            case 'l': interpreter->addOp(getTemplatizedOp2<'l', BinaryOp>(1)); break;
+            case 'g': interpreter->addOp(getTemplatizedOp2<'g', BinaryOp>(1)); break;
             case '&':
                 assert(false);  // interpreter->addOp(getTemplatizedOp2<'&',BinaryOp>(1));break;
             case '|':
                 assert(false);  // interpreter->addOp(getTemplatizedOp2<'|',BinaryOp>(1));break;
-            default:
-                assert(false);
+            default: assert(false);
         }
         int op2 = interpreter->allocFP(1);
         interpreter->addOperand(op0);
@@ -859,7 +773,7 @@ int ExprPrototypeNode::buildInterpreter(Interpreter* interpreter) const {
 }
 
 int ExprCompareEqNode::buildInterpreter(Interpreter* interpreter) const {
-    const ExprNode* child0 = child(0), *child1 = child(1);
+    const ExprNode *child0 = child(0), *child1 = child(1);
     int op0 = child0->buildInterpreter(interpreter);
     int op1 = child1->buildInterpreter(interpreter);
 

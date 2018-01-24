@@ -148,7 +148,7 @@ class CETool : public QObject {
 
     CEMainUI* ui() { return _ui; }
 
-signals:
+  signals:
     void curveChanged(int index);
     void segChanged(int curve, int segment);
     void curveListChanged();

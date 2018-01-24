@@ -134,8 +134,7 @@ class ExprTreeModel : public QAbstractItemModel {
 
     ~ExprTreeModel() { delete root; }
 
-    void update()
-    {
+    void update() {
         beginResetModel();
         endResetModel();
     }
@@ -217,8 +216,7 @@ class ExprTreeFilterModel : public QSortFilterProxyModel {
   public:
     ExprTreeFilterModel(QWidget* parent = 0) : QSortFilterProxyModel(parent) {}
 
-    void update()
-    {
+    void update() {
         beginResetModel();
         endResetModel();
     }
@@ -266,8 +264,7 @@ ExprBrowser::ExprBrowser(QWidget* parent, ExprEditor* editor)
     rootLayout->addWidget(treeNew);
     // selection mode and signal
     treeNew->setSelectionMode(QAbstractItemView::SingleSelection);
-    connect(treeNew->selectionModel(),
-            SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)),
+    connect(treeNew->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)),
             SLOT(handleSelection(const QModelIndex&, const QModelIndex&)));
 }
 
@@ -436,7 +433,6 @@ bool ExprBrowser::getExpressionDirs() {
     std::string configFile = std::string(env) + "/config.txt";
     std::ifstream file(configFile.c_str());
     if (file) {
-
         std::string key;
         while (file) {
             file >> key;

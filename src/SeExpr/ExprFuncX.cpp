@@ -21,15 +21,15 @@
 #include <cstdio>
 
 namespace SeExpr2 {
-int ExprFuncSimple::EvalOp(int *opData, double *fp, char **c, std::vector<int> &callStack) {
-    ExprFuncSimple *simple = reinterpret_cast<ExprFuncSimple *>(c[opData[0]]);
+int ExprFuncSimple::EvalOp(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+    ExprFuncSimple* simple = reinterpret_cast<ExprFuncSimple*>(c[opData[0]]);
     //    ExprFuncNode::Data* simpleData=reinterpret_cast<ExprFuncNode::Data*>(c[opData[1]]);
     ArgHandle args(opData, fp, c, callStack);
     simple->eval(args);
     return 1;
 }
 
-int ExprFuncSimple::buildInterpreter(const ExprFuncNode *node, Interpreter *interpreter) const {
+int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node, Interpreter* interpreter) const {
     std::vector<int> operands;
     for (int c = 0; c < node->numChildren(); c++) {
         int operand = node->child(c)->buildInterpreter(interpreter);
@@ -60,7 +60,7 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode *node, Interpreter *inte
     interpreter->addOp(EvalOp);
     int ptrLoc = interpreter->allocPtr();
     int ptrDataLoc = interpreter->allocPtr();
-    interpreter->s[ptrLoc] = (char *)this;
+    interpreter->s[ptrLoc] = (char*)this;
     interpreter->addOperand(ptrLoc);
     interpreter->addOperand(ptrDataLoc);
     interpreter->addOperand(outoperand);
@@ -72,10 +72,10 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode *node, Interpreter *inte
 
     // call into interpreter eval
     int pc = interpreter->nextPC() - 1;
-    int *opCurr = (&interpreter->opData[0]) + interpreter->ops[pc].second;
+    int* opCurr = (&interpreter->opData[0]) + interpreter->ops[pc].second;
 
     ArgHandle args(opCurr, &interpreter->d[0], &interpreter->s[0], interpreter->callStack);
-    interpreter->s[ptrDataLoc] = reinterpret_cast<char *>(evalConstant(node, args));
+    interpreter->s[ptrDataLoc] = reinterpret_cast<char*>(evalConstant(node, args));
 
     return outoperand;
 }
@@ -105,24 +105,24 @@ extern "C" {
 // opdata[2] points to return value
 // opdata[3] points to number of args
 // opdata[4] points to beginning of arguments in
-void SeExpr2LLVMEvalCustomFunction(int *opDataArg,
-                                   double *fpArg,
-                                   char **strArg,
-                                   void **funcdata,
-                                   const SeExpr2::ExprFuncNode *node) {
-    const SeExpr2::ExprFunc *func = node->func();
-    SeExpr2::ExprFuncX *funcX = const_cast<SeExpr2::ExprFuncX *>(func->funcx());
-    SeExpr2::ExprFuncSimple *funcSimple = static_cast<SeExpr2::ExprFuncSimple *>(funcX);
+void SeExpr2LLVMEvalCustomFunction(int* opDataArg,
+                                   double* fpArg,
+                                   char** strArg,
+                                   void** funcdata,
+                                   const SeExpr2::ExprFuncNode* node) {
+    const SeExpr2::ExprFunc* func = node->func();
+    SeExpr2::ExprFuncX* funcX = const_cast<SeExpr2::ExprFuncX*>(func->funcx());
+    SeExpr2::ExprFuncSimple* funcSimple = static_cast<SeExpr2::ExprFuncSimple*>(funcX);
 
-    strArg[0] = reinterpret_cast<char *>(funcSimple);
+    strArg[0] = reinterpret_cast<char*>(funcSimple);
 
     std::vector<int> callStack;
     SeExpr2::ExprFuncSimple::ArgHandle handle(opDataArg, fpArg, strArg, callStack);
     if (!*funcdata) {
         handle.data = funcSimple->evalConstant(node, handle);
-        *funcdata = reinterpret_cast<void *>(handle.data);
+        *funcdata = reinterpret_cast<void*>(handle.data);
     } else {
-        handle.data = reinterpret_cast<SeExpr2::ExprFuncNode::Data *>(*funcdata);
+        handle.data = reinterpret_cast<SeExpr2::ExprFuncNode::Data*>(*funcdata);
     }
 
     funcSimple->eval(handle);

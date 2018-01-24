@@ -47,21 +47,21 @@ double clamp(double x) { return std::max(0., std::min(255., x)); }
 class ImageSynthExpression : public SeExpr2::Expression {
   public:
     // Constructor that takes the expression to parse
-    ImageSynthExpression(const std::string &expr) : SeExpr2::Expression(expr) {}
+    ImageSynthExpression(const std::string& expr) : SeExpr2::Expression(expr) {}
 
     // Simple variable that just returns its internal value
     struct Var : public SeExpr2::ExprVarRef {
         Var(const double val) : SeExpr2::ExprVarRef(SeExpr2::ExprType().FP(1).Varying()), val(val) {}
         Var() : SeExpr2::ExprVarRef(SeExpr2::ExprType().FP(1).Varying()), val(0.0) {}
         double val;  // independent variable
-        void eval(double *result) { result[0] = val; }
-        void eval(const char **result) { assert(false); }
+        void eval(double* result) { result[0] = val; }
+        void eval(const char** result) { assert(false); }
     };
     // variable map
     mutable std::map<std::string, Var> vars;
 
     // resolve function that only supports one external variable 'x'
-    SeExpr2::ExprVarRef *resolveVar(const std::string &name) const {
+    SeExpr2::ExprVarRef* resolveVar(const std::string& name) const {
         std::map<std::string, Var>::iterator i = vars.find(name);
         if (i != vars.end()) return &i->second;
         return 0;
@@ -71,7 +71,7 @@ class ImageSynthExpression : public SeExpr2::Expression {
 class ImageSynthesizer {
   public:
     ImageSynthesizer();
-    unsigned char *evaluateExpression(const std::string &exprStr);
+    unsigned char* evaluateExpression(const std::string& exprStr);
 
   private:
     int _width;
@@ -83,7 +83,7 @@ ImageSynthesizer::ImageSynthesizer() {
     _height = 256;
 }
 
-unsigned char *ImageSynthesizer::evaluateExpression(const std::string &exprStr) {
+unsigned char* ImageSynthesizer::evaluateExpression(const std::string& exprStr) {
     ImageSynthExpression expr(exprStr);
 
     // make variables
@@ -102,11 +102,11 @@ unsigned char *ImageSynthesizer::evaluateExpression(const std::string &exprStr) 
 
     // evaluate expression
     std::cerr << "Evaluating expression..." << std::endl;
-    unsigned char *image = new unsigned char[_width * _height * 4];
+    unsigned char* image = new unsigned char[_width * _height * 4];
     double one_over_width = 1. / _width, one_over_height = 1. / _height;
-    double &u = expr.vars["u"].val;
-    double &v = expr.vars["v"].val;
-    unsigned char *pixel = image;
+    double& u = expr.vars["u"].val;
+    double& v = expr.vars["v"].val;
+    unsigned char* pixel = image;
     for (int row = 0; row < _height; row++) {
         for (int col = 0; col < _width; col++) {
             u = one_over_width * (col + .5);
@@ -125,7 +125,7 @@ unsigned char *ImageSynthesizer::evaluateExpression(const std::string &exprStr) 
 
 //-- IMAGE EDITOR DIALOG METHODS --//
 
-ImageEditorDialog::ImageEditorDialog(QWidget *parent) : QDialog(parent) {
+ImageEditorDialog::ImageEditorDialog(QWidget* parent) : QDialog(parent) {
     _imageSynthesizer = new ImageSynthesizer();
 
     this->setWindowTitle("Image Synthesis Editor");
@@ -142,15 +142,15 @@ ImageEditorDialog::ImageEditorDialog(QWidget *parent) : QDialog(parent) {
     QPixmap imagePixmap = QPixmap::fromImage(image);
     imagePixmap = imagePixmap.scaled(256, 256, Qt::KeepAspectRatio);
     _imageLabel->setPixmap(imagePixmap);
-    QWidget *imagePreviewWidget = new QWidget();
-    QHBoxLayout *imagePreviewLayout = new QHBoxLayout(imagePreviewWidget);
+    QWidget* imagePreviewWidget = new QWidget();
+    QHBoxLayout* imagePreviewLayout = new QHBoxLayout(imagePreviewWidget);
     imagePreviewLayout->addStretch();
     imagePreviewLayout->addWidget(_imageLabel);
     imagePreviewLayout->addStretch();
 
     // Expression controls
-    ExprControlCollection *controls = new ExprControlCollection();
-    QScrollArea *scrollArea = new QScrollArea();
+    ExprControlCollection* controls = new ExprControlCollection();
+    QScrollArea* scrollArea = new QScrollArea();
     scrollArea->setMinimumHeight(100);
     scrollArea->setFixedWidth(450);
     scrollArea->setWidgetResizable(true);
@@ -160,7 +160,7 @@ ImageEditorDialog::ImageEditorDialog(QWidget *parent) : QDialog(parent) {
     _editor = new ExprEditor(this, controls);
 
     // Expression browser
-    ExprBrowser *browser = new ExprBrowser(0, _editor);
+    ExprBrowser* browser = new ExprBrowser(0, _editor);
 
     // Add user expressions, example expressions to browser list.
     browser->addUserExpressionPath("imageEditor");
@@ -174,34 +174,34 @@ ImageEditorDialog::ImageEditorDialog(QWidget *parent) : QDialog(parent) {
     browser->update();
 
     // Create apply button and connect to image preview.
-    QPushButton *applyButton = new QPushButton("Apply");
-    connect(applyButton, SIGNAL(clicked()), (ImageEditorDialog *)this, SLOT(applyExpression()));
+    QPushButton* applyButton = new QPushButton("Apply");
+    connect(applyButton, SIGNAL(clicked()), (ImageEditorDialog*)this, SLOT(applyExpression()));
 
     // Layout widgets: Top section contains left side with previewer and
     // controls, right side with browser.  Bottom section contains editor
     // and apply button.
-    QVBoxLayout *rootLayout = new QVBoxLayout();
+    QVBoxLayout* rootLayout = new QVBoxLayout();
     this->setLayout(rootLayout);
 
-    QWidget *topWidget = new QWidget();
-    QHBoxLayout *topLayout = new QHBoxLayout();
+    QWidget* topWidget = new QWidget();
+    QHBoxLayout* topLayout = new QHBoxLayout();
     topLayout->setContentsMargins(0, 0, 0, 0);
     topWidget->setLayout(topLayout);
 
-    QWidget *leftWidget = new QWidget();
-    QVBoxLayout *leftLayout = new QVBoxLayout();
+    QWidget* leftWidget = new QWidget();
+    QVBoxLayout* leftLayout = new QVBoxLayout();
     leftLayout->setContentsMargins(0, 0, 0, 0);
     leftWidget->setLayout(leftLayout);
     leftLayout->addWidget(imagePreviewWidget);
     leftLayout->addWidget(scrollArea, 1);
 
-    QWidget *bottomWidget = new QWidget();
-    QVBoxLayout *bottomLayout = new QVBoxLayout();
+    QWidget* bottomWidget = new QWidget();
+    QVBoxLayout* bottomLayout = new QVBoxLayout();
     bottomLayout->setContentsMargins(0, 0, 0, 0);
     bottomWidget->setLayout(bottomLayout);
 
-    QWidget *buttonWidget = new QWidget();
-    QHBoxLayout *buttonLayout = new QHBoxLayout(0);
+    QWidget* buttonWidget = new QWidget();
+    QHBoxLayout* buttonLayout = new QHBoxLayout(0);
     buttonWidget->setLayout(buttonLayout);
     buttonLayout->addWidget(applyButton);
 
@@ -237,9 +237,9 @@ void ImageEditorDialog::applyExpression() {
 
 //-- MAIN --//
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
-    ImageEditorDialog *dialog = new ImageEditorDialog(0);
+    ImageEditorDialog* dialog = new ImageEditorDialog(0);
     dialog->show();
     app.exec();
     return 0;

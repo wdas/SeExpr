@@ -43,8 +43,8 @@ int main() {
     eval.Pointer(offC) = C.data();
     eval.Pointer(offI2) = I2.data();
 
-    auto buildAndRun = [&](
-        Expression::EvaluationStrategy strategy, const std::string& expr, ExprType type, int output) {
+    auto buildAndRun = [&](Expression::EvaluationStrategy strategy, const std::string& expr, ExprType type,
+                           int output) {
         Expression e(strategy);
         e.setExpr(expr);
         e.setVarBlockCreator(&creator);
@@ -53,16 +53,16 @@ int main() {
             throw std::runtime_error(std::string("Expr '") + expr + "'" + " invalid because\n" + e.parseError() + "\n");
             return;
         } else {
-            #if 1 // run multiple
+#if 1  // run multiple
             e.evalMultiple(&eval, output, 0, 16);
-            #else // vs the old way
+#else  // vs the old way
             for (int index = 0; index < 16; index++) {
                 eval.indirectIndex = index;
                 const double* data = e.evalFP(&eval);
                 int dim = type.dim();
                 for (int k = 0; k < dim; k++) eval.Pointer(output)[dim * index + k] = data[k];
             }
-            #endif
+#endif
         }
     };
     // buildAndRun("a=printf(\"Test %v\",i);[i,i*2,i*4]",TypeVec(3),offA);

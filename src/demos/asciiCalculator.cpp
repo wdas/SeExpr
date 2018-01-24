@@ -77,9 +77,7 @@ class CalculatorExpr : public Expression {
 
     Vec<double, 3, false> peek() { return stack[_count - 1].val; }
 
-    int count() const {
-        return _count;
-    };
+    int count() const { return _count; };
 
   private:
     //! Simple variable that just returns its internal value
@@ -114,7 +112,6 @@ class CalculatorExpr : public Expression {
 };
 
 int main(int argc, char* argv[]) {
-
     std::cout << "SeExpr Basic Calculator";
 
     CalculatorExpr expr;

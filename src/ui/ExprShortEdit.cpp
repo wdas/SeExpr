@@ -303,7 +303,6 @@ void ExprShortTextEdit::paintEvent(QPaintEvent* e) {
 }
 
 void ExprShortTextEdit::keyPressEvent(QKeyEvent* e) {
-
     // If the completer is active pass keys it needs down
     if (completer && completer->popup()->isVisible()) {
         switch (e->key()) {
@@ -311,11 +310,8 @@ void ExprShortTextEdit::keyPressEvent(QKeyEvent* e) {
             case Qt::Key_Return:
             case Qt::Key_Escape:
             case Qt::Key_Tab:
-            case Qt::Key_Backtab:
-                e->ignore();
-                return;
-            default:
-                break;
+            case Qt::Key_Backtab: e->ignore(); return;
+            default: break;
         }
     }
 
@@ -366,7 +362,6 @@ void ExprShortTextEdit::keyPressEvent(QKeyEvent* e) {
     if (!isShortcut && (hasModifier || e->text().isEmpty() || completionPrefix.length() < 1 || index == -1)) {
         completer->popup()->hide();
     } else {
-
         // copy the completion prefix in if we don't already have it in the completer
         if (completionPrefix != completer->completionPrefix()) {
             completer->setCompletionPrefix(completionPrefix);
