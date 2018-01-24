@@ -356,10 +356,14 @@ TEST(BasicTests, Modulo) {
 TEST(BasicTests, BadSyntax) {
     Expression expr("!@#$%^)");
     EXPECT_FALSE(expr.syntaxOK());
+    EXPECT_NO_THROW(SeExpr2::Vec3d::copy(expr.evalFP()));
+    EXPECT_NO_THROW(expr.evalStr());
 }
 
 TEST(BasicTests, InvalidEvaluator) {
     Expression expr("unregisteredVar");
     EXPECT_TRUE(expr.syntaxOK());
     EXPECT_FALSE(expr.isValid());
+    EXPECT_NO_THROW(SeExpr2::Vec3d::copy(expr.evalFP()));
+    EXPECT_NO_THROW(expr.evalStr());
 }

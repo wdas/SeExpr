@@ -92,7 +92,10 @@ class NullEvaluator : public Evaluator {
     virtual bool prep(ExprNode* parseTree, ExprType desiredReturnType) { return false; }
     virtual bool isValid() const override { return false; }
 
-    virtual const double* evalFP(VarBlock* varBlock) { return {}; }
+    virtual const double* evalFP(VarBlock* varBlock) {
+        static double invalid[16] = {};
+        return invalid;
+    }
     virtual const char* evalStr(VarBlock* varBlock) { return ""; }
     virtual void evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) {}
 };
