@@ -55,4 +55,4 @@ test: install
 imagetest: install
 	$(PYTHON) src/tests/imageTestsReportNew.py runall
 
-precommit: format
+precommit: format test

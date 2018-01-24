@@ -67,7 +67,7 @@ if(EXISTS ${GTEST_DIR}/include)
         install(TARGETS testmain2 DESTINATION share/test/SeExpr2)
         install(PROGRAMS imagediff.py DESTINATION share/test/SeExpr2)
 
-        add_test(NAME basic COMMAND testmain2 --gtest_filter="BasicTests.*")
+        add_test(NAME basic COMMAND testmain2 --gtest_filter=BasicTests.*)
     else()
         message(STATUS "Couldn't find PNG -- not doing tests")
     endif()
