@@ -171,10 +171,7 @@ void Expression::setExpr(const std::string& e) {
     }
 }
 
-bool Expression::isConstant() const {
-    parse();
-    return returnType().isLifetimeConstant();
-}
+bool Expression::isConstant() const { return returnType().isLifetimeConstant(); }
 
 bool Expression::usesVar(const std::string& name) const {
     parse();
@@ -222,13 +219,14 @@ void Expression::prep() const {
         _parseTree->addError("Expression generated type " + _parseTree->type().toString() +
                              " incompatible with desired type " + _desiredReturnType.toString());
     } else {
+        _returnType = _parseTree->type();
         // optimize for constant values - if we have a module of just one constant float, avoid using LLVM.
         //   Querying typing information during prep()-time is a bit difficult. For the most part, our type
         //   information is uninitialized until after prep()-time. The only exception is for constant,
         //   single floating point values.
         //
         // TODO: separate Object Representation (ExprNode) from ParseTree (which should just be cheap tokens)
-        bool isConstant_ = isConstant() || (_parseTree && _parseTree->numChildren() == 1 && _parseTree->child(0)->type().isLifetimeConstant());
+        bool isConstant_ = _returnType.isLifetimeConstant() || (_parseTree && _parseTree->numChildren() == 1 && _parseTree->child(0)->type().isLifetimeConstant());
         EvaluationStrategy strategy = isConstant_ ? EvaluationStrategy::UseInterpreter : _evaluationStrategyHint;
 
         evaluator = (strategy == UseInterpreter) ? (Evaluator*)new Interpreter() : (Evaluator*)new LLVMEvaluator();
@@ -271,5 +269,8 @@ void Expression::prep() const {
 }
 
 bool Expression::isVec() const { return syntaxOK() ? _parseTree->isVec() : _wantVec; }
-const ExprType& Expression::returnType() const { return syntaxOK() ? _returnType : ExprType().Error(); }
+const ExprType& Expression::returnType() const {
+    prep();
+    return _returnType;
+}
 }  // end namespace SeExpr2/
