@@ -23,17 +23,17 @@
 #include "VarBlock.h"
 #include "ExprNode.h"
 
-extern "C" void SeExpr2LLVMEvalVarRef(SeExpr2::ExprVarRef *seVR, double *result);
-extern "C" void SeExpr2LLVMEvalCustomFunction(int *opDataArg,
-                                              double *fpArg,
-                                              char **strArg,
-                                              void **funcdata,
-                                              const SeExpr2::ExprFuncNode *node);
+extern "C" void SeExpr2LLVMEvalVarRef(SeExpr2::ExprVarRef* seVR, double* result);
+extern "C" void SeExpr2LLVMEvalCustomFunction(int* opDataArg,
+                                              double* fpArg,
+                                              char** strArg,
+                                              void** funcdata,
+                                              const SeExpr2::ExprFuncNode* node);
 
 namespace SeExpr2 {
 #ifdef SEEXPR_ENABLE_LLVM
 
-LLVM_VALUE promoteToDim(LLVM_VALUE val, unsigned dim, llvm::IRBuilder<> &Builder);
+LLVM_VALUE promoteToDim(LLVM_VALUE val, unsigned dim, llvm::IRBuilder<>& Builder);
 
 class LLVMEvaluator : public Evaluator {
     // TODO: this seems needlessly complex, let's fix it
@@ -42,18 +42,18 @@ class LLVMEvaluator : public Evaluator {
     template <class T>
     class LLVMEvaluationContext {
       private:
-        typedef void (*FunctionPtr)(T *, char **, uint32_t);
-        typedef void (*FunctionPtrMultiple)(char **, uint32_t, uint32_t, uint32_t);
+        typedef void (*FunctionPtr)(T*, char**, uint32_t);
+        typedef void (*FunctionPtrMultiple)(char**, uint32_t, uint32_t, uint32_t);
         FunctionPtr functionPtr;
         FunctionPtrMultiple functionPtrMultiple;
-        T *resultData;
+        T* resultData;
 
       public:
-        LLVMEvaluationContext(const LLVMEvaluationContext &) = delete;
-        LLVMEvaluationContext &operator=(const LLVMEvaluationContext &) = delete;
+        LLVMEvaluationContext(const LLVMEvaluationContext&) = delete;
+        LLVMEvaluationContext& operator=(const LLVMEvaluationContext&) = delete;
         ~LLVMEvaluationContext() { delete[] resultData; }
         LLVMEvaluationContext() : functionPtr(nullptr), resultData(nullptr) {}
-        void init(void *fp, void *fpLoop, int dim) {
+        void init(void* fp, void* fpLoop, int dim) {
             reset();
             functionPtr = reinterpret_cast<FunctionPtr>(fp);
             functionPtrMultiple = reinterpret_cast<FunctionPtrMultiple>(fpLoop);
@@ -65,12 +65,12 @@ class LLVMEvaluator : public Evaluator {
             functionPtrMultiple = nullptr;
             resultData = nullptr;
         }
-        const T *operator()(VarBlock *varBlock) {
+        const T* operator()(VarBlock* varBlock) {
             assert(functionPtr && resultData);
             functionPtr(resultData, varBlock ? varBlock->data() : nullptr, varBlock ? varBlock->indirectIndex : 0);
             return resultData;
         }
-        void operator()(VarBlock *varBlock, size_t outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) {
+        void operator()(VarBlock* varBlock, size_t outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) {
             assert(functionPtrMultiple && resultData);
             functionPtrMultiple(varBlock ? varBlock->data() : nullptr, outputVarBlockOffset, rangeStart, rangeEnd);
         }
@@ -79,7 +79,7 @@ class LLVMEvaluator : public Evaluator {
     bool _debugging;
 
     std::unique_ptr<LLVMEvaluationContext<double>> _llvmEvalFP;
-    std::unique_ptr<LLVMEvaluationContext<char *>> _llvmEvalStr;
+    std::unique_ptr<LLVMEvaluationContext<char*>> _llvmEvalStr;
 
     std::unique_ptr<llvm::LLVMContext> _llvmContext;
     std::unique_ptr<llvm::ExecutionEngine> TheExecutionEngine;
@@ -97,11 +97,14 @@ class LLVMEvaluator : public Evaluator {
 
     virtual bool isValid() const override { return true; }
 
-    virtual const double *evalFP(VarBlock *varBlock) override { return (*_llvmEvalFP)(varBlock); }
+    virtual const double* evalFP(VarBlock* varBlock) override { return (*_llvmEvalFP)(varBlock); }
 
-    virtual const char *evalStr(VarBlock *varBlock) override { return *(*_llvmEvalStr)(varBlock); }
+    virtual const char* evalStr(VarBlock* varBlock) override { return *(*_llvmEvalStr)(varBlock); }
 
-    virtual void evalMultiple(VarBlock *varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) override {
+    virtual void evalMultiple(VarBlock* varBlock,
+                              int outputVarBlockOffset,
+                              size_t rangeStart,
+                              size_t rangeEnd) override {
         return (*_llvmEvalFP)(varBlock, outputVarBlockOffset, rangeStart, rangeEnd);
     }
 
@@ -131,17 +134,20 @@ class LLVMEvaluator : public Evaluator {
         return false;
     }
 
-    virtual const double *evalFP(VarBlock *varBlock) override {
+    virtual const double* evalFP(VarBlock* varBlock) override {
         unsupported();
         return 0;
     }
 
-    virtual const char *evalStr(VarBlock *varBlock) override {
+    virtual const char* evalStr(VarBlock* varBlock) override {
         unsupported();
         return "";
     }
 
-    virtual void evalMultiple(VarBlock *varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) override {
+    virtual void evalMultiple(VarBlock* varBlock,
+                              int outputVarBlockOffset,
+                              size_t rangeStart,
+                              size_t rangeEnd) override {
         unsupported();
     }
 };

@@ -44,9 +44,9 @@ class CurveGraphicsView : public QGraphicsView {
     }
     ~CurveGraphicsView() {}
 
-    virtual void resizeEvent(QResizeEvent *event);
+    virtual void resizeEvent(QResizeEvent* event);
 
-signals:
+  signals:
     void resizeSignal(int width, int height);
 };
 
@@ -69,12 +69,12 @@ class CurveScene : public QGraphicsScene {
     void removePoint(const int index);
     void removeAll();
 
-    virtual void keyPressEvent(QKeyEvent *event);
+    virtual void keyPressEvent(QKeyEvent* event);
 
-    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
-    virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
-    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
-    virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
+    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* mouseEvent);
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent);
+    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* mouseEvent);
+    virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent* event);
     void drawRect();
 
     void drawPoly();
@@ -90,15 +90,14 @@ class CurveScene : public QGraphicsScene {
     friend class ExprCurve;
 
   private:
-    T_CURVE *_curve;
-  public
-slots:
+    T_CURVE* _curve;
+  public slots:
     void interpChanged(const int interp);
     void selPosChanged(double pos);
     void selValChanged(double val);
     void resize(const int width, const int height);
 
-signals:
+  signals:
     void cvSelected(double x, double y, T_INTERP interp);
     void curveChanged();
 
@@ -106,10 +105,10 @@ signals:
     int _width;
     int _height;
     T_INTERP _interp;
-    std::vector<QGraphicsEllipseItem *> _circleObjects;
+    std::vector<QGraphicsEllipseItem*> _circleObjects;
     int _selectedItem;
-    QGraphicsPolygonItem *_curvePoly;
-    QGraphicsRectItem *_baseRect;
+    QGraphicsPolygonItem* _curvePoly;
+    QGraphicsRectItem* _baseRect;
     bool _lmb;
 };
 
@@ -120,7 +119,7 @@ class ExprCurve : public QWidget {
     typedef T_CURVE::InterpType T_INTERP;
 
   public:
-    ExprCurve(QWidget *parent = 0,
+    ExprCurve(QWidget* parent = 0,
               QString pLabel = "",
               QString vLabel = "",
               QString iLabel = "",
@@ -130,22 +129,21 @@ class ExprCurve : public QWidget {
     // Convenience Functions
     void addPoint(const double x, const double y, const T_INTERP interp, bool select = false);
 
-    CurveScene *_scene;
+    CurveScene* _scene;
 
-  public
-slots:
+  public slots:
     void cvSelectedSlot(double pos, double val, T_INTERP interp);
     void selPosChanged();
     void selValChanged();
     void openDetail();
 
-signals:
+  signals:
     void selPosChangedSignal(double pos);
     void selValChangedSignal(double val);
 
   private:
-    QLineEdit *_selPosEdit;
-    QLineEdit *_selValEdit;
-    QComboBox *_interpComboBox;
+    QLineEdit* _selPosEdit;
+    QLineEdit* _selValEdit;
+    QComboBox* _interpComboBox;
 };
 #endif

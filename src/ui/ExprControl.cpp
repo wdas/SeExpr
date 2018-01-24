@@ -52,43 +52,113 @@
 #include "Editable.h"
 
 /* XPM */
-static const char* refreshXPM[] = {
-    "20 20 4 1",            "# c #303030",          "a c #585858",          "b c #c3c3c3",
-    ". c #dcdcdc",          "....................", "....................", "....................",
-    ".......#aaaa#.......", ".....#########......", "....###bbbbb###.....", "....##b.....b##.....",
-    "...bb#b.....b##.....", "...bbbb....aaaaaa...", "...........aaaaaa...", "....##......####....",
-    "...####......##.....", "..######............", "..aaa#aa............", "....##......bbb.....",
-    "....##b...bbbab.....", "....a#abbbb##ab.....", ".....#a####aa#b.....", ".....aaaaaaa#.b.....",
-    "...................."};
+static const char* refreshXPM[] = {"20 20 4 1",
+                                   "# c #303030",
+                                   "a c #585858",
+                                   "b c #c3c3c3",
+                                   ". c #dcdcdc",
+                                   "....................",
+                                   "....................",
+                                   "....................",
+                                   ".......#aaaa#.......",
+                                   ".....#########......",
+                                   "....###bbbbb###.....",
+                                   "....##b.....b##.....",
+                                   "...bb#b.....b##.....",
+                                   "...bbbb....aaaaaa...",
+                                   "...........aaaaaa...",
+                                   "....##......####....",
+                                   "...####......##.....",
+                                   "..######............",
+                                   "..aaa#aa............",
+                                   "....##......bbb.....",
+                                   "....##b...bbbab.....",
+                                   "....a#abbbb##ab.....",
+                                   ".....#a####aa#b.....",
+                                   ".....aaaaaaa#.b.....",
+                                   "...................."};
 
 /* XPM */
-static const char* graphXPM[] = {
-    "20 20 5 1",            "c c #000040",          "a c #303030",          "# c #58a8ff",
-    ". c #dcdcdc",          "b c #ff0000",          "..........#a.a......", "..........#a.a.....b",
-    "..........#.a.....bb", "..........#aa....bb.", "..........#.....bb..", "..........#....bb...",
-    "..........#....bb...", "....bbb...#...bb....", "...bbbbb..#..bbb....", "...b...bbb#.bbb.....",
-    "..bb....bb#bbb......", "##bb####bbbbb#######", ".bb......bbb....c.c.", ".bb.......#......c..",
-    ".b........#.....c.c.", "bb........#.........", "b.........#.........", "..........#.........",
-    "..........#.........", "..........#........."};
+static const char* graphXPM[] = {"20 20 5 1",
+                                 "c c #000040",
+                                 "a c #303030",
+                                 "# c #58a8ff",
+                                 ". c #dcdcdc",
+                                 "b c #ff0000",
+                                 "..........#a.a......",
+                                 "..........#a.a.....b",
+                                 "..........#.a.....bb",
+                                 "..........#aa....bb.",
+                                 "..........#.....bb..",
+                                 "..........#....bb...",
+                                 "..........#....bb...",
+                                 "....bbb...#...bb....",
+                                 "...bbbbb..#..bbb....",
+                                 "...b...bbb#.bbb.....",
+                                 "..bb....bb#bbb......",
+                                 "##bb####bbbbb#######",
+                                 ".bb......bbb....c.c.",
+                                 ".bb.......#......c..",
+                                 ".b........#.....c.c.",
+                                 "bb........#.........",
+                                 "b.........#.........",
+                                 "..........#.........",
+                                 "..........#.........",
+                                 "..........#........."};
 
 /* XPM */
-static const char* directoryXPM[] = {
-    "20 20 3 1",            ". c None",             "# c #000000",          "a c #d8c59e",
-    "....................", "....................", "....................", "....................",
-    "...........#######..", "...........#aaaaa#..", "..##########aaaaa#..", "..#aaaaaaaaaaaaaa#..",
-    "..#aaaaaaaaaaaaaa#..", "..#aaaaaaaaaaaaaa#..", "..#aaaaaaaaaaaaaa#..", "..#aaaaaaaaaaaaaa#..",
-    "..#aaaaa##a##a##a#..", "..#aaaaa##a##a##a#..", "..#aaaaaaaaaaaaaa#..", "..################..",
-    "....................", "....................", "....................", "...................."};
+static const char* directoryXPM[] = {"20 20 3 1",
+                                     ". c None",
+                                     "# c #000000",
+                                     "a c #d8c59e",
+                                     "....................",
+                                     "....................",
+                                     "....................",
+                                     "....................",
+                                     "...........#######..",
+                                     "...........#aaaaa#..",
+                                     "..##########aaaaa#..",
+                                     "..#aaaaaaaaaaaaaa#..",
+                                     "..#aaaaaaaaaaaaaa#..",
+                                     "..#aaaaaaaaaaaaaa#..",
+                                     "..#aaaaaaaaaaaaaa#..",
+                                     "..#aaaaaaaaaaaaaa#..",
+                                     "..#aaaaa##a##a##a#..",
+                                     "..#aaaaa##a##a##a#..",
+                                     "..#aaaaaaaaaaaaaa#..",
+                                     "..################..",
+                                     "....................",
+                                     "....................",
+                                     "....................",
+                                     "...................."};
 
 /* XPM */
-static const char* fileXPM[] = {
-    "20 20 5 1",            ". c None",             "# c #000000",          "c c #303030",
-    "b c #a79b80",          "a c #ddcdaa",          "....................", "....................",
-    "....#########.......", "....#aaaaaaa##......", "....#aaaaaaa#b#.....", "....#aaaaaaa#bb#....",
-    "....#aaaaaaa####....", "....#aaaaaaaaaa#....", "....#aaaaaaaaaa#....", "....#aaaaaaaaaa#....",
-    "....#aaaaaaaaaa#....", "....#aaaaaaaaaa#....", "....#aaaaaaaaaa#....", "....#aaaaaaaaaa#....",
-    "....#aaaaaaaaaa#....", "....#accaccacca#....", "....#accaccacca#....", "....#aaaaaaaaaa#....",
-    "....############....", "...................."};
+static const char* fileXPM[] = {"20 20 5 1",
+                                ". c None",
+                                "# c #000000",
+                                "c c #303030",
+                                "b c #a79b80",
+                                "a c #ddcdaa",
+                                "....................",
+                                "....................",
+                                "....#########.......",
+                                "....#aaaaaaa##......",
+                                "....#aaaaaaa#b#.....",
+                                "....#aaaaaaa#bb#....",
+                                "....#aaaaaaa####....",
+                                "....#aaaaaaaaaa#....",
+                                "....#aaaaaaaaaa#....",
+                                "....#aaaaaaaaaa#....",
+                                "....#aaaaaaaaaa#....",
+                                "....#aaaaaaaaaa#....",
+                                "....#aaaaaaaaaa#....",
+                                "....#aaaaaaaaaa#....",
+                                "....#aaaaaaaaaa#....",
+                                "....#accaccacca#....",
+                                "....#accaccacca#....",
+                                "....#aaaaaaaaaa#....",
+                                "....############....",
+                                "...................."};
 
 void ExprSlider::mousePressEvent(QMouseEvent* e) { mouseMoveEvent(e); }
 
@@ -212,7 +282,6 @@ void ExprControl::linkDisconnect(int newId) {
 
 NumberControl::NumberControl(int id, NumberEditable* editable)
     : ExprControl(id, editable, false), _numberEditable(editable) {
-
     // slider
     float smin = editable->min, smax = editable->max;
     if (!_numberEditable->isInt) {
@@ -272,7 +341,6 @@ void NumberControl::setValue(float value) {
 
 VectorControl::VectorControl(int id, VectorEditable* editable)
     : ExprControl(id, editable, true), _numberEditable(editable) {
-
     if (_numberEditable->isColor) {
         _swatch = new ExprCSwatchFrame(editable->v);
         _swatch->setFixedWidth(38);
@@ -316,8 +384,8 @@ void VectorControl::swatchChanged(QColor gah) {
 }
 
 QColor VectorControl::getColor() {
-    return QColor::fromRgbF(
-        clamp(_numberEditable->v[0], 0, 1), clamp(_numberEditable->v[1], 0, 1), clamp(_numberEditable->v[2], 0, 1));
+    return QColor::fromRgbF(clamp(_numberEditable->v[0], 0, 1), clamp(_numberEditable->v[1], 0, 1),
+                            clamp(_numberEditable->v[2], 0, 1));
 }
 
 void VectorControl::setColor(QColor color) {
@@ -592,7 +660,6 @@ struct ExprGraphPreview : public QWidget {
 
 AnimCurveControl::AnimCurveControl(int id, AnimCurveEditable* editable)
     : ExprControl(id, editable, false), _editable(editable) {
-
     _preview = new ExprGraphPreview();
     _preview->setMinimumWidth(200);
     _preview->setMinimumHeight(60);

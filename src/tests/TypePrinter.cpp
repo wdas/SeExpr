@@ -30,9 +30,9 @@ using namespace SeExpr2;
 //! Simple expression class to print out all intermediate types
 class TypePrinterExpr : public TypeBuilderExpr {
   public:
-    TypePrinterExpr() : TypeBuilderExpr(), _examiner(), _walker(&_examiner) {};
+    TypePrinterExpr() : TypeBuilderExpr(), _examiner(), _walker(&_examiner){};
 
-    TypePrinterExpr(const std::string& e) : TypeBuilderExpr(e), _examiner(), _walker(&_examiner) {};
+    TypePrinterExpr(const std::string& e) : TypeBuilderExpr(e), _examiner(), _walker(&_examiner){};
 
     inline void walk() {
         if (_parseTree) _walker.walk(_parseTree);
@@ -43,9 +43,7 @@ class TypePrinterExpr : public TypeBuilderExpr {
     SeExpr2::ConstWalker _walker;
 
   protected:
-    ExprVarRef* resolveVar(const std::string& name) const {
-        return TypeBuilderExpr::resolveVar(name);
-    };
+    ExprVarRef* resolveVar(const std::string& name) const { return TypeBuilderExpr::resolveVar(name); };
 
     ExprFunc* resolveFunc(const std::string& name) const { return TypeBuilderExpr::resolveFunc(name); }
 };
@@ -86,7 +84,6 @@ int main(int argc, char* argv[]) {
             if (!valid)
                 std::cerr << "Expression failed: " << expr.parseError() << std::endl;
             else if (expr.returnType().isFP() && expr.returnType().dim() <= 16) {
-
                 const double* res = expr.evalFP();
                 for (int i = 0; i < expr.returnType().dim(); i++) {
                     std::cerr << res[i] << " ";

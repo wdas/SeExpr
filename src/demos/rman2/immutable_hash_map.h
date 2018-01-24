@@ -46,7 +46,7 @@ class immutable_hash_map {
         _keys.resize(table_size);
         _values.resize(table_size);
 
-        key_type* kp = keys, *end = kp + size;
+        key_type *kp = keys, *end = kp + size;
         value_type* vp = values;
         while (kp != end) {
             int pos = find(*kp);

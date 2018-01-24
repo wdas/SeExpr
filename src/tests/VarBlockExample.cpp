@@ -34,14 +34,9 @@ void run(int way) {
     std::string exprStr;
     SeExpr2::PrintTiming timer("way " + std::to_string(way));
     switch (way) {
-        case 0:
-            exprStr = "singleII+singleII2";
-            break;
-        case 2:
-            exprStr = "singleI+singleI2";
-            break;
-        default:
-            throw std::runtime_error("Invalid way");
+        case 0: exprStr = "singleII+singleII2"; break;
+        case 2: exprStr = "singleI+singleI2"; break;
+        default: throw std::runtime_error("Invalid way");
     }
     Expr e(exprStr);
     e.singleII.v[0] = 1.;

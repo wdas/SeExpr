@@ -41,16 +41,11 @@ class ASTHandle {
         // exit(1);
         if (!node) return object;
         switch (node->type()) {
-            case ASTType::Assign:
-                return boost::python::str(static_cast<typename ASTPolicy::Assign*>(node)->value());
-            case ASTType::Var:
-                return boost::python::str(static_cast<typename ASTPolicy::Var*>(node)->value());
-            case ASTType::Call:
-                return boost::python::str(static_cast<typename ASTPolicy::Call*>(node)->value());
-            case ASTType::String:
-                return boost::python::str(static_cast<typename ASTPolicy::String*>(node)->value());
-            case ASTType::Num:
-                return boost::python::object(static_cast<typename ASTPolicy::Num*>(node)->value());
+            case ASTType::Assign: return boost::python::str(static_cast<typename ASTPolicy::Assign*>(node)->value());
+            case ASTType::Var: return boost::python::str(static_cast<typename ASTPolicy::Var*>(node)->value());
+            case ASTType::Call: return boost::python::str(static_cast<typename ASTPolicy::Call*>(node)->value());
+            case ASTType::String: return boost::python::str(static_cast<typename ASTPolicy::String*>(node)->value());
+            case ASTType::Num: return boost::python::object(static_cast<typename ASTPolicy::Num*>(node)->value());
             case ASTType::BinaryOp:
                 return boost::python::object(static_cast<typename ASTPolicy::BinaryOp*>(node)->value());
             case ASTType::UnaryOp:
@@ -98,8 +93,9 @@ void translateParseError(ParseError const& e) { PyErr_SetString(PyExc_RuntimeErr
 using namespace boost::python;
 BOOST_PYTHON_MODULE(core) {
     register_exception_translator<ParseError>(&translateParseError);
-    class_<AST>("AST", init<std::string>()).def("isValid", &AST::isValid).def(
-        "root", &AST::root, return_value_policy<manage_new_object>())
+    class_<AST>("AST", init<std::string>())
+        .def("isValid", &AST::isValid)
+        .def("root", &AST::root, return_value_policy<manage_new_object>())
         //.def("edit",&AST::edit)
         ;
 

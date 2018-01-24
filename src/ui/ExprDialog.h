@@ -55,8 +55,8 @@ class ExprDialog : public QDialog {
     QPushButton* cancelButton;
     ExprControlCollection* controls;
 
-    QPushButton* applyButton, *previewButton, *saveButton, *saveAsButton;
-    QPushButton* saveLocalButton, *clearButton;
+    QPushButton *applyButton, *previewButton, *saveButton, *saveAsButton;
+    QPushButton *saveLocalButton, *clearButton;
     QLineEdit* helpFindBox;
     QTimer* showEditorTimer;
     QTextBrowser* helpBrowser;
@@ -88,20 +88,18 @@ class ExprDialog : public QDialog {
     void findHelper(QTextDocument::FindFlags flags);
     void closeEvent(QCloseEvent* event);
 
-signals:
+  signals:
     void preview();
     void expressionApplied();
     void dialogClosed();
-  private
-slots:
+  private slots:
     void previewExpression();
     void verifiedApply();
     void verifiedAccept();
     void findNextInHelp();
     void findPrevInHelp();
     void _showEditor();
-  public
-slots:
+  public slots:
 
     void applyExpression();
 

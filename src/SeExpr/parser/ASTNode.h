@@ -45,48 +45,27 @@ enum class ASTType {
 };
 inline const char* ASTTypeToString(ASTType type) {
     switch (type) {
-        case ASTType::Invalid:
-            return "Invalid";
-        case ASTType::Module:
-            return "Module";
-        case ASTType::Prototype:
-            return "Prototype";
-        case ASTType::LocalFunction:
-            return "LocalFunction";
-        case ASTType::Block:
-            return "Block";
-        case ASTType::Node:
-            return "Node";
-        case ASTType::IfThenElse:
-            return "IfThenElse";
-        case ASTType::Vec:
-            return "Vec";
-        case ASTType::Cond:
-            return "Cond";
-        case ASTType::Compare:
-            return "Compare";
-        case ASTType::UnaryOp:
-            return "UnaryOp";
-        case ASTType::BinaryOp:
-            return "BinaryOp";
-        case ASTType::CompareEq:
-            return "CompareEq";
-        case ASTType::TernaryOp:
-            return "TernaryOp";
-        case ASTType::Subscript:
-            return "Subscript";
-        case ASTType::Var:
-            return "Var";
-        case ASTType::Num:
-            return "Num";
-        case ASTType::Call:
-            return "Call";
-        case ASTType::Assign:
-            return "Assign";
-        case ASTType::String:
-            return "String";
-        case ASTType::Def:
-            return "Def";
+        case ASTType::Invalid: return "Invalid";
+        case ASTType::Module: return "Module";
+        case ASTType::Prototype: return "Prototype";
+        case ASTType::LocalFunction: return "LocalFunction";
+        case ASTType::Block: return "Block";
+        case ASTType::Node: return "Node";
+        case ASTType::IfThenElse: return "IfThenElse";
+        case ASTType::Vec: return "Vec";
+        case ASTType::Cond: return "Cond";
+        case ASTType::Compare: return "Compare";
+        case ASTType::UnaryOp: return "UnaryOp";
+        case ASTType::BinaryOp: return "BinaryOp";
+        case ASTType::CompareEq: return "CompareEq";
+        case ASTType::TernaryOp: return "TernaryOp";
+        case ASTType::Subscript: return "Subscript";
+        case ASTType::Var: return "Var";
+        case ASTType::Num: return "Num";
+        case ASTType::Call: return "Call";
+        case ASTType::Assign: return "Assign";
+        case ASTType::String: return "String";
+        case ASTType::Def: return "Def";
     }
     return "<invalid>";
 }
@@ -107,8 +86,7 @@ class ASTNode {
     };
 
     template <typename... Args>
-    ASTNode(const Range& range, const ASTType& type, Args&&... args)
-        : _type(type) {
+    ASTNode(const Range& range, const ASTType& type, Args&&... args) : _type(type) {
         for (int k = 0; k < 2; k++) _range[k] = range[k];
         Adder a(_children);
         a.sequence(std::forward<Args&&>(args)...);
@@ -125,7 +103,6 @@ class ASTNode {
     }
 
     void print(std::ostream& out, int indent = 1, const std::string* originalStr = 0, unsigned int mask = 0) {
-
         if (originalStr) {
             Range r = range();
             auto replaceNew = [](const std::string& a) {
@@ -194,23 +171,21 @@ struct ASTPolicy {
     typedef ASTNode Base;
     typedef std::unique_ptr<ASTNode> Ptr;
 
-#define SEEXPR_AST_SUBCLASS(name)                    \
-    struct name : public Base {                      \
-        template <typename... Args>                  \
-        name(const Range& range, Args&&... args)     \
-            : Base(range, ASTType::name, args...) {} \
+#define SEEXPR_AST_SUBCLASS(name)                                                         \
+    struct name : public Base {                                                           \
+        template <typename... Args>                                                       \
+        name(const Range& range, Args&&... args) : Base(range, ASTType::name, args...) {} \
     };
-#define SEEXPR_AST_SUBCLASS_OP(name)                                     \
-    struct name : public Base {                                          \
-        template <typename... Args>                                      \
-        name(const Range& range, char op, Args&&... args)                \
-            : Base(range, ASTType::name, args...), _op(op) {}            \
-        std::string display() const { return std::string(#name) + _op; } \
-        char op() const { return _op; }                                  \
-        char value() const { return _op; }                               \
-                                                                         \
-      private:                                                           \
-        char _op;                                                        \
+#define SEEXPR_AST_SUBCLASS_OP(name)                                                                        \
+    struct name : public Base {                                                                             \
+        template <typename... Args>                                                                         \
+        name(const Range& range, char op, Args&&... args) : Base(range, ASTType::name, args...), _op(op) {} \
+        std::string display() const { return std::string(#name) + _op; }                                    \
+        char op() const { return _op; }                                                                     \
+        char value() const { return _op; }                                                                  \
+                                                                                                            \
+      private:                                                                                              \
+        char _op;                                                                                           \
     };
     SEEXPR_AST_SUBCLASS(Module);
     SEEXPR_AST_SUBCLASS(Prototype);

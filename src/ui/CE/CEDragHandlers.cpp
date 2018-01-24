@@ -163,7 +163,6 @@ void CEKeyMoveHandler::setMultiDrag(std::vector<CEGraphKey*> graph_segments) {
 }
 
 void CEKeyMoveHandler::moveKey(bool useCommand) {
-
     if (_anchorTimes.size() > 0) {
         // We are doing Multi-Drag!
         for (unsigned int i = 0; i < _anchorTimes.size(); i++) {

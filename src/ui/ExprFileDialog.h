@@ -75,8 +75,7 @@ class ExprFileDialog : public QFileDialog {
     void setButtonName(const QString& str);
     void addSidebarShortcut(const QString& s);
 
-  private
-slots:
+  private slots:
     void handleOk();
     void editReturnPress();
     void gotoFavorites();

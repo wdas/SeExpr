@@ -86,13 +86,13 @@ int Func4Op(int* opData, double* fp, char** c, std::vector<int>& callStack) {
     return 1;
 }
 int Func5Op(int* opData, double* fp, char** c, std::vector<int>& callStack) {
-    fp[opData[6]] = ((ExprFuncStandard::Func5*)(c[opData[0]]))(
-        fp[opData[1]], fp[opData[2]], fp[opData[3]], fp[opData[4]], fp[opData[5]]);
+    fp[opData[6]] = ((ExprFuncStandard::Func5*)(c[opData[0]]))(fp[opData[1]], fp[opData[2]], fp[opData[3]],
+                                                               fp[opData[4]], fp[opData[5]]);
     return 1;
 }
 int Func6Op(int* opData, double* fp, char** c, std::vector<int>& callStack) {
-    fp[opData[7]] = ((ExprFuncStandard::Func6*)(c[opData[0]]))(
-        fp[opData[1]], fp[opData[2]], fp[opData[3]], fp[opData[4]], fp[opData[5]], fp[opData[6]]);
+    fp[opData[7]] = ((ExprFuncStandard::Func6*)(c[opData[0]]))(fp[opData[1]], fp[opData[2]], fp[opData[3]],
+                                                               fp[opData[4]], fp[opData[5]], fp[opData[6]]);
     return 1;
 }
 int FuncNOp(int* opData, double* fp, char** c, std::vector<int>& callStack) {
@@ -155,50 +155,21 @@ int ExprFuncStandard::buildInterpreter(const ExprFuncNode* node, Interpreter* in
 
     Interpreter::OpF op = 0;
     switch (_funcType) {
-        case FUNC0:
-            op = Func0Op;
-            break;
-        case FUNC1:
-            op = Func1Op;
-            break;
-        case FUNC2:
-            op = Func2Op;
-            break;
-        case FUNC3:
-            op = Func3Op;
-            break;
-        case FUNC4:
-            op = Func4Op;
-            break;
-        case FUNC5:
-            op = Func5Op;
-            break;
-        case FUNC6:
-            op = Func6Op;
-            break;
-        case FUNCN:
-            op = FuncNOp;
-            break;
-        case FUNC1V:
-            op = Func1VOp;
-            break;
-        case FUNC2V:
-            op = Func2VOp;
-            break;
-        case FUNCNV:
-            op = FuncNVOp;
-            break;
-        case FUNC1VV:
-            op = Func1VVOp;
-            break;
-        case FUNC2VV:
-            op = Func2VVOp;
-            break;
-        case FUNCNVV:
-            op = FuncNVVOp;
-            break;
-        default:
-            assert(false);
+        case FUNC0: op = Func0Op; break;
+        case FUNC1: op = Func1Op; break;
+        case FUNC2: op = Func2Op; break;
+        case FUNC3: op = Func3Op; break;
+        case FUNC4: op = Func4Op; break;
+        case FUNC5: op = Func5Op; break;
+        case FUNC6: op = Func6Op; break;
+        case FUNCN: op = FuncNOp; break;
+        case FUNC1V: op = Func1VOp; break;
+        case FUNC2V: op = Func2VOp; break;
+        case FUNCNV: op = FuncNVOp; break;
+        case FUNC1VV: op = Func1VVOp; break;
+        case FUNC2VV: op = Func2VVOp; break;
+        case FUNCNVV: op = FuncNVVOp; break;
+        default: assert(false);
     }
 
     if (_funcType < VEC) {

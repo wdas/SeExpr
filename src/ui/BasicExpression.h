@@ -42,9 +42,7 @@ class BasicExpression : public SeExpr2::Expression {
         void eval(double* result) {
             for (int k = 0; k < 3; k++) result[k] = value[k];
         };
-        void eval(const char** result) {
-            assert(false);
-        };
+        void eval(const char** result) { assert(false); };
     };
 
     struct DummyFuncX : SeExpr2::ExprFuncSimple {

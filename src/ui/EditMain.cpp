@@ -21,7 +21,7 @@
 #include <QApplication>
 #include "SeExprEdDialog.h"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
     SeExprEdDialog dialog(0);
     dialog.setWindowTitle("Expression Editor");

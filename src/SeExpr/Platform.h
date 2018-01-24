@@ -113,12 +113,12 @@ class Timer {
         gettimeofday(&stopTime, 0);
         long seconds = stopTime.tv_sec - startTime.tv_sec;
         long useconds = stopTime.tv_usec - startTime.tv_usec;
-        long elapsedTime = ((seconds) * 1000 + useconds / 1000.0) + 0.5;
+        long elapsedTime = ((seconds)*1000 + useconds / 1000.0) + 0.5;
 #else
         clock_gettime(CLOCK_MONOTONIC, &stopTime);
         long seconds = stopTime.tv_sec - startTime.tv_sec;
         long nseconds = stopTime.tv_nsec - startTime.tv_nsec;
-        long elapsedTime = ((seconds) * 1000 + nseconds / 1000000.0) + 0.5;
+        long elapsedTime = ((seconds)*1000 + nseconds / 1000000.0) + 0.5;
 #endif
         return elapsedTime;
     }

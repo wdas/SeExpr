@@ -190,12 +190,9 @@ double remap(double x, double source, double range, double falloff, double inter
     }
 
     switch (int(interp)) {
-        case 0:
-            return linearstep(x, b, a);
-        case 1:
-            return smoothstep(x, b, a);
-        default:
-            return gaussstep(x, b, a);
+        case 0: return linearstep(x, b, a);
+        case 1: return smoothstep(x, b, a);
+        default: return gaussstep(x, b, a);
     }
 }
 static const char* remap_docstring =
@@ -473,21 +470,11 @@ double noise(int n, const Vec3d* args) {
     for (int i = 0; i < n; i++) p[i] = args[i][0];
     double result;
     switch (n) {
-        case 1:
-            Noise<1, 1>(p, &result);
-            break;
-        case 2:
-            Noise<2, 1>(p, &result);
-            break;
-        case 3:
-            Noise<3, 1>(p, &result);
-            break;
-        case 4:
-            Noise<4, 1>(p, &result);
-            break;
-        default:
-            result = 0;
-            break;
+        case 1: Noise<1, 1>(p, &result); break;
+        case 2: Noise<2, 1>(p, &result); break;
+        case 3: Noise<3, 1>(p, &result); break;
+        case 4: Noise<4, 1>(p, &result); break;
+        default: result = 0; break;
     }
     return .5 * result + .5;
 }
@@ -556,14 +543,10 @@ double turbulence(int n, const Vec3d* args) {
     Vec3d p = 0.0;
 
     switch (n) {
-        case 4:
-            gain = args[3][0];
-        case 3:
-            lacunarity = args[2][0];
-        case 2:
-            octaves = int(clamp(args[1][0], 1, 8));
-        case 1:
-            p = args[0];
+        case 4: gain = args[3][0];
+        case 3: lacunarity = args[2][0];
+        case 2: octaves = int(clamp(args[1][0], 1, 8));
+        case 1: p = args[0];
     }
 
     double result = 0;
@@ -580,14 +563,10 @@ Vec3d vturbulence(int n, const Vec3d* args) {
     Vec3d p = 0.0;
 
     switch (n) {
-        case 4:
-            gain = args[3][0];
-        case 3:
-            lacunarity = args[2][0];
-        case 2:
-            octaves = int(clamp(args[1][0], 1, 8));
-        case 1:
-            p = args[0];
+        case 4: gain = args[3][0];
+        case 3: lacunarity = args[2][0];
+        case 2: octaves = int(clamp(args[1][0], 1, 8));
+        case 1: p = args[0];
     }
 
     Vec3d result;
@@ -606,14 +585,10 @@ double fbm(int n, const Vec3d* args) {
     Vec3d p = 0.0;
 
     switch (n) {
-        case 4:
-            gain = args[3][0];
-        case 3:
-            lacunarity = args[2][0];
-        case 2:
-            octaves = int(clamp(args[1][0], 1, 8));
-        case 1:
-            p = args[0];
+        case 4: gain = args[3][0];
+        case 3: lacunarity = args[2][0];
+        case 2: octaves = int(clamp(args[1][0], 1, 8));
+        case 1: p = args[0];
     }
 
     double result = 0.0;
@@ -638,14 +613,10 @@ Vec3d vfbm(int n, const Vec3d* args) {
     Vec3d p = 0.0;
 
     switch (n) {
-        case 4:
-            gain = args[3][0];
-        case 3:
-            lacunarity = args[2][0];
-        case 2:
-            octaves = int(clamp(args[1][0], 1, 8));
-        case 1:
-            p = args[0];
+        case 4: gain = args[3][0];
+        case 3: lacunarity = args[2][0];
+        case 2: octaves = int(clamp(args[1][0], 1, 8));
+        case 1: p = args[0];
     }
 
     Vec3d result = 0.0;
@@ -664,16 +635,11 @@ double fbm4(int n, const Vec3d* args) {
     float time = 0.0;
 
     switch (n) {
-        case 5:
-            gain = args[4][0];
-        case 4:
-            lacunarity = args[3][0];
-        case 3:
-            octaves = int(clamp(args[2][0], 1, 8));
-        case 2:
-            time = args[1][0];
-        case 1:
-            p = args[0];
+        case 5: gain = args[4][0];
+        case 4: lacunarity = args[3][0];
+        case 3: octaves = int(clamp(args[2][0], 1, 8));
+        case 2: time = args[1][0];
+        case 1: p = args[0];
     }
 
     double result = 0.0;
@@ -699,16 +665,11 @@ Vec3d vfbm4(int n, const Vec3d* args) {
     float time = 0.0;
 
     switch (n) {
-        case 5:
-            gain = args[4][0];
-        case 4:
-            lacunarity = args[3][0];
-        case 3:
-            octaves = int(clamp(args[2][0], 1, 8));
-        case 2:
-            time = args[1][0];
-        case 1:
-            p = args[0];
+        case 5: gain = args[4][0];
+        case 4: lacunarity = args[3][0];
+        case 3: octaves = int(clamp(args[2][0], 1, 8));
+        case 2: time = args[1][0];
+        case 1: p = args[0];
     }
 
     Vec3d result = 0.0;
@@ -749,8 +710,7 @@ static const char* ccellnoise_docstring =
 double pnoise(const Vec3d& p, const Vec3d& period) {
     double result;
     double args[3] = {p[0], p[1], p[2]};
-    int pargs[3] = {std::max((int)1, (int)period[0]),
-                    std::max((int)1, (int)period[1]),
+    int pargs[3] = {std::max((int)1, (int)period[0]), std::max((int)1, (int)period[1]),
                     std::max((int)1, (int)period[2])};
     PNoise<3, 1>(args, pargs, &result);
     return result;
@@ -842,20 +802,13 @@ Vec3d voronoiFn(VoronoiPointData& data, int n, const Vec3d* args) {
     double fbmLacunarity = 2;
     double fbmGain = 0.5;
     switch (n) {
-        case 7:
-            fbmGain = args[6][0];
-        case 6:
-            fbmLacunarity = args[5][0];
-        case 5:
-            fbmOctaves = args[4][0];
-        case 4:
-            fbmScale = args[3][0];
-        case 3:
-            jitter = clamp(args[2][0], 1e-3, 1);
-        case 2:
-            type = int(args[1][0]);
-        case 1:
-            p = args[0];
+        case 7: fbmGain = args[6][0];
+        case 6: fbmLacunarity = args[5][0];
+        case 5: fbmOctaves = args[4][0];
+        case 4: fbmScale = args[3][0];
+        case 3: jitter = clamp(args[2][0], 1e-3, 1);
+        case 2: type = int(args[1][0]);
+        case 1: p = args[0];
     }
 
     if (fbmScale > 0) {
@@ -875,15 +828,10 @@ Vec3d voronoiFn(VoronoiPointData& data, int n, const Vec3d* args) {
         voronoi_f1_3d(data, p, jitter, f1, pos1);
 
     switch (type) {
-        case 1:
-            pos1[0] += 10;
-            return cellnoise(pos1);
-        case 2:
-            return f1;
-        case 3:
-            return f2;
-        case 4:
-            return f2 - f1;
+        case 1: pos1[0] += 10; return cellnoise(pos1);
+        case 2: return f1;
+        case 3: return f2;
+        case 4: return f2 - f1;
         case 5: {
             float scalefactor = (pos2 - pos1).length() / ((pos1 - p).length() + (pos2 - p).length());
             return smoothstep(f2 - f1, 0, 0.1 * scalefactor);
@@ -908,20 +856,13 @@ Vec3d cvoronoiFn(VoronoiPointData& data, int n, const Vec3d* args) {
     double fbmLacunarity = 2;
     double fbmGain = 0.5;
     switch (n) {
-        case 7:
-            fbmGain = args[6][0];
-        case 6:
-            fbmLacunarity = args[5][0];
-        case 5:
-            fbmOctaves = args[4][0];
-        case 4:
-            fbmScale = args[3][0];
-        case 3:
-            jitter = clamp(args[2][0], 1e-3, 1);
-        case 2:
-            type = int(args[1][0]);
-        case 1:
-            p = args[0];
+        case 7: fbmGain = args[6][0];
+        case 6: fbmLacunarity = args[5][0];
+        case 5: fbmOctaves = args[4][0];
+        case 4: fbmScale = args[3][0];
+        case 3: jitter = clamp(args[2][0], 1e-3, 1);
+        case 2: type = int(args[1][0]);
+        case 1: p = args[0];
     }
 
     if (fbmScale > 0) {
@@ -942,15 +883,10 @@ Vec3d cvoronoiFn(VoronoiPointData& data, int n, const Vec3d* args) {
 
     Vec3d color = ccellnoise(pos1);
     switch (type) {
-        case 1:
-            pos1[0] += 10;
-            return color;
-        case 2:
-            return f1 * color;
-        case 3:
-            return f2 * color;
-        case 4:
-            return (f2 - f1) * color;
+        case 1: pos1[0] += 10; return color;
+        case 2: return f1 * color;
+        case 3: return f2 * color;
+        case 4: return (f2 - f1) * color;
         case 5: {
             float scalefactor = (pos2 - pos1).length() / ((pos1 - p).length() + (pos2 - p).length());
             return smoothstep(f2 - f1, 0, 0.1 * scalefactor) * color;
@@ -974,18 +910,12 @@ Vec3d pvoronoiFn(VoronoiPointData& data, int n, const Vec3d* args) {
     double fbmLacunarity = 2;
     double fbmGain = 0.5;
     switch (n) {
-        case 6:
-            fbmGain = args[5][0];
-        case 5:
-            fbmLacunarity = args[4][0];
-        case 4:
-            fbmOctaves = args[3][0];
-        case 3:
-            fbmScale = args[2][0];
-        case 2:
-            jitter = clamp(args[1][0], 1e-3, 1);
-        case 1:
-            p = args[0];
+        case 6: fbmGain = args[5][0];
+        case 5: fbmLacunarity = args[4][0];
+        case 4: fbmOctaves = args[3][0];
+        case 3: fbmScale = args[2][0];
+        case 2: jitter = clamp(args[1][0], 1e-3, 1);
+        case 1: p = args[0];
     }
 
     if (fbmScale > 0) {

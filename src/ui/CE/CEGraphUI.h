@@ -96,8 +96,7 @@ class CEGraphUI : public QGLWidget {
 
     virtual QSize minimumSizeHint() const { return QSize(200, 200); }
 
-  public
-slots:
+  public slots:
 
     /// Notification methods (from CETool)
     void invalidateCurve(int index);

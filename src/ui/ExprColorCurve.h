@@ -53,17 +53,17 @@ class CCurveScene : public QGraphicsScene {
     void removePoint(const int index);
     void removeAll();
 
-    virtual void keyPressEvent(QKeyEvent *event);
+    virtual void keyPressEvent(QKeyEvent* event);
 
-    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
-    virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
-    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
-    virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
+    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* mouseEvent);
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent);
+    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* mouseEvent);
+    virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent* event);
     void drawRect();
 
     void drawPoints();
 
-    QPixmap &getPixmap();
+    QPixmap& getPixmap();
     void emitCurveChanged();
 
     void rebuildCurve();
@@ -75,7 +75,7 @@ class CCurveScene : public QGraphicsScene {
   public slots:
     void interpChanged(const int interp);
     void selPosChanged(double pos);
-    void selValChanged(const SeExpr2::Vec3d &val);
+    void selValChanged(const SeExpr2::Vec3d& val);
     void resize(const int width, const int height);
 
   signals:
@@ -83,7 +83,7 @@ class CCurveScene : public QGraphicsScene {
     void curveChanged();
 
   private:
-    T_CURVE *_curve;
+    T_CURVE* _curve;
 
     QByteArray getCPixmap();
 
@@ -91,42 +91,42 @@ class CCurveScene : public QGraphicsScene {
     int _height;
     SeExpr2::Vec3d _color;
     T_INTERP _interp;
-    std::vector<QGraphicsEllipseItem *> _circleObjects;
+    std::vector<QGraphicsEllipseItem*> _circleObjects;
     int _selectedItem;
     QPixmap _pixmap;
     bool _pixmapDirty;
-    QWidget *_baseRectW;
-    QGraphicsProxyWidget *_baseRect;
+    QWidget* _baseRectW;
+    QGraphicsProxyWidget* _baseRect;
     bool _lmb;
 };
 
 class ExprCBoxWidget : public QWidget {
     Q_OBJECT
   public:
-    ExprCBoxWidget(CCurveScene *curveScene, QWidget *parent = 0) : QWidget(parent), _curveScene(curveScene) {}
+    ExprCBoxWidget(CCurveScene* curveScene, QWidget* parent = 0) : QWidget(parent), _curveScene(curveScene) {}
     ~ExprCBoxWidget() {}
 
   protected:
-    virtual void paintEvent(QPaintEvent *event);
+    virtual void paintEvent(QPaintEvent* event);
 
   private:
-    CCurveScene *_curveScene;
+    CCurveScene* _curveScene;
 };
 
 class ExprCSwatchFrame : public QFrame {
     Q_OBJECT
   public:
-    ExprCSwatchFrame(SeExpr2::Vec3d value, QWidget *parent = 0);
+    ExprCSwatchFrame(SeExpr2::Vec3d value, QWidget* parent = 0);
     ~ExprCSwatchFrame() {}
 
-    void setValue(const SeExpr2::Vec3d &value);
+    void setValue(const SeExpr2::Vec3d& value);
     SeExpr2::Vec3d getValue() const;
 
   protected:
-    virtual void paintEvent(QPaintEvent *event);
-    virtual void mousePressEvent(QMouseEvent *event);
+    virtual void paintEvent(QPaintEvent* event);
+    virtual void mousePressEvent(QMouseEvent* event);
 
-signals:
+  signals:
     void selValChangedSignal(SeExpr2::Vec3d value);
     void swatchChanged(QColor color);
 
@@ -142,7 +142,7 @@ class ExprColorCurve : public QWidget {
     typedef T_CURVE::InterpType T_INTERP;
 
   public:
-    ExprColorCurve(QWidget *parent = 0,
+    ExprColorCurve(QWidget* parent = 0,
                    QString pLabel = "",
                    QString vLabel = "",
                    QString iLabel = "",
@@ -154,7 +154,7 @@ class ExprColorCurve : public QWidget {
     void setSwatchColor(QColor color);
     QColor getSwatchColor();
 
-    CCurveScene *_scene;
+    CCurveScene* _scene;
 
   public slots:
     void cvSelectedSlot(const double pos, const SeExpr2::Vec3d val, const T_INTERP interp);
@@ -170,8 +170,8 @@ class ExprColorCurve : public QWidget {
     void internalSwatchChanged(QColor color);
 
   private:
-    QLineEdit *_selPosEdit;
-    ExprCSwatchFrame *_selValEdit;
-    QComboBox *_interpComboBox;
+    QLineEdit* _selPosEdit;
+    ExprCSwatchFrame* _selValEdit;
+    QComboBox* _interpComboBox;
 };
 #endif

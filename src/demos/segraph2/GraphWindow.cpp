@@ -81,8 +81,7 @@ GraphWindow::GraphWindow(QWidget* parent) : QFrame(parent), time(0) {
     // If data,selection,or layout changes in model then redraw graph
     connect(functions, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), graph, SLOT(redraw()));
     connect(functions, SIGNAL(layoutChanged()), graph, SLOT(redraw()));
-    connect(table->selectionModel(),
-            SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+    connect(table->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
             SLOT(selectionChanged(const QItemSelection&, const QItemSelection&)));
 
     QTimer::singleShot(1, this, SLOT(updateTime()));

@@ -96,7 +96,6 @@ void CEGraphCurve::buildSeg(int n) {
 }
 
 void CEGraphCurve::updateView() {
-
     _firstSegInView = 0;
     _lastSegInView = numSegs() - 1;
     // TODO: make this as adaptive as before

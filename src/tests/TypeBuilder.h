@@ -36,23 +36,17 @@ using namespace SeExpr2;
 class TypeBuilderExpr : public Expression {
   public:
     struct DummyFuncX : ExprFuncX {
-        DummyFuncX() : ExprFuncX(false) {};
+        DummyFuncX() : ExprFuncX(false){};
 
-        virtual bool isScalar() const {
-            return true;
-        };
-        virtual ExprType retType() const {
-            return ExprType().FP(1).Varying();
-        };
+        virtual bool isScalar() const { return true; };
+        virtual ExprType retType() const { return ExprType().FP(1).Varying(); };
         // TODO: fix -- just a no-op function to get code to compile.
         virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnv& env) const {
             return ExprType().None();
         };
 
         // TODO: fix -- just a no-op function to get code to compile.
-        virtual int buildInterpreter(const ExprFuncNode* node, Interpreter* interpreter) const {
-            return 0;
-        };
+        virtual int buildInterpreter(const ExprFuncNode* node, Interpreter* interpreter) const { return 0; };
 
         void eval(const ExprFuncNode* node, Vec3d& result) const { result = Vec3d(); }
     } dummyFuncX;
@@ -61,17 +55,15 @@ class TypeBuilderExpr : public Expression {
 
     class ExprNothingVarRef : public ExprVarRef {
       public:
-        ExprNothingVarRef(const ExprType& type) : ExprVarRef::ExprVarRef(type) {};
+        ExprNothingVarRef(const ExprType& type) : ExprVarRef::ExprVarRef(type){};
 
-        void eval(const ExprVarNode* node, Vec3d& result) {
-            result = 0.0;
-        };
+        void eval(const ExprVarNode* node, Vec3d& result) { result = 0.0; };
 
         // TODO: fix -- just a no-op function to get code to compile.
-        virtual void eval(double* result) {};
+        virtual void eval(double* result){};
 
         // TODO: fix -- just a no-op function to get code to compile.
-        virtual void eval(const char** resultStr) {};
+        virtual void eval(const char** resultStr){};
     };
 
     //! Empty constructor
@@ -81,7 +73,7 @@ class TypeBuilderExpr : public Expression {
           ST(ExprType().String().Varying()), SE(ExprType().Error().Varying()), LC(ExprType().FP(1).Constant()),
           LU(ExprType().FP(1).Uniform()), LV(ExprType().FP(1).Varying()), LE(ExprType().FP(1).Error()),
           v(ExprType().FP(1).Varying()), x(ExprType().FP(1).Varying()), y(ExprType().FP(1).Varying()),
-          z(ExprType().FP(1).Varying()) {};
+          z(ExprType().FP(1).Varying()){};
 
     TypeBuilderExpr(const std::string& e)
         : Expression::Expression(e), dummyFunc(dummyFuncX, 0, 16), func(dummyFuncX, 3, 3),
@@ -89,7 +81,7 @@ class TypeBuilderExpr : public Expression {
           ST(ExprType().String().Varying()), SE(ExprType().Error().Varying()), LC(ExprType().FP(1).Constant()),
           LU(ExprType().FP(1).Uniform()), LV(ExprType().FP(1).Varying()), LE(ExprType().FP(1).Error()),
           v(ExprType().FP(1).Varying()), x(ExprType().FP(1).Varying()), y(ExprType().FP(1).Varying()),
-          z(ExprType().FP(1).Varying()) {};
+          z(ExprType().FP(1).Varying()){};
 
     //! resolve function
     ExprVarRef* resolveVar(const std::string& name) const {

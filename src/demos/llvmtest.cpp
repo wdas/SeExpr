@@ -26,11 +26,11 @@ using namespace SeExpr2;
 class llvmexpr : public Expression {
   public:
     //! Constructor that takes the expression to parse
-    llvmexpr(const std::string &expr, const ExprType &type = ExprType().FP(3)) : Expression(expr, type) {}
+    llvmexpr(const std::string& expr, const ExprType& type = ExprType().FP(3)) : Expression(expr, type) {}
 };
 
 // TODO: turn off parsing output.
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     if (argc < 2) {
         std::cerr << "need a filename as argument\n";
         return 1;
@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
             assert(false);
         }
 
-        const double *result = expr.evalFP();
+        const double* result = expr.evalFP();
 
         for (int i = 0; i < dim; ++i) std::cout << result[i] << ' ';
         std::cout << std::endl;
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
             assert(false);
         }
 
-        const char *result = expr.evalStr();
+        const char* result = expr.evalStr();
 
         std::cout << result;
     }

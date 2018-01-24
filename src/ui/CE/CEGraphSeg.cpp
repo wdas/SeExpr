@@ -125,7 +125,9 @@ void CEGraphSeg::paintKey() {
 CEDragHandler* CEGraphSeg::getDragHandler(int part, int keystate) {
     bool alt = keystate & Qt::AltModifier;
     switch (part) {
-        case Seg: { return alt ? new CENewKeyHandler(this) : 0; }
+        case Seg: {
+            return alt ? new CENewKeyHandler(this) : 0;
+        }
     }
     return 0;
 }
@@ -284,7 +286,6 @@ void CEGraphUniformSeg::updateView() {
 }
 
 CEGraphBezSeg::CEGraphBezSeg(CEGraphCurve* curve, int index) : CEGraphUniformSeg(curve, index) {
-
     _numParams = 4;
     _params = new double[4];
     auto it = curve->animCurve().getFirstKey() + index;

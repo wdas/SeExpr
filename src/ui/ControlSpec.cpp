@@ -56,13 +56,9 @@ bool SpecExaminer::examine(const ExprNode* examinee) {
     return true;
 };
 
-inline std::vector<const ControlSpec*>::const_iterator SpecExaminer::begin() const {
-    return _specList.begin();
-};
+inline std::vector<const ControlSpec*>::const_iterator SpecExaminer::begin() const { return _specList.begin(); };
 
-inline std::vector<const ControlSpec*>::const_iterator const SpecExaminer::end() const {
-    return _specList.end();
-};
+inline std::vector<const ControlSpec*>::const_iterator const SpecExaminer::end() const { return _specList.end(); };
 
 //! Returns true if no newline separates comment and node
 inline bool isWS(const char* source, int start, int end) {
@@ -136,8 +132,7 @@ std::string ExprVectorAssignSpec::toString() const {
 }
 
 template <class T>
-ExprCurveAssignSpec<T>::ExprCurveAssignSpec(const ExprAssignNode& node)
-    : ControlSpec(node), _vec() {
+ExprCurveAssignSpec<T>::ExprCurveAssignSpec(const ExprAssignNode& node) : ControlSpec(node), _vec() {
     _name = node.name();
     const ExprFuncNode* cnode = static_cast<const ExprFuncNode*>(node.child(0));
     _lookupText = cnode->child(0)->toString();
@@ -234,18 +229,10 @@ std::string ExprStrSpec::toString() const {
     std::stringstream ss;
     ss << _name << ": \"" + _str + "\" ";
     switch (_type) {
-        case STRING:
-            ss << "STRING";
-            break;
-        case FILE:
-            ss << "FILE";
-            break;
-        case DIRECTORY:
-            ss << "DIRECTORY";
-            break;
-        default:
-            ss << "INVALID";
-            break;
+        case STRING: ss << "STRING"; break;
+        case FILE: ss << "FILE"; break;
+        case DIRECTORY: ss << "DIRECTORY"; break;
+        default: ss << "INVALID"; break;
     }
     return ss.str();
 }

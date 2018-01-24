@@ -21,7 +21,7 @@
 #include <QApplication>
 #include "ExprDialog.h"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
     ExprDialog dialog(0);
     dialog.setWindowTitle("Expression Editor 2");

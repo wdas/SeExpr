@@ -31,12 +31,7 @@ class Graph : public QWidget {
     Q_OBJECT;
 
   public:
-    enum OperationCode {
-        NONE = 0,
-        FIND_MIN,
-        FIND_MAX,
-        FIND_ROOT
-    };
+    enum OperationCode { NONE = 0, FIND_MIN, FIND_MAX, FIND_ROOT };
 
   private:
     //    PyObject* callable;
@@ -111,8 +106,7 @@ class Graph : public QWidget {
     void solveMin(const int function, double xmin, double xmax, bool solveMax = false);
     //! Solve max problem using golden
     void solveMax(const int function, double xmin, double xmax);
-  public
-slots:
+  public slots:
     //! Redraw graph and clear all given roots
     void redraw();
 };

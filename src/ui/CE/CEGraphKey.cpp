@@ -40,7 +40,6 @@ bool CEGraphKey::beginPart(Part part) {
 void CEGraphKey::endPart() { glPopName(); }
 
 void CEGraphKey::paint(bool selected) {
-
     glPushName(_index);
 
     CEGraphUI* ui = _curve->ui();
@@ -77,17 +76,9 @@ void CEGraphKey::paintHandles() {
     if (!_weighted) inWeight = outWeight = 3;
     double inAngle = M_PI * _key.getInAngle() / 180., outAngle = M_PI * _key.getOutAngle() / 180.;
     double time = _key.getTime(), value = _key.getValue();
-    paintHandle(0,
-                time,
-                value,
-                -inWeight * cos(inAngle),
-                -inWeight * sin(inAngle),
+    paintHandle(0, time, value, -inWeight * cos(inAngle), -inWeight * sin(inAngle),
                 _key.getInTangentType() == animlib::AnimKeyframe::kTangentFixed);
-    paintHandle(1,
-                time,
-                value,
-                outWeight * cos(outAngle),
-                outWeight * sin(outAngle),
+    paintHandle(1, time, value, outWeight * cos(outAngle), outWeight * sin(outAngle),
                 _key.getOutTangentType() == animlib::AnimKeyframe::kTangentFixed);
 }
 
@@ -138,7 +129,9 @@ CEGraphKey::~CEGraphKey() {}
 CEDragHandler* CEGraphKey::getDragHandler(int part, int keystate) {
     bool alt = keystate & Qt::AltModifier;
     switch (part) {
-        case NoPart: { return 0; }
+        case NoPart: {
+            return 0;
+        }
         case KeyTime: {
             double hsnap = alt ? 0.0 : 1.0;
             return new CEKeyMoveHandler(this, 1, 0, hsnap);
@@ -148,14 +141,10 @@ CEDragHandler* CEGraphKey::getDragHandler(int part, int keystate) {
             return new CEKeyMoveHandler(this, alt, 1, hsnap);
         }
         // new CEBezHandler(key,handle,dragAngle,dragLength)
-        case HandleBase + 0:
-            return new CEBezHandler(this, 0, 1, 0, _weighted);
-        case HandleBase + 1:
-            return new CEBezHandler(this, 1, 1, 0, _weighted);
-        case KnobBase + 0:
-            return new CEBezHandler(this, 0, alt, 1, _weighted);
-        case KnobBase + 1:
-            return new CEBezHandler(this, 1, alt, 1, _weighted);
+        case HandleBase + 0: return new CEBezHandler(this, 0, 1, 0, _weighted);
+        case HandleBase + 1: return new CEBezHandler(this, 1, 1, 0, _weighted);
+        case KnobBase + 0: return new CEBezHandler(this, 0, alt, 1, _weighted);
+        case KnobBase + 1: return new CEBezHandler(this, 1, alt, 1, _weighted);
     }
     return 0;
 }
