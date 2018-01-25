@@ -350,26 +350,6 @@ other values (3-10)</li>
   <li>pick ( value, 10, 20, 1, 1, 0 ) - values 10, 11, and 13 through
 20 will be returned (12 is skipped due to zero weight)</li>
 </ul>
-Note: the filename for the map and
-projmap functions can specify an optional format-arg which will be
-inserted into the filename as indicated in the examples below:<br>
-<ul>
-  <li>map( 'noise.%d.map.tx', 10 ) &nbsp; <i>references a file named
-'noise.10.map.tx'</i><br>
-  </li>
-  <li>map( 'fenceColor-%04d.tx', 12 )&nbsp;&nbsp;&nbsp; <i>references
-a file named
-'fenceColor-0012.tx'</i></li>
-  <li>map( 'map-%d.tx', $objectId)&nbsp;&nbsp; <i>builds the filename
-based on the object Id</i></li>
-  <li>map( 'map-%d.tx', cycle($objectId, 10, 20))&nbsp;&nbsp; <i>cycles
-through maps 10 through 20 based on
-object Id</i></li>
-  <li>map( 'map-%d.tx', pick($objectId, 10, 20)) &nbsp; <i>picks maps
-10 through 20 randomly based on
-object Id</i><br>
-  </li>
-</ul>
 <br>
 <h4><a name="General_Math_Functions"></a>
 General Math Functions and Constants<br>

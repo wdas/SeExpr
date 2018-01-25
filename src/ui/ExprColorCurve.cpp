@@ -22,16 +22,16 @@
 #include <iostream>
 #include <algorithm>
 
-#include <QtGui/QColorDialog>
-#include <QtGui/QDoubleValidator>
-#include <QtGui/QGraphicsSceneMouseEvent>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QResizeEvent>
-#include <QtGui/QPushButton>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QMenu>
+#include <QColorDialog>
+#include <QDoubleValidator>
+#include <QGraphicsSceneMouseEvent>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QVBoxLayout>
+#include <QResizeEvent>
+#include <QPushButton>
+#include <QDialogButtonBox>
+#include <QMenu>
 
 #include <SeExpr2/ExprBuiltins.h>
 #ifdef SEEXPR_USE_QDGUI
@@ -445,9 +445,9 @@ ExprColorCurve::ExprColorCurve(QWidget *parent, QString pLabel, QString vLabel, 
 
     // when a user selects a cv, update the fields on left
     connect(_scene,
-            SIGNAL(cvSelected(double, SeExpr2::SeExpr2::Vec3d, T_INTERP)),
+            SIGNAL(cvSelected(double, SeExpr2::Vec3d, T_INTERP)),
             this,
-            SLOT(cvSelectedSlot(double, SeExpr2::SeExpr2::Vec3d, T_INTERP)));
+            SLOT(cvSelectedSlot(double, SeExpr2::Vec3d, T_INTERP)));
     // when a user selects a different interp, the curve has to redraw
     connect(_interpComboBox, SIGNAL(activated(int)), _scene, SLOT(interpChanged(int)));
     // when a user types a different position, the curve has to redraw
@@ -455,9 +455,9 @@ ExprColorCurve::ExprColorCurve(QWidget *parent, QString pLabel, QString vLabel, 
     connect(this, SIGNAL(selPosChangedSignal(double)), _scene, SLOT(selPosChanged(double)));
     // when a user selects a different color, the ramp has to redraw
     connect(_selValEdit,
-            SIGNAL(selValChangedSignal(SeExpr2::SeExpr2::Vec3d)),
+            SIGNAL(selValChangedSignal(SeExpr2::Vec3d)),
             _scene,
-            SLOT(selValChanged(SeExpr2::SeExpr2::Vec3d)));
+            SLOT(selValChanged(SeExpr2::Vec3d)));
     connect(_selValEdit, SIGNAL(swatchChanged(QColor)), this, SLOT(internalSwatchChanged(QColor)));
     // when the widget is resized, resize the curve widget
     connect(curveView, SIGNAL(resizeSignal(int, int)), _scene, SLOT(resize(int, int)));

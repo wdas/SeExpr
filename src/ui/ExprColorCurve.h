@@ -24,11 +24,11 @@
 
 #include <vector>
 
-#include <QtCore/QObject>
-#include <QtGui/QComboBox>
-#include <QtGui/QGraphicsProxyWidget>
-#include <QtGui/QGraphicsView>
-#include <QtGui/QLineEdit>
+#include <QObject>
+#include <QComboBox>
+#include <QGraphicsProxyWidget>
+#include <QGraphicsView>
+#include <QLineEdit>
 
 #include <SeExpr2/Vec.h>
 
@@ -72,20 +72,19 @@ class CCurveScene : public QGraphicsScene {
 
     friend class ExprColorCurve;
 
-  private:
-    T_CURVE *_curve;
-  public
-slots:
+  public slots:
     void interpChanged(const int interp);
     void selPosChanged(double pos);
     void selValChanged(const SeExpr2::Vec3d &val);
     void resize(const int width, const int height);
 
-signals:
+  signals:
     void cvSelected(double x, const SeExpr2::Vec3d y, const T_INTERP interp);
     void curveChanged();
 
   private:
+    T_CURVE *_curve;
+
     QByteArray getCPixmap();
 
     int _width;
@@ -157,19 +156,18 @@ class ExprColorCurve : public QWidget {
 
     CCurveScene *_scene;
 
-  public
-slots:
+  public slots:
     void cvSelectedSlot(const double pos, const SeExpr2::Vec3d val, const T_INTERP interp);
     void selPosChanged();
     void openDetail();
-  private
-slots:
-    void internalSwatchChanged(QColor color);
 
-signals:
+  signals:
     void selPosChangedSignal(double pos);
     void selValChangedSignal(SeExpr2::Vec3d val);
     void swatchChanged(QColor color);
+
+  private slots:
+    void internalSwatchChanged(QColor color);
 
   private:
     QLineEdit *_selPosEdit;

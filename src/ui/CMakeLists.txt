@@ -33,10 +33,17 @@ if (EXISTS "/usr/share/apps/cmake/modules")
     # Needed for some versions of CMake, which only look in version-specific module path
     list(APPEND CMAKE_MODULE_PATH "/usr/share/apps/cmake/modules")
 endif()
-find_package(PyQt4)
-set(PYQT4_SIP ${PYQT4_SIP_DIR})
-if (NOT PYQT4_FOUND)
-    get_build_info(pyqt4-sip PYQT4_SIP)
+
+if (NOT DEFINED PYQT_SIP_FLAGS)
+    get_build_info(pyqt-sip-flags PYQT_SIP_FLAGS)
+    separate_arguments(PYQT_SIP_FLAGS)
+endif()
+
+if (NOT DEFINED PYQT_SIP_DIR)
+    get_build_info(pyqt4-sip PYQT_SIP_DIR)
+    if (NOT DEFINED PYQT_SIP_DIR)
+       message(FATAL_ERROR "PYQT_SIP_DIR must be defined")
+    endif()
 endif()
 
 set(CMAKE_INSTALL_PYTHON "${PYTHON_SITE}/SeExpr2" )
@@ -44,7 +51,7 @@ set(CMAKE_INSTALL_PYTHON "${PYTHON_SITE}/SeExpr2" )
 # Other package dependencies...
 find_package(OpenGL)
 
-if(QT4_FOUND)
+if(Qt5_FOUND OR QT4_FOUND)
 
     BuildParserScanner(ExprSpecParserLex ExprSpecParser ExprSpec
                        editor_parser_cpp)
@@ -63,8 +70,13 @@ if(QT4_FOUND)
         ExprControlCollection.cpp ExprGrapher2d.cpp ExprBrowser.cpp
         BasicExpression.cpp ExprDeepWater.cpp)
 
-    qt4_wrap_cpp(EDITOR_MOC_SRCS ${EDITOR_MOC_HDRS})
+    if (ENABLE_QT5)
+        qt5_wrap_cpp(EDITOR_MOC_SRCS ${EDITOR_MOC_HDRS})
+    else()
+        qt4_wrap_cpp(EDITOR_MOC_SRCS ${EDITOR_MOC_HDRS})
+    endif()
 
+    set(ANIMLIB_SRCS "")
     if (DEFINED ANIMLIB_DIR)
         set(CE_MOC_HDRS CE/CECurveListUI.h CE/CEDragHandlers.h CE/CEGraphCurve.h
             CE/CEGraphKey.h CE/CEGraphSeg.h CE/CEGraphUI.h CE/CEMainUI.h
@@ -74,12 +86,17 @@ if(QT4_FOUND)
             CE/CEGraphKey.cpp CE/CEGraphSeg.cpp CE/CEGraphUI.cpp CE/CEMainUI.cpp
             CE/CESegEditUI.cpp CE/CETool.cpp)
 
-        qt4_wrap_cpp(CE_MOC_SRCS ${CE_MOC_HDRS})
+        if (ENABLE_QT5)
+            qt5_wrap_cpp(CE_MOC_SRCS ${CE_MOC_HDRS})
+        else()
+            qt4_wrap_cpp(CE_MOC_SRCS ${CE_MOC_HDRS})
+        endif()
+        set(ANIMLIB_SRCS "${CE_CPPS} ${CE_MOC_SRCS}")
     endif()
 
     if (WIN32)
         add_library(SeExpr2Editor ${EDITOR_CPPS} ${EDITOR_MOC_SRCS}
-                    ${CE_CPPS} ${CE_MOC_SRCS}
+                    ${ANIMLIB_SRCS}
                     ${editor_parser_cpp})
         generate_export_header(SeExpr2Editor
                                BASE_NAME SeExpr2Editor
@@ -88,19 +105,28 @@ if(QT4_FOUND)
                                STATIC_DEFINE SeExpr2Editor_BUILT_AS_STATIC )
     else()
         add_library(SeExpr2Editor SHARED ${EDITOR_CPPS} ${EDITOR_MOC_SRCS}
-                    ${CE_CPPS} ${CE_MOC_SRCS}
+                    ${ANIMLIB_SRCS}
                     ${editor_parser_cpp})
     endif()
 
-    include_directories(${QT_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
-                        ${CMAKE_CURRENT_SOURCE_DIR}/CE)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(SeExpr2Editor SeExpr2)
-    target_link_libraries(SeExpr2Editor ${QT_QTCORE_LIBRARY})
-    target_link_libraries(SeExpr2Editor ${QT_QTGUI_LIBRARY})
-    target_link_libraries(SeExpr2Editor ${QT_QTOPENGL_LIBRARY})
-    target_link_libraries(SeExpr2Editor ${GLUT_LIBRARY} ${OPENGL_LIBRARY})
+
+    if (ENABLE_QT5)
+        target_link_libraries(SeExpr2Editor Qt5::Core)
+        target_link_libraries(SeExpr2Editor Qt5::Gui)
+        target_link_libraries(SeExpr2Editor Qt5::Widgets)
+        target_link_libraries(SeExpr2Editor Qt5::OpenGL)
+    else()
+        target_link_libraries(SeExpr2Editor ${QT_QTCORE_LIBRARY})
+        target_link_libraries(SeExpr2Editor ${QT_QTGUI_LIBRARY})
+        target_link_libraries(SeExpr2Editor ${QT_QTOPENGL_LIBRARY})
+    endif()
+    target_link_libraries(SeExpr2Editor ${OPENGL_LIBRARY})
+    target_link_libraries(SeExpr2Editor ${GLUT_LIBRARY})
 
     if (DEFINED ANIMLIB_DIR)
+        include_directories(${CMAKE_CURRENT_SOURCE_DIR}/CE)
         target_link_libraries(SeExpr2Editor animlib)
     endif()
 
@@ -120,7 +146,10 @@ if(QT4_FOUND)
         target_link_libraries(SeExpr2Editor opengl32)
     endif()
 
+    ## Install library and includes
     install(TARGETS SeExpr2Editor DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ DESTINATION include/SeExpr2/UI
+            FILES_MATCHING PATTERN "*.h")
 
     # Setup header files
     file(GLOB public_includes "*.h")
@@ -128,29 +157,38 @@ if(QT4_FOUND)
 
     # Generate python module expreditor2, using sip
     find_program(SIP_EXEC sip)
-    set(SIP_QT_TAG -t Qt_4_8_0)
 
     set(CMAKE_CXX_FLAGS "-std=c++11")
-    include_directories(${SIP_INCLUDE_DIR} ${PYQT4_SIP}
-                        ${PYTHON_INCLUDE_DIR} ${QT_INCLUDE_DIR}/QtCore
-                        ${QT_INCLUDE_DIR}/QtGui)
+    include_directories(${SIP_INCLUDE_DIR}
+                        ${PYQT_SIP_DIR}
+                        ${PYTHON_INCLUDE_DIR})
 
     add_custom_command(OUTPUT sipexpreditor2part0.cpp
                        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/SeExpr2Editor.sip
                        COMMENT 'Processing SeExpr2Editor.sip'
                        COMMAND ${SIP_EXEC} -w -c .
-                       -x VendorID -x PyQt_NoPrintRangeBug -x Py_v3
-                       ${SIP_QT_TAG}
-                       -t WS_X11 -g -j 1
-                       -I. -I${PYQT4_SIP} -I${SIP_INCLUDE_DIR}
+                       ${PYQT_SIP_FLAGS}
+                       -j 1
+                       -I. -I${PYQT_SIP_DIR} -I${SIP_INCLUDE_DIR}
                        ${CMAKE_CURRENT_SOURCE_DIR}/SeExpr2Editor.sip
                        VERBATIM)
 
     add_library(expreditor2 SHARED sipexpreditor2part0.cpp)
     target_link_libraries(expreditor2 SeExpr2Editor ${SEEXPR_LIBRARIES}
-                          ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY}
-                          ${QT_QTOPENGL_LIBRARY} ${OPENGL_LIBRARY}
-                          ${GLUT_LIBRARY} ${PYTHON_LIBRARIES})
+                          ${OPENGL_LIBRARY} ${GLUT_LIBRARY} ${PYTHON_LIBRARIES})
+
+    if (ENABLE_QT5)
+        target_link_libraries(expreditor2 SeExpr2Editor
+                              Qt5::Core
+                              Qt5::Gui
+                              Qt5::Widgets
+                              Qt5::OpenGL)
+    else()
+        target_link_libraries(expreditor2 SeExpr2Editor
+                              ${QT_QTCORE_LIBRARY}
+                              ${QT_QTGUI_LIBRARY}
+                              ${QT_QTOPENGL_LIBRARY})
+    endif()
 
     # No prefix on python module name
     set_target_properties(expreditor2 PROPERTIES PREFIX "")

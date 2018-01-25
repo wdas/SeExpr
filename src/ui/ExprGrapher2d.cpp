@@ -20,11 +20,11 @@
 */
 
 #include "ExprGrapher2d.h"
-#include <QtGui/QGridLayout>
-#include <QtGui/QLineEdit>
-#include <QtGui/QDoubleValidator>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QLabel>
+#include <QGridLayout>
+#include <QLineEdit>
+#include <QDoubleValidator>
+#include <QHBoxLayout>
+#include <QLabel>
 
 ExprGrapherWidget::ExprGrapherWidget(QWidget* parent, int width, int height)
     : view(new ExprGrapherView(*this, this, width, height)), expr("", SeExpr2::ExprType().FP(1)) {

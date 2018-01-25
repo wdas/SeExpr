@@ -1111,7 +1111,7 @@ struct VarCodeGeneration {
                 varRef->type().isLifetimeUniform() ? baseMemory : Builder.CreateInBoundsGEP(baseMemory, indirectIndex);
             return Builder.CreateLoad(variablePointer);
         } else {
-            std::vector<Value *> loadedValues(3);
+            std::vector<Value *> loadedValues(dim);
             for (int component = 0; component < dim; component++) {
                 Value *componentIndex = ConstantInt::get(Type::getInt32Ty(llvmContext), component);
                 /// If we are uniform always assume indirectIndex is 0 (there's only one value)

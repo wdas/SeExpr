@@ -21,10 +21,10 @@
 #ifndef ExprGrapher2d_h
 #define ExprGrapher2d_h
 
-#include <QtCore/QObject>
-#include <QtGui/QPalette>
-#include <QtOpenGL/QGLWidget>
-#include <QtGui/QMouseEvent>
+#include <QObject>
+#include <QPalette>
+#include <QGLWidget>
+#include <QMouseEvent>
 
 #include "BasicExpression.h"
 

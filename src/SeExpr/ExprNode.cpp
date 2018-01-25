@@ -136,13 +136,9 @@ ExprType ExprModuleNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
 }
 
 ExprType ExprPrototypeNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
-    // TODO: implement prototype
-    bool error = false;
-    checkCondition(false, "Prototypes are currently not supported", error);
-    return ExprType().Error();
-#if 0
     bool error = false;
 
+#if 0 // TODO: implement prototype
     if (_retTypeSet) checkCondition(returnType().isValid(), "Function has bad return type", error);
 
     _argTypes.clear();
@@ -155,14 +151,15 @@ ExprType ExprPrototypeNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder)
         std::cerr << "after create localvar phi " << localVar->getPhi() << std::endl;
         child(c)->prep(wantScalar, envBuilder);
     }
-
+#else
+    checkCondition(false, "Prototypes are currently not supported", error);
+#endif
     if (error)
         setType(ExprType().Error());
     else
         setType(ExprType().None().Varying());
 
     return _type;
-#endif
 }
 
 void ExprPrototypeNode::addArgTypes(ExprNode* surrogate) {
@@ -188,8 +185,9 @@ void ExprPrototypeNode::addArgs(ExprNode* surrogate) {
 }
 
 ExprType ExprLocalFunctionNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
-#if 0  // TODO: no local functions for now
     bool error = false;
+
+#if 0  // TODO: no local functions for now
 
     // prep prototype and check for errors
     ExprPrototypeNode* prototype = (ExprPrototypeNode*)child(0);
@@ -223,12 +221,16 @@ ExprType ExprLocalFunctionNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuil
         checkCondition(false, "Invalid type for blockType is " + blockType.toString(), error);
         error = true;
     }
-    return _type = error ? ExprType().Error() : ExprType().None().Varying();
 #else
-    bool error = false;
     checkCondition(false, "Local functions are currently not supported.", error);
-    return ExprType().Error();
 #endif
+
+    if (error)
+        setType(ExprType().Error());
+    else
+        setType(ExprType().None().Varying());
+
+    return _type;
 }
 
 // TODO: write buildInterpreter for local function node

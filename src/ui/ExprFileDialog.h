@@ -20,14 +20,14 @@
 #ifndef EXPRFILEDIALOG_H
 #define EXPRFILEDIALOG_H
 
-#include <QtGui/QLabel>
-#include <QtGui/QComboBox>
-#include <QtGui/QCheckBox>
-#include <QtGui/QLineEdit>
-#include <QtGui/QPixmap>
-#include <QtGui/QFileDialog>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QPushButton>
+#include <QLabel>
+#include <QComboBox>
+#include <QCheckBox>
+#include <QLineEdit>
+#include <QPixmap>
+#include <QFileDialog>
+#include <QVBoxLayout>
+#include <QPushButton>
 
 class ExprPreviewWidget : public QWidget {
   public:

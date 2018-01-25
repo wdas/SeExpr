@@ -17,16 +17,16 @@
 #ifndef _GraphWindow_h_
 #define _GraphWindow_h_
 
-#include <QtGui/QWidget>
-#include <QtGui/QTextEdit>
-#include <QtGui/QLineEdit>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QCompleter>
-#include <QtGui/QStatusBar>
-#include <QtGui/QLabel>
-#include <QtGui/QPushButton>
-#include <QtGui/QTableView>
-#include <QtGui/QMessageBox>
+#include <QWidget>
+#include <QTextEdit>
+#include <QLineEdit>
+#include <QVBoxLayout>
+#include <QCompleter>
+#include <QStatusBar>
+#include <QLabel>
+#include <QPushButton>
+#include <QTableView>
+#include <QMessageBox>
 
 #include "Functions.h"
 #include "Graph.h"

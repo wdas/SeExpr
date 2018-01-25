@@ -18,31 +18,31 @@
 * @brief This provides an expression editor for SeExpr syntax with auto ui features
 * @author  aselle
 */
-#include <QtGui/QLineEdit>
-#include <QtGui/QPushButton>
-#include <QtCore/QRegExp>
-#include <QtGui/QSplitter>
-#include <QtGui/QLabel>
-#include <QtGui/QMouseEvent>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QPaintEvent>
-#include <QtGui/QPainter>
-#include <QtGui/QScrollArea>
-#include <QtGui/QSpacerItem>
-#include <QtGui/QSizePolicy>
-#include <QtGui/QTextCharFormat>
-#include <QtGui/QCompleter>
-#include <QtGui/QAbstractItemView>
-#include <QtGui/QStandardItemModel>
-#include <QtGui/QStringListModel>
-#include <QtGui/QScrollBar>
-#include <QtGui/QToolTip>
-#include <QtGui/QListWidget>
-#include <QtGui/QTreeView>
-#include <QtGui/QAction>
-#include <QtGui/QMenu>
+#include <QRegExp>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QSplitter>
+#include <QLabel>
+#include <QMouseEvent>
+#include <QKeyEvent>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QPaintEvent>
+#include <QPainter>
+#include <QScrollArea>
+#include <QSpacerItem>
+#include <QSizePolicy>
+#include <QTextCharFormat>
+#include <QCompleter>
+#include <QAbstractItemView>
+#include <QStandardItemModel>
+#include <QStringListModel>
+#include <QScrollBar>
+#include <QToolTip>
+#include <QListWidget>
+#include <QTreeView>
+#include <QAction>
+#include <QMenu>
 
 #include <SeExpr2/Expression.h>
 #include <SeExpr2/ExprNode.h>
