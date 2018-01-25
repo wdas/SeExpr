@@ -269,6 +269,8 @@ class Vec {
     friend inline T_VEC_VALUE operator*(const T& s, const Vec& v) { return T_VEC_VALUE(s) * v; }
     friend inline T_VEC_VALUE operator/(const T& s, const Vec& v) { return T_VEC_VALUE(s) / v; }
 
+    inline void fill(T val) { for (int k = 0; k < d; ++k) x[k] = val; }
+
     //! Square of euclidean (2) norm
     inline T length2() const {
         T data[d];
