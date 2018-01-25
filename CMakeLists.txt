@@ -88,7 +88,7 @@ set(LLVM_LIB "")
 if (ENABLE_LLVM_BACKEND)
     set(LLVM_DIR /usr/share/llvm/cmake CACHE PATH "Where to search for LLVM i.e. ")
 
-    find_package(LLVM CONFIG NAMES LLVM CONFIGS LLVMConfig.cmake)
+    find_package(LLVM CONFIG NAMES LLVM CONFIGS LLVM-Config.cmake LLVMConfig.cmake)
     if (LLVM_FOUND)
         set(SEEXPR_ENABLE_LLVM_BACKEND 1)
         message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")

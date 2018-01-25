@@ -34,13 +34,16 @@ if (EXISTS "/usr/share/apps/cmake/modules")
     list(APPEND CMAKE_MODULE_PATH "/usr/share/apps/cmake/modules")
 endif()
 
-if (NOT DEFINED PYQT_SIP_DIR)
-    message(FATAL_ERROR "PYQT_SIP_DIR must be defined")
-endif()
-
 if (NOT DEFINED PYQT_SIP_FLAGS)
     get_build_info(pyqt-sip-flags PYQT_SIP_FLAGS)
     separate_arguments(PYQT_SIP_FLAGS)
+endif()
+
+if (NOT DEFINED PYQT_SIP_DIR)
+    get_build_info(pyqt4-sip PYQT_SIP_DIR)
+    if (NOT DEFINED PYQT_SIP_DIR)
+       message(FATAL_ERROR "PYQT_SIP_DIR must be defined")
+    endif()
 endif()
 
 set(CMAKE_INSTALL_PYTHON "${PYTHON_SITE}/SeExpr2" )
@@ -73,6 +76,7 @@ if(Qt5_FOUND OR QT4_FOUND)
         qt4_wrap_cpp(EDITOR_MOC_SRCS ${EDITOR_MOC_HDRS})
     endif()
 
+    set(ANIMLIB_SRCS "")
     if (DEFINED ANIMLIB_DIR)
         set(CE_MOC_HDRS CE/CECurveListUI.h CE/CEDragHandlers.h CE/CEGraphCurve.h
             CE/CEGraphKey.h CE/CEGraphSeg.h CE/CEGraphUI.h CE/CEMainUI.h
@@ -87,11 +91,12 @@ if(Qt5_FOUND OR QT4_FOUND)
         else()
             qt4_wrap_cpp(CE_MOC_SRCS ${CE_MOC_HDRS})
         endif()
+        set(ANIMLIB_SRCS "${CE_CPPS} ${CE_MOC_SRCS}")
     endif()
 
     if (WIN32)
         add_library(SeExpr2Editor ${EDITOR_CPPS} ${EDITOR_MOC_SRCS}
-                    ${CE_CPPS} ${CE_MOC_SRCS}
+                    ${ANIMLIB_SRCS}
                     ${editor_parser_cpp})
         generate_export_header(SeExpr2Editor
                                BASE_NAME SeExpr2Editor
@@ -100,12 +105,11 @@ if(Qt5_FOUND OR QT4_FOUND)
                                STATIC_DEFINE SeExpr2Editor_BUILT_AS_STATIC )
     else()
         add_library(SeExpr2Editor SHARED ${EDITOR_CPPS} ${EDITOR_MOC_SRCS}
-                    ${CE_CPPS} ${CE_MOC_SRCS}
+                    ${ANIMLIB_SRCS}
                     ${editor_parser_cpp})
     endif()
 
-    include_directories(${CMAKE_CURRENT_SOURCE_DIR}
-                        ${CMAKE_CURRENT_SOURCE_DIR}/CE)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(SeExpr2Editor SeExpr2)
 
     if (ENABLE_QT5)
@@ -122,6 +126,7 @@ if(Qt5_FOUND OR QT4_FOUND)
     target_link_libraries(SeExpr2Editor ${GLUT_LIBRARY})
 
     if (DEFINED ANIMLIB_DIR)
+        include_directories(${CMAKE_CURRENT_SOURCE_DIR}/CE)
         target_link_libraries(SeExpr2Editor animlib)
     endif()
 

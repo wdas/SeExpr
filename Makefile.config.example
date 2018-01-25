@@ -11,8 +11,12 @@ ifeq ($(uname_S),Linux)
         EXTRA_CMAKE_ARGS += -DGTEST_DIR=/usr
     endif
 
-    ifdef RP_animlib
+    # only build animlib if soure directory exists and env var set
+    CE_dir = $(wildcard "src/ui/CE")
+    ifneq ("$(CE_dir)", "")
+	ifdef RP_animlib
         EXTRA_CMAKE_ARGS += -DANIMLIB_DIR=$(RP_animlib)
+    endif
     endif
 
     ifdef RP_boost_disney
