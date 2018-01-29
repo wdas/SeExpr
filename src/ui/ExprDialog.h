@@ -98,8 +98,7 @@ class ExprDialog : public QDialog {
     void dialogClosed();
     void forwardAvailable(bool);
     void backwardAvailable(bool);
-  private
-slots:
+  private slots:
     void previewExpression();
     void verifiedApply();
     void verifiedAccept();
@@ -111,8 +110,7 @@ slots:
     void histBackward();
     void histForward();
     void histAdd();
-  public
-slots:
+  public slots:
 
     void applyExpression();
 

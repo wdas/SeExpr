@@ -407,7 +407,7 @@ void ExprShortTextEdit::showTip(const QString& string) {
         delete _tip;
         _tip = 0;
     }
-    _tip = new ExprPopupDoc(this, mapToGlobal(cr.bottomLeft()+QPoint(0,6)), string);
+    _tip = new ExprPopupDoc(this, mapToGlobal(cr.bottomLeft() + QPoint(0, 6)), string);
 }
 
 void ExprShortTextEdit::hideTip() {

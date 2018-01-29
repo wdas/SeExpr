@@ -274,9 +274,7 @@ ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent) {
     resize(500, 200);
 }
 
-void ExprAddDialog::listIndexChanged(int index) {
-    stackWidget->setCurrentIndex(index);
-}
+void ExprAddDialog::listIndexChanged(int index) { stackWidget->setCurrentIndex(index); }
 
 void ExprAddDialog::colorChooseClicked() {
     color = QColorDialog::getColor(color);

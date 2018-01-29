@@ -79,15 +79,13 @@ uint32_t hashReduce(uint32_t index[d]) {
     return u2.i;
 }
 
-template<class T>
-const T& min(const T& a, const T& b)
-{
+template <class T>
+const T& min(const T& a, const T& b) {
     return (b < a) ? b : a;
 }
 
-template<class T>
-const T& max(const T& a, const T& b)
-{
+template <class T>
+const T& max(const T& a, const T& b) {
     return (b > a) ? b : a;
 }
 

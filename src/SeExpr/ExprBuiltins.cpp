@@ -231,7 +231,7 @@ double average(int n, double* args) {
         sum += args[i];
     }
     double div = (double)n;
-    return sum/div;
+    return sum / div;
 }
 static const char* average_docstring = "average(a,b,c,...)\nAverage all inputs.";
 
@@ -776,18 +776,15 @@ static Vec3d* voronoi_points(VoronoiPointData& data, const Vec3d& cell, double j
     return data.points;
 }
 
-
 double manhattanDistance(const Vec3d& a, const Vec3d& b) {
-    return fabs(a[0]-b[0])+fabs(a[1]-b[1])+fabs(a[2]-b[2]);
+    return fabs(a[0] - b[0]) + fabs(a[1] - b[1]) + fabs(a[2] - b[2]);
 }
 
 double minkowskiDistance(const Vec3d& a, const Vec3d& b, double p) {
-    return pow(pow(fabs(a[0] - b[0]),p) +
-               pow(fabs(a[1] - b[1]),p) +
-               pow(fabs(a[2] - b[2]),p),1/p);
+    return pow(pow(fabs(a[0] - b[0]), p) + pow(fabs(a[1] - b[1]), p) + pow(fabs(a[2] - b[2]), p), 1 / p);
 }
 
-double chebyshevDistance(const Vec3d& a, const Vec3d& b){
+double chebyshevDistance(const Vec3d& a, const Vec3d& b) {
     double x = fabs(a[0] - b[0]);
     double y = fabs(a[1] - b[1]);
     double z = fabs(a[2] - b[2]);
@@ -797,12 +794,12 @@ double chebyshevDistance(const Vec3d& a, const Vec3d& b){
 }
 
 static void voronoi_f1_3d(VoronoiPointData& data,
-                            const Vec3d& p,
-                            double jitter,
-                            double& f1,
-                            Vec3d& pos1,
-                            int distance,
-                            double exponent) {
+                          const Vec3d& p,
+                          double jitter,
+                          double& f1,
+                          Vec3d& pos1,
+                          int distance,
+                          double exponent) {
     // from Advanced Renderman, page 257
     Vec3d thiscell(floor(p[0]) + 0.5, floor(p[1]) + 0.5, floor(p[2]) + 0.5);
 
@@ -811,27 +808,26 @@ static void voronoi_f1_3d(VoronoiPointData& data,
     Vec3d* end = pos + 27;
     double dist;
     for (; pos != end; pos++) {
-        if (distance == 4){
-            if (exponent == 1.0){
+        if (distance == 4) {
+            if (exponent == 1.0) {
                 dist = manhattanDistance(*pos, p);
-            } else if (exponent == 2.0){
+            } else if (exponent == 2.0) {
                 Vec3d offset = *pos - p;
                 dist = sqrt(offset.dot(offset));
-            }else{
+            } else {
                 dist = minkowskiDistance(*pos, p, exponent);
             }
-        }else if (distance == 3){
+        } else if (distance == 3) {
             dist = chebyshevDistance(*pos, p);
-        }
-        else if (distance == 2){
+        } else if (distance == 2) {
             dist = manhattanDistance(*pos, p);
-        }else{
+        } else {
             Vec3d offset = *pos - p;
             dist = sqrt(offset.dot(offset));
         }
         if (dist < f1) {
             f1 = dist;
-            pos1 = *pos; //closest point
+            pos1 = *pos;  // closest point
         }
     }
 }
@@ -852,21 +848,20 @@ static void voronoi_f1f2_3d(VoronoiPointData& data,
     Vec3d* end = pos + 27;
     double dist;
     for (; pos != end; pos++) {
-        if (distance == 4){
-            if (exponent == 1.0){
+        if (distance == 4) {
+            if (exponent == 1.0) {
                 dist = manhattanDistance(*pos, p);
-            } else if (exponent == 2.0){
+            } else if (exponent == 2.0) {
                 Vec3d offset = *pos - p;
                 dist = sqrt(offset.dot(offset));
-            }else{
+            } else {
                 dist = minkowskiDistance(*pos, p, exponent);
             }
-        }else if (distance == 3){
+        } else if (distance == 3) {
             dist = chebyshevDistance(*pos, p);
-        }
-        else if (distance == 2){
+        } else if (distance == 2) {
             dist = manhattanDistance(*pos, p);
-        }else{
+        } else {
             Vec3d offset = *pos - p;
             dist = sqrt(offset.dot(offset));
         }
@@ -874,14 +869,13 @@ static void voronoi_f1f2_3d(VoronoiPointData& data,
             f2 = f1;
             pos2 = pos1;
             f1 = dist;
-            pos1 = *pos;//closest point
+            pos1 = *pos;  // closest point
         } else if (dist < f2) {
             f2 = dist;
-            pos2 = *pos;//2nd closest point
+            pos2 = *pos;  // 2nd closest point
         }
     }
 }
-
 
 Vec3d voronoiUtil(VoronoiPointData& data, int n, const Vec3d* args, bool color) {
     Vec3d p;
@@ -924,9 +918,9 @@ Vec3d voronoiUtil(VoronoiPointData& data, int n, const Vec3d* args, bool color) 
     if (distance == 2) scalefactor = 0.5;
 
     Vec3d col;
-    if(color){
+    if (color) {
         col = ccellnoise(pos1);
-    }else{
+    } else {
         col = 1;
     }
 
@@ -937,33 +931,31 @@ Vec3d voronoiUtil(VoronoiPointData& data, int n, const Vec3d* args, bool color) 
         case 4: return (f2 - f1) * col;
         case 5: {
             float scalefactor = (pos2 - pos1).length() / ((pos1 - p).length() + (pos2 - p).length());
-            return smoothstep(f2 - f1, 0, 0.1 * scalefactor)*col;
+            return smoothstep(f2 - f1, 0, 0.1 * scalefactor) * col;
         }
     }
 
     return 0.0;
 }
-Vec3d voronoiFn(VoronoiPointData& data, int n, const Vec3d* args) {
-    return voronoiUtil(data, n, args, false);
-}
+Vec3d voronoiFn(VoronoiPointData& data, int n, const Vec3d* args) { return voronoiUtil(data, n, args, false); }
 const static char* voronoi_docstring =
     "float voronoi(vector v, int type=1,float jitter=0.5, float fbmScale=0, int fbmOctaves=4,float fbmLacunarity=2, "
     "float fbmGain=.5, int distanceType, float exponent)\n"
     "voronoi is a cellular noise pattern. It is a jittered variant of cellnoise.\n"
     "type: 1=random cell value, 2=distance to closest(f1), 3=distance to 2nd closest(f2), 4=f2-f1, 5=borders"
     "distanceType: 1=Euclidean, 2=Manhattan, 3=Chebyshev, 4=Minkowski\n"
-    "exponent: when using minkowski, exponent controls shape. Values between 1 and 2 transition from Manhattan to Euclidean";
+    "exponent: when using minkowski, exponent controls shape. Values between 1 and 2 transition from Manhattan to "
+    "Euclidean";
 
-Vec3d cvoronoiFn(VoronoiPointData& data, int n, const Vec3d* args) {
-    return voronoiUtil(data, n, args, true);
-}
+Vec3d cvoronoiFn(VoronoiPointData& data, int n, const Vec3d* args) { return voronoiUtil(data, n, args, true); }
 const static char* cvoronoi_docstring =
     "float cvoronoi(vector v, int type=1,float jitter=0.5, float fbmScale=0, int fbmOctaves=4,float fbmLacunarity=2, "
     "float fbmGain=.5, int distanceType, float exponent)\n"
     "returns a colored version of voronoi. It is a jittered variant of ccellnoise.\n"
     "type: 1=random cell value, 2=distance to closest(f1), 3=distance to 2nd closest(f2), 4=f2-f1, 5=borders"
     "distanceType: 1=Euclidean, 2=Manhattan, 3=Chebyshev, 4=Minkowski\n"
-    "exponent: when using minkowski, exponent controls shape. Values between 1 and 2 transition from Manhattan to Euclidean";
+    "exponent: when using minkowski, exponent controls shape. Values between 1 and 2 transition from Manhattan to "
+    "Euclidean";
 
 Vec3d pvoronoiFn(VoronoiPointData& data, int n, const Vec3d* args) {
     // args = p, jitter,
@@ -1006,7 +998,8 @@ const static char* pvoronoi_docstring =
     "float fbmGain=.5, int distanceType, float exponent)\n"
     "returns center of voronoi cell.\n"
     "distanceType: 1=Euclidean, 2=Manhattan, 3=Chebyshev, 4=Minkowski\n"
-    "exponent: when using minkowski, exponent controls shape. Values between 1 and 2 transition from Manhattan to Euclidean";
+    "exponent: when using minkowski, exponent controls shape. Values between 1 and 2 transition from Manhattan to "
+    "Euclidean";
 
 class CachedVoronoiFunc : public ExprFuncSimple {
   public:
@@ -1059,7 +1052,7 @@ double dist(int n, const Vec3d* args) {
         bx = args[1][0];
         by = args[1][1];
         bz = args[1][2];
-    } else if (n==4) {
+    } else if (n == 4) {
         ax = args[0][0];
         ay = args[1][0];
         az = 0;
@@ -1073,7 +1066,8 @@ double dist(int n, const Vec3d* args) {
         bx = args[3][0];
         by = args[4][0];
         bz = args[5][0];
-    } else return 0.0;
+    } else
+        return 0.0;
     double x = ax - bx;
     double y = ay - by;
     double z = az - bz;
@@ -1248,7 +1242,7 @@ double chooseIndex(int n, double* params) {
     // NaN protection
     if (key != key) return 0;
     int nvals = n - 1;
-    return params[int(cycle(key,1,nvals))];
+    return params[int(cycle(key, 1, nvals))];
 }
 static const char* chooseIndex_docstring =
     "float chooseIndex(int index,float choice1, float choice2, [...])\n"

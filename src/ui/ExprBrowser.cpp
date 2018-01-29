@@ -270,8 +270,7 @@ ExprBrowser::ExprBrowser(QWidget* parent, ExprEditor* editor)
     // selection mode and signal
     treeNew->setSelectionMode(QAbstractItemView::SingleSelection);
     connect(refreshButton, SIGNAL(clicked()), SLOT(reload()));
-    connect(treeNew->selectionModel(),
-            SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)),
+    connect(treeNew->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)),
             SLOT(handleSelection(const QModelIndex&, const QModelIndex&)));
 }
 

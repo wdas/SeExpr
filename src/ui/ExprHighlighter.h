@@ -78,11 +78,10 @@ class ExprHighlighter : public QSyntaxHighlighter {
         rule.format = functionFormat;
         highlightingRules.append(rule);
 
-        singleLineCommentFormat.setForeground(QColor::fromHsv(210, 64, lightness*.5));
+        singleLineCommentFormat.setForeground(QColor::fromHsv(210, 64, lightness * .5));
         rule.pattern = QRegExp("#[^\n]*");
         rule.format = singleLineCommentFormat;
         highlightingRules.append(rule);
-
     }
 
     void highlightBlock(const QString& text) {

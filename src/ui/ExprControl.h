@@ -186,8 +186,7 @@ class NumberControl : public ExprControl {
     void setValue(float value);
     /// Update values in slider and textbox  given what the model contains
     void updateControl();
-  private
-slots:
+  private slots:
     void checkChanged(bool checked);
     void sliderChanged(int val);
     void editChanged(int id, const QString& text);

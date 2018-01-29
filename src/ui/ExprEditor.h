@@ -75,7 +75,7 @@ class ExprTextEdit : public QTextEdit {
     void hideTip();
 
     virtual void keyPressEvent(QKeyEvent* e);
-    void insertFromMimeData ( const QMimeData * source );
+    void insertFromMimeData(const QMimeData* source);
     void focusInEvent(QFocusEvent* e);
     void focusOutEvent(QFocusEvent* e);
     void mousePressEvent(QMouseEvent* event);

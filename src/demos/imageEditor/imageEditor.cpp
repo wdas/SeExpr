@@ -245,7 +245,7 @@ int main(int argc, char* argv[]) {
     app.setPalette(createDefaultColorPalette());
     app.setFont(QFont("Consolas", 12));
 
-    ImageEditorDialog *dialog = new ImageEditorDialog(0);
+    ImageEditorDialog* dialog = new ImageEditorDialog(0);
     dialog->show();
     app.exec();
     return 0;

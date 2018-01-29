@@ -43,38 +43,37 @@ class ExprAddDialog : public QDialog {
     Q_OBJECT;
 
   public:
-    QLineEdit *variableName;
-    QStackedWidget *stackWidget;
-    QListWidget *listWidget;
-    QLineEdit *intDefault;
-    QLineEdit *intMin;
-    QLineEdit *intMax;
-    QLineEdit *floatDefault;
-    QLineEdit *floatMin;
-    QLineEdit *floatMax;
-    QLineEdit *vectorDefault0;
-    QLineEdit *vectorDefault1;
-    QLineEdit *vectorDefault2;
-    QLineEdit *vectorMin;
-    QLineEdit *vectorMax;
-    QLineEdit *curveLookup;
-    QLineEdit *colorCurveLookup;
-    QLineEdit *animCurveLookup;
-    QLineEdit *animCurveLink;
-    QLineEdit *swatchLookup;
-    QLineEdit *deepWaterLookup;
-    QRadioButton *rainbowPaletteBtn;
-    QRadioButton *grayPaletteBtn;
+    QLineEdit* variableName;
+    QStackedWidget* stackWidget;
+    QListWidget* listWidget;
+    QLineEdit* intDefault;
+    QLineEdit* intMin;
+    QLineEdit* intMax;
+    QLineEdit* floatDefault;
+    QLineEdit* floatMin;
+    QLineEdit* floatMax;
+    QLineEdit* vectorDefault0;
+    QLineEdit* vectorDefault1;
+    QLineEdit* vectorDefault2;
+    QLineEdit* vectorMin;
+    QLineEdit* vectorMax;
+    QLineEdit* curveLookup;
+    QLineEdit* colorCurveLookup;
+    QLineEdit* animCurveLookup;
+    QLineEdit* animCurveLink;
+    QLineEdit* swatchLookup;
+    QLineEdit* deepWaterLookup;
+    QRadioButton* rainbowPaletteBtn;
+    QRadioButton* grayPaletteBtn;
     QColor color;
-    QPushButton *colorWidget;
-    QComboBox *stringTypeWidget;
-    QLineEdit *stringDefaultWidget;
-    QLineEdit *stringNameWidget;
+    QPushButton* colorWidget;
+    QComboBox* stringTypeWidget;
+    QLineEdit* stringDefaultWidget;
+    QLineEdit* stringNameWidget;
 
-    ExprAddDialog(int &count, QWidget *parent = 0);
-    const char *initSwatch();
-  private
-slots:
+    ExprAddDialog(int& count, QWidget* parent = 0);
+    const char* initSwatch();
+  private slots:
     void listIndexChanged(int index);
     void colorChooseClicked();
 };

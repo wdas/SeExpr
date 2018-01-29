@@ -317,12 +317,12 @@ NumberControl::NumberControl(int id, NumberEditable* editable)
     _checkBox = new QCheckBox();
     bool checkState = _numberEditable->v;
     _checkBox->setChecked(checkState);
-    if(_isBool){
+    if (_isBool) {
         hbox->addWidget(_checkBox);
         connect(_checkBox, SIGNAL(toggled(bool)), SLOT(checkChanged(bool)));
         _slider->setVisible(false);
         _edit->setVisible(false);
-    }else{
+    } else {
         hbox->addWidget(_slider, 3);
         hbox->addWidget(_edit);
         _checkBox->setVisible(false);
@@ -334,7 +334,7 @@ NumberControl::NumberControl(int id, NumberEditable* editable)
 }
 void NumberControl::checkChanged(bool checked) {
     if (_updating) return;
-    setValue(checked?1:0);
+    setValue(checked ? 1 : 0);
 }
 
 void NumberControl::sliderChanged(int value) {
@@ -356,7 +356,7 @@ void NumberControl::updateControl() {
     int sliderval = int(_numberEditable->isInt ? _numberEditable->v : _numberEditable->v * 1e5);
     if (sliderval != _slider->value()) _slider->setValue(sliderval);
     _edit->setText(QString("%1").arg(_numberEditable->v, 0, 'f', _numberEditable->isInt ? 0 : 3));
-    if (_isBool){
+    if (_isBool) {
         bool checkState = _numberEditable->v;
         _checkBox->setChecked(checkState);
     }

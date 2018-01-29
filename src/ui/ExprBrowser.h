@@ -69,11 +69,10 @@ class ExprBrowser : public QWidget {
     void expandToDepth(int depth);
     void setApplyOnSelect(bool on) { _applyOnSelect = on; }
 
-signals:
+  signals:
     void selectionChanged(const QString& str);
 
-  public
-slots:
+  public slots:
     void reload();
     bool getExpressionDirs();
     void handleSelection(const QModelIndex& current, const QModelIndex& previous);

@@ -191,10 +191,7 @@ ExprTextEdit::ExprTextEdit(QWidget* parent) : QTextEdit(parent), lastStyleForHig
     _popupEnabledAction->setChecked(true);
 }
 
-void ExprTextEdit::insertFromMimeData(const QMimeData* source)
-{
-    QTextEdit::insertPlainText(source->text());
-}
+void ExprTextEdit::insertFromMimeData(const QMimeData* source) { QTextEdit::insertPlainText(source->text()); }
 
 void ExprTextEdit::focusInEvent(QFocusEvent* e) {
     if (completer) completer->setWidget(this);
