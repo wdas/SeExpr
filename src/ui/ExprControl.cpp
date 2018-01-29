@@ -160,6 +160,16 @@ static const char* fileXPM[] = {"20 20 5 1",
                                 "....############....",
                                 "...................."};
 
+ExprLineEdit::ExprLineEdit(int id, QWidget* parent) : QLineEdit(parent), _id(id), _signaling(0) {
+    connect(this, SIGNAL(textChanged(const QString&)), SLOT(textChangedCB(const QString&)));
+}
+
+void ExprLineEdit::textChangedCB(const QString& text) {
+    _signaling = 1;
+    emit textChanged(_id, text);
+    _signaling = 0;
+}
+
 void ExprSlider::mousePressEvent(QMouseEvent* e) { mouseMoveEvent(e); }
 
 void ExprSlider::mouseMoveEvent(QMouseEvent* e) {
@@ -284,6 +294,7 @@ NumberControl::NumberControl(int id, NumberEditable* editable)
     : ExprControl(id, editable, false), _numberEditable(editable) {
     // slider
     float smin = editable->min, smax = editable->max;
+    _isBool = _numberEditable->isInt && smin == 0 && smax == 1;
     if (!_numberEditable->isInt) {
         smin *= 1e5;
         smax *= 1e5;
@@ -297,16 +308,33 @@ NumberControl::NumberControl(int id, NumberEditable* editable)
     _slider->setMinimumWidth(0);
     _slider->setFixedHeight(16);
     _slider->setFocusPolicy(Qt::ClickFocus);
-    hbox->addWidget(_slider, 3);
+
     // edit box
     _edit = new ExprLineEdit(0, this);
     _edit->setMinimumWidth(0);
     _edit->setFixedHeight(16);
-    hbox->addWidget(_edit);
+    _edit->setFixedWidth(80);
+    _checkBox = new QCheckBox();
+    bool checkState = _numberEditable->v;
+    _checkBox->setChecked(checkState);
+    if(_isBool){
+        hbox->addWidget(_checkBox);
+        connect(_checkBox, SIGNAL(toggled(bool)), SLOT(checkChanged(bool)));
+        _slider->setVisible(false);
+        _edit->setVisible(false);
+    }else{
+        hbox->addWidget(_slider, 3);
+        hbox->addWidget(_edit);
+        _checkBox->setVisible(false);
+    }
     connect(_edit, SIGNAL(textChanged(int, const QString&)), SLOT(editChanged(int, const QString&)));
     connect(_slider, SIGNAL(valueChanged(int)), SLOT(sliderChanged(int)));
     // show current values
     updateControl();
+}
+void NumberControl::checkChanged(bool checked) {
+    if (_updating) return;
+    setValue(checked?1:0);
 }
 
 void NumberControl::sliderChanged(int value) {
@@ -328,6 +356,10 @@ void NumberControl::updateControl() {
     int sliderval = int(_numberEditable->isInt ? _numberEditable->v : _numberEditable->v * 1e5);
     if (sliderval != _slider->value()) _slider->setValue(sliderval);
     _edit->setText(QString("%1").arg(_numberEditable->v, 0, 'f', _numberEditable->isInt ? 0 : 3));
+    if (_isBool){
+        bool checkState = _numberEditable->v;
+        _checkBox->setChecked(checkState);
+    }
     _updating = 0;
 }
 

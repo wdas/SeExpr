@@ -31,11 +31,66 @@
 #include <fstream>
 
 #define P3D_CONFIG_ENVVAR "P3D_CONFIG_PATH"
+static const char* arrow_left_xpm[]={
+    "16 16 9 1",
+    "g c #808080",
+    "b c #c0c000",
+    "e c #808080",
+    "# c #000000",
+    "c c #ffff00",
+    ". c None",
+    "a c #585858",
+    "f c #606060",
+    "d c #a0a0a0",
+    "................",
+    "................",
+    "......##........",
+    ".....#d#........",
+    "....#de#........",
+    "...#dee#######..",
+    "..#deeeeddddd#..",
+    ".#deeeeeeeeef#..",
+    ".#eeeeeeeeeef#..",
+    "..#eeefffffff#..",
+    "...#eef#######..",
+    "....#ef#........",
+    ".....#f#........",
+    "......##........",
+    "................",
+    "................"};
+static const char* arrow_right_xpm[]={
+    "16 16 9 1",
+    "g c #808080",
+    "b c #c0c000",
+    "e c #808080",
+    "# c #000000",
+    "c c #ffff00",
+    ". c None",
+    "a c #585858",
+    "f c #606060",
+    "d c #a0a0a0",
+    "................",
+    "................",
+    "........##......",
+    "........#d#.....",
+    "........#de#....",
+    "..#######eee#...",
+    "..#dddddeeeee#..",
+    "..#deeeeeeeeee#.",
+    "..#deeeeeeeeef#.",
+    "..#dfffffeeef#..",
+    "..#######def#...",
+    "........#df#....",
+    "........#d#.....",
+    "........##......",
+    "................",
+    "................"};
 
-ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0) {
+ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0),  currhistitem(0) {
     this->setMinimumWidth(600);
     QVBoxLayout* rootLayout = new QVBoxLayout(0);
     rootLayout->setMargin(2);
+    rootLayout->setSpacing(2);
     this->setLayout(rootLayout);
 
     showEditorTimer = new QTimer();
@@ -49,6 +104,8 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0) 
 
     QWidget* previewLibraryWidget = new QWidget();
     QHBoxLayout* previewLibraryLayout = new QHBoxLayout();
+    previewLibraryLayout->setSpacing(2);
+    previewLibraryLayout->setMargin(2);
     previewLibraryWidget->setLayout(previewLibraryLayout);
     topTabWidget->addTab(previewLibraryWidget, "Preview / Library");
 
@@ -63,11 +120,13 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0) 
     leftWidget->setFixedWidth(450);
     QVBoxLayout* leftLayout = new QVBoxLayout();
     leftLayout->setMargin(0);
+    leftLayout->setSpacing(2);
     leftWidget->setLayout(leftLayout);
     QHBoxLayout* previewLayout = new QHBoxLayout();
-    grapher = new ExprGrapherWidget(this, 200, 200);
+    grapher = new ExprGrapherWidget(this, 256, 256);
     previewLayout->addWidget(grapher, 0);
     previewCommentLabel = new QLabel();
+    previewCommentLabel->setWordWrap(true);
     previewLayout->addWidget(previewCommentLabel, 1, Qt::AlignLeft | Qt::AlignTop);
     leftLayout->addLayout(previewLayout);
     previewLibraryLayout->addWidget(leftWidget);
@@ -79,6 +138,31 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0) 
     buttonBarLayout->setMargin(1);
     previewButton = new QPushButton("Preview");
     buttonBarLayout->addWidget(previewButton);
+
+
+    QPushButton* histBack = new QPushButton(this);
+    buttonBarLayout->addWidget(histBack);
+    histBack->setIcon(QPixmap( arrow_left_xpm ));
+    histBack->setToolTip("Previous In History");
+    histBack->setEnabled(0);
+    histBack->setFixedSize(24,24);
+    QPushButton* histForw = new QPushButton(this);
+    buttonBarLayout->addWidget(histForw);
+    histForw->setIcon(QPixmap( arrow_right_xpm ));
+    histForw->setToolTip("Next In History");
+    histForw->setEnabled(0);
+    histForw->setFixedSize(24,24);
+    history.push_back("");
+    connect(this, SIGNAL(backwardAvailable(bool)), histBack,
+            SLOT(setEnabled(bool)));
+    connect(this, SIGNAL(forwardAvailable(bool)), histForw,
+            SLOT(setEnabled(bool)));
+    QPushButton* reloadExprPb = new QPushButton("Reload");
+    reloadExprPb->setFixedHeight(24);
+    reloadExprPb->setToolTip("Reload current expression");
+    buttonBarLayout->addWidget(reloadExprPb);
+    connect(reloadExprPb, SIGNAL(clicked()), this, SLOT(reloadExpression()));
+
     saveButton = new QPushButton("Save");
     buttonBarLayout->addWidget(saveButton);
     saveAsButton = new QPushButton("Save As");
@@ -93,14 +177,7 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0) 
     controls = new ExprControlCollection();
 
     // controls
-    QScrollArea* scrollArea = new QScrollArea();
-    scrollArea->setWidget(controls);
-    // scrollArea->setWidget(new QLabel("test\nweird\nfds\nfdsahsha\nfsdajdlsa\nfasdjjhsafd\nfasdhjdfsa\nfdasjdfsha"));
-    scrollArea->setFocusPolicy(Qt::NoFocus);
-    scrollArea->setMinimumHeight(100);
-    scrollArea->setFixedWidth(450);
-    scrollArea->setWidgetResizable(true);
-    leftLayout->addWidget(scrollArea, 1);
+    leftLayout->addWidget(controls, 1);
 
     // make button bar
     editor = new ExprEditor(this, controls);
@@ -135,6 +212,9 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0) 
     connect(saveButton, SIGNAL(clicked()), browser, SLOT(saveExpression()));
     connect(saveAsButton, SIGNAL(clicked()), browser, SLOT(saveExpressionAs()));
     connect(saveLocalButton, SIGNAL(clicked()), browser, SLOT(saveLocalExpressionAs()));
+    connect(histBack, SIGNAL(clicked()), SLOT(histBackward()));
+    connect(histForw, SIGNAL(clicked()), SLOT(histForward()));
+    connect(browser, SIGNAL(selectionChanged(const QString &)), SLOT(selectionChanged(const QString &)));
 }
 
 void ExprDialog::showEditor(int idx) {
@@ -188,6 +268,7 @@ void ExprDialog::verifiedApply() {
         Q_UNUSED(ret);
         if (msgBox.clickedButton() == okButton) emit expressionApplied();
     }
+    histAdd();
 }
 
 void ExprDialog::verifiedAccept() {
@@ -210,6 +291,16 @@ void ExprDialog::verifiedAccept() {
             accept();
         }
     }
+}
+
+void ExprDialog::reloadExpression()
+{
+    if (currentexprfile=="") return;
+
+    std::ifstream file(currentexprfile.toStdString().c_str());
+    std::string fileContents((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    editor->setExpr(fileContents, false);
+    histAdd();
 }
 
 void ExprDialog::setupHelp(QTabWidget* tab) {
@@ -287,36 +378,30 @@ void ExprDialog::applyExpression() {
     grapher->expr.setExpr(editor->getExpr());
     grapher->update();
 
-    // set the label widget to mention that variables will not be previewed
+    // set the label widget to mention that functions and variables will not be previewed
     bool empty = true;
-    if (grapher->expr.varmap.size() > 0) {
-        std::stringstream s;
-        s << "<b>Variables not supported in preview (assumed zero):</b><br>";
-        int count = 0;
-        for (BasicExpression::VARMAP::iterator i = grapher->expr.varmap.begin(); i != grapher->expr.varmap.end(); ++i) {
-            count++;
-            s << "$" << i->first << " ";
-            if (count % 4 == 0) s << "<br>";
+    std::stringstream s;
+    if (grapher->expr.varmap.size() > 0 || grapher->expr.funcmap.size() > 0){
+        s << "<b>Variables/Functions not supported in preview (assumed zero):</b><br>";
+        if (grapher->expr.varmap.size() > 0) {
+            for (BasicExpression::VARMAP::iterator i = grapher->expr.varmap.begin(); i != grapher->expr.varmap.end(); ++i) {
+                s << "$" << i->first << " ";
+            }
+            empty = false;
         }
-        previewCommentLabel->setText(s.str().c_str());
-        empty = false;
-    } else
-        previewCommentLabel->setText("");
-    // set the label widget to mention that variables will not be previewed
-    if (grapher->expr.funcmap.size() > 0) {
-        std::stringstream s;
-        s << "<b>Functions not supported in preview (assumed zero):</b><br>";
-        int count = 0;
-        for (BasicExpression::FUNCMAP::iterator i = grapher->expr.funcmap.begin(); i != grapher->expr.funcmap.end();
-             ++i) {
-            count++;
-            s << "" << i->first << "() ";
-            if (count % 4 == 0) s << "<br>";
+        if (grapher->expr.funcmap.size() > 0) {
+            for (BasicExpression::FUNCMAP::iterator i = grapher->expr.funcmap.begin(); i != grapher->expr.funcmap.end();
+                 ++i) {
+                s << "" << i->first << "() ";
+            }
+            empty = false;
         }
-        previewCommentLabel->setText(s.str().c_str());
-        empty = false;
     }
-    if (empty) previewCommentLabel->setText("");
+    if (empty) {
+        previewCommentLabel->setText("");
+    } else {
+        previewCommentLabel->setText(s.str().c_str());
+    }
 
     // put errors into editor module
     bool valid = grapher->expr.isValid();
@@ -332,6 +417,74 @@ void ExprDialog::applyExpression() {
 void ExprDialog::clearExpression() {
     browser->clearSelection();
     editor->setExpr("", false);
-    grapher->expr.setExpr("");
-    grapher->update();
+    applyExpression();
+}
+
+void removeDuplicates(QStringList& strlist)
+{
+    if (strlist.size()<2) return;
+    QStringList::Iterator it = strlist.begin();
+    QString last = *it;
+    std::vector<QStringList::Iterator> deletelist;
+    for ( ++it; it != strlist.end(); ++it )
+    {
+        if (*it==last) deletelist.push_back(it);
+        last = *it;
+    }
+    for (int i=0; i<deletelist.size(); i++) strlist.erase(deletelist[i]);
+}
+
+void ExprDialog::enableBackForwards()
+{
+    //std::cout << currhistitem << " " << history.size() << "\n";
+    if (currhistitem<=0 || history.size()<2)
+        emit backwardAvailable(false);
+    if (currhistitem>0 && history.size()>=2)
+        emit backwardAvailable(true);
+
+    if (currhistitem>=history.size()-1 || history.size()<2)
+        emit forwardAvailable(false);
+    if (currhistitem<history.size()-1 && history.size()>=2)
+        emit forwardAvailable(true);
+}
+void ExprDialog::selectionChanged(const QString& str) {
+
+    currentexprfile = str;
+    histAdd();
+    previewExpression();
+}
+
+
+void ExprDialog::histBackward()
+{
+    if (history.isEmpty() || currhistitem<=0) return;
+    QString oldtext = editor->getExpr().c_str();
+    if (currhistitem==history.size()-1) history[currhistitem] = editor->getExpr().c_str();
+    currhistitem--;
+    editor->setExpr(history[currhistitem].toStdString());
+    emit forwardAvailable(true);
+    removeDuplicates(history);
+    currhistitem = std::min(currhistitem,(int)history.size()-1);
+    enableBackForwards();
+    if (oldtext==editor->getExpr().c_str() && currhistitem>0) histBackward();
+}
+
+void ExprDialog::histForward()
+{
+    if (history.isEmpty() || currhistitem>=history.size()-1) return;
+    currhistitem++;
+    editor->setExpr(history[currhistitem].toStdString());
+    enableBackForwards();
+}
+
+void ExprDialog::histAdd()
+{
+    if (history.isEmpty() || editor->getExpr()=="") return;
+
+    history.last() = editor->getExpr().c_str();
+    currhistitem = history.size();
+    history.push_back("");
+    removeDuplicates(history);
+    currhistitem = std::min(currhistitem,(int)history.size()-1);
+    enableBackForwards();
 }
