@@ -32,6 +32,7 @@ ExprGrapherWidget::ExprGrapherWidget(QWidget* parent, int width, int height)
     setFixedSize(width, height + 30);
     QVBoxLayout* vbox = new QVBoxLayout;
     vbox->setMargin(0);
+    vbox->setMargin(2);
     setLayout(vbox);
     vbox->addWidget(view, 0, Qt::AlignLeft | Qt::AlignTop);
     QHBoxLayout* hbox = new QHBoxLayout;
@@ -41,6 +42,7 @@ ExprGrapherWidget::ExprGrapherWidget(QWidget* parent, int width, int height)
     float xmin, xmax, ymin, ymax, z;
     view->getWindow(xmin, xmax, ymin, ymax, z);
     scale = new QLineEdit();
+    scale->setToolTip("sets the preview scale");
     QDoubleValidator* valValidator = new QDoubleValidator(0.0, 10000000.0, 6, scale);
     scale->setValidator(valValidator);
     scale->setValidator(valValidator);
@@ -50,7 +52,7 @@ ExprGrapherWidget::ExprGrapherWidget(QWidget* parent, int width, int height)
     connect(view, SIGNAL(scaleValueManipulated()), this, SLOT(scaleValueManipulated()));
     connect(view, SIGNAL(clicked()), this, SLOT(forwardPreview()));
 
-    hbox->addWidget(new QLabel("Width"), 0);
+    hbox->addWidget(new QLabel("scale"), 0);
     hbox->addWidget(scale, 0);
 }
 

@@ -63,13 +63,18 @@ class ExprBrowser : public QWidget {
     std::string getSelectedPath();
     void selectPath(const char* path);
     void addUserExpressionPath(const std::string& context);
-    bool getExpressionDirs();
     bool getExpressionDirs(const std::string& context);
     void setSearchPath(const QString& context, const QString& path);
     void expandAll();
     void expandToDepth(int depth);
     void setApplyOnSelect(bool on) { _applyOnSelect = on; }
+
+  signals:
+    void selectionChanged(const QString& str);
+
   public slots:
+    void reload();
+    bool getExpressionDirs();
     void handleSelection(const QModelIndex& current, const QModelIndex& previous);
     void update();
     void clear();

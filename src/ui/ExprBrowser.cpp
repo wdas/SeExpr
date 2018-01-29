@@ -238,7 +238,7 @@ class ExprTreeFilterModel : public QSortFilterProxyModel {
 ExprBrowser::~ExprBrowser() { delete treeModel; }
 
 ExprBrowser::ExprBrowser(QWidget* parent, ExprEditor* editor)
-    : QWidget(parent), editor(editor), _context(""), _searchPath(""), _applyOnSelect(true) {
+    : QWidget(parent), editor(editor), _context(""), _searchPath(""), _applyOnSelect(false) {
     QVBoxLayout* rootLayout = new QVBoxLayout;
     rootLayout->setMargin(0);
     this->setLayout(rootLayout);
@@ -250,6 +250,11 @@ ExprBrowser::ExprBrowser(QWidget* parent, ExprEditor* editor)
     QPushButton* clearFilterButton = new QPushButton("X");
     clearFilterButton->setFixedWidth(24);
     searchAndClearLayout->addWidget(clearFilterButton, 1);
+    // TODO: use icon for reload button
+    QPushButton* refreshButton = new QPushButton("reload");
+    refreshButton->setFixedHeight(20);
+    refreshButton->setFocusPolicy(Qt::NoFocus);
+    searchAndClearLayout->addWidget(refreshButton);
     rootLayout->addLayout(searchAndClearLayout);
     connect(clearFilterButton, SIGNAL(clicked()), SLOT(clearFilter()));
     // model of tree
@@ -264,6 +269,7 @@ ExprBrowser::ExprBrowser(QWidget* parent, ExprEditor* editor)
     rootLayout->addWidget(treeNew);
     // selection mode and signal
     treeNew->setSelectionMode(QAbstractItemView::SingleSelection);
+    connect(refreshButton, SIGNAL(clicked()), SLOT(reload()));
     connect(treeNew->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)),
             SLOT(handleSelection(const QModelIndex&, const QModelIndex&)));
 }
@@ -309,6 +315,7 @@ void ExprBrowser::handleSelection(const QModelIndex& current, const QModelIndex&
             std::ifstream file(path.toStdString().c_str());
             std::string fileContents((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
             editor->setExpr(fileContents, _applyOnSelect);
+            emit selectionChanged(path);
         }
     }
 }
@@ -402,6 +409,11 @@ void ExprBrowser::addUserExpressionPath(const std::string& context) {
             addPath("My Expressions", path);
         }
     }
+}
+
+void ExprBrowser::reload() {
+    getExpressionDirs();
+    expandAll();
 }
 
 /*

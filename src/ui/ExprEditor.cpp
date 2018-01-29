@@ -43,6 +43,7 @@
 #include <QTreeView>
 #include <QAction>
 #include <QMenu>
+#include <QMimeData>
 
 #include <SeExpr2/Expression.h>
 #include <SeExpr2/ExprNode.h>
@@ -57,16 +58,6 @@
 #include "ExprColorCurve.h"
 #include "ExprControl.h"
 #include "ExprPopupDoc.h"
-
-ExprLineEdit::ExprLineEdit(int id, QWidget* parent) : QLineEdit(parent), _id(id), _signaling(0) {
-    connect(this, SIGNAL(textChanged(const QString&)), SLOT(textChangedCB(const QString&)));
-}
-
-void ExprLineEdit::textChangedCB(const QString& text) {
-    _signaling = 1;
-    emit textChanged(_id, text);
-    _signaling = 0;
-}
 
 void ExprEditor::controlChanged(int id) {
     QString newText = exprTe->toPlainText();
@@ -199,6 +190,8 @@ ExprTextEdit::ExprTextEdit(QWidget* parent) : QTextEdit(parent), lastStyleForHig
     _popupEnabledAction->setCheckable(true);
     _popupEnabledAction->setChecked(true);
 }
+
+void ExprTextEdit::insertFromMimeData(const QMimeData* source) { QTextEdit::insertPlainText(source->text()); }
 
 void ExprTextEdit::focusInEvent(QFocusEvent* e) {
     if (completer) completer->setWidget(this);

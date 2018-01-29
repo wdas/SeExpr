@@ -174,16 +174,20 @@ class NumberControl : public ExprControl {
     ExprSlider* _slider;
     /// Text box for the number
     ExprLineEdit* _edit;
+    QCheckBox* _checkBox;
+    bool _isBool;
 
   public:
     NumberControl(int id, NumberEditable* number);
 
   private:
+    bool isBool();
     /// Update the model with the value and notify the collection
     void setValue(float value);
     /// Update values in slider and textbox  given what the model contains
     void updateControl();
   private slots:
+    void checkChanged(bool checked);
     void sliderChanged(int val);
     void editChanged(int id, const QString& text);
 };

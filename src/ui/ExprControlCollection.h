@@ -30,6 +30,8 @@
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QSlider>
+#include <QListWidget>
+#include <QStackedWidget>
 #include "ExprControl.h"
 
 class QVBoxLayout;
@@ -42,7 +44,8 @@ class ExprAddDialog : public QDialog {
 
   public:
     QLineEdit* variableName;
-    QTabWidget* tabWidget;
+    QStackedWidget* stackWidget;
+    QListWidget* listWidget;
     QLineEdit* intDefault;
     QLineEdit* intMin;
     QLineEdit* intMax;
@@ -71,6 +74,7 @@ class ExprAddDialog : public QDialog {
     ExprAddDialog(int& count, QWidget* parent = 0);
     const char* initSwatch();
   private slots:
+    void listIndexChanged(int index);
     void colorChooseClicked();
 };
 
