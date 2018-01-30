@@ -55,7 +55,7 @@ if(Qt5_FOUND OR QT4_FOUND)
         ExprShortEdit.h ExprDeepWater.h)
 
     set(EDITOR_CPPS ExprFileDialog.cpp ExprControl.cpp
-        ExprEditor.cpp ExprMain.cpp ExprShortEdit.cpp
+        ExprEditor.cpp ExprShortEdit.cpp
         ExprCurve.cpp  ExprColorCurve.cpp ExprColorSwatch.cpp
         EditableExpression.cpp ExprPopupDoc.cpp
         ExprCompletionModel.cpp ExprDialog.cpp

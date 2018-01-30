@@ -19,25 +19,20 @@
 #include <string>
 
 #include <QApplication>
-#include "ExprDialog.h"
+#include <QStyleFactory>
+#include <ExprDialog.h>
+#include "common/palette.h"
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
+    app.setStyle(QStyleFactory::create("Fusion"));
+    app.setPalette(createDefaultColorPalette());
+    app.setFont(QFont("Consolas", 12));
+
     ExprDialog dialog(0);
     dialog.setWindowTitle("Expression Editor 2");
     dialog.show();
-
-    if (argc < 2 || std::string(argv[1]) != "-automatedTest") {
-        if (dialog.exec() == QDialog::Accepted)
-            std::cerr << "returned expression: " << dialog.getExpressionString() << std::endl;
-    } else {
-        std::string str = "$u + $v";
-        dialog.setExpressionString(str);
-        if (dialog.getExpressionString() != str) {
-            std::cerr << "test failed: " << dialog.getExpressionString() << " != " << str << std::endl;
-            return 1;
-        }
-    }
+    app.exec();
 
     return 0;
 }
