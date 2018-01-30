@@ -38,7 +38,7 @@
 #include <ExprBrowser.h>
 #include <Expression.h>
 
-#include "palette.h"
+#include "../common/palette.h"
 #include "ImageEditorDialog.h"
 
 //-- IMAGE SYNTHESIZER CLASSES AND METHODS --//
