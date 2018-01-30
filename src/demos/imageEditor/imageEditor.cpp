@@ -240,7 +240,11 @@ void ImageEditorDialog::applyExpression() {
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
-    ImageEditorDialog *dialog = new ImageEditorDialog(0);
+    app.setStyle(QStyleFactory::create("Fusion"));
+    app.setPalette(createDefaultColorPalette());
+    app.setFont(QFont("Consolas", 12));
+
+    ImageEditorDialog* dialog = new ImageEditorDialog(0);
     dialog->show();
     app.exec();
     return 0;
