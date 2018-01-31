@@ -32,11 +32,10 @@ class ImageEditorDialog : public QDialog {
     ImageEditorDialog(QWidget* parent = 0);
 
   private:
-    QLabel *_imageLabel;
-    ExprEditor *_editor;
+    QLabel* _imageLabel;
+    ExprEditor* _editor;
     png::Image<png::RGB32Pixel> _image;
     ImageSynthesizer<png::Image<png::RGB32Pixel>> _imageSynthesizer;
-  private
-slots:
+  private slots:
     void applyExpression();
 };

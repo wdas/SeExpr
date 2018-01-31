@@ -43,7 +43,7 @@
 
 //-- IMAGE EDITOR DIALOG METHODS --//
 
-ImageEditorDialog::ImageEditorDialog(QWidget *parent) : QDialog(parent), _image(256, 256), _imageSynthesizer(_image) {
+ImageEditorDialog::ImageEditorDialog(QWidget* parent) : QDialog(parent), _image(256, 256), _imageSynthesizer(_image) {
     this->setWindowTitle("Image Synthesis Editor");
 
     // Image Previewer
