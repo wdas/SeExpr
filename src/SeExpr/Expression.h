@@ -127,14 +127,15 @@ class Expression {
     inline bool isValid() const { return evaluator()->isValid(); }
 
     const ExprNode* parseTree() const {
+        if (_parseTree) return _parseTree.get();
         parse();
-        return _parseTree;
+        return _parseTree.get();
     }
 
     Evaluator* evaluator() const {
-        if (_evaluator) return _evaluator;
+        if (_evaluator) return _evaluator.get();
         prep();
-        return _evaluator;
+        return _evaluator.get();
     }
 
     /** Get parse error (if any).  First call syntaxOK or isValid
@@ -254,7 +255,7 @@ class Expression {
     /** Variable environment */
     mutable ExprVarEnvBuilder _envBuilder;
     /** Parse tree (null if syntax is bad). */
-    mutable ExprNode* _parseTree;
+    mutable std::unique_ptr<ExprNode> _parseTree;
 
     /** Prepare expression (bind vars/functions, etc.)
     and remember error if any */
@@ -284,7 +285,7 @@ class Expression {
     /** Whether or not we have unsafe functions */
     mutable std::vector<std::string> _threadUnsafeFunctionCalls;
 
-    mutable Evaluator* _evaluator;
+    mutable std::unique_ptr<Evaluator> _evaluator;
 
     // Var block creator
     const VarBlockCreator* _varBlockCreator = 0;

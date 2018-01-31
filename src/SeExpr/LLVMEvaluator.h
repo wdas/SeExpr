@@ -85,7 +85,12 @@ class LLVMEvaluator : public Evaluator {
     std::unique_ptr<llvm::ExecutionEngine> TheExecutionEngine;
 
   public:
-    LLVMEvaluator() : _debugging(false) {}
+    LLVMEvaluator()
+        : _debugging(false)
+        , _llvmEvalFP(nullptr)
+        , _llvmEvalStr(nullptr)
+        , _llvmContext(nullptr)
+        , TheExecutionEngine(nullptr) {}
 
     virtual void setDebugging(bool debugging) override { _debugging = debugging; }
 
