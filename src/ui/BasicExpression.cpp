@@ -37,9 +37,9 @@ void BasicExpression::clearVars() {
     funcmap.clear();
 }
 
-void BasicExpression::setExpr(const std::string& str) {
+void BasicExpression::reset() {
+    Expression::reset();
     clearVars();
-    Expression::setExpr(str);
 }
 
 SeExpr2::ExprVarRef* BasicExpression::resolveVar(const std::string& name) const {
