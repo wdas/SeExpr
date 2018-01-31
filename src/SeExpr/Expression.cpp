@@ -120,8 +120,8 @@ Expression::~Expression() { reset(); }
 
 void Expression::reset() {
     std::lock_guard<std::mutex> guard(_prepMutex);
-    delete _evaluator;
-    delete _parseTree;
+    _evaluator.reset(nullptr);
+    _parseTree.reset(nullptr);
     _parseError = "";
     _vars.clear();
     _funcs.clear();
@@ -173,12 +173,14 @@ bool Expression::usesFunc(const std::string& name) const {
 void Expression::parse() const {
     if (_parseTree) return;
     int tempStartPos, tempEndPos;
-    ExprParseAction(_parseTree, _parseError, tempStartPos, tempEndPos, _comments, this, _expression.c_str(), _wantVec);
-    if (!_parseTree) {
+    ExprNode* parseTree_ = nullptr;
+    ExprParseAction(parseTree_, _parseError, tempStartPos, tempEndPos, _comments, this, _expression.c_str(), _wantVec);
+    if (!parseTree_) {
         addError(_parseError, tempStartPos, tempEndPos);
-        delete _parseTree;
+        delete parseTree_;
     } else {
         // TODO: need promote
+        _parseTree.reset(parseTree_);
         _returnType = _parseTree->type();
     }
 }
@@ -219,7 +221,7 @@ void Expression::prep() const {
 
         evaluator = (strategy == UseInterpreter) ? (Evaluator*)new Interpreter() : (Evaluator*)new LLVMEvaluator();
         evaluator->setDebugging(debugging);
-        error = !evaluator->prep(_parseTree, _desiredReturnType);
+        error = !evaluator->prep(_parseTree.get(), _desiredReturnType);
     }
 
     if (error) {
@@ -252,7 +254,7 @@ void Expression::prep() const {
     }
 
     if (!evaluator) evaluator = new NullEvaluator();
-    _evaluator = evaluator;
+    _evaluator.reset(evaluator);
     assert(_evaluator);
 }
 

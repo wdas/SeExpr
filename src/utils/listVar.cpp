@@ -56,7 +56,7 @@ class ListVarExpr : public Expression {
 
     void walk() {
         _hasWalked = true;
-        walker.walk(_parseTree);
+        walker.walk(parseTree());
     };
 
     bool hasWalked() { return _hasWalked; };
