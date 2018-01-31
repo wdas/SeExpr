@@ -82,9 +82,9 @@ class BasicExpression : public SeExpr2::Expression {
     BasicExpression(const std::string& expr, const SeExpr2::ExprType& type = SeExpr2::ExprType().FP(3));
     virtual ~BasicExpression();
 
-    SeExpr2::ExprVarRef* resolveVar(const std::string& name) const;
-    SeExpr2::ExprFunc* resolveFunc(const std::string& name) const;
-    void setExpr(const std::string& str);
+    virtual void reset() override;
+    virtual SeExpr2::ExprVarRef* resolveVar(const std::string& name) const override;
+    virtual SeExpr2::ExprFunc* resolveFunc(const std::string& name) const override;
     void clearVars();
 };
 

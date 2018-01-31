@@ -86,11 +86,8 @@ class LLVMEvaluator : public Evaluator {
 
   public:
     LLVMEvaluator()
-        : _debugging(false)
-        , _llvmEvalFP(nullptr)
-        , _llvmEvalStr(nullptr)
-        , _llvmContext(nullptr)
-        , TheExecutionEngine(nullptr) {}
+        : _debugging(false), _llvmEvalFP(nullptr), _llvmEvalStr(nullptr), _llvmContext(nullptr),
+          TheExecutionEngine(nullptr) {}
 
     virtual void setDebugging(bool debugging) override { _debugging = debugging; }
 
