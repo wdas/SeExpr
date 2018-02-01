@@ -16,8 +16,9 @@
 */
 #pragma once
 
-#include <vector>
+#include <iostream>
 #include <memory>
+#include <vector>
 
 /// A Simple AST class for representing SeExpr, useful for editors
 enum class ASTType {

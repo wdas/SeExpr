@@ -38,7 +38,7 @@
 #include <ExprBrowser.h>
 #include <Expression.h>
 
-#include "palette.h"
+#include "../common/palette.h"
 #include "ImageEditorDialog.h"
 
 //-- IMAGE SYNTHESIZER CLASSES AND METHODS --//
@@ -241,7 +241,7 @@ void ImageEditorDialog::applyExpression() {
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
-    app.setStyle(QStyleFactory::create("Plastique"));
+    app.setStyle(QStyleFactory::create("Fusion"));
     app.setPalette(createDefaultColorPalette());
     app.setFont(QFont("Consolas", 12));
 

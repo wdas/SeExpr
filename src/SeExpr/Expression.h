@@ -106,11 +106,11 @@ class Expression {
 
     /** Sets desired return value.
         This will allow the evaluation to potentially be optimized. */
-    void setDesiredReturnType(const ExprType& type);
+    virtual void setDesiredReturnType(const ExprType& type) final;
 
     /** Set expression string to e.
         This invalidates all parsed state. */
-    void setExpr(const std::string& e);
+    virtual void setExpr(const std::string& e) final;
 
     //! Get the string that this expression is currently set to evaluate
     const std::string& getExpr() const { return _expression; }
@@ -127,14 +127,15 @@ class Expression {
     inline bool isValid() const { return evaluator()->isValid(); }
 
     const ExprNode* parseTree() const {
+        if (_parseTree) return _parseTree.get();
         parse();
-        return _parseTree;
+        return _parseTree.get();
     }
 
     Evaluator* evaluator() const {
-        if (_evaluator) return _evaluator;
+        if (_evaluator) return _evaluator.get();
         prep();
-        return _evaluator;
+        return _evaluator.get();
     }
 
     /** Get parse error (if any).  First call syntaxOK or isValid
@@ -197,7 +198,8 @@ class Expression {
     inline const char* evalStr(VarBlock* varBlock = nullptr) const { return evaluator()->evalStr(varBlock); }
 
     /** Reset expr - force reparse/rebind */
-    void reset();
+    // if overridden, you must still call Expression::reset()!
+    virtual void reset();
 
     /** override resolveVar to add external variables */
     virtual ExprVarRef* resolveVar(const std::string& /*name*/) const { return 0; }
@@ -218,10 +220,10 @@ class Expression {
 
     /** An immutable reference to access context parameters from say ExprFuncX's */
     const Context& context() const { return *_context; }
-    void setContext(const Context& context);
+    virtual void setContext(const Context& context) final;
 
     /** Set variable block creator (lifetime of expression must be <= block) **/
-    void setVarBlockCreator(const VarBlockCreator* varBlockCreator);
+    virtual void setVarBlockCreator(const VarBlockCreator* varBlockCreator) final;
 
     const VarBlockCreator* varBlockCreator() const { return _varBlockCreator; }
 
@@ -254,7 +256,7 @@ class Expression {
     /** Variable environment */
     mutable ExprVarEnvBuilder _envBuilder;
     /** Parse tree (null if syntax is bad). */
-    mutable ExprNode* _parseTree;
+    mutable std::unique_ptr<ExprNode> _parseTree;
 
     /** Prepare expression (bind vars/functions, etc.)
     and remember error if any */
@@ -284,7 +286,7 @@ class Expression {
     /** Whether or not we have unsafe functions */
     mutable std::vector<std::string> _threadUnsafeFunctionCalls;
 
-    mutable Evaluator* _evaluator;
+    mutable std::unique_ptr<Evaluator> _evaluator;
 
     // Var block creator
     const VarBlockCreator* _varBlockCreator = 0;
