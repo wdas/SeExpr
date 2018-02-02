@@ -72,10 +72,7 @@ class ExprDialog : public QDialog {
 
     std::string getExpressionString() { return editor->getExpr(); }
 
-    void setExpressionString(const std::string& str) {
-        clearExpression();
-        editor->setExpr(str, /*apply*/ false);
-    }
+    void setExpressionString(const std::string& str) { editor->setExpr(str); }
 
     void show();
     int exec();
