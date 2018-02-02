@@ -78,11 +78,7 @@ void ExprGrapherWidget::scaleValueManipulated() {
     scale->setText(QString("%1").arg(.5 * (xmax - xmin)));
 }
 
-void ExprGrapherWidget::update() {
-    expr.setDesiredReturnType(SeExpr2::ExprType().FP(3));
-
-    view->update();
-}
+void ExprGrapherWidget::update() { view->update(); }
 
 void ExprGrapherWidget::forwardPreview() { emit preview(); }
 

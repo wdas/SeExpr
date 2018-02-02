@@ -332,6 +332,7 @@ void ExprDialog::applyExpression() {
     editor->clearErrors();
     // set new expression
     grapher->expr.setExpr(editor->getExpr());
+    grapher->expr.setDesiredReturnType(SeExpr2::ExprType().FP(3));
     grapher->update();
 
     // set the label widget to mention that functions and variables will not be previewed
