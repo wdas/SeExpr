@@ -134,7 +134,14 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0),
     controls = new ExprControlCollection();
 
     // controls
-    leftLayout->addWidget(controls, 1);
+    //leftLayout->addWidget(controls, 1);
+    QScrollArea* scrollArea = new QScrollArea();
+    scrollArea->setWidget(controls);
+    scrollArea->setFocusPolicy(Qt::NoFocus);
+    scrollArea->setMinimumHeight(100);
+    scrollArea->setFixedWidth(450);
+    scrollArea->setWidgetResizable(true);
+    leftLayout->addWidget(scrollArea, 1);
 
     // make button bar
     editor = new ExprEditor(this, controls);

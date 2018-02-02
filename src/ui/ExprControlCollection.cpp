@@ -39,25 +39,10 @@
 
 ExprControlCollection::ExprControlCollection(QWidget* parent, bool showAddButton)
     : QWidget(parent), count(0), showAddButton(showAddButton), editableExpression(0) {
-    QVBoxLayout* mainlayout = new QVBoxLayout();
-    mainlayout->setMargin(0);
-    mainlayout->setSpacing(0);
-
-    QWidget* scrollWidget = new QWidget();
-    QScrollArea* scrollArea = new QScrollArea();
-
-    scrollArea->setFocusPolicy(Qt::NoFocus);
-    scrollArea->setMinimumHeight(100);
-    scrollArea->setWidgetResizable(true);
-
     controlLayout = new QVBoxLayout();
     controlLayout->setMargin(0);
     controlLayout->setSpacing(0);
     controlLayout->insertStretch(-1, 100);
-
-    scrollWidget->setLayout(controlLayout);
-    scrollArea->setWidget(scrollWidget);
-    mainlayout->addWidget(scrollArea);
 
     if (showAddButton) {
         QPushButton* button = new QPushButton("Add Widget");
@@ -65,10 +50,10 @@ ExprControlCollection::ExprControlCollection(QWidget* parent, bool showAddButton
         QHBoxLayout* buttonLayout = new QHBoxLayout();
         buttonLayout->insertStretch(-1, 100);
         buttonLayout->addWidget(button, 0);
-        mainlayout->addLayout(buttonLayout);
+        controlLayout->addLayout(buttonLayout);
         connect(button, SIGNAL(clicked()), SLOT(addControlDialog()));
     }
-    setLayout(mainlayout);
+    setLayout(controlLayout);
 }
 
 ExprControlCollection::~ExprControlCollection() { delete editableExpression; }
@@ -430,6 +415,7 @@ bool ExprControlCollection::rebuildControls(const QString& expressionText, std::
             if (widget) {
                 // successfully made widget
                 int insertPoint = controlLayout->count() - 1;
+                if (showAddButton) insertPoint--;
                 controlLayout->insertWidget(insertPoint, widget);
                 _controls.push_back(widget);
                 connect(widget, SIGNAL(controlChanged(int)), SLOT(singleControlChanged(int)));
