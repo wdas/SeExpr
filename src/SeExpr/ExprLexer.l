@@ -41,6 +41,13 @@
 #define YY_DECL int SeExpr2lex(YYSTYPE* yylval_param, YYLTYPE* yylloc, void* yyscanner, SeExpr2::ParseState *state, SeExpr2::ParseData* parseData) 
 #define YYLEX_PARAM &yylval_param, &yylloc
 
+#define YY_USER_ACTION { \
+  yylloc->first_line = yylloc->last_line = yylineno; \
+  yylloc->first_column = state->yycolno; \
+  yylloc->last_column = state->yycolno+yyleng-1; \
+  state->yycolno += yyleng;\
+}
+
 #ifdef SEEXPR_WIN32
 #define YY_NO_UNISTD_H
 #define YY_SKIP_YYWRAP
@@ -109,18 +116,21 @@ box             { yylval->d = 3; return NUMBER; }
 \"(\\\"|[^"\n])*\"  { /* match quoted string, allow embedded quote, \" */
                       yylval->s = strdup(&yytext[1]);
                       yylval->s[strlen(yylval->s)-1] = '\0';
+                      yycolumn = 1;
                       return STR; }
 \'(\\\'|[^'\n])*\'  { /* match quoted string, allow embedded quote, \' */
                       yylval->s = strdup(&yytext[1]);
                       yylval->s[strlen(yylval->s)-1] = '\0';
+                      yycolumn = 1;
                       return STR; }
 ${IDENT}            { yylval->s = strdup(&yytext[1]); return VAR; }
 ${IDENT}"::"{IDENT} { yylval->s = strdup(&yytext[1]); return VAR; }
 {IDENT}             { yylval->s = strdup(yytext); return NAME; }
 
-"\\n"           /* ignore quoted newline */;
+"\\n"               { yycolumn = 1; }
 "\\t"           /* ignore quoted tab */;
-[ \t\n]         /* ignore whitespace */;
+[ \t]           /* ignore whitespace */;
+\n                  { yycolumn = 1; }
 
 \#([^\\\n]|\\[^n\n])*   { /* match comment */
                           int startPos=YY_CURRENT_BUFFER->yy_bs_column;
@@ -164,6 +174,7 @@ bool ExprParseAction(SeExpr2::ExprNode*& parseTree,
 
     // scan and parse expression string
     yy_buffer_state* buffer = yy_scan_string(exprStr, scanner);
+    yyset_lineno(0, scanner);
     int resultCode = SeExpr2parse(scanner, &state, parseData);
     yy_delete_buffer(buffer, scanner);
 
