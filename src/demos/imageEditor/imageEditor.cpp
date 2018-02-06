@@ -31,6 +31,7 @@
 #include <QPushButton>
 #include <QScrollArea>
 #include <QVBoxLayout>
+#include <QStyleFactory>
 
 #include <ExprBrowser.h>
 #include <ExprControlCollection.h>

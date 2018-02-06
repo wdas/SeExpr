@@ -24,6 +24,7 @@
 
 class CEGraphUI;
 class CETool;
+class CEGraphKey;
 class CEGraphSeg;
 
 class CEDragHandler {
