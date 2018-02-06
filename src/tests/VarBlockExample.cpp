@@ -1,6 +1,6 @@
 #include <SeExpr2/Expression.h>
-#include <SeExpr2/VarBlock.h>
 #include <SeExpr2/Platform.h>
+#include <SeExpr2/VarBlock.h>
 #include <iostream>
 
 struct Expr : public SeExpr2::Expression {

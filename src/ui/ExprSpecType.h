@@ -17,11 +17,11 @@
 #ifndef _ExprSpecType_h_
 #define _ExprSpecType_h_
 
-#include <SeExpr2/Vec.h>
-#include <vector>
-#include <sstream>
 #include <SeExpr2/Curve.h>
+#include <SeExpr2/Vec.h>
 #include <cstdio>
+#include <sstream>
+#include <vector>
 
 /// Mini parse tree node... Only represents literals, and lists of literals
 struct ExprSpecNode {
@@ -42,8 +42,7 @@ struct ExprSpecVectorNode : public ExprSpecNode {
     SeExpr2::Vec3d v;
     ExprSpecVectorNode(int startPos, int endPos, ExprSpecNode* x, ExprSpecNode* y, ExprSpecNode* z)
         : ExprSpecNode(startPos, endPos) {
-        v = SeExpr2::Vec3d(static_cast<ExprSpecScalarNode*>(x)->v,
-                           static_cast<ExprSpecScalarNode*>(y)->v,
+        v = SeExpr2::Vec3d(static_cast<ExprSpecScalarNode*>(x)->v, static_cast<ExprSpecScalarNode*>(y)->v,
                            static_cast<ExprSpecScalarNode*>(z)->v);
     }
 };

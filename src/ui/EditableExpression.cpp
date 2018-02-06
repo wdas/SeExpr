@@ -15,8 +15,8 @@
 * http://www.apache.org/licenses/LICENSE-2.0
 */
 #include "Editable.h"
-#include "EditableExpression.h"
 #include <sstream>
+#include "EditableExpression.h"
 
 bool ExprSpecParse(std::vector<Editable*>& literals,
                    std::vector<std::string>& variables,

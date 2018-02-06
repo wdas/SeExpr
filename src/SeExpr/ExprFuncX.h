@@ -17,9 +17,9 @@
 #ifndef _ExprFuncX_h_
 #define _ExprFuncX_h_
 
+#include "ExprNode.h"
 #include "ExprType.h"
 #include "Vec.h"
-#include "ExprNode.h"
 
 namespace SeExpr2 {
 class ExprFuncNode;

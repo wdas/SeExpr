@@ -17,8 +17,8 @@
 #define _Functions_h_
 
 #include <QTableView>
-#include <iostream>
 #include <cfloat>
+#include <iostream>
 
 #include <Expression.h>
 

@@ -17,8 +17,8 @@
 
 #include <Expression.h>
 #include <fstream>
-#include <string>
 #include <sstream>
+#include <string>
 
 using namespace std;
 using namespace SeExpr2;

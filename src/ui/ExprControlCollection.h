@@ -22,16 +22,16 @@
 #define _ExprControlCollection_h
 #include <vector>
 
-#include <QTimer>
-#include <QRegExp>
-#include <QTextBrowser>
-#include <QPlainTextEdit>
+#include <QCheckBox>
 #include <QDialog>
 #include <QLineEdit>
-#include <QCheckBox>
-#include <QSlider>
 #include <QListWidget>
+#include <QPlainTextEdit>
+#include <QRegExp>
+#include <QSlider>
 #include <QStackedWidget>
+#include <QTextBrowser>
+#include <QTimer>
 #include "ExprControl.h"
 
 class QVBoxLayout;
@@ -73,8 +73,7 @@ class ExprAddDialog : public QDialog {
 
     ExprAddDialog(int &count, QWidget *parent = 0);
     const char *initSwatch();
-  private
-slots:
+  private slots:
     void listIndexChanged(int index);
     void colorChooseClicked();
 };
@@ -117,8 +116,7 @@ class ExprControlCollection : public QWidget {
         AnimCurveControl::setAnimCurveCallback(callback);
     }
 
-  private
-slots:
+  private slots:
     /// When a user clicks "Add Widget" button
     void addControlDialog();
     /// Notification when by a control whenever it is edited
@@ -127,7 +125,7 @@ slots:
     void linkColorLink(int id);
     /// Notification by a control that a color is edited (when it is linked)
     void linkColorEdited(int id, QColor color);
-signals:
+  signals:
     /// Notification that a specific control was changed
     void controlChanged(int id);
     /// Gives information about when a link color was changed
@@ -135,8 +133,7 @@ signals:
     /// Emitted to request that a new widget string should be added to the expression
     /// i.e. after "Add Widget" was used
     void insertString(const std::string &controlString);
-  public
-slots:
+  public slots:
     /// Notification from outside that a linked color widget was changed
     /// and should be forwarded to any linked controls
     void linkColorInput(QColor color);

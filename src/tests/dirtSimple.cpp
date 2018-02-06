@@ -18,8 +18,8 @@
 #include <SeExpr2/Expression.h>
 
 #include <Vec.h>
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 using namespace SeExpr2;

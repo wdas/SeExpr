@@ -17,8 +17,8 @@
 #ifndef _Interpreter_h_
 #define _Interpreter_h_
 
-#include <vector>
 #include <stack>
+#include <vector>
 
 #include "Evaluator.h"
 #include "ExprNode.h"
@@ -135,7 +135,10 @@ class Interpreter : public Evaluator {
         return &d[_returnSlot];
     }
 
-    virtual inline void evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) override {
+    virtual inline void evalMultiple(VarBlock* varBlock,
+                                     int outputVarBlockOffset,
+                                     size_t rangeStart,
+                                     size_t rangeEnd) override {
         // TODO: need strings to work
         int dim = _desiredReturnType.dim();
         // double* iHack=reinterpret_cast<double**>(varBlock->data())[outputVarBlockOffset];

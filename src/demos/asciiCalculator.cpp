@@ -15,11 +15,11 @@
 * http://www.apache.org/licenses/LICENSE-2.0
 */
 
-#include <SeExpr2/Expression.h>
 #include <SeExpr2/ExprFunc.h>
+#include <SeExpr2/Expression.h>
 #include <SeExpr2/Vec.h>
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 #define STACK_DEPTH 256
@@ -77,9 +77,7 @@ class CalculatorExpr : public Expression {
 
     Vec<double, 3, false> peek() { return stack[_count - 1].val; }
 
-    int count() const {
-        return _count;
-    };
+    int count() const { return _count; };
 
   private:
     //! Simple variable that just returns its internal value
@@ -114,7 +112,6 @@ class CalculatorExpr : public Expression {
 };
 
 int main(int argc, char* argv[]) {
-
     std::cout << "SeExpr Basic Calculator";
 
     CalculatorExpr expr;

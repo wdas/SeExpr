@@ -19,19 +19,19 @@
 * @author Arthur Shek
 * @version ashek     05/04/09  Initial Version
 */
-#include <iostream>
 #include <algorithm>
+#include <iostream>
 
 #include <QColorDialog>
+#include <QDialogButtonBox>
 #include <QDoubleValidator>
 #include <QGraphicsSceneMouseEvent>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QVBoxLayout>
-#include <QResizeEvent>
-#include <QPushButton>
-#include <QDialogButtonBox>
 #include <QMenu>
+#include <QPushButton>
+#include <QResizeEvent>
+#include <QVBoxLayout>
 
 #include <SeExpr2/ExprBuiltins.h>
 #ifdef SEEXPR_USE_QDGUI
@@ -288,11 +288,7 @@ void CCurveScene::drawPoints() {
             pen = QPen(Qt::black, 1.0);
         }
         _circleObjects.push_back(addEllipse(
-            pt._pos * _width - 4,
-            _height + 3,
-            8,
-            8,
-            pen,
+            pt._pos * _width - 4, _height + 3, 8, 8, pen,
             QBrush(QColor(int(255 * pt._val[0] + 0.5), int(255 * pt._val[1] + 0.5), int(255 * pt._val[2] + 0.5)))));
         QGraphicsEllipseItem *circle = _circleObjects.back();
         circle->setFlag(QGraphicsItem::ItemIsMovable, true);
@@ -444,9 +440,7 @@ ExprColorCurve::ExprColorCurve(QWidget *parent, QString pLabel, QString vLabel, 
     // SIGNALS
 
     // when a user selects a cv, update the fields on left
-    connect(_scene,
-            SIGNAL(cvSelected(double, SeExpr2::Vec3d, T_INTERP)),
-            this,
+    connect(_scene, SIGNAL(cvSelected(double, SeExpr2::Vec3d, T_INTERP)), this,
             SLOT(cvSelectedSlot(double, SeExpr2::Vec3d, T_INTERP)));
     // when a user selects a different interp, the curve has to redraw
     connect(_interpComboBox, SIGNAL(activated(int)), _scene, SLOT(interpChanged(int)));
@@ -454,10 +448,7 @@ ExprColorCurve::ExprColorCurve(QWidget *parent, QString pLabel, QString vLabel, 
     connect(_selPosEdit, SIGNAL(returnPressed()), this, SLOT(selPosChanged()));
     connect(this, SIGNAL(selPosChangedSignal(double)), _scene, SLOT(selPosChanged(double)));
     // when a user selects a different color, the ramp has to redraw
-    connect(_selValEdit,
-            SIGNAL(selValChangedSignal(SeExpr2::Vec3d)),
-            _scene,
-            SLOT(selValChanged(SeExpr2::Vec3d)));
+    connect(_selValEdit, SIGNAL(selValChangedSignal(SeExpr2::Vec3d)), _scene, SLOT(selValChanged(SeExpr2::Vec3d)));
     connect(_selValEdit, SIGNAL(swatchChanged(QColor)), this, SLOT(internalSwatchChanged(QColor)));
     // when the widget is resized, resize the curve widget
     connect(curveView, SIGNAL(resizeSignal(int, int)), _scene, SLOT(resize(int, int)));

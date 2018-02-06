@@ -19,19 +19,19 @@
 * @author Arthur Shek
 * @version ashek     05/04/09  Initial Version
 */
-#include <iostream>
 #include <algorithm>
+#include <iostream>
 
 #include <QDialog>
+#include <QDialogButtonBox>
 #include <QDoubleValidator>
 #include <QGraphicsSceneMouseEvent>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QVBoxLayout>
+#include <QMenu>
 #include <QPushButton>
 #include <QResizeEvent>
-#include <QDialogButtonBox>
-#include <QMenu>
+#include <QVBoxLayout>
 
 #include <SeExpr2/ExprBuiltins.h>
 #include <cfloat>

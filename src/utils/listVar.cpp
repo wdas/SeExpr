@@ -15,18 +15,17 @@
  http://www.apache.org/licenses/LICENSE-2.0
 */
 #include <Expression.h>
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
-#include "ExprWalker.h"
 #include "ExprPatterns.h"
+#include "ExprWalker.h"
 
 using namespace SeExpr2;
 
 /// Examiner that builds a list of all variable references
 class VarListExaminer : public ConstExaminer {
-
   public:
     virtual bool examine(T_NODE* examinee) {
         if (const ExprVarNode* var = isVariable(examinee)) {
@@ -35,15 +34,9 @@ class VarListExaminer : public ConstExaminer {
         };
         return true;
     }
-    virtual void reset() {
-        _varList.clear();
-    };
-    inline int length() const {
-        return _varList.size();
-    };
-    inline const ExprVarNode* var(int i) const {
-        return _varList[i];
-    };
+    virtual void reset() { _varList.clear(); };
+    inline int length() const { return _varList.size(); };
+    inline const ExprVarNode* var(int i) const { return _varList[i]; };
 
   private:
     std::vector<const ExprVarNode*> _varList;
@@ -56,19 +49,17 @@ class VarListExaminer : public ConstExaminer {
 class ListVarExpr : public Expression {
   public:
     //! Constructor that takes the expression to parse
-    ListVarExpr(const std::string& expr) : Expression(expr), _hasWalked(false), examiner(), walker(&examiner) {};
+    ListVarExpr(const std::string& expr) : Expression(expr), _hasWalked(false), examiner(), walker(&examiner){};
 
     //! Empty constructor
-    ListVarExpr() : Expression(), _hasWalked(false), examiner(), walker(&examiner) {};
+    ListVarExpr() : Expression(), _hasWalked(false), examiner(), walker(&examiner){};
 
     void walk() {
         _hasWalked = true;
         walker.walk(_parseTree);
     };
 
-    bool hasWalked() {
-        return _hasWalked;
-    };
+    bool hasWalked() { return _hasWalked; };
 
     int count() const {
         if (isValid() && _hasWalked) {
@@ -83,9 +74,7 @@ class ListVarExpr : public Expression {
     ConstWalker walker;
 
     //! resolve function that only supports one external variable 'x'
-    ExprVarRef* resolveVar(const std::string& name) const {
-        return 0;
-    };
+    ExprVarRef* resolveVar(const std::string& name) const { return 0; };
 };
 
 void quit(const std::string& str) {

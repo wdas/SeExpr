@@ -24,11 +24,11 @@
 
 #include <vector>
 
-#include <QObject>
 #include <QComboBox>
 #include <QGraphicsProxyWidget>
 #include <QGraphicsView>
 #include <QLineEdit>
+#include <QObject>
 
 #include <SeExpr2/Vec.h>
 
@@ -126,7 +126,7 @@ class ExprCSwatchFrame : public QFrame {
     virtual void paintEvent(QPaintEvent *event);
     virtual void mousePressEvent(QMouseEvent *event);
 
-signals:
+  signals:
     void selValChangedSignal(SeExpr2::Vec3d value);
     void swatchChanged(QColor color);
 

@@ -19,11 +19,11 @@
 */
 #ifndef __Editable__
 #define __Editable__
-#include <sstream>
-#include <SeExpr2/Vec.h>
 #include <SeExpr2/Curve.h>
+#include <SeExpr2/Vec.h>
 #include <cstdio>
 #include <cstring>
+#include <sstream>
 #ifdef SEEXPR_USE_ANIMLIB
 #include <animlib/AnimCurve.h>
 #include <animlib/AnimKeyframe.h>

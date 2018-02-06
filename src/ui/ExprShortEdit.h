@@ -22,12 +22,12 @@
 #ifndef ExprShortEditUI_h
 #define ExprShortEditUI_h
 
-#include <vector>
 #include <string>
+#include <vector>
 
-#include <QWidget>
 #include <QTextEdit>
 #include <QWheelEvent>
+#include <QWidget>
 
 class ExprControlCollection;
 class QToolButton;
@@ -102,8 +102,7 @@ class ExprShortEdit : public QWidget {
   protected:
     void checkErrors();
 
-  protected
-slots:
+  protected slots:
     virtual void detailPressed();
     virtual void expandPressed();
     virtual void textFinished();
@@ -113,7 +112,7 @@ slots:
     virtual void expressionApplied();
     virtual void dialogClosed();
 
-signals:
+  signals:
     void exprChanged();
 };
 
@@ -147,10 +146,9 @@ class ExprShortTextEdit : public QTextEdit {
 
     void setColor(bool editing);
     void finishEdit();
-signals:
+  signals:
     void editingFinished();
-  private
-slots:
+  private slots:
     void insertCompletion(const QString& completion);
 };
 

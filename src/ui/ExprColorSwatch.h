@@ -1,11 +1,11 @@
 #ifndef _ExprColorSwatch_h_
 #define _ExprColorSwatch_h_
 
-#include <vector>
-#include <QObject>
-#include <QFrame>
-#include <QWidget>
 #include <SeExpr2/Vec.h>
+#include <QFrame>
+#include <QObject>
+#include <QWidget>
+#include <vector>
 
 class QGridLayout;
 
@@ -17,19 +17,16 @@ class ExprColorFrame : public QFrame {
 
     void setValue(const SeExpr2::Vec3d &value);
     SeExpr2::Vec3d getValue() const;
-    bool selected() {
-        return _selected;
-    };
+    bool selected() { return _selected; };
 
   protected:
     virtual void paintEvent(QPaintEvent *event);
     virtual void mouseReleaseEvent(QMouseEvent *event);
 
-  private
-slots:
+  private slots:
     void deleteSwatchMenu(const QPoint &pos);
 
-signals:
+  signals:
     void selValChangedSignal(SeExpr2::Vec3d value);
     void swatchChanged(QColor color);
     void deleteSwatch(ExprColorFrame *swatch);
@@ -63,13 +60,12 @@ class ExprColorSwatchWidget : public QWidget {
     void setSwatchColor(int index, QColor color);
     QColor getSwatchColor(int index);
 
-  private
-slots:
+  private slots:
     void addNewColor();
     void removeSwatch(ExprColorFrame *);
     void internalSwatchChanged(QColor color);
 
-signals:
+  signals:
     void selValChangedSignal(SeExpr2::Vec3d val);
     void swatchChanged(int index, SeExpr2::Vec3d val);
     void swatchAdded(int index, SeExpr2::Vec3d val);

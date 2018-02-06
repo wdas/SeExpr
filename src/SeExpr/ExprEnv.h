@@ -17,14 +17,14 @@
 #ifndef ExprEnv_h
 #define ExprEnv_h
 
-#include <vector>
-#include <map>
 #include <cassert>
+#include <map>
 #include <memory>
+#include <vector>
 
-#include "ExprType.h"
-#include "ExprLLVM.h"
 #include <iostream>
+#include "ExprLLVM.h"
+#include "ExprType.h"
 
 namespace SeExpr2 {
 class ExprVarRef;
@@ -87,7 +87,7 @@ class ExprLocalVarPhi : public ExprLocalVar {
     }
 
     ExprNode* _condNode;
-    ExprLocalVar* _thenVar, *_elseVar;
+    ExprLocalVar *_thenVar, *_elseVar;
 };
 
 //! Variable scope for tracking variable lookup
@@ -115,7 +115,7 @@ class ExprVarEnv {
   public:
     // TODO: figure out when anotherOwns is needed
     //! Create a scope with no parent
-    ExprVarEnv() : _parent(0) {};
+    ExprVarEnv() : _parent(0){};
 
     ~ExprVarEnv();
 
@@ -143,7 +143,7 @@ class ExprVarEnv {
 };
 
 //! Variable scope builder is used by the type checking and code gen to track visiblity of variables and changing of
-//scopes
+// scopes
 // It is inspired by IRBuilder's notion of a basic block insertion point
 class ExprVarEnvBuilder {
   public:

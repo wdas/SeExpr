@@ -18,45 +18,45 @@
 * @brief This provides an expression editor for SeExpr syntax with auto ui features
 * @author  aselle
 */
-#include <QRegExp>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QSplitter>
-#include <QLabel>
-#include <QMouseEvent>
-#include <QKeyEvent>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QPaintEvent>
-#include <QPainter>
-#include <QScrollArea>
-#include <QSpacerItem>
-#include <QSizePolicy>
-#include <QTextCharFormat>
-#include <QCompleter>
 #include <QAbstractItemView>
-#include <QStandardItemModel>
-#include <QStringListModel>
-#include <QScrollBar>
-#include <QToolTip>
-#include <QListWidget>
-#include <QTreeView>
 #include <QAction>
+#include <QCompleter>
+#include <QHBoxLayout>
+#include <QKeyEvent>
+#include <QLabel>
+#include <QLineEdit>
+#include <QListWidget>
 #include <QMenu>
 #include <QMimeData>
+#include <QMouseEvent>
+#include <QPaintEvent>
+#include <QPainter>
+#include <QPushButton>
+#include <QRegExp>
+#include <QScrollArea>
+#include <QScrollBar>
+#include <QSizePolicy>
+#include <QSpacerItem>
+#include <QSplitter>
+#include <QStandardItemModel>
+#include <QStringListModel>
+#include <QTextCharFormat>
+#include <QToolTip>
+#include <QTreeView>
+#include <QVBoxLayout>
 
-#include <SeExpr2/Expression.h>
-#include <SeExpr2/ExprNode.h>
-#include <SeExpr2/ExprFunc.h>
 #include <SeExpr2/ExprBuiltins.h>
+#include <SeExpr2/ExprFunc.h>
+#include <SeExpr2/ExprNode.h>
+#include <SeExpr2/Expression.h>
 
-#include "ExprEditor.h"
-#include "ExprHighlighter.h"
+#include "ExprColorCurve.h"
 #include "ExprCompletionModel.h"
+#include "ExprControl.h"
 #include "ExprControlCollection.h"
 #include "ExprCurve.h"
-#include "ExprColorCurve.h"
-#include "ExprControl.h"
+#include "ExprEditor.h"
+#include "ExprHighlighter.h"
 #include "ExprPopupDoc.h"
 
 void ExprEditor::controlChanged(int id) {
@@ -191,10 +191,7 @@ ExprTextEdit::ExprTextEdit(QWidget* parent) : QTextEdit(parent), lastStyleForHig
     _popupEnabledAction->setChecked(true);
 }
 
-void ExprTextEdit::insertFromMimeData(const QMimeData* source)
-{
-    QTextEdit::insertPlainText(source->text());
-}
+void ExprTextEdit::insertFromMimeData(const QMimeData* source) { QTextEdit::insertPlainText(source->text()); }
 
 void ExprTextEdit::focusInEvent(QFocusEvent* e) {
     if (completer) completer->setWidget(this);
@@ -288,7 +285,6 @@ void ExprTextEdit::keyPressEvent(QKeyEvent* e) {
     if (!isShortcut && (hasModifier || e->text().isEmpty() || completionPrefix.length() < 1 || index == -1)) {
         completer->popup()->hide();
     } else if (_popupEnabledAction->isChecked()) {
-
         // copy the completion prefix in if we don't already have it in the completer
         if (completionPrefix != completer->completionPrefix()) {
             completer->setCompletionPrefix(completionPrefix);

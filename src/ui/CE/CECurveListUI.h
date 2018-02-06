@@ -51,8 +51,7 @@ class CECurveListUI : public QWidget {
     /// override of minimumSizeHint
     virtual QSize minimumSizeHint() const { return QSize(0, 0); }
 
-  private
-slots:
+  private slots:
 
     void invalidateCurveList();
     void invalidateSelection();

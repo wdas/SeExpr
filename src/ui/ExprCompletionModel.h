@@ -23,12 +23,12 @@
 #define ExprCompletionModel_h
 
 #include <QtCore/QAbstractItemModel>
-#include <QtCore/QString>
 #include <QtCore/QSize>
+#include <QtCore/QString>
 #include <vector>
 
 class ExprCompletionModel : public QAbstractItemModel  // ItemModel
-                            {
+{
   public:
     // clear/add functions (these are ones that will be resolved with resolveFunc()
     void clearFunctions();

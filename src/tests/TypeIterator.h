@@ -18,12 +18,12 @@
 #define TYPEITERATOR_H
 
 #include <Expression.h>
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
-#include "ExprNode.h"
 #include "ExprFunc.h"
+#include "ExprNode.h"
 #include "TypeBuilder.h"
 
 class TypeTesterExpr;  // forward declaration for parent pointer
@@ -34,26 +34,16 @@ class TypeTesterExpr;  // forward declaration for parent pointer
 
 class EnvironmentManager {
   public:
-    EnvironmentManager(const std::string &name, TypeTesterExpr *parent) : _name(name), _parent(parent) {};
+    EnvironmentManager(const std::string &name, TypeTesterExpr *parent) : _name(name), _parent(parent){};
 
-    inline TypeTesterExpr *parent() {
-        return _parent;
-    };
-    inline TypeTesterExpr *parent() const {
-        return _parent;
-    };
+    inline TypeTesterExpr *parent() { return _parent; };
+    inline TypeTesterExpr *parent() const { return _parent; };
 
-    inline void set(const std::string &from) {
-        parent()->setVar(_name, from);
-    };
+    inline void set(const std::string &from) { parent()->setVar(_name, from); };
 
-    inline ExprType type(const std::string &from) const {
-        return parent()->resolveVar(from)->type();
-    };
+    inline ExprType type(const std::string &from) const { return parent()->resolveVar(from)->type(); };
 
-    inline std::string toString(const std::string &from) const {
-        return type(from).toString();
-    };
+    inline std::string toString(const std::string &from) const { return type(from).toString(); };
 
   private:
     std::string _name;
@@ -62,14 +52,10 @@ class EnvironmentManager {
 
 class Counter {
   public:
-    Counter(int max) : _max(max), _current(0) {};
+    Counter(int max) : _max(max), _current(0){};
 
-    inline int max() const {
-        return _max;
-    };
-    inline int remaining() const {
-        return max() - _current;
-    };
+    inline int max() const { return _max; };
+    inline int remaining() const { return max() - _current; };
     inline int start() {
         _current = 1;
         return remaining();
@@ -87,7 +73,7 @@ class Counter {
 class PrimaryTypeIterator {
   public:
     PrimaryTypeIterator(const std::string &var, TypeTesterExpr *parent)
-        : _manager(var, parent), _counter(5), _current("Iterator Error") {};
+        : _manager(var, parent), _counter(5), _current("Iterator Error"){};
 
     inline int start() {
         set("F1");
@@ -107,18 +93,10 @@ class PrimaryTypeIterator {
         return at;
     };
 
-    inline int max() const {
-        return _counter.max();
-    };
-    inline ExprType current() const {
-        return _manager.type(_current);
-    };
-    inline std::string toString() const {
-        return _manager.toString(_current);
-    };
-    inline int remaining() const {
-        return _counter.remaining();
-    };
+    inline int max() const { return _counter.max(); };
+    inline ExprType current() const { return _manager.type(_current); };
+    inline std::string toString() const { return _manager.toString(_current); };
+    inline int remaining() const { return _counter.remaining(); };
 
   private:
     inline void set(const std::string &str) {
@@ -134,7 +112,7 @@ class PrimaryTypeIterator {
 class LifetimeTypeIterator {
   public:
     LifetimeTypeIterator(const std::string &var, TypeTesterExpr *parent)
-        : _manager(var, parent), _counter(4), _current("Iterator Error") {};
+        : _manager(var, parent), _counter(4), _current("Iterator Error"){};
 
     inline int start() {
         set("LC");
@@ -152,18 +130,10 @@ class LifetimeTypeIterator {
         return at;
     };
 
-    inline int max() const {
-        return _counter.max();
-    };
-    inline ExprType current() const {
-        return _manager.type(_current);
-    };
-    inline std::string toString() const {
-        return _manager.toString(_current);
-    };
-    inline int remaining() const {
-        return _counter.remaining();
-    };
+    inline int max() const { return _counter.max(); };
+    inline ExprType current() const { return _manager.type(_current); };
+    inline std::string toString() const { return _manager.toString(_current); };
+    inline int remaining() const { return _counter.remaining(); };
 
   private:
     inline void set(const std::string &str) {
@@ -180,7 +150,7 @@ template <typename IteratorClass>
 class DoubleTypeIterator {
   public:
     DoubleTypeIterator(const std::string &var1, const std::string &var2, TypeTesterExpr *parent)
-        : _first(var1, parent), _second(var2, parent) {};
+        : _first(var1, parent), _second(var2, parent){};
 
     inline int start() {
         _first.start();
@@ -200,24 +170,14 @@ class DoubleTypeIterator {
         return remaining();
     };
 
-    inline int max() const {
-        return _first.max() * _second.max();
-    };
+    inline int max() const { return _first.max() * _second.max(); };
 
-    inline ExprType first() const {
-        return _first.current();
-    };
-    inline ExprType second() const {
-        return _second.current();
-    };
+    inline ExprType first() const { return _first.current(); };
+    inline ExprType second() const { return _second.current(); };
 
-    inline std::string toString() const {
-        return (_first.toString() + " " + _second.toString());
-    };
+    inline std::string toString() const { return (_first.toString() + " " + _second.toString()); };
 
-    inline int remaining() const {
-        return (_second.max() * _first.remaining() + _second.remaining());
-    };
+    inline int remaining() const { return (_second.max() * _first.remaining() + _second.remaining()); };
 
   private:
     IteratorClass _first;
@@ -231,7 +191,7 @@ class TripleTypeIterator {
                        const std::string &var2,
                        const std::string &var3,
                        TypeTesterExpr *parent)
-        : _first(var1, parent), _second(var2, var3, parent) {};
+        : _first(var1, parent), _second(var2, var3, parent){};
 
     inline int start() {
         _first.start();
@@ -251,27 +211,15 @@ class TripleTypeIterator {
         return remaining();
     };
 
-    inline int max() const {
-        return _first.max() * _second.max();
-    };
+    inline int max() const { return _first.max() * _second.max(); };
 
-    inline ExprType first() const {
-        return _first.current();
-    };
-    inline ExprType second() const {
-        return _second.first();
-    };
-    inline ExprType third() const {
-        return _second.second();
-    };
+    inline ExprType first() const { return _first.current(); };
+    inline ExprType second() const { return _second.first(); };
+    inline ExprType third() const { return _second.second(); };
 
-    inline std::string toString() const {
-        return (_first.toString() + " " + _second.toString());
-    };
+    inline std::string toString() const { return (_first.toString() + " " + _second.toString()); };
 
-    inline int remaining() const {
-        return (_second.max() * _first.remaining() + _second.remaining());
-    };
+    inline int remaining() const { return (_second.max() * _first.remaining() + _second.remaining()); };
 
   private:
     IteratorClass _first;
@@ -283,7 +231,7 @@ class SingleWholeTypeIterator {
     typedef ExprType (*ProcType)(const ExprType &);
 
     SingleWholeTypeIterator(const std::string &var, const ProcType proc, TypeTesterExpr *parent)
-        : _primary(var, parent), _lifetime(var, parent), _proc(proc), _switch(false) {};
+        : _primary(var, parent), _lifetime(var, parent), _proc(proc), _switch(false){};
 
     inline int start() {
         _primary.start();
@@ -304,17 +252,11 @@ class SingleWholeTypeIterator {
         return remaining();
     };
 
-    inline ExprType result() const {
-        return _proc(current());
-    };
+    inline ExprType result() const { return _proc(current()); };
 
-    inline const std::string givenString() const {
-        return current().toString();
-    };
+    inline const std::string givenString() const { return current().toString(); };
 
-    inline int remaining() const {
-        return _primary.remaining() + _lifetime.remaining();
-    };
+    inline int remaining() const { return _primary.remaining() + _lifetime.remaining(); };
 
     inline ExprType current() const {
         if (!_switch)
@@ -338,7 +280,7 @@ class DoubleWholeTypeIterator {
                             const std::string &var2,
                             const ProcType proc,
                             TypeTesterExpr *parent)
-        : _primary(var1, var2, parent), _lifetime(var1, var2, parent), _proc(proc), _switch(false) {};
+        : _primary(var1, var2, parent), _lifetime(var1, var2, parent), _proc(proc), _switch(false){};
 
     inline int start() {
         _primary.start();
@@ -358,17 +300,11 @@ class DoubleWholeTypeIterator {
         return remaining();
     };
 
-    inline ExprType result() const {
-        return _proc(first(), second());
-    };
+    inline ExprType result() const { return _proc(first(), second()); };
 
-    inline const std::string givenString() const {
-        return (first().toString() + " " + second().toString());
-    };
+    inline const std::string givenString() const { return (first().toString() + " " + second().toString()); };
 
-    inline int remaining() const {
-        return _primary.remaining() + _lifetime.remaining();
-    };
+    inline int remaining() const { return _primary.remaining() + _lifetime.remaining(); };
 
     inline ExprType first() const {
         if (!_switch)
@@ -400,7 +336,7 @@ class TripleWholeTypeIterator {
                             const std::string &var3,
                             const ProcType proc,
                             TypeTesterExpr *parent)
-        : _primary(var1, var2, var3, parent), _lifetime(var1, var2, var3, parent), _proc(proc), _switch(false) {};
+        : _primary(var1, var2, var3, parent), _lifetime(var1, var2, var3, parent), _proc(proc), _switch(false){};
 
     inline int start() {
         _primary.start();
@@ -420,17 +356,13 @@ class TripleWholeTypeIterator {
         return remaining();
     };
 
-    inline ExprType result() const {
-        return _proc(first(), second(), third());
-    };
+    inline ExprType result() const { return _proc(first(), second(), third()); };
 
     inline const std::string givenString() const {
         return (first().toString() + " " + second().toString() + " " + third().toString());
     };
 
-    inline int remaining() const {
-        return _primary.remaining() + _lifetime.remaining();
-    };
+    inline int remaining() const { return _primary.remaining() + _lifetime.remaining(); };
 
     inline ExprType first() const {
         if (!_switch)

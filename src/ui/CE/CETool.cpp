@@ -18,14 +18,14 @@
 * @brief Contains the Definition of class CETool.
 */
 
-#include <sstream>
-#include <math.h>
-#include <limits>
-#include <alloca.h>
-#include <string.h>
-#include <iFactory.h>
-#include "CEMainUI.h"
 #include "CETool.h"
+#include <alloca.h>
+#include <iFactory.h>
+#include <math.h>
+#include <string.h>
+#include <limits>
+#include <sstream>
+#include "CEMainUI.h"
 
 namespace {
 inline double clamp(double x, double min, double max) { return x < min ? min : x > max ? max : x; }
@@ -483,7 +483,7 @@ void keysUpdated(animlib::AnimCurve* curve, int keyStart, int keyEnd, bool regen
     for (int i = keyStart; i < keyEnd; i++) {
         double deriv = 0;
         double deltaPrev = 0, deltaNext = 0, hNext = 0, hPrev = 0;
-        animlib::AnimKeyframe* prev = (*curve)[i - 1], *curr = (*curve)[i], *next = (*curve)[i + 1];
+        animlib::AnimKeyframe *prev = (*curve)[i - 1], *curr = (*curve)[i], *next = (*curve)[i + 1];
         if (prev) {
             deltaPrev = curr->getValue() - prev->getValue();
             hPrev = curr->getTime() - prev->getTime();
@@ -578,11 +578,9 @@ void keysUpdated(animlib::AnimCurve* curve, int keyStart, int keyEnd, bool regen
 }
 
 void keyUpdated(animlib::AnimCurve* curve, int key) {
-
     int numKeys = curve->getNumKeys();
     // key position changes affect spline tangents of neighbors, so do two in each direction to be safe!
     if (numKeys == 1) {
-
     } else {
         int keyStart = std::max(0, key - 1);
         int keyEnd = std::min(numKeys, key + 2);
@@ -633,7 +631,7 @@ void CETool::setSegment(int curve,
 void CETool::setSegmentFrame(double frame, int curve, int seg) {
     // prevent making key cross other keys
     animlib::AnimCurve& anim = *_curves[curve]->animCurve;
-    animlib::AnimKeyframe* prev = anim[seg - 1], *next = anim[seg + 1];
+    animlib::AnimKeyframe *prev = anim[seg - 1], *next = anim[seg + 1];
     // TODO: next ulp?
     if (prev && prev->getTime() >= frame) frame = prev->getTime() + .001;
     if (next && frame >= next->getTime()) frame = next->getTime() - .001;
@@ -672,7 +670,6 @@ void CETool::setLocked(int curve, int segment, bool val) {
     // if the curve changes from weighted to non, we set all weights to 1
     // if the curve changes from non-weighted to weighted, we set all weights to equivalent values to not change curve
     if (animlib::AnimKeyframe* key = (*_curves[curve]->animCurve)[segment]) {
-
         key->setLocked(val);
         key->setInAngle(key->getOutAngle());
         key->setInTangentType(key->getOutTangentType());

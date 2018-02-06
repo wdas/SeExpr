@@ -21,22 +21,22 @@
 */
 
 #include "CEGraphUI.h"
-#include <iostream>
 #include <alloca.h>
-#include <string.h>
-#include <stdio.h>
 #include <math.h>
-#include "CETool.h"
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#include "CEDragHandlers.h"
 #include "CEGraphCurve.h"
 #include "CEGraphKey.h"
 #include "CEGraphSeg.h"
-#include "CEDragHandlers.h"
+#include "CETool.h"
 
 #include <iostream>
 using namespace std;
 
-#include <Qt>
 #include <QMouseEvent>
+#include <Qt>
 
 // #include <GL/glx.h> conflicts w/ Qt!  Just declare what we need.
 extern "C" void glXUseXFont(Qt::HANDLE, int, int, int);
@@ -751,16 +751,8 @@ void CEGraphUI::mousePressEvent(QMouseEvent* e) {
                     double _anchorTime = _view.vx(x);
                     double _anchorValue = _view.vy(y);
                     int loc = _tool->insertKey(_anchorTime);
-                    _tool->setSegment(curve,
-                                      loc,
-                                      _anchorTime,
-                                      _anchorValue,
-                                      0.,
-                                      0.,
-                                      1.,
-                                      1.,
-                                      animlib::AnimKeyframe::kTangentAuto,
-                                      animlib::AnimKeyframe::kTangentAuto);
+                    _tool->setSegment(curve, loc, _anchorTime, _anchorValue, 0., 0., 1., 1.,
+                                      animlib::AnimKeyframe::kTangentAuto, animlib::AnimKeyframe::kTangentAuto);
                 }
 
             } else {
@@ -838,16 +830,8 @@ void CEGraphUI::mouseDoubleClickEvent(QMouseEvent* e) {
                     double _anchorTime = _view.vx(x);
                     double _anchorValue = _view.vy(y);
                     int loc = _tool->insertKey(_anchorTime);
-                    _tool->setSegment(curve,
-                                      loc,
-                                      _anchorTime,
-                                      _anchorValue,
-                                      0.,
-                                      0.,
-                                      1.,
-                                      1.,
-                                      animlib::AnimKeyframe::kTangentAuto,
-                                      animlib::AnimKeyframe::kTangentAuto);
+                    _tool->setSegment(curve, loc, _anchorTime, _anchorValue, 0., 0., 1., 1.,
+                                      animlib::AnimKeyframe::kTangentAuto, animlib::AnimKeyframe::kTangentAuto);
                 }
             }
         }

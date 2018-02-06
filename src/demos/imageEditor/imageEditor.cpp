@@ -19,22 +19,22 @@
    @file imageEditor.cpp
 */
 
+#include <png.h>
 #include <iostream>
 #include <string>
-#include <png.h>
 
 #include <QApplication>
 #include <QDialog>
-#include <QVBoxLayout>
-#include <QScrollArea>
-#include <QLabel>
 #include <QImage>
-#include <QPushButton>
+#include <QLabel>
 #include <QMessageBox>
+#include <QPushButton>
+#include <QScrollArea>
+#include <QVBoxLayout>
 
+#include <ExprBrowser.h>
 #include <ExprControlCollection.h>
 #include <ExprEditor.h>
-#include <ExprBrowser.h>
 #include <Expression.h>
 
 #include "ImageEditorDialog.h"

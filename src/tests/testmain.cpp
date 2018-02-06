@@ -15,8 +15,8 @@
  http://www.apache.org/licenses/LICENSE-2.0
 */
 
-#include <stdio.h>
 #include <gtest/gtest.h>
+#include <stdio.h>
 
 using ::testing::InitGoogleTest;
 

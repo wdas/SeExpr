@@ -21,9 +21,9 @@
 #ifndef CETool_h
 #define CETool_h
 
-#include <vector>
-#include <set>
 #include <DMsg/DMsg.h>
+#include <set>
+#include <vector>
 //#include <iTool.h>
 //#include <iSgExpr.h>
 // qt3 #include <qobject.h>
@@ -148,7 +148,7 @@ class CETool : public QObject {
 
     CEMainUI* ui() { return _ui; }
 
-signals:
+  signals:
     void curveChanged(int index);
     void segChanged(int curve, int segment);
     void curveListChanged();

@@ -17,13 +17,13 @@
 #ifndef TYPETESTS_H
 #define TYPETESTS_H
 
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
-#include <Expression.h>
-#include <ExprNode.h>
 #include <ExprFunc.h>
+#include <ExprNode.h>
+#include <Expression.h>
 
 #include "TypeBuilder.h"
 #include "TypePrinter.h"
@@ -43,17 +43,13 @@ class TypeTesterExpr : public TypeBuilderExpr {
     TypePrintExaminer _examiner;
     SeExpr2::ConstWalker _walker;
 
-    TypeTesterExpr() : TypeBuilderExpr(), _walker(&_examiner) {};
+    TypeTesterExpr() : TypeBuilderExpr(), _walker(&_examiner){};
 
-    TypeTesterExpr(const std::string &e) : TypeBuilderExpr(e), _walker(&_examiner) {};
+    TypeTesterExpr(const std::string &e) : TypeBuilderExpr(e), _walker(&_examiner){};
 
-    virtual ExprVarRef *resolveVar(const std::string &name) const {
-        return TypeBuilderExpr::resolveVar(name);
-    };
+    virtual ExprVarRef *resolveVar(const std::string &name) const { return TypeBuilderExpr::resolveVar(name); };
 
-    ExprFunc *resolveFunc(const std::string &name) const {
-        return TypeBuilderExpr::resolveFunc(name);
-    };
+    ExprFunc *resolveFunc(const std::string &name) const { return TypeBuilderExpr::resolveFunc(name); };
 
     void doTest(const std::string &testStr, ExprType expectedResult, ExprType actualResult);
 

@@ -21,19 +21,19 @@
 #ifndef _MY_EXPR_EDITOR_H
 #define _MY_EXPR_EDITOR_H
 
-#include <QObject>
-#include <QMessageBox>
+#include <QFileDialog>
 #include <QGLWidget>
 #include <QHBoxLayout>
-#include <QSplitter>
+#include <QMessageBox>
+#include <QObject>
 #include <QPalette>
 #include <QPushButton>
-#include <QFileDialog>
-#include <QSpacerItem>
 #include <QSizePolicy>
+#include <QSpacerItem>
+#include <QSplitter>
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
 #include "ExprEditor.h"
 
@@ -55,8 +55,8 @@ class ExprDialog : public QDialog {
     QPushButton* cancelButton;
     ExprControlCollection* controls;
 
-    QPushButton* applyButton, *previewButton, *saveButton, *saveAsButton;
-    QPushButton* saveLocalButton, *clearButton;
+    QPushButton *applyButton, *previewButton, *saveButton, *saveAsButton;
+    QPushButton *saveLocalButton, *clearButton;
     QLineEdit* helpFindBox;
     QTimer* showEditorTimer;
     QTextBrowser* helpBrowser;
@@ -92,14 +92,13 @@ class ExprDialog : public QDialog {
     void findHelper(QTextDocument::FindFlags flags);
     void closeEvent(QCloseEvent* event);
 
-signals:
+  signals:
     void preview();
     void expressionApplied();
     void dialogClosed();
     void forwardAvailable(bool);
     void backwardAvailable(bool);
-  private
-slots:
+  private slots:
     void previewExpression();
     void verifiedApply();
     void verifiedAccept();
@@ -111,8 +110,7 @@ slots:
     void histBackward();
     void histForward();
     void histAdd();
-  public
-slots:
+  public slots:
 
     void applyExpression();
 

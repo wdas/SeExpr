@@ -108,8 +108,7 @@ class ASTNode {
     };
 
     template <typename... Args>
-    ASTNode(const Range& range, const ASTType& type, Args&&... args)
-        : _type(type) {
+    ASTNode(const Range& range, const ASTType& type, Args&&... args) : _type(type) {
         for (int k = 0; k < 2; k++) _range[k] = range[k];
         Adder a(_children);
         a.sequence(std::forward<Args&&>(args)...);
@@ -126,7 +125,6 @@ class ASTNode {
     }
 
     void print(std::ostream& out, int indent = 1, const std::string* originalStr = 0, unsigned int mask = 0) {
-
         if (originalStr) {
             Range r = range();
             auto replaceNew = [](const std::string& a) {
@@ -195,23 +193,21 @@ struct ASTPolicy {
     typedef ASTNode Base;
     typedef std::unique_ptr<ASTNode> Ptr;
 
-#define SEEXPR_AST_SUBCLASS(name)                    \
-    struct name : public Base {                      \
-        template <typename... Args>                  \
-        name(const Range& range, Args&&... args)     \
-            : Base(range, ASTType::name, args...) {} \
+#define SEEXPR_AST_SUBCLASS(name)                                                         \
+    struct name : public Base {                                                           \
+        template <typename... Args>                                                       \
+        name(const Range& range, Args&&... args) : Base(range, ASTType::name, args...) {} \
     };
-#define SEEXPR_AST_SUBCLASS_OP(name)                                     \
-    struct name : public Base {                                          \
-        template <typename... Args>                                      \
-        name(const Range& range, char op, Args&&... args)                \
-            : Base(range, ASTType::name, args...), _op(op) {}            \
-        std::string display() const { return std::string(#name) + _op; } \
-        char op() const { return _op; }                                  \
-        char value() const { return _op; }                               \
-                                                                         \
-      private:                                                           \
-        char _op;                                                        \
+#define SEEXPR_AST_SUBCLASS_OP(name)                                                                        \
+    struct name : public Base {                                                                             \
+        template <typename... Args>                                                                         \
+        name(const Range& range, char op, Args&&... args) : Base(range, ASTType::name, args...), _op(op) {} \
+        std::string display() const { return std::string(#name) + _op; }                                    \
+        char op() const { return _op; }                                                                     \
+        char value() const { return _op; }                                                                  \
+                                                                                                            \
+      private:                                                                                              \
+        char _op;                                                                                           \
     };
     SEEXPR_AST_SUBCLASS(Module);
     SEEXPR_AST_SUBCLASS(Prototype);

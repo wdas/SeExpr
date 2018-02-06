@@ -22,17 +22,11 @@
 
 namespace SeExpr2 {
 
-inline const ExprVarNode* isVariable(const ExprNode* testee) {
-    return dynamic_cast<const ExprVarNode*>(testee);
-};
+inline const ExprVarNode* isVariable(const ExprNode* testee) { return dynamic_cast<const ExprVarNode*>(testee); };
 
-inline const ExprNumNode* isScalar(const ExprNode* testee) {
-    return dynamic_cast<const ExprNumNode*>(testee);
-};
+inline const ExprNumNode* isScalar(const ExprNode* testee) { return dynamic_cast<const ExprNumNode*>(testee); };
 
-inline const ExprVecNode* isVector(const ExprNode* testee) {
-    return dynamic_cast<const ExprVecNode*>(testee);
-};
+inline const ExprVecNode* isVector(const ExprNode* testee) { return dynamic_cast<const ExprVecNode*>(testee); };
 
 inline const ExprVecNode* isLitVec(const ExprNode* testee) {
     if (const ExprVecNode* vec = isVector(testee))
@@ -41,17 +35,11 @@ inline const ExprVecNode* isLitVec(const ExprNode* testee) {
     return 0;
 };
 
-inline const ExprStrNode* isString(const ExprNode* testee) {
-    return dynamic_cast<const ExprStrNode*>(testee);
-};
+inline const ExprStrNode* isString(const ExprNode* testee) { return dynamic_cast<const ExprStrNode*>(testee); };
 
-inline const ExprAssignNode* isAssign(const ExprNode* testee) {
-    return dynamic_cast<const ExprAssignNode*>(testee);
-};
+inline const ExprAssignNode* isAssign(const ExprNode* testee) { return dynamic_cast<const ExprAssignNode*>(testee); };
 
-inline const ExprFuncNode* isFunc(const ExprNode* testee) {
-    return dynamic_cast<const ExprFuncNode*>(testee);
-};
+inline const ExprFuncNode* isFunc(const ExprNode* testee) { return dynamic_cast<const ExprFuncNode*>(testee); };
 
 inline const ExprFuncNode* isNamedFunc(const ExprNode* testee, const std::string& name) {
     if (const ExprFuncNode* func = isFunc(testee))

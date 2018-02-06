@@ -17,12 +17,12 @@
 #include "ExprConfig.h"
 
 #ifdef SEEXPR_ENABLE_LLVM
+#include <array>
+#include "ExprFunc.h"
 #include "ExprLLVM.h"
 #include "ExprLLVMAll.h"
 #include "ExprNode.h"
-#include "ExprFunc.h"
 #include "VarBlock.h"
-#include <array>
 using namespace llvm;
 using namespace SeExpr2;
 
@@ -729,7 +729,6 @@ LLVM_VALUE ExprCompareNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
 }
 
 LLVM_VALUE ExprCondNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
-
 #if 0  // old non-short circuit
     LLVM_VALUE condVal = getFirstElement(child(0)->codegen(Builder), Builder);
     LLVM_VALUE cond = Builder.CreateFCmpUNE(condVal,
@@ -810,7 +809,6 @@ LLVM_VALUE ExprFuncNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
                 argumentIsVectorAndNeedsDistribution[i] = 1;
             }
     } else if (seFuncType == ExprFuncStandard::FUNCNV || seFuncType == ExprFuncStandard::FUNCNVV) {
-
     } else {
         unsigned shift = isReturnVector(seFuncType) ? 1 : 0;
         for (unsigned i = 0; i < args.size(); ++i) {
@@ -1063,8 +1061,7 @@ struct VarCodeGeneration {
                     varRef->type().isLifetimeUniform()
                         ? Builder.CreateInBoundsGEP(Type::getDoubleTy(llvmContext), baseMemory, componentIndex)
                         : Builder.CreateInBoundsGEP(
-                              Type::getDoubleTy(llvmContext),
-                              baseMemory,
+                              Type::getDoubleTy(llvmContext), baseMemory,
                               Builder.CreateAdd(Builder.CreateMul(indirectIndex, variableStrideValue), componentIndex));
                 loadedValues[component] = Builder.CreateLoad(variablePointer, varName);
             }

@@ -17,11 +17,11 @@
 #ifndef ExprType_h
 #define ExprType_h
 
-#include <vector>
-#include <string>
-#include <map>
 #include <cassert>
+#include <map>
 #include <sstream>
+#include <string>
+#include <vector>
 
 #pragma push_macro("None")
 #undef None

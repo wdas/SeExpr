@@ -18,24 +18,24 @@
 * @brief Manages/creates a bunch of ExprControls by using expression text
 * @author  aselle
 */
-#include <QVBoxLayout>
+#include "ExprControl.h"
+#include <QColorDialog>
+#include <QDialogButtonBox>
+#include <QFormLayout>
 #include <QHBoxLayout>
-#include <QToolButton>
+#include <QLabel>
 #include <QPushButton>
 #include <QRadioButton>
-#include <QFormLayout>
-#include <QDialogButtonBox>
-#include <QColorDialog>
-#include <QLabel>
+#include <QToolButton>
+#include <QVBoxLayout>
+#include "Editable.h"
+#include "EditableExpression.h"
+#include "ExprColorCurve.h"
+#include "ExprCompletionModel.h"
+#include "ExprControlCollection.h"
+#include "ExprCurve.h"
 #include "ExprEditor.h"
 #include "ExprHighlighter.h"
-#include "ExprCompletionModel.h"
-#include "ExprCurve.h"
-#include "ExprColorCurve.h"
-#include "ExprControl.h"
-#include "ExprControlCollection.h"
-#include "EditableExpression.h"
-#include "Editable.h"
 
 ExprControlCollection::ExprControlCollection(QWidget* parent, bool showAddButton)
     : QWidget(parent), count(0), showAddButton(showAddButton), editableExpression(0) {
@@ -274,9 +274,7 @@ ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent) {
     resize(500, 200);
 }
 
-void ExprAddDialog::listIndexChanged(int index) {
-    stackWidget->setCurrentIndex(index);
-}
+void ExprAddDialog::listIndexChanged(int index) { stackWidget->setCurrentIndex(index); }
 
 void ExprAddDialog::colorChooseClicked() {
     color = QColorDialog::getColor(color);
@@ -303,12 +301,14 @@ void ExprControlCollection::addControlDialog() {
         QString s;
         switch (dialog->listWidget->currentRow()) {
             case 0:
-                s = QString("%1 = curve(%2,0,0,4,1,1,4);\n").arg(dialog->variableName->text()).arg(
-                    dialog->curveLookup->text());
+                s = QString("%1 = curve(%2,0,0,4,1,1,4);\n")
+                        .arg(dialog->variableName->text())
+                        .arg(dialog->curveLookup->text());
                 break;
             case 1:
-                s = QString("%1 = ccurve(%2,0,[0,0,0],4,1,[1,1,1],4);\n").arg(dialog->variableName->text()).arg(
-                    dialog->colorCurveLookup->text());
+                s = QString("%1 = ccurve(%2,0,[0,0,0],4,1,[1,1,1],4);\n")
+                        .arg(dialog->variableName->text())
+                        .arg(dialog->colorCurveLookup->text());
                 break;
             case 2:
                 s = dialog->variableName->text() + " = " + dialog->intDefault->text() + "; # " +

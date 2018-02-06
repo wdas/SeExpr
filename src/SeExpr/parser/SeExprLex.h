@@ -16,16 +16,16 @@
 */
 #pragma once
 
-#include <iostream>
-#include <string>
-#include <map>
-#include <stdexcept>
-#include <cstdio>
-#include <fstream>
-#include <sstream>
-#include <cassert>
 #include <array>
+#include <cassert>
+#include <cstdio>
 #include <cstring>
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 
 struct ParseError {
     ParseError(const std::string& errorStr) : _errorStr(errorStr) {}
@@ -88,7 +88,6 @@ class Lexer {
     };
 
     struct Buffer {
-
         Buffer(const std::string& bufIn) : text(bufIn), buf(text.c_str()), curr(buf) {}
         // read current character
         char operator()() const { return *curr; }
@@ -134,7 +133,7 @@ class Lexer {
             // assert(position[1] > 0 && position[1] < bufLen);
             position[0] = std::max(0, position[0]);
             position[1] = std::min(bufLen - 1, position[1]);
-            const char* startLine = buf + position[0], *endLine = buf + position[1];
+            const char *startLine = buf + position[0], *endLine = buf + position[1];
             int offset = 0;
             for (; startLine > buf && *startLine != '\n'; startLine--, offset++) {
                 if (*startLine == '\n') {

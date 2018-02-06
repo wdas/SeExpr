@@ -20,8 +20,8 @@
 #include "Evaluator.h"
 #include "ExprConfig.h"
 #include "ExprLLVMAll.h"
-#include "VarBlock.h"
 #include "ExprNode.h"
+#include "VarBlock.h"
 
 extern "C" void SeExpr2LLVMEvalVarRef(SeExpr2::ExprVarRef *seVR, double *result);
 extern "C" void SeExpr2LLVMEvalCustomFunction(int *opDataArg,
@@ -93,7 +93,7 @@ class LLVMEvaluator : public Evaluator {
         // TheModule->dump();
     }
 
-    virtual bool prep(ExprNode* parseTree, ExprType desiredReturnType) override;
+    virtual bool prep(ExprNode *parseTree, ExprType desiredReturnType) override;
 
     virtual bool isValid() const override { return true; }
 
@@ -101,7 +101,10 @@ class LLVMEvaluator : public Evaluator {
 
     virtual const char *evalStr(VarBlock *varBlock) override { return *(*_llvmEvalStr)(varBlock); }
 
-    virtual void evalMultiple(VarBlock *varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) override {
+    virtual void evalMultiple(VarBlock *varBlock,
+                              int outputVarBlockOffset,
+                              size_t rangeStart,
+                              size_t rangeEnd) override {
         return (*_llvmEvalFP)(varBlock, outputVarBlockOffset, rangeStart, rangeEnd);
     }
 
@@ -121,7 +124,7 @@ class LLVMEvaluator : public Evaluator {
 
     virtual inline void dump() const override { unsupported(); }
 
-    virtual bool prep(ExprNode* parseTree, ExprType desiredReturnType) override {
+    virtual bool prep(ExprNode *parseTree, ExprType desiredReturnType) override {
         unsupported();
         return false;
     }
@@ -141,7 +144,10 @@ class LLVMEvaluator : public Evaluator {
         return "";
     }
 
-    virtual void evalMultiple(VarBlock *varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) override {
+    virtual void evalMultiple(VarBlock *varBlock,
+                              int outputVarBlockOffset,
+                              size_t rangeStart,
+                              size_t rangeEnd) override {
         unsupported();
     }
 };

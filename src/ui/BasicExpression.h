@@ -22,10 +22,10 @@
 #ifndef BasicExpression_h
 #define BasicExpression_h
 
-#include <map>
-#include <SeExpr2/Expression.h>
 #include <SeExpr2/ExprFunc.h>
 #include <SeExpr2/ExprNode.h>
+#include <SeExpr2/Expression.h>
+#include <map>
 
 class BasicExpression : public SeExpr2::Expression {
   public:
@@ -42,9 +42,7 @@ class BasicExpression : public SeExpr2::Expression {
         void eval(double* result) {
             for (int k = 0; k < 3; k++) result[k] = value[k];
         };
-        void eval(const char** result) {
-            assert(false);
-        };
+        void eval(const char** result) { assert(false); };
     };
 
     struct DummyFuncX : SeExpr2::ExprFuncSimple {

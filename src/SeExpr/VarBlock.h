@@ -17,8 +17,8 @@
 #ifndef VarBlock_h
 #define VarBlock_h
 
-#include "Expression.h"
 #include "ExprType.h"
+#include "Expression.h"
 #include "Vec.h"
 
 namespace SeExpr2 {

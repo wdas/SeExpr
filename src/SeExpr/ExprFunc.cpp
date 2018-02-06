@@ -14,19 +14,19 @@
  You may obtain a copy of the License at
  http://www.apache.org/licenses/LICENSE-2.0
 */
-#include <string>
-#include <map>
 #include <stdlib.h>
 #include <iostream>
+#include <map>
+#include <string>
 #ifndef SEEXPR_WIN32
-#include <dlfcn.h>
 #include <dirent.h>
+#include <dlfcn.h>
 #endif
 
-#include "Expression.h"
+#include "ExprBuiltins.h"
 #include "ExprFunc.h"
 #include "ExprNode.h"
-#include "ExprBuiltins.h"
+#include "Expression.h"
 
 #include "Mutex.h"
 
@@ -120,11 +120,10 @@ void ExprFunc::cleanup() {
     Functions = nullptr;
 #ifdef SEEXPR_WIN32
 #else
-    for(size_t i=0; i<dynlib.size(); i++){
+    for (size_t i = 0; i < dynlib.size(); i++) {
         dlclose(dynlib[i]);
     }
 #endif
-
 }
 
 const ExprFunc* ExprFunc::lookup(const std::string& name) {

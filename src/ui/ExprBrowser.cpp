@@ -19,24 +19,24 @@
 * @author  aselle
 */
 #include <QDir>
+#include <QFileDialog>
 #include <QFileInfo>
+#include <QHeaderView>
+#include <QLabel>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QSizePolicy>
+#include <QSortFilterProxyModel>
+#include <QSpacerItem>
+#include <QTabWidget>
+#include <QTextBrowser>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 #include <QVBoxLayout>
-#include <QTabWidget>
-#include <QHeaderView>
-#include <QLabel>
-#include <QTextBrowser>
-#include <QPushButton>
-#include <QSpacerItem>
-#include <QSizePolicy>
-#include <QSortFilterProxyModel>
-#include <QFileDialog>
-#include <QMessageBox>
 
 #include <cassert>
-#include "ExprEditor.h"
 #include "ExprBrowser.h"
+#include "ExprEditor.h"
 
 #define P3D_CONFIG_ENVVAR "P3D_CONFIG_PATH"
 
@@ -134,8 +134,7 @@ class ExprTreeModel : public QAbstractItemModel {
 
     ~ExprTreeModel() { delete root; }
 
-    void update()
-    {
+    void update() {
         beginResetModel();
         endResetModel();
     }
@@ -217,8 +216,7 @@ class ExprTreeFilterModel : public QSortFilterProxyModel {
   public:
     ExprTreeFilterModel(QWidget* parent = 0) : QSortFilterProxyModel(parent) {}
 
-    void update()
-    {
+    void update() {
         beginResetModel();
         endResetModel();
     }
@@ -272,8 +270,7 @@ ExprBrowser::ExprBrowser(QWidget* parent, ExprEditor* editor)
     // selection mode and signal
     treeNew->setSelectionMode(QAbstractItemView::SingleSelection);
     connect(refreshButton, SIGNAL(clicked()), SLOT(reload()));
-    connect(treeNew->selectionModel(),
-            SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)),
+    connect(treeNew->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)),
             SLOT(handleSelection(const QModelIndex&, const QModelIndex&)));
 }
 
@@ -448,7 +445,6 @@ bool ExprBrowser::getExpressionDirs() {
     std::string configFile = std::string(env) + "/config.txt";
     std::ifstream file(configFile.c_str());
     if (file) {
-
         std::string key;
         while (file) {
             file >> key;

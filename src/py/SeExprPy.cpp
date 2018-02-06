@@ -15,9 +15,9 @@
  http://www.apache.org/licenses/LICENSE-2.0
 */
 
-#include <boost/python.hpp>
-#include <SeExprParse.h>
 #include <ASTNode.h>
+#include <SeExprParse.h>
+#include <boost/python.hpp>
 #include <memory>
 
 class AST;
@@ -98,8 +98,9 @@ void translateParseError(ParseError const& e) { PyErr_SetString(PyExc_RuntimeErr
 using namespace boost::python;
 BOOST_PYTHON_MODULE(core) {
     register_exception_translator<ParseError>(&translateParseError);
-    class_<AST>("AST", init<std::string>()).def("isValid", &AST::isValid).def(
-        "root", &AST::root, return_value_policy<manage_new_object>())
+    class_<AST>("AST", init<std::string>())
+        .def("isValid", &AST::isValid)
+        .def("root", &AST::root, return_value_policy<manage_new_object>())
         //.def("edit",&AST::edit)
         ;
 

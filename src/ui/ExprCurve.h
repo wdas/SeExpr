@@ -24,11 +24,11 @@
 
 #include <vector>
 
-#include <QObject>
 #include <QComboBox>
 #include <QGraphicsPolygonItem>
 #include <QGraphicsView>
 #include <QLineEdit>
+#include <QObject>
 
 #include <SeExpr2/Curve.h>
 
@@ -46,7 +46,7 @@ class CurveGraphicsView : public QGraphicsView {
 
     virtual void resizeEvent(QResizeEvent *event);
 
-signals:
+  signals:
     void resizeSignal(int width, int height);
 };
 
@@ -91,14 +91,13 @@ class CurveScene : public QGraphicsScene {
 
   private:
     T_CURVE *_curve;
-  public
-slots:
+  public slots:
     void interpChanged(const int interp);
     void selPosChanged(double pos);
     void selValChanged(double val);
     void resize(const int width, const int height);
 
-signals:
+  signals:
     void cvSelected(double x, double y, T_INTERP interp);
     void curveChanged();
 
@@ -132,14 +131,13 @@ class ExprCurve : public QWidget {
 
     CurveScene *_scene;
 
-  public
-slots:
+  public slots:
     void cvSelectedSlot(double pos, double val, T_INTERP interp);
     void selPosChanged();
     void selValChanged();
     void openDetail();
 
-signals:
+  signals:
     void selPosChangedSignal(double pos);
     void selValChangedSignal(double val);
 

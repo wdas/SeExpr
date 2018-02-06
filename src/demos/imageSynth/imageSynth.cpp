@@ -17,15 +17,15 @@
 /**
    @file imageSynth.cpp
 */
-#include <map>
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
 #include <Expression.h>
 #include <Interpreter.h>
 #include <Platform.h>
 #include <png.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <fstream>
+#include <map>
 
 namespace SeExpr2 {
 //! Simple image synthesizer expression class to support our function grapher
@@ -142,14 +142,7 @@ int main(int argc, char* argv[]) {
     info_ptr = png_create_info_struct(png_ptr);
     png_init_io(png_ptr, fp);
     int color_type = PNG_COLOR_TYPE_RGBA;
-    png_set_IHDR(png_ptr,
-                 info_ptr,
-                 width,
-                 height,
-                 8,
-                 color_type,
-                 PNG_INTERLACE_NONE,
-                 PNG_COMPRESSION_TYPE_DEFAULT,
+    png_set_IHDR(png_ptr, info_ptr, width, height, 8, color_type, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
                  PNG_FILTER_TYPE_DEFAULT);
     const unsigned char* ptrs[height];
     for (int i = 0; i < height; i++) {

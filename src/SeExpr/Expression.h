@@ -17,18 +17,18 @@
 #ifndef Expression_h
 #define Expression_h
 
-#include <string>
-#include <map>
-#include <set>
-#include <mutex>
-#include <vector>
-#include <iomanip>
 #include <stdint.h>
-#include "ExprConfig.h"
-#include "Vec.h"
+#include <iomanip>
+#include <map>
+#include <mutex>
+#include <set>
+#include <string>
+#include <vector>
 #include "Context.h"
 #include "Evaluator.h"
+#include "ExprConfig.h"
 #include "ExprEnv.h"
+#include "Vec.h"
 
 namespace llvm {
 class ExecutionEngine;
@@ -44,22 +44,18 @@ class Expression;
 
 //! abstract class for implementing variable references
 class ExprVarRef {
-    ExprVarRef() : _type(ExprType().Error().Varying()) {};
+    ExprVarRef() : _type(ExprType().Error().Varying()){};
 
   public:
-    ExprVarRef(const ExprType& type) : _type(type) {};
+    ExprVarRef(const ExprType& type) : _type(type){};
 
     virtual ~ExprVarRef() {}
 
     //! sets (current) type to given type
-    virtual void setType(const ExprType& type) {
-        _type = type;
-    };
+    virtual void setType(const ExprType& type) { _type = type; };
 
     //! returns (current) type
-    virtual ExprType type() const {
-        return _type;
-    };
+    virtual ExprType type() const { return _type; };
 
     //! returns this variable's value by setting result
     virtual void eval(double* result) = 0;
@@ -77,10 +73,7 @@ class VarBlockCreator;
 class Expression {
   public:
     //! Types of evaluation strategies that are available
-    enum EvaluationStrategy {
-        UseInterpreter,
-        UseLLVM
-    };
+    enum EvaluationStrategy { UseInterpreter, UseLLVM };
     //! What evaluation strategy to use by default
     static EvaluationStrategy defaultEvaluationStrategy;
     //! Whether to debug expressions

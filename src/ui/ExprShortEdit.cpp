@@ -18,25 +18,25 @@
 * @brief This provides an expression editor for SeExpr syntax with auto ui features
 * @author  aselle
 */
-#include <QLineEdit>
-#include <QPushButton>
-#include <QToolButton>
+#include <QCompleter>
 #include <QHBoxLayout>
 #include <QIcon>
-#include <QCompleter>
-#include <QTreeView>
-#include <QScrollBar>
-#include <QToolTip>
 #include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QScrollBar>
+#include <QToolButton>
+#include <QToolTip>
+#include <QTreeView>
 
-#include "ExprShortEdit.h"
-#include "ExprDialog.h"
+#include "BasicExpression.h"
 #include "ExprBrowser.h"
-#include "ExprHighlighter.h"
 #include "ExprCompletionModel.h"
 #include "ExprControlCollection.h"
+#include "ExprDialog.h"
+#include "ExprHighlighter.h"
 #include "ExprPopupDoc.h"
-#include "BasicExpression.h"
+#include "ExprShortEdit.h"
 
 /* XPM */
 static const char* sum_xpm[] = {"16 16 6 1",        "# c None",         ". c None",         "b c #808080",
@@ -304,7 +304,6 @@ void ExprShortTextEdit::paintEvent(QPaintEvent* e) {
 }
 
 void ExprShortTextEdit::keyPressEvent(QKeyEvent* e) {
-
     // If the completer is active pass keys it needs down
     if (completer && completer->popup()->isVisible()) {
         switch (e->key()) {
@@ -367,7 +366,6 @@ void ExprShortTextEdit::keyPressEvent(QKeyEvent* e) {
     if (!isShortcut && (hasModifier || e->text().isEmpty() || completionPrefix.length() < 1 || index == -1)) {
         completer->popup()->hide();
     } else {
-
         // copy the completion prefix in if we don't already have it in the completer
         if (completionPrefix != completer->completionPrefix()) {
             completer->setCompletionPrefix(completionPrefix);
@@ -412,7 +410,7 @@ void ExprShortTextEdit::showTip(const QString& string) {
         delete _tip;
         _tip = 0;
     }
-    _tip = new ExprPopupDoc(this, mapToGlobal(cr.bottomLeft()+QPoint(0,6)), string);
+    _tip = new ExprPopupDoc(this, mapToGlobal(cr.bottomLeft() + QPoint(0, 6)), string);
 }
 
 void ExprShortTextEdit::hideTip() {

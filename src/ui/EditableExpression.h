@@ -20,8 +20,8 @@
 #ifndef __EditableExpression__
 #define __EditableExpression__
 
-#include <vector>
 #include <string>
+#include <vector>
 
 class Editable;
 

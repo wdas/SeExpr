@@ -20,18 +20,18 @@
 
 /*qt3
 #include <qlabel.h>
-#include <qlistbox.h>
 #include <qlayout.h>
+#include <qlistbox.h>
 */
 
-#include <QWidget>
 #include <QLabel>
+#include <QLayout>
 #include <QListWidget>
 #include <QListWidgetItem>
-#include <QLayout>
+#include <QWidget>
 
-#include "CETool.h"
 #include "CECurveListUI.h"
+#include "CETool.h"
 
 /**
  * Constructor.

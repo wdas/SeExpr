@@ -17,13 +17,13 @@
 
 // Set up helper methods and classes for generating images from test expressions
 
-#include <map>
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-#include <fstream>
 #include <assert.h>
 #include <dirent.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <fstream>
+#include <map>
 //#include <gtest/pcrecpp.h>
 
 #include <png.h>
@@ -47,7 +47,6 @@ double clamp(double x) { return std::max(0., std::min(255., x)); }
 namespace SeExpr2 {
 
 class RandFuncX : public ExprFuncSimple {
-
     struct Data : public ExprFuncNode::Data {
         std::vector<std::pair<int, int> > ranges;
         std::string format;
@@ -111,7 +110,6 @@ class MapFunc : public ExprFuncSimple {
 // triplanar(string name, [vector scale], [float blend], [vector rotation],
 //           [vector translation])
 class TriplanarFuncX : public ExprFuncSimple {
-
     virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const {
         bool valid = true;
         valid &= node->checkArg(0, ExprType().String().Constant(), envBuilder);
@@ -301,15 +299,8 @@ bool TestImage::writePNGImage(const char* imageFile) {
         info_ptr = png_create_info_struct(png_ptr);
         png_init_io(png_ptr, fp);
         int color_type = PNG_COLOR_TYPE_RGBA;
-        png_set_IHDR(png_ptr,
-                     info_ptr,
-                     _width,
-                     _height,
-                     8,
-                     color_type,
-                     PNG_INTERLACE_NONE,
-                     PNG_COMPRESSION_TYPE_DEFAULT,
-                     PNG_FILTER_TYPE_DEFAULT);
+        png_set_IHDR(png_ptr, info_ptr, _width, _height, 8, color_type, PNG_INTERLACE_NONE,
+                     PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
         const unsigned char* ptrs[_height];
         for (int i = 0; i < _height; i++) {
             ptrs[i] = &_image[_width * i * 4];
@@ -493,13 +484,13 @@ TEST(perf, noexpr) {
 
 static int forceStaticInitializationToMakeTimingBetter = []() {
     SeExpr2::ExprFunc::init();  // force static initialize
-    #if 0
+#if 0
     ImageSynthExpr e("deepTMA(P,1,1,1,1,1,1,1,1,1,1,1,1,1)");
     if (!e.isValid()) {
         std::cerr << "INVALID!" << std::endl;
     }
     const double* foo=e.evalFP();
     std::cout<<"foo "<<foo[0]<<" "<<std::endl;
-    #endif
+#endif
     return 1;
 }();

@@ -16,12 +16,12 @@
 */
 #include <math.h>
 //#include <DGStrUtils.h>
-#include "CETool.h"
-#include "CEGraphUI.h"
-#include "CEGraphCurve.h"
-#include "CEGraphSeg.h"
-#include "CEGraphKey.h"
 #include "CEDragHandlers.h"
+#include "CEGraphCurve.h"
+#include "CEGraphKey.h"
+#include "CEGraphSeg.h"
+#include "CEGraphUI.h"
+#include "CETool.h"
 
 static double RoundNicely(double val, double inc) {
     // first make inc nice (i.e. [1, 2, or 5] * some power of 10)
@@ -163,7 +163,6 @@ void CEKeyMoveHandler::setMultiDrag(std::vector<CEGraphKey*> graph_segments) {
 }
 
 void CEKeyMoveHandler::moveKey(bool useCommand) {
-
     if (_anchorTimes.size() > 0) {
         // We are doing Multi-Drag!
         for (unsigned int i = 0; i < _anchorTimes.size(); i++) {

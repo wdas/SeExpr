@@ -20,10 +20,10 @@
 
 #include <vector>
 
-#include <QObject>
 #include <QGraphicsPolygonItem>
 #include <QGraphicsView>
 #include <QLineEdit>
+#include <QObject>
 
 #include <cmath>
 #include <iostream>
@@ -75,17 +75,13 @@ struct SeDeepWater {
 
     T sqr(T x) { return x * x; }
 
-    inline static T kscale() {
-        return 1 / 100.0;
-    };
+    inline static T kscale() { return 1 / 100.0; };
 
     T toIndex(const T x) { return x / kscale(); }
 
     T fromIndex(const T index) { return kscale() * index; }
 
-    inline static T bottom_offset() {
-        return -5;
-    };
+    inline static T bottom_offset() { return -5; };
 
     T fromLog(const T x) { return std::log(x) - bottom_offset(); }
 
@@ -169,7 +165,7 @@ class DeepWaterGraphicsView : public QGraphicsView {
 
     virtual void resizeEvent(QResizeEvent *event);
 
-signals:
+  signals:
     void resizeSignal(int width, int height);
 };
 
@@ -180,7 +176,7 @@ class DeepWaterLineEdit : public QLineEdit {
     DeepWaterLineEdit(QWidget *parent = 0) {}
     ~DeepWaterLineEdit() {}
 
-signals:
+  signals:
     void focusOut();
 
   protected:
@@ -220,8 +216,7 @@ class DeepWaterScene : public QGraphicsScene {
   private:
     T_CURVE *_curve;
 
-  public
-slots:
+  public slots:
     void resolutionChanged(int val);
     void tileSizeChanged(double val);
     void lengthCutoffChanged(double val);
@@ -234,7 +229,7 @@ slots:
     void sharpenChanged(double val);
     void resize(const int width, const int height);
 
-signals:
+  signals:
     void deepWaterChanged();
 
   private:
@@ -254,8 +249,7 @@ class ExprDeepWater : public QWidget {
     void setParams(const SeDeepWaterParams &params);
     DeepWaterScene *_scene;
 
-  public
-slots:
+  public slots:
     void resolutionChanged();
     void tileSizeChanged();
     void lengthCutoffChanged();
@@ -267,7 +261,7 @@ slots:
     void directionalReflectionDampingChanged();
     void sharpenChanged();
 
-signals:
+  signals:
     void resolutionChangedSignal(int val);
     void tileSizeChangedSignal(double val);
     void lengthCutoffChangedSignal(double val);

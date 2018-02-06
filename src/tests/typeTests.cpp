@@ -16,8 +16,8 @@
 */
 #include <gtest/gtest.h>
 
-#include "typeTests.h"
 #include <SeExpr2/TypeIterator.h>
+#include "typeTests.h"
 
 void TypeTesterExpr::doTest(const std::string &testStr, ExprType expectedResult, ExprType actualResult) {
     setExpr(testStr);
@@ -61,9 +61,7 @@ void TypeTesterExpr::testTwoVars(const std::string &testStr,
     };
 }
 
-ExprType identity(const ExprType &type) {
-    return type;
-};
+ExprType identity(const ExprType &type) { return type; };
 
 ExprType numeric(const ExprType &type) {
     return type.isFP() ? type : ExprType().Error().Varying();

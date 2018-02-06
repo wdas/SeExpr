@@ -16,8 +16,8 @@
 */
 #include <animlib/AnimCurve.h>
 #include <QApplication>
-#include "CETool.h"
 #include "CEMainUI.h"
+#include "CETool.h"
 
 #include <fenv.h>
 

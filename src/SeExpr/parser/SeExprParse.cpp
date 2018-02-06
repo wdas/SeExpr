@@ -29,8 +29,7 @@ int main(int argc, char* argv[]) {
     try {
         auto tree = parser.parse();
         tree->print(std::cout, 0, &content);
-    }
-    catch (const ParseError& e) {
+    } catch (const ParseError& e) {
         std::cerr << "parse error: " << e._errorStr << std::endl;
     }
     return 0;

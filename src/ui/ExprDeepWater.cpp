@@ -16,15 +16,15 @@
 *
 * @file ExprDeepWater.cpp
 */
-#include <iostream>
 #include <algorithm>
+#include <iostream>
 
 #include <QDialog>
 #include <QHBoxLayout>
-#include <QLabel>
-#include <QVBoxLayout>
-#include <QResizeEvent>
 #include <QIntValidator>
+#include <QLabel>
+#include <QResizeEvent>
+#include <QVBoxLayout>
 
 #include <SeExpr2/ExprBuiltins.h>
 #include <cfloat>
@@ -155,8 +155,8 @@ void DeepWaterScene::drawGrid() {
     if (_gridRect == 0) {
         _gridRect = addRect(0, 0, _width, _height, QPen(Qt::black, 1.0), QBrush(Qt::gray));
     }
-    _gridRect->setRect(
-        _width * _curve->getKLow(), 0, _width * _curve->getKHigh() - _width * _curve->getKLow(), _height);
+    _gridRect->setRect(_width * _curve->getKLow(), 0, _width * _curve->getKHigh() - _width * _curve->getKLow(),
+                       _height);
     _gridRect->setBrush(QBrush(_curve->inGrid() ? Qt::green : Qt::cyan));
     _gridRect->setZValue(2);
     _gridRect->setOpacity(0.25);
@@ -387,16 +387,12 @@ ExprDeepWater::ExprDeepWater(QWidget *parent)
     connect(this, SIGNAL(flowDirectionChangedSignal(QString)), _scene, SLOT(flowDirectionChanged(QString)));
     connect(_directionalFactorExponentEdit, SIGNAL(returnPressed()), this, SLOT(directionalFactorExponentChanged()));
     connect(_directionalFactorExponentEdit, SIGNAL(focusOut()), this, SLOT(directionalFactorExponentChanged()));
-    connect(this,
-            SIGNAL(directionalFactorExponentChangedSignal(double)),
-            _scene,
+    connect(this, SIGNAL(directionalFactorExponentChangedSignal(double)), _scene,
             SLOT(directionalFactorExponentChanged(double)));
-    connect(
-        _directionalReflectionDampingEdit, SIGNAL(returnPressed()), this, SLOT(directionalReflectionDampingChanged()));
+    connect(_directionalReflectionDampingEdit, SIGNAL(returnPressed()), this,
+            SLOT(directionalReflectionDampingChanged()));
     connect(_directionalReflectionDampingEdit, SIGNAL(focusOut()), this, SLOT(directionalReflectionDampingChanged()));
-    connect(this,
-            SIGNAL(directionalReflectionDampingChangedSignal(double)),
-            _scene,
+    connect(this, SIGNAL(directionalReflectionDampingChangedSignal(double)), _scene,
             SLOT(directionalReflectionDampingChanged(double)));
     connect(_sharpenEdit, SIGNAL(returnPressed()), this, SLOT(sharpenChanged()));
     connect(_sharpenEdit, SIGNAL(focusOut()), this, SLOT(sharpenChanged()));

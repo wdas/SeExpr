@@ -14,12 +14,12 @@
  You may obtain a copy of the License at
  http://www.apache.org/licenses/LICENSE-2.0
 */
-#include "ExprNode.h"
 #include "Interpreter.h"
-#include "VarBlock.h"
-#include <iostream>
-#include <cstdio>
 #include <dlfcn.h>
+#include <cstdio>
+#include <iostream>
+#include "ExprNode.h"
+#include "VarBlock.h"
 
 // TODO: optimize to write to location directly on a CondNode
 namespace SeExpr2 {
@@ -531,7 +531,7 @@ int ExprVecNode::buildInterpreter(Interpreter* interpreter) const {
 }
 
 int ExprBinaryOpNode::buildInterpreter(Interpreter* interpreter) const {
-    const ExprNode* child0 = child(0), *child1 = child(1);
+    const ExprNode *child0 = child(0), *child1 = child(1);
     int dim0 = child0->type().dim(), dim1 = child1->type().dim(), dimout = type().dim();
     int op0 = child0->buildInterpreter(interpreter);
     int op1 = child1->buildInterpreter(interpreter);
@@ -612,7 +612,7 @@ int ExprUnaryOpNode::buildInterpreter(Interpreter* interpreter) const {
 }
 
 int ExprSubscriptNode::buildInterpreter(Interpreter* interpreter) const {
-    const ExprNode* child0 = child(0), *child1 = child(1);
+    const ExprNode *child0 = child(0), *child1 = child(1);
     int dimin = child0->type().dim();
     int op0 = child0->buildInterpreter(interpreter);
     int op1 = child1->buildInterpreter(interpreter);
@@ -763,7 +763,7 @@ int ExprIfThenElseNode::buildInterpreter(Interpreter* interpreter) const {
 }
 
 int ExprCompareNode::buildInterpreter(Interpreter* interpreter) const {
-    const ExprNode* child0 = child(0), *child1 = child(1);
+    const ExprNode *child0 = child(0), *child1 = child(1);
     assert(type().dim() == 1 && type().isFP());
 
     if (_op == '&' || _op == '|') {
@@ -859,7 +859,7 @@ int ExprPrototypeNode::buildInterpreter(Interpreter* interpreter) const {
 }
 
 int ExprCompareEqNode::buildInterpreter(Interpreter* interpreter) const {
-    const ExprNode* child0 = child(0), *child1 = child(1);
+    const ExprNode *child0 = child(0), *child1 = child(1);
     int op0 = child0->buildInterpreter(interpreter);
     int op1 = child1->buildInterpreter(interpreter);
 

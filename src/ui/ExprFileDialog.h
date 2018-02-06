@@ -20,14 +20,14 @@
 #ifndef EXPRFILEDIALOG_H
 #define EXPRFILEDIALOG_H
 
-#include <QLabel>
-#include <QComboBox>
 #include <QCheckBox>
+#include <QComboBox>
+#include <QFileDialog>
+#include <QLabel>
 #include <QLineEdit>
 #include <QPixmap>
-#include <QFileDialog>
-#include <QVBoxLayout>
 #include <QPushButton>
+#include <QVBoxLayout>
 
 class ExprPreviewWidget : public QWidget {
   public:
@@ -75,8 +75,7 @@ class ExprFileDialog : public QFileDialog {
     void setButtonName(const QString& str);
     void addSidebarShortcut(const QString& s);
 
-  private
-slots:
+  private slots:
     void handleOk();
     void editReturnPress();
     void gotoFavorites();

@@ -15,8 +15,8 @@
 * http://www.apache.org/licenses/LICENSE-2.0
 */
 #include <SeExpr2/Expression.h>
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 using namespace SeExpr2;

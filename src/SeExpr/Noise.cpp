@@ -15,8 +15,8 @@
  http://www.apache.org/licenses/LICENSE-2.0
 */
 
-#include <iostream>
 #include <smmintrin.h>
+#include <iostream>
 #include "ExprBuiltins.h"
 
 namespace {

@@ -17,13 +17,13 @@
 #ifndef ExprFunc_h
 #define ExprFunc_h
 
-#include "Vec.h"
 #include <vector>
+#include "Vec.h"
 
-#include "ExprType.h"
 #include "ExprEnv.h"
-#include "ExprFuncX.h"
 #include "ExprFuncStandard.h"
+#include "ExprFuncX.h"
+#include "ExprType.h"
 
 namespace SeExpr2 {
 
@@ -81,10 +81,10 @@ class ExprFunc {
 
     // bool isScalar() const { return _scalar; };
 
-    ExprFunc() : _func(0), _minargs(0), _maxargs(0) {};
+    ExprFunc() : _func(0), _minargs(0), _maxargs(0){};
 
     //! User defined function with custom argument parsing
-    ExprFunc(ExprFuncX& f, int min = 1, int max = 1) : _func(&f), _minargs(min), _maxargs(max) {};
+    ExprFunc(ExprFuncX& f, int min = 1, int max = 1) : _func(&f), _minargs(min), _maxargs(max){};
 
     ExprFunc(ExprFuncStandard::Func0* f)
         : _standardFunc(ExprFuncStandard::FUNC0, (void*)f), _func(0), _minargs(0), _maxargs(0) {}

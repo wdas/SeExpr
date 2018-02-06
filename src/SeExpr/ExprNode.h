@@ -28,13 +28,13 @@
 #endif
 
 #include "ExprConfig.h"
-#include "ExprLLVM.h"
-#include "Expression.h"
-#include "ExprType.h"
 #include "ExprEnv.h"
-#include "Vec.h"
-#include "Interpreter.h"
+#include "ExprLLVM.h"
+#include "ExprType.h"
+#include "Expression.h"
 #include "IndentedStreamBuf.h"
+#include "Interpreter.h"
+#include "Vec.h"
 
 namespace SeExpr2 {
 class ExprFunc;
@@ -103,9 +103,7 @@ class ExprNode {
     const Expression* expr() const { return _expr; }
 
     /// Access to original string representation of current expression
-    std::string toString() const {
-        return expr()->getExpr().substr(startPos(), length());
-    };
+    std::string toString() const { return expr()->getExpr().substr(startPos(), length()); };
 
     /// @{ @name Relationship Queries and Manipulation
 
@@ -143,9 +141,7 @@ class ExprNode {
     /// @}
 
     /// The type of the node
-    const ExprType& type() const {
-        return _type;
-    };
+    const ExprType& type() const { return _type; };
 
     /// @{ @name Access position in the input buffer that created this node
 
@@ -159,9 +155,7 @@ class ExprNode {
     /// Access end position in input string
     inline short int endPos() const { return _endPos; }
     /// Access length of input string
-    inline short int length() const {
-        return endPos() - startPos();
-    };
+    inline short int length() const { return endPos() - startPos(); };
 
     /// @}
 
@@ -170,9 +164,7 @@ class ExprNode {
 
   protected: /*protected functions*/
     //! Set type of parameter
-    inline void setType(const ExprType& t) {
-        _type = t;
-    };
+    inline void setType(const ExprType& t) { _type = t; };
     //! Set's the type to the argument but uses the children to determine lifetime
     inline void setTypeWithChildLife(const ExprType& t) {
         setType(t);
@@ -215,8 +207,8 @@ class ExprNode {
     /// types match (true if they do)
     inline bool checkTypesCompatible(const ExprType& first, const ExprType& second, bool& error) {
         if (!ExprType::valuesCompatible(first, second)) {
-            return checkCondition(
-                false, "Type mismatch. First: " + first.toString() + " Second: " + second.toString(), error);
+            return checkCondition(false, "Type mismatch. First: " + first.toString() + " Second: " + second.toString(),
+                                  error);
         } else
             return false;
     }
@@ -287,20 +279,12 @@ class ExprPrototypeNode : public ExprNode {
         _retTypeSet = true;
     };
 
-    inline bool isReturnTypeSet() const {
-        return _retTypeSet;
-    };
+    inline bool isReturnTypeSet() const { return _retTypeSet; };
 
-    inline ExprType returnType() const {
-        return (_retTypeSet ? _retType : ExprType().Error().Varying());
-    };
+    inline ExprType returnType() const { return (_retTypeSet ? _retType : ExprType().Error().Varying()); };
 
-    inline ExprType argType(int i) const {
-        return _argTypes[i];
-    };
-    inline const ExprNode* arg(int i) const {
-        return child(i);
-    };
+    inline ExprType argType(int i) const { return _argTypes[i]; };
+    inline const ExprNode* arg(int i) const { return child(i); };
 
     const std::string& name() const { return _name; }
 
@@ -379,12 +363,8 @@ class ExprAssignNode : public ExprNode {
     // virtual void eval(Vec3d& result) const;
     virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 
-    const std::string& name() const {
-        return _name;
-    };
-    const ExprType& assignedType() const {
-        return _assignedType;
-    };
+    const std::string& name() const { return _name; };
+    const ExprType& assignedType() const { return _assignedType; };
     const ExprLocalVar* localVar() const { return _localVar; }
 
   private:
@@ -500,16 +480,12 @@ class ExprVarNode : public ExprNode {
 /// Node that stores a numeric constant
 class ExprNumNode : public ExprNode {
   public:
-    ExprNumNode(const Expression* expr, double val) : ExprNode(expr), _val(val) {
-    _type = ExprType().FP(1).Constant();
-    }
+    ExprNumNode(const Expression* expr, double val) : ExprNode(expr), _val(val) { _type = ExprType().FP(1).Constant(); }
 
     virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
     virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
-    double value() const {
-        return _val;
-    };
+    double value() const { return _val; };
 
   private:
     double _val;
@@ -519,7 +495,7 @@ class ExprNumNode : public ExprNode {
 class ExprStrNode : public ExprNode {
   public:
     ExprStrNode(const Expression* expr, const char* str) : ExprNode(expr), _str(str) {
-    _type = ExprType().String().Constant();
+        _type = ExprType().String().Constant();
     }
 
     virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
@@ -539,7 +515,7 @@ class ExprFuncNode : public ExprNode {
         : ExprNode(expr), _name(name), _func(0), _localFunc(0), _data(0) {
         expr->addFunc(name);
     }
-    virtual ~ExprFuncNode() {/* TODO: fix delete _data;*/
+    virtual ~ExprFuncNode() { /* TODO: fix delete _data;*/
     }
 
     virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);

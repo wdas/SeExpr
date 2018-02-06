@@ -15,8 +15,8 @@
 * http://www.apache.org/licenses/LICENSE-2.0
 */
 #include "ExprPopupDoc.h"
-#include <QLabel>
 #include <QHBoxLayout>
+#include <QLabel>
 
 ExprPopupDoc::ExprPopupDoc(QWidget* parent, const QPoint& placecr, const QString& msg) {
     Q_UNUSED(parent);

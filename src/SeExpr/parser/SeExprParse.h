@@ -17,10 +17,10 @@
 #pragma once
 #include "SeExprLex.h"
 
-#include <cassert>
-#include <vector>
-#include <memory>
 #include <array>
+#include <cassert>
+#include <memory>
+#include <vector>
 
 typedef std::array<int, 2> Range;
 
@@ -31,13 +31,9 @@ class SeParser {
   public:
     struct RangeC {
         RangeC(const Range& previous, const Range& pos) : _previous(previous), _current(pos) { _start = pos; }
-        const Range operator()() {
-            return std::array<int, 2>{_start[0], _current[0]};
-        }
+        const Range operator()() { return std::array<int, 2>{_start[0], _current[0]}; }
         const Range start() const { return _start; }
-        const Range toPrevious() const {
-            return std::array<int, 2>{_start[0], _previous[1]};
-        }
+        const Range toPrevious() const { return std::array<int, 2>{_start[0], _previous[1]}; }
 
       private:
         Range _start;
@@ -184,8 +180,7 @@ class SeParser {
         if (token == Lexer::ARROW) {
             getToken();
             std::string identName = tokenText;
-            ensureNextTwoTokens(Lexer::IDENT,
-                                Lexer::PAREN_OPEN,
+            ensureNextTwoTokens(Lexer::IDENT, Lexer::PAREN_OPEN,
                                 "Arrow operator requires function call immediately after '->' operator");
             if (curriedArgument.get())
                 throw ParseError(std::string("Expected only one curriedArgument in flight, call developers fast.") +
@@ -205,8 +200,8 @@ class SeParser {
             NodePtr res1 = expr();
             ensureAndGetToken(token == Lexer::COLON, "Expected : after ternary started with ?");
             NodePtr res2 = expr();
-            curr = NodePtr(new typename Policy::TernaryOp(
-                rangec.toPrevious(), '?', std::move(curr), std::move(res1), std::move(res2)));
+            curr = NodePtr(new typename Policy::TernaryOp(rangec.toPrevious(), '?', std::move(curr), std::move(res1),
+                                                          std::move(res2)));
         }
         return curr;
     }

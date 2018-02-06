@@ -14,14 +14,14 @@
 * You may obtain a copy of the License at
 * http://www.apache.org/licenses/LICENSE-2.0
 */
-#include <math.h>
-#include <GL/gl.h>
-#include "CETool.h"
-#include "CEGraphUI.h"
-#include "CEDragHandlers.h"
 #include "CEGraphCurve.h"
-#include "CEGraphSeg.h"
+#include <GL/gl.h>
+#include <math.h>
+#include "CEDragHandlers.h"
 #include "CEGraphKey.h"
+#include "CEGraphSeg.h"
+#include "CEGraphUI.h"
+#include "CETool.h"
 
 CEGraphCurve::CEGraphCurve(CEGraphUI* ui, animlib::AnimCurve* curveData, int index)
     : _ui(ui), _animCurve(curveData), _index(index), _segsValid(0), _viewValid(0), _firstSegInView(0),
@@ -96,7 +96,6 @@ void CEGraphCurve::buildSeg(int n) {
 }
 
 void CEGraphCurve::updateView() {
-
     _firstSegInView = 0;
     _lastSegInView = numSegs() - 1;
     // TODO: make this as adaptive as before

@@ -21,11 +21,11 @@
 #ifndef ExprBrowser_h
 #define ExprBrowser_h
 
-#include <QWidget>
 #include <QAbstractItemModel>
+#include <QWidget>
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
 class QLineEdit;
@@ -69,11 +69,10 @@ class ExprBrowser : public QWidget {
     void expandToDepth(int depth);
     void setApplyOnSelect(bool on) { _applyOnSelect = on; }
 
-signals:
+  signals:
     void selectionChanged(const QString& str);
 
-  public
-slots:
+  public slots:
     void reload();
     bool getExpressionDirs();
     void handleSelection(const QModelIndex& current, const QModelIndex& previous);
@@ -83,8 +82,7 @@ slots:
     void saveExpression();
     void saveLocalExpressionAs();
     void saveExpressionAs();
-  private
-slots:
+  private slots:
     void clearFilter();
     void filterChanged(const QString& str);
 };

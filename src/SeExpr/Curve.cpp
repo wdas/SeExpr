@@ -14,11 +14,11 @@
 * You may obtain a copy of the License at
 * http://www.apache.org/licenses/LICENSE-2.0
 */
-#include <SeExpr2/Expression.h>
 #include <SeExpr2/ExprBuiltins.h>
-#include <cfloat>
-#include <cassert>
+#include <SeExpr2/Expression.h>
 #include <algorithm>
+#include <cassert>
+#include <cfloat>
 
 #include "Curve.h"
 
@@ -40,8 +40,7 @@ bool Curve<T>::cvLessThan(const CV& cv1, const CV& cv2) {
 }
 
 template <class T>
-Curve<T>::Curve()
-    : cacheCV(0), prepared(false) {
+Curve<T>::Curve() : cacheCV(0), prepared(false) {
     _cvData.push_back(CV(-FLT_MAX, T(), kNone));
     _cvData.push_back(CV(FLT_MAX, T(), kNone));
 }

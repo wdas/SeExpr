@@ -16,17 +16,17 @@
 */
 #ifndef _ExprControl_h_
 #define _ExprControl_h_
-#include <QTextBrowser>
-#include <QPlainTextEdit>
-#include <QDialog>
-#include <QTimer>
-#include <QRegExp>
-#include <QLineEdit>
 #include <QCheckBox>
+#include <QDialog>
+#include <QLineEdit>
+#include <QPlainTextEdit>
+#include <QRegExp>
 #include <QSlider>
+#include <QTextBrowser>
+#include <QTimer>
 
-#include "ExprCurve.h"
 #include "ExprColorCurve.h"
+#include "ExprCurve.h"
 #include "ExprDeepWater.h"
 
 class QLabel;
@@ -70,17 +70,16 @@ class ExprControl : public QWidget {
     /// Interface for getting the color (used for linked color picking)
     virtual QColor getColor() { return QColor(); }
     /// Interface for setting the color (used for linked color picking)
-    virtual void setColor(QColor color) {Q_UNUSED(color)};
+    virtual void setColor(QColor color){Q_UNUSED(color)};
 
-signals:
+  signals:
     // sends that the control has been changed to the control collection
     void controlChanged(int id);
     // sends the new color to the control collection
     void linkColorEdited(int id, QColor color);
     // sends that a color link is desired to the control collection
     void linkColorLink(int id);
-  public
-slots:
+  public slots:
     // receives that the link should be changed to the given state (0=off,1=on)
     void linkStateChange(int state);
 
@@ -110,11 +109,10 @@ class ExprLineEdit : public QLineEdit {
         QLineEdit::setText(t);
     }
 
-signals:
+  signals:
     void textChanged(int id, const QString& text);
 
-  private
-slots:
+  private slots:
     void textChangedCB(const QString& text);
 
   private:
@@ -154,11 +152,10 @@ class ExprChannelSlider : public QWidget {
     float value() const { return _value; }
     void setDisplayColor(QColor c) { _col = c; }
 
-  public
-slots:
+  public slots:
     void setValue(float value);
 
-signals:
+  signals:
     void valueChanged(int id, float value);
 
   private:
@@ -189,8 +186,7 @@ class NumberControl : public ExprControl {
     void setValue(float value);
     /// Update values in slider and textbox  given what the model contains
     void updateControl();
-  private
-slots:
+  private slots:
     void checkChanged(bool checked);
     void sliderChanged(int val);
     void editChanged(int id, const QString& text);
@@ -220,8 +216,7 @@ class VectorControl : public ExprControl {
     void setValue(int id, float value);
     /// update the individual slider and eidt box controls
     void updateControl();
-  private
-slots:
+  private slots:
     void sliderChanged(int id, float val);
     void editChanged(int id, const QString& text);
     void swatchChanged(QColor color);
@@ -241,8 +236,7 @@ class StringControl : public ExprControl {
 
   private:
     void updateControl();
-  private
-slots:
+  private slots:
     void textChanged(const QString& newText);
     void fileBrowse();
     void directoryBrowse();
@@ -259,8 +253,7 @@ class CurveControl : public ExprControl {
 
   public:
     CurveControl(int id, CurveEditable* stringEditable);
-  private
-slots:
+  private slots:
     void curveChanged();
 };
 
@@ -277,8 +270,7 @@ class CCurveControl : public ExprControl {
     CCurveControl(int id, ColorCurveEditable* stringEditable);
     QColor getColor();
     void setColor(QColor color);
-  private
-slots:
+  private slots:
     void curveChanged();
 };
 
@@ -295,12 +287,10 @@ class AnimCurveControl : public ExprControl {
     typedef void (*AnimCurveCallback)(const std::string&, animlib::AnimCurve& curve);
     static void setAnimCurveCallback(AnimCurveCallback callback);
 
-  public
-slots:
+  public slots:
     void editGraphClicked();
 
-  private
-slots:
+  private slots:
     void refreshClicked();
 
   private:
@@ -318,8 +308,7 @@ class ColorSwatchControl : public ExprControl {
 
   public:
     ColorSwatchControl(int id, ColorSwatchEditable* swatchEditable);
-  private
-slots:
+  private slots:
     void buildSwatchWidget();
     void colorChanged(int index, SeExpr2::Vec3d value);
     void colorAdded(int index, SeExpr2::Vec3d value);
@@ -340,8 +329,7 @@ class DeepWaterControl : public ExprControl {
 
   public:
     DeepWaterControl(int id, DeepWaterEditable* stringEditable);
-  private
-slots:
+  private slots:
     void deepWaterChanged();
 };
 

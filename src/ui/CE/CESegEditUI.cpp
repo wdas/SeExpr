@@ -18,17 +18,17 @@
 * @brief Contains the Definition of class CESegEditUI.
 */
 
+#include <QCheckBox>
 #include <QComboBox>
 #include <QGroupBox>
-#include <QLabel>
 #include <QHBoxLayout>
+#include <QKeyEvent>
+#include <QLabel>
 #include <QLineEdit>
 #include <QValidator>
-#include <QKeyEvent>
-#include <QCheckBox>
 
-#include "CETool.h"
 #include "CESegEditUI.h"
+#include "CETool.h"
 
 MyTextEdit::MyTextEdit(QWidget* parent) : QTextEdit(parent), editing(false) {}
 

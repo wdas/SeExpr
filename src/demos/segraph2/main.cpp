@@ -15,10 +15,10 @@
  http://www.apache.org/licenses/LICENSE-2.0
 */
 #include <QApplication>
-#include "GraphWindow.h"
-#include <cmath>
 #include <cfloat>
+#include <cmath>
 #include <iostream>
+#include "GraphWindow.h"
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);

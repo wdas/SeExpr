@@ -15,8 +15,8 @@
  http://www.apache.org/licenses/LICENSE-2.0
 */
 
-#include "ExprNode.h"
 #include "ExprFuncStandard.h"
+#include "ExprNode.h"
 
 namespace SeExpr2 {
 
@@ -86,13 +86,13 @@ int Func4Op(int* opData, double* fp, char** c, std::vector<int>& callStack) {
     return 1;
 }
 int Func5Op(int* opData, double* fp, char** c, std::vector<int>& callStack) {
-    fp[opData[6]] = ((ExprFuncStandard::Func5*)(c[opData[0]]))(
-        fp[opData[1]], fp[opData[2]], fp[opData[3]], fp[opData[4]], fp[opData[5]]);
+    fp[opData[6]] = ((ExprFuncStandard::Func5*)(c[opData[0]]))(fp[opData[1]], fp[opData[2]], fp[opData[3]],
+                                                               fp[opData[4]], fp[opData[5]]);
     return 1;
 }
 int Func6Op(int* opData, double* fp, char** c, std::vector<int>& callStack) {
-    fp[opData[7]] = ((ExprFuncStandard::Func6*)(c[opData[0]]))(
-        fp[opData[1]], fp[opData[2]], fp[opData[3]], fp[opData[4]], fp[opData[5]], fp[opData[6]]);
+    fp[opData[7]] = ((ExprFuncStandard::Func6*)(c[opData[0]]))(fp[opData[1]], fp[opData[2]], fp[opData[3]],
+                                                               fp[opData[4]], fp[opData[5]], fp[opData[6]]);
     return 1;
 }
 int FuncNOp(int* opData, double* fp, char** c, std::vector<int>& callStack) {

@@ -1,19 +1,19 @@
+#include <algorithm>
 #include <iostream>
 #include <sstream>
-#include <algorithm>
 
 #include <QColorDialog>
+#include <QDialogButtonBox>
 #include <QDoubleValidator>
 #include <QGraphicsSceneMouseEvent>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
 #include <QGridLayout>
-#include <QResizeEvent>
-#include <QPushButton>
-#include <QDialogButtonBox>
-#include <QPainter>
-#include <QMenu>
+#include <QHBoxLayout>
 #include <QLabel>
+#include <QMenu>
+#include <QPainter>
+#include <QPushButton>
+#include <QResizeEvent>
+#include <QVBoxLayout>
 
 #include <SeExpr2/ExprBuiltins.h>
 #ifdef SEEXPR_USE_QDGUI
@@ -50,7 +50,6 @@ void ExprColorFrame::mouseReleaseEvent(QMouseEvent *event) {
     if (event->button() == Qt::RightButton)
         deleteSwatchMenu(event->pos());
     else {
-
 #ifdef SEEXPR_USE_QDGUI
         QColor color = QdColorPickerDialog::chooseColorFromDialog(_color, this);
 #else

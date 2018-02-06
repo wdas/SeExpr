@@ -34,7 +34,6 @@ class ImageEditorDialog : public QDialog {
     QLabel *_imageLabel;
     ExprEditor *_editor;
     ImageSynthesizer *_imageSynthesizer;
-  private
-slots:
+  private slots:
     void applyExpression();
 };

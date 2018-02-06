@@ -20,15 +20,14 @@
 namespace SeExpr2 {
 
 struct ParseData {
-
     // error (set from yyerror)
-    std::string ParseError;  
+    std::string ParseError;
     int errorStart, errorEnd;
 
-    const char* ParseStr;            // string being parsed
+    const char* ParseStr;  // string being parsed
     std::vector<SeExpr2::ExprNode*> ParseNodes;
-    SeExpr2::ExprNode* ParseResult;  // must set result here since yyparse can't return it
-    const SeExpr2::Expression* Expr; // used for parenting created SeExprOp's
+    SeExpr2::ExprNode* ParseResult;   // must set result here since yyparse can't return it
+    const SeExpr2::Expression* Expr;  // used for parenting created SeExprOp's
 
     /* The list of nodes being built is remembered locally here.
        Eventually (if there are no syntax errors) ownership of the nodes
@@ -37,36 +36,30 @@ struct ParseData {
        and free any nodes that were allocated before the error to avoid a
        memory leak. */
 
-    inline SeExpr2::ExprNode* Remember(SeExpr2::ExprNode* n,const int startPos,const int endPos)
-    { 
-        ParseNodes.push_back(n); 
-        n->setPosition(startPos,endPos); 
-        return n; 
+    inline SeExpr2::ExprNode* Remember(SeExpr2::ExprNode* n, const int startPos, const int endPos) {
+        ParseNodes.push_back(n);
+        n->setPosition(startPos, endPos);
+        return n;
     }
 
     // Remove node from list -- but DON'T delete; it's been added elsewhere in parsetree
-    inline void Forget(SeExpr2::ExprNode* n)
-    { 
-        ParseNodes.erase(std::find(ParseNodes.begin(), ParseNodes.end(), n)); 
-    }
+    inline void Forget(SeExpr2::ExprNode* n) { ParseNodes.erase(std::find(ParseNodes.begin(), ParseNodes.end(), n)); }
 };
 
 struct ParseState {
-    ParseState( std::vector<std::pair<int,int> >* comments ) : comments(comments) {}
-    int columnNumber=0; // really buffer position
-    int lineNumber=0;   // not used
-    std::vector<std::pair<int,int> >* comments=0;
+    ParseState(std::vector<std::pair<int, int> >* comments) : comments(comments) {}
+    int columnNumber = 0;  // really buffer position
+    int lineNumber = 0;    // not used
+    std::vector<std::pair<int, int> >* comments = 0;
 
-    void resetCounters(std::vector<std::pair<int,int> >& commentsIn){
-        columnNumber=lineNumber=0;
-        comments=&commentsIn;
+    void resetCounters(std::vector<std::pair<int, int> >& commentsIn) {
+        columnNumber = lineNumber = 0;
+        comments = &commentsIn;
     }
 
-    int currentPosition()
-    {
+    int currentPosition() {
         int currentPosition = 0;
         return currentPosition;
     }
 };
-
 }

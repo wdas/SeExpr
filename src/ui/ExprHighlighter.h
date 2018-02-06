@@ -20,8 +20,8 @@
 */
 #ifndef _ExprHighlighter_h_
 #define _ExprHighlighter_h_
-#include <QSyntaxHighlighter>
 #include <QPalette>
+#include <QSyntaxHighlighter>
 #include <iostream>
 
 class ExprHighlighter : public QSyntaxHighlighter {
@@ -78,15 +78,14 @@ class ExprHighlighter : public QSyntaxHighlighter {
         rule.format = functionFormat;
         highlightingRules.append(rule);
 
-        singleLineCommentFormat.setForeground(QColor::fromHsv(210, 64, lightness*.5));
+        singleLineCommentFormat.setForeground(QColor::fromHsv(210, 64, lightness * .5));
         rule.pattern = QRegExp("#[^\n]*");
         rule.format = singleLineCommentFormat;
         highlightingRules.append(rule);
-
     }
 
     void highlightBlock(const QString& text) {
-        foreach(HighlightingRule rule, highlightingRules) {
+        foreach (HighlightingRule rule, highlightingRules) {
             QRegExp expression(rule.pattern);
             int index = text.indexOf(expression);
             while (index >= 0) {

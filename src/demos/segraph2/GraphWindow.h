@@ -17,16 +17,16 @@
 #ifndef _GraphWindow_h_
 #define _GraphWindow_h_
 
-#include <QWidget>
-#include <QTextEdit>
-#include <QLineEdit>
-#include <QVBoxLayout>
 #include <QCompleter>
-#include <QStatusBar>
 #include <QLabel>
-#include <QPushButton>
-#include <QTableView>
+#include <QLineEdit>
 #include <QMessageBox>
+#include <QPushButton>
+#include <QStatusBar>
+#include <QTableView>
+#include <QTextEdit>
+#include <QVBoxLayout>
+#include <QWidget>
 
 #include "Functions.h"
 #include "Graph.h"
@@ -40,13 +40,12 @@ class GraphWindow : public QFrame {
     QLineEdit* edit;
     Functions* functions;
     QTableView* table;
-    QPushButton* rootbutton, *minbutton, *maxbutton;
+    QPushButton *rootbutton, *minbutton, *maxbutton;
     QSlider* timeSlider;
     QStatusBar* status;
     GraphWindow(QWidget* parent = 0);
     ~GraphWindow();
-  private
-slots:
+  private slots:
     //! Add new function when it is entered into the add box
     void addNewFunction();
     //! Start finding a numeric quantity after button clicked

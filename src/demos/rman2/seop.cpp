@@ -14,17 +14,17 @@
  You may obtain a copy of the License at
  http://www.apache.org/licenses/LICENSE-2.0
 */
-#include <RslPlugin.h>
-#include <rx.h>
-#include <map>
-#include <list>
-#include <pthread.h>
-#include <SeVec.h>
-#include <SeExpression.h>
-#include <SeExprFunc.h>
 #include <RixInterfaces.h>
+#include <RslPlugin.h>
+#include <SeExprFunc.h>
+#include <SeExpression.h>
+#include <SeVec.h>
+#include <pthread.h>
+#include <rx.h>
 #include <cstdlib>
 #include <cstring>
+#include <list>
+#include <map>
 #include "immutable_hash_map.h"
 
 namespace {
@@ -78,7 +78,6 @@ class SeRmanExpr;
 
 //! Store per thread caches of expressions and the variable bindings
 struct ThreadData {
-
     // rix message interface
     RixMessages* msgs;
 

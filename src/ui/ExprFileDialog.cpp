@@ -19,10 +19,10 @@
 
 #include "ExprFileDialog.h"
 
-#include <QToolButton>
-#include <QPalette>
 #include <QMenu>
+#include <QPalette>
 #include <QTimer>
+#include <QToolButton>
 #include <QUrl>
 #include <iostream>
 

@@ -15,10 +15,10 @@
 * http://www.apache.org/licenses/LICENSE-2.0
 */
 
-#include "ExprType.h"
 #include "ExprEnv.h"
-#include "Expression.h"
 #include <vector>
+#include "ExprType.h"
+#include "Expression.h"
 
 namespace SeExpr2 {
 

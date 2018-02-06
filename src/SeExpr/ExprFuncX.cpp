@@ -15,10 +15,10 @@
  http://www.apache.org/licenses/LICENSE-2.0
 */
 #include "ExprFunc.h"
-#include "ExprFuncX.h"
-#include "Interpreter.h"
-#include "ExprNode.h"
 #include <cstdio>
+#include "ExprFuncX.h"
+#include "ExprNode.h"
+#include "Interpreter.h"
 
 namespace SeExpr2 {
 int ExprFuncSimple::EvalOp(int *opData, double *fp, char **c, std::vector<int> &callStack) {

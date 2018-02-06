@@ -18,77 +18,147 @@
 * @brief UI control widgets for expressions.
 * @author  aselle
 */
-#include <QRegExp>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QToolButton>
-#include <QSplitter>
-#include <QLabel>
-#include <QMouseEvent>
-#include <QKeyEvent>
+#include <QAbstractItemView>
+#include <QCompleter>
+#include <QDialogButtonBox>
+#include <QFileDialog>
 #include <QHBoxLayout>
-#include <QVBoxLayout>
+#include <QKeyEvent>
+#include <QLabel>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QMouseEvent>
 #include <QPaintEvent>
 #include <QPainter>
+#include <QPushButton>
+#include <QRegExp>
 #include <QScrollArea>
-#include <QSpacerItem>
+#include <QScrollBar>
 #include <QSizePolicy>
-#include <QTextCharFormat>
-#include <QCompleter>
-#include <QAbstractItemView>
+#include <QSpacerItem>
+#include <QSplitter>
 #include <QStandardItemModel>
 #include <QStringListModel>
-#include <QFileDialog>
-#include <QDialogButtonBox>
-#include <QScrollBar>
+#include <QTextCharFormat>
+#include <QToolButton>
 #include <QToolTip>
-#include <QListWidget>
 #include <QTreeView>
+#include <QVBoxLayout>
 
-#include "ExprControl.h"
+#include "Editable.h"
 #include "ExprColorCurve.h"
 #include "ExprColorSwatch.h"
+#include "ExprControl.h"
 #include "ExprFileDialog.h"
-#include "Editable.h"
 
 /* XPM */
-static const char* refreshXPM[] = {
-    "20 20 4 1",            "# c #303030",          "a c #585858",          "b c #c3c3c3",
-    ". c #dcdcdc",          "....................", "....................", "....................",
-    ".......#aaaa#.......", ".....#########......", "....###bbbbb###.....", "....##b.....b##.....",
-    "...bb#b.....b##.....", "...bbbb....aaaaaa...", "...........aaaaaa...", "....##......####....",
-    "...####......##.....", "..######............", "..aaa#aa............", "....##......bbb.....",
-    "....##b...bbbab.....", "....a#abbbb##ab.....", ".....#a####aa#b.....", ".....aaaaaaa#.b.....",
-    "...................."};
+static const char* refreshXPM[] = {"20 20 4 1",
+                                   "# c #303030",
+                                   "a c #585858",
+                                   "b c #c3c3c3",
+                                   ". c #dcdcdc",
+                                   "....................",
+                                   "....................",
+                                   "....................",
+                                   ".......#aaaa#.......",
+                                   ".....#########......",
+                                   "....###bbbbb###.....",
+                                   "....##b.....b##.....",
+                                   "...bb#b.....b##.....",
+                                   "...bbbb....aaaaaa...",
+                                   "...........aaaaaa...",
+                                   "....##......####....",
+                                   "...####......##.....",
+                                   "..######............",
+                                   "..aaa#aa............",
+                                   "....##......bbb.....",
+                                   "....##b...bbbab.....",
+                                   "....a#abbbb##ab.....",
+                                   ".....#a####aa#b.....",
+                                   ".....aaaaaaa#.b.....",
+                                   "...................."};
 
 /* XPM */
-static const char* graphXPM[] = {
-    "20 20 5 1",            "c c #000040",          "a c #303030",          "# c #58a8ff",
-    ". c #dcdcdc",          "b c #ff0000",          "..........#a.a......", "..........#a.a.....b",
-    "..........#.a.....bb", "..........#aa....bb.", "..........#.....bb..", "..........#....bb...",
-    "..........#....bb...", "....bbb...#...bb....", "...bbbbb..#..bbb....", "...b...bbb#.bbb.....",
-    "..bb....bb#bbb......", "##bb####bbbbb#######", ".bb......bbb....c.c.", ".bb.......#......c..",
-    ".b........#.....c.c.", "bb........#.........", "b.........#.........", "..........#.........",
-    "..........#.........", "..........#........."};
+static const char* graphXPM[] = {"20 20 5 1",
+                                 "c c #000040",
+                                 "a c #303030",
+                                 "# c #58a8ff",
+                                 ". c #dcdcdc",
+                                 "b c #ff0000",
+                                 "..........#a.a......",
+                                 "..........#a.a.....b",
+                                 "..........#.a.....bb",
+                                 "..........#aa....bb.",
+                                 "..........#.....bb..",
+                                 "..........#....bb...",
+                                 "..........#....bb...",
+                                 "....bbb...#...bb....",
+                                 "...bbbbb..#..bbb....",
+                                 "...b...bbb#.bbb.....",
+                                 "..bb....bb#bbb......",
+                                 "##bb####bbbbb#######",
+                                 ".bb......bbb....c.c.",
+                                 ".bb.......#......c..",
+                                 ".b........#.....c.c.",
+                                 "bb........#.........",
+                                 "b.........#.........",
+                                 "..........#.........",
+                                 "..........#.........",
+                                 "..........#........."};
 
 /* XPM */
-static const char* directoryXPM[] = {
-    "20 20 3 1",            ". c None",             "# c #000000",          "a c #d8c59e",
-    "....................", "....................", "....................", "....................",
-    "...........#######..", "...........#aaaaa#..", "..##########aaaaa#..", "..#aaaaaaaaaaaaaa#..",
-    "..#aaaaaaaaaaaaaa#..", "..#aaaaaaaaaaaaaa#..", "..#aaaaaaaaaaaaaa#..", "..#aaaaaaaaaaaaaa#..",
-    "..#aaaaa##a##a##a#..", "..#aaaaa##a##a##a#..", "..#aaaaaaaaaaaaaa#..", "..################..",
-    "....................", "....................", "....................", "...................."};
+static const char* directoryXPM[] = {"20 20 3 1",
+                                     ". c None",
+                                     "# c #000000",
+                                     "a c #d8c59e",
+                                     "....................",
+                                     "....................",
+                                     "....................",
+                                     "....................",
+                                     "...........#######..",
+                                     "...........#aaaaa#..",
+                                     "..##########aaaaa#..",
+                                     "..#aaaaaaaaaaaaaa#..",
+                                     "..#aaaaaaaaaaaaaa#..",
+                                     "..#aaaaaaaaaaaaaa#..",
+                                     "..#aaaaaaaaaaaaaa#..",
+                                     "..#aaaaaaaaaaaaaa#..",
+                                     "..#aaaaa##a##a##a#..",
+                                     "..#aaaaa##a##a##a#..",
+                                     "..#aaaaaaaaaaaaaa#..",
+                                     "..################..",
+                                     "....................",
+                                     "....................",
+                                     "....................",
+                                     "...................."};
 
 /* XPM */
-static const char* fileXPM[] = {
-    "20 20 5 1",            ". c None",             "# c #000000",          "c c #303030",
-    "b c #a79b80",          "a c #ddcdaa",          "....................", "....................",
-    "....#########.......", "....#aaaaaaa##......", "....#aaaaaaa#b#.....", "....#aaaaaaa#bb#....",
-    "....#aaaaaaa####....", "....#aaaaaaaaaa#....", "....#aaaaaaaaaa#....", "....#aaaaaaaaaa#....",
-    "....#aaaaaaaaaa#....", "....#aaaaaaaaaa#....", "....#aaaaaaaaaa#....", "....#aaaaaaaaaa#....",
-    "....#aaaaaaaaaa#....", "....#accaccacca#....", "....#accaccacca#....", "....#aaaaaaaaaa#....",
-    "....############....", "...................."};
+static const char* fileXPM[] = {"20 20 5 1",
+                                ". c None",
+                                "# c #000000",
+                                "c c #303030",
+                                "b c #a79b80",
+                                "a c #ddcdaa",
+                                "....................",
+                                "....................",
+                                "....#########.......",
+                                "....#aaaaaaa##......",
+                                "....#aaaaaaa#b#.....",
+                                "....#aaaaaaa#bb#....",
+                                "....#aaaaaaa####....",
+                                "....#aaaaaaaaaa#....",
+                                "....#aaaaaaaaaa#....",
+                                "....#aaaaaaaaaa#....",
+                                "....#aaaaaaaaaa#....",
+                                "....#aaaaaaaaaa#....",
+                                "....#aaaaaaaaaa#....",
+                                "....#aaaaaaaaaa#....",
+                                "....#aaaaaaaaaa#....",
+                                "....#accaccacca#....",
+                                "....#accaccacca#....",
+                                "....#aaaaaaaaaa#....",
+                                "....############....",
+                                "...................."};
 
 ExprLineEdit::ExprLineEdit(int id, QWidget* parent) : QLineEdit(parent), _id(id), _signaling(0) {
     connect(this, SIGNAL(textChanged(const QString&)), SLOT(textChangedCB(const QString&)));
@@ -222,7 +292,6 @@ void ExprControl::linkDisconnect(int newId) {
 
 NumberControl::NumberControl(int id, NumberEditable* editable)
     : ExprControl(id, editable, false), _numberEditable(editable) {
-
     // slider
     float smin = editable->min, smax = editable->max;
     _isBool = _numberEditable->isInt && smin == 0 && smax == 1;
@@ -248,12 +317,12 @@ NumberControl::NumberControl(int id, NumberEditable* editable)
     _checkBox = new QCheckBox();
     bool checkState = _numberEditable->v;
     _checkBox->setChecked(checkState);
-    if(_isBool){
+    if (_isBool) {
         hbox->addWidget(_checkBox);
         connect(_checkBox, SIGNAL(toggled(bool)), SLOT(checkChanged(bool)));
         _slider->setVisible(false);
         _edit->setVisible(false);
-    }else{
+    } else {
         hbox->addWidget(_slider, 3);
         hbox->addWidget(_edit);
         _checkBox->setVisible(false);
@@ -265,7 +334,7 @@ NumberControl::NumberControl(int id, NumberEditable* editable)
 }
 void NumberControl::checkChanged(bool checked) {
     if (_updating) return;
-    setValue(checked?1:0);
+    setValue(checked ? 1 : 0);
 }
 
 void NumberControl::sliderChanged(int value) {
@@ -287,7 +356,7 @@ void NumberControl::updateControl() {
     int sliderval = int(_numberEditable->isInt ? _numberEditable->v : _numberEditable->v * 1e5);
     if (sliderval != _slider->value()) _slider->setValue(sliderval);
     _edit->setText(QString("%1").arg(_numberEditable->v, 0, 'f', _numberEditable->isInt ? 0 : 3));
-    if (_isBool){
+    if (_isBool) {
         bool checkState = _numberEditable->v;
         _checkBox->setChecked(checkState);
     }
@@ -304,7 +373,6 @@ void NumberControl::setValue(float value) {
 
 VectorControl::VectorControl(int id, VectorEditable* editable)
     : ExprControl(id, editable, true), _numberEditable(editable) {
-
     if (_numberEditable->isColor) {
         _swatch = new ExprCSwatchFrame(editable->v);
         _swatch->setFixedWidth(38);
@@ -348,8 +416,8 @@ void VectorControl::swatchChanged(QColor gah) {
 }
 
 QColor VectorControl::getColor() {
-    return QColor::fromRgbF(
-        clamp(_numberEditable->v[0], 0, 1), clamp(_numberEditable->v[1], 0, 1), clamp(_numberEditable->v[2], 0, 1));
+    return QColor::fromRgbF(clamp(_numberEditable->v[0], 0, 1), clamp(_numberEditable->v[1], 0, 1),
+                            clamp(_numberEditable->v[2], 0, 1));
 }
 
 void VectorControl::setColor(QColor color) {
@@ -624,7 +692,6 @@ struct ExprGraphPreview : public QWidget {
 
 AnimCurveControl::AnimCurveControl(int id, AnimCurveEditable* editable)
     : ExprControl(id, editable, false), _editable(editable) {
-
     _preview = new ExprGraphPreview();
     _preview->setMinimumWidth(200);
     _preview->setMinimumHeight(60);

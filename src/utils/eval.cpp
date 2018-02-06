@@ -15,13 +15,13 @@
  http://www.apache.org/licenses/LICENSE-2.0
 */
 
-#include <vector>
-#include <iostream>
-#include <cmath>
 #include <ExprNode.h>
 #include <ExprWalker.h>
 #include <Expression.h>
+#include <cmath>
+#include <iostream>
 #include <typeinfo>
+#include <vector>
 using namespace SeExpr2;
 
 class Expr : public Expression {
