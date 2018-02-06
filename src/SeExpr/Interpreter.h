@@ -22,10 +22,10 @@
 
 #include "Evaluator.h"
 #include "ExprNode.h"
-#include "VarBlock.h"
 
 namespace SeExpr2 {
 class ExprLocalVar;
+class VarBlock;
 
 //! Promotes a FP[1] to FP[d]
 template <int d>
@@ -138,19 +138,7 @@ class Interpreter : public Evaluator {
     virtual inline void evalMultiple(VarBlock* varBlock,
                                      int outputVarBlockOffset,
                                      size_t rangeStart,
-                                     size_t rangeEnd) override {
-        // TODO: need strings to work
-        int dim = _desiredReturnType.dim();
-        // double* iHack=reinterpret_cast<double**>(varBlock->data())[outputVarBlockOffset];
-        double* destBase = reinterpret_cast<double**>(varBlock->data())[outputVarBlockOffset];
-        for (size_t i = rangeStart; i < rangeEnd; i++) {
-            varBlock->indirectIndex = i;
-            const double* f = evalFP(varBlock);
-            for (int k = 0; k < dim; k++) {
-                destBase[dim * i + k] = f[k];
-            }
-        }
-    }
+                                     size_t rangeEnd) override;
 
     virtual bool isValid() const override { return true; }
 
