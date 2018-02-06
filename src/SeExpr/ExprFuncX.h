@@ -114,6 +114,30 @@ class ExprFuncSimple : public ExprFuncX {
 
   private:
     static int EvalOp(int* opData, double* fp, char** c, std::vector<int>& callStack);
+    static int EvalClosureOp(int* opData, double* fp, char** c, std::vector<int>& callStack);
+};
+
+template <typename FunctionCodeStorage>
+class ExprFuncClosure : public ExprFuncSimple {
+  public:
+    ExprFuncClosure() : ExprFuncSimple(true), _callable(nullptr) {}
+    explicit ExprFuncClosure(FunctionCodeStorage callable_) : ExprFuncSimple(true), _callable(callable_) {}
+
+    virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const override {
+        assert(false);
+    }
+
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const override {
+        return nullptr;
+    }
+
+    virtual inline void eval(ArgHandle args) override {
+        assert(_callable);
+        _callable(args);
+    }
+
+  private:
+    FunctionCodeStorage _callable;
 };
 
 class ExprFuncLocal : public ExprFuncX {

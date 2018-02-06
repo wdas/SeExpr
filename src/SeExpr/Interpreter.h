@@ -71,6 +71,7 @@ class Interpreter : public Evaluator {
     Interpreter() : _debugging(false), _returnSlot(0), _desiredReturnType(), _startedOp(false), _pcStart(0) {
         s.push_back(nullptr);  // reserved for double** of variable block
         s.push_back(nullptr);  // reserved for double** of variable block
+        s.push_back(nullptr);  // reserved for double** of function block
     }
 
     /// Return the position that the next instruction will be placed at

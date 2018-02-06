@@ -14,17 +14,37 @@
  You may obtain a copy of the License at
  http://www.apache.org/licenses/LICENSE-2.0
 */
+#include <cstdio>
+#include <stdexcept>
+
 #include "ExprFunc.h"
 #include "ExprFuncX.h"
-#include "Interpreter.h"
 #include "ExprNode.h"
-#include <cstdio>
+#include "Interpreter.h"
+#include "VarBlock.h"
 
 namespace SeExpr2 {
 int ExprFuncSimple::EvalOp(int* opData, double* fp, char** c, std::vector<int>& callStack) {
-    ExprFuncSimple* simple = reinterpret_cast<ExprFuncSimple*>(c[opData[0]]);
-    //    ExprFuncNode::Data* simpleData=reinterpret_cast<ExprFuncNode::Data*>(c[opData[1]]);
+    const ExprFuncNode* node = reinterpret_cast<const ExprFuncNode*>(c[opData[0]]);
+    ExprFuncSimple* simple = const_cast<ExprFuncSimple*>(reinterpret_cast<const ExprFuncSimple*>(node->func()->funcx()));
     ArgHandle args(opData, fp, c, callStack);
+    simple->eval(args);
+    return 1;
+}
+
+int ExprFuncSimple::EvalClosureOp(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+    const ExprFuncNode* node = reinterpret_cast<const ExprFuncNode*>(c[opData[0]]);
+
+    ExprFuncX** funcs = (ExprFuncX**)c[0];
+    const auto* funcSymbol = static_cast<const VarBlockCreator::FuncSymbol*>(node->func()->funcx());
+    int offset = funcSymbol->offset();
+    ExprFuncSimple* simple = reinterpret_cast<ExprFuncSimple*>(funcs[offset]);
+    ArgHandle args(opData, fp, c, callStack);
+
+    if (!args.data) {
+        args.data = simple->evalConstant(node, args);
+    }
+
     simple->eval(args);
     return 1;
 }
@@ -57,10 +77,16 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node, Interpreter* inte
     else
         assert(false);
 
-    interpreter->addOp(EvalOp);
-    int ptrLoc = interpreter->allocPtr();
     int ptrDataLoc = interpreter->allocPtr();
-    interpreter->s[ptrLoc] = (char*)this;
+    const auto* funcSymbol = dynamic_cast<const VarBlockCreator::FuncSymbol*>(node->func()->funcx());
+    bool isLateBoundClosure = (bool)funcSymbol;
+    if (isLateBoundClosure) {
+        interpreter->addOp(EvalClosureOp);
+    } else {
+        interpreter->addOp(EvalOp);
+    }
+    int ptrLoc = interpreter->allocPtr();
+    interpreter->s[ptrLoc] = (char*)node;
     interpreter->addOperand(ptrLoc);
     interpreter->addOperand(ptrDataLoc);
     interpreter->addOperand(outoperand);
@@ -75,7 +101,7 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node, Interpreter* inte
     int* opCurr = (&interpreter->opData[0]) + interpreter->ops[pc].second;
 
     ArgHandle args(opCurr, &interpreter->d[0], &interpreter->s[0], interpreter->callStack);
-    interpreter->s[ptrDataLoc] = reinterpret_cast<char*>(evalConstant(node, args));
+    if (!isLateBoundClosure) interpreter->s[ptrDataLoc] = reinterpret_cast<char*>(evalConstant(node, args));
 
     return outoperand;
 }
@@ -109,10 +135,18 @@ void SeExpr2LLVMEvalCustomFunction(int* opDataArg,
                                    double* fpArg,
                                    char** strArg,
                                    void** funcdata,
-                                   const SeExpr2::ExprFuncNode* node) {
-    const SeExpr2::ExprFunc* func = node->func();
-    SeExpr2::ExprFuncX* funcX = const_cast<SeExpr2::ExprFuncX*>(func->funcx());
-    SeExpr2::ExprFuncSimple* funcSimple = static_cast<SeExpr2::ExprFuncSimple*>(funcX);
+                                   const SeExpr2::ExprFuncNode* node,
+                                   double** varBlockData) {
+    SeExpr2::ExprFuncX* funcX = const_cast<SeExpr2::ExprFuncX*>(node->func()->funcx());
+
+    SeExpr2::ExprFuncSimple* funcSimple;
+    if (auto* funcSymbol = dynamic_cast<SeExpr2::VarBlockCreator::FuncSymbol*>(funcX)) {
+        SeExpr2::ExprFuncX** funcs = (SeExpr2::ExprFuncX**)varBlockData;
+        int offset = funcSymbol->offset();
+        funcSimple = reinterpret_cast<SeExpr2::ExprFuncSimple*>(funcs[offset]);
+    } else {
+        funcSimple = static_cast<SeExpr2::ExprFuncSimple*>(funcX);
+    }
 
     strArg[0] = reinterpret_cast<char*>(funcSimple);
 
