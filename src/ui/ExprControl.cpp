@@ -372,7 +372,7 @@ void NumberControl::setValue(float value) {
 }
 
 VectorControl::VectorControl(int id, VectorEditable* editable)
-    : ExprControl(id, editable, true), _numberEditable(editable) {
+    : ExprControl(id, editable, false), _numberEditable(editable) {
     if (_numberEditable->isColor) {
         _swatch = new ExprCSwatchFrame(editable->v);
         _swatch->setFixedWidth(38);
@@ -547,7 +547,7 @@ void CurveControl::curveChanged() {
 }
 
 CCurveControl::CCurveControl(int id, ColorCurveEditable* editable)
-    : ExprControl(id, editable, true), _curveEditable(editable) {
+    : ExprControl(id, editable, false), _curveEditable(editable) {
     _curve = new ExprColorCurve(this, "Pos:", "Val:", "Interp:");
     _curve->setFixedHeight(80);
 
