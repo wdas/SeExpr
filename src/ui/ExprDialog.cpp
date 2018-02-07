@@ -105,12 +105,14 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0),
     histBack->setToolTip("Previous In History");
     histBack->setEnabled(0);
     histBack->setFixedSize(24, 24);
+    histBack->setFocusPolicy(Qt::NoFocus);
     QPushButton* histForw = new QPushButton(this);
     buttonBarLayout->addWidget(histForw);
     histForw->setIcon(QPixmap(arrow_right_xpm));
     histForw->setToolTip("Next In History");
     histForw->setEnabled(0);
     histForw->setFixedSize(24, 24);
+    histForw->setFocusPolicy(Qt::NoFocus);
     history.push_back("");
     connect(this, SIGNAL(backwardAvailable(bool)), histBack, SLOT(setEnabled(bool)));
     connect(this, SIGNAL(forwardAvailable(bool)), histForw, SLOT(setEnabled(bool)));
