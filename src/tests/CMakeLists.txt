@@ -13,7 +13,7 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
-if(EXISTS ${GTEST_DIR}/include)
+if (GTEST_DIR)
     # Google test framework
     include_directories(BEFORE ${GTEST_DIR}/include)
     include_directories(${CMAKE_BINARY_DIR}/src/SeExpr)

@@ -80,9 +80,10 @@ else()
     find_library(BOOST_PYTHON3_LIB NAMES "boost_python3" "boost_python3${PYTHON_VERSION_MINOR}")
     SET (BOOST_PYTHON_LIBNAME ${BOOST_PYTHON3_LIB} CACHE STRING "what library name for boost python")
 endif()
-set(GTEST_DIR /usr CACHE PATH "Where to find GTEST") # /usr/include/gtest)
-set(ENABLE_LLVM_BACKEND ON CACHE BOOL "Whether to build with LLVM backend")
-set(USE_PYTHON ON CACHE BOOL "Whether to compile python libraries")
+
+set(GTEST_DIR "" CACHE STRING "Where to find GTEST")
+option(ENABLE_LLVM_BACKEND "Whether to build with LLVM backend" ON)
+option(USE_PYTHON "Whether to compile python libraries" ON)
 
 set(LLVM_LIB "")
 if (ENABLE_LLVM_BACKEND)
