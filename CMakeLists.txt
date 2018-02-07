@@ -42,6 +42,8 @@ endif()
 
 # macros
 include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+include(GenerateExportHeader)
 include(src/build/macros.cmake)
 
 # Default installation prefix
@@ -158,7 +160,6 @@ endif()
 
 ## Setup platform specific helper defines build variants
 if (WIN32)
-    include (GenerateExportHeader)
     add_definitions(-DSEEXPR_WIN32)
 else()
     add_definitions(-Wall -Wextra -Wno-unused-parameter)
@@ -230,6 +231,8 @@ endif()
 
 ## Install location for html documentation
 set(SEEXPR_HTML_DOC_PATH "share/doc/SeExpr2")
+set(CMAKE_DIR "share/cmake/${PROJECT_NAME}")
+set(INCLUDE_DIR "include/${PROJECT_NAME}")
 
 ## Make modules able to see seexpr library
 # Setup environment variable to link seexpr
@@ -248,3 +251,19 @@ add_subdirectory(src/utils)
 add_subdirectory(src/demos)
 add_subdirectory(src/doc)
 add_subdirectory(src/tests)
+
+# cmake packaging -- this is done after adding subdirectories so that
+# all exported targets are found by export() below.
+configure_file("src/build/seexpr2.pc.in" "seexpr2.pc" @ONLY)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/seexpr2.pc"
+    COMPONENT devel DESTINATION share/pkgconfig)
+
+write_basic_package_version_file("seexpr2-version.cmake" VERSION ${SeExpr2_VERSION} COMPATIBILITY AnyNewerVersion)
+
+configure_package_config_file(
+    "src/build/seexpr2-config.cmake" "seexpr2-config.cmake"
+    INSTALL_DESTINATION ${CMAKE_DIR}
+    PATH_VARS CMAKE_INSTALL_PREFIX CMAKE_INSTALL_LIBDIR CMAKE_INSTALL_INCLUDEDIR)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/seexpr2-config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/seexpr2-version.cmake"
+    COMPONENT devel DESTINATION ${CMAKE_DIR})

@@ -95,18 +95,24 @@ set_property(TARGET SeExpr2 PROPERTY
              INTERFACE_SeExpr2_MAJOR_VERSION ${SeExpr2_MAJOR_VERSION})
 set_property(TARGET SeExpr2 APPEND PROPERTY
              COMPATIBLE_INTERFACE_STRING ${SeExpr2_MAJOR_VERSION})
+
+generate_export_header(SeExpr2)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/seexpr2_export.h"
+        COMPONENT devel DESTINATION "include/SeExpr2")
+
 ## Install binary and includes
-install(TARGETS SeExpr2 DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        DESTINATION include/SeExpr2
+install(TARGETS SeExpr2 DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        EXPORT SeExpr2Targets)
+
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
+        COMPONENT devel DESTINATION "include/SeExpr2"
         FILES_MATCHING PATTERN "*.h")
 
-configure_file(ExprConfig.h.in ExprConfig.h)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ExprConfig.h DESTINATION include/SeExpr2)
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+configure_file("ExprConfig.h.in" "ExprConfig.h")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ExprConfig.h"
+        COMPONENT devel DESTINATION "include/SeExpr2")
 
-configure_file(seexpr2.pc.in seexpr2.pc @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/seexpr2.pc DESTINATION share/pkgconfig)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 if (ENABLE_LLVM_BACKEND)
     if (NOT WIN32)
