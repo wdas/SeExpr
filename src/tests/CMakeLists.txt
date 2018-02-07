@@ -27,6 +27,8 @@ if (GTEST_DIR)
         include_directories(${PNG_DIR}/include)
         find_library(PNG_LIBRARIES png PATHS ${PNG_DIR}/${CMAKE_INSTALL_LIBDIR})
         set(PNG_FOUND 1)
+    else()
+        find_package(PNG QUIET)
     endif()
 
     if (PNG_FOUND)
