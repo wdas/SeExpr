@@ -44,7 +44,8 @@ endif()
 
     add_executable(imageEditor2 ${imageEditor_CPPS} ${imageEditor_MOC_SRCS})
     include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-    include_directories(${SEEXPR_EDITOR_INCLUDES})
+    include_directories(${CMAKE_SOURCE_DIR}/src/SeExpr)
+    include_directories(${CMAKE_SOURCE_DIR}/src/SeExpr/UI)
 
 if (ENABLE_QT5)
     target_link_libraries(imageEditor2 Qt5::Core)

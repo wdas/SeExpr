@@ -243,7 +243,7 @@ include_directories(BEFORE ${CMAKE_SOURCE_DIR}/src/ui)
 
 ## Traverse subdirectories
 add_subdirectory(src/SeExpr)
-add_subdirectory(src/ui)
+add_subdirectory(src/SeExpr/UI)
 add_subdirectory(src/py)
 add_subdirectory(src/utils)
 add_subdirectory(src/demos)

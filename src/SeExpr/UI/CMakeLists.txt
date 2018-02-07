@@ -155,10 +155,6 @@ if (Qt5_FOUND OR QT4_FOUND)
     install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ DESTINATION include/SeExpr2/UI
             FILES_MATCHING PATTERN "*.h")
 
-    # Setup header files
-    file(GLOB public_includes "*.h")
-    file(COPY ${public_includes} DESTINATION ${CMAKE_BINARY_DIR}/include/SeExpr2/UI)
-
     # Generate python module expreditor2, using sip
     find_program(SIP_EXEC sip)
 
