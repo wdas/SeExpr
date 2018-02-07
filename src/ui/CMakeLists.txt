@@ -35,7 +35,11 @@ if (EXISTS "/usr/share/apps/cmake/modules")
 endif()
 
 if (NOT DEFINED PYQT_SIP_FLAGS)
-    get_build_info(pyqt-sip-flags PYQT_SIP_FLAGS)
+    if (ENABLE_QT5)
+        get_build_info(pyqt5-sip-flags PYQT_SIP_FLAGS)
+    else()
+        get_build_info(pyqt4-sip-flags PYQT_SIP_FLAGS)
+    endif()
     separate_arguments(PYQT_SIP_FLAGS)
 endif()
 
@@ -51,7 +55,7 @@ set(CMAKE_INSTALL_PYTHON "${PYTHON_SITE}/SeExpr2" )
 # Other package dependencies...
 find_package(OpenGL)
 
-if(Qt5_FOUND OR QT4_FOUND)
+if (Qt5_FOUND OR QT4_FOUND)
 
     BuildParserScanner(ExprSpecParserLex ExprSpecParser ExprSpec
                        editor_parser_cpp)
