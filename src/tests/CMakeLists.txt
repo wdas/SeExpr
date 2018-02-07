@@ -74,6 +74,9 @@ else()
     message(STATUS "Couldn't find gtest framework -- not building main tests")
 endif()
 
+add_test(NAME imageTestsReport
+         COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/imageTestsReportNew.py runall)
+
 add_executable(dirtSimple "dirtSimple.cpp")
 target_link_libraries(dirtSimple SeExpr2 ${PNG_LIBRARIES})
 install(TARGETS dirtSimple DESTINATION bin)

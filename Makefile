@@ -58,8 +58,4 @@ format:
 	$(FIND) $(CURDIR)/src -name '*.cpp' | $(XARGS) $(CLANG_FORMAT) -i
 	$(FIND) $(CURDIR)/src -name '*.h' | $(XARGS) $(CLANG_FORMAT) -i
 
-# TODO: run this via cmake
-imagetest: install
-	$(PYTHON) src/tests/imageTestsReportNew.py runall
-
 precommit: format
