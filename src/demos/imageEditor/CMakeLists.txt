@@ -29,7 +29,9 @@ else()
                         ${QT_INCLUDE_DIR}/QtGui)
 endif()
 
-find_package(PNG)
+if (NOT PNG_DIR)
+    find_package(PNG QUIET)
+endif()
 
 if(Qt5_FOUND OR QT4_FOUND)
 if(PNG_FOUND)
