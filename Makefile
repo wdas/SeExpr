@@ -55,7 +55,6 @@ $(BUILD): $(CMAKE_FILES)
 	touch $@
 
 format:
-	$(FIND) $(CURDIR)/src -name '*.cpp' | $(XARGS) $(CLANG_FORMAT) -i
-	$(FIND) $(CURDIR)/src -name '*.h' | $(XARGS) $(CLANG_FORMAT) -i
+	git ls-files '*.cpp' '*.h' | $(XARGS) $(CLANG_FORMAT) -i
 
 precommit: format
