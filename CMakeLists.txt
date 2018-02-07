@@ -230,7 +230,7 @@ if (DEFINED QDGUI_DIR)
 endif()
 
 ## Install location for html documentation
-set(SEEXPR_HTML_DOC_PATH "share/doc/SeExpr2")
+set(DOC_DIR "share/doc/${PROJECT_NAME}")
 set(CMAKE_DIR "share/cmake/${PROJECT_NAME}")
 set(INCLUDE_DIR "include/${PROJECT_NAME}")
 
