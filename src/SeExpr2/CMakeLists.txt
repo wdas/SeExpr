@@ -89,6 +89,12 @@ else()
     add_library(SeExpr2 STATIC ${io_cpp} ${core_cpp} ${parser_cpp} ${llvm_cpp})
 endif()
 
+set_property(TARGET SeExpr2 PROPERTY VERSION ${SeExpr2_VERSION})
+set_property(TARGET SeExpr2 PROPERTY SOVERSION ${SeExpr2_MAJOR_VERSION})
+set_property(TARGET SeExpr2 PROPERTY
+             INTERFACE_SeExpr2_MAJOR_VERSION ${SeExpr2_MAJOR_VERSION})
+set_property(TARGET SeExpr2 APPEND PROPERTY
+             COMPATIBLE_INTERFACE_STRING ${SeExpr2_MAJOR_VERSION})
 ## Install binary and includes
 install(TARGETS SeExpr2 DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

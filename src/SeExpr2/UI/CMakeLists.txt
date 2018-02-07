@@ -113,6 +113,13 @@ if (Qt5_FOUND OR QT4_FOUND)
                     ${editor_parser_cpp})
     endif()
 
+    set_property(TARGET SeExpr2Editor PROPERTY VERSION ${SeExpr2_VERSION})
+    set_property(TARGET SeExpr2Editor PROPERTY SOVERSION 3)
+    set_property(TARGET SeExpr2Editor PROPERTY
+                 INTERFACE_SeExpr2Editor_MAJOR_VERSION ${SeExpr2_MAJOR_VERSION})
+    set_property(TARGET SeExpr2Editor APPEND PROPERTY
+                 COMPATIBLE_INTERFACE_STRING ${SeExpr2_MAJOR_VERSION})
+
     include_directories(${CMAKE_BINARY_DIR}/src/SeExpr2)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(SeExpr2Editor SeExpr2)
