@@ -13,10 +13,11 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
+include_directories(${CMAKE_BINARY_DIR}/src/SeExpr2)
+
 if (GTEST_DIR)
     # Google test framework
-    include_directories(BEFORE ${GTEST_DIR}/include)
-    include_directories(${CMAKE_BINARY_DIR}/src/SeExpr)
+    include_directories(AFTER ${GTEST_DIR}/include)
     link_directories(${GTEST_DIR}/${CMAKE_INSTALL_LIBDIR})
 
     # Uncomment below to print performance stats

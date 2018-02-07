@@ -14,13 +14,14 @@
  You may obtain a copy of the License at
  http://www.apache.org/licenses/LICENSE-2.0
 */
-#include <Expression.h>
+
+#include <SeExpr2/Expression.h>
+#include <SeExpr2/ExprWalker.h>
+#include <SeExpr2/ExprPatterns.h>
+
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
-
-#include "ExprWalker.h"
-#include "ExprPatterns.h"
 
 using namespace SeExpr2;
 

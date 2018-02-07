@@ -28,7 +28,7 @@
 #include <cmath>
 #include <iostream>
 
-#include <SeExpr2/Vec.h>
+#include "../Vec.h"
 
 struct SeDeepWaterParams {
     SeDeepWaterParams() {}

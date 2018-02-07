@@ -13,6 +13,8 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
+include_directories(${CMAKE_BINARY_DIR}/src/SeExpr2)
+
 foreach(item eval listVar)
     add_executable("${item}" "${item}.cpp")
     target_link_libraries("${item}" ${SEEXPR_LIBRARIES})

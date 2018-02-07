@@ -32,10 +32,10 @@
 #include "Platform.h"
 
 #include "Evaluator.h"
+#include "ExprWalker.h"
 
 #include <cstdio>
 #include <typeinfo>
-#include <ExprWalker.h>
 
 namespace SeExpr2 {
 

@@ -236,14 +236,11 @@ set(SEEXPR_LLVM_LIBRARIES SeExpr2LLVM)
 set(SEEXPR_EDITOR_LIBRARIES SeExpr2Editor)
 
 # make it so seexpr can be found
-include_directories(BEFORE ${CMAKE_BINARY_DIR}/include)
-include_directories(BEFORE ${CMAKE_BINARY_DIR}/src/SeExpr)
-include_directories(BEFORE ${CMAKE_SOURCE_DIR}/src/SeExpr)
-include_directories(BEFORE ${CMAKE_SOURCE_DIR}/src/ui)
+include_directories(BEFORE ${CMAKE_SOURCE_DIR}/src)
 
 ## Traverse subdirectories
-add_subdirectory(src/SeExpr)
-add_subdirectory(src/SeExpr/UI)
+add_subdirectory(src/SeExpr2)
+add_subdirectory(src/SeExpr2/UI)
 add_subdirectory(src/py)
 add_subdirectory(src/utils)
 add_subdirectory(src/demos)

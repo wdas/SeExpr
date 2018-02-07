@@ -42,7 +42,7 @@ http://wdas.github.io/SeExpr/doxygen/v1 (for older documentation)
 
 ```
 src/
-   SeExpr/   Library code
+   SeExpr2/  Library code
    ui/       User Interface components for editing
    demos/    Demo Applications
    tests/    Regression Tests

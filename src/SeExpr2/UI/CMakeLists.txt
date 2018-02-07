@@ -113,6 +113,7 @@ if (Qt5_FOUND OR QT4_FOUND)
                     ${editor_parser_cpp})
     endif()
 
+    include_directories(${CMAKE_BINARY_DIR}/src/SeExpr2)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(SeExpr2Editor SeExpr2)
 

@@ -24,6 +24,9 @@ set_source_files_properties("ExprBuiltins.cpp" PROPERTIES COMPILE_DEFINITIONS "_
 #add_definitions(-DSEEXPR_DEBUG)
 #add_definitions(-DSEEXPR_PERFORMANCE)
 
+# Allow flex/bison to find the current directory
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
 ## find our parser generators
 find_program(BISON_EXE bison)
 find_program(FLEX_EXE flex)
@@ -88,15 +91,13 @@ endif()
 
 ## Install binary and includes
 install(TARGETS SeExpr2 DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ DESTINATION include/SeExpr2
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        DESTINATION include/SeExpr2
         FILES_MATCHING PATTERN "*.h")
-
-# Setup header files
-file(GLOB public_includes "*.h")
-file(COPY ${public_includes} DESTINATION ${CMAKE_BINARY_DIR}/include/SeExpr2)
 
 configure_file(ExprConfig.h.in ExprConfig.h)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ExprConfig.h DESTINATION include/SeExpr2)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 configure_file(seexpr2.pc.in seexpr2.pc @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/seexpr2.pc DESTINATION share/pkgconfig)
