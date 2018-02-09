@@ -98,19 +98,19 @@ set_property(TARGET SeExpr2 APPEND PROPERTY
 
 generate_export_header(SeExpr2)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/seexpr2_export.h"
-        COMPONENT devel DESTINATION "include/SeExpr2")
+        COMPONENT devel DESTINATION ${INCLUDE_DIR})
 
 ## Install binary and includes
 install(TARGETS SeExpr2 DESTINATION ${CMAKE_INSTALL_LIBDIR}
         EXPORT SeExpr2Targets)
 
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
-        COMPONENT devel DESTINATION "include/SeExpr2"
+        COMPONENT devel DESTINATION ${INCLUDE_DIR}
         FILES_MATCHING PATTERN "*.h")
 
 configure_file("ExprConfig.h.in" "ExprConfig.h")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ExprConfig.h"
-        COMPONENT devel DESTINATION "include/SeExpr2")
+        COMPONENT devel DESTINATION ${INCLUDE_DIR})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 

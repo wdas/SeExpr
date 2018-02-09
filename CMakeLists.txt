@@ -73,6 +73,11 @@ endif()
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "CMAKE_INSTALL_LIBDIR = ${CMAKE_INSTALL_LIBDIR}")
 
+## Install locations
+set(DOC_DIR "share/doc/${PROJECT_NAME}")
+set(CMAKE_DIR "share/cmake/${PROJECT_NAME}")
+set(INCLUDE_DIR "include/${PROJECT_NAME}")
+
 # Configuration options
 # TODO: find GTEST and boost and python the proper ways
 set(BOOST_DIR /usr CACHE PATH "where boost is located")
@@ -228,11 +233,6 @@ if (DEFINED QDGUI_DIR)
     include_directories(${QDGUI_DIR}/include)
     link_directories(${QDGUI_DIR}/${CMAKE_INSTALL_LIBDIR})
 endif()
-
-## Install location for html documentation
-set(DOC_DIR "share/doc/${PROJECT_NAME}")
-set(CMAKE_DIR "share/cmake/${PROJECT_NAME}")
-set(INCLUDE_DIR "include/${PROJECT_NAME}")
 
 ## Make modules able to see seexpr library
 # Setup environment variable to link seexpr

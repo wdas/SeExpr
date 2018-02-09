@@ -160,7 +160,7 @@ if (Qt5_FOUND OR QT4_FOUND)
 
     ## Install library and includes
     install(TARGETS SeExpr2Editor DESTINATION ${CMAKE_INSTALL_LIBDIR})
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ DESTINATION include/SeExpr2/UI
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ DESTINATION ${INCLUDE_DIR}/UI
             FILES_MATCHING PATTERN "*.h")
 
     # Generate python module expreditor2, using sip
