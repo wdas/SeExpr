@@ -144,8 +144,8 @@ class VarBlockCreator {
       public:
         FuncSymbol(const ExprFuncDeclaration& decl, uint32_t offset_)
             : ExprFuncSimple(true), _decl(decl), _offset(offset_), _func(*this, decl.minArgs, decl.maxArgs) {
-                assert(_decl.types.size() && "FuncSymbol missing type information");
-            }
+            assert(_decl.types.size() && "FuncSymbol missing type information");
+        }
 
         FuncSymbol(const FuncSymbol&) = delete;
         FuncSymbol& operator=(const FuncSymbol&) = delete;
@@ -155,8 +155,8 @@ class VarBlockCreator {
             , _decl(std::move(other._decl))
             , _offset(std::move(other._offset))
             , _func(*this, other._func.minArgs(), other._func.maxArgs()) {
-                assert(_decl.types.size() && "FuncSymbol missing type information");
-            }
+            assert(_decl.types.size() && "FuncSymbol missing type information");
+        }
 
         inline uint32_t offset() const { return _offset; }
         inline ExprFunc& func() const { return _func; }
@@ -168,11 +168,16 @@ class VarBlockCreator {
         }
 
         virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const override {
-            assert(false);
             return nullptr;
         }
 
-        virtual void eval(ArgHandle args) override { assert(false); }
+        virtual void eval(ArgHandle args) override {
+            assert(args.varBlock);
+            ExprFuncSimple** funcs = const_cast<ExprFuncSimple**>((const ExprFuncSimple**)args.varBlock);
+            assert(funcs);
+            ExprFuncSimple* funcsimple = funcs[offset()];
+            if (funcsimple) funcsimple->eval(args);
+        }
 
       private:
         ExprFuncDeclaration _decl;

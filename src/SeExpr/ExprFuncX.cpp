@@ -27,7 +27,7 @@ namespace SeExpr2 {
 int ExprFuncSimple::EvalOp(int* opData, double* fp, char** c, std::vector<int>& callStack) {
     const ExprFuncNode* node = reinterpret_cast<const ExprFuncNode*>(c[opData[0]]);
     ExprFuncSimple* simple = const_cast<ExprFuncSimple*>(reinterpret_cast<const ExprFuncSimple*>(node->func()->funcx()));
-    ArgHandle args(opData, fp, c, callStack);
+    ArgHandle args(opData, fp, c, callStack, c[0]);
     simple->eval(args);
     return 1;
 }
@@ -39,7 +39,7 @@ int ExprFuncSimple::EvalClosureOp(int* opData, double* fp, char** c, std::vector
     const auto* funcSymbol = static_cast<const VarBlockCreator::FuncSymbol*>(node->func()->funcx());
     int offset = funcSymbol->offset();
     ExprFuncSimple* simple = reinterpret_cast<ExprFuncSimple*>(funcs[offset]);
-    ArgHandle args(opData, fp, c, callStack);
+    ArgHandle args(opData, fp, c, callStack, c[0]);
 
     if (!args.data) {
         args.data = simple->evalConstant(node, args);
@@ -100,7 +100,7 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node, Interpreter* inte
     int pc = interpreter->nextPC() - 1;
     int* opCurr = (&interpreter->opData[0]) + interpreter->ops[pc].second;
 
-    ArgHandle args(opCurr, &interpreter->d[0], &interpreter->s[0], interpreter->callStack);
+    ArgHandle args(opCurr, &interpreter->d[0], &interpreter->s[0], interpreter->callStack, nullptr);
     if (!isLateBoundClosure) interpreter->s[ptrDataLoc] = reinterpret_cast<char*>(evalConstant(node, args));
 
     return outoperand;
@@ -156,21 +156,12 @@ void SeExpr2LLVMEvalCustomFunction(int* opDataArg,
                                    void** funcdata,
                                    const SeExpr2::ExprFuncNode* node,
                                    double** varBlockData) {
-    SeExpr2::ExprFuncX* funcX = const_cast<SeExpr2::ExprFuncX*>(node->func()->funcx());
-
-    SeExpr2::ExprFuncSimple* funcSimple;
-    if (auto* funcSymbol = dynamic_cast<SeExpr2::VarBlockCreator::FuncSymbol*>(funcX)) {
-        SeExpr2::ExprFuncX** funcs = (SeExpr2::ExprFuncX**)varBlockData;
-        int offset = funcSymbol->offset();
-        funcSimple = reinterpret_cast<SeExpr2::ExprFuncSimple*>(funcs[offset]);
-    } else {
-        funcSimple = static_cast<SeExpr2::ExprFuncSimple*>(funcX);
-    }
+    SeExpr2::ExprFuncSimple* funcSimple = const_cast<SeExpr2::ExprFuncSimple*>((const SeExpr2::ExprFuncSimple*)node->func()->funcx());
 
     strArg[0] = reinterpret_cast<char*>(funcSimple);
 
     std::vector<int> callStack;
-    SeExpr2::ExprFuncSimple::ArgHandle handle(opDataArg, fpArg, strArg, callStack);
+    SeExpr2::ExprFuncSimple::ArgHandle handle(opDataArg, fpArg, strArg, callStack, (const char*)varBlockData);
     if (!*funcdata) {
         handle.data = funcSimple->evalConstant(node, handle);
         *funcdata = reinterpret_cast<void*>(handle.data);
@@ -179,6 +170,5 @@ void SeExpr2LLVMEvalCustomFunction(int* opDataArg,
     }
 
     funcSimple->eval(handle);
-    // for (int i = 0; i < retSize; ++i) result[i] = fp[1 + i];
 }
 }

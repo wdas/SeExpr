@@ -24,8 +24,9 @@
 namespace SeExpr2 {
 class ExprFuncDeclaration;
 class ExprFuncNode;
-class Interpreter;
+class ExprFuncSimple;
 class ExprVarEnv;
+class Interpreter;
 typedef std::map<std::string, double> Statistics;
 
 //! Extension function spec, used for complicated argument custom functions.
@@ -70,17 +71,22 @@ class ExprFuncX {
     bool _threadSafe;
 };
 
+// This is used for most plugin functions
 class ExprFuncSimple : public ExprFuncX {
   public:
     ExprFuncSimple(const bool threadSafe) : ExprFuncX(threadSafe) {}
 
     class ArgHandle {
       public:
-        ArgHandle(int* opData, double* fp, char** c, std::vector<int>& /*callStack*/)
-            : outFp(fp[opData[2]]), outStr(c[opData[2]]), data(reinterpret_cast<ExprFuncNode::Data*>(c[opData[1]])),
-              // TODO: put the value in opData rather than fp
-              _nargs((int)fp[opData[3]]),  // TODO: would be good not to have to convert to int!
-              opData(opData + 4), fp(fp), c(c) {}
+        ArgHandle(int* opData, double* fp, char** c, std::vector<int>& /*callStack*/, const char* v)
+            : outFp(fp[opData[2]])
+            , outStr(c[opData[2]])
+            , data(reinterpret_cast<ExprFuncNode::Data*>(c[opData[1]]))
+            , varBlock(v)
+            , _nargs((int)fp[opData[3]])  // TODO: put the value in opData rather than fp
+            , opData(opData + 4)          // TODO: would be good not to have to convert to int!
+            , fp(fp)
+            , c(c) {}
 
         template <int d>
         Vec<double, d, true> inFp(int i) {
@@ -98,6 +104,7 @@ class ExprFuncSimple : public ExprFuncX {
         double& outFp;
         char*& outStr;
         ExprFuncNode::Data* data;
+        const char* varBlock;
 
       private:
         int _nargs;
@@ -128,6 +135,7 @@ class ExprFuncClosure : public ExprFuncSimple {
 
     virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const override {
         assert(false);
+        return ExprType().Error();
     }
 
     virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const override {
