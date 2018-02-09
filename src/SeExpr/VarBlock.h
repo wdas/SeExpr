@@ -219,7 +219,7 @@ class VarBlockCreator {
     inline size_t numFunctions() const { return _funcs.size(); }
 
     /// Get an evaluation handle (one needed per thread)
-    VarBlock create() { return VarBlock(_offset); }
+    VarBlock create() const { return VarBlock(_offset); }
 
     /// Resolve the variable using anything in the data block (call from resolveVar in Expr subclass)
     ExprVarRef* resolveVar(const std::string& name) const {
