@@ -143,38 +143,28 @@ class VarBlockCreator {
     class FuncSymbol : public ExprFuncSimple {
       public:
         FuncSymbol(const ExprFuncDeclaration& decl, uint32_t offset_)
-            : ExprFuncSimple(true), _types(decl.types), _offset(offset_), _func(*this, decl.minArgs, decl.maxArgs){};
+            : ExprFuncSimple(true), _decl(decl), _offset(offset_), _func(*this, decl.minArgs, decl.maxArgs) {
+                assert(_decl.types.size() && "FuncSymbol missing type information");
+            }
 
         FuncSymbol(const FuncSymbol&) = delete;
         FuncSymbol& operator=(const FuncSymbol&) = delete;
 
         FuncSymbol(FuncSymbol&& other)
             : ExprFuncSimple(true)
-            , _types(std::move(other._types))
+            , _decl(std::move(other._decl))
             , _offset(std::move(other._offset))
-            , _func(*this, other._func.minArgs(), other._func.maxArgs()) {}
+            , _func(*this, other._func.minArgs(), other._func.maxArgs()) {
+                assert(_decl.types.size() && "FuncSymbol missing type information");
+            }
 
         inline uint32_t offset() const { return _offset; }
         inline ExprFunc& func() const { return _func; }
 
         virtual ExprType type() const override { return _type; }
         virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& env) const override {
-            assert(node);
-
-            int nargs = node->numChildren();
-            if (nargs < _func.minArgs() || nargs > _func.maxArgs()) {
-                std::stringstream msg;
-                msg << "Wrong number of arguments, should be " << _func.minArgs() << " to " << _func.maxArgs();
-                node->addError(msg.str());
-                return SeExpr2::ExprType().Error();
-            }
-            for (int i = 0; i < nargs; ++i) {
-                if (!node->checkArg(i, _types[i], env)) {
-                    return SeExpr2::ExprType().Error();
-                }
-            }
-
-            return _types.back();
+            assert(_decl.types.size() && "FuncSymbol missing type information");
+            return ExprFuncSimple::genericPrep(node, scalarWanted, env, _decl);
         }
 
         virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const override {
@@ -185,7 +175,7 @@ class VarBlockCreator {
         virtual void eval(ArgHandle args) override { assert(false); }
 
       private:
-        std::vector<ExprType> _types;
+        ExprFuncDeclaration _decl;
         uint32_t _offset;
         mutable ExprFunc _func;
     };
@@ -206,7 +196,7 @@ class VarBlockCreator {
             throw std::runtime_error("Already registered a function named " + name);
         } else {
             int offset = _offset++;
-            _funcs.insert(std::make_pair(name, FuncSymbol(decl, offset)));
+            _funcs.emplace(name, FuncSymbol(decl, offset));
             return offset;
         }
     }

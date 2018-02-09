@@ -105,6 +105,25 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node, Interpreter* inte
 
     return outoperand;
 }
+
+ExprType ExprFuncSimple::genericPrep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& env, const ExprFuncDeclaration& decl) {
+    assert(node);
+
+    int nargs = node->numChildren();
+    if (nargs < decl.minArgs || nargs > decl.maxArgs) {
+        std::stringstream msg;
+        msg << "Wrong number of arguments, should be " << decl.minArgs << " to " << decl.maxArgs;
+        node->addError(msg.str());
+        return SeExpr2::ExprType().Error();
+    }
+    for (int i = 0; i < nargs; ++i) {
+        if (!node->checkArg(i, decl.types[i], env)) {
+            return SeExpr2::ExprType().Error();
+        }
+    }
+
+    return decl.types.back();
+}
 }
 
 extern "C" {
