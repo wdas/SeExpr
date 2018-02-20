@@ -47,7 +47,9 @@ class VarBlock {
     friend class VarBlockCreator;
 
     /// Move semantics is the only allowed way to change the structure
-    VarBlock(VarBlock&& other) { _dataPtrs = std::move(other._dataPtrs); }
+    VarBlock(VarBlock&& other) : indirectIndex(std::move(other.indirectIndex)) {
+        _dataPtrs = std::move(other._dataPtrs);
+    }
 
     virtual ~VarBlock() {}
 
