@@ -408,9 +408,7 @@ void ExprBrowser::addUserExpressionPath(const std::string& context) {
     }
 }
 
-void ExprBrowser::reload() {
-    getExpressionDirs();
-}
+void ExprBrowser::reload() { getExpressionDirs(); }
 
 /*
  * NOTE: The hard-coded paint3d assumptions can be removed once
@@ -437,7 +435,6 @@ bool ExprBrowser::getExpressionDirs() {
     }
 
     clear();
-
 
     std::string configFile = std::string(env) + "/config.txt";
     std::ifstream file(configFile.c_str());

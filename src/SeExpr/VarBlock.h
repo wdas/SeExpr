@@ -153,10 +153,8 @@ class VarBlockCreator {
         FuncSymbol& operator=(const FuncSymbol&) = delete;
 
         FuncSymbol(FuncSymbol&& other)
-            : ExprFuncSimple(true)
-            , _decl(std::move(other._decl))
-            , _offset(std::move(other._offset))
-            , _func(*this, other._func.minArgs(), other._func.maxArgs()) {
+            : ExprFuncSimple(true), _decl(std::move(other._decl)), _offset(std::move(other._offset)),
+              _func(*this, other._func.minArgs(), other._func.maxArgs()) {
             assert(_decl.types.size() && "FuncSymbol missing type information");
         }
 

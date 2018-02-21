@@ -244,7 +244,7 @@ void Expression::prep() const {
             int line = lower - lines.begin();
             int lineStart = line ? lines[line - 1] : 0;
             int col = _errors[i].startPos - lineStart;
-            sstream << (line+1) << ":" << col << ": error: " << _errors[i].error << std::endl;
+            sstream << (line + 1) << ":" << col << ": error: " << _errors[i].error << std::endl;
         }
         _parseError = std::string(sstream.str());
     }

@@ -26,7 +26,8 @@
 namespace SeExpr2 {
 int ExprFuncSimple::EvalOp(int* opData, double* fp, char** c, std::vector<int>& callStack) {
     const ExprFuncNode* node = reinterpret_cast<const ExprFuncNode*>(c[opData[0]]);
-    ExprFuncSimple* simple = const_cast<ExprFuncSimple*>(reinterpret_cast<const ExprFuncSimple*>(node->func()->funcx()));
+    ExprFuncSimple* simple =
+        const_cast<ExprFuncSimple*>(reinterpret_cast<const ExprFuncSimple*>(node->func()->funcx()));
     ArgHandle args(opData, fp, c, callStack, c[0]);
     simple->eval(args);
     return 1;
@@ -106,7 +107,10 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node, Interpreter* inte
     return outoperand;
 }
 
-ExprType ExprFuncSimple::genericPrep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& env, const ExprFuncDeclaration& decl) {
+ExprType ExprFuncSimple::genericPrep(ExprFuncNode* node,
+                                     bool scalarWanted,
+                                     ExprVarEnvBuilder& env,
+                                     const ExprFuncDeclaration& decl) {
     assert(node);
 
     int nargs = node->numChildren();
@@ -156,7 +160,8 @@ void SeExpr2LLVMEvalCustomFunction(int* opDataArg,
                                    void** funcdata,
                                    const SeExpr2::ExprFuncNode* node,
                                    double** varBlockData) {
-    SeExpr2::ExprFuncSimple* funcSimple = const_cast<SeExpr2::ExprFuncSimple*>((const SeExpr2::ExprFuncSimple*)node->func()->funcx());
+    SeExpr2::ExprFuncSimple* funcSimple =
+        const_cast<SeExpr2::ExprFuncSimple*>((const SeExpr2::ExprFuncSimple*)node->func()->funcx());
 
     strArg[0] = reinterpret_cast<char*>(funcSimple);
 
