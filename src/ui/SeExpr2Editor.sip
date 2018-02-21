@@ -58,6 +58,7 @@ class ExprDialog:QDialog{
 #include "ExprDialog.h"
 %End
 public:
+    ExprBrowser* browser;
     ExprEditor* editor;
 
 
