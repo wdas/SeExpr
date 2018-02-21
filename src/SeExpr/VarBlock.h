@@ -110,6 +110,7 @@ class SymbolTable : public VarBlock {
     }
 
   private:
+    // TODO: small object optimization
     void* alloc(uint32_t offset, size_t bytes) {
         void* ptr = malloc(bytes);
         _allocations.push_back(ptr);
