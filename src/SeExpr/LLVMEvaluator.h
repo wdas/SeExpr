@@ -28,7 +28,8 @@ extern "C" void SeExpr2LLVMEvalCustomFunction(int* opDataArg,
                                               double* fpArg,
                                               char** strArg,
                                               void** funcdata,
-                                              const SeExpr2::ExprFuncNode* node);
+                                              const SeExpr2::ExprFuncNode* node,
+                                              double** varBlockData);
 
 namespace SeExpr2 {
 #ifdef SEEXPR_ENABLE_LLVM

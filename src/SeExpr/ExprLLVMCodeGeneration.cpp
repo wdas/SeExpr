@@ -414,6 +414,7 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode* funcNode, LLVM_BUILDER Builder
         createAllocaInst(Builder, Type::getInt32Ty(llvmContext), (unsigned)nargs + 4, "opDataArgPtr");
     AllocaInst* fpArg = createAllocaInst(Builder, Type::getDoubleTy(llvmContext), sizeOfFpArgs, "fpArgPtr");
     AllocaInst* strArg = createAllocaInst(Builder, Type::getInt8PtrTy(llvmContext), sizeOfStrArgs, "strArgPtr");
+
     // TODO:MEME
     Builder.CreateStore(ConstantFP::get(Type::getDoubleTy(llvmContext), nargs), fpArg);
     LLVM_VALUE opDataPtr0 = Builder.CreateConstGEP1_32(opDataArg, 0);
@@ -487,8 +488,16 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode* funcNode, LLVM_BUILDER Builder
     params.push_back(fpArg);
     params.push_back(strArg);
     params.push_back(dataGV);
+
     ConstantInt* ptrToExprNode = ConstantInt::get(Type::getInt64Ty(llvmContext), (uint64_t)funcNode);
     params.push_back(ptrToExprNode);
+
+    // pass VarBlock pointer to SeExpr2LLVMEvalCustomFunction
+    Function* function = llvm_getFunction(Builder);
+    auto argIterator = function->arg_begin();
+    argIterator++;  // skip first arg
+    llvm::Argument* variableBlock = &*(argIterator++);
+    params.push_back(variableBlock);
 
     Function* callee = llvm_getModule(Builder)->getFunction("SeExpr2LLVMEvalCustomFunction");
     Builder.CreateCall(callee, params);

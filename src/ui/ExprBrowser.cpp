@@ -272,11 +272,11 @@ ExprBrowser::ExprBrowser(QWidget* parent, ExprEditor* editor)
     connect(refreshButton, SIGNAL(clicked()), SLOT(reload()));
     connect(treeNew->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)),
             SLOT(handleSelection(const QModelIndex&, const QModelIndex&)));
+    reload();
 }
 
 void ExprBrowser::addPath(const std::string& name, const std::string& path) {
-    labels.append(QString::fromStdString(name));
-    paths.append(QString::fromStdString(path));
+    paths[name] = path;
     treeModel->addPath(name.c_str(), path.c_str());
 }
 
@@ -321,10 +321,7 @@ void ExprBrowser::handleSelection(const QModelIndex& current, const QModelIndex&
 }
 
 void ExprBrowser::clear() {
-    labels.clear();
-    paths.clear();
     clearSelection();
-
     treeModel->clear();
 }
 
@@ -406,15 +403,12 @@ void ExprBrowser::addUserExpressionPath(const std::string& context) {
         std::string path = std::string(homepath) + "/" + context + "/expressions/";
         if (QDir(QString(path.c_str())).exists()) {
             _userExprDir = path;
-            addPath("My Expressions", path);
+            paths["My Expressions"] = path;
         }
     }
 }
 
-void ExprBrowser::reload() {
-    getExpressionDirs();
-    expandAll();
-}
+void ExprBrowser::reload() { getExpressionDirs(); }
 
 /*
  * NOTE: The hard-coded paint3d assumptions can be removed once
@@ -457,13 +451,13 @@ bool ExprBrowser::getExpressionDirs() {
                     std::string label, path;
                     file >> label;
                     file >> path;
-                    if (QDir(QString(path.c_str())).exists()) addPath(label, path);
+                    if (QDir(QString(path.c_str())).exists()) paths[label] = path;
                 } else if (key == "ExpressionSubDir") {
                     std::string path;
                     file >> path;
                     _localExprDir = path;
                     if (QDir(QString(path.c_str())).exists()) {
-                        addPath("Local", _localExprDir);
+                        paths["Local"] = _localExprDir;
                         enableLocal = true;
                     }
                     /* These are for compatibility with xgen.
@@ -473,14 +467,14 @@ bool ExprBrowser::getExpressionDirs() {
                     std::string path;
                     file >> path;
                     path += "/expressions/";
-                    if (QDir(QString(path.c_str())).exists()) addPath("Global", path);
+                    if (QDir(QString(path.c_str())).exists()) paths["Global"] = path;
                 } else if (key == "LocalRepo") {
                     std::string path;
                     file >> path;
                     path += "/expressions/";
                     _localExprDir = path;
                     if (QDir(QString(path.c_str())).exists()) {
-                        addPath("Local", _localExprDir);
+                        paths["Local"] = _localExprDir;
                         enableLocal = true;
                     }
 
@@ -507,7 +501,7 @@ bool ExprBrowser::getExpressionDirs() {
                             }
                         }
                         if(QDir(QString(path.c_str())).exists()){
-                            addPath("User", path);
+                            paths["User"] = path;
                             homeFound = true;
                         }
                     */
@@ -519,6 +513,11 @@ bool ExprBrowser::getExpressionDirs() {
         }
     }
     addUserExpressionPath(context);
+
+    for (const auto& pair : paths) {
+        treeModel->addPath(pair.first.c_str(), pair.second.c_str());
+    }
+
     update();
     return enableLocal;
 }

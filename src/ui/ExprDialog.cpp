@@ -136,7 +136,7 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0),
     controls = new ExprControlCollection();
 
     // controls
-    //leftLayout->addWidget(controls, 1);
+    // leftLayout->addWidget(controls, 1);
     QScrollArea* scrollArea = new QScrollArea();
     scrollArea->setWidget(controls);
     scrollArea->setFocusPolicy(Qt::NoFocus);

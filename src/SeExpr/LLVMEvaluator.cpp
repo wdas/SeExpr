@@ -45,7 +45,8 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType) {
         Type* i64Ty = Type::getInt64Ty(*_llvmContext);
         Type* doublePtrTy = Type::getDoublePtrTy(*_llvmContext);
         PointerType* i8PtrPtr = PointerType::getUnqual(i8PtrTy);
-        Type* ParamTys[] = {i32PtrTy, doublePtrTy, i8PtrPtr, i8PtrPtr, i64Ty};
+        Type* doublePtrPtrTy = PointerType::getUnqual(doublePtrTy);
+        Type* ParamTys[] = {i32PtrTy, doublePtrTy, i8PtrPtr, i8PtrPtr, i64Ty, doublePtrPtrTy};
         {
             FunctionType* FT = FunctionType::get(Type::getVoidTy(*_llvmContext), ParamTys, false);
             SeExpr2LLVMEvalCustomFunctionFunc =

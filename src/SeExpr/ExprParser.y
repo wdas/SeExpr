@@ -31,17 +31,6 @@
 #include "ExprParser.tab.h"
 #include "Mutex.h"
 
-/******************
- lexer declarations
- ******************/
-
-#define YY_USER_ACTION { \
-    yylloc->first_line = state->lineNumber; \
-    yylloc->first_column = state->columnNumber; \
-    columnNumber+=yyleng;\
-    yylloc->last_column = state->columnNumber; \
-    yylloc->last_line = state->lineNumber;}
-
 /*******************
  parser declarations
  *******************/
@@ -367,7 +356,7 @@ void SeExpr2error(YYLTYPE* yyloc,
                   char const* /*msg*/)
 {
     // find start of line containing error
-    int pos = state->columnNumber;
+    int pos = state->yycolno;
     int lineno = 1, start = 0, end = strlen(parseData->ParseStr);
     bool multiline = 0;
     for (int i = start; i < pos; i++)

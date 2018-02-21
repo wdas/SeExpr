@@ -533,6 +533,12 @@ ExprType ExprFuncNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
         // TODO: we need to type check arguments here
     } else {
         if (!_func) _func = _expr->resolveFunc(_name);
+        if (!_func) {
+            if (const VarBlockCreator* creator = _expr->varBlockCreator()) {
+                // data block defined external function
+                _func = creator->resolveFunc(name());
+            }
+        }
         if (!_func) _func = ExprFunc::lookup(_name);
 
         // check that function exists and that the function has the right number of arguments

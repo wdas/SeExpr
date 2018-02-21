@@ -27,6 +27,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <unordered_map>
 
 class QLineEdit;
 class QTreeWidget;
@@ -44,8 +45,7 @@ class ExprBrowser : public QWidget {
     Q_OBJECT
 
     ExprEditor* editor;
-    QList<QString> labels;
-    QList<QString> paths;
+    std::unordered_map<std::string, std::string> paths;
     ExprTreeModel* treeModel;
     ExprTreeFilterModel* proxyModel;
     QTreeView* treeNew;

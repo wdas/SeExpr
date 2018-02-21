@@ -47,19 +47,8 @@ struct ParseData {
 };
 
 struct ParseState {
-    ParseState(std::vector<std::pair<int, int> >* comments) : comments(comments) {}
-    int columnNumber = 0;  // really buffer position
-    int lineNumber = 0;    // not used
+    ParseState(std::vector<std::pair<int, int> >* comments) : yycolno(0), comments(comments) {}
+    int yycolno = 0;  // really buffer position
     std::vector<std::pair<int, int> >* comments = 0;
-
-    void resetCounters(std::vector<std::pair<int, int> >& commentsIn) {
-        columnNumber = lineNumber = 0;
-        comments = &commentsIn;
-    }
-
-    int currentPosition() {
-        int currentPosition = 0;
-        return currentPosition;
-    }
 };
 }

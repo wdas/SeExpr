@@ -131,6 +131,15 @@ class ExprFunc {
     int _maxargs;
     static std::vector<void*> dynlib;
 };
+
+struct ExprFuncDeclaration {
+    ExprFuncDeclaration(int minArgs_, int maxArgs_, const std::vector<ExprType>& types_)
+        : minArgs(minArgs_), maxArgs(maxArgs_), types(types_) {}
+
+    int minArgs;
+    int maxArgs;
+    std::vector<ExprType> types;
+};
 }
 
 #endif

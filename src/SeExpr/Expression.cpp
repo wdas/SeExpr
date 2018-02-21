@@ -240,11 +240,11 @@ void Expression::prep() const {
 
         std::stringstream sstream;
         for (unsigned int i = 0; i < _errors.size(); i++) {
-            int* bound = std::lower_bound(&*lines.begin(), &*lines.end(), _errors[i].startPos);
-            int line = bound - &*lines.begin() + 1;
-            int lineStart = line == 1 ? 0 : lines[line - 1];
+            auto lower = std::lower_bound(lines.begin(), lines.end(), _errors[i].startPos);
+            int line = lower - lines.begin();
+            int lineStart = line ? lines[line - 1] : 0;
             int col = _errors[i].startPos - lineStart;
-            sstream << "  Line " << line << " Col " << col << " " << _errors[i].error << std::endl;
+            sstream << (line + 1) << ":" << col << ": error: " << _errors[i].error << std::endl;
         }
         _parseError = std::string(sstream.str());
     }
