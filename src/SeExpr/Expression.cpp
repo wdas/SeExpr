@@ -171,6 +171,7 @@ bool Expression::usesFunc(const std::string& name) const {
 }
 
 void Expression::parse() const {
+    std::lock_guard<std::mutex> guard(_parseMutex);
     if (_parseTree) return;
     int tempStartPos, tempEndPos;
     ExprNode* parseTree_ = nullptr;

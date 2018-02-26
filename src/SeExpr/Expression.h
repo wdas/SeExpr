@@ -263,6 +263,7 @@ class Expression {
     void prep() const;
 
   private:
+    mutable std::mutex _parseMutex;
     mutable std::mutex _prepMutex;
 
     /** Cached parse error (returned by isValid) */
