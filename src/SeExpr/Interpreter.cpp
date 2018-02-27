@@ -316,11 +316,11 @@ struct EvalVarBlockIndirect {
     static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
         if (c[0]) {
             int stride = opData[2];
-            int outputVarBlockOffset = opData[0];
+            int varBlockOffset = opData[0];
             int destIndex = opData[1];
             size_t indirectIndex = reinterpret_cast<size_t>(c[1]);
             double* basePointer =
-                reinterpret_cast<double**>(c[0])[outputVarBlockOffset] + (uniform ? 0 : (stride * indirectIndex));
+                reinterpret_cast<double**>(c[0])[varBlockOffset] + (uniform ? 0 : (stride * indirectIndex));
             double* destPointer = fp + destIndex;
             assert(basePointer && "Invalid VarBlock entry");
             assert(destPointer && "Corrupted interpreter stack");

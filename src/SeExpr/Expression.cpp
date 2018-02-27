@@ -176,7 +176,8 @@ void Expression::parse() const {
     if (_parseTree) return;
     int tempStartPos, tempEndPos;
     ExprNode* parseTree_ = nullptr;
-    bool OK = ExprParseAction(parseTree_, _parseError, tempStartPos, tempEndPos, _comments, this, _expression.c_str(), _wantVec);
+    bool OK = ExprParseAction(parseTree_, _parseError, tempStartPos, tempEndPos, _comments, this, _expression.c_str(),
+                              _wantVec);
     if (!OK || !parseTree_) {
         addError(_parseError, tempStartPos, tempEndPos);
         delete parseTree_;

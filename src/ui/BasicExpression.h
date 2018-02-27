@@ -54,8 +54,7 @@ class BasicExpression : public SeExpr2::Expression {
                                        SeExpr2::ExprVarEnvBuilder& envBuilder) const {
             bool valid = true;
             int nargs = node->numChildren();
-            for (int i = 0; i < nargs; i++)
-                valid &= node->checkArg(i, SeExpr2::ExprType().FP(3).Varying(), envBuilder);
+            for (int i = 0; i < nargs; i++) valid &= node->checkArg(i, SeExpr2::ExprType().FP(3).Varying(), envBuilder);
             return valid ? SeExpr2::ExprType().FP(3).Varying() : SeExpr2::ExprType().Error();
         }
 
