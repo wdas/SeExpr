@@ -302,6 +302,8 @@ struct EvalVarBlock {
         if (c[0]) {
             double* basePointer = reinterpret_cast<double*>(c[0]) + opData[0];
             double* destPointer = fp + opData[1];
+            assert(basePointer && "Invalid VarBlock entry");
+            assert(destPointer && "Corrupted interpreter stack");
             for (int i = 0; i < dim; i++) destPointer[i] = basePointer[i];
         }
         return 1;
@@ -320,6 +322,8 @@ struct EvalVarBlockIndirect {
             double* basePointer =
                 reinterpret_cast<double**>(c[0])[outputVarBlockOffset] + (uniform ? 0 : (stride * indirectIndex));
             double* destPointer = fp + destIndex;
+            assert(basePointer && "Invalid VarBlock entry");
+            assert(destPointer && "Corrupted interpreter stack");
             for (int i = 0; i < dim; i++) destPointer[i] = basePointer[i];
         } else {
             // TODO: this happens in initial evaluation!
