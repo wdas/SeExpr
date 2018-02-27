@@ -19,6 +19,7 @@
 
 #include <SeExpr2/Expression.h>
 #include <SeExpr2/ExprFunc.h>
+#include <SeExpr2/VarBlock.h>
 #include <SeExpr2/Vec.h>
 using namespace SeExpr2;
 
@@ -364,4 +365,27 @@ TEST(BasicTests, InvalidEvaluator) {
     EXPECT_FALSE(expr.isValid());
     EXPECT_NO_THROW(SeExpr2::Vec3d::copy(expr.evalFP()));
     EXPECT_NO_THROW(expr.evalStr());
+}
+
+struct TestSymbols : public SeExpr2::VarBlockCreator {
+    TestSymbols() {
+        centroid = registerVariable("centroid", SeExpr2::ExprType().FP(3).Varying());
+        doStuff = registerFunction("doStuff", ExprFuncDeclaration(1, 1, {SeExpr2::ExprType().FP(3).Varying(),
+                                                                         SeExpr2::ExprType().FP(3).Varying()}));
+    }
+
+    int centroid;
+    int doStuff;
+};
+
+TEST(BasicTests, UsesVar) {
+    TestSymbols testSymbols;
+    Expression expr("doStuff($centroid)");
+    expr.setVarBlockCreator(&testSymbols);
+
+    EXPECT_TRUE(expr.syntaxOK());
+    EXPECT_TRUE(expr.isValid());
+
+    EXPECT_TRUE(expr.usesVar("centroid"));
+    EXPECT_TRUE(expr.usesFunc("doStuff"));
 }

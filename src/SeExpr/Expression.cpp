@@ -161,12 +161,12 @@ void Expression::setExpr(const std::string& e) {
 bool Expression::isConstant() const { return returnType().isLifetimeConstant(); }
 
 bool Expression::usesVar(const std::string& name) const {
-    parse();
+    prep();
     return _vars.find(name) != _vars.end();
 }
 
 bool Expression::usesFunc(const std::string& name) const {
-    parse();
+    prep();
     return _funcs.find(name) != _funcs.end();
 }
 
