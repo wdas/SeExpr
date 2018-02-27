@@ -171,6 +171,7 @@ bool Expression::usesFunc(const std::string& name) const {
 }
 
 void Expression::parse() const {
+    if (_parseTree) return;
     std::lock_guard<std::mutex> guard(_parseMutex);
     if (_parseTree) return;
     int tempStartPos, tempEndPos;
@@ -187,6 +188,7 @@ void Expression::parse() const {
 }
 
 void Expression::prep() const {
+    if (_evaluator) return;
     std::lock_guard<std::mutex> guard(_prepMutex);
     if (_evaluator) return;
 #ifdef SEEXPR_PERFORMANCE
