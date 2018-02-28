@@ -50,7 +50,6 @@ bool Interpreter::prep(ExprNode* parseTree, ExprType desiredReturnType) {
 void Interpreter::evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) {
     // TODO: need strings to work
     int dim = _desiredReturnType.dim();
-    // double* iHack=reinterpret_cast<double**>(varBlock->data())[outputVarBlockOffset];
     double* destBase = reinterpret_cast<double**>(varBlock->data())[outputVarBlockOffset];
     for (size_t i = rangeStart; i < rangeEnd; i++) {
         varBlock->indirectIndex = i;

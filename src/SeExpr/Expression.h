@@ -281,9 +281,6 @@ class Expression {
     /** Functions used in this expr */
     mutable std::set<std::string> _funcs;
 
-    /** Local variable table */
-    // mutable LocalVarTable _localVars;
-
     /** Whether or not we have unsafe functions */
     mutable std::vector<std::string> _threadUnsafeFunctionCalls;
 
@@ -299,19 +296,6 @@ class Expression {
 
     //! add function evaluation (this is for internal use)
     void addFunc(const char* n) const { _funcs.insert(n); }
-
-    ////! get local variable reference (this is for internal use)
-    // ExprVarRef* resolveLocalVar(const char* n) const {
-    //    LocalVarTable::iterator iter = _localVars.find(n);
-    //    if (iter != _localVars.end()) return &iter->second;
-    //    return 0;
-    //}
-
-    /** get local variable reference. This is potentially useful for expression debuggers
-        and/or uses of expressions where mutable variables are desired */
-    /* ExprLocalVarRef* getLocalVar(const char* n) const { */
-    /*     return &_localVars[n];  */
-    /* } */
 };
 }
 
