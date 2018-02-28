@@ -47,32 +47,29 @@ class LLVMEvaluator : public Evaluator {
         typedef void (*FunctionPtrMultiple)(char**, uint32_t, uint32_t, uint32_t);
         FunctionPtr functionPtr;
         FunctionPtrMultiple functionPtrMultiple;
-        T* resultData;
 
       public:
+        LLVMEvaluationContext() : functionPtr(nullptr) {}
+        ~LLVMEvaluationContext() {}
+
         LLVMEvaluationContext(const LLVMEvaluationContext&) = delete;
         LLVMEvaluationContext& operator=(const LLVMEvaluationContext&) = delete;
-        ~LLVMEvaluationContext() { delete[] resultData; }
-        LLVMEvaluationContext() : functionPtr(nullptr), resultData(nullptr) {}
+
         void init(void* fp, void* fpLoop, int dim) {
             reset();
             functionPtr = reinterpret_cast<FunctionPtr>(fp);
             functionPtrMultiple = reinterpret_cast<FunctionPtrMultiple>(fpLoop);
-            resultData = new T[dim];
         }
         void reset() {
-            if (resultData) delete[] resultData;
             functionPtr = nullptr;
             functionPtrMultiple = nullptr;
-            resultData = nullptr;
         }
-        const T* operator()(VarBlock* varBlock) {
-            assert(functionPtr && resultData);
-            functionPtr(resultData, varBlock ? varBlock->data() : nullptr, varBlock ? varBlock->indirectIndex : 0);
-            return resultData;
+        void operator()(T* dst, VarBlock* varBlock) {
+            assert(functionPtr);
+            functionPtr(dst, varBlock ? varBlock->data() : nullptr, varBlock ? varBlock->indirectIndex : 0);
         }
         void operator()(VarBlock* varBlock, size_t outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) {
-            assert(functionPtrMultiple && resultData);
+            assert(functionPtrMultiple);
             functionPtrMultiple(varBlock ? varBlock->data() : nullptr, outputVarBlockOffset, rangeStart, rangeEnd);
         }
     };
@@ -100,14 +97,14 @@ class LLVMEvaluator : public Evaluator {
 
     virtual bool isValid() const override { return true; }
 
-    virtual const double* evalFP(VarBlock* varBlock) override { return (*_llvmEvalFP)(varBlock); }
+    virtual void evalFP(double* dst, VarBlock* varBlock) const override { (*_llvmEvalFP)(dst, varBlock); }
 
-    virtual const char* evalStr(VarBlock* varBlock) override { return *(*_llvmEvalStr)(varBlock); }
+    virtual void evalStr(char* dst, VarBlock* varBlock) const override { (*_llvmEvalStr)(&dst, varBlock); }
 
     virtual void evalMultiple(VarBlock* varBlock,
                               int outputVarBlockOffset,
                               size_t rangeStart,
-                              size_t rangeEnd) override {
+                              size_t rangeEnd) const override {
         return (*_llvmEvalFP)(varBlock, outputVarBlockOffset, rangeStart, rangeEnd);
     }
 
@@ -137,12 +134,12 @@ class LLVMEvaluator : public Evaluator {
         return false;
     }
 
-    virtual const double* evalFP(VarBlock* varBlock) override {
+    virtual const double* evalFP(VarBlock* varBlock) const override {
         unsupported();
         return 0;
     }
 
-    virtual const char* evalStr(VarBlock* varBlock) override {
+    virtual const char* evalStr(VarBlock* varBlock) const override {
         unsupported();
         return "";
     }
@@ -150,7 +147,7 @@ class LLVMEvaluator : public Evaluator {
     virtual void evalMultiple(VarBlock* varBlock,
                               int outputVarBlockOffset,
                               size_t rangeStart,
-                              size_t rangeEnd) override {
+                              size_t rangeEnd) const override {
         unsupported();
     }
 };
