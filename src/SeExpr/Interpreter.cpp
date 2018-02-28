@@ -47,20 +47,16 @@ bool Interpreter::prep(ExprNode* parseTree, ExprType desiredReturnType) {
     return true;
 }
 
-void Interpreter::evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) {
+void Interpreter::evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) const {
     // TODO: need strings to work
-    int dim = _desiredReturnType.dim();
     double* destBase = reinterpret_cast<double**>(varBlock->data())[outputVarBlockOffset];
     for (size_t i = rangeStart; i < rangeEnd; i++) {
         varBlock->indirectIndex = i;
-        const double* f = evalFP(varBlock);
-        for (int k = 0; k < dim; k++) {
-            destBase[dim * i + k] = f[k];
-        }
+        evalFP(destBase, varBlock);
     }
 }
 
-void Interpreter::eval(VarBlock* block, bool debug) {
+void Interpreter::eval(VarBlock* block, bool debug) const {
     if (block) {
         static_assert(sizeof(char*) == sizeof(size_t), "Expect to fit size_t in char*");
         s[0] = reinterpret_cast<char*>(block->data());
@@ -157,8 +153,8 @@ struct BinaryOp {
     }
 
     static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
-        double* in1 = fp + opData[0];
-        double* in2 = fp + opData[1];
+        const double* in1 = fp + opData[0];
+        const double* in2 = fp + opData[1];
         double* out = fp + opData[2];
 
         for (int k = 0; k < d; k++) {
@@ -192,7 +188,7 @@ struct BinaryOp {
 template <char op, int d>
 struct UnaryOp {
     static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
-        double* in = fp + opData[0];
+        const double* in = fp + opData[0];
         double* out = fp + opData[1];
         for (int k = 0; k < d; k++) {
             switch (op) {
@@ -337,8 +333,8 @@ template <char op, int d>
 struct CompareEqOp {
     static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
         bool result = true;
-        double* in0 = fp + opData[0];
-        double* in1 = fp + opData[1];
+        const double* in0 = fp + opData[0];
+        const double* in1 = fp + opData[1];
         double* out = fp + opData[2];
         for (int k = 0; k < d; k++) {
             switch (op) {

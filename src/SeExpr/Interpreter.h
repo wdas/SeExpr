@@ -44,11 +44,11 @@ struct Promote {
 class Interpreter : public Evaluator {
   public:
     /// Double data (constants and evaluated)
-    std::vector<double> d;
+    mutable std::vector<double> d;
     /// constant and evaluated pointer data
-    std::vector<char*> s;
+    mutable std::vector<char*> s;
     /// Ooperands to op
-    std::vector<int> opData;
+    mutable std::vector<int> opData;
 
     /// Not needed for eval only building
     typedef std::map<const ExprLocalVar*, int> VarToLoc;
@@ -58,9 +58,10 @@ class Interpreter : public Evaluator {
     typedef int (*OpF)(int*, double*, char**, std::vector<int>&);
 
     std::vector<std::pair<OpF, int> > ops;
-    std::vector<int> callStack;
+    mutable std::vector<int> callStack;
 
   private:
+    mutable std::mutex _m;
     bool _debugging;
     int _returnSlot;
     ExprType _desiredReturnType;
@@ -126,20 +127,22 @@ class Interpreter : public Evaluator {
 
     virtual bool prep(ExprNode* parseTree, ExprType desiredReturnType) override;
 
-    virtual inline const char* evalStr(VarBlock* varBlock) override {
+    virtual inline void evalStr(char* dst, VarBlock* varBlock) const override {
+        std::lock_guard<std::mutex> guard(_m);
         eval(varBlock);
-        return s[_returnSlot];
+        memcpy((char*)dst, (const char*)&s[_returnSlot], sizeof(char*));
     }
 
-    virtual inline const double* evalFP(VarBlock* varBlock) override {
+    virtual inline void evalFP(double* dst, VarBlock* varBlock) const override {
+        std::lock_guard<std::mutex> guard(_m);
         eval(varBlock);
-        return &d[_returnSlot];
+        memcpy((char*)dst, (const char*)&d[_returnSlot], sizeof(double)*_desiredReturnType.dim());
     }
 
     virtual inline void evalMultiple(VarBlock* varBlock,
                                      int outputVarBlockOffset,
                                      size_t rangeStart,
-                                     size_t rangeEnd) override;
+                                     size_t rangeEnd) const override;
 
     virtual bool isValid() const override { return true; }
 
@@ -151,7 +154,7 @@ class Interpreter : public Evaluator {
     void setPCStart(int pcStart) { _pcStart = pcStart; }
 
   private:
-    void eval(VarBlock* varBlock, bool debug = false);
+    void eval(VarBlock* varBlock, bool debug = false) const;
 };
 
 //! Return the function f encapsulated in class T for the dynamic i converted to a static d.
