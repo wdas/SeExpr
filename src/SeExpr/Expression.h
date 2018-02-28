@@ -189,13 +189,31 @@ class Expression {
         evaluator()->evalMultiple(varBlock, outputVarBlockOffset, rangeStart, rangeEnd);
     }
 
-    // TODO: make this deprecated
-    /** Evaluates and returns float (check returnType()!) */
-    inline const double* evalFP(VarBlock* varBlock = nullptr) const { return evaluator()->evalFP(varBlock); }
+    // Evaluates and returns float (check returnType()!)
+    // Not thread-safe
+    inline const double* evalFP(VarBlock* varBlock = nullptr) const {
+        _results.resize(_desiredReturnType.dim());
+        evaluator()->evalFP(_results.data(), varBlock);
+        return _results.data();
+    }
 
-    // TODO: make this deprecated
-    /** Evaluates and returns string (check returnType()!) */
-    inline const char* evalStr(VarBlock* varBlock = nullptr) const { return evaluator()->evalStr(varBlock); }
+    // Evaluates and returns string (check returnType()!)
+    // Not thread-safe
+    inline const char* evalStr(VarBlock* varBlock = nullptr) const {
+        _results.resize(_desiredReturnType.dim());
+        evaluator()->evalStr((char*)_results.data(), varBlock);
+        return (const char*)_results.data();
+    }
+
+    // Evaluates and returns float (check returnType()!)
+    inline void evalFP(double* dst, VarBlock* varBlock = nullptr) const {
+        evaluator()->evalFP(dst, varBlock);
+    }
+
+    // Evaluates and returns string (check returnType()!)
+    inline void evalStr(char* dst, VarBlock* varBlock = nullptr) const {
+        evaluator()->evalStr(dst, varBlock);
+    }
 
     /** Reset expr - force reparse/rebind */
     // if overridden, you must still call Expression::reset()!
@@ -288,6 +306,8 @@ class Expression {
 
     // Var block creator
     const VarBlockCreator* _varBlockCreator = 0;
+
+    mutable std::vector<double> _results;
 
     /* internal */ public:
 

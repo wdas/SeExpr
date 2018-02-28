@@ -92,12 +92,9 @@ class NullEvaluator : public Evaluator {
     virtual bool prep(ExprNode* parseTree, ExprType desiredReturnType) { return false; }
     virtual bool isValid() const override { return false; }
 
-    virtual const double* evalFP(VarBlock* varBlock) {
-        static double invalid[16] = {};
-        return invalid;
-    }
-    virtual const char* evalStr(VarBlock* varBlock) { return ""; }
-    virtual void evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) {}
+    virtual void evalFP(double* dst, VarBlock* varBlock) const override {}
+    virtual void evalStr(char* dst, VarBlock* varBlock) const override {}
+    virtual void evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) const override {}
 };
 
 Expression::Expression(Expression::EvaluationStrategy evaluationStrategyHint)
@@ -130,6 +127,7 @@ void Expression::reset() {
     _envBuilder.reset();
     _threadUnsafeFunctionCalls.clear();
     _comments.clear();
+    _results.resize(_desiredReturnType.dim());
 }
 
 void Expression::setContext(const Context& context) {
