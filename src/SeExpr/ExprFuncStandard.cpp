@@ -151,7 +151,7 @@ int ExprFuncStandard::buildInterpreter(const ExprFuncNode* node, Interpreter* in
     int retOp = -1;
 
     int funcPtrLoc = interpreter->allocPtr();
-    interpreter->s[funcPtrLoc] = (char*)_func;
+    interpreter->state.s[funcPtrLoc] = (char*)_func;
 
     Interpreter::OpF op = 0;
     switch (_funcType) {

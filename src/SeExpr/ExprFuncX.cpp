@@ -70,7 +70,7 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node, Interpreter* inte
     }
     int outoperand = -1;
     int nargsData = interpreter->allocFP(1);
-    interpreter->d[nargsData] = node->numChildren();
+    interpreter->state.d[nargsData] = node->numChildren();
     if (node->type().isFP())
         outoperand = interpreter->allocFP(node->type().dim());
     else if (node->type().isString())
@@ -87,7 +87,7 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node, Interpreter* inte
         interpreter->addOp(EvalOp);
     }
     int ptrLoc = interpreter->allocPtr();
-    interpreter->s[ptrLoc] = (char*)node;
+    interpreter->state.s[ptrLoc] = (char*)node;
     interpreter->addOperand(ptrLoc);
     interpreter->addOperand(ptrDataLoc);
     interpreter->addOperand(outoperand);
@@ -101,8 +101,8 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node, Interpreter* inte
     int pc = interpreter->nextPC() - 1;
     int* opCurr = (&interpreter->opData[0]) + interpreter->ops[pc].second;
 
-    ArgHandle args(opCurr, &interpreter->d[0], &interpreter->s[0], interpreter->callStack, nullptr);
-    if (!isLateBoundClosure) interpreter->s[ptrDataLoc] = reinterpret_cast<char*>(evalConstant(node, args));
+    ArgHandle args(opCurr, &interpreter->state.d[0], &interpreter->state.s[0], interpreter->state.callStack, nullptr);
+    if (!isLateBoundClosure) interpreter->state.s[ptrDataLoc] = reinterpret_cast<char*>(evalConstant(node, args));
 
     return outoperand;
 }

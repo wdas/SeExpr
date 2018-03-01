@@ -59,11 +59,11 @@ void Interpreter::evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, siz
 void Interpreter::eval(VarBlock* block, bool debug) const {
     if (block) {
         static_assert(sizeof(char*) == sizeof(size_t), "Expect to fit size_t in char*");
-        s[0] = reinterpret_cast<char*>(block->data());
-        s[1] = reinterpret_cast<char*>(block->indirectIndex);
+        state.s[0] = reinterpret_cast<char*>(block->data());
+        state.s[1] = reinterpret_cast<char*>(block->indirectIndex);
     }
-    double* fp = &d[0];
-    char** str = &s[0];
+    double* fp = &state.d[0];
+    char** str = &state.s[0];
     int pc = _pcStart;
     int end = ops.size();
     while (pc < end) {
@@ -72,8 +72,8 @@ void Interpreter::eval(VarBlock* block, bool debug) const {
             print(pc);
         }
         const std::pair<OpF, int>& op = ops[pc];
-        pc += op.first(opCurr, fp, str, callStack);
         const int* opCurr = &opData[0] + op.second;
+        pc += op.first(opCurr, fp, str, state.callStack);
     }
 }
 
@@ -93,19 +93,17 @@ void Interpreter::print(int pc) const {
     std::cerr << "---- opdata  ----------------------" << std::endl;
     for (size_t k = 0; k < opData.size(); k++) {
         std::cerr << "opData[" << k << "]= " << opData[k] << std::endl;
-        ;
     }
     std::cerr << "----- fp --------------------------" << std::endl;
-    for (size_t k = 0; k < d.size(); k++) {
-        std::cerr << "fp[" << k << "]= " << d[k] << std::endl;
-        ;
+    for (size_t k = 0; k < state.d.size(); k++) {
+        std::cerr << "fp[" << k << "]= " << state.d[k] << std::endl;
     }
     std::cerr << "---- str     ----------------------" << std::endl;
-    std::cerr << "s[0] reserved for datablock = " << reinterpret_cast<size_t>(s[0]) << std::endl;
-    std::cerr << "s[1] is indirectIndex = " << reinterpret_cast<size_t>(s[1]) << std::endl;
-    for (size_t k = 2; k < s.size(); k++) {
-        std::cerr << "s[" << k << "]= 0x" << s[k];
-        if (s[k]) std::cerr << " '" << s[k][0] << s[k][1] << s[k][2] << s[k][3] << "...'";
+    std::cerr << "s[0] reserved for datablock = " << reinterpret_cast<size_t>(state.s[0]) << std::endl;
+    std::cerr << "s[1] is indirectIndex = " << reinterpret_cast<size_t>(state.s[1]) << std::endl;
+    for (size_t k = 2; k < state.s.size(); k++) {
+        std::cerr << "s[" << k << "]= 0x" << state.s[k];
+        if (state.s[k]) std::cerr << " '" << state.s[k][0] << state.s[k][1] << state.s[k][2] << state.s[k][3] << "...'";
         std::cerr << std::endl;
     }
 
@@ -462,13 +460,13 @@ int ExprNode::buildInterpreter(Interpreter* interpreter) const {
 
 int ExprNumNode::buildInterpreter(Interpreter* interpreter) const {
     int loc = interpreter->allocFP(1);
-    interpreter->d[loc] = value();
+    interpreter->state.d[loc] = value();
     return loc;
 }
 
 int ExprStrNode::buildInterpreter(Interpreter* interpreter) const {
     int loc = interpreter->allocPtr();
-    interpreter->s[loc] = const_cast<char*>(_str.c_str());
+    interpreter->state.s[loc] = const_cast<char*>(_str.c_str());
     return loc;
 }
 
@@ -591,7 +589,7 @@ int ExprVarNode::buildInterpreter(Interpreter* interpreter) const {
         } else {
             int varRefLoc = interpreter->allocPtr();
             interpreter->addOp(EvalVar::f);
-            interpreter->s[varRefLoc] = const_cast<char*>(reinterpret_cast<const char*>(var));
+            interpreter->state.s[varRefLoc] = const_cast<char*>(reinterpret_cast<const char*>(var));
             interpreter->addOperand(varRefLoc);
             interpreter->addOperand(destLoc);
             interpreter->endOp();

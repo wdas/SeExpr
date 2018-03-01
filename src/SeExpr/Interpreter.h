@@ -43,10 +43,16 @@ struct Promote {
 /// just fixed locations, because we have no recursion!
 class Interpreter : public Evaluator {
   public:
-    /// Double data (constants and evaluated)
-    mutable std::vector<double> d;
-    /// constant and evaluated pointer data
-    mutable std::vector<char*> s;
+
+    // TODO: To make the Interpreter thread-safe, State must
+    // be able to be thread-local (or if tbb is used, task-local).
+    struct State {
+        std::vector<double> d;  // double data (constants and evaluated)
+        std::vector<char*> s;   // constant and evaluated pointer data
+        std::vector<int> callStack;
+    };
+
+    mutable State state;
 
     /// Not needed for eval only building
     typedef std::map<const ExprLocalVar*, int> VarToLoc;
@@ -56,7 +62,6 @@ class Interpreter : public Evaluator {
     typedef int (*OpF)(const int*, double*, char**, std::vector<int>&);
 
     std::vector<std::pair<OpF, int> > ops;
-    mutable std::vector<int> callStack;
 
     std::vector<int> opData;  // operands to op
 
@@ -70,9 +75,8 @@ class Interpreter : public Evaluator {
 
   public:
     Interpreter() : _debugging(false), _returnSlot(0), _desiredReturnType(), _startedOp(false), _pcStart(0) {
-        s.push_back(nullptr);  // reserved for double** of variable block
-        s.push_back(nullptr);  // reserved for double** of variable block
-        s.push_back(nullptr);  // reserved for double** of function block
+        allocPtr(); // reserved for double** of variable block
+        allocPtr(); // reserved for indirectIndex of variable block
     }
 
     /// Return the position that the next instruction will be placed at
@@ -92,12 +96,12 @@ class Interpreter : public Evaluator {
     void endOp(bool execute = true) {
         _startedOp = false;
         if (execute) {
-            double* fp = &d[0];
-            char** str = &s[0];
+            double* fp = &state.d[0];
+            char** str = &state.s[0];
             int pc = ops.size() - 1;
             const std::pair<OpF, int>& op = ops[pc];
             int* opCurr = &opData[0] + op.second;
-            pc += op.first(opCurr, fp, str, callStack);
+            pc += op.first(opCurr, fp, str, state.callStack);
         }
     }
 
@@ -111,15 +115,15 @@ class Interpreter : public Evaluator {
 
     ///! Allocate a floating point set of data of dimension n
     int allocFP(int n) {
-        int ret = d.size();
-        for (int k = 0; k < n; k++) d.push_back(0);
+        int ret = state.d.size();
+        for (int k = 0; k < n; k++) state.d.push_back(0);
         return ret;
     }
 
     /// Allocate a pointer location (can be anything, but typically space for char*)
     int allocPtr() {
-        int ret = s.size();
-        s.push_back(0);
+        int ret = state.s.size();
+        state.s.push_back(nullptr);
         return ret;
     }
 
@@ -130,13 +134,13 @@ class Interpreter : public Evaluator {
     virtual inline void evalStr(char* dst, VarBlock* varBlock) const override {
         std::lock_guard<std::mutex> guard(_m);
         eval(varBlock);
-        memcpy((char*)dst, (const char*)&s[_returnSlot], sizeof(char*));
+        memcpy((char*)dst, (const char*)&state.s[_returnSlot], sizeof(char*));
     }
 
     virtual inline void evalFP(double* dst, VarBlock* varBlock) const override {
         std::lock_guard<std::mutex> guard(_m);
         eval(varBlock);
-        memcpy((char*)dst, (const char*)&d[_returnSlot], sizeof(double)*_desiredReturnType.dim());
+        memcpy((char*)dst, (const char*)&state.d[_returnSlot], sizeof(double) * _desiredReturnType.dim());
     }
 
     virtual inline void evalMultiple(VarBlock* varBlock,
