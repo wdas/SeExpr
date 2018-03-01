@@ -161,22 +161,24 @@ void Expression::setExpr(const std::string& e) {
 bool Expression::isConstant() const { return returnType().isLifetimeConstant(); }
 
 bool Expression::usesVar(const std::string& name) const {
-    parse();
+    prep();
     return _vars.find(name) != _vars.end();
 }
 
 bool Expression::usesFunc(const std::string& name) const {
-    parse();
+    prep();
     return _funcs.find(name) != _funcs.end();
 }
 
 void Expression::parse() const {
+    if (_parseTree) return;
     std::lock_guard<std::mutex> guard(_parseMutex);
     if (_parseTree) return;
     int tempStartPos, tempEndPos;
     ExprNode* parseTree_ = nullptr;
-    ExprParseAction(parseTree_, _parseError, tempStartPos, tempEndPos, _comments, this, _expression.c_str(), _wantVec);
-    if (!parseTree_) {
+    bool OK = ExprParseAction(parseTree_, _parseError, tempStartPos, tempEndPos, _comments, this, _expression.c_str(),
+                              _wantVec);
+    if (!OK || !parseTree_) {
         addError(_parseError, tempStartPos, tempEndPos);
         delete parseTree_;
     } else {
@@ -187,6 +189,7 @@ void Expression::parse() const {
 }
 
 void Expression::prep() const {
+    if (_evaluator) return;
     std::lock_guard<std::mutex> guard(_prepMutex);
     if (_evaluator) return;
 #ifdef SEEXPR_PERFORMANCE
