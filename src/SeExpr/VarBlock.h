@@ -162,6 +162,9 @@ class VarBlockCreator {
         inline uint32_t offset() const { return _offset; }
         inline ExprFunc& func() const { return _func; }
 
+        inline ExprFuncDeclaration& signature() { return _decl; }
+        inline const ExprFuncDeclaration& signature() const { return _decl; }
+
         virtual ExprType type() const override { return _type; }
         virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& env) const override {
             assert(_decl.types.size() && "FuncSymbol missing type information");
@@ -226,6 +229,22 @@ class VarBlockCreator {
         auto it = _funcs.find(name);
         if (it != _funcs.end()) return &it->second.func();
         return nullptr;
+    }
+
+    void dump() const {
+        for (const auto& pair : _vars) {
+            printf("[%4d] %s :: ", pair.second.offset(), pair.first.c_str());
+            std::cout << pair.second.type().toString() << std::endl;
+        }
+        for (const auto& pair : _funcs) {
+            printf("[%4d] %s() :: ", pair.second.offset(), pair.first.c_str());
+            const ExprFuncDeclaration& signature = pair.second.signature();
+            for(size_t i = 0; i < signature.types.size(); ++i) {
+                if (i > 0) std::cout << " -> ";
+                std::cout << signature.types[i].toString();
+            }
+            std::cout << std::endl;
+        }
     }
 
   private:
