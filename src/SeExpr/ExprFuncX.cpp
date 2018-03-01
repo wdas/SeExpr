@@ -24,7 +24,7 @@
 #include "VarBlock.h"
 
 namespace SeExpr2 {
-int ExprFuncSimple::EvalOp(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+int ExprFuncSimple::EvalOp(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
     const ExprFuncNode* node = reinterpret_cast<const ExprFuncNode*>(c[opData[0]]);
     ExprFuncSimple* simple =
         const_cast<ExprFuncSimple*>(reinterpret_cast<const ExprFuncSimple*>(node->func()->funcx()));
@@ -33,7 +33,7 @@ int ExprFuncSimple::EvalOp(int* opData, double* fp, char** c, std::vector<int>& 
     return 1;
 }
 
-int ExprFuncSimple::EvalClosureOp(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+int ExprFuncSimple::EvalClosureOp(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
     const ExprFuncNode* node = reinterpret_cast<const ExprFuncNode*>(c[opData[0]]);
 
     ExprFuncX** funcs = (ExprFuncX**)c[0];
@@ -154,7 +154,7 @@ extern "C" {
 // opdata[2] points to return value
 // opdata[3] points to number of args
 // opdata[4] points to beginning of arguments in
-void SeExpr2LLVMEvalCustomFunction(int* opDataArg,
+void SeExpr2LLVMEvalCustomFunction(const int* opDataArg,
                                    double* fpArg,
                                    char** strArg,
                                    void** funcdata,

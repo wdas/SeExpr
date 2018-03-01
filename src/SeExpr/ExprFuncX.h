@@ -78,7 +78,7 @@ class ExprFuncSimple : public ExprFuncX {
 
     class ArgHandle {
       public:
-        ArgHandle(int* opData, double* fp, char** c, std::vector<int>& /*callStack*/, const char* v)
+        ArgHandle(const int* opData, double* fp, char** c, std::vector<int>& /*callStack*/, const char* v)
             : outFp(fp[opData[2]]), outStr(c[opData[2]]), data(reinterpret_cast<ExprFuncNode::Data*>(c[opData[1]])),
               varBlock(v), _nargs((int)fp[opData[3]])  // TODO: put the value in opData rather than fp
               ,
@@ -106,7 +106,7 @@ class ExprFuncSimple : public ExprFuncX {
 
       private:
         int _nargs;
-        int* opData;
+        const int* opData;
         double* fp;
         char** c;
         // std::stack<int>& callStack;
@@ -124,8 +124,8 @@ class ExprFuncSimple : public ExprFuncX {
                                 const ExprFuncDeclaration& decl);
 
   private:
-    static int EvalOp(int* opData, double* fp, char** c, std::vector<int>& callStack);
-    static int EvalClosureOp(int* opData, double* fp, char** c, std::vector<int>& callStack);
+    static int EvalOp(const int* opData, double* fp, char** c, std::vector<int>& callStack);
+    static int EvalClosureOp(const int* opData, double* fp, char** c, std::vector<int>& callStack);
 };
 
 template <typename FunctionCodeStorage>

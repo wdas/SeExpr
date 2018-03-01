@@ -31,7 +31,7 @@ class VarBlock;
 template <int d>
 struct Promote {
     // TODO: this needs a name that is prefixed by Se!
-    static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+    static int f(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
         int posIn = opData[0];
         int posOut = opData[1];
         for (int k = posOut; k < posOut + d; k++) fp[k] = fp[posIn];
@@ -47,18 +47,18 @@ class Interpreter : public Evaluator {
     mutable std::vector<double> d;
     /// constant and evaluated pointer data
     mutable std::vector<char*> s;
-    /// Ooperands to op
-    mutable std::vector<int> opData;
 
     /// Not needed for eval only building
     typedef std::map<const ExprLocalVar*, int> VarToLoc;
     VarToLoc varToLoc;
 
     /// Op function pointer arguments are (int* currOpData,double* currD,char** c,std::stack<int>& callStackurrS)
-    typedef int (*OpF)(int*, double*, char**, std::vector<int>&);
+    typedef int (*OpF)(const int*, double*, char**, std::vector<int>&);
 
     std::vector<std::pair<OpF, int> > ops;
     mutable std::vector<int> callStack;
+
+    std::vector<int> opData;  // operands to op
 
   private:
     mutable std::mutex _m;
