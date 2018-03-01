@@ -509,7 +509,7 @@ ExprType ExprVarNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
         }
     }
     // If we get here we do not have a variable!
-    checkCondition(_var || _localVar, std::string("No variable named ''") + name() + "'", error);
+    checkCondition(_var || _localVar, std::string("No variable named '") + name() + "'", error);
     setType(ExprType().Error());
     return _type;
 }
