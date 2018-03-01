@@ -46,12 +46,15 @@ class Evaluator {
     virtual bool isValid() const = 0;
 
     // Evaluates and returns float (check returnType()!)
-    virtual const double* evalFP(VarBlock* varBlock) = 0;
+    virtual void evalFP(double* dst, VarBlock* varBlock) const = 0;
 
     // Evaluates and returns string (check returnType()!)
-    virtual const char* evalStr(VarBlock* varBlock) = 0;
+    virtual void evalStr(char* dst, VarBlock* varBlock) const = 0;
 
     // Evaluate multiple blocks
-    virtual void evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) = 0;
+    virtual void evalMultiple(VarBlock* varBlock,
+                              int outputVarBlockOffset,
+                              size_t rangeStart,
+                              size_t rangeEnd) const = 0;
 };
 }

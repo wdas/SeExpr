@@ -24,7 +24,7 @@
 #include "VarBlock.h"
 
 namespace SeExpr2 {
-int ExprFuncSimple::EvalOp(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+int ExprFuncSimple::EvalOp(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
     const ExprFuncNode* node = reinterpret_cast<const ExprFuncNode*>(c[opData[0]]);
     ExprFuncSimple* simple =
         const_cast<ExprFuncSimple*>(reinterpret_cast<const ExprFuncSimple*>(node->func()->funcx()));
@@ -33,7 +33,7 @@ int ExprFuncSimple::EvalOp(int* opData, double* fp, char** c, std::vector<int>& 
     return 1;
 }
 
-int ExprFuncSimple::EvalClosureOp(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+int ExprFuncSimple::EvalClosureOp(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
     const ExprFuncNode* node = reinterpret_cast<const ExprFuncNode*>(c[opData[0]]);
 
     ExprFuncX** funcs = (ExprFuncX**)c[0];
@@ -70,7 +70,7 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node, Interpreter* inte
     }
     int outoperand = -1;
     int nargsData = interpreter->allocFP(1);
-    interpreter->d[nargsData] = node->numChildren();
+    interpreter->state.d[nargsData] = node->numChildren();
     if (node->type().isFP())
         outoperand = interpreter->allocFP(node->type().dim());
     else if (node->type().isString())
@@ -87,7 +87,7 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node, Interpreter* inte
         interpreter->addOp(EvalOp);
     }
     int ptrLoc = interpreter->allocPtr();
-    interpreter->s[ptrLoc] = (char*)node;
+    interpreter->state.s[ptrLoc] = (char*)node;
     interpreter->addOperand(ptrLoc);
     interpreter->addOperand(ptrDataLoc);
     interpreter->addOperand(outoperand);
@@ -101,8 +101,8 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node, Interpreter* inte
     int pc = interpreter->nextPC() - 1;
     int* opCurr = (&interpreter->opData[0]) + interpreter->ops[pc].second;
 
-    ArgHandle args(opCurr, &interpreter->d[0], &interpreter->s[0], interpreter->callStack, nullptr);
-    if (!isLateBoundClosure) interpreter->s[ptrDataLoc] = reinterpret_cast<char*>(evalConstant(node, args));
+    ArgHandle args(opCurr, &interpreter->state.d[0], &interpreter->state.s[0], interpreter->state.callStack, nullptr);
+    if (!isLateBoundClosure) interpreter->state.s[ptrDataLoc] = reinterpret_cast<char*>(evalConstant(node, args));
 
     return outoperand;
 }
@@ -154,7 +154,7 @@ extern "C" {
 // opdata[2] points to return value
 // opdata[3] points to number of args
 // opdata[4] points to beginning of arguments in
-void SeExpr2LLVMEvalCustomFunction(int* opDataArg,
+void SeExpr2LLVMEvalCustomFunction(const int* opDataArg,
                                    double* fpArg,
                                    char** strArg,
                                    void** funcdata,

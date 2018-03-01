@@ -47,28 +47,23 @@ bool Interpreter::prep(ExprNode* parseTree, ExprType desiredReturnType) {
     return true;
 }
 
-void Interpreter::evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) {
+void Interpreter::evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) const {
     // TODO: need strings to work
-    int dim = _desiredReturnType.dim();
-    // double* iHack=reinterpret_cast<double**>(varBlock->data())[outputVarBlockOffset];
     double* destBase = reinterpret_cast<double**>(varBlock->data())[outputVarBlockOffset];
     for (size_t i = rangeStart; i < rangeEnd; i++) {
         varBlock->indirectIndex = i;
-        const double* f = evalFP(varBlock);
-        for (int k = 0; k < dim; k++) {
-            destBase[dim * i + k] = f[k];
-        }
+        evalFP(destBase, varBlock);
     }
 }
 
-void Interpreter::eval(VarBlock* block, bool debug) {
+void Interpreter::eval(VarBlock* block, bool debug) const {
     if (block) {
         static_assert(sizeof(char*) == sizeof(size_t), "Expect to fit size_t in char*");
-        s[0] = reinterpret_cast<char*>(block->data());
-        s[1] = reinterpret_cast<char*>(block->indirectIndex);
+        state.s[0] = reinterpret_cast<char*>(block->data());
+        state.s[1] = reinterpret_cast<char*>(block->indirectIndex);
     }
-    double* fp = &d[0];
-    char** str = &s[0];
+    double* fp = &state.d[0];
+    char** str = &state.s[0];
     int pc = _pcStart;
     int end = ops.size();
     while (pc < end) {
@@ -77,8 +72,8 @@ void Interpreter::eval(VarBlock* block, bool debug) {
             print(pc);
         }
         const std::pair<OpF, int>& op = ops[pc];
-        int* opCurr = &opData[0] + op.second;
-        pc += op.first(opCurr, fp, str, callStack);
+        const int* opCurr = &opData[0] + op.second;
+        pc += op.first(opCurr, fp, str, state.callStack);
     }
 }
 
@@ -98,19 +93,17 @@ void Interpreter::print(int pc) const {
     std::cerr << "---- opdata  ----------------------" << std::endl;
     for (size_t k = 0; k < opData.size(); k++) {
         std::cerr << "opData[" << k << "]= " << opData[k] << std::endl;
-        ;
     }
     std::cerr << "----- fp --------------------------" << std::endl;
-    for (size_t k = 0; k < d.size(); k++) {
-        std::cerr << "fp[" << k << "]= " << d[k] << std::endl;
-        ;
+    for (size_t k = 0; k < state.d.size(); k++) {
+        std::cerr << "fp[" << k << "]= " << state.d[k] << std::endl;
     }
     std::cerr << "---- str     ----------------------" << std::endl;
-    std::cerr << "s[0] reserved for datablock = " << reinterpret_cast<size_t>(s[0]) << std::endl;
-    std::cerr << "s[1] is indirectIndex = " << reinterpret_cast<size_t>(s[1]) << std::endl;
-    for (size_t k = 2; k < s.size(); k++) {
-        std::cerr << "s[" << k << "]= 0x" << s[k];
-        if (s[k]) std::cerr << " '" << s[k][0] << s[k][1] << s[k][2] << s[k][3] << "...'";
+    std::cerr << "s[0] reserved for datablock = " << reinterpret_cast<size_t>(state.s[0]) << std::endl;
+    std::cerr << "s[1] is indirectIndex = " << reinterpret_cast<size_t>(state.s[1]) << std::endl;
+    for (size_t k = 2; k < state.s.size(); k++) {
+        std::cerr << "s[" << k << "]= 0x" << state.s[k];
+        if (state.s[k]) std::cerr << " '" << state.s[k][0] << state.s[k][1] << state.s[k][2] << state.s[k][3] << "...'";
         std::cerr << std::endl;
     }
 
@@ -157,9 +150,9 @@ struct BinaryOp {
         return a - floor(a / b) * b;
     }
 
-    static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
-        double* in1 = fp + opData[0];
-        double* in2 = fp + opData[1];
+    static int f(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
+        const double* in1 = fp + opData[0];
+        const double* in2 = fp + opData[1];
         double* out = fp + opData[2];
 
         for (int k = 0; k < d; k++) {
@@ -192,8 +185,8 @@ struct BinaryOp {
 /// Computes a unary op on a FP[d]
 template <char op, int d>
 struct UnaryOp {
-    static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
-        double* in = fp + opData[0];
+    static int f(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
+        const double* in = fp + opData[0];
         double* out = fp + opData[1];
         for (int k = 0; k < d; k++) {
             switch (op) {
@@ -212,7 +205,7 @@ struct UnaryOp {
 //! Subscripts
 template <int d>
 struct Subscript {
-    static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+    static int f(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
         int tuple = opData[0];
         int subscript = int(fp[opData[1]]);
         int out = opData[2];
@@ -227,7 +220,7 @@ struct Subscript {
 //! build a vector tuple from a bunch of numbers
 template <int d>
 struct Tuple {
-    static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+    static int f(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
         int out = opData[d];
         for (int k = 0; k < d; k++) {
             fp[out + k] = fp[opData[k]];
@@ -239,7 +232,7 @@ struct Tuple {
 //! Assign a floating point to another (NOTE: if src and dest have different dimensions, use Promote)
 template <int d>
 struct AssignOp {
-    static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+    static int f(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
         int in = opData[0];
         int out = opData[1];
         for (int k = 0; k < d; k++) {
@@ -251,7 +244,7 @@ struct AssignOp {
 
 //! Assigns a string from one position to another
 struct AssignStrOp {
-    static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+    static int f(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
         int in = opData[0];
         int out = opData[1];
         c[out] = c[in];
@@ -261,7 +254,7 @@ struct AssignStrOp {
 
 //! Jumps relative to current executing pc if cond is true
 struct CondJmpRelativeIfFalse {
-    static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+    static int f(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
         bool cond = (bool)fp[opData[0]];
         if (!cond)
             return opData[1];
@@ -272,7 +265,7 @@ struct CondJmpRelativeIfFalse {
 
 //! Jumps relative to current executing pc if cond is true
 struct CondJmpRelativeIfTrue {
-    static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+    static int f(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
         bool cond = (bool)fp[opData[0]];
         if (cond)
             return opData[1];
@@ -283,12 +276,12 @@ struct CondJmpRelativeIfTrue {
 
 //! Jumps relative to current executing pc unconditionally
 struct JmpRelative {
-    static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) { return opData[0]; }
+    static int f(const int* opData, double* fp, char** c, std::vector<int>& callStack) { return opData[0]; }
 };
 
 //! Evaluates an external variable
 struct EvalVar {
-    static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+    static int f(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
         ExprVarRef* ref = reinterpret_cast<ExprVarRef*>(c[opData[0]]);
         ref->eval(fp + opData[1]);  // ,c+opData[1]);
         return 1;
@@ -298,7 +291,7 @@ struct EvalVar {
 //! Evaluates an external variable using a variable block
 template <int dim>
 struct EvalVarBlock {
-    static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+    static int f(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
         if (c[0]) {
             double* basePointer = reinterpret_cast<double*>(c[0]) + opData[0];
             double* destPointer = fp + opData[1];
@@ -313,7 +306,7 @@ struct EvalVarBlock {
 //! Evaluates an external variable using a variable block
 template <char uniform, int dim>
 struct EvalVarBlockIndirect {
-    static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+    static int f(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
         if (c[0]) {
             int stride = opData[2];
             int varBlockOffset = opData[0];
@@ -336,10 +329,10 @@ struct EvalVarBlockIndirect {
 
 template <char op, int d>
 struct CompareEqOp {
-    static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+    static int f(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
         bool result = true;
-        double* in0 = fp + opData[0];
-        double* in1 = fp + opData[1];
+        const double* in0 = fp + opData[0];
+        const double* in1 = fp + opData[1];
         double* out = fp + opData[2];
         for (int k = 0; k < d; k++) {
             switch (op) {
@@ -357,7 +350,7 @@ struct CompareEqOp {
 
 template <char op>
 struct CompareEqOp<op, 3> {
-    static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+    static int f(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
         bool eq = fp[opData[0]] == fp[opData[1]] && fp[opData[0] + 1] == fp[opData[1] + 1] &&
                   fp[opData[0] + 2] == fp[opData[1] + 2];
         if (op == '=') fp[opData[2]] = eq;
@@ -369,7 +362,7 @@ struct CompareEqOp<op, 3> {
 template <char op, int d>
 struct StrCompareEqOp {
     // TODO: this should rely on tokenization and not use strcmp
-    static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+    static int f(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
         switch (op) {
             case '=': fp[opData[2]] = strcmp(c[opData[0]], c[opData[1]]) == 0; break;
             case '!': fp[opData[2]] = strcmp(c[opData[0]], c[opData[1]]) == 0; break;
@@ -380,7 +373,7 @@ struct StrCompareEqOp {
 }
 
 namespace {
-int ProcedureReturn(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+int ProcedureReturn(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
     int newPC = callStack.back();
     callStack.pop_back();
     return newPC - opData[0];
@@ -388,7 +381,7 @@ int ProcedureReturn(int* opData, double* fp, char** c, std::vector<int>& callSta
 }
 
 namespace {
-int ProcedureCall(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+int ProcedureCall(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
     callStack.push_back(opData[0]);
     return opData[1];
 }
@@ -467,13 +460,13 @@ int ExprNode::buildInterpreter(Interpreter* interpreter) const {
 
 int ExprNumNode::buildInterpreter(Interpreter* interpreter) const {
     int loc = interpreter->allocFP(1);
-    interpreter->d[loc] = value();
+    interpreter->state.d[loc] = value();
     return loc;
 }
 
 int ExprStrNode::buildInterpreter(Interpreter* interpreter) const {
     int loc = interpreter->allocPtr();
-    interpreter->s[loc] = const_cast<char*>(_str.c_str());
+    interpreter->state.s[loc] = const_cast<char*>(_str.c_str());
     return loc;
 }
 
@@ -596,7 +589,7 @@ int ExprVarNode::buildInterpreter(Interpreter* interpreter) const {
         } else {
             int varRefLoc = interpreter->allocPtr();
             interpreter->addOp(EvalVar::f);
-            interpreter->s[varRefLoc] = const_cast<char*>(reinterpret_cast<const char*>(var));
+            interpreter->state.s[varRefLoc] = const_cast<char*>(reinterpret_cast<const char*>(var));
             interpreter->addOperand(varRefLoc);
             interpreter->addOperand(destLoc);
             interpreter->endOp();

@@ -212,14 +212,14 @@ static const char* mix_docstring = "mix(float a,float b,float alpha)\nBlend of a
 
 double max(int n, double* args) {
     double value = args[0];
-    for (unsigned int i = 1; i < n; i++) {
+    for (int i = 1; i < n; i++) {
         value = args[i] > value ? args[i] : value;
     }
     return value;
 }
 double min(int n, double* args) {
     double value = args[0];
-    for (unsigned int i = 1; i < n; i++) {
+    for (int i = 1; i < n; i++) {
         value = args[i] < value ? args[i] : value;
     }
     return value;
@@ -227,7 +227,7 @@ double min(int n, double* args) {
 
 double average(int n, double* args) {
     double sum = 0.0;
-    for (unsigned int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++) {
         sum += args[i];
     }
     double div = (double)n;

@@ -21,9 +21,10 @@
 
 #include <QDialog>
 
+#include "../common/ImageSynthesizer.h"
+
 class QLabel;
 class ExprEditor;
-class ImageSynthesizer;
 
 class ImageEditorDialog : public QDialog {
     Q_OBJECT
@@ -33,7 +34,8 @@ class ImageEditorDialog : public QDialog {
   private:
     QLabel* _imageLabel;
     ExprEditor* _editor;
-    ImageSynthesizer* _imageSynthesizer;
+    png::Image<png::RGB32Pixel> _image;
+    ImageSynthesizer<png::Image<png::RGB32Pixel>> _imageSynthesizer;
   private slots:
     void applyExpression();
 };

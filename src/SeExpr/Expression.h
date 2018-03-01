@@ -189,13 +189,27 @@ class Expression {
         evaluator()->evalMultiple(varBlock, outputVarBlockOffset, rangeStart, rangeEnd);
     }
 
-    // TODO: make this deprecated
-    /** Evaluates and returns float (check returnType()!) */
-    inline const double* evalFP(VarBlock* varBlock = nullptr) const { return evaluator()->evalFP(varBlock); }
+    // Evaluates and returns float (check returnType()!)
+    // Not thread-safe
+    inline const double* evalFP(VarBlock* varBlock = nullptr) const {
+        _results.resize(_desiredReturnType.dim());
+        evaluator()->evalFP(_results.data(), varBlock);
+        return _results.data();
+    }
 
-    // TODO: make this deprecated
-    /** Evaluates and returns string (check returnType()!) */
-    inline const char* evalStr(VarBlock* varBlock = nullptr) const { return evaluator()->evalStr(varBlock); }
+    // Evaluates and returns string (check returnType()!)
+    // Not thread-safe
+    inline const char* evalStr(VarBlock* varBlock = nullptr) const {
+        _results.resize(_desiredReturnType.dim());
+        evaluator()->evalStr((char*)_results.data(), varBlock);
+        return (const char*)_results.data();
+    }
+
+    // Evaluates and returns float (check returnType()!)
+    inline void evalFP(double* dst, VarBlock* varBlock = nullptr) const { evaluator()->evalFP(dst, varBlock); }
+
+    // Evaluates and returns string (check returnType()!)
+    inline void evalStr(char* dst, VarBlock* varBlock = nullptr) const { evaluator()->evalStr(dst, varBlock); }
 
     /** Reset expr - force reparse/rebind */
     // if overridden, you must still call Expression::reset()!
@@ -281,9 +295,6 @@ class Expression {
     /** Functions used in this expr */
     mutable std::set<std::string> _funcs;
 
-    /** Local variable table */
-    // mutable LocalVarTable _localVars;
-
     /** Whether or not we have unsafe functions */
     mutable std::vector<std::string> _threadUnsafeFunctionCalls;
 
@@ -292,6 +303,8 @@ class Expression {
     // Var block creator
     const VarBlockCreator* _varBlockCreator = 0;
 
+    mutable std::vector<double> _results;
+
     /* internal */ public:
 
     //! add local variable (this is for internal use)
@@ -299,19 +312,6 @@ class Expression {
 
     //! add function evaluation (this is for internal use)
     void addFunc(const char* n) const { _funcs.insert(n); }
-
-    ////! get local variable reference (this is for internal use)
-    // ExprVarRef* resolveLocalVar(const char* n) const {
-    //    LocalVarTable::iterator iter = _localVars.find(n);
-    //    if (iter != _localVars.end()) return &iter->second;
-    //    return 0;
-    //}
-
-    /** get local variable reference. This is potentially useful for expression debuggers
-        and/or uses of expressions where mutable variables are desired */
-    /* ExprLocalVarRef* getLocalVar(const char* n) const { */
-    /*     return &_localVars[n];  */
-    /* } */
 };
 }
 
