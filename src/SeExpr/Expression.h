@@ -206,14 +206,10 @@ class Expression {
     }
 
     // Evaluates and returns float (check returnType()!)
-    inline void evalFP(double* dst, VarBlock* varBlock = nullptr) const {
-        evaluator()->evalFP(dst, varBlock);
-    }
+    inline void evalFP(double* dst, VarBlock* varBlock = nullptr) const { evaluator()->evalFP(dst, varBlock); }
 
     // Evaluates and returns string (check returnType()!)
-    inline void evalStr(char* dst, VarBlock* varBlock = nullptr) const {
-        evaluator()->evalStr(dst, varBlock);
-    }
+    inline void evalStr(char* dst, VarBlock* varBlock = nullptr) const { evaluator()->evalStr(dst, varBlock); }
 
     /** Reset expr - force reparse/rebind */
     // if overridden, you must still call Expression::reset()!

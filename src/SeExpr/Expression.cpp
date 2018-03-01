@@ -94,7 +94,10 @@ class NullEvaluator : public Evaluator {
 
     virtual void evalFP(double* dst, VarBlock* varBlock) const override {}
     virtual void evalStr(char* dst, VarBlock* varBlock) const override {}
-    virtual void evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) const override {}
+    virtual void evalMultiple(VarBlock* varBlock,
+                              int outputVarBlockOffset,
+                              size_t rangeStart,
+                              size_t rangeEnd) const override {}
 };
 
 Expression::Expression(Expression::EvaluationStrategy evaluationStrategyHint)

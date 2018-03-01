@@ -43,7 +43,6 @@ struct Promote {
 /// just fixed locations, because we have no recursion!
 class Interpreter : public Evaluator {
   public:
-
     // TODO: To make the Interpreter thread-safe, State must
     // be able to be thread-local (or if tbb is used, task-local).
     struct State {
@@ -75,8 +74,8 @@ class Interpreter : public Evaluator {
 
   public:
     Interpreter() : _debugging(false), _returnSlot(0), _desiredReturnType(), _startedOp(false), _pcStart(0) {
-        allocPtr(); // reserved for double** of variable block
-        allocPtr(); // reserved for indirectIndex of variable block
+        allocPtr();  // reserved for double** of variable block
+        allocPtr();  // reserved for indirectIndex of variable block
     }
 
     /// Return the position that the next instruction will be placed at
