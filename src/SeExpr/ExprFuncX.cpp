@@ -38,8 +38,10 @@ int ExprFuncSimple::EvalClosureOp(const int* opData, double* fp, char** c, std::
 
     ExprFuncX** funcs = (ExprFuncX**)c[0];
     const auto* funcSymbol = static_cast<const VarBlockCreator::FuncSymbol*>(node->func()->funcx());
+    assert(funcSymbol && "Missing plugin function symbol");
     int offset = funcSymbol->offset();
     ExprFuncSimple* simple = reinterpret_cast<ExprFuncSimple*>(funcs[offset]);
+    assert(simple && "Missing plugin function definition");
     ArgHandle args(opData, fp, c, callStack, c[0]);
 
     if (!args.data) {
