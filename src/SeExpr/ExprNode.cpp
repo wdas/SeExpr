@@ -99,7 +99,7 @@ void ExprNode::addChildren(ExprNode* surrogate) {
     delete surrogate;
 }
 
-ExprType ExprNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     /** Default is to call prep on children (giving AnyType as desired type).
      *  If all children return valid types, returns NoneType.
      *  Otherwise,                          returns ErrorType.
@@ -122,7 +122,7 @@ ExprType ExprNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-ExprType ExprModuleNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprModuleNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     bool error = false;
 
     for (int c = 0; c < numChildren(); c++) error |= !child(c)->prep(false, envBuilder).isValid();
@@ -134,7 +134,7 @@ ExprType ExprModuleNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-ExprType ExprPrototypeNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprPrototypeNode::prep(bool, ExprVarEnvBuilder&) {
     bool error = false;
 
 #if 0  // TODO: implement prototype
@@ -183,7 +183,7 @@ void ExprPrototypeNode::addArgs(ExprNode* surrogate) {
 #endif
 }
 
-ExprType ExprLocalFunctionNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprLocalFunctionNode::prep(bool, ExprVarEnvBuilder&) {
     bool error = false;
 
 #if 0  // TODO: no local functions for now
@@ -233,7 +233,7 @@ ExprType ExprLocalFunctionNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuil
 }
 
 // TODO: write buildInterpreter for local function node
-ExprType ExprLocalFunctionNode::prep(ExprFuncNode* callerNode, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const {
+ExprType ExprLocalFunctionNode::prep(ExprFuncNode* callerNode, bool, ExprVarEnvBuilder&) const {
 #if 0
     bool error = false;
     callerNode->checkCondition(callerNode->numChildren() == prototype()->numChildren(),
@@ -265,7 +265,7 @@ ExprType ExprBlockNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-ExprType ExprIfThenElseNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprIfThenElseNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     ExprType condType, thenType, elseType;
 
     bool error = false;
@@ -302,7 +302,7 @@ ExprType ExprIfThenElseNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder
     return _type;
 }
 
-ExprType ExprAssignNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprAssignNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     _assignedType = child(0)->prep(false, envBuilder);
 
     std::unique_ptr<ExprLocalVar> localVar(new ExprLocalVar(child(0)->type()));
@@ -319,7 +319,7 @@ ExprType ExprAssignNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-ExprType ExprVecNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprVecNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     bool error = false;
 
     int max_child_d = 0;
@@ -395,7 +395,7 @@ ExprType ExprCondNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-ExprType ExprSubscriptNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprSubscriptNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     // TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
     ExprType vecType, scriptType;
 
@@ -415,7 +415,7 @@ ExprType ExprSubscriptNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder)
     return _type;
 }
 
-ExprType ExprCompareEqNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprCompareEqNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     // TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
     ExprType firstType, secondType;
 
@@ -436,7 +436,7 @@ ExprType ExprCompareEqNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder)
     return _type;
 }
 
-ExprType ExprCompareNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprCompareNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     // TODO: assume we want scalar
     // TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
     ExprType firstType, secondType;
@@ -458,8 +458,8 @@ ExprType ExprCompareNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-ExprType ExprBinaryOpNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
-    // TODO: aselle this probably should set the type to be FP1 if wantScalar is true!
+ExprType ExprBinaryOpNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
+    // TODO: aselle this probably should set the type to be FP1 if is true!
     // TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
     ExprType firstType, secondType;
 
@@ -479,7 +479,7 @@ ExprType ExprBinaryOpNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) 
     return _type;
 }
 
-ExprType ExprVarNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprVarNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     // ask expression to resolve var
     bool error = false;
     if ((_localVar = envBuilder.current()->find(name()))) {
@@ -514,9 +514,9 @@ ExprType ExprVarNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-ExprType ExprNumNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) { return _type; }
+ExprType ExprNumNode::prep(bool, ExprVarEnvBuilder&) { return _type; }
 
-ExprType ExprStrNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) { return _type; }
+ExprType ExprStrNode::prep(bool, ExprVarEnvBuilder&) { return _type; }
 
 ExprType ExprFuncNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     bool error = false;

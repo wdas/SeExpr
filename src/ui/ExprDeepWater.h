@@ -173,7 +173,7 @@ class DeepWaterLineEdit : public QLineEdit {
     Q_OBJECT
 
   public:
-    DeepWaterLineEdit(QWidget* parent = 0) {}
+    DeepWaterLineEdit(QWidget* = 0) {}
     ~DeepWaterLineEdit() {}
 
   signals:

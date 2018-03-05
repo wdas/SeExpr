@@ -349,7 +349,7 @@ arg:
    so it's ignored.)
 */
 
-void SeExpr2error(YYLTYPE* yyloc,
+void SeExpr2error(YYLTYPE*,
                   void* scanner, 
                   SeExpr2::ParseState* state, 
                   SeExpr2::ParseData* parseData, 

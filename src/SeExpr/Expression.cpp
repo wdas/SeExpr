@@ -89,15 +89,12 @@ class NullEvaluator : public Evaluator {
     }
     virtual void dump() const override {}
 
-    virtual bool prep(ExprNode* parseTree, ExprType desiredReturnType) { return false; }
+    virtual bool prep(ExprNode*, ExprType) { return false; }
     virtual bool isValid() const override { return false; }
 
-    virtual void evalFP(double* dst, VarBlock* varBlock) const override {}
-    virtual void evalStr(char* dst, VarBlock* varBlock) const override {}
-    virtual void evalMultiple(VarBlock* varBlock,
-                              int outputVarBlockOffset,
-                              size_t rangeStart,
-                              size_t rangeEnd) const override {}
+    virtual void evalFP(double*, VarBlock*) const override {}
+    virtual void evalStr(char*, VarBlock*) const override {}
+    virtual void evalMultiple(VarBlock*, int, size_t, size_t) const override {}
 };
 
 Expression::Expression(Expression::EvaluationStrategy evaluationStrategyHint)

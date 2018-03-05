@@ -41,7 +41,7 @@ class GrapherExpr : public Expression {
         double val;  // independent variable
         void eval(double* result) { result[0] = val; }
 
-        void eval(const char** result) {}
+        void eval(const char**) {}
     };
 
     //! independent variable
@@ -55,6 +55,11 @@ class GrapherExpr : public Expression {
 };
 
 int main(int argc, char* argv[]) {
+    if (argc > 2) {
+        std::cerr << "usage: asciiGraph <filename>" << std::endl;
+        exit(1);
+    }
+
     std::string exprStr =
         "\
                          $val=.5*PI*x;\

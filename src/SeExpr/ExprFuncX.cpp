@@ -87,7 +87,7 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node, Interpreter* inte
         interpreter->addOp(EvalOp);
     }
     int ptrLoc = interpreter->allocPtr();
-    interpreter->state.s[ptrLoc] = (char*)node;
+    interpreter->state.s[ptrLoc] = const_cast<char*>(reinterpret_cast<const char*>(node));
     interpreter->addOperand(ptrLoc);
     interpreter->addOperand(ptrDataLoc);
     interpreter->addOperand(outoperand);
@@ -108,7 +108,7 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node, Interpreter* inte
 }
 
 ExprType ExprFuncSimple::genericPrep(ExprFuncNode* node,
-                                     bool scalarWanted,
+                                     bool,
                                      ExprVarEnvBuilder& env,
                                      const ExprFuncDeclaration& decl) {
     assert(node);

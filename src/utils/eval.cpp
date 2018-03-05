@@ -34,13 +34,13 @@ class Expr : public Expression {
         void eval(double* result) {
             for (int k = 0; k < 3; k++) result[k] = val;
         }
-        void eval(const char** result) { assert(false); }
+        void eval(const char**) { assert(false); }
     };
     mutable Var X;
 
     struct VarStr : public ExprVarRef {
         VarStr() : ExprVarRef(ExprType().Varying().String()) {}
-        void eval(double* result) { assert(false); }
+        void eval(double*) { assert(false); }
 
         void eval(const char** resultStr) { resultStr[0] = "testo"; }
     };
@@ -55,6 +55,11 @@ class Expr : public Expression {
 };
 
 int main(int argc, char* argv[]) {
+    if (argc != 2) {
+        std::cout << "usage: eval <expression>" << std::endl;
+        exit(1);
+    }
+
     std::cerr << "fun fun" << std::endl;
     Expr expr;
     expr.setExpr(argv[1]);

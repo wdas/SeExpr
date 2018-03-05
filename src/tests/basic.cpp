@@ -32,7 +32,7 @@ static double countInvocations(double x) {
 struct Func : public ExprFuncSimple {
     Func() : ExprFuncSimple(true) {}
 
-    virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const {
+    virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const {
         bool valid = true;
         valid &= node->checkArg(0, ExprType().FP(3).Constant(), envBuilder);
         valid &= node->checkArg(1, ExprType().String().Varying(), envBuilder);
@@ -40,7 +40,7 @@ struct Func : public ExprFuncSimple {
         valid &= node->checkArg(3, ExprType().String().Constant(), envBuilder);
         return valid ? ExprType().FP(4) : ExprType().Error();
     }
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const { return nullptr; }
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const { return nullptr; }
     virtual void eval(ArgHandle args) {
         const char* s1 = args.inStr(1);
         const char* s2 = args.inStr(3);

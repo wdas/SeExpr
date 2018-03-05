@@ -544,7 +544,7 @@ static const char* cnoise_docstring =
     "color cnoise ( vector v)\n"
     "color noise formed with original perlin noise at location (C2 interpolant)";
 
-double snoise4(int n, const Vec3d* args) {
+double snoise4(int, const Vec3d* args) {
     double result;
     double procargs[4] = {args[0][0], args[0][1], args[0][2], args[1][0]};
     Noise<4, 1>(procargs, &result);
@@ -554,7 +554,7 @@ static const char* snoise4_docstring =
     "float snoise4 ( vector v,float t)\n"
     "4D signed noise w/ range -1 to 1 formed with original perlin noise at location (C2 interpolant)";
 
-Vec3d vnoise4(int n, const Vec3d* args) {
+Vec3d vnoise4(int, const Vec3d* args) {
     Vec3d result;
     double procargs[4] = {args[0][0], args[0][1], args[0][2], args[1][0]};
     Noise<4, 3>(procargs, &result[0]);
@@ -1006,7 +1006,7 @@ class CachedVoronoiFunc : public ExprFuncSimple {
     typedef Vec3d VoronoiFunc(VoronoiPointData& data, int n, const Vec3d* args);
     CachedVoronoiFunc(VoronoiFunc* vfunc) : ExprFuncSimple(true), _vfunc(vfunc) {}
 
-    virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const {
+    virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const {
         // check number of arguments
         int nargs = node->numChildren();
         if (nargs < 1 || nargs > 9) {
@@ -1020,9 +1020,7 @@ class CachedVoronoiFunc : public ExprFuncSimple {
         return valid ? ExprType().FP(3).Varying() : ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const {
-        return new VoronoiPointData();
-    }
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const { return new VoronoiPointData(); }
 
     virtual void eval(ArgHandle args) {
         VoronoiPointData* data = static_cast<VoronoiPointData*>(args.data);
@@ -1328,7 +1326,7 @@ class CurveFuncX : public ExprFuncSimple {
   public:
     CurveFuncX() : ExprFuncSimple(true) {}
 
-    virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const {
+    virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const {
         // check number of arguments
         int nargs = node->numChildren();
         if ((nargs - 1) % 3) {
@@ -1346,7 +1344,7 @@ class CurveFuncX : public ExprFuncSimple {
         return valid ? ExprType().FP(1).Varying() : ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const {
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle args) const {
         CurveData<double>* data = new CurveData<double>;
         for (int i = 1; i < args.nargs() - 2; i += 3) {
             double pos = args.inFp<1>(i)[0];
@@ -1378,7 +1376,7 @@ static const char* curve_docstring =
     "4-monotone (non oscillating spline)";
 
 class CCurveFuncX : public ExprFuncSimple {
-    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const {
+    virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const {
         // check number of arguments
         int nargs = node->numChildren();
         if ((nargs - 1) % 3) {
@@ -1396,7 +1394,7 @@ class CCurveFuncX : public ExprFuncSimple {
         return valid ? ExprType().FP(3).Varying() : ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const {
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle args) const {
         CurveData<Vec3d>* data = new CurveData<Vec3d>;
         for (int i = 1; i < args.nargs() - 2; i += 3) {
             double pos = args.inFp<1>(i)[0];
@@ -1459,7 +1457,7 @@ class GetVar : public ExprFuncSimple {
         return varType.isValid() ? varType : ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const {
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle) const {
         return new Data(node->type().isFP() ? getTemplatizedOp<Assign, Data::func>(node->type().dim()) : nullptr,
                         node->type().dim());
     }
@@ -1475,8 +1473,6 @@ class GetVar : public ExprFuncSimple {
         Data* data = static_cast<Data*>(args.data);
         assert(data);
         double* out = &args.outFp;
-        // for(int i=0;i<data->dim;i++) std::cerr<<" "<<args.inFp<1>(0)[i];
-        // std::cerr<<std::endl;
         if (data->f)
             data->f(out, &args.inFp<1>(0)[0]);
         else
@@ -1498,7 +1494,7 @@ class PrintFuncX : public ExprFuncSimple {
     };
 
   public:
-    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const {
+    virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const {
         int nargs = node->numChildren();
         if (nargs < 1) {
             node->addError("Wrong number of arguments, should be GE 1");
@@ -1513,7 +1509,7 @@ class PrintFuncX : public ExprFuncSimple {
         return ExprType().FP(1).Constant();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const {
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle args) const {
         // parse format string
         unsigned int bakeStart = 0;
         int searchStart = 0;
@@ -1528,7 +1524,6 @@ class PrintFuncX : public ExprFuncSimple {
             std::size_t percentStart = format.find('%', searchStart);
             if (percentStart == std::string::npos) break;
             if (percentStart + 1 == format.length()) {
-                // node->addError("Unexpected end of format string");
                 delete data;
                 assert(false);
             } else if (format[percentStart + 1] == '%') {
@@ -1544,11 +1539,8 @@ class PrintFuncX : public ExprFuncSimple {
                 searchStart = percentStart + 2;
                 bakeStart = searchStart;
             } else {
-                // node->addError("Invalid format string, only %v is allowed");
                 delete data;
                 // TODO: check that this is correct
-                // return ExprType().Error().Varying();
-                // return false;
                 assert(false);
             }
         }
@@ -1632,7 +1624,7 @@ static const char* testfunc_docstring="fdsA";
 
 #endif
 
-void defineBuiltins(ExprFunc::Define define, ExprFunc::Define3 define3) {
+void defineBuiltins(ExprFunc::Define, ExprFunc::Define3 define3) {
 // functions from math.h (global namespace)
 //#define FUNC(func)	  define(#func, ExprFunc(::func))
 #define FUNCADOC(name, func) define3(name, ExprFunc(::func), func##_docstring)

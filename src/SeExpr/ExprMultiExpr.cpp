@@ -35,7 +35,7 @@ struct GlobalFP : public GlobalVal {
     void eval(double* result) {
         for (int i = 0; i < type().dim(); i++) result[i] = val[i];
     }
-    void eval(const char** result) { assert(false); }
+    void eval(const char**) { assert(false); }
     bool isVec() { return type().dim() > 1; }
 };
 
@@ -43,7 +43,7 @@ struct GlobalStr : public GlobalVal {
     GlobalStr(const std::string& varName) : GlobalVal(varName, ExprType().String().Varying()), val(0) {}
 
     const char* val;
-    void eval(double* result) { assert(false); }
+    void eval(double*) { assert(false); }
     void eval(const char** result) { *result = val; }
     bool isVec() { return 0; }
 };

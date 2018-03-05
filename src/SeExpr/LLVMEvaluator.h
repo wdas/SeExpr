@@ -55,7 +55,7 @@ class LLVMEvaluator : public Evaluator {
         LLVMEvaluationContext(const LLVMEvaluationContext&) = delete;
         LLVMEvaluationContext& operator=(const LLVMEvaluationContext&) = delete;
 
-        void init(void* fp, void* fpLoop, int dim) {
+        void init(void* fp, void* fpLoop, int) {
             reset();
             functionPtr = reinterpret_cast<FunctionPtr>(fp);
             functionPtrMultiple = reinterpret_cast<FunctionPtrMultiple>(fpLoop);
