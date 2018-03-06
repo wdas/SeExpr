@@ -82,6 +82,18 @@ class SymbolTable : public VarBlock {
   public:
     explicit SymbolTable(VarBlock&& block) : VarBlock(std::move(block)) {}
 
+    SymbolTable(SymbolTable&& other)
+        : _allocations(std::move(other._allocations))
+        , _function_code_segments(std::move(other._function_code_segments)) {}
+
+    SymbolTable& operator=(SymbolTable&& other) {
+        _allocations = std::move(other._allocations);
+        _function_code_segments = std::move(other._function_code_segments);
+    }
+
+    SymbolTable(const SymbolTable&) = delete;
+    SymbolTable& operator=(const SymbolTable&) = delete;
+
     virtual ~SymbolTable() {
         for (auto pair : _allocations) free(pair.second);
     }
