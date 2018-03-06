@@ -17,10 +17,10 @@
 #ifndef VarBlock_h
 #define VarBlock_h
 
-#include <deque>
 #include <functional>
 #include <sstream>
 #include <vector>
+#include <unordered_map>
 
 #include "Expression.h"
 #include "ExprType.h"
@@ -83,7 +83,7 @@ class SymbolTable : public VarBlock {
     explicit SymbolTable(VarBlock&& block) : VarBlock(std::move(block)) {}
 
     virtual ~SymbolTable() {
-        for (void* a : _allocations) free(a);
+        for (auto pair : _allocations) free(pair.second);
     }
 
     // Set code segment for some Function declared in the VarBlockCreator
@@ -100,25 +100,28 @@ class SymbolTable : public VarBlock {
 
     // dumb helper for integrations in apps that couldn't be bothered to have clean ownership of
     // their own variables with a guaranteed lifetime
-    double& Scalar(uint32_t offset) { return *(double*)alloc(offset, sizeof(double)); }
+    double& Scalar(uint32_t offset) { return *alloc(offset, sizeof(double)); }
 
     // dumb helper for integrations in apps that couldn't be bothered to have clean ownership of
     // their own variables with a guaranteed lifetime
     template <int d>
     Vec<double, d, true> Vector(uint32_t offset) {
-        return Vec<double, d, true>((double*)alloc(offset, d * sizeof(double)));
+        return Vec<double, d, true>(alloc(offset, d * sizeof(double)));
     }
 
   private:
     // TODO: small object optimization
-    void* alloc(uint32_t offset, size_t bytes) {
-        void* ptr = malloc(bytes);
-        _allocations.push_back(ptr);
-        Pointer(offset) = (double*)ptr;
+    double* alloc(uint32_t offset, size_t bytes) {
+        auto iter = _allocations.find(offset);
+        if (iter != _allocations.end()) return iter->second;
+
+        double* ptr = (double*)malloc(bytes);
+        _allocations[offset] = ptr;
+        Pointer(offset) = ptr;
         return ptr;
     }
 
-    std::deque<void*> _allocations;
+    std::unordered_map<uint32_t, double*> _allocations;
     std::vector<std::unique_ptr<SeExpr2::ExprFuncX>> _function_code_segments;
 };
 
