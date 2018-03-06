@@ -157,8 +157,10 @@ class VarBlockCreator {
         FuncSymbol& operator=(const FuncSymbol&) = delete;
 
         FuncSymbol(FuncSymbol&& other)
-            : ExprFuncSimple(true), _decl(std::move(other._decl)), _offset(std::move(other._offset)),
-              _func(*this, other._func.minArgs(), other._func.maxArgs()) {
+            : ExprFuncSimple(true)
+            , _decl(std::move(other._decl))
+            , _offset(std::move(other._offset))
+            , _func(*this, other._func.minArgs(), other._func.maxArgs()) {
             assert(_decl.types.size() && "FuncSymbol missing type information");
         }
 
@@ -242,7 +244,7 @@ class VarBlockCreator {
         for (const auto& pair : _funcs) {
             printf("[%4d] %s() :: ", pair.second.offset(), pair.first.c_str());
             const ExprFuncDeclaration& signature = pair.second.signature();
-            for(size_t i = 0; i < signature.types.size(); ++i) {
+            for (size_t i = 0; i < signature.types.size(); ++i) {
                 if (i > 0) std::cout << " -> ";
                 std::cout << signature.types[i].toString();
             }
