@@ -168,13 +168,11 @@ class VarBlockCreator {
             return ExprFuncSimple::genericPrep(node, scalarWanted, env, _decl);
         }
 
-        virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const override {
-            return nullptr;
-        }
+        virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const override { return nullptr; }
 
         virtual void eval(ArgHandle args) override {
             assert(args.varBlock);
-            ExprFuncSimple** funcs = const_cast<ExprFuncSimple**>((const ExprFuncSimple**)args.varBlock);
+            ExprFuncSimple** funcs = reinterpret_cast<ExprFuncSimple**>(const_cast<char*>(args.varBlock));
             assert(funcs);
             ExprFuncSimple* funcsimple = funcs[offset()];
             if (funcsimple) funcsimple->eval(args);

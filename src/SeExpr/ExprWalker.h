@@ -35,7 +35,7 @@ class Examiner {
     typedef typename ADD_CONST<ExprNode, constnode>::TYPE T_NODE;
 
     virtual bool examine(T_NODE* examinee) = 0;
-    virtual void post(T_NODE* examinee){};  // TODO: make this pure virt
+    virtual void post(T_NODE*){};  // TODO: make this pure virt
     virtual void reset() = 0;
 };
 

@@ -74,14 +74,14 @@ class ListVarExpr : public Expression {
     ConstWalker walker;
 
     //! resolve function that only supports one external variable 'x'
-    ExprVarRef* resolveVar(const std::string& name) const { return 0; };
+    ExprVarRef* resolveVar(const std::string&) const { return 0; };
 };
 
 void quit(const std::string& str) {
     if (str == "quit" || str == "q") exit(0);
 };
 
-int main(int argc, char* argv[]) {
+int main() {
     ListVarExpr expr;
     std::string str;
 

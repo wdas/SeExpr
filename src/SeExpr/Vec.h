@@ -100,28 +100,28 @@ class Vec {
     template <class T2>
     static Vec<T, d, false> copy(
         T2* raw,
-        INVALID_WITH_VECTOR_REFERENCE u = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
+        INVALID_WITH_VECTOR_REFERENCE = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
         Vec<T, d, false> ret;
         for (int k = 0; k < d; k++) ret[k] = static_cast<T>(raw[k]);
         return ret;
     }
 
     //! Initialize vector to be reference to plain raw data
-    explicit Vec(T* raw, INVALID_WITH_VECTOR_VALUE u = (typename my_enable_if<ref, INVALID_WITH_VECTOR_VALUE>::TYPE()))
+    explicit Vec(T* raw, INVALID_WITH_VECTOR_VALUE = (typename my_enable_if<ref, INVALID_WITH_VECTOR_VALUE>::TYPE()))
         : x(raw) {}
 
     //! Empty constructor (this is invalid for a reference type)
-    Vec(INVALID_WITH_VECTOR_REFERENCE u = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {}
+    Vec(INVALID_WITH_VECTOR_REFERENCE = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {}
 
     //! Convenience constant vector initialization (valid for any d)
-    Vec(T v0, INVALID_WITH_VECTOR_REFERENCE u = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
+    Vec(T v0, INVALID_WITH_VECTOR_REFERENCE = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
         for (int k = 0; k < d; k++) x[k] = v0;
     }
 
     //! Convenience 2 vector initialization (only for d==2)
     Vec(T v1,
         T v2,
-        INVALID_WITH_VECTOR_REFERENCE u = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
+        INVALID_WITH_VECTOR_REFERENCE = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
         typename seexpr_static_assert<d == 2, INVALID_WITH_DIMENSION>::TYPE();
         x[0] = v1;
         x[1] = v2;
@@ -131,7 +131,7 @@ class Vec {
     Vec(T v1,
         T v2,
         T v3,
-        INVALID_WITH_VECTOR_REFERENCE u = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
+        INVALID_WITH_VECTOR_REFERENCE = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
         typename seexpr_static_assert<d == 3, INVALID_WITH_DIMENSION>::TYPE();
         x[0] = v1;
         x[1] = v2;
@@ -143,7 +143,7 @@ class Vec {
         T v2,
         T v3,
         T v4,
-        INVALID_WITH_VECTOR_REFERENCE u = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
+        INVALID_WITH_VECTOR_REFERENCE = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
         typename seexpr_static_assert<d == 4, INVALID_WITH_DIMENSION>::TYPE();
         x[0] = v1;
         x[1] = v2;
@@ -159,7 +159,7 @@ class Vec {
     //! Copy construct. Only valid if we are not going to be reference data!
     template <class T2, bool refother>
     Vec(const Vec<T2, d, refother>& other,
-        INVALID_WITH_VECTOR_REFERENCE u =
+        INVALID_WITH_VECTOR_REFERENCE =
             (typename my_enable_if<!ref && refother != ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
         *this = other;
     }

@@ -52,14 +52,14 @@ class RandFuncX : public ExprFuncSimple {
         std::string format;
     };
 
-    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const {
+    virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const {
         bool valid = true;
         for (int i = 0; i < node->numChildren(); i++)
             valid &= node->checkArg(i, ExprType().FP(1).Varying(), envBuilder);
         return valid ? ExprType().FP(1).Varying() : ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const { return new Data; }
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const { return new Data; }
 
     virtual void eval(ArgHandle args) {
         if (args.nargs() >= 2) {
@@ -84,7 +84,7 @@ class MapFunc : public ExprFuncSimple {
     MapFunc() : ExprFuncSimple(true) {}  // Thread Safe
     virtual ~MapFunc() {}
 
-    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const {
+    virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const {
         bool valid = true;
         valid &= node->checkArg(0, ExprType().String().Constant(), envBuilder);
         for (int i = 1; i < node->numChildren(); i++)
@@ -92,7 +92,7 @@ class MapFunc : public ExprFuncSimple {
         return valid ? ExprType().FP(3).Varying() : ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const { return new Data; }
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const { return new Data; }
 
     virtual void eval(ArgHandle args) {
         double* out = &args.outFp;
@@ -110,7 +110,7 @@ class MapFunc : public ExprFuncSimple {
 // triplanar(string name, [vector scale], [float blend], [vector rotation],
 //           [vector translation])
 class TriplanarFuncX : public ExprFuncSimple {
-    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const {
+    virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const {
         bool valid = true;
         valid &= node->checkArg(0, ExprType().String().Constant(), envBuilder);
         for (int i = 1; i < node->numChildren(); i++)
@@ -118,7 +118,7 @@ class TriplanarFuncX : public ExprFuncSimple {
         return valid ? ExprType().FP(3).Varying() : ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const { return nullptr; }
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const { return nullptr; }
 
     virtual void eval(ArgHandle args) {
         double* out = &args.outFp;
@@ -157,7 +157,7 @@ class ImageSynthExpr : public Expression {
         double val;  // independent variable
         void eval(double* result) { result[0] = val; }
 
-        void eval(const char** result) { assert(false); }
+        void eval(const char**) { assert(false); }
     };
 
     struct VecVar : public ExprVarRef {
@@ -169,7 +169,7 @@ class ImageSynthExpr : public Expression {
             for (int k = 0; k < 3; k++) result[k] = val[k];
         }
 
-        void eval(const char** reuslt) {}
+        void eval(const char**) {}
     };
 
     //! variable map
@@ -301,11 +301,11 @@ bool TestImage::writePNGImage(const char* imageFile) {
         int color_type = PNG_COLOR_TYPE_RGBA;
         png_set_IHDR(png_ptr, info_ptr, _width, _height, 8, color_type, PNG_INTERLACE_NONE,
                      PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
-        const unsigned char* ptrs[_height];
+        png_byte** ptrs = new png_byte*[_height];
         for (int i = 0; i < _height; i++) {
             ptrs[i] = &_image[_width * i * 4];
         }
-        png_set_rows(png_ptr, info_ptr, (png_byte**)ptrs);
+        png_set_rows(png_ptr, info_ptr, ptrs);
         png_write_png(png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, 0);
 
         fclose(fp);
@@ -459,7 +459,7 @@ TEST(perf, noexpr) {
     typedef Vec<double, 3, false> VecT;
     float prept = prepareTime.elapsedTime();
 
-    auto func = [](double u, double v, const VecT& P, const VecT& Cs, const VecT& Ci, double faceId, VecT& result) {
+    auto func = [](double u, double v, const VecT&, const VecT&, const VecT&, double, VecT& result) {
         VecT foo(u * u + v * v), bar = foo * foo;
         bar += VecT(u * v);
         result = bar;

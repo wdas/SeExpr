@@ -90,7 +90,7 @@ class CalculatorExpr : public Expression {
             for (int k = 0; k < 3; k++) result[k] = val[k];
         }
 
-        void eval(const char** result) {}
+        void eval(const char**) {}
     };
 
     //! previous computations
@@ -111,7 +111,7 @@ class CalculatorExpr : public Expression {
     };
 };
 
-int main(int argc, char* argv[]) {
+int main() {
     std::cout << "SeExpr Basic Calculator";
 
     CalculatorExpr expr;
