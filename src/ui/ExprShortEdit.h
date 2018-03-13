@@ -49,6 +49,7 @@ class ExprShortEdit : public QWidget {
     QTimer* controlRebuildTimer;
     QToolButton* editDetail;
     ExprControlCollection* controls;
+    bool _expanded;
     ExprDialog* _dialog;
     QVBoxLayout* vboxlayout;
     QHBoxLayout* hboxlayout;
