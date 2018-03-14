@@ -101,7 +101,7 @@ class ExprFuncSimple : public ExprFuncX {
 
         double& outFp;
         char*& outStr;
-        ExprFuncNode::Data* data;
+        const ExprFuncNode::Data* data;
         const char* varBlock;
 
       private:

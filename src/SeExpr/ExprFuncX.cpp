@@ -143,7 +143,7 @@ void SeExpr2LLVMEvalCustomFunction(const int* opDataArg,
     SeExpr2::ExprFuncSimple::ArgHandle handle(opDataArg, fpArg, strArg, callStack, (const char*)varBlockData);
     if (!*funcdata) {
         handle.data = funcSimple->evalConstant(node, handle); // TODO: this probably leaks memory
-        *funcdata = reinterpret_cast<void*>(handle.data);
+        *funcdata = const_cast<void*>(reinterpret_cast<const void*>(handle.data));
     } else {
         handle.data = reinterpret_cast<SeExpr2::ExprFuncNode::Data*>(*funcdata);
     }
