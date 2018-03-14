@@ -125,7 +125,6 @@ class ExprFuncSimple : public ExprFuncX {
 
   private:
     static int EvalOp(const int* opData, double* fp, char** c, std::vector<int>& callStack);
-    static int EvalClosureOp(const int* opData, double* fp, char** c, std::vector<int>& callStack);
 };
 
 template <typename FunctionCodeStorage>
