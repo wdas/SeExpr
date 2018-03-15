@@ -31,7 +31,7 @@ int ExprFuncSimple::EvalOp(const int* opData, double* fp, char** c, std::vector<
     ArgHandle args(opData, fp, c, callStack, c[0]);
 
     if (!args.data) {
-        args.data = simple->evalConstant(node, args); // TODO: this probably leaks memory
+        args.data = simple->evalConstant(node, args);  // TODO: this probably leaks memory
     }
 
     simple->eval(args);
@@ -142,7 +142,7 @@ void SeExpr2LLVMEvalCustomFunction(const int* opDataArg,
     std::vector<int> callStack;
     SeExpr2::ExprFuncSimple::ArgHandle handle(opDataArg, fpArg, strArg, callStack, (const char*)varBlockData);
     if (!*funcdata) {
-        handle.data = funcSimple->evalConstant(node, handle); // TODO: this probably leaks memory
+        handle.data = funcSimple->evalConstant(node, handle);  // TODO: this probably leaks memory
         *funcdata = const_cast<void*>(reinterpret_cast<const void*>(handle.data));
     } else {
         handle.data = reinterpret_cast<SeExpr2::ExprFuncNode::Data*>(*funcdata);

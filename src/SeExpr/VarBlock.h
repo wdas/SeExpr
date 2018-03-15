@@ -83,8 +83,8 @@ class SymbolTable : public VarBlock {
     explicit SymbolTable(VarBlock&& block) : VarBlock(std::move(block)) {}
 
     SymbolTable(SymbolTable&& other)
-        : _allocations(std::move(other._allocations))
-        , _function_code_segments(std::move(other._function_code_segments)) {}
+        : _allocations(std::move(other._allocations)),
+          _function_code_segments(std::move(other._function_code_segments)) {}
 
     SymbolTable& operator=(SymbolTable&& other) {
         _allocations = std::move(other._allocations);
@@ -169,10 +169,8 @@ class VarBlockCreator {
         FuncSymbol& operator=(const FuncSymbol&) = delete;
 
         FuncSymbol(FuncSymbol&& other)
-            : ExprFuncSimple(true)
-            , _decl(std::move(other._decl))
-            , _offset(std::move(other._offset))
-            , _func(*this, other._func.minArgs(), other._func.maxArgs()) {
+            : ExprFuncSimple(true), _decl(std::move(other._decl)), _offset(std::move(other._offset)),
+              _func(*this, other._func.minArgs(), other._func.maxArgs()) {
             assert(_decl.types.size() && "FuncSymbol missing type information");
         }
 
