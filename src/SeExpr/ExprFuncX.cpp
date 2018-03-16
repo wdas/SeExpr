@@ -29,21 +29,9 @@ int ExprFuncSimple::EvalOp(const int* opData, double* fp, char** c, std::vector<
     ExprFuncSimple* simple =
         const_cast<ExprFuncSimple*>(reinterpret_cast<const ExprFuncSimple*>(node->func()->funcx()));
     ArgHandle args(opData, fp, c, callStack, c[0]);
-    simple->eval(args);
-    return 1;
-}
-
-int ExprFuncSimple::EvalClosureOp(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
-    const ExprFuncNode* node = reinterpret_cast<const ExprFuncNode*>(c[opData[0]]);
-
-    ExprFuncX** funcs = (ExprFuncX**)c[0];
-    const auto* funcSymbol = static_cast<const VarBlockCreator::FuncSymbol*>(node->func()->funcx());
-    int offset = funcSymbol->offset();
-    ExprFuncSimple* simple = reinterpret_cast<ExprFuncSimple*>(funcs[offset]);
-    ArgHandle args(opData, fp, c, callStack, c[0]);
 
     if (!args.data) {
-        args.data = simple->evalConstant(node, args);
+        args.data = simple->evalConstant(node, args);  // TODO: this probably leaks memory
     }
 
     simple->eval(args);
@@ -79,13 +67,7 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node, Interpreter* inte
         assert(false);
 
     int ptrDataLoc = interpreter->allocPtr();
-    const auto* funcSymbol = dynamic_cast<const VarBlockCreator::FuncSymbol*>(node->func()->funcx());
-    bool isLateBoundClosure = (bool)funcSymbol;
-    if (isLateBoundClosure) {
-        interpreter->addOp(EvalClosureOp);
-    } else {
-        interpreter->addOp(EvalOp);
-    }
+    interpreter->addOp(EvalOp);
     int ptrLoc = interpreter->allocPtr();
     interpreter->state.s[ptrLoc] = const_cast<char*>(reinterpret_cast<const char*>(node));
     interpreter->addOperand(ptrLoc);
@@ -96,14 +78,6 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node, Interpreter* inte
         interpreter->addOperand(operands[c]);
     }
     interpreter->endOp(false);  // do not eval because the function may not be evaluatable!
-
-    // call into interpreter eval
-    int pc = interpreter->nextPC() - 1;
-    int* opCurr = (&interpreter->opData[0]) + interpreter->ops[pc].second;
-
-    ArgHandle args(opCurr, &interpreter->state.d[0], &interpreter->state.s[0], interpreter->state.callStack, nullptr);
-    if (!isLateBoundClosure) interpreter->state.s[ptrDataLoc] = reinterpret_cast<char*>(evalConstant(node, args));
-
     return outoperand;
 }
 
@@ -168,8 +142,8 @@ void SeExpr2LLVMEvalCustomFunction(const int* opDataArg,
     std::vector<int> callStack;
     SeExpr2::ExprFuncSimple::ArgHandle handle(opDataArg, fpArg, strArg, callStack, (const char*)varBlockData);
     if (!*funcdata) {
-        handle.data = funcSimple->evalConstant(node, handle);
-        *funcdata = reinterpret_cast<void*>(handle.data);
+        handle.data = funcSimple->evalConstant(node, handle);  // TODO: this probably leaks memory
+        *funcdata = const_cast<void*>(reinterpret_cast<const void*>(handle.data));
     } else {
         handle.data = reinterpret_cast<SeExpr2::ExprFuncNode::Data*>(*funcdata);
     }

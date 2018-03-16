@@ -17,10 +17,10 @@
 #ifndef VarBlock_h
 #define VarBlock_h
 
-#include <deque>
 #include <functional>
 #include <sstream>
 #include <vector>
+#include <unordered_map>
 
 #include "Expression.h"
 #include "ExprType.h"
@@ -82,8 +82,20 @@ class SymbolTable : public VarBlock {
   public:
     explicit SymbolTable(VarBlock&& block) : VarBlock(std::move(block)) {}
 
+    SymbolTable(SymbolTable&& other)
+        : _allocations(std::move(other._allocations)),
+          _function_code_segments(std::move(other._function_code_segments)) {}
+
+    SymbolTable& operator=(SymbolTable&& other) {
+        _allocations = std::move(other._allocations);
+        _function_code_segments = std::move(other._function_code_segments);
+    }
+
+    SymbolTable(const SymbolTable&) = delete;
+    SymbolTable& operator=(const SymbolTable&) = delete;
+
     virtual ~SymbolTable() {
-        for (void* a : _allocations) free(a);
+        for (auto pair : _allocations) free(pair.second);
     }
 
     // Set code segment for some Function declared in the VarBlockCreator
@@ -100,25 +112,28 @@ class SymbolTable : public VarBlock {
 
     // dumb helper for integrations in apps that couldn't be bothered to have clean ownership of
     // their own variables with a guaranteed lifetime
-    double& Scalar(uint32_t offset) { return *(double*)alloc(offset, sizeof(double)); }
+    double& Scalar(uint32_t offset) { return *alloc(offset, sizeof(double)); }
 
     // dumb helper for integrations in apps that couldn't be bothered to have clean ownership of
     // their own variables with a guaranteed lifetime
     template <int d>
     Vec<double, d, true> Vector(uint32_t offset) {
-        return Vec<double, d, true>((double*)alloc(offset, d * sizeof(double)));
+        return Vec<double, d, true>(alloc(offset, d * sizeof(double)));
     }
 
   private:
     // TODO: small object optimization
-    void* alloc(uint32_t offset, size_t bytes) {
-        void* ptr = malloc(bytes);
-        _allocations.push_back(ptr);
-        Pointer(offset) = (double*)ptr;
+    double* alloc(uint32_t offset, size_t bytes) {
+        auto iter = _allocations.find(offset);
+        if (iter != _allocations.end()) return iter->second;
+
+        double* ptr = (double*)malloc(bytes);
+        _allocations[offset] = ptr;
+        Pointer(offset) = ptr;
         return ptr;
     }
 
-    std::deque<void*> _allocations;
+    std::unordered_map<uint32_t, double*> _allocations;
     std::vector<std::unique_ptr<SeExpr2::ExprFuncX>> _function_code_segments;
 };
 
@@ -162,13 +177,22 @@ class VarBlockCreator {
         inline uint32_t offset() const { return _offset; }
         inline ExprFunc& func() const { return _func; }
 
+        inline ExprFuncDeclaration& signature() { return _decl; }
+        inline const ExprFuncDeclaration& signature() const { return _decl; }
+
         virtual ExprType type() const override { return _type; }
         virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& env) const override {
             assert(_decl.types.size() && "FuncSymbol missing type information");
             return ExprFuncSimple::genericPrep(node, scalarWanted, env, _decl);
         }
 
-        virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const override { return nullptr; }
+        virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const override {
+            assert(args.varBlock);
+            ExprFuncSimple** funcs = reinterpret_cast<ExprFuncSimple**>(const_cast<char*>(args.varBlock));
+            assert(funcs);
+            ExprFuncSimple* funcsimple = funcs[offset()];
+            return funcsimple ? funcsimple->evalConstant(node, args) : nullptr;
+        }
 
         virtual void eval(ArgHandle args) override {
             assert(args.varBlock);
@@ -226,6 +250,22 @@ class VarBlockCreator {
         auto it = _funcs.find(name);
         if (it != _funcs.end()) return &it->second.func();
         return nullptr;
+    }
+
+    void dump() const {
+        for (const auto& pair : _vars) {
+            printf("[%4d] %s :: ", pair.second.offset(), pair.first.c_str());
+            std::cout << pair.second.type().toString() << std::endl;
+        }
+        for (const auto& pair : _funcs) {
+            printf("[%4d] %s() :: ", pair.second.offset(), pair.first.c_str());
+            const ExprFuncDeclaration& signature = pair.second.signature();
+            for (size_t i = 0; i < signature.types.size(); ++i) {
+                if (i > 0) std::cout << " -> ";
+                std::cout << signature.types[i].toString();
+            }
+            std::cout << std::endl;
+        }
     }
 
   private:

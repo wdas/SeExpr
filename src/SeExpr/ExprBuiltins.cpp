@@ -1020,17 +1020,17 @@ class CachedVoronoiFunc : public ExprFuncSimple {
         return valid ? ExprType().FP(3).Varying() : ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const { return new VoronoiPointData(); }
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const { return nullptr; }
 
     virtual void eval(ArgHandle args) {
-        VoronoiPointData* data = static_cast<VoronoiPointData*>(args.data);
+        VoronoiPointData data;
         int nargs = args.nargs();
         Vec3d* sevArgs = (Vec3d*)alloca(sizeof(Vec3d) * nargs);
 
         for (int i = 0; i < nargs; i++)
             for (int j = 0; j < 3; j++) sevArgs[i][j] = args.inFp<3>(i)[j];
 
-        Vec3d result = _vfunc(*data, nargs, sevArgs);
+        Vec3d result = _vfunc(data, nargs, sevArgs);
         double* out = &args.outFp;
         for (int i = 0; i < 3; i++) out[i] = result[i];
     }
@@ -1362,7 +1362,7 @@ class CurveFuncX : public ExprFuncSimple {
     }
 
     virtual void eval(ArgHandle args) {
-        CurveData<double>* data = static_cast<CurveData<double>*>(args.data);
+        const CurveData<double>* data = static_cast<const CurveData<double>*>(args.data);
         double param = args.inFp<1>(0)[0];
         args.outFp = data->curve.getValue(param);
     }
@@ -1412,7 +1412,7 @@ class CCurveFuncX : public ExprFuncSimple {
     }
 
     virtual void eval(ArgHandle args) {
-        CurveData<Vec3d>* data = static_cast<CurveData<Vec3d>*>(args.data);
+        const CurveData<Vec3d>* data = static_cast<const CurveData<Vec3d>*>(args.data);
         double param = args.inFp<1>(0)[0];
         Vec3d result = data->curve.getValue(param);
         double* out = &args.outFp;
@@ -1470,7 +1470,7 @@ class GetVar : public ExprFuncSimple {
     };
 
     virtual void eval(ArgHandle args) {
-        Data* data = static_cast<Data*>(args.data);
+        const Data* data = static_cast<const Data*>(args.data);
         assert(data);
         double* out = &args.outFp;
         if (data->f)
@@ -1559,7 +1559,7 @@ class PrintFuncX : public ExprFuncSimple {
     }
 
     virtual void eval(ArgHandle args) {
-        Data* data = (Data*)args.data;
+        const Data* data = (const Data*)args.data;
         int item = 1;
         for (unsigned int i = 0; i < data->ranges.size(); i++) {
             const std::pair<int, int>& range = data->ranges[i];
