@@ -17,18 +17,20 @@
 #ifndef Expression_h
 #define Expression_h
 
-#include <string>
-#include <map>
-#include <set>
-#include <mutex>
-#include <vector>
-#include <iomanip>
 #include <stdint.h>
-#include "ExprConfig.h"
-#include "Vec.h"
+
+#include <iomanip>
+#include <map>
+#include <mutex>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "Context.h"
 #include "Evaluator.h"
 #include "ExprEnv.h"
+#include "ExprConfig.h"
+#include "Vec.h"
 
 namespace llvm {
 class ExecutionEngine;
