@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <iomanip>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <set>
 #include <string>
@@ -253,8 +254,6 @@ class Expression {
     /** Computed return type. */
     mutable ExprType _desiredReturnType;
 
-    /** Variable environment */
-    mutable ExprVarEnvBuilder _envBuilder;
     /** Parse tree (null if syntax is bad). */
     mutable std::unique_ptr<ExprNode> _parseTree;
 

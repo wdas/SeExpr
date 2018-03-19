@@ -127,7 +127,6 @@ void Expression::reset() {
     _funcs.clear();
     //_localVars.clear();
     _errors.clear();
-    _envBuilder.reset();
     _threadUnsafeFunctionCalls.clear();
     _comments.clear();
 }
@@ -198,11 +197,12 @@ void Expression::prep() const {
 
     bool error = false;
     Evaluator* evaluator = nullptr;
+    ExprVarEnvBuilder envBuilder;
 
     if (!_parseTree) {
         // parse error
         error = true;
-    } else if (!_parseTree->prep(_desiredReturnType.isFP(1), _envBuilder).isValid()) {
+    } else if (!_parseTree->prep(_desiredReturnType.isFP(1), envBuilder).isValid()) {
         // prep error
         error = true;
     } else if (!ExprType::valuesCompatible(_parseTree->type(), _desiredReturnType)) {
