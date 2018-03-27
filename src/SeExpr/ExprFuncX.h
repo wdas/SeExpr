@@ -79,11 +79,12 @@ class ExprFuncSimple : public ExprFuncX {
     class ArgHandle {
       public:
         ArgHandle(const int* opData, double* fp, char** c, std::vector<int>& /*callStack*/, const char* v)
-            : outFp(fp[opData[2]]), outStr(c[opData[2]]), data(reinterpret_cast<ExprFuncNode::Data*>(c[opData[1]])),
-              varBlock(v), _nargs((int)fp[opData[3]])  // TODO: put the value in opData rather than fp
-              ,
-              opData(opData + 4)  // TODO: would be good not to have to convert to int!
-              ,
+            : outFp(fp[opData[2]]),
+              outStr(c[opData[2]]),
+              data(reinterpret_cast<ExprFuncNode::Data*>(c[opData[1]])),
+              varBlock(v),
+              _nargs((int)fp[opData[3]]),  // TODO: put the value in opData rather than fp
+              opData(opData + 4),          // TODO: would be good not to have to convert to int!
               fp(fp), c(c) {}
 
         template <int d>
