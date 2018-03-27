@@ -57,6 +57,7 @@ static const char* stop_xpm[] = {"16 16 4 1",        "       c None",    ".     
 ExprShortEdit::ExprShortEdit(QWidget* parent, bool expanded, bool applyOnSelect)
     : QWidget(parent), _dialog(0), _context(""), _searchPath(""), _applyOnSelect(applyOnSelect) {
     controlRebuildTimer = new QTimer(this);
+    _expanded = false;
 
     vboxlayout = new QVBoxLayout();
     vboxlayout->setSpacing(2);
@@ -73,10 +74,7 @@ ExprShortEdit::ExprShortEdit(QWidget* parent, bool expanded, bool applyOnSelect)
     expandButton = new QToolButton();
     expandButton->setFixedSize(20, 20);
     expandButton->setFocusPolicy(Qt::NoFocus);
-    if (expanded)
-        expandButton->setArrowType(Qt::DownArrow);
-    else
-        expandButton->setArrowType(Qt::RightArrow);
+    expandButton->setArrowType(Qt::RightArrow);
     connect(expandButton, SIGNAL(clicked()), SLOT(expandPressed()));
 
     QToolButton* button = new QToolButton();
@@ -93,11 +91,13 @@ ExprShortEdit::ExprShortEdit(QWidget* parent, bool expanded, bool applyOnSelect)
 
     vboxlayout->addLayout(hboxlayout);
 
-    controls = 0;
-    if (expanded) expandPressed();
+    controls = 0;    
 
     setLayout(vboxlayout);
     connect(controlRebuildTimer, SIGNAL(timeout()), SLOT(rebuildControls()));
+    checkErrors();
+    rebuildControls();
+    if (expanded) expandPressed();
 }
 
 ExprShortEdit::~ExprShortEdit() {}
@@ -133,34 +133,49 @@ void ExprShortEdit::expressionApplied() { setExpressionString(_dialog->getExpres
 void ExprShortEdit::dialogClosed() { setEnabled(true); }
 
 void ExprShortEdit::rebuildControls() {
-    if (controls) {
-        bool wasShown = !edit->completer->popup()->isHidden();
-        bool newVariables = controls->rebuildControls(getExpression(), edit->completionModel->local_variables);
-        if (controls->numControls() == 0) {
-            controls->deleteLater();
-            controls = 0;
-            expandButton->setArrowType(Qt::RightArrow);
-        } else
-            vboxlayout->addWidget(controls);
-
-        if (newVariables) edit->completer->setModel(edit->completionModel);
-        if (wasShown) edit->completer->popup()->show();
+    if (!controls){
+      controls = new ExprControlCollection(0, false);
+      connect(controls, SIGNAL(controlChanged(int)), SLOT(controlChanged(int)));
     }
-}
-
-void ExprShortEdit::expandPressed() {
-    if (controls) {
-        // vboxlayout->removeWidget(controls);
+    bool wasShown = !edit->completer->popup()->isHidden();
+    bool newVariables = controls->rebuildControls(getExpression(), edit->completionModel->local_variables);
+    if (controls->numControls() == 0) {
         controls->deleteLater();
         controls = 0;
         expandButton->setArrowType(Qt::RightArrow);
+        expandButton->setVisible(false);
+        _expanded = false;
     } else {
-        controls = new ExprControlCollection(0, false);
-        // vboxlayout->addWidget(controls);
-        connect(controls, SIGNAL(controlChanged(int)), SLOT(controlChanged(int)));
-        controlRebuildTimer->setSingleShot(true);
-        controlRebuildTimer->start(0);
+        vboxlayout->addWidget(controls);
+        expandButton->setVisible(true);
+        if (_expanded){
+          controls->setVisible(true);
+          expandButton->setArrowType(Qt::DownArrow);
+        } else {
+          controls->setVisible(false);
+          expandButton->setArrowType(Qt::RightArrow);
+        }
+    }
+    if (newVariables) edit->completer->setModel(edit->completionModel);
+    if (wasShown) edit->completer->popup()->show();
+}
+
+void ExprShortEdit::expandPressed() {
+    if (_expanded){
+        _expanded = false;
+        expandButton->setArrowType(Qt::RightArrow);
+        if (controls) {
+          controls->setVisible(false);
+        }
+    } else {
+      if (controls) {
+        controls->setVisible(true);
         expandButton->setArrowType(Qt::DownArrow);
+        _expanded = true;
+      } else {        
+        _expanded = false;
+        expandButton->setArrowType(Qt::RightArrow);
+      }
     }
 }
 
