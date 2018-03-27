@@ -39,6 +39,7 @@
 namespace SeExpr2 {
 class ExprFunc;
 class ExprFuncX;
+class ExprFuncSimple;
 
 /** Expression node base class.  Always constructed by parser in ExprParser.y
    Parse tree nodes - this is where the expression evaluation happens.
@@ -512,11 +513,10 @@ class ExprStrNode : public ExprNode {
 class ExprFuncNode : public ExprNode {
   public:
     ExprFuncNode(const Expression* expr, const char* name)
-        : ExprNode(expr), _name(name), _func(0), _localFunc(0), _data(0) {
+        : ExprNode(expr), _name(name), _func(0), _localFunc(0), _data(nullptr) {
         expr->addFunc(name);
     }
-    virtual ~ExprFuncNode() { /* TODO: fix delete _data;*/
-    }
+    virtual ~ExprFuncNode() {}
 
     virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
@@ -571,16 +571,16 @@ class ExprFuncNode : public ExprNode {
         sorted lists for binary searches in curve evaluation, etc. This should be done
         in ExprFuncX::prep().
     */
-    void setData(Data* data) const { _data = data; }
 
     //! get associated blind data (returns 0 if none)
     /***
         Use this to get data associated in the prep() routine. This is typically
         used from ExprFuncX::eval()
     */
-    Data* getData() const { return _data; }
     int promote(int i) const { return _promote[i]; }
     const ExprFunc* func() const { return _func; }
+
+    const Data* getOrComputeData(ExprFuncSimple* f, void* args) const;
 
   private:
     std::string _name;
@@ -590,7 +590,8 @@ class ExprFuncNode : public ExprNode {
                                               //    mutable std::vector<double> _scalarArgs;
                                               //    mutable std::vector<Vec3d> _vecArgs;
     mutable std::vector<int> _promote;
-    mutable Data* _data;
+    mutable std::mutex _data_mutex;
+    mutable std::unique_ptr<const Data> _data;
 };
 
 /// Policy which provides all the AST Types for the parser.
