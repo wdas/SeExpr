@@ -229,6 +229,7 @@ void Expression::prep() const {
 
     if (error) {
         if (evaluator) delete evaluator;
+        evaluator = nullptr;
         _returnType = ExprType().Error();
 
         // build line lookup table
