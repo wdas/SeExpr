@@ -18,10 +18,10 @@
 #include <vector>
 #include <iostream>
 #include <cmath>
-#include <ExprNode.h>
-#include <ExprWalker.h>
-#include <Expression.h>
 #include <typeinfo>
+#include <SeExpr2/ExprNode.h>
+#include <SeExpr2/ExprWalker.h>
+#include <SeExpr2/Expression.h>
 using namespace SeExpr2;
 
 class Expr : public Expression {

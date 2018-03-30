@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 # Copyright Disney Enterprises, Inc.  All rights reserved.
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,8 +19,11 @@ import sys
 import subprocess
 import re
 
-seexpr1=os.environ["RP_SeExpr"]
-seexpr2=os.environ["RP_seexpr2"]
+seexpr1=os.environ.get("RP_SeExpr")
+seexpr2=os.environ.get("RP_seexpr2")
+if not seexpr1 or not seexpr2:
+    print('%s: test versions not present, skipping tests' % sys.argv[0])
+    sys.exit(0)
 
 versionKeys="v1","v2-interp","v2-llvm"
 versions={"v2-llvm": "SE_EXPR_EVAL=LLVM "+os.path.join(seexpr2,"share","test","SeExpr2","testmain2"),

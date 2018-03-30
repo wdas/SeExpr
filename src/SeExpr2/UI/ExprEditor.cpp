@@ -44,10 +44,10 @@
 #include <QAction>
 #include <QMenu>
 
-#include <SeExpr2/Expression.h>
-#include <SeExpr2/ExprNode.h>
-#include <SeExpr2/ExprFunc.h>
-#include <SeExpr2/ExprBuiltins.h>
+#include "../Expression.h"
+#include "../ExprNode.h"
+#include "../ExprFunc.h"
+#include "../ExprBuiltins.h"
 
 #include "ExprEditor.h"
 #include "ExprHighlighter.h"

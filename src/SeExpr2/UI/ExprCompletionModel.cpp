@@ -19,7 +19,7 @@
 * @author  aselle
 */
 #include <QLineEdit>
-#include <Expression.h>
+#include <SeExpr2/Expression.h>
 #include <SeExpr2/ExprFunc.h>
 #include "ExprCompletionModel.h"
 

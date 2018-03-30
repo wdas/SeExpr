@@ -18,9 +18,11 @@ cmake_minimum_required(VERSION 2.4.6)
 
 ## project name & version
 project(SeExpr2)
-set(${PROJECT_NAME}_MAJOR_VERSION 0)
-set(${PROJECT_NAME}_MINOR_VERSION 1)
-set(${PROJECT_NAME}_PATCH_LEVEL 0)
+
+# "API" version
+set(${PROJECT_NAME}_VERSION "2.0")
+set(${PROJECT_NAME}_MAJOR_VERSION 2)
+set(${PROJECT_NAME}_MINOR_VERSION 0)
 
 enable_testing()
 
@@ -40,6 +42,8 @@ endif()
 
 # macros
 include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+include(GenerateExportHeader)
 include(src/build/macros.cmake)
 
 # Default installation prefix
@@ -69,6 +73,11 @@ endif()
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "CMAKE_INSTALL_LIBDIR = ${CMAKE_INSTALL_LIBDIR}")
 
+## Install locations
+set(DOC_DIR "share/doc/${PROJECT_NAME}")
+set(CMAKE_DIR "share/cmake/${PROJECT_NAME}")
+set(INCLUDE_DIR "include/${PROJECT_NAME}")
+
 # Configuration options
 # TODO: find GTEST and boost and python the proper ways
 set(BOOST_DIR /usr CACHE PATH "where boost is located")
@@ -80,9 +89,10 @@ else()
     find_library(BOOST_PYTHON3_LIB NAMES "boost_python3" "boost_python3${PYTHON_VERSION_MINOR}")
     SET (BOOST_PYTHON_LIBNAME ${BOOST_PYTHON3_LIB} CACHE STRING "what library name for boost python")
 endif()
-set(GTEST_DIR /usr CACHE PATH "Where to find GTEST") # /usr/include/gtest)
-set(ENABLE_LLVM_BACKEND ON CACHE BOOL "Whether to build with LLVM backend")
-set(USE_PYTHON ON CACHE BOOL "Whether to compile python libraries")
+
+set(GTEST_DIR "" CACHE STRING "Where to find GTEST")
+option(ENABLE_LLVM_BACKEND "Whether to build with LLVM backend" ON)
+option(USE_PYTHON "Whether to compile python libraries" ON)
 
 set(LLVM_LIB "")
 if (ENABLE_LLVM_BACKEND)
@@ -155,7 +165,6 @@ endif()
 
 ## Setup platform specific helper defines build variants
 if (WIN32)
-    include (GenerateExportHeader)
     add_definitions(-DSEEXPR_WIN32)
 else()
     add_definitions(-Wall -Wextra -Wno-unused-parameter)
@@ -225,9 +234,6 @@ if (DEFINED QDGUI_DIR)
     link_directories(${QDGUI_DIR}/${CMAKE_INSTALL_LIBDIR})
 endif()
 
-## Install location for html documentation
-set(SEEXPR_HTML_DOC_PATH "share/doc/SeExpr2")
-
 ## Make modules able to see seexpr library
 # Setup environment variable to link seexpr
 set(SEEXPR_LIBRARIES SeExpr2)
@@ -235,16 +241,29 @@ set(SEEXPR_LLVM_LIBRARIES SeExpr2LLVM)
 set(SEEXPR_EDITOR_LIBRARIES SeExpr2Editor)
 
 # make it so seexpr can be found
-include_directories(BEFORE ${CMAKE_BINARY_DIR}/include)
-include_directories(BEFORE ${CMAKE_BINARY_DIR}/src/SeExpr)
-include_directories(BEFORE ${CMAKE_SOURCE_DIR}/src/SeExpr)
-include_directories(BEFORE ${CMAKE_SOURCE_DIR}/src/ui)
+include_directories(BEFORE ${CMAKE_SOURCE_DIR}/src)
 
 ## Traverse subdirectories
-add_subdirectory(src/SeExpr)
-add_subdirectory(src/ui)
+add_subdirectory(src/SeExpr2)
+add_subdirectory(src/SeExpr2/UI)
 add_subdirectory(src/py)
 add_subdirectory(src/utils)
 add_subdirectory(src/demos)
 add_subdirectory(src/doc)
 add_subdirectory(src/tests)
+
+# cmake packaging -- this is done after adding subdirectories so that
+# all exported targets are found by export() below.
+configure_file("src/build/seexpr2.pc.in" "seexpr2.pc" @ONLY)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/seexpr2.pc"
+    COMPONENT devel DESTINATION share/pkgconfig)
+
+write_basic_package_version_file("seexpr2-version.cmake" VERSION ${SeExpr2_VERSION} COMPATIBILITY AnyNewerVersion)
+
+configure_package_config_file(
+    "src/build/seexpr2-config.cmake" "seexpr2-config.cmake"
+    INSTALL_DESTINATION ${CMAKE_DIR}
+    PATH_VARS CMAKE_INSTALL_PREFIX CMAKE_INSTALL_LIBDIR CMAKE_INSTALL_INCLUDEDIR)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/seexpr2-config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/seexpr2-version.cmake"
+    COMPONENT devel DESTINATION ${CMAKE_DIR})

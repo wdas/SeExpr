@@ -29,7 +29,9 @@ else()
                         ${QT_INCLUDE_DIR}/QtGui)
 endif()
 
-find_package(PNG)
+if (NOT PNG_DIR)
+    find_package(PNG QUIET)
+endif()
 
 if(Qt5_FOUND OR QT4_FOUND)
 if(PNG_FOUND)
@@ -43,8 +45,6 @@ else()
 endif()
 
     add_executable(imageEditor2 ${imageEditor_CPPS} ${imageEditor_MOC_SRCS})
-    include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-    include_directories(${SEEXPR_EDITOR_INCLUDES})
 
 if (ENABLE_QT5)
     target_link_libraries(imageEditor2 Qt5::Core)
