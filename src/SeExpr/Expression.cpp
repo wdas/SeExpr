@@ -94,7 +94,7 @@ class NullEvaluator : public Evaluator {
 
     virtual void evalFP(double*, VarBlock*) const override {}
     virtual void evalStr(char*, VarBlock*) const override {}
-    virtual void evalMultiple(VarBlock*, int, size_t, size_t) const override {}
+    virtual void evalMultiple(VarBlock*, double*, size_t, size_t) const override {}
 };
 
 Expression::Expression(Expression::EvaluationStrategy evaluationStrategyHint)
@@ -265,5 +265,11 @@ bool Expression::isVec() const { return syntaxOK() ? _parseTree->isVec() : _want
 const ExprType& Expression::returnType() const {
     prep();
     return _returnType;
+}
+
+void Expression::evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) const {
+    assert(varBlock);
+    double* outputPtr = const_cast<double*&>(varBlock->Pointer(outputVarBlockOffset));
+    evaluator()->evalMultiple(varBlock, outputPtr, rangeStart, rangeEnd);
 }
 }  // end namespace SeExpr2/

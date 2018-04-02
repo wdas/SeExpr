@@ -187,9 +187,11 @@ class Expression {
     const ExprType& returnType() const;
 
     /// Evaluate multiple blocks
-    inline void evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) const {
-        evaluator()->evalMultiple(varBlock, outputVarBlockOffset, rangeStart, rangeEnd);
+    inline void evalMultiple(VarBlock* varBlock, double* outputBuffer, size_t rangeStart, size_t rangeEnd) const {
+        evaluator()->evalMultiple(varBlock, outputBuffer, rangeStart, rangeEnd);
     }
+
+    void evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) const;
 
     // Evaluates and returns float (check returnType()!)
     // Not thread-safe

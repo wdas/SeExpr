@@ -60,20 +60,20 @@ class VarBlock {
     inline size_t numSymbols() const { return _dataPtrs.size(); }
 
     /// Get a reference to the data block pointer which can be modified
-    double*& Pointer(uint32_t offset) { return reinterpret_cast<double*&>(_dataPtrs[offset]); }
-    char**& CharPointer(uint32_t offset) { return reinterpret_cast<char**&>(_dataPtrs[offset]); }
-    ExprFuncX*& Function(uint32_t offset) { return reinterpret_cast<ExprFuncX*&>(_dataPtrs[offset]); }
+    const double*& Pointer(uint32_t offset) { return reinterpret_cast<const double*&>(_dataPtrs[offset]); }
+    const char*& CharPointer(uint32_t offset) { return reinterpret_cast<const char*&>(_dataPtrs[offset]); }
+    const ExprFuncX*& Function(uint32_t offset) { return reinterpret_cast<const ExprFuncX*&>(_dataPtrs[offset]); }
 
     /// indirect index to add to pointer based data
     // i.e.  _dataPtrs[someAttributeOffset][indirectIndex]
     int indirectIndex;
 
     /// Raw data of the data block pointer (used by compiler)
-    char** data() { return _dataPtrs.data(); }
+    const char** data() { return _dataPtrs.data(); }
 
   private:
     /// This stores double* or char** ptrs
-    std::vector<char*> _dataPtrs;
+    std::vector<const char*> _dataPtrs;
 };
 
 // helper class for using VarBlocks
