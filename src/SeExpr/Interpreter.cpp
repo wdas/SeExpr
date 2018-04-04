@@ -24,7 +24,8 @@
 // TODO: optimize to write to location directly on a CondNode
 namespace SeExpr2 {
 
-bool Interpreter::prep(ExprNode* parseTree, ExprType desiredReturnType) {
+bool Interpreter::prep(ExprNode* parseTree, ExprType desiredReturnType)
+{
     if (_debugging) {
         parseTree->dump();
         std::cerr << "Eval strategy is interpreter" << std::endl;
@@ -43,11 +44,13 @@ bool Interpreter::prep(ExprNode* parseTree, ExprType desiredReturnType) {
             endOp();
         }
     }
-    if (_debugging) print();
+    if (_debugging)
+        print();
     return true;
 }
 
-void Interpreter::evalMultiple(VarBlock* varBlock, double* outputBuffer, size_t rangeStart, size_t rangeEnd) const {
+void Interpreter::evalMultiple(VarBlock* varBlock, double* outputBuffer, size_t rangeStart, size_t rangeEnd) const
+{
     // TODO: need strings to work
     for (size_t i = rangeStart; i < rangeEnd; i++) {
         varBlock->indirectIndex = i;
@@ -55,7 +58,8 @@ void Interpreter::evalMultiple(VarBlock* varBlock, double* outputBuffer, size_t 
     }
 }
 
-void Interpreter::eval(VarBlock* block, bool debug) const {
+void Interpreter::eval(VarBlock* block, bool debug) const
+{
     if (block) {
         static_assert(sizeof(char*) == sizeof(size_t), "Expect to fit size_t in char*");
         state.s[0] = reinterpret_cast<char*>(block->data());
@@ -76,12 +80,14 @@ void Interpreter::eval(VarBlock* block, bool debug) const {
     }
 }
 
-void Interpreter::print(int pc) const {
+void Interpreter::print(int pc) const
+{
     std::cerr << "---- ops     ----------------------" << std::endl;
     for (size_t i = 0; i < ops.size(); i++) {
         Dl_info info;
         const char* name = "";
-        if (dladdr((void*)ops[i].first, &info)) name = info.dli_sname;
+        if (dladdr((void*)ops[i].first, &info))
+            name = info.dli_sname;
         fprintf(stderr, "%s %s %p (", pc == (int)i ? "-->" : "   ", name, ops[i].first);
         int nextGuy = (i == ops.size() - 1 ? opData.size() : ops[i + 1].second);
         for (int k = ops[i].second; k < nextGuy; k++) {
@@ -102,7 +108,8 @@ void Interpreter::print(int pc) const {
     std::cerr << "s[1] is indirectIndex = " << reinterpret_cast<size_t>(state.s[1]) << std::endl;
     for (size_t k = 2; k < state.s.size(); k++) {
         std::cerr << "s[" << k << "]= 0x" << state.s[k];
-        if (state.s[k]) std::cerr << " '" << state.s[k][0] << state.s[k][1] << state.s[k][2] << state.s[k][3] << "...'";
+        if (state.s[k])
+            std::cerr << " '" << state.s[k][0] << state.s[k][1] << state.s[k][2] << state.s[k][3] << "...'";
         std::cerr << std::endl;
     }
 
@@ -116,25 +123,44 @@ void Interpreter::print(int pc) const {
 //! Return the function f encapsulated in class T for the dynamic i converted to a static d. (partial application of
 // template using c)
 template <char c, template <char c1, int d> class T>
-static Interpreter::OpF getTemplatizedOp2(int i) {
+static Interpreter::OpF getTemplatizedOp2(int i)
+{
     switch (i) {
-        case 1: return T<c, 1>::f;
-        case 2: return T<c, 2>::f;
-        case 3: return T<c, 3>::f;
-        case 4: return T<c, 4>::f;
-        case 5: return T<c, 5>::f;
-        case 6: return T<c, 6>::f;
-        case 7: return T<c, 7>::f;
-        case 8: return T<c, 8>::f;
-        case 9: return T<c, 9>::f;
-        case 10: return T<c, 10>::f;
-        case 11: return T<c, 11>::f;
-        case 12: return T<c, 12>::f;
-        case 13: return T<c, 13>::f;
-        case 14: return T<c, 14>::f;
-        case 15: return T<c, 15>::f;
-        case 16: return T<c, 16>::f;
-        default: assert(false && "Invalid dynamic parameter (not supported template)"); break;
+    case 1:
+        return T<c, 1>::f;
+    case 2:
+        return T<c, 2>::f;
+    case 3:
+        return T<c, 3>::f;
+    case 4:
+        return T<c, 4>::f;
+    case 5:
+        return T<c, 5>::f;
+    case 6:
+        return T<c, 6>::f;
+    case 7:
+        return T<c, 7>::f;
+    case 8:
+        return T<c, 8>::f;
+    case 9:
+        return T<c, 9>::f;
+    case 10:
+        return T<c, 10>::f;
+    case 11:
+        return T<c, 11>::f;
+    case 12:
+        return T<c, 12>::f;
+    case 13:
+        return T<c, 13>::f;
+    case 14:
+        return T<c, 14>::f;
+    case 15:
+        return T<c, 15>::f;
+    case 16:
+        return T<c, 16>::f;
+    default:
+        assert(false && "Invalid dynamic parameter (not supported template)");
+        break;
     }
     return 0;
 }
@@ -144,34 +170,60 @@ namespace {
 //! Computes a binary op of vector dimension d
 template <char op, int d>
 struct BinaryOp {
-    static double niceMod(double a, double b) {
-        if (b == 0) return 0;
+    static double niceMod(double a, double b)
+    {
+        if (b == 0)
+            return 0;
         return a - floor(a / b) * b;
     }
 
-    static int f(const int* opData, double* fp, char**, std::vector<int>&) {
+    static int f(const int* opData, double* fp, char**, std::vector<int>&)
+    {
         const double* in1 = fp + opData[0];
         const double* in2 = fp + opData[1];
         double* out = fp + opData[2];
 
         for (int k = 0; k < d; k++) {
             switch (op) {
-                case '+': *out = (*in1) + (*in2); break;
-                case '-': *out = (*in1) - (*in2); break;
-                case '*': *out = (*in1) * (*in2); break;
-                case '/': *out = (*in1) / (*in2); break;
-                case '%': *out = niceMod(*in1, *in2); break;
-                case '^':
-                    *out = pow(*in1, *in2);
-                    break;
-                // these only make sense with d==1
-                case '<': *out = (*in1) < (*in2); break;
-                case '>': *out = (*in1) > (*in2); break;
-                case 'l': *out = (*in1) <= (*in2); break;
-                case 'g': *out = (*in1) >= (*in2); break;
-                case '&': *out = (*in1) && (*in2); break;
-                case '|': *out = (*in1) || (*in2); break;
-                default: assert(false);
+            case '+':
+                *out = (*in1) + (*in2);
+                break;
+            case '-':
+                *out = (*in1) - (*in2);
+                break;
+            case '*':
+                *out = (*in1) * (*in2);
+                break;
+            case '/':
+                *out = (*in1) / (*in2);
+                break;
+            case '%':
+                *out = niceMod(*in1, *in2);
+                break;
+            case '^':
+                *out = pow(*in1, *in2);
+                break;
+            // these only make sense with d==1
+            case '<':
+                *out = (*in1) < (*in2);
+                break;
+            case '>':
+                *out = (*in1) > (*in2);
+                break;
+            case 'l':
+                *out = (*in1) <= (*in2);
+                break;
+            case 'g':
+                *out = (*in1) >= (*in2);
+                break;
+            case '&':
+                *out = (*in1) && (*in2);
+                break;
+            case '|':
+                *out = (*in1) || (*in2);
+                break;
+            default:
+                assert(false);
             }
             in1++;
             in2++;
@@ -184,15 +236,23 @@ struct BinaryOp {
 /// Computes a unary op on a FP[d]
 template <char op, int d>
 struct UnaryOp {
-    static int f(const int* opData, double* fp, char**, std::vector<int>&) {
+    static int f(const int* opData, double* fp, char**, std::vector<int>&)
+    {
         const double* in = fp + opData[0];
         double* out = fp + opData[1];
         for (int k = 0; k < d; k++) {
             switch (op) {
-                case '-': *out = -(*in); break;
-                case '~': *out = 1 - (*in); break;
-                case '!': *out = !*in; break;
-                default: assert(false);
+            case '-':
+                *out = -(*in);
+                break;
+            case '~':
+                *out = 1 - (*in);
+                break;
+            case '!':
+                *out = !*in;
+                break;
+            default:
+                assert(false);
             }
             in++;
             out++;
@@ -204,7 +264,8 @@ struct UnaryOp {
 //! Subscripts
 template <int d>
 struct Subscript {
-    static int f(const int* opData, double* fp, char**, std::vector<int>&) {
+    static int f(const int* opData, double* fp, char**, std::vector<int>&)
+    {
         int tuple = opData[0];
         int subscript = int(fp[opData[1]]);
         int out = opData[2];
@@ -219,7 +280,8 @@ struct Subscript {
 //! build a vector tuple from a bunch of numbers
 template <int d>
 struct Tuple {
-    static int f(const int* opData, double* fp, char**, std::vector<int>&) {
+    static int f(const int* opData, double* fp, char**, std::vector<int>&)
+    {
         int out = opData[d];
         for (int k = 0; k < d; k++) {
             fp[out + k] = fp[opData[k]];
@@ -231,7 +293,8 @@ struct Tuple {
 //! Assign a floating point to another (NOTE: if src and dest have different dimensions, use Promote)
 template <int d>
 struct AssignOp {
-    static int f(const int* opData, double* fp, char**, std::vector<int>&) {
+    static int f(const int* opData, double* fp, char**, std::vector<int>&)
+    {
         int in = opData[0];
         int out = opData[1];
         for (int k = 0; k < d; k++) {
@@ -243,7 +306,8 @@ struct AssignOp {
 
 //! Assigns a string from one position to another
 struct AssignStrOp {
-    static int f(const int* opData, double*, char** c, std::vector<int>&) {
+    static int f(const int* opData, double*, char** c, std::vector<int>&)
+    {
         int in = opData[0];
         int out = opData[1];
         c[out] = c[in];
@@ -253,7 +317,8 @@ struct AssignStrOp {
 
 //! Jumps relative to current executing pc if cond is true
 struct CondJmpRelativeIfFalse {
-    static int f(const int* opData, double* fp, char**, std::vector<int>&) {
+    static int f(const int* opData, double* fp, char**, std::vector<int>&)
+    {
         bool cond = (bool)fp[opData[0]];
         if (!cond)
             return opData[1];
@@ -264,7 +329,8 @@ struct CondJmpRelativeIfFalse {
 
 //! Jumps relative to current executing pc if cond is true
 struct CondJmpRelativeIfTrue {
-    static int f(const int* opData, double* fp, char**, std::vector<int>&) {
+    static int f(const int* opData, double* fp, char**, std::vector<int>&)
+    {
         bool cond = (bool)fp[opData[0]];
         if (cond)
             return opData[1];
@@ -275,12 +341,16 @@ struct CondJmpRelativeIfTrue {
 
 //! Jumps relative to current executing pc unconditionally
 struct JmpRelative {
-    static int f(const int* opData, double*, char**, std::vector<int>&) { return opData[0]; }
+    static int f(const int* opData, double*, char**, std::vector<int>&)
+    {
+        return opData[0];
+    }
 };
 
 //! Evaluates an external variable
 struct EvalVar {
-    static int f(const int* opData, double* fp, char** c, std::vector<int>&) {
+    static int f(const int* opData, double* fp, char** c, std::vector<int>&)
+    {
         ExprVarRef* ref = reinterpret_cast<ExprVarRef*>(c[opData[0]]);
         ref->eval(fp + opData[1]);  // ,c+opData[1]);
         return 1;
@@ -290,13 +360,15 @@ struct EvalVar {
 //! Evaluates an external variable using a variable block
 template <int dim>
 struct EvalVarBlock {
-    static int f(const int* opData, double* fp, char** c, std::vector<int>&) {
+    static int f(const int* opData, double* fp, char** c, std::vector<int>&)
+    {
         if (c[0]) {
             double* basePointer = reinterpret_cast<double*>(c[0]) + opData[0];
             double* destPointer = fp + opData[1];
             assert(basePointer && "Invalid VarBlock entry");
             assert(destPointer && "Corrupted interpreter stack");
-            for (int i = 0; i < dim; i++) destPointer[i] = basePointer[i];
+            for (int i = 0; i < dim; i++)
+                destPointer[i] = basePointer[i];
         }
         return 1;
     }
@@ -305,7 +377,8 @@ struct EvalVarBlock {
 //! Evaluates an external variable using a variable block
 template <char uniform, int dim>
 struct EvalVarBlockIndirect {
-    static int f(const int* opData, double* fp, char** c, std::vector<int>&) {
+    static int f(const int* opData, double* fp, char** c, std::vector<int>&)
+    {
         if (c[0]) {
             int stride = opData[2];
             int varBlockOffset = opData[0];
@@ -316,7 +389,8 @@ struct EvalVarBlockIndirect {
             double* destPointer = fp + destIndex;
             assert(basePointer && "Invalid VarBlock entry");
             assert(destPointer && "Corrupted interpreter stack");
-            for (int i = 0; i < dim; i++) destPointer[i] = basePointer[i];
+            for (int i = 0; i < dim; i++)
+                destPointer[i] = basePointer[i];
         } else {
             // TODO: this happens in initial evaluation!
             // std::cerr<<"Did not get data block"<<std::endl;
@@ -328,16 +402,22 @@ struct EvalVarBlockIndirect {
 
 template <char op, int d>
 struct CompareEqOp {
-    static int f(const int* opData, double* fp, char**, std::vector<int>&) {
+    static int f(const int* opData, double* fp, char**, std::vector<int>&)
+    {
         bool result = true;
         const double* in0 = fp + opData[0];
         const double* in1 = fp + opData[1];
         double* out = fp + opData[2];
         for (int k = 0; k < d; k++) {
             switch (op) {
-                case '=': result &= (*in0) == (*in1); break;
-                case '!': result &= (*in0) != (*in1); break;
-                default: assert(false);
+            case '=':
+                result &= (*in0) == (*in1);
+                break;
+            case '!':
+                result &= (*in0) != (*in1);
+                break;
+            default:
+                assert(false);
             }
             in0++;
             in1++;
@@ -349,11 +429,14 @@ struct CompareEqOp {
 
 template <char op>
 struct CompareEqOp<op, 3> {
-    static int f(const int* opData, double* fp, char**, std::vector<int>&) {
+    static int f(const int* opData, double* fp, char**, std::vector<int>&)
+    {
         bool eq = fp[opData[0]] == fp[opData[1]] && fp[opData[0] + 1] == fp[opData[1] + 1] &&
                   fp[opData[0] + 2] == fp[opData[1] + 2];
-        if (op == '=') fp[opData[2]] = eq;
-        if (op == '!') fp[opData[2]] = !eq;
+        if (op == '=')
+            fp[opData[2]] = eq;
+        if (op == '!')
+            fp[opData[2]] = !eq;
         return 1;
     }
 };
@@ -361,10 +444,15 @@ struct CompareEqOp<op, 3> {
 template <char op, int d>
 struct StrCompareEqOp {
     // TODO: this should rely on tokenization and not use strcmp
-    static int f(const int* opData, double* fp, char** c, std::vector<int>&) {
+    static int f(const int* opData, double* fp, char** c, std::vector<int>&)
+    {
         switch (op) {
-            case '=': fp[opData[2]] = strcmp(c[opData[0]], c[opData[1]]) == 0; break;
-            case '!': fp[opData[2]] = strcmp(c[opData[0]], c[opData[1]]) == 0; break;
+        case '=':
+            fp[opData[2]] = strcmp(c[opData[0]], c[opData[1]]) == 0;
+            break;
+        case '!':
+            fp[opData[2]] = strcmp(c[opData[0]], c[opData[1]]) == 0;
+            break;
         }
         return 1;
     }
@@ -372,7 +460,8 @@ struct StrCompareEqOp {
 }
 
 namespace {
-int ProcedureReturn(const int* opData, double*, char**, std::vector<int>& callStack) {
+int ProcedureReturn(const int* opData, double*, char**, std::vector<int>& callStack)
+{
     int newPC = callStack.back();
     callStack.pop_back();
     return newPC - opData[0];
@@ -380,16 +469,19 @@ int ProcedureReturn(const int* opData, double*, char**, std::vector<int>& callSt
 }
 
 namespace {
-int ProcedureCall(const int* opData, double*, char**, std::vector<int>& callStack) {
+int ProcedureCall(const int* opData, double*, char**, std::vector<int>& callStack)
+{
     callStack.push_back(opData[0]);
     return opData[1];
 }
 }
 
-int ExprLocalFunctionNode::buildInterpreter(Interpreter* interpreter) const {
+int ExprLocalFunctionNode::buildInterpreter(Interpreter* interpreter) const
+{
     _procedurePC = interpreter->nextPC();
     int lastOperand = 0;
-    for (int c = 0; c < numChildren(); c++) lastOperand = child(c)->buildInterpreter(interpreter);
+    for (int c = 0; c < numChildren(); c++)
+        lastOperand = child(c)->buildInterpreter(interpreter);
     int basePC = interpreter->nextPC();
     ;
     interpreter->addOp(ProcedureReturn);
@@ -401,7 +493,8 @@ int ExprLocalFunctionNode::buildInterpreter(Interpreter* interpreter) const {
     return 0;
 }
 
-int ExprLocalFunctionNode::buildInterpreterForCall(const ExprFuncNode* callerNode, Interpreter* interpreter) const {
+int ExprLocalFunctionNode::buildInterpreterForCall(const ExprFuncNode* callerNode, Interpreter* interpreter) const
+{
     std::vector<int> operands;
     for (int c = 0; c < callerNode->numChildren(); c++) {
         const ExprNode* child = callerNode->child(c);
@@ -452,38 +545,45 @@ int ExprLocalFunctionNode::buildInterpreterForCall(const ExprFuncNode* callerNod
     return outoperand;
 }
 
-int ExprNode::buildInterpreter(Interpreter* interpreter) const {
-    for (int c = 0; c < numChildren(); c++) child(c)->buildInterpreter(interpreter);
+int ExprNode::buildInterpreter(Interpreter* interpreter) const
+{
+    for (int c = 0; c < numChildren(); c++)
+        child(c)->buildInterpreter(interpreter);
     return -1;
 }
 
-int ExprNumNode::buildInterpreter(Interpreter* interpreter) const {
+int ExprNumNode::buildInterpreter(Interpreter* interpreter) const
+{
     int loc = interpreter->allocFP(1);
     interpreter->state.d[loc] = value();
     return loc;
 }
 
-int ExprStrNode::buildInterpreter(Interpreter* interpreter) const {
+int ExprStrNode::buildInterpreter(Interpreter* interpreter) const
+{
     int loc = interpreter->allocPtr();
     interpreter->state.s[loc] = const_cast<char*>(_str.c_str());
     return loc;
 }
 
-int ExprVecNode::buildInterpreter(Interpreter* interpreter) const {
+int ExprVecNode::buildInterpreter(Interpreter* interpreter) const
+{
     std::vector<int> locs;
     for (int k = 0; k < numChildren(); k++) {
         const ExprNode* c = child(k);
         locs.push_back(c->buildInterpreter(interpreter));
     }
     interpreter->addOp(getTemplatizedOp<Tuple>(numChildren()));
-    for (int k = 0; k < numChildren(); k++) interpreter->addOperand(locs[k]);
+    for (int k = 0; k < numChildren(); k++)
+        interpreter->addOperand(locs[k]);
     int loc = interpreter->allocFP(numChildren());
     interpreter->addOperand(loc);
     interpreter->endOp();
     return loc;
 }
 
-int ExprBinaryOpNode::buildInterpreter(Interpreter* interpreter) const {
+int ExprBinaryOpNode::buildInterpreter(Interpreter* interpreter) const
+{
     const ExprNode *child0 = child(0), *child1 = child(1);
     int dim0 = child0->type().dim(), dim1 = child1->type().dim(), dimout = type().dim();
     int op0 = child0->buildInterpreter(interpreter);
@@ -508,13 +608,26 @@ int ExprBinaryOpNode::buildInterpreter(Interpreter* interpreter) const {
     }
 
     switch (_op) {
-        case '+': interpreter->addOp(getTemplatizedOp2<'+', BinaryOp>(dimout)); break;
-        case '-': interpreter->addOp(getTemplatizedOp2<'-', BinaryOp>(dimout)); break;
-        case '*': interpreter->addOp(getTemplatizedOp2<'*', BinaryOp>(dimout)); break;
-        case '/': interpreter->addOp(getTemplatizedOp2<'/', BinaryOp>(dimout)); break;
-        case '^': interpreter->addOp(getTemplatizedOp2<'^', BinaryOp>(dimout)); break;
-        case '%': interpreter->addOp(getTemplatizedOp2<'%', BinaryOp>(dimout)); break;
-        default: assert(false);
+    case '+':
+        interpreter->addOp(getTemplatizedOp2<'+', BinaryOp>(dimout));
+        break;
+    case '-':
+        interpreter->addOp(getTemplatizedOp2<'-', BinaryOp>(dimout));
+        break;
+    case '*':
+        interpreter->addOp(getTemplatizedOp2<'*', BinaryOp>(dimout));
+        break;
+    case '/':
+        interpreter->addOp(getTemplatizedOp2<'/', BinaryOp>(dimout));
+        break;
+    case '^':
+        interpreter->addOp(getTemplatizedOp2<'^', BinaryOp>(dimout));
+        break;
+    case '%':
+        interpreter->addOp(getTemplatizedOp2<'%', BinaryOp>(dimout));
+        break;
+    default:
+        assert(false);
     }
     int op2 = interpreter->allocFP(dimout);
     interpreter->addOperand(op0);
@@ -525,16 +638,24 @@ int ExprBinaryOpNode::buildInterpreter(Interpreter* interpreter) const {
     return op2;
 }
 
-int ExprUnaryOpNode::buildInterpreter(Interpreter* interpreter) const {
+int ExprUnaryOpNode::buildInterpreter(Interpreter* interpreter) const
+{
     const ExprNode* child0 = child(0);
     int dimout = type().dim();
     int op0 = child0->buildInterpreter(interpreter);
 
     switch (_op) {
-        case '-': interpreter->addOp(getTemplatizedOp2<'-', UnaryOp>(dimout)); break;
-        case '~': interpreter->addOp(getTemplatizedOp2<'~', UnaryOp>(dimout)); break;
-        case '!': interpreter->addOp(getTemplatizedOp2<'!', UnaryOp>(dimout)); break;
-        default: assert(false);
+    case '-':
+        interpreter->addOp(getTemplatizedOp2<'-', UnaryOp>(dimout));
+        break;
+    case '~':
+        interpreter->addOp(getTemplatizedOp2<'~', UnaryOp>(dimout));
+        break;
+    case '!':
+        interpreter->addOp(getTemplatizedOp2<'!', UnaryOp>(dimout));
+        break;
+    default:
+        assert(false);
     }
     int op1 = interpreter->allocFP(dimout);
     interpreter->addOperand(op0);
@@ -544,7 +665,8 @@ int ExprUnaryOpNode::buildInterpreter(Interpreter* interpreter) const {
     return op1;
 }
 
-int ExprSubscriptNode::buildInterpreter(Interpreter* interpreter) const {
+int ExprSubscriptNode::buildInterpreter(Interpreter* interpreter) const
+{
     const ExprNode *child0 = child(0), *child1 = child(1);
     int dimin = child0->type().dim();
     int op0 = child0->buildInterpreter(interpreter);
@@ -559,7 +681,8 @@ int ExprSubscriptNode::buildInterpreter(Interpreter* interpreter) const {
     return op2;
 }
 
-int ExprVarNode::buildInterpreter(Interpreter* interpreter) const {
+int ExprVarNode::buildInterpreter(Interpreter* interpreter) const
+{
     if (const ExprLocalVar* var = _localVar) {
         // if (const ExprLocalVar* phi = var->getPhi()) var = phi;
         Interpreter::VarToLoc::iterator i = interpreter->varToLoc.find(var);
@@ -598,12 +721,14 @@ int ExprVarNode::buildInterpreter(Interpreter* interpreter) const {
     return -1;
 }
 
-int ExprLocalVar::buildInterpreter(Interpreter* interpreter) const {
+int ExprLocalVar::buildInterpreter(Interpreter* interpreter) const
+{
     return interpreter->varToLoc[this] =
                _type.isFP() ? interpreter->allocFP(_type.dim()) : _type.isString() ? interpreter->allocPtr() : -1;
 }
 
-int ExprAssignNode::buildInterpreter(Interpreter* interpreter) const {
+int ExprAssignNode::buildInterpreter(Interpreter* interpreter) const
+{
     int loc = _localVar->buildInterpreter(interpreter);
     assert(loc != -1 && "Invalid type found");
 
@@ -623,7 +748,8 @@ int ExprAssignNode::buildInterpreter(Interpreter* interpreter) const {
     return loc;
 }
 
-void copyVarToPromotedPosition(Interpreter* interpreter, ExprLocalVar* varSource, ExprLocalVar* varDest) {
+void copyVarToPromotedPosition(Interpreter* interpreter, ExprLocalVar* varSource, ExprLocalVar* varDest)
+{
     if (varDest->type().isFP()) {
         int destDim = varDest->type().dim();
         if (destDim != varSource->type().dim()) {
@@ -645,7 +771,8 @@ void copyVarToPromotedPosition(Interpreter* interpreter, ExprLocalVar* varSource
     }
 }
 
-int ExprIfThenElseNode::buildInterpreter(Interpreter* interpreter) const {
+int ExprIfThenElseNode::buildInterpreter(Interpreter* interpreter) const
+{
     int condop = child(0)->buildInterpreter(interpreter);
     int basePC = interpreter->nextPC();
 
@@ -695,7 +822,8 @@ int ExprIfThenElseNode::buildInterpreter(Interpreter* interpreter) const {
     return -1;
 }
 
-int ExprCompareNode::buildInterpreter(Interpreter* interpreter) const {
+int ExprCompareNode::buildInterpreter(Interpreter* interpreter) const
+{
     const ExprNode *child0 = child(0), *child1 = child(1);
     assert(type().dim() == 1 && type().isFP());
 
@@ -742,15 +870,24 @@ int ExprCompareNode::buildInterpreter(Interpreter* interpreter) const {
         int op0 = child0->buildInterpreter(interpreter);
         int op1 = child1->buildInterpreter(interpreter);
         switch (_op) {
-            case '<': interpreter->addOp(getTemplatizedOp2<'<', BinaryOp>(1)); break;
-            case '>': interpreter->addOp(getTemplatizedOp2<'>', BinaryOp>(1)); break;
-            case 'l': interpreter->addOp(getTemplatizedOp2<'l', BinaryOp>(1)); break;
-            case 'g': interpreter->addOp(getTemplatizedOp2<'g', BinaryOp>(1)); break;
-            case '&':
-                assert(false);  // interpreter->addOp(getTemplatizedOp2<'&',BinaryOp>(1));break;
-            case '|':
-                assert(false);  // interpreter->addOp(getTemplatizedOp2<'|',BinaryOp>(1));break;
-            default: assert(false);
+        case '<':
+            interpreter->addOp(getTemplatizedOp2<'<', BinaryOp>(1));
+            break;
+        case '>':
+            interpreter->addOp(getTemplatizedOp2<'>', BinaryOp>(1));
+            break;
+        case 'l':
+            interpreter->addOp(getTemplatizedOp2<'l', BinaryOp>(1));
+            break;
+        case 'g':
+            interpreter->addOp(getTemplatizedOp2<'g', BinaryOp>(1));
+            break;
+        case '&':
+            assert(false);  // interpreter->addOp(getTemplatizedOp2<'&',BinaryOp>(1));break;
+        case '|':
+            assert(false);  // interpreter->addOp(getTemplatizedOp2<'|',BinaryOp>(1));break;
+        default:
+            assert(false);
         }
         int op2 = interpreter->allocFP(1);
         interpreter->addOperand(op0);
@@ -761,7 +898,8 @@ int ExprCompareNode::buildInterpreter(Interpreter* interpreter) const {
     }
 }
 
-int ExprPrototypeNode::buildInterpreter(Interpreter* interpreter) const {
+int ExprPrototypeNode::buildInterpreter(Interpreter* interpreter) const
+{
     // set up parents
     _interpreterOps.clear();
     for (int c = 0; c < numChildren(); c++) {
@@ -782,7 +920,8 @@ int ExprPrototypeNode::buildInterpreter(Interpreter* interpreter) const {
     return 0;
 }
 
-int ExprCompareEqNode::buildInterpreter(Interpreter* interpreter) const {
+int ExprCompareEqNode::buildInterpreter(Interpreter* interpreter) const
+{
     const ExprNode *child0 = child(0), *child1 = child(1);
     int op0 = child0->buildInterpreter(interpreter);
     int op1 = child1->buildInterpreter(interpreter);
@@ -831,7 +970,8 @@ int ExprCompareEqNode::buildInterpreter(Interpreter* interpreter) const {
     return op2;
 }
 
-int ExprCondNode::buildInterpreter(Interpreter* interpreter) const {
+int ExprCondNode::buildInterpreter(Interpreter* interpreter) const
+{
     int opOut = -1;
     // TODO: handle strings!
     int dimout = type().dim();
@@ -895,16 +1035,19 @@ int ExprCondNode::buildInterpreter(Interpreter* interpreter) const {
     return opOut;
 }
 
-int ExprBlockNode::buildInterpreter(Interpreter* interpreter) const {
+int ExprBlockNode::buildInterpreter(Interpreter* interpreter) const
+{
     assert(numChildren() == 2);
     child(0)->buildInterpreter(interpreter);
     return child(1)->buildInterpreter(interpreter);
 }
 
-int ExprModuleNode::buildInterpreter(Interpreter* interpreter) const {
+int ExprModuleNode::buildInterpreter(Interpreter* interpreter) const
+{
     int lastIdx = 0;
     for (int c = 0; c < numChildren(); c++) {
-        if (c == numChildren() - 1) interpreter->setPCStart(interpreter->nextPC());
+        if (c == numChildren() - 1)
+            interpreter->setPCStart(interpreter->nextPC());
         lastIdx = child(c)->buildInterpreter(interpreter);
     }
     return lastIdx;

@@ -43,7 +43,8 @@
 
 //-- IMAGE EDITOR DIALOG METHODS --//
 
-ImageEditorDialog::ImageEditorDialog(QWidget* parent) : QDialog(parent), _image(256, 256), _imageSynthesizer(_image) {
+ImageEditorDialog::ImageEditorDialog(QWidget* parent) : QDialog(parent), _image(256, 256), _imageSynthesizer(_image)
+{
     this->setWindowTitle("Image Synthesis Editor");
 
     // Image Previewer
@@ -132,7 +133,8 @@ ImageEditorDialog::ImageEditorDialog(QWidget* parent) : QDialog(parent), _image(
 }
 
 // Apply expression, if any, from the editor contents to the preview image
-void ImageEditorDialog::applyExpression() {
+void ImageEditorDialog::applyExpression()
+{
     std::string exprStr = _editor->getExpr();
     if (exprStr.empty()) {
         QMessageBox msgBox;
@@ -153,7 +155,8 @@ void ImageEditorDialog::applyExpression() {
 
 //-- MAIN --//
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     QApplication app(argc, argv);
     app.setStyle(QStyleFactory::create("Fusion"));
     app.setPalette(createDefaultColorPalette());

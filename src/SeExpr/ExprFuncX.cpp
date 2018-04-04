@@ -24,7 +24,8 @@
 #include "VarBlock.h"
 
 namespace SeExpr2 {
-int ExprFuncSimple::EvalOp(const int* opData, double* fp, char** c, std::vector<int>& callStack) {
+int ExprFuncSimple::EvalOp(const int* opData, double* fp, char** c, std::vector<int>& callStack)
+{
     const ExprFuncNode* node = reinterpret_cast<const ExprFuncNode*>(c[opData[0]]);
     ExprFuncSimple* simple =
         const_cast<ExprFuncSimple*>(reinterpret_cast<const ExprFuncSimple*>(node->func()->funcx()));
@@ -38,7 +39,8 @@ int ExprFuncSimple::EvalOp(const int* opData, double* fp, char** c, std::vector<
     return 1;
 }
 
-int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node, Interpreter* interpreter) const {
+int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node, Interpreter* interpreter) const
+{
     std::vector<int> operands;
     for (int c = 0; c < node->numChildren(); c++) {
         int operand = node->child(c)->buildInterpreter(interpreter);
@@ -81,10 +83,8 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node, Interpreter* inte
     return outoperand;
 }
 
-ExprType ExprFuncSimple::genericPrep(ExprFuncNode* node,
-                                     bool,
-                                     ExprVarEnvBuilder& env,
-                                     const ExprFuncDeclaration& decl) {
+ExprType ExprFuncSimple::genericPrep(ExprFuncNode* node, bool, ExprVarEnvBuilder& env, const ExprFuncDeclaration& decl)
+{
     assert(node);
 
     int nargs = node->numChildren();
@@ -133,7 +133,8 @@ void SeExpr2LLVMEvalCustomFunction(const int* opDataArg,
                                    char** strArg,
                                    void** funcdata,
                                    const SeExpr2::ExprFuncNode* node,
-                                   double** varBlockData) {
+                                   double** varBlockData)
+{
     SeExpr2::ExprFuncSimple* funcSimple =
         const_cast<SeExpr2::ExprFuncSimple*>((const SeExpr2::ExprFuncSimple*)node->func()->funcx());
 

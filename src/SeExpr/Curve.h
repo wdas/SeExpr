@@ -42,7 +42,9 @@ class Curve {
     //! Supported interpolation types
     enum InterpType { kNone = 0, kLinear, kSmooth, kSpline, kMonotoneSpline };
     struct CV {
-        CV(double pos, const T& val, InterpType type) : _pos(pos), _val(val), _interp(type) {}
+        CV(double pos, const T& val, InterpType type) : _pos(pos), _val(val), _interp(type)
+        {
+        }
 
         double _pos;
         T _val, _deriv;

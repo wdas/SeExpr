@@ -18,8 +18,14 @@
 #include <fenv.h>
 
 Graph::Graph(Functions* functions, QStatusBar* status)
-    : funcs(*functions), operationCode(NONE), rootShow(false), minShow(false), dragging(false), scaling(false),
-      status(status) {
+    : funcs(*functions)
+    , operationCode(NONE)
+    , rootShow(false)
+    , minShow(false)
+    , dragging(false)
+    , scaling(false)
+    , status(status)
+{
     // use standard window...
     xmin = -10;
     xmax = 10;
@@ -31,11 +37,13 @@ Graph::Graph(Functions* functions, QStatusBar* status)
     funcs.addFunction("xmod=x-2*PI*t;xmod-xmod*xmod*xmod/6");
 }
 
-float Graph::fit(float t, float src0, float src1, float dest0, float dest1) {
+float Graph::fit(float t, float src0, float src1, float dest0, float dest1)
+{
     return (t - src0) / (src1 - src0) * (dest1 - dest0) + dest0;
 }
 
-void Graph::drawX(QPainter& painter, int power, bool label) {
+void Graph::drawX(QPainter& painter, int power, bool label)
+{
     float delta = pow(logBase, power - 1) / divs;
     float xline = ceil(xmin / delta) * delta;
     QString format("%1");
@@ -51,7 +59,8 @@ void Graph::drawX(QPainter& painter, int power, bool label) {
     }
 }
 
-void Graph::drawY(QPainter& painter, int power, bool label) {
+void Graph::drawY(QPainter& painter, int power, bool label)
+{
     QString format("%1");
     float delta = pow(logBase, power - 1) / divs;
     float yline = ceil(ymin / delta) * delta;
@@ -67,7 +76,8 @@ void Graph::drawY(QPainter& painter, int power, bool label) {
     }
 }
 
-void Graph::paintEvent(QPaintEvent* /*event*/) {
+void Graph::paintEvent(QPaintEvent* /*event*/)
+{
     QPainter painter(this);
 
     QBrush brush;
@@ -142,8 +152,10 @@ void Graph::paintEvent(QPaintEvent* /*event*/) {
     }
 }
 
-void Graph::plot(QPainter& painter, int funcId) {
-    if (!funcs.isValid(funcId)) return;
+void Graph::plot(QPainter& painter, int funcId)
+{
+    if (!funcs.isValid(funcId))
+        return;
 
     QPen curvepen;
     QColor color = funcs.getColor(funcId);
@@ -203,7 +215,8 @@ void Graph::plot(QPainter& painter, int funcId) {
     // std::cerr<<"Plottted "<<plotted<<std::endl;
 }
 
-void Graph::mousePressEvent(QMouseEvent* event) {
+void Graph::mousePressEvent(QMouseEvent* event)
+{
     lastcx = event->x();
     lastcy = event->y();
     if (event->button() == Qt::MidButton)
@@ -219,7 +232,8 @@ void Graph::mousePressEvent(QMouseEvent* event) {
     }
 }
 
-void Graph::mouseMoveEvent(QMouseEvent* event) {
+void Graph::mouseMoveEvent(QMouseEvent* event)
+{
     if (dragging || scaling || operationCode) {
         int newx = event->x(), newy = event->y();
         // std::cerr<<"new "<<newx<<" "<<newy<<std::endl;
@@ -253,34 +267,45 @@ void Graph::mouseMoveEvent(QMouseEvent* event) {
     }
 }
 
-void Graph::mouseReleaseEvent(QMouseEvent* event) {
+void Graph::mouseReleaseEvent(QMouseEvent* event)
+{
     dragging = false;
     scaling = false;
     if (operationCode) {
         float x, y;
         xforminv(event->x(), event->y(), x, y);
         switch (operationCode) {
-            case NONE: break;
-            case FIND_ROOT: solveRoot(functionIndex, x); break;
-            case FIND_MIN: solveMin(functionIndex, boundStart, x); break;
-            case FIND_MAX: solveMax(functionIndex, boundStart, x); break;
+        case NONE:
+            break;
+        case FIND_ROOT:
+            solveRoot(functionIndex, x);
+            break;
+        case FIND_MIN:
+            solveMin(functionIndex, boundStart, x);
+            break;
+        case FIND_MAX:
+            solveMax(functionIndex, boundStart, x);
+            break;
         }
         status->showMessage("");
         operationCode = NONE;
     }
 }
 
-void Graph::xform(float x, float y, float& cx, float& cy) {
+void Graph::xform(float x, float y, float& cx, float& cy)
+{
     cx = (x - xmin) / (xmax - xmin) * width();
     cy = height() - (y - ymin) / (ymax - ymin) * height() - 1;
 }
 
-void Graph::xforminv(float cx, float cy, float& x, float& y) {
+void Graph::xforminv(float cx, float cy, float& x, float& y)
+{
     x = cx / width() * (xmax - xmin) + xmin;
     y = (height() - cy - 1) / height() * (ymax - ymin) + ymin;
 }
 
-void Graph::scheduleRoot(const OperationCode operationCode_in, const int functionIndex_in) {
+void Graph::scheduleRoot(const OperationCode operationCode_in, const int functionIndex_in)
+{
     operationCode = operationCode_in;
     functionIndex = functionIndex_in;
     boundStart = xmin - 5;
@@ -289,7 +314,8 @@ void Graph::scheduleRoot(const OperationCode operationCode_in, const int functio
     repaint();
 }
 
-void Graph::solveRoot(const int function, double xInitial) {
+void Graph::solveRoot(const int function, double xInitial)
+{
     double x0 = xInitial;
     double y_x0 = funcs.eval(function, x0);
     double x1 = xInitial + 1e-5;
@@ -308,13 +334,15 @@ void Graph::solveRoot(const int function, double xInitial) {
     repaint();
 }
 
-double Graph::golden(const int function, double xmin, double xcenter, double xmax, bool solveMax, double tolerance) {
+double Graph::golden(const int function, double xmin, double xcenter, double xmax, bool solveMax, double tolerance)
+{
     static const double phi = .5 * (1. + sqrt(5.)), resPhi = 2 - phi;
 
     // double xcenter=.5*(xmin+xmax);
     double xnew = xcenter + resPhi * (xmax - xcenter);
 
-    if (fabs(xmax - xmin) < 1e-5 * (fabs(xnew) + fabs(xcenter))) return (xmax + xmin) / 2;
+    if (fabs(xmax - xmin) < 1e-5 * (fabs(xnew) + fabs(xcenter)))
+        return (xmax + xmin) / 2;
 
     double f_xcenter = funcs.eval(function, xcenter);
     double f_xnew = funcs.eval(function, xnew);
@@ -329,8 +357,10 @@ double Graph::golden(const int function, double xmin, double xcenter, double xma
         return golden(function, xnew, xcenter, xmin, solveMax, tolerance);
 }
 
-void Graph::solveMin(const int function, double xmin, double xmax, bool solveMax) {
-    if (xmax < xmin) std::swap(xmin, xmax);
+void Graph::solveMin(const int function, double xmin, double xmax, bool solveMax)
+{
+    if (xmax < xmin)
+        std::swap(xmin, xmax);
     double xsolve = golden(function, xmin, .5 * (xmin + xmax), xmax, solveMax, 1e-5);
     rootX = xsolve;
     rootY = funcs.eval(function, xsolve);
@@ -339,9 +369,13 @@ void Graph::solveMin(const int function, double xmin, double xmax, bool solveMax
     repaint();
 }
 
-void Graph::solveMax(const int function, double xmin, double xmax) { solveMin(function, xmin, xmax, true); }
+void Graph::solveMax(const int function, double xmin, double xmax)
+{
+    solveMin(function, xmin, xmax, true);
+}
 
-void Graph::redraw() {
+void Graph::redraw()
+{
     rootShow = false;
     minShow = false;
     repaint();

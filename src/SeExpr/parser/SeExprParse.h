@@ -30,10 +30,22 @@ class SeParser {
 
   public:
     struct RangeC {
-        RangeC(const Range& previous, const Range& pos) : _previous(previous), _current(pos) { _start = pos; }
-        const Range operator()() { return std::array<int, 2>{_start[0], _current[0]}; }
-        const Range start() const { return _start; }
-        const Range toPrevious() const { return std::array<int, 2>{_start[0], _previous[1]}; }
+        RangeC(const Range& previous, const Range& pos) : _previous(previous), _current(pos)
+        {
+            _start = pos;
+        }
+        const Range operator()()
+        {
+            return std::array<int, 2>{_start[0], _current[0]};
+        }
+        const Range start() const
+        {
+            return _start;
+        }
+        const Range toPrevious() const
+        {
+            return std::array<int, 2>{_start[0], _previous[1]};
+        }
 
       private:
         Range _start;
@@ -42,10 +54,15 @@ class SeParser {
     };
 
     SeParser(const std::string& inputString)
-        : lexer(inputString), lookAheadToken(Lexer::END_OF_BUFFER), lookAheadTokenText(""),
-          lookAheadTokenPosition(std::array<int, 2>{{0, 0}}) {}
+        : lexer(inputString)
+        , lookAheadToken(Lexer::END_OF_BUFFER)
+        , lookAheadTokenText("")
+        , lookAheadTokenPosition(std::array<int, 2>{{0, 0}})
+    {
+    }
 
-    void getToken() {
+    void getToken()
+    {
         oldTokenPosition = tokenPosition;
         token = lookAheadToken;
         tokenText = lookAheadTokenText;
@@ -56,15 +73,18 @@ class SeParser {
         // DEBUG: std::cerr<<"token is "<<tokenText<<std::endl;
     }
 
-    NodePtr parse() {
+    NodePtr parse()
+    {
         getToken();
         getToken();
         NodePtr tree = module();
-        if (token != Lexer::END_OF_BUFFER) throw ParseError("Parse error, unexpected continued tokens!");
+        if (token != Lexer::END_OF_BUFFER)
+            throw ParseError("Parse error, unexpected continued tokens!");
         return tree;
     }
 
-    NodePtr module() {
+    NodePtr module()
+    {
         RangeC r(oldTokenPosition, tokenPosition);
         NodePtr moduleTree(new typename Policy::Module(r()));
         while (token == Lexer::DEF) {
@@ -75,23 +95,28 @@ class SeParser {
         return moduleTree;
     }
 
-    void ensure(bool value, const std::string& msg) {
+    void ensure(bool value, const std::string& msg)
+    {
         if (!value) {
             throw ParseError(msg + "\n" + lexer.underlineToken(tokenPosition));
         }
     }
-    void ensureAndGetToken(bool value, const std::string& msg) {
+    void ensureAndGetToken(bool value, const std::string& msg)
+    {
         ensure(value, msg);
         getToken();
     }
-    void ensureNextTwoTokens(Lexer::Token token1, Lexer::Token token2, const std::string& msg) {
+    void ensureNextTwoTokens(Lexer::Token token1, Lexer::Token token2, const std::string& msg)
+    {
         if (token != token1 && lookAheadToken != token2)
             throw ParseError(msg + "\n" + lexer.underlineToken(tokenPosition));
     }
-    NodePtr declaration() {
+    NodePtr declaration()
+    {
         RangeC rangec(oldTokenPosition, tokenPosition);
         ensureAndGetToken(token == Lexer::DEF, "Expected the word 'def' in declaration");
-        if (token != Lexer::IDENT) typeDeclare();
+        if (token != Lexer::IDENT)
+            typeDeclare();
         ensureAndGetToken(token == Lexer::IDENT, "Expected identifier");
         ensureAndGetToken(token == Lexer::PAREN_OPEN, "Expected open parentheses for function declaration");
         typeList();
@@ -103,7 +128,8 @@ class SeParser {
         return NodePtr(new typename Policy::Def(rangec()));
     }
 
-    void typeDeclare() {
+    void typeDeclare()
+    {
         ensureAndGetToken(token == Lexer::STRING || token == Lexer::FLOAT, "Expected type 'FLOAT' or type 'STRING'");
         if (token == Lexer::BRACKET_OPEN) {
             getToken();
@@ -113,13 +139,15 @@ class SeParser {
         lifetimeOptional();
     }
 
-    void lifetimeOptional() {
+    void lifetimeOptional()
+    {
         if (token == Lexer::CONSTANT || token == Lexer::UNIFORM || token == Lexer::VARYING || token == Lexer::ERROR) {
             getToken();
         }
     }
 
-    void typeList() {
+    void typeList()
+    {
         while (token != Lexer::PAREN_CLOSE) {
             typeDeclare();
             ensureAndGetToken(token == Lexer::IDENT, "Need variable name in formal parameter declaration");
@@ -133,12 +161,14 @@ class SeParser {
         }
     }
 
-    bool isAssignOrMutator(Lexer::Token t) const {
+    bool isAssignOrMutator(Lexer::Token t) const
+    {
         return t == Lexer::ASSIGN || t == Lexer::PLUS_EQUAL || t == Lexer::MINUS_EQUAL || t == Lexer::TIMES_EQUAL ||
                t == Lexer::DIVIDE_EQUAL || t == Lexer::MOD_EQUAL || t == Lexer::POWER_EQUAL;
     }
 
-    NodePtr block() {
+    NodePtr block()
+    {
         RangeC r(oldTokenPosition, tokenPosition);
         NodePtr ret(new typename Policy::Block(r()));
         while (1) {
@@ -174,7 +204,8 @@ class SeParser {
 
     /// expr: expr1 -> expr   (nominally)
     // NOTE: expr must contain IDENT PARENOPEN immediately next in the token stream
-    NodePtr expr() {
+    NodePtr expr()
+    {
         RangeC rangec(oldTokenPosition, tokenPosition);
         NodePtr parent = expr1();
         if (token == Lexer::ARROW) {
@@ -192,7 +223,8 @@ class SeParser {
     }
 
     // expr1: expr2 ? expr : expr
-    NodePtr expr1() {
+    NodePtr expr1()
+    {
         RangeC rangec(oldTokenPosition, tokenPosition);
         NodePtr curr = expr2();
         if (token == Lexer::QUESTION) {
@@ -207,7 +239,8 @@ class SeParser {
     }
 
     // expr2: expr3 { OR expr3 }*
-    NodePtr expr2() {
+    NodePtr expr2()
+    {
         RangeC rangec(oldTokenPosition, tokenPosition);
         NodePtr curr = expr3();
         while (token == Lexer::OR) {
@@ -219,7 +252,8 @@ class SeParser {
     }
 
     // expr3: expr4 { AND expr4 }*
-    NodePtr expr3() {
+    NodePtr expr3()
+    {
         RangeC rangec(oldTokenPosition, tokenPosition);
         NodePtr curr = expr4();
         while (token == Lexer::AND) {
@@ -231,7 +265,8 @@ class SeParser {
     }
 
     // expr4: expr5 { EQ|NE expr5 }*
-    NodePtr expr4() {
+    NodePtr expr4()
+    {
         RangeC rangec(oldTokenPosition, tokenPosition);
         NodePtr curr = expr5();
         while (token == Lexer::EQUALS || token == Lexer::NOT_EQUALS) {
@@ -243,7 +278,8 @@ class SeParser {
     }
 
     // expr5: expr6 { <|<=|>|>= expr6 }*
-    NodePtr expr5() {
+    NodePtr expr5()
+    {
         RangeC rangec(oldTokenPosition, tokenPosition);
         NodePtr curr = expr6();
         while (1) {
@@ -266,7 +302,8 @@ class SeParser {
     }
 
     // expr6: expr7 { +|- expr7}*
-    NodePtr expr6() {
+    NodePtr expr6()
+    {
         RangeC rangec(oldTokenPosition, tokenPosition);
         NodePtr curr = expr7();
         while (token == Lexer::PLUS || token == Lexer::MINUS) {
@@ -281,7 +318,8 @@ class SeParser {
     }
 
     // expr7: expr8 { *|/|% expr8}*
-    NodePtr expr7() {
+    NodePtr expr7()
+    {
         RangeC rangec(oldTokenPosition, tokenPosition);
         NodePtr curr = expr8();
         while (token == Lexer::TIMES || token == Lexer::DIVIDE || token == Lexer::MOD) {
@@ -296,7 +334,8 @@ class SeParser {
     }
 
     // expr8: {!|~|-|+}* expr9
-    NodePtr expr8() {
+    NodePtr expr8()
+    {
         NodePtr parent;
         typename Policy::Base* curr = 0;
         RangeC rangec(oldTokenPosition, tokenPosition);
@@ -331,7 +370,8 @@ class SeParser {
     }
 
     // expr9: {expr10 ^}* expr10
-    NodePtr expr9() {
+    NodePtr expr9()
+    {
         RangeC rangec(oldTokenPosition, tokenPosition);
         NodePtr parent = expr10();
         typename Policy::Base* curr = 0;
@@ -350,7 +390,8 @@ class SeParser {
     }
 
     // expr10: expr11 { [ expr ] }*
-    NodePtr expr10() {
+    NodePtr expr10()
+    {
         RangeC rangec(oldTokenPosition, tokenPosition);
         NodePtr curr = expr11();
         while (token == Lexer::BRACKET_OPEN) {
@@ -364,7 +405,8 @@ class SeParser {
     }
 
     // expr11: (expr) | NUM | IDENT | IDENT (args) | STR | '[' expr {, expr}* ']'
-    NodePtr expr11() {
+    NodePtr expr11()
+    {
         if (token == Lexer::PAREN_OPEN) {
             getToken();
             NodePtr ret = expr();
@@ -415,18 +457,22 @@ class SeParser {
         return 0;
     }
 
-    void functionArgs(NodePtr& objectToAddArgsTo) {
+    void functionArgs(NodePtr& objectToAddArgsTo)
+    {
         // TODO: fix
         // NodePtr args(new typename Policy::Node(r()));
-        if (curriedArgument) objectToAddArgsTo->addChild(std::move(curriedArgument));
+        if (curriedArgument)
+            objectToAddArgsTo->addChild(std::move(curriedArgument));
         while (token != Lexer::PAREN_CLOSE) {
             objectToAddArgsTo->addChild(expr());
-            if (token != Lexer::COMMA) break;
+            if (token != Lexer::COMMA)
+                break;
             getToken();
         }
     }
 
-    NodePtr assign() {
+    NodePtr assign()
+    {
         RangeC rangec(oldTokenPosition, tokenPosition);
         ensure(token == Lexer::IDENT, "Expected identifier at begin of assignment");
         std::string varName = tokenText;
@@ -441,13 +487,26 @@ class SeParser {
             RangeC rangec(oldTokenPosition, tokenPosition);
             char code = ' ';
             switch (operatorToken) {
-                case Lexer::PLUS_EQUAL: code = '+'; break;
-                case Lexer::MINUS_EQUAL: code = '-'; break;
-                case Lexer::TIMES_EQUAL: code = '*'; break;
-                case Lexer::DIVIDE_EQUAL: code = '/'; break;
-                case Lexer::MOD_EQUAL: code = '%'; break;
-                case Lexer::POWER_EQUAL: code = '^'; break;
-                default: ensure(false, "Invalid assignment modifier!");
+            case Lexer::PLUS_EQUAL:
+                code = '+';
+                break;
+            case Lexer::MINUS_EQUAL:
+                code = '-';
+                break;
+            case Lexer::TIMES_EQUAL:
+                code = '*';
+                break;
+            case Lexer::DIVIDE_EQUAL:
+                code = '/';
+                break;
+            case Lexer::MOD_EQUAL:
+                code = '%';
+                break;
+            case Lexer::POWER_EQUAL:
+                code = '^';
+                break;
+            default:
+                ensure(false, "Invalid assignment modifier!");
             }
             NodePtr varNode = NodePtr(new typename Policy::Var(rangec(), varName));
             e = NodePtr(new typename Policy::BinaryOp(rangec(), code, std::move(varNode), std::move(e)));
@@ -460,7 +519,8 @@ class SeParser {
         return assignNode;
     }
 
-    NodePtr assignBlock(bool exprAtEnd) {
+    NodePtr assignBlock(bool exprAtEnd)
+    {
         RangeC rangec(oldTokenPosition, tokenPosition);
         NodePtr assigns(new typename Policy::Node(rangec()));
         ensureAndGetToken(token == Lexer::BRACE_OPEN, "Expected opening braces after if condition");
@@ -475,7 +535,8 @@ class SeParser {
         return assigns;
     }
 
-    NodePtr ifthenelse() {
+    NodePtr ifthenelse()
+    {
         RangeC rangec(oldTokenPosition, tokenPosition);
         ensureAndGetToken(token == Lexer::IF, "Expected if at begin of if then else");
         ensureAndGetToken(token == Lexer::PAREN_OPEN, "Expected open parentheses after if");

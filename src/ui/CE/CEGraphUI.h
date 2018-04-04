@@ -66,7 +66,10 @@ class CEGraphUI : public QGLWidget {
     // view position in (x:frames, y:curve units)
     const CEGraphView& getView();
 
-    CETool* tool() { return _tool; }
+    CETool* tool()
+    {
+        return _tool;
+    }
     void moveSelBox(int x1, int y1, int x2, int y2);
     void hideSelBox();
     enum ColorType {
@@ -84,7 +87,8 @@ class CEGraphUI : public QGLWidget {
     };
     void setColor(ColorType color);
     const QColor& getColor(ColorType color);
-    void getActivePart(int& curve, int& seg, int& part) {
+    void getActivePart(int& curve, int& seg, int& part)
+    {
         curve = _activeCurve;
         seg = _activeSeg;
         part = _activePart;
@@ -94,7 +98,10 @@ class CEGraphUI : public QGLWidget {
     CEGraphKey* getKey(int curve, int seg);
     int doSelectModeRender(int x1, int x2, int y1, int y2, GLuint* buffer, int bufsize);
 
-    virtual QSize minimumSizeHint() const { return QSize(200, 200); }
+    virtual QSize minimumSizeHint() const
+    {
+        return QSize(200, 200);
+    }
 
   public slots:
 

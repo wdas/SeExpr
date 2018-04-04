@@ -65,10 +65,15 @@ class ExprControl : public QWidget {
 
   public:
     ExprControl(int id, Editable* editable, bool showColorLink);
-    virtual ~ExprControl() {}
+    virtual ~ExprControl()
+    {
+    }
 
     /// Interface for getting the color (used for linked color picking)
-    virtual QColor getColor() { return QColor(); }
+    virtual QColor getColor()
+    {
+        return QColor();
+    }
     /// Interface for setting the color (used for linked color picking)
     virtual void setColor(QColor color){Q_UNUSED(color)};
 
@@ -90,7 +95,8 @@ class ExprControl : public QWidget {
 
 /// clamp val to the specified range [minval,maxval]
 template <class T, class T2, class T3>
-T clamp(const T val, const T2 minval, const T3 maxval) {
+T clamp(const T val, const T2 minval, const T3 maxval)
+{
     if (val < minval)
         return minval;
     else if (val > maxval)
@@ -104,8 +110,10 @@ class ExprLineEdit : public QLineEdit {
     Q_OBJECT
   public:
     ExprLineEdit(int id, QWidget* parent);
-    virtual void setText(const QString& t) {
-        if (_signaling) return;
+    virtual void setText(const QString& t)
+    {
+        if (_signaling)
+            return;
         QLineEdit::setText(t);
     }
 
@@ -124,20 +132,29 @@ class ExprLineEdit : public QLineEdit {
 class ExprSlider : public QSlider {
     Q_OBJECT
   public:
-    ExprSlider(QWidget* parent = 0) : QSlider(parent) {}
-    ExprSlider(Qt::Orientation orientation, QWidget* parent = 0) : QSlider(orientation, parent) {}
+    ExprSlider(QWidget* parent = 0) : QSlider(parent)
+    {
+    }
+    ExprSlider(Qt::Orientation orientation, QWidget* parent = 0) : QSlider(orientation, parent)
+    {
+    }
     virtual void mousePressEvent(QMouseEvent* e);
     virtual void mouseMoveEvent(QMouseEvent* e);
     virtual void paintEvent(QPaintEvent* e);
-    virtual void leaveEvent(QEvent* event) {
+    virtual void leaveEvent(QEvent* event)
+    {
         Q_UNUSED(event);
         update();
     }
-    virtual void enterEvent(QEvent* event) {
+    virtual void enterEvent(QEvent* event)
+    {
         Q_UNUSED(event);
         update();
     }
-    virtual void wheelEvent(QWheelEvent* e) { e->ignore(); }
+    virtual void wheelEvent(QWheelEvent* e)
+    {
+        e->ignore();
+    }
 };
 
 /// Channel Slider (i.e. for colors)
@@ -148,9 +165,18 @@ class ExprChannelSlider : public QWidget {
     virtual void paintEvent(QPaintEvent* e);
     virtual void mousePressEvent(QMouseEvent* e);
     virtual void mouseMoveEvent(QMouseEvent* e);
-    virtual void wheelEvent(QWheelEvent* e) { e->ignore(); }
-    float value() const { return _value; }
-    void setDisplayColor(QColor c) { _col = c; }
+    virtual void wheelEvent(QWheelEvent* e)
+    {
+        e->ignore();
+    }
+    float value() const
+    {
+        return _value;
+    }
+    void setDisplayColor(QColor c)
+    {
+        _col = c;
+    }
 
   public slots:
     void setValue(float value);

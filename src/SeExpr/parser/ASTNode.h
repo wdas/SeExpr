@@ -44,29 +44,51 @@ enum class ASTType {
     String,
     Def
 };
-inline const char* ASTTypeToString(ASTType type) {
+inline const char* ASTTypeToString(ASTType type)
+{
     switch (type) {
-        case ASTType::Invalid: return "Invalid";
-        case ASTType::Module: return "Module";
-        case ASTType::Prototype: return "Prototype";
-        case ASTType::LocalFunction: return "LocalFunction";
-        case ASTType::Block: return "Block";
-        case ASTType::Node: return "Node";
-        case ASTType::IfThenElse: return "IfThenElse";
-        case ASTType::Vec: return "Vec";
-        case ASTType::Cond: return "Cond";
-        case ASTType::Compare: return "Compare";
-        case ASTType::UnaryOp: return "UnaryOp";
-        case ASTType::BinaryOp: return "BinaryOp";
-        case ASTType::CompareEq: return "CompareEq";
-        case ASTType::TernaryOp: return "TernaryOp";
-        case ASTType::Subscript: return "Subscript";
-        case ASTType::Var: return "Var";
-        case ASTType::Num: return "Num";
-        case ASTType::Call: return "Call";
-        case ASTType::Assign: return "Assign";
-        case ASTType::String: return "String";
-        case ASTType::Def: return "Def";
+    case ASTType::Invalid:
+        return "Invalid";
+    case ASTType::Module:
+        return "Module";
+    case ASTType::Prototype:
+        return "Prototype";
+    case ASTType::LocalFunction:
+        return "LocalFunction";
+    case ASTType::Block:
+        return "Block";
+    case ASTType::Node:
+        return "Node";
+    case ASTType::IfThenElse:
+        return "IfThenElse";
+    case ASTType::Vec:
+        return "Vec";
+    case ASTType::Cond:
+        return "Cond";
+    case ASTType::Compare:
+        return "Compare";
+    case ASTType::UnaryOp:
+        return "UnaryOp";
+    case ASTType::BinaryOp:
+        return "BinaryOp";
+    case ASTType::CompareEq:
+        return "CompareEq";
+    case ASTType::TernaryOp:
+        return "TernaryOp";
+    case ASTType::Subscript:
+        return "Subscript";
+    case ASTType::Var:
+        return "Var";
+    case ASTType::Num:
+        return "Num";
+    case ASTType::Call:
+        return "Call";
+    case ASTType::Assign:
+        return "Assign";
+    case ASTType::String:
+        return "String";
+    case ASTType::Def:
+        return "Def";
     }
     return "<invalid>";
 }
@@ -74,36 +96,46 @@ class ASTNode {
   public:
     /// Allows adding arbitary number of items to a container holding unique_ptrs
     struct Adder {
-        void sequence() {}
+        void sequence()
+        {
+        }
         template <typename T, typename... Targs>
-        void sequence(T&& guy, Targs&&... args) {
+        void sequence(T&& guy, Targs&&... args)
+        {
             container.emplace_back(std::move(guy));
             sequence(args...);
         }
-        Adder(std::vector<std::unique_ptr<ASTNode>>& container) : container(container) {}
+        Adder(std::vector<std::unique_ptr<ASTNode>>& container) : container(container)
+        {
+        }
 
       private:
         std::vector<std::unique_ptr<ASTNode>>& container;
     };
 
     template <typename... Args>
-    ASTNode(const Range& range, const ASTType& type, Args&&... args) : _type(type) {
-        for (int k = 0; k < 2; k++) _range[k] = range[k];
+    ASTNode(const Range& range, const ASTType& type, Args&&... args) : _type(type)
+    {
+        for (int k = 0; k < 2; k++)
+            _range[k] = range[k];
         Adder a(_children);
         a.sequence(std::forward<Args&&>(args)...);
     }
 
-    ASTNode* addChild(std::unique_ptr<ASTNode> node) {
+    ASTNode* addChild(std::unique_ptr<ASTNode> node)
+    {
         _children.push_back(std::move(node));
         return _children.back().get();
     }
-    std::unique_ptr<ASTNode> removeChild() {
+    std::unique_ptr<ASTNode> removeChild()
+    {
         std::unique_ptr<ASTNode> ret(std::move(_children.back()));
         _children.pop_back();
         return ret;
     }
 
-    void print(std::ostream& out, int indent = 1, const std::string* originalStr = 0, unsigned int mask = 0) {
+    void print(std::ostream& out, int indent = 1, const std::string* originalStr = 0, unsigned int mask = 0)
+    {
         if (originalStr) {
             Range r = range();
             auto replaceNew = [](const std::string& a) {
@@ -151,14 +183,29 @@ class ASTNode {
             (*it)->print(out, indent + 1, originalStr, newMask);
         }
     }
-    virtual std::string display() const { return ASTTypeToString(_type); }
+    virtual std::string display() const
+    {
+        return ASTTypeToString(_type);
+    }
 
-    void setRange(const Range& range) { _range = range; }
-    const Range& range() const { return _range; }
+    void setRange(const Range& range)
+    {
+        _range = range;
+    }
+    const Range& range() const
+    {
+        return _range;
+    }
 
-    ASTType type() const { return _type; }  // TODO: fix
+    ASTType type() const
+    {
+        return _type;
+    }  // TODO: fix
     // const std::string& typeString() const{return typeToName[_type];} // TODO: fix
-    const std::vector<std::unique_ptr<ASTNode>>& children() const { return _children; }
+    const std::vector<std::unique_ptr<ASTNode>>& children() const
+    {
+        return _children;
+    }
 
   private:
     ASTType _type;
@@ -172,21 +219,34 @@ struct ASTPolicy {
     typedef ASTNode Base;
     typedef std::unique_ptr<ASTNode> Ptr;
 
-#define SEEXPR_AST_SUBCLASS(name)                                                         \
-    struct name : public Base {                                                           \
-        template <typename... Args>                                                       \
-        name(const Range& range, Args&&... args) : Base(range, ASTType::name, args...) {} \
+#define SEEXPR_AST_SUBCLASS(name)                                                      \
+    struct name : public Base {                                                        \
+        template <typename... Args>                                                    \
+        name(const Range& range, Args&&... args) : Base(range, ASTType::name, args...) \
+        {                                                                              \
+        }                                                                              \
     };
-#define SEEXPR_AST_SUBCLASS_OP(name)                                                                        \
-    struct name : public Base {                                                                             \
-        template <typename... Args>                                                                         \
-        name(const Range& range, char op, Args&&... args) : Base(range, ASTType::name, args...), _op(op) {} \
-        std::string display() const { return std::string(#name) + _op; }                                    \
-        char op() const { return _op; }                                                                     \
-        char value() const { return _op; }                                                                  \
-                                                                                                            \
-      private:                                                                                              \
-        char _op;                                                                                           \
+#define SEEXPR_AST_SUBCLASS_OP(name)                                                                     \
+    struct name : public Base {                                                                          \
+        template <typename... Args>                                                                      \
+        name(const Range& range, char op, Args&&... args) : Base(range, ASTType::name, args...), _op(op) \
+        {                                                                                                \
+        }                                                                                                \
+        std::string display() const                                                                      \
+        {                                                                                                \
+            return std::string(#name) + _op;                                                             \
+        }                                                                                                \
+        char op() const                                                                                  \
+        {                                                                                                \
+            return _op;                                                                                  \
+        }                                                                                                \
+        char value() const                                                                               \
+        {                                                                                                \
+            return _op;                                                                                  \
+        }                                                                                                \
+                                                                                                         \
+      private:                                                                                           \
+        char _op;                                                                                        \
     };
     SEEXPR_AST_SUBCLASS(Module);
     SEEXPR_AST_SUBCLASS(Prototype);
@@ -205,23 +265,47 @@ struct ASTPolicy {
     SEEXPR_AST_SUBCLASS(Def);
 
     struct String : public Base {
-        String(const Range& range, const std::string& s) : Base(range, ASTType::String), s(s) {}
-        const std::string& value() const { return s; }
+        String(const Range& range, const std::string& s) : Base(range, ASTType::String), s(s)
+        {
+        }
+        const std::string& value() const
+        {
+            return s;
+        }
         std::string s;
-        std::string display() const { return std::string("string") + " " + s; }
+        std::string display() const
+        {
+            return std::string("string") + " " + s;
+        }
     };
 
     struct Num : public Base {
-        Num(const Range& range, double num) : Base(range, ASTType::Num), num(num) {}
+        Num(const Range& range, double num) : Base(range, ASTType::Num), num(num)
+        {
+        }
         double num;
-        double value() const { return num; }
-        std::string display() const { return std::string("num") + " " + std::to_string(num); }
+        double value() const
+        {
+            return num;
+        }
+        std::string display() const
+        {
+            return std::string("num") + " " + std::to_string(num);
+        }
     };
 
     struct Var : public Base {
-        Var(const Range& range, const std::string& var) : Base(range, ASTType::Var), var(var) {}
-        const std::string& value() const { return var; }
-        std::string display() const { return std::string("var") + " '" + var + "'"; }
+        Var(const Range& range, const std::string& var) : Base(range, ASTType::Var), var(var)
+        {
+        }
+        const std::string& value() const
+        {
+            return var;
+        }
+        std::string display() const
+        {
+            return std::string("var") + " '" + var + "'";
+        }
 
       private:
         std::string var;
@@ -229,18 +313,34 @@ struct ASTPolicy {
 
     struct Assign : public Base {
         Assign(const Range& range, const std::string& var, Ptr node)
-            : Base(range, ASTType::Assign, std::move(node)), var(var) {}
-        std::string display() const { return std::string("assign ") + " '" + var + "'"; }
-        const std::string& value() const { return var; }
+            : Base(range, ASTType::Assign, std::move(node)), var(var)
+        {
+        }
+        std::string display() const
+        {
+            return std::string("assign ") + " '" + var + "'";
+        }
+        const std::string& value() const
+        {
+            return var;
+        }
 
       private:
         std::string var;
     };
 
     struct Call : public Base {
-        Call(const Range& range, const std::string& symbolIn) : Base(range, ASTType::Call), func(symbolIn) {}
-        std::string display() const { return std::string("call ") + " '" + func + "'"; }
-        const std::string& value() const { return func; }
+        Call(const Range& range, const std::string& symbolIn) : Base(range, ASTType::Call), func(symbolIn)
+        {
+        }
+        std::string display() const
+        {
+            return std::string("call ") + " '" + func + "'";
+        }
+        const std::string& value() const
+        {
+            return func;
+        }
 
       private:
         std::string func;

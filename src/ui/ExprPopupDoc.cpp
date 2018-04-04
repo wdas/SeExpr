@@ -18,7 +18,8 @@
 #include <QLabel>
 #include <QHBoxLayout>
 
-ExprPopupDoc::ExprPopupDoc(QWidget* parent, const QPoint& placecr, const QString& msg) {
+ExprPopupDoc::ExprPopupDoc(QWidget* parent, const QPoint& placecr, const QString& msg)
+{
     Q_UNUSED(parent);
     label = new QLabel(msg);
     QHBoxLayout* layout = new QHBoxLayout;
@@ -34,7 +35,8 @@ ExprPopupDoc::ExprPopupDoc(QWidget* parent, const QPoint& placecr, const QString
     show();
 }
 
-void ExprPopupDoc::mousePressEvent(QMouseEvent* event) {
+void ExprPopupDoc::mousePressEvent(QMouseEvent* event)
+{
     Q_UNUSED(event);
     hide();
 }

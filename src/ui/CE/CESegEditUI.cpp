@@ -30,9 +30,12 @@
 #include "CETool.h"
 #include "CESegEditUI.h"
 
-MyTextEdit::MyTextEdit(QWidget* parent) : QTextEdit(parent), editing(false) {}
+MyTextEdit::MyTextEdit(QWidget* parent) : QTextEdit(parent), editing(false)
+{
+}
 
-void MyTextEdit::keyPressEvent(QKeyEvent* e) {
+void MyTextEdit::keyPressEvent(QKeyEvent* e)
+{
     // Accept expression
     if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter) {
         selectAll();
@@ -54,15 +57,19 @@ void MyTextEdit::keyPressEvent(QKeyEvent* e) {
     QTextEdit::keyPressEvent(e);
 }
 
-void MyTextEdit::setColor(bool editing) {}
+void MyTextEdit::setColor(bool editing)
+{
+}
 
-void MyTextEdit::finishEdit() {
+void MyTextEdit::finishEdit()
+{
     editing = false;
     setColor(false);
     emit editingFinished();
 }
 
-void MyTextEdit::focusOutEvent(QFocusEvent* e) {
+void MyTextEdit::focusOutEvent(QFocusEvent* e)
+{
     // setTextCursor(QTextCursor());
     finishEdit();
     QTextCursor newCursor = textCursor();
@@ -74,7 +81,8 @@ void MyTextEdit::focusOutEvent(QFocusEvent* e) {
 
 namespace {
 
-const char* TypeToLabel(const char* type) {
+const char* TypeToLabel(const char* type)
+{
     if (!strcmp(type, ""))
         return "expr";
     else if (!strcmp(type, "t"))
@@ -83,7 +91,8 @@ const char* TypeToLabel(const char* type) {
     return type;
 }
 
-const char* LabelToType(const char* label) {
+const char* LabelToType(const char* label)
+{
     if (!strcmp(label, "expr"))
         return "";
     else if (!strcmp(label, "tweak"))
@@ -125,7 +134,8 @@ struct InfinityTypesEntry {
                      {"oscillate", animlib::AnimCurve::kInfinityOscillate},
                      {0, animlib::AnimCurve::kInfinityConstant}};
 
-MyTextEdit* CESegEditUI::addEdit(QGridLayout* grid, int row, int col, const QString& label) {
+MyTextEdit* CESegEditUI::addEdit(QGridLayout* grid, int row, int col, const QString& label)
+{
     MyTextEdit* edit = new MyTextEdit(this);
     edit->setFixedWidth(EditMaxWidth * 1.5);
     edit->setFixedHeight(25);
@@ -137,7 +147,8 @@ MyTextEdit* CESegEditUI::addEdit(QGridLayout* grid, int row, int col, const QStr
     return edit;
 }
 
-QComboBox* CESegEditUI::addCombo(QGridLayout* grid, int row, int col, const QString& label) {
+QComboBox* CESegEditUI::addCombo(QGridLayout* grid, int row, int col, const QString& label)
+{
     QComboBox* combo;
     combo = new QComboBox();
     auto it = &TangTypes[0];
@@ -151,7 +162,8 @@ QComboBox* CESegEditUI::addCombo(QGridLayout* grid, int row, int col, const QStr
     return combo;
 }
 
-QComboBox* CESegEditUI::addComboInfinity(QGridLayout* grid, int row, int col, const QString& label) {
+QComboBox* CESegEditUI::addComboInfinity(QGridLayout* grid, int row, int col, const QString& label)
+{
     QComboBox* combo;
     combo = new QComboBox();
     auto it = &InfinityTypes[0];
@@ -168,7 +180,8 @@ QComboBox* CESegEditUI::addComboInfinity(QGridLayout* grid, int row, int col, co
 /**
  * Currently the default constructor does nothing.
  */
-CESegEditUI::CESegEditUI(QWidget* parent, CETool* tool) : QWidget(parent), _tool(tool), _valid(0), _updating(0) {
+CESegEditUI::CESegEditUI(QWidget* parent, CETool* tool) : QWidget(parent), _tool(tool), _valid(0), _updating(0)
+{
     setObjectName("SegEdit");
     setContentsMargins(0, 0, 0, 0);
 
@@ -223,28 +236,36 @@ CESegEditUI::CESegEditUI(QWidget* parent, CETool* tool) : QWidget(parent), _tool
 /**
  * Destructor.
  */
-CESegEditUI::~CESegEditUI() {
+CESegEditUI::~CESegEditUI()
+{
     // delete [] _params;
 }
 
-void CESegEditUI::invalidateCurve(int index) {
-    if (index == _curveIndex) invalidate();
+void CESegEditUI::invalidateCurve(int index)
+{
+    if (index == _curveIndex)
+        invalidate();
 }
 
-void CESegEditUI::invalidate() {
-    if (_updating) return;  // prevent circular update!
+void CESegEditUI::invalidate()
+{
+    if (_updating)
+        return;  // prevent circular update!
     if (_valid) {
         _valid = 0;
         update();
     }
 }
 
-void CESegEditUI::paintEvent(QPaintEvent* event) {
-    if (!_valid) doUpdate();
+void CESegEditUI::paintEvent(QPaintEvent* event)
+{
+    if (!_valid)
+        doUpdate();
     QWidget::paintEvent(event);
 }
 
-void CESegEditUI::doUpdate() {
+void CESegEditUI::doUpdate()
+{
     _updating = 1;
     // see if we have 1 and only 1 curve selected
     msg::list sel;
@@ -298,12 +319,14 @@ void CESegEditUI::doUpdate() {
 }
 
 namespace {
-void disableEdit(MyTextEdit* w) {
+void disableEdit(MyTextEdit* w)
+{
     w->setEnabled(0);
     w->setText("");
 }
 }
-void CESegEditUI::disableControls() {
+void CESegEditUI::disableControls()
+{
     disableEdit(_frame);
     disableEdit(_value);
     disableEdit(_inAngle);
@@ -325,7 +348,8 @@ void CESegEditUI::disableControls() {
     //    _params[i]->hide();
 }
 
-void CESegEditUI::enableTangType(QComboBox* combo, animlib::AnimKeyframe::tangentType type, bool enable) {
+void CESegEditUI::enableTangType(QComboBox* combo, animlib::AnimKeyframe::tangentType type, bool enable)
+{
     int index = 0;
     while (TangTypes[index].name != 0) {
         if (TangTypes[index].type == type) {
@@ -340,7 +364,8 @@ void CESegEditUI::enableTangType(QComboBox* combo, animlib::AnimKeyframe::tangen
     }
 }
 
-void CESegEditUI::enableInfinityType(QComboBox* combo, animlib::AnimCurve::infinityType type) {
+void CESegEditUI::enableInfinityType(QComboBox* combo, animlib::AnimCurve::infinityType type)
+{
     int index = 0;
     while (InfinityTypes[index].name != 0) {
         if (InfinityTypes[index].type == type) {
@@ -352,13 +377,16 @@ void CESegEditUI::enableInfinityType(QComboBox* combo, animlib::AnimCurve::infin
 }
 
 namespace {
-void setTextAndEnable(MyTextEdit* edit, double val, bool enableState = true) {
+void setTextAndEnable(MyTextEdit* edit, double val, bool enableState = true)
+{
     edit->setText(QString().sprintf("%g", val));
     edit->setEnabled(enableState);
-    if (edit->hasFocus()) edit->selectAll();
+    if (edit->hasFocus())
+        edit->selectAll();
 }
 }
-void CESegEditUI::enableControls() {
+void CESegEditUI::enableControls()
+{
     msg::str expr;
     msg::str type;
     msg::list params;
@@ -376,17 +404,23 @@ void CESegEditUI::enableControls() {
     enableTangType(_outType, key.getOutTangentType(), true);
 }
 
-void CESegEditUI::handleInfinityChanged() {
-    if (_updating) return;
-    if (_curveIndex < 0) return;
+void CESegEditUI::handleInfinityChanged()
+{
+    if (_updating)
+        return;
+    if (_curveIndex < 0)
+        return;
 
     _tool->setSelectedInfinity(InfinityTypes[_preInfinity->currentIndex()].type,
                                InfinityTypes[_postInfinity->currentIndex()].type);
 }
 
-void CESegEditUI::handleChanged() {
-    if (_updating) return;
-    if (_curveIndex < 0) return;
+void CESegEditUI::handleChanged()
+{
+    if (_updating)
+        return;
+    if (_curveIndex < 0)
+        return;
     bool ok = 0;
     double frame = _frame->toPlainText().toDouble(&ok);
     if (!ok) {
@@ -421,21 +455,28 @@ void CESegEditUI::handleChanged() {
     bool locked = _locked->isChecked();
     animlib::AnimKeyframe::tangentType inType = TangTypes[_inType->currentIndex()].type;
     animlib::AnimKeyframe::tangentType outType = TangTypes[_outType->currentIndex()].type;
-    if (locked) inType = outType;
+    if (locked)
+        inType = outType;
 
     _tool->setSelectedSegment(frame, value, inAngle, outAngle, inWeight, outWeight, inType, outType);
 }
 
-void CESegEditUI::weightedChanged(int val) {
-    if (_updating) return;
-    if (_curveIndex < 0) return;
+void CESegEditUI::weightedChanged(int val)
+{
+    if (_updating)
+        return;
+    if (_curveIndex < 0)
+        return;
 
     _tool->setSelectedWeighted(val);
 }
 
-void CESegEditUI::lockedChanged(int val) {
-    if (_updating) return;
-    if (_curveIndex < 0) return;
+void CESegEditUI::lockedChanged(int val)
+{
+    if (_updating)
+        return;
+    if (_curveIndex < 0)
+        return;
 
     _tool->setSelectedLocked(val);
 }

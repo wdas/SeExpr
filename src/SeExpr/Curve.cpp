@@ -25,34 +25,40 @@
 namespace SeExpr2 {
 
 template <>
-double Curve<double>::comp(const double& val, const int) {
+double Curve<double>::comp(const double& val, const int)
+{
     return val;
 }
 
 template <>
-double Curve<Vec3d>::comp(const Vec3d& val, const int i) {
+double Curve<Vec3d>::comp(const Vec3d& val, const int i)
+{
     return val[i];
 }
 
 template <class T>
-bool Curve<T>::cvLessThan(const CV& cv1, const CV& cv2) {
+bool Curve<T>::cvLessThan(const CV& cv1, const CV& cv2)
+{
     return cv1._pos < cv2._pos;
 }
 
 template <class T>
-Curve<T>::Curve() : cacheCV(0), prepared(false) {
+Curve<T>::Curve() : cacheCV(0), prepared(false)
+{
     _cvData.push_back(CV(-FLT_MAX, T(), kNone));
     _cvData.push_back(CV(FLT_MAX, T(), kNone));
 }
 
 template <class T>
-void Curve<T>::addPoint(double position, const T& val, InterpType type) {
+void Curve<T>::addPoint(double position, const T& val, InterpType type)
+{
     prepared = false;
     _cvData.push_back(CV(position, val, type));
 }
 
 template <class T>
-void Curve<T>::preparePoints() {
+void Curve<T>::preparePoints()
+{
     prepared = true;
     cacheCV = 0;
     // sort
@@ -100,7 +106,8 @@ void Curve<T>::preparePoints() {
 // TODO: this function and the next could be merged with template magic
 //       but it might be simpler to just have two copies!
 template <class T>
-T Curve<T>::getValue(const double param) const {
+T Curve<T>::getValue(const double param) const
+{
     assert(prepared);
     // find the cv data point index just greater than the desired param
     const int numPoints = _cvData.size();
@@ -115,36 +122,39 @@ T Curve<T>::getValue(const double param) const {
     const float t1 = _cvData[index]._pos;
     const T k1 = _cvData[index]._val;
     switch (interp) {
-        case kNone: return k0; break;
-        case kLinear: {
-            double u = (param - t0) / (t1 - t0);
-            return k0 + u * (k1 - k0);
-        } break;
-        case kSmooth: {
-            double u = (param - t0) / (t1 - t0);
-            return k0 * (u - 1) * (u - 1) * (2 * u + 1) + k1 * u * u * (3 - 2 * u);
-        } break;
-        case kSpline:
-        case kMonotoneSpline: {
-            double x = param - _cvData[index - 1]._pos;                // xstart
-            double h = _cvData[index]._pos - _cvData[index - 1]._pos;  // xend-xstart
-            T y = _cvData[index - 1]._val;                             // f(xstart)
-            T delta = _cvData[index]._val - _cvData[index - 1]._val;   // f(xend)-f(xstart)
-            T d1 = _cvData[index - 1]._deriv;                          // f'(xstart)
-            T d2 = _cvData[index]._deriv;                              // f'(xend)
-            return (x * (delta * (3 * h - 2 * x) * x + h * (-h + x) * (-(d1 * h) + (d1 + d2) * x))) / (h * h * h) + y;
-        } break;
-        default:
-            assert(false);
-            return T();
-            break;
+    case kNone:
+        return k0;
+        break;
+    case kLinear: {
+        double u = (param - t0) / (t1 - t0);
+        return k0 + u * (k1 - k0);
+    } break;
+    case kSmooth: {
+        double u = (param - t0) / (t1 - t0);
+        return k0 * (u - 1) * (u - 1) * (2 * u + 1) + k1 * u * u * (3 - 2 * u);
+    } break;
+    case kSpline:
+    case kMonotoneSpline: {
+        double x = param - _cvData[index - 1]._pos;                // xstart
+        double h = _cvData[index]._pos - _cvData[index - 1]._pos;  // xend-xstart
+        T y = _cvData[index - 1]._val;                             // f(xstart)
+        T delta = _cvData[index]._val - _cvData[index - 1]._val;   // f(xend)-f(xstart)
+        T d1 = _cvData[index - 1]._deriv;                          // f'(xstart)
+        T d2 = _cvData[index]._deriv;                              // f'(xend)
+        return (x * (delta * (3 * h - 2 * x) * x + h * (-h + x) * (-(d1 * h) + (d1 + d2) * x))) / (h * h * h) + y;
+    } break;
+    default:
+        assert(false);
+        return T();
+        break;
     }
 }
 
 // TODO: this function and the previous could be merged with template magic
 //       but it might be simpler to just have two copies!
 template <class T>
-double Curve<T>::getChannelValue(const double param, int channel) const {
+double Curve<T>::getChannelValue(const double param, int channel) const
+{
     assert(prepared);
     // find the cv data point index just greater than the desired param
     const int numPoints = _cvData.size();
@@ -159,56 +169,61 @@ double Curve<T>::getChannelValue(const double param, int channel) const {
     const float t1 = _cvData[index]._pos;
     const double k1 = comp(_cvData[index]._val, channel);
     switch (interp) {
-        case kNone: return k0; break;
-        case kLinear: {
+    case kNone:
+        return k0;
+        break;
+    case kLinear: {
+        double u = (param - t0) / (t1 - t0);
+        return k0 + u * (k1 - k0);
+    } break;
+    case kSmooth:
+        // standard cubic interpolation
+        {
             double u = (param - t0) / (t1 - t0);
-            return k0 + u * (k1 - k0);
-        } break;
-        case kSmooth:
-            // standard cubic interpolation
-            {
-                double u = (param - t0) / (t1 - t0);
-                return k0 * (u - 1) * (u - 1) * (2 * u + 1) + k1 * u * u * (3 - 2 * u);
-            }
-            break;
-        case kSpline:
-        case kMonotoneSpline: {
-            double x = param - _cvData[index - 1]._pos;                // xstart
-            double h = _cvData[index]._pos - _cvData[index - 1]._pos;  // xend-xstart
-            double y = comp(_cvData[index - 1]._val, channel);         // f(xtart)
-            double delta =
-                comp(_cvData[index]._val, channel) - comp(_cvData[index - 1]._val, channel);  // f(xend)-f(xtart)
-            double d1 = comp(_cvData[index - 1]._deriv, channel);                             // f'(xtart)
-            double d2 = comp(_cvData[index]._deriv, channel);                                 // f'(xend)
+            return k0 * (u - 1) * (u - 1) * (2 * u + 1) + k1 * u * u * (3 - 2 * u);
+        }
+        break;
+    case kSpline:
+    case kMonotoneSpline: {
+        double x = param - _cvData[index - 1]._pos;                                                  // xstart
+        double h = _cvData[index]._pos - _cvData[index - 1]._pos;                                    // xend-xstart
+        double y = comp(_cvData[index - 1]._val, channel);                                           // f(xtart)
+        double delta = comp(_cvData[index]._val, channel) - comp(_cvData[index - 1]._val, channel);  // f(xend)-f(xtart)
+        double d1 = comp(_cvData[index - 1]._deriv, channel);                                        // f'(xtart)
+        double d2 = comp(_cvData[index]._deriv, channel);                                            // f'(xend)
 
-            return (x * (delta * (3 * h - 2 * x) * x + h * (-h + x) * (-(d1 * h) + (d1 + d2) * x))) / (h * h * h) + y;
-        } break;
-        default:
-            assert(false);
-            return 0;
-            break;
+        return (x * (delta * (3 * h - 2 * x) * x + h * (-h + x) * (-(d1 * h) + (d1 + d2) * x))) / (h * h * h) + y;
+    } break;
+    default:
+        assert(false);
+        return 0;
+        break;
     }
 }
 
 template <class T>
-typename Curve<T>::CV Curve<T>::getLowerBoundCV(const double param) const {
+typename Curve<T>::CV Curve<T>::getLowerBoundCV(const double param) const
+{
     assert(prepared);
     const CV* cvDataBegin = &_cvData[0];
     int numPoints = _cvData.size();
     int index =
         std::upper_bound(cvDataBegin, cvDataBegin + numPoints, CV(param, T(), kLinear), cvLessThan) - cvDataBegin;
     index = std::max(1, std::min(index, numPoints - 1));
-    if (index - 1 > 0) return _cvData[index - 1];
+    if (index - 1 > 0)
+        return _cvData[index - 1];
     return _cvData[index];
 }
 
 template <class T>
-bool Curve<T>::interpTypeValid(InterpType interp) {
+bool Curve<T>::interpTypeValid(InterpType interp)
+{
     return interp == kNone || interp == kLinear || interp == kSmooth || interp == kSpline || interp == kMonotoneSpline;
 }
 
 template <>
-inline void Curve<double>::clampCurveSegment(const double& delta, double& d1, double& d2) {
+inline void Curve<double>::clampCurveSegment(const double& delta, double& d1, double& d2)
+{
     if (delta == 0)
         d1 = d2 = 0;
     else {
@@ -218,7 +233,8 @@ inline void Curve<double>::clampCurveSegment(const double& delta, double& d1, do
 }
 
 template <>
-void Curve<Vec3d>::clampCurveSegment(const Vec3d& delta, Vec3d& d1, Vec3d& d2) {
+void Curve<Vec3d>::clampCurveSegment(const Vec3d& delta, Vec3d& d1, Vec3d& d2)
+{
     for (int i = 0; i < 3; i++) {
         if (delta[i] == 0)
             d1[i] = d2[i] = 0;

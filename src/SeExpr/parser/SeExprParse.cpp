@@ -21,7 +21,8 @@
 
 //#ifdef TEST_PARSER
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     if (argc != 2) {
         std::cerr << "usage: SeExprParse <filename>" << std::endl;
         exit(1);

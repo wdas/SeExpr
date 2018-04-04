@@ -103,8 +103,12 @@ class CCurveScene : public QGraphicsScene {
 class ExprCBoxWidget : public QWidget {
     Q_OBJECT
   public:
-    ExprCBoxWidget(CCurveScene* curveScene, QWidget* parent = 0) : QWidget(parent), _curveScene(curveScene) {}
-    ~ExprCBoxWidget() {}
+    ExprCBoxWidget(CCurveScene* curveScene, QWidget* parent = 0) : QWidget(parent), _curveScene(curveScene)
+    {
+    }
+    ~ExprCBoxWidget()
+    {
+    }
 
   protected:
     virtual void paintEvent(QPaintEvent* event);
@@ -117,7 +121,9 @@ class ExprCSwatchFrame : public QFrame {
     Q_OBJECT
   public:
     ExprCSwatchFrame(SeExpr2::Vec3d value, QWidget* parent = 0);
-    ~ExprCSwatchFrame() {}
+    ~ExprCSwatchFrame()
+    {
+    }
 
     void setValue(const SeExpr2::Vec3d& value);
     SeExpr2::Vec3d getValue() const;
@@ -147,7 +153,9 @@ class ExprColorCurve : public QWidget {
                    QString vLabel = "",
                    QString iLabel = "",
                    bool expandable = true);
-    ~ExprColorCurve() {}
+    ~ExprColorCurve()
+    {
+    }
 
     // Convenience Functions
     void addPoint(const double x, const SeExpr2::Vec3d y, const T_INTERP interp, bool select = false);

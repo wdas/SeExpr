@@ -31,7 +31,9 @@
 #include <SeExpr2/Vec.h>
 
 struct SeDeepWaterParams {
-    SeDeepWaterParams() {}
+    SeDeepWaterParams()
+    {
+    }
     SeDeepWaterParams(int resolutionIn,
                       double tileSizeIn,
                       double lengthCutoffIn,
@@ -44,10 +46,20 @@ struct SeDeepWaterParams {
                       double sharpenIn,
                       double timeIn,
                       double filterWidthIn)
-        : resolution(resolutionIn), tileSize(tileSizeIn), lengthCutoff(lengthCutoffIn), amplitude(amplitudeIn),
-          windAngle(windAngleIn), windSpeed(windSpeedIn), directionalFactorExponent(directionalFactorExponentIn),
-          directionalReflectionDamping(directionalReflectionDampingIn), flowDirection(flowDirectionIn),
-          sharpen(sharpenIn), time(timeIn), filterWidth(filterWidthIn) {}
+        : resolution(resolutionIn)
+        , tileSize(tileSizeIn)
+        , lengthCutoff(lengthCutoffIn)
+        , amplitude(amplitudeIn)
+        , windAngle(windAngleIn)
+        , windSpeed(windSpeedIn)
+        , directionalFactorExponent(directionalFactorExponentIn)
+        , directionalReflectionDamping(directionalReflectionDampingIn)
+        , flowDirection(flowDirectionIn)
+        , sharpen(sharpenIn)
+        , time(timeIn)
+        , filterWidth(filterWidthIn)
+    {
+    }
 
     int resolution;
     double tileSize;
@@ -65,35 +77,66 @@ struct SeDeepWaterParams {
 
 template <class T>
 struct SeDeepWater {
-    SeDeepWater() : gravity(9.8) {}
-    virtual ~SeDeepWater() {}
+    SeDeepWater() : gravity(9.8)
+    {
+    }
+    virtual ~SeDeepWater()
+    {
+    }
 
-    void setParams(const SeDeepWaterParams& paramsIn) {
+    void setParams(const SeDeepWaterParams& paramsIn)
+    {
         params = paramsIn;
         gridSize = 1 << params.resolution;
     }
 
-    T sqr(T x) { return x * x; }
+    T sqr(T x)
+    {
+        return x * x;
+    }
 
-    inline static T kscale() { return 1 / 100.0; };
+    inline static T kscale()
+    {
+        return 1 / 100.0;
+    };
 
-    T toIndex(const T x) { return x / kscale(); }
+    T toIndex(const T x)
+    {
+        return x / kscale();
+    }
 
-    T fromIndex(const T index) { return kscale() * index; }
+    T fromIndex(const T index)
+    {
+        return kscale() * index;
+    }
 
-    inline static T bottom_offset() { return -5; };
+    inline static T bottom_offset()
+    {
+        return -5;
+    };
 
-    T fromLog(const T x) { return std::log(x) - bottom_offset(); }
+    T fromLog(const T x)
+    {
+        return std::log(x) - bottom_offset();
+    }
 
-    T toLog(const T z) { return std::exp(z + bottom_offset()); }
+    T toLog(const T z)
+    {
+        return std::exp(z + bottom_offset());
+    }
 
-    T powerLaw(const T x, const SeDeepWaterParams& params) {
+    T powerLaw(const T x, const SeDeepWaterParams& params)
+    {
         return params.amplitude * exp(-1 / sqr(x)) / pow(x, 4 + params.directionalFactorExponent);  // power law
     }
 
-    T rescale(const T x) { return std::pow(x, .1); }
+    T rescale(const T x)
+    {
+        return std::pow(x, .1);
+    }
 
-    void generateSpectrum() {
+    void generateSpectrum()
+    {
         const T L = params.windSpeed * params.windSpeed / gravity;
         const T coefficient = 2 * M_PI / params.tileSize;
 
@@ -122,25 +165,34 @@ struct SeDeepWater {
     }
 
     //! Evaluates curve and returns full value
-    T getValue(double param) const {
-        if (energy.empty()) return 0;
-        if (param < 0) param = 0;
-        if (param > 1) param = 1;
+    T getValue(double param) const
+    {
+        if (energy.empty())
+            return 0;
+        if (param < 0)
+            param = 0;
+        if (param > 1)
+            param = 1;
         int index = param * energy.size() - 1;
         return energy[index];
     }
 
-    T getKLow() {
+    T getKLow()
+    {
         T klow = (T)klowindex / energy.size();
         return klow < 0 ? 0 : klow;
     }
 
-    T getKHigh() {
+    T getKHigh()
+    {
         T khigh = (T)khighindex / energy.size();
         return khigh > 1 ? 1 : khigh;
     }
 
-    bool inGrid() { return kmaxindex > klowindex && kmaxindex < khighindex; }
+    bool inGrid()
+    {
+        return kmaxindex > klowindex && kmaxindex < khighindex;
+    }
 
     T gravity;
     size_t gridSize;
@@ -157,11 +209,14 @@ struct SeDeepWater {
 class DeepWaterGraphicsView : public QGraphicsView {
     Q_OBJECT
   public:
-    DeepWaterGraphicsView() {
+    DeepWaterGraphicsView()
+    {
         setTransformationAnchor(QGraphicsView::NoAnchor);
         setResizeAnchor(QGraphicsView::NoAnchor);
     }
-    ~DeepWaterGraphicsView() {}
+    ~DeepWaterGraphicsView()
+    {
+    }
 
     virtual void resizeEvent(QResizeEvent* event);
 
@@ -173,14 +228,19 @@ class DeepWaterLineEdit : public QLineEdit {
     Q_OBJECT
 
   public:
-    DeepWaterLineEdit(QWidget* = 0) {}
-    ~DeepWaterLineEdit() {}
+    DeepWaterLineEdit(QWidget* = 0)
+    {
+    }
+    ~DeepWaterLineEdit()
+    {
+    }
 
   signals:
     void focusOut();
 
   protected:
-    virtual void focusOutEvent(QFocusEvent* e) {
+    virtual void focusOutEvent(QFocusEvent* e)
+    {
         QLineEdit::focusOutEvent(e);
         emit(focusOut());
     }
@@ -244,7 +304,9 @@ class ExprDeepWater : public QWidget {
     Q_OBJECT
   public:
     ExprDeepWater(QWidget* parent = 0);
-    ~ExprDeepWater() {}
+    ~ExprDeepWater()
+    {
+    }
 
     void setParams(const SeDeepWaterParams& params);
     DeepWaterScene* _scene;

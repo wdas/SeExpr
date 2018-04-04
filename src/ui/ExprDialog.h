@@ -70,9 +70,15 @@ class ExprDialog : public QDialog {
   public:
     ExprDialog(QWidget* parent);
 
-    std::string getExpressionString() { return editor->getExpr(); }
+    std::string getExpressionString()
+    {
+        return editor->getExpr();
+    }
 
-    void setExpressionString(const std::string& str) { editor->setExpr(str); }
+    void setExpressionString(const std::string& str)
+    {
+        editor->setExpr(str);
+    }
 
     void show();
     int exec();

@@ -27,7 +27,8 @@
 
 using namespace SeExpr2;
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     if (argc != 5) {
         std::cerr << "Usage: " << argv[0] << " <image file> <width> <height> <exprFile>" << std::endl;
         return 1;

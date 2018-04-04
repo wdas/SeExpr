@@ -39,16 +39,24 @@ class ExprHighlighter : public QSyntaxHighlighter {
     int lightness;
 
   public:
-    ExprHighlighter(QTextDocument* parent) : QSyntaxHighlighter(parent), lightness(130) { init(); }
+    ExprHighlighter(QTextDocument* parent) : QSyntaxHighlighter(parent), lightness(130)
+    {
+        init();
+    }
 
-    ExprHighlighter(QTextEdit* edit) : QSyntaxHighlighter(edit), lightness(130) { init(); }
+    ExprHighlighter(QTextEdit* edit) : QSyntaxHighlighter(edit), lightness(130)
+    {
+        init();
+    }
 
-    void fixStyle(const QPalette& palette) {
+    void fixStyle(const QPalette& palette)
+    {
         lightness = palette.color(QPalette::Base).value() < 127 ? 250 : 130;
         init();
     }
 
-    void init() {
+    void init()
+    {
         HighlightingRule rule;
         highlightingRules.clear();
 
@@ -84,7 +92,8 @@ class ExprHighlighter : public QSyntaxHighlighter {
         highlightingRules.append(rule);
     }
 
-    void highlightBlock(const QString& text) {
+    void highlightBlock(const QString& text)
+    {
         foreach (HighlightingRule rule, highlightingRules) {
             QRegExp expression(rule.pattern);
             int index = text.indexOf(expression);

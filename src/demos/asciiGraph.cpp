@@ -28,33 +28,48 @@ using namespace SeExpr2;
 class GrapherExpr : public Expression {
   public:
     //! Constructor that takes the expression to parse
-    GrapherExpr(const std::string& expr) : Expression(expr) {}
+    GrapherExpr(const std::string& expr) : Expression(expr)
+    {
+    }
 
     //! set the independent variable
-    void setX(double x_input) { x.val = x_input; }
+    void setX(double x_input)
+    {
+        x.val = x_input;
+    }
 
   private:
     //! Simple variable that just returns its internal value
     struct SimpleVar : public ExprVarRef {
-        SimpleVar() : ExprVarRef(ExprType().FP(1).Varying()), val(0.0) {}
+        SimpleVar() : ExprVarRef(ExprType().FP(1).Varying()), val(0.0)
+        {
+        }
 
         double val;  // independent variable
-        void eval(double* result) { result[0] = val; }
+        void eval(double* result)
+        {
+            result[0] = val;
+        }
 
-        void eval(const char**) {}
+        void eval(const char**)
+        {
+        }
     };
 
     //! independent variable
     mutable SimpleVar x;
 
     //! resolve function that only supports one external variable 'x'
-    ExprVarRef* resolveVar(const std::string& name) const {
-        if (name == "x") return &x;
+    ExprVarRef* resolveVar(const std::string& name) const
+    {
+        if (name == "x")
+            return &x;
         return 0;
     }
 };
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     if (argc > 2) {
         std::cerr << "usage: asciiGraph <filename>" << std::endl;
         exit(1);
@@ -117,7 +132,8 @@ int main(int argc, char* argv[]) {
             // transform from logical to device coordinate
             int j = (y - ymin) / (ymax - ymin) * h;
             // store to the buffer
-            if (j >= 0 && j < h) buffer[i + j * w] = '#';
+            if (j >= 0 && j < h)
+                buffer[i + j * w] = '#';
         }
     }
 

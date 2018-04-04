@@ -32,16 +32,31 @@ class CEGraphCurve {
   public:
     CEGraphCurve(CEGraphUI* ui, animlib::AnimCurve* data, int index);
     ~CEGraphCurve();
-    CEGraphUI* ui() { return _ui; }
-    animlib::AnimCurve& animCurve() { return *_animCurve; }
-    int index() { return _index; }
+    CEGraphUI* ui()
+    {
+        return _ui;
+    }
+    animlib::AnimCurve& animCurve()
+    {
+        return *_animCurve;
+    }
+    int index()
+    {
+        return _index;
+    }
     void paint(bool selected);
     void invalidate();
     void invalidateView();
     int numSegs();
     void getSegAndKey(int segIndex, CEGraphSeg*& seg, CEGraphKey*& key);
-    int firstSegInView() { return _firstSegInView; }
-    int lastSegInView() { return _lastSegInView; }
+    int firstSegInView()
+    {
+        return _firstSegInView;
+    }
+    int lastSegInView()
+    {
+        return _lastSegInView;
+    }
 
   private:
     void clearSegs();
@@ -57,7 +72,9 @@ class CEGraphCurve {
     bool _viewValid;
 
     struct SegPtr {
-        SegPtr() : seg(0), key(0) {}
+        SegPtr() : seg(0), key(0)
+        {
+        }
         CEGraphSeg* seg;  // segment built lazily in getSeg()
         CEGraphKey* key;  // segment built lazily in getSeg()
     };

@@ -133,9 +133,15 @@ class CETool : public QObject {
 
     /// from iTool
     /// applies any configuration changes to the tool
-    err::Result configureTool() { return errSUCCESS; }
+    err::Result configureTool()
+    {
+        return errSUCCESS;
+    }
     /// saves any configuration changes to the tool
-    err::Result saveToolConfiguration() { return errSUCCESS; }
+    err::Result saveToolConfiguration()
+    {
+        return errSUCCESS;
+    }
     /// the tool should map the GUI and return the associated QWidget
     err::Result map(QWidget*& uiComponent, QWidget* parent);
     // called after the gui for the tool has been mapped
@@ -144,9 +150,15 @@ class CETool : public QObject {
     err::Result postUnmapNotify();
 
     /// public methods
-    int numCurves() const { return (int)_curves.size(); }
+    int numCurves() const
+    {
+        return (int)_curves.size();
+    }
 
-    CEMainUI* ui() { return _ui; }
+    CEMainUI* ui()
+    {
+        return _ui;
+    }
 
   signals:
     void curveChanged(int index);
@@ -163,7 +175,10 @@ class CETool : public QObject {
     CETool& operator=(const CETool&);
 
     /// Called by msg code when tool is unregistered
-    virtual void release() { delete this; }
+    virtual void release()
+    {
+        delete this;
+    }
 
     void addCurveInternal(animlib::AnimCurve* id, const char* name);
     int findCurve(animlib::AnimCurve* curve);
@@ -185,7 +200,10 @@ class CETool : public QObject {
         int numSegs;
         std::set<int> segsSelected;
 
-        ~CurveData() { delete animCurve; }
+        ~CurveData()
+        {
+            delete animCurve;
+        }
     };
     typedef std::vector<CurveData*> CurveList;
     CurveList _curves;

@@ -43,13 +43,15 @@ namespace SeExpr2 {
 bool Expression::debugging = getenv("SE_EXPR_DEBUG") != 0;
 // Choose the defeault strategy based on what we've compiled with (SEEXPR_ENABLE_LLVM)
 // And the environment variables SE_EXPR_DEBUG
-static Expression::EvaluationStrategy chooseDefaultEvaluationStrategy() {
+static Expression::EvaluationStrategy chooseDefaultEvaluationStrategy()
+{
     if (Expression::debugging) {
         std::cerr << "SeExpr2 Debug Mode Enabled " << __VERSION__ << std::endl;
     }
 #ifdef SEEXPR_ENABLE_LLVM
     if (char* env = getenv("SE_EXPR_EVAL")) {
-        if (Expression::debugging) std::cerr << "Overriding SeExpr Evaluation Default to be " << env << std::endl;
+        if (Expression::debugging)
+            std::cerr << "Overriding SeExpr Evaluation Default to be " << env << std::endl;
         return !strcmp(env, "LLVM") ? Expression::UseLLVM : !strcmp(env, "INTERPRETER") ? Expression::UseInterpreter
                                                                                         : Expression::UseInterpreter;
     } else
@@ -66,7 +68,8 @@ class TypePrintExaminer : public SeExpr2::Examiner<true> {
     virtual void reset(){};
 };
 
-bool TypePrintExaminer::examine(const ExprNode* examinee) {
+bool TypePrintExaminer::examine(const ExprNode* examinee)
+{
     const ExprNode* curr = examinee;
     int depth = 0;
     char buf[1024];
@@ -83,24 +86,47 @@ bool TypePrintExaminer::examine(const ExprNode* examinee) {
 
 class NullEvaluator : public Evaluator {
   public:
-    virtual ~NullEvaluator() {}
-
-    virtual void setDebugging(bool) override { /* do nothing */
+    virtual ~NullEvaluator()
+    {
     }
-    virtual void dump() const override {}
 
-    virtual bool prep(ExprNode*, ExprType) { return false; }
-    virtual bool isValid() const override { return false; }
+    virtual void setDebugging(bool) override
+    { /* do nothing */
+    }
+    virtual void dump() const override
+    {
+    }
 
-    virtual void evalFP(double*, VarBlock*) const override {}
-    virtual void evalStr(char*, VarBlock*) const override {}
-    virtual void evalMultiple(VarBlock*, double*, size_t, size_t) const override {}
+    virtual bool prep(ExprNode*, ExprType)
+    {
+        return false;
+    }
+    virtual bool isValid() const override
+    {
+        return false;
+    }
+
+    virtual void evalFP(double*, VarBlock*) const override
+    {
+    }
+    virtual void evalStr(char*, VarBlock*) const override
+    {
+    }
+    virtual void evalMultiple(VarBlock*, double*, size_t, size_t) const override
+    {
+    }
 };
 
 Expression::Expression(Expression::EvaluationStrategy evaluationStrategyHint)
-    : _wantVec(true), _expression(""), _evaluationStrategyHint(evaluationStrategyHint), _context(&Context::global()),
-      _desiredReturnType(ExprType().FP(3).Varying()), _parseTree(nullptr), _evaluator(nullptr),
-      _varBlockCreator(nullptr) {
+    : _wantVec(true)
+    , _expression("")
+    , _evaluationStrategyHint(evaluationStrategyHint)
+    , _context(&Context::global())
+    , _desiredReturnType(ExprType().FP(3).Varying())
+    , _parseTree(nullptr)
+    , _evaluator(nullptr)
+    , _varBlockCreator(nullptr)
+{
     ExprFunc::init();
 }
 
@@ -108,14 +134,25 @@ Expression::Expression(const std::string& e,
                        const ExprType& type,
                        EvaluationStrategy evaluationStrategyHint,
                        const Context& context)
-    : _wantVec(true), _expression(e), _evaluationStrategyHint(evaluationStrategyHint), _context(&context),
-      _desiredReturnType(type), _parseTree(nullptr), _evaluator(nullptr), _varBlockCreator(nullptr) {
+    : _wantVec(true)
+    , _expression(e)
+    , _evaluationStrategyHint(evaluationStrategyHint)
+    , _context(&context)
+    , _desiredReturnType(type)
+    , _parseTree(nullptr)
+    , _evaluator(nullptr)
+    , _varBlockCreator(nullptr)
+{
     ExprFunc::init();
 }
 
-Expression::~Expression() { reset(); }
+Expression::~Expression()
+{
+    reset();
+}
 
-void Expression::reset() {
+void Expression::reset()
+{
     std::lock_guard<std::mutex> guard(_prepMutex);
     _evaluator.reset(nullptr);
     _parseTree.reset(nullptr);
@@ -129,48 +166,61 @@ void Expression::reset() {
     _results.resize(_desiredReturnType.dim());
 }
 
-void Expression::setContext(const Context& context) {
+void Expression::setContext(const Context& context)
+{
     reset();
     _context = &context;
 }
 
-void Expression::setDesiredReturnType(const ExprType& type) {
+void Expression::setDesiredReturnType(const ExprType& type)
+{
     if (_desiredReturnType != type) {
         reset();
         _desiredReturnType = type;
     }
 }
 
-void Expression::setVarBlockCreator(const VarBlockCreator* creator) {
+void Expression::setVarBlockCreator(const VarBlockCreator* creator)
+{
     if (_varBlockCreator != creator) {
         reset();
         _varBlockCreator = creator;
     }
 }
 
-void Expression::setExpr(const std::string& e) {
+void Expression::setExpr(const std::string& e)
+{
     if (_expression != e) {
-        if (!_expression.empty()) reset();
+        if (!_expression.empty())
+            reset();
         _expression = e;
     }
 }
 
-bool Expression::isConstant() const { return returnType().isLifetimeConstant(); }
+bool Expression::isConstant() const
+{
+    return returnType().isLifetimeConstant();
+}
 
-bool Expression::usesVar(const std::string& name) const {
+bool Expression::usesVar(const std::string& name) const
+{
     prep();
     return _vars.find(name) != _vars.end();
 }
 
-bool Expression::usesFunc(const std::string& name) const {
+bool Expression::usesFunc(const std::string& name) const
+{
     prep();
     return _funcs.find(name) != _funcs.end();
 }
 
-void Expression::parse() const {
-    if (_parseTree) return;
+void Expression::parse() const
+{
+    if (_parseTree)
+        return;
     std::lock_guard<std::mutex> guard(_parseMutex);
-    if (_parseTree) return;
+    if (_parseTree)
+        return;
     int tempStartPos, tempEndPos;
     ExprNode* parseTree_ = nullptr;
     bool OK = ExprParseAction(parseTree_, _parseError, tempStartPos, tempEndPos, _comments, this, _expression.c_str(),
@@ -185,10 +235,13 @@ void Expression::parse() const {
     }
 }
 
-void Expression::prep() const {
-    if (_evaluator) return;
+void Expression::prep() const
+{
+    if (_evaluator)
+        return;
     std::lock_guard<std::mutex> guard(_prepMutex);
-    if (_evaluator) return;
+    if (_evaluator)
+        return;
 #ifdef SEEXPR_PERFORMANCE
     PrintTiming timer("[ PREP     ] v2 prep time: ");
 #endif
@@ -227,7 +280,8 @@ void Expression::prep() const {
     }
 
     if (error) {
-        if (evaluator) delete evaluator;
+        if (evaluator)
+            delete evaluator;
         evaluator = nullptr;
         _returnType = ExprType().Error();
 
@@ -236,7 +290,8 @@ void Expression::prep() const {
         const char* start = _expression.c_str();
         const char* p = _expression.c_str();
         while (*p != 0) {
-            if (*p == '\n') lines.push_back(p - start);
+            if (*p == '\n')
+                lines.push_back(p - start);
             p++;
         }
         lines.push_back(p - start);
@@ -256,18 +311,24 @@ void Expression::prep() const {
         std::cerr << "parse error \n" << parseError() << std::endl;
     }
 
-    if (!evaluator) evaluator = new NullEvaluator();
+    if (!evaluator)
+        evaluator = new NullEvaluator();
     _evaluator.reset(evaluator);
     assert(_evaluator);
 }
 
-bool Expression::isVec() const { return syntaxOK() ? _parseTree->isVec() : _wantVec; }
-const ExprType& Expression::returnType() const {
+bool Expression::isVec() const
+{
+    return syntaxOK() ? _parseTree->isVec() : _wantVec;
+}
+const ExprType& Expression::returnType() const
+{
     prep();
     return _returnType;
 }
 
-void Expression::evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) const {
+void Expression::evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) const
+{
     assert(varBlock);
     double* outputPtr = const_cast<double*&>(varBlock->Pointer(outputVarBlockOffset));
     evaluator()->evalMultiple(varBlock, outputPtr, rangeStart, rangeEnd);

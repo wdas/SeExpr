@@ -28,9 +28,14 @@
 #include <cstring>
 
 struct ParseError {
-    ParseError(const std::string& errorStr) : _errorStr(errorStr) {}
+    ParseError(const std::string& errorStr) : _errorStr(errorStr)
+    {
+    }
 
-    const std::string& what() const { return _errorStr; }
+    const std::string& what() const
+    {
+        return _errorStr;
+    }
 
     std::string _errorStr;
 };
@@ -88,17 +93,26 @@ class Lexer {
     };
 
     struct Buffer {
-        Buffer(const std::string& bufIn) : text(bufIn), buf(text.c_str()), curr(buf) {}
+        Buffer(const std::string& bufIn) : text(bufIn), buf(text.c_str()), curr(buf)
+        {
+        }
         // read current character
-        char operator()() const { return *curr; }
+        char operator()() const
+        {
+            return *curr;
+        }
         // Move character pointer backward
-        void operator--() {
+        void operator--()
+        {
             // TODO: if you hit the edge this is wrong!
-            if (*curr != '\0') curr--;
-            if (curr < buf) throw std::runtime_error("Unpop");
+            if (*curr != '\0')
+                curr--;
+            if (curr < buf)
+                throw std::runtime_error("Unpop");
         }
         // Move character pointer forward (or not if we are at EOF)
-        void operator++() {
+        void operator++()
+        {
             if (*curr != 0) {
                 curr++;
                 if (*curr == '\n') {
@@ -110,22 +124,28 @@ class Lexer {
             }
         }
 
-        void mark() { start = curr; }
+        void mark()
+        {
+            start = curr;
+        }
 
-        std::string markToCurr() const {
+        std::string markToCurr() const
+        {
             std::string stringOut(start, curr);
             // std::copy(start,curr,stringOut.begin());
             return stringOut;
         }
 
-        std::array<int, 2> getTokenPosition() const {
+        std::array<int, 2> getTokenPosition() const
+        {
             std::array<int, 2> ret;
             ret[0] = start - buf;
             ret[1] = curr - buf;
             return ret;
         }
 
-        std::string underlineToken(std::array<int, 2> position) const {
+        std::string underlineToken(std::array<int, 2> position) const
+        {
             int bufLen = strlen(buf);
             std::cerr << "position " << position[0] << " " << position[1] << " buflen " << bufLen << std::endl;
 
@@ -162,26 +182,41 @@ class Lexer {
         int col;
     };
 
-    Lexer(const std::string& bufIn) : buffer(bufIn) { populateReservedWords(); }
+    Lexer(const std::string& bufIn) : buffer(bufIn)
+    {
+        populateReservedWords();
+    }
 
     static std::string getTokenName(Token tok);
 
-    std::string getTokenText() const { return buffer.markToCurr(); }
+    std::string getTokenText() const
+    {
+        return buffer.markToCurr();
+    }
 
-    std::array<int, 2> getTokenPosition() const { return buffer.getTokenPosition(); }
+    std::array<int, 2> getTokenPosition() const
+    {
+        return buffer.getTokenPosition();
+    }
 
-    std::string underlineToken(const std::array<int, 2>& position) const { return buffer.underlineToken(position); }
+    std::string underlineToken(const std::array<int, 2>& position) const
+    {
+        return buffer.underlineToken(position);
+    }
 
-    Token getToken() {
+    Token getToken()
+    {
         // First eat anything that is whitespace and comments
         bool ateCommentsOrWhitespace = true;
         while (ateCommentsOrWhitespace) {
             ateCommentsOrWhitespace = false;
             // skip whitespace
-            for (; buffer() == ' ' || buffer() == '\t' || buffer() == '\n'; ++buffer) ateCommentsOrWhitespace = true;
+            for (; buffer() == ' ' || buffer() == '\t' || buffer() == '\n'; ++buffer)
+                ateCommentsOrWhitespace = true;
             // eat comments
             if (buffer() == '#') {
-                while (buffer() != '\n' && buffer() != '\0') ++buffer;
+                while (buffer() != '\n' && buffer() != '\0')
+                    ++buffer;
                 ++buffer;
                 ateCommentsOrWhitespace = true;
             }
@@ -192,8 +227,10 @@ class Lexer {
         if (buffer() == '$' || isalpha(buffer())) {
             std::string ident;
             // ident.push_back(buffer());
-            if (buffer() == '$') ++buffer;
-            for (; isalpha(buffer()) || buffer() == '_' || isdigit(buffer()); ++buffer) ident.push_back(buffer());
+            if (buffer() == '$')
+                ++buffer;
+            for (; isalpha(buffer()) || buffer() == '_' || isdigit(buffer()); ++buffer)
+                ident.push_back(buffer());
             auto it = reservedWords.find(ident);
             if (ident.empty())
                 throw ParseError("Variable has no text length! hint: ${frame} should be substituted upstream" +
@@ -232,116 +269,142 @@ class Lexer {
         char firstChar = buffer();
         ++buffer;
         switch (firstChar) {
-            case '|':
-                if (buffer() == '|') {
-                    ++buffer;
-                    return OR;
-                }
-                break;
-            case '&':
-                if (buffer() == '&') {
-                    ++buffer;
-                    return AND;
-                }
-                break;
-            case '=':
-                if (buffer() == '=') {
-                    ++buffer;
-                    return EQUALS;
-                } else
-                    return ASSIGN;
-                break;
-            case '!':
-                if (buffer() == '=') {
-                    ++buffer;
-                    return NOT_EQUALS;
-                } else
-                    return NOT;
-                break;
-            case '>':
-                if (buffer() == '=') {
-                    ++buffer;
-                    return GREATER_EQUAL;
-                } else
-                    return GREATER;
-                break;
-            case '<':
-                if (buffer() == '=') {
-                    ++buffer;
-                    return LESS_EQUAL;
-                } else
-                    return LESS;
-                break;
-            case '+':
-                if (buffer() == '=') {
-                    ++buffer;
-                    return PLUS_EQUAL;
-                } else
-                    return PLUS;
-                break;
-            case '-':
-                if (buffer() == '=') {
-                    ++buffer;
-                    return MINUS_EQUAL;
-                }
-                if (buffer() == '>') {
-                    ++buffer;
-                    return ARROW;
-                } else
-                    return MINUS;
-                break;
-            case '*':
-                if (buffer() == '=') {
-                    ++buffer;
-                    return TIMES_EQUAL;
-                } else
-                    return TIMES;
-                break;
-            case '/':
-                if (buffer() == '=') {
-                    ++buffer;
-                    return DIVIDE_EQUAL;
-                } else
-                    return DIVIDE;
-                break;
-            case '%':
-                if (buffer() == '=') {
-                    ++buffer;
-                    return MOD_EQUAL;
-                } else
-                    return MOD;
-                break;
-            case '^':
-                if (buffer() == '=') {
-                    ++buffer;
-                    return POWER_EQUAL;
-                } else
-                    return POWER;
-                break;
-            case '~': return TWIDLE; break;
-            case '[': return BRACKET_OPEN; break;
-            case ']': return BRACKET_CLOSE; break;
-            case '{': return BRACE_OPEN; break;
-            case '}': return BRACE_CLOSE; break;
-            case '(': return PAREN_OPEN; break;
-            case ')': return PAREN_CLOSE; break;
-            case '?': return QUESTION; break;
-            case ':': return COLON; break;
-            case ';': return SEMICOLON; break;
-            case ',': return COMMA; break;
+        case '|':
+            if (buffer() == '|') {
+                ++buffer;
+                return OR;
+            }
+            break;
+        case '&':
+            if (buffer() == '&') {
+                ++buffer;
+                return AND;
+            }
+            break;
+        case '=':
+            if (buffer() == '=') {
+                ++buffer;
+                return EQUALS;
+            } else
+                return ASSIGN;
+            break;
+        case '!':
+            if (buffer() == '=') {
+                ++buffer;
+                return NOT_EQUALS;
+            } else
+                return NOT;
+            break;
+        case '>':
+            if (buffer() == '=') {
+                ++buffer;
+                return GREATER_EQUAL;
+            } else
+                return GREATER;
+            break;
+        case '<':
+            if (buffer() == '=') {
+                ++buffer;
+                return LESS_EQUAL;
+            } else
+                return LESS;
+            break;
+        case '+':
+            if (buffer() == '=') {
+                ++buffer;
+                return PLUS_EQUAL;
+            } else
+                return PLUS;
+            break;
+        case '-':
+            if (buffer() == '=') {
+                ++buffer;
+                return MINUS_EQUAL;
+            }
+            if (buffer() == '>') {
+                ++buffer;
+                return ARROW;
+            } else
+                return MINUS;
+            break;
+        case '*':
+            if (buffer() == '=') {
+                ++buffer;
+                return TIMES_EQUAL;
+            } else
+                return TIMES;
+            break;
+        case '/':
+            if (buffer() == '=') {
+                ++buffer;
+                return DIVIDE_EQUAL;
+            } else
+                return DIVIDE;
+            break;
+        case '%':
+            if (buffer() == '=') {
+                ++buffer;
+                return MOD_EQUAL;
+            } else
+                return MOD;
+            break;
+        case '^':
+            if (buffer() == '=') {
+                ++buffer;
+                return POWER_EQUAL;
+            } else
+                return POWER;
+            break;
+        case '~':
+            return TWIDLE;
+            break;
+        case '[':
+            return BRACKET_OPEN;
+            break;
+        case ']':
+            return BRACKET_CLOSE;
+            break;
+        case '{':
+            return BRACE_OPEN;
+            break;
+        case '}':
+            return BRACE_CLOSE;
+            break;
+        case '(':
+            return PAREN_OPEN;
+            break;
+        case ')':
+            return PAREN_CLOSE;
+            break;
+        case '?':
+            return QUESTION;
+            break;
+        case ':':
+            return COLON;
+            break;
+        case ';':
+            return SEMICOLON;
+            break;
+        case ',':
+            return COMMA;
+            break;
         }
 
-        if (buffer() == '\0') return END_OF_BUFFER;
+        if (buffer() == '\0')
+            return END_OF_BUFFER;
         throw ParseError("Invalid token " + buffer.underlineToken(buffer.getTokenPosition()));
     }
 
-    int readDigits(std::string& numBuf) {
+    int readDigits(std::string& numBuf)
+    {
         int count = 0;
-        for (; isdigit(buffer()); ++buffer, count++) numBuf.push_back(buffer());
+        for (; isdigit(buffer()); ++buffer, count++)
+            numBuf.push_back(buffer());
         return count;
     }
 
-    void recognizeNumber() {
+    void recognizeNumber()
+    {
         // double number;
         std::string numBuf;
         numBuf.reserve(32);
@@ -365,10 +428,12 @@ class Lexer {
         }
     }
 
-    Token parseOperator(char primary, Token primaryToken, char secondary, Token secondaryToken) {
+    Token parseOperator(char primary, Token primaryToken, char secondary, Token secondaryToken)
+    {
         if (buffer() == primary) {
             ++buffer;
-            if (buffer() == secondary) return secondaryToken;
+            if (buffer() == secondary)
+                return secondaryToken;
             --buffer;
             return primaryToken;
         }

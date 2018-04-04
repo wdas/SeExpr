@@ -72,7 +72,10 @@ typedef __int64 FilePos;
 #define fseeko _fseeki64
 #define ftello _ftelli64
 
-inline double log2(double x) { return log(x) * 1.4426950408889634; }
+inline double log2(double x)
+{
+    return log(x) * 1.4426950408889634;
+}
 
 typedef unsigned int uint32_t;
 #define M_E (2.7182818284590452354)
@@ -96,9 +99,12 @@ class Timer {
     bool started;
 
   public:
-    Timer() : started(false) {}
+    Timer() : started(false)
+    {
+    }
 
-    void start() {
+    void start()
+    {
         started = true;
 #ifdef __APPLE__
         gettimeofday(&startTime, 0);
@@ -107,7 +113,8 @@ class Timer {
 #endif
     }
 
-    long elapsedTime() {
+    long elapsedTime()
+    {
         assert(started);
 #ifdef __APPLE__
         gettimeofday(&stopTime, 0);
@@ -126,18 +133,32 @@ class Timer {
 #else  // Windows
 class Timer {
   public:
-    Timer() : started(false) {}
+    Timer() : started(false)
+    {
+    }
 
-    void start() { std::cerr << "timer not implemented on Windows" << std::endl; }
-    long elapsedTime() { return 0; }
+    void start()
+    {
+        std::cerr << "timer not implemented on Windows" << std::endl;
+    }
+    long elapsedTime()
+    {
+        return 0;
+    }
 };
 #endif
 
 class PrintTiming {
   public:
-    PrintTiming(const std::string& s) : _s(s) { _timer.start(); }
+    PrintTiming(const std::string& s) : _s(s)
+    {
+        _timer.start();
+    }
 
-    ~PrintTiming() { std::cout << _s << " (" << _timer.elapsedTime() << " ms)" << std::endl; }
+    ~PrintTiming()
+    {
+        std::cout << _s << " (" << _timer.elapsedTime() << " ms)" << std::endl;
+    }
 
   private:
     Timer _timer;
@@ -155,10 +176,22 @@ namespace SeExprInternal2 {
 
 class _Mutex {
   public:
-    _Mutex() { _mutex = CreateMutex(NULL, FALSE, NULL); }
-    ~_Mutex() { CloseHandle(_mutex); }
-    void lock() { WaitForSingleObject(_mutex, INFINITE); }
-    void unlock() { ReleaseMutex(_mutex); }
+    _Mutex()
+    {
+        _mutex = CreateMutex(NULL, FALSE, NULL);
+    }
+    ~_Mutex()
+    {
+        CloseHandle(_mutex);
+    }
+    void lock()
+    {
+        WaitForSingleObject(_mutex, INFINITE);
+    }
+    void unlock()
+    {
+        ReleaseMutex(_mutex);
+    }
 
   private:
     HANDLE _mutex;
@@ -166,10 +199,22 @@ class _Mutex {
 
 class _SpinLock {
   public:
-    _SpinLock() { InitializeCriticalSection(&_spinlock); }
-    ~_SpinLock() { DeleteCriticalSection(&_spinlock); }
-    void lock() { EnterCriticalSection(&_spinlock); }
-    void unlock() { LeaveCriticalSection(&_spinlock); }
+    _SpinLock()
+    {
+        InitializeCriticalSection(&_spinlock);
+    }
+    ~_SpinLock()
+    {
+        DeleteCriticalSection(&_spinlock);
+    }
+    void lock()
+    {
+        EnterCriticalSection(&_spinlock);
+    }
+    void unlock()
+    {
+        LeaveCriticalSection(&_spinlock);
+    }
 
   private:
     CRITICAL_SECTION _spinlock;
@@ -179,10 +224,22 @@ class _SpinLock {
 // assume linux/unix/posix
 class _Mutex {
   public:
-    _Mutex() { pthread_mutex_init(&_mutex, 0); }
-    ~_Mutex() { pthread_mutex_destroy(&_mutex); }
-    void lock() { pthread_mutex_lock(&_mutex); }
-    void unlock() { pthread_mutex_unlock(&_mutex); }
+    _Mutex()
+    {
+        pthread_mutex_init(&_mutex, 0);
+    }
+    ~_Mutex()
+    {
+        pthread_mutex_destroy(&_mutex);
+    }
+    void lock()
+    {
+        pthread_mutex_lock(&_mutex);
+    }
+    void unlock()
+    {
+        pthread_mutex_unlock(&_mutex);
+    }
 
   private:
     pthread_mutex_t _mutex;
@@ -191,10 +248,21 @@ class _Mutex {
 #ifdef __APPLE__
 class _SpinLock {
   public:
-    _SpinLock() { _spinlock = 0; }
-    ~_SpinLock() {}
-    void lock() { OSSpinLockLock(&_spinlock); }
-    void unlock() { OSSpinLockUnlock(&_spinlock); }
+    _SpinLock()
+    {
+        _spinlock = 0;
+    }
+    ~_SpinLock()
+    {
+    }
+    void lock()
+    {
+        OSSpinLockLock(&_spinlock);
+    }
+    void unlock()
+    {
+        OSSpinLockUnlock(&_spinlock);
+    }
 
   private:
     OSSpinLock _spinlock;
@@ -202,10 +270,22 @@ class _SpinLock {
 #else
 class _SpinLock {
   public:
-    _SpinLock() { pthread_spin_init(&_spinlock, PTHREAD_PROCESS_PRIVATE); }
-    ~_SpinLock() { pthread_spin_destroy(&_spinlock); }
-    void lock() { pthread_spin_lock(&_spinlock); }
-    void unlock() { pthread_spin_unlock(&_spinlock); }
+    _SpinLock()
+    {
+        pthread_spin_init(&_spinlock, PTHREAD_PROCESS_PRIVATE);
+    }
+    ~_SpinLock()
+    {
+        pthread_spin_destroy(&_spinlock);
+    }
+    void lock()
+    {
+        pthread_spin_lock(&_spinlock);
+    }
+    void unlock()
+    {
+        pthread_spin_unlock(&_spinlock);
+    }
 
   private:
     pthread_spinlock_t _spinlock;

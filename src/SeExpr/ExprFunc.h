@@ -87,42 +87,81 @@ class ExprFunc {
     ExprFunc(ExprFuncX& f, int min = 1, int max = 1) : _func(&f), _minargs(min), _maxargs(max){};
 
     ExprFunc(ExprFuncStandard::Func0* f)
-        : _standardFunc(ExprFuncStandard::FUNC0, (void*)f), _func(0), _minargs(0), _maxargs(0) {}
+        : _standardFunc(ExprFuncStandard::FUNC0, (void*)f), _func(0), _minargs(0), _maxargs(0)
+    {
+    }
     ExprFunc(ExprFuncStandard::Func1* f)
-        : _standardFunc(ExprFuncStandard::FUNC1, (void*)f), _func(0), _minargs(1), _maxargs(1) {}
+        : _standardFunc(ExprFuncStandard::FUNC1, (void*)f), _func(0), _minargs(1), _maxargs(1)
+    {
+    }
     ExprFunc(ExprFuncStandard::Func2* f)
-        : _standardFunc(ExprFuncStandard::FUNC2, (void*)f), _func(0), _minargs(2), _maxargs(2) {}
+        : _standardFunc(ExprFuncStandard::FUNC2, (void*)f), _func(0), _minargs(2), _maxargs(2)
+    {
+    }
     ExprFunc(ExprFuncStandard::Func3* f)
-        : _standardFunc(ExprFuncStandard::FUNC3, (void*)f), _func(0), _minargs(3), _maxargs(3) {}
+        : _standardFunc(ExprFuncStandard::FUNC3, (void*)f), _func(0), _minargs(3), _maxargs(3)
+    {
+    }
     ExprFunc(ExprFuncStandard::Func4* f)
-        : _standardFunc(ExprFuncStandard::FUNC4, (void*)f), _func(0), _minargs(4), _maxargs(4) {}
+        : _standardFunc(ExprFuncStandard::FUNC4, (void*)f), _func(0), _minargs(4), _maxargs(4)
+    {
+    }
     ExprFunc(ExprFuncStandard::Func5* f)
-        : _standardFunc(ExprFuncStandard::FUNC5, (void*)f), _func(0), _minargs(5), _maxargs(5) {}
+        : _standardFunc(ExprFuncStandard::FUNC5, (void*)f), _func(0), _minargs(5), _maxargs(5)
+    {
+    }
     ExprFunc(ExprFuncStandard::Func6* f)
-        : _standardFunc(ExprFuncStandard::FUNC6, (void*)f), _func(0), _minargs(6), _maxargs(6) {}
+        : _standardFunc(ExprFuncStandard::FUNC6, (void*)f), _func(0), _minargs(6), _maxargs(6)
+    {
+    }
     ExprFunc(ExprFuncStandard::Funcn* f, int minArgs, int maxArgs)
-        : _standardFunc(ExprFuncStandard::FUNCN, (void*)f), _func(0), _minargs(minArgs), _maxargs(maxArgs) {}
+        : _standardFunc(ExprFuncStandard::FUNCN, (void*)f), _func(0), _minargs(minArgs), _maxargs(maxArgs)
+    {
+    }
     ExprFunc(ExprFuncStandard::Func1v* f)
-        : _standardFunc(ExprFuncStandard::FUNC1V, (void*)f), _func(0), _minargs(1), _maxargs(1) {}
+        : _standardFunc(ExprFuncStandard::FUNC1V, (void*)f), _func(0), _minargs(1), _maxargs(1)
+    {
+    }
     ExprFunc(ExprFuncStandard::Func2v* f)
-        : _standardFunc(ExprFuncStandard::FUNC2V, (void*)f), _func(0), _minargs(2), _maxargs(2) {}
+        : _standardFunc(ExprFuncStandard::FUNC2V, (void*)f), _func(0), _minargs(2), _maxargs(2)
+    {
+    }
     ExprFunc(ExprFuncStandard::Funcnv* f, int minArgs, int maxArgs)
-        : _standardFunc(ExprFuncStandard::FUNCNV, (void*)f), _func(0), _minargs(minArgs), _maxargs(maxArgs) {}
+        : _standardFunc(ExprFuncStandard::FUNCNV, (void*)f), _func(0), _minargs(minArgs), _maxargs(maxArgs)
+    {
+    }
     ExprFunc(ExprFuncStandard::Func1vv* f)
-        : _standardFunc(ExprFuncStandard::FUNC1VV, (void*)f), _func(0), _minargs(1), _maxargs(1) {}
+        : _standardFunc(ExprFuncStandard::FUNC1VV, (void*)f), _func(0), _minargs(1), _maxargs(1)
+    {
+    }
     ExprFunc(ExprFuncStandard::Func2vv* f)
-        : _standardFunc(ExprFuncStandard::FUNC2VV, (void*)f), _func(0), _minargs(2), _maxargs(2) {}
+        : _standardFunc(ExprFuncStandard::FUNC2VV, (void*)f), _func(0), _minargs(2), _maxargs(2)
+    {
+    }
     ExprFunc(ExprFuncStandard::Funcnvv* f)
-        : _standardFunc(ExprFuncStandard::FUNC1VV, (void*)f), _func(0), _minargs(1), _maxargs(1) {}
+        : _standardFunc(ExprFuncStandard::FUNC1VV, (void*)f), _func(0), _minargs(1), _maxargs(1)
+    {
+    }
     ExprFunc(ExprFuncStandard::Funcnvv* f, int minArgs, int maxArgs)
-        : _standardFunc(ExprFuncStandard::FUNCNVV, (void*)f), _func(0), _minargs(minArgs), _maxargs(maxArgs) {}
+        : _standardFunc(ExprFuncStandard::FUNCNVV, (void*)f), _func(0), _minargs(minArgs), _maxargs(maxArgs)
+    {
+    }
 
     //! return the minimum number of acceptable arguments
-    int minArgs() const { return _minargs; }
+    int minArgs() const
+    {
+        return _minargs;
+    }
     //! return the maximum number of acceptable arguments
-    int maxArgs() const { return _maxargs; }
+    int maxArgs() const
+    {
+        return _maxargs;
+    }
     //! return pointer to the funcx
-    const ExprFuncX* funcx() const { return _func ? _func : &_standardFunc; }
+    const ExprFuncX* funcx() const
+    {
+        return _func ? _func : &_standardFunc;
+    }
 
   private:
     ExprFuncStandard _standardFunc;
@@ -134,7 +173,9 @@ class ExprFunc {
 
 struct ExprFuncDeclaration {
     ExprFuncDeclaration(int minArgs_, int maxArgs_, const std::vector<ExprType>& types_)
-        : minArgs(minArgs_), maxArgs(maxArgs_), types(types_) {}
+        : minArgs(minArgs_), maxArgs(maxArgs_), types(types_)
+    {
+    }
 
     int minArgs;
     int maxArgs;

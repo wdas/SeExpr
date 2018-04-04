@@ -49,7 +49,10 @@ class CECurveListUI : public QWidget {
     virtual ~CECurveListUI();
 
     /// override of minimumSizeHint
-    virtual QSize minimumSizeHint() const { return QSize(0, 0); }
+    virtual QSize minimumSizeHint() const
+    {
+        return QSize(0, 0);
+    }
 
   private slots:
 

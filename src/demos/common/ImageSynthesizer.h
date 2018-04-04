@@ -26,19 +26,24 @@
 
 struct SimpleExpression : public SeExpr2::Expression {
     SimpleExpression(const SeExpr2::VarBlockCreator& creator_, const std::string& expr)
-        : SeExpr2::Expression(), _creator(creator_) {
+        : SeExpr2::Expression(), _creator(creator_)
+    {
         setExpr(expr);
         setVarBlockCreator(&_creator);
     }
 
   private:
-    SeExpr2::ExprVarRef* resolveVar(const std::string& name) const override { return _creator.resolveVar(name); }
+    SeExpr2::ExprVarRef* resolveVar(const std::string& name) const override
+    {
+        return _creator.resolveVar(name);
+    }
 
     const SeExpr2::VarBlockCreator& _creator;
 };
 
 struct ImageSynthVars : public SeExpr2::VarBlockCreator {
-    ImageSynthVars() {
+    ImageSynthVars()
+    {
         u = registerVariable("u", SeExpr2::ExprType().FP(1).Varying());
         v = registerVariable("v", SeExpr2::ExprType().FP(1).Varying());
         w = registerVariable("w", SeExpr2::ExprType().FP(1).Varying());
@@ -52,19 +57,22 @@ struct ImageSynthVars : public SeExpr2::VarBlockCreator {
 };
 
 template <typename T>
-void toPixel(png::GrayPixel<T>& pixel, const double* result) {
+void toPixel(png::GrayPixel<T>& pixel, const double* result)
+{
     pixel.value = std::numeric_limits<T>::max() * result[0];
 }
 
 template <typename T>
-void toPixel(png::RGBPixel<T>& pixel, const double* result) {
+void toPixel(png::RGBPixel<T>& pixel, const double* result)
+{
     pixel.r = std::numeric_limits<T>::max() * result[0];
     pixel.g = std::numeric_limits<T>::max() * result[1];
     pixel.b = std::numeric_limits<T>::max() * result[2];
 }
 
 template <typename T>
-void toPixel(png::RGBAPixel<T>& pixel, const double* result) {
+void toPixel(png::RGBAPixel<T>& pixel, const double* result)
+{
     pixel.r = std::numeric_limits<T>::max() * result[0];
     pixel.g = std::numeric_limits<T>::max() * result[1];
     pixel.b = std::numeric_limits<T>::max() * result[2];
@@ -77,9 +85,12 @@ class ImageSynthesizer {
     typedef typename PixelT::component_type ComponentT;
 
   public:
-    ImageSynthesizer(ImageT& image_) : _image(image_) {}
+    ImageSynthesizer(ImageT& image_) : _image(image_)
+    {
+    }
 
-    bool evaluateExpression(const std::string& exprStr) {
+    bool evaluateExpression(const std::string& exprStr)
+    {
         static ImageSynthVars creator;
 
         SimpleExpression expr(creator, exprStr);

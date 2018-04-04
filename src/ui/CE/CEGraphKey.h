@@ -37,10 +37,22 @@ class CEGraphKey {
     };
 
     CEDragHandler* getDragHandler(int part, int keystate);
-    CEGraphCurve* curve() { return _curve; }
-    int index() { return _index; }
-    const animlib::AnimKeyframe& key() const { return _key; }
-    bool weighted() const { return _weighted; }
+    CEGraphCurve* curve()
+    {
+        return _curve;
+    }
+    int index()
+    {
+        return _index;
+    }
+    const animlib::AnimKeyframe& key() const
+    {
+        return _key;
+    }
+    bool weighted() const
+    {
+        return _weighted;
+    }
 
   private:
     bool beginPart(Part part);

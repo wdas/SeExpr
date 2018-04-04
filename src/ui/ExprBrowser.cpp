@@ -43,34 +43,43 @@
 class ExprTreeItem {
   public:
     ExprTreeItem(ExprTreeItem* parent, const QString& label, const QString& path)
-        : row(-1), parent(parent), label(label), path(path), populated(parent == 0) {}
-
-    ~ExprTreeItem() {
-        for (unsigned int i = 0; i < children.size(); i++) delete children[i];
+        : row(-1), parent(parent), label(label), path(path), populated(parent == 0)
+    {
     }
 
-    ExprTreeItem* find(QString path) {
+    ~ExprTreeItem()
+    {
+        for (unsigned int i = 0; i < children.size(); i++)
+            delete children[i];
+    }
+
+    ExprTreeItem* find(QString path)
+    {
         if (this->path == path)
             return this;
         else {
             populate();
             for (unsigned int i = 0; i < children.size(); i++) {
                 ExprTreeItem* ret = children[i]->find(path);
-                if (ret) return ret;
+                if (ret)
+                    return ret;
             }
         }
         return 0;
     }
 
-    void clear() {
+    void clear()
+    {
         for (unsigned int i = 0; i < children.size(); i++) {
             delete children[i];
         }
         children.clear();
     }
 
-    void populate() {
-        if (populated) return;
+    void populate()
+    {
+        if (populated)
+            return;
         populated = true;
         QFileInfo info(path);
         if (info.isDir()) {
@@ -86,12 +95,14 @@ class ExprTreeItem {
         }
     }
 
-    void addChild(ExprTreeItem* child) {
+    void addChild(ExprTreeItem* child)
+    {
         child->row = children.size();
         children.push_back(child);
     }
 
-    ExprTreeItem* getChild(const int row) {
+    ExprTreeItem* getChild(const int row)
+    {
         populate();
         if (row < 0 || row > (int)children.size()) {
             assert(false);
@@ -99,12 +110,14 @@ class ExprTreeItem {
         return children[row];
     }
 
-    int getChildCount() {
+    int getChildCount()
+    {
         populate();
         return children.size();
     }
 
-    void regen() {
+    void regen()
+    {
         std::vector<QString> labels, paths;
         for (unsigned int i = 0; i < children.size(); i++) {
             labels.push_back(children[i]->label);
@@ -113,7 +126,8 @@ class ExprTreeItem {
         }
         children.clear();
 
-        for (unsigned int i = 0; i < labels.size(); i++) addChild(new ExprTreeItem(this, labels[i], paths[i]));
+        for (unsigned int i = 0; i < labels.size(); i++)
+            addChild(new ExprTreeItem(this, labels[i], paths[i]));
     }
 
     int row;
@@ -130,25 +144,37 @@ class ExprTreeModel : public QAbstractItemModel {
     ExprTreeItem* root;
 
   public:
-    ExprTreeModel() : root(new ExprTreeItem(0, "", "")) {}
+    ExprTreeModel() : root(new ExprTreeItem(0, "", ""))
+    {
+    }
 
-    ~ExprTreeModel() { delete root; }
+    ~ExprTreeModel()
+    {
+        delete root;
+    }
 
-    void update() {
+    void update()
+    {
         beginResetModel();
         endResetModel();
     }
 
-    void clear() {
+    void clear()
+    {
         beginResetModel();
         root->clear();
         endResetModel();
     }
 
-    void addPath(const char* label, const char* path) { root->addChild(new ExprTreeItem(root, label, path)); }
+    void addPath(const char* label, const char* path)
+    {
+        root->addChild(new ExprTreeItem(root, label, path));
+    }
 
-    QModelIndex parent(const QModelIndex& index) const {
-        if (!index.isValid()) return QModelIndex();
+    QModelIndex parent(const QModelIndex& index) const
+    {
+        if (!index.isValid())
+            return QModelIndex();
         ExprTreeItem* item = (ExprTreeItem*)(index.internalPointer());
         ExprTreeItem* parentItem = item->parent;
         if (parentItem == root)
@@ -157,7 +183,8 @@ class ExprTreeModel : public QAbstractItemModel {
             return createIndex(parentItem->row, 0, parentItem);
     }
 
-    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const {
+    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const
+    {
         if (!hasIndex(row, column, parent))
             return QModelIndex();
         else if (!parent.isValid())
@@ -168,12 +195,14 @@ class ExprTreeModel : public QAbstractItemModel {
         }
     }
 
-    int columnCount(const QModelIndex& parent) const {
+    int columnCount(const QModelIndex& parent) const
+    {
         Q_UNUSED(parent);
         return 1;
     }
 
-    int rowCount(const QModelIndex& parent = QModelIndex()) const {
+    int rowCount(const QModelIndex& parent = QModelIndex()) const
+    {
         if (!parent.isValid())
             return root->getChildCount();
         else {
@@ -185,9 +214,12 @@ class ExprTreeModel : public QAbstractItemModel {
         }
     }
 
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const {
-        if (!index.isValid()) return QVariant();
-        if (role != Qt::DisplayRole) return QVariant();
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const
+    {
+        if (!index.isValid())
+            return QVariant();
+        if (role != Qt::DisplayRole)
+            return QVariant();
         ExprTreeItem* item = (ExprTreeItem*)(index.internalPointer());
         if (!item)
             return QVariant();
@@ -195,7 +227,8 @@ class ExprTreeModel : public QAbstractItemModel {
             return QVariant(item->label);
     }
 
-    QModelIndex find(QString path) {
+    QModelIndex find(QString path)
+    {
         ExprTreeItem* item = root->find(path);
         if (!item) {
             beginResetModel();
@@ -214,14 +247,18 @@ class ExprTreeModel : public QAbstractItemModel {
 
 class ExprTreeFilterModel : public QSortFilterProxyModel {
   public:
-    ExprTreeFilterModel(QWidget* parent = 0) : QSortFilterProxyModel(parent) {}
+    ExprTreeFilterModel(QWidget* parent = 0) : QSortFilterProxyModel(parent)
+    {
+    }
 
-    void update() {
+    void update()
+    {
         beginResetModel();
         endResetModel();
     }
 
-    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const {
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
+    {
         if (sourceParent.isValid() && sourceModel()->data(sourceParent).toString().contains(filterRegExp()))
             return true;
         QString data = sourceModel()->data(sourceModel()->index(sourceRow, 0, sourceParent)).toString();
@@ -229,16 +266,21 @@ class ExprTreeFilterModel : public QSortFilterProxyModel {
 
         QModelIndex subIndex = sourceModel()->index(sourceRow, 0, sourceParent);
         if (subIndex.isValid()) {
-            for (int i = 0; i < sourceModel()->rowCount(subIndex); ++i) keep = keep || filterAcceptsRow(i, subIndex);
+            for (int i = 0; i < sourceModel()->rowCount(subIndex); ++i)
+                keep = keep || filterAcceptsRow(i, subIndex);
         }
         return keep;
     }
 };
 
-ExprBrowser::~ExprBrowser() { delete treeModel; }
+ExprBrowser::~ExprBrowser()
+{
+    delete treeModel;
+}
 
 ExprBrowser::ExprBrowser(QWidget* parent, ExprEditor* editor)
-    : QWidget(parent), editor(editor), _context(""), _searchPath(""), _applyOnSelect(false) {
+    : QWidget(parent), editor(editor), _context(""), _searchPath(""), _applyOnSelect(false)
+{
     QVBoxLayout* rootLayout = new QVBoxLayout;
     rootLayout->setMargin(0);
     this->setLayout(rootLayout);
@@ -275,17 +317,20 @@ ExprBrowser::ExprBrowser(QWidget* parent, ExprEditor* editor)
     reload();
 }
 
-void ExprBrowser::addPath(const std::string& name, const std::string& path) {
+void ExprBrowser::addPath(const std::string& name, const std::string& path)
+{
     paths[name] = path;
     treeModel->addPath(name.c_str(), path.c_str());
 }
 
-void ExprBrowser::setSearchPath(const QString& context, const QString& path) {
+void ExprBrowser::setSearchPath(const QString& context, const QString& path)
+{
     _context = context.toStdString();
     _searchPath = path.toStdString();
 }
 
-std::string ExprBrowser::getSelectedPath() {
+std::string ExprBrowser::getSelectedPath()
+{
     QModelIndex sel = treeNew->currentIndex();
     if (sel.isValid()) {
         QModelIndex realCurrent = proxyModel->mapToSource(sel);
@@ -295,17 +340,20 @@ std::string ExprBrowser::getSelectedPath() {
     return std::string("");
 }
 
-void ExprBrowser::selectPath(const char* path) {
+void ExprBrowser::selectPath(const char* path)
+{
     QModelIndex index = treeModel->find(path);
     treeNew->setCurrentIndex(proxyModel->mapFromSource(index));
 }
 
-void ExprBrowser::update() {
+void ExprBrowser::update()
+{
     treeModel->update();
     proxyModel->update();
 }
 
-void ExprBrowser::handleSelection(const QModelIndex& current, const QModelIndex& previous) {
+void ExprBrowser::handleSelection(const QModelIndex& current, const QModelIndex& previous)
+{
     Q_UNUSED(previous)
     if (current.isValid()) {
         QModelIndex realCurrent = proxyModel->mapToSource(current);
@@ -320,16 +368,24 @@ void ExprBrowser::handleSelection(const QModelIndex& current, const QModelIndex&
     }
 }
 
-void ExprBrowser::clear() {
+void ExprBrowser::clear()
+{
     clearSelection();
     treeModel->clear();
 }
 
-void ExprBrowser::clearSelection() { treeNew->clearSelection(); }
+void ExprBrowser::clearSelection()
+{
+    treeNew->clearSelection();
+}
 
-void ExprBrowser::clearFilter() { exprFilter->clear(); }
+void ExprBrowser::clearFilter()
+{
+    exprFilter->clear();
+}
 
-void ExprBrowser::filterChanged(const QString& str) {
+void ExprBrowser::filterChanged(const QString& str)
+{
     proxyModel->setFilterRegExp(QRegExp(str));
     proxyModel->setFilterKeyColumn(0);
     if (str != "") {
@@ -339,7 +395,8 @@ void ExprBrowser::filterChanged(const QString& str) {
     }
 }
 
-void ExprBrowser::saveExpressionAs() {
+void ExprBrowser::saveExpressionAs()
+{
     QString path = QFileDialog::getSaveFileName(this, "Save Expression", QString::fromStdString(_userExprDir), "*.se");
 
     if (path.length() > 0) {
@@ -357,7 +414,8 @@ void ExprBrowser::saveExpressionAs() {
     }
 }
 
-void ExprBrowser::saveLocalExpressionAs() {
+void ExprBrowser::saveLocalExpressionAs()
+{
     QString path = QFileDialog::getSaveFileName(this, "Save Expression", QString::fromStdString(_localExprDir), "*.se");
 
     if (path.length() > 0) {
@@ -375,7 +433,8 @@ void ExprBrowser::saveLocalExpressionAs() {
     }
 }
 
-void ExprBrowser::saveExpression() {
+void ExprBrowser::saveExpression()
+{
     std::string path = getSelectedPath();
     if (path.length() == 0) {
         saveExpressionAs();
@@ -392,12 +451,19 @@ void ExprBrowser::saveExpression() {
     file.close();
 }
 
-void ExprBrowser::expandAll() { treeNew->expandAll(); }
+void ExprBrowser::expandAll()
+{
+    treeNew->expandAll();
+}
 
-void ExprBrowser::expandToDepth(int depth) { treeNew->expandToDepth(depth); }
+void ExprBrowser::expandToDepth(int depth)
+{
+    treeNew->expandToDepth(depth);
+}
 
 // Location for storing user's expression files
-void ExprBrowser::addUserExpressionPath(const std::string& context) {
+void ExprBrowser::addUserExpressionPath(const std::string& context)
+{
     char* homepath = getenv("HOME");
     if (homepath) {
         std::string path = std::string(homepath) + "/" + context + "/expressions/";
@@ -408,14 +474,18 @@ void ExprBrowser::addUserExpressionPath(const std::string& context) {
     }
 }
 
-void ExprBrowser::reload() { getExpressionDirs(); }
+void ExprBrowser::reload()
+{
+    getExpressionDirs();
+}
 
 /*
  * NOTE: The hard-coded paint3d assumptions can be removed once
  * it (and bonsai?) are adjusted to call setSearchPath(context, path)
  */
 
-bool ExprBrowser::getExpressionDirs() {
+bool ExprBrowser::getExpressionDirs()
+{
     const char* env;
     bool enableLocal = false;
     /*bool homeFound = false; -- for xgen's config.txt UserRepo section below */
@@ -425,7 +495,8 @@ bool ExprBrowser::getExpressionDirs() {
     else
         env = getenv(P3D_CONFIG_ENVVAR); /* For backwards compatibility */
 
-    if (!env) return enableLocal;
+    if (!env)
+        return enableLocal;
 
     std::string context;
     if (_context.length() > 0) {
@@ -451,7 +522,8 @@ bool ExprBrowser::getExpressionDirs() {
                     std::string label, path;
                     file >> label;
                     file >> path;
-                    if (QDir(QString(path.c_str())).exists()) paths[label] = path;
+                    if (QDir(QString(path.c_str())).exists())
+                        paths[label] = path;
                 } else if (key == "ExpressionSubDir") {
                     std::string path;
                     file >> path;
@@ -467,7 +539,8 @@ bool ExprBrowser::getExpressionDirs() {
                     std::string path;
                     file >> path;
                     path += "/expressions/";
-                    if (QDir(QString(path.c_str())).exists()) paths["Global"] = path;
+                    if (QDir(QString(path.c_str())).exists())
+                        paths["Global"] = path;
                 } else if (key == "LocalRepo") {
                     std::string path;
                     file >> path;

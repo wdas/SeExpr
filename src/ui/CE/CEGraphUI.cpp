@@ -41,19 +41,41 @@ using namespace std;
 // #include <GL/glx.h> conflicts w/ Qt!  Just declare what we need.
 extern "C" void glXUseXFont(Qt::HANDLE, int, int, int);
 
-static double RaiseToInc(double val, double inc) { return ceil(val / inc) * inc; }
+static double RaiseToInc(double val, double inc)
+{
+    return ceil(val / inc) * inc;
+}
 
-static double LowerToInc(double val, double inc) { return floor(val / inc) * inc; }
+static double LowerToInc(double val, double inc)
+{
+    return floor(val / inc) * inc;
+}
 
 /**
  * Constructor.
  */
 CEGraphUI::CEGraphUI(QWidget* parent, CETool* tool)
-    : QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::DepthBuffer | QGL::HasOverlay), parent), _tool(tool),
-      //_ce(tool->rcvrId()),
-      _fontListBase(0), _fontListCount(0), _viewValid(0), _showCrossHairs(0), _crossX(0), _crossY(0), _showSelBox(0),
-      _selBoxX1(0), _selBoxY1(0), _selBoxX2(0), _selBoxY2(0), _curveListValid(0), _activeCurve(-1), _activeSeg(-1),
-      _activePart(-1), _dragHandler(0) {
+    : QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::DepthBuffer | QGL::HasOverlay), parent)
+    , _tool(tool)
+    ,
+    //_ce(tool->rcvrId()),
+    _fontListBase(0)
+    , _fontListCount(0)
+    , _viewValid(0)
+    , _showCrossHairs(0)
+    , _crossX(0)
+    , _crossY(0)
+    , _showSelBox(0)
+    , _selBoxX1(0)
+    , _selBoxY1(0)
+    , _selBoxX2(0)
+    , _selBoxY2(0)
+    , _curveListValid(0)
+    , _activeCurve(-1)
+    , _activeSeg(-1)
+    , _activePart(-1)
+    , _dragHandler(0)
+{
     setObjectName("Graph");
 
     setMouseTracking(1);
@@ -85,7 +107,10 @@ CEGraphUI::CEGraphUI(QWidget* parent, CETool* tool)
 /**
  * Destructor.
  */
-CEGraphUI::~CEGraphUI() { clearCurves(); }
+CEGraphUI::~CEGraphUI()
+{
+    clearCurves();
+}
 
 /*
 void
@@ -98,53 +123,74 @@ CEGraphUI::show()
 }
 */
 
-void CEGraphUI::setColor(ColorType color) { qglColor(_colors[color]); }
+void CEGraphUI::setColor(ColorType color)
+{
+    qglColor(_colors[color]);
+}
 
-const QColor& CEGraphUI::getColor(ColorType color) { return _colors[color]; }
+const QColor& CEGraphUI::getColor(ColorType color)
+{
+    return _colors[color];
+}
 
-void CEGraphUI::clearCurves() {
+void CEGraphUI::clearCurves()
+{
     for (size_t i = 0; i < _curves.size(); i++) {
         delete _curves[i];
     }
     _curves.clear();
 }
 
-CEGraphCurve* CEGraphUI::getCurve(int curve) {
-    if (!_curveListValid) updateCurves();
-    if (curve < 0 || curve >= (int)_curves.size()) return 0;
+CEGraphCurve* CEGraphUI::getCurve(int curve)
+{
+    if (!_curveListValid)
+        updateCurves();
+    if (curve < 0 || curve >= (int)_curves.size())
+        return 0;
     return _curves[curve];
 }
 
-CEGraphSeg* CEGraphUI::getSeg(int curve, int seg) {
-    if (!_curveListValid) updateCurves();
-    if (curve < 0 || curve >= (int)_curves.size()) return 0;
+CEGraphSeg* CEGraphUI::getSeg(int curve, int seg)
+{
+    if (!_curveListValid)
+        updateCurves();
+    if (curve < 0 || curve >= (int)_curves.size())
+        return 0;
     CEGraphKey* keyPtr = 0;
     CEGraphSeg* segPtr = 0;
     _curves[curve]->getSegAndKey(seg, segPtr, keyPtr);
     return segPtr;
 }
 
-CEGraphKey* CEGraphUI::getKey(int curve, int seg) {
-    if (!_curveListValid) updateCurves();
-    if (curve < 0 || curve >= (int)_curves.size()) return 0;
+CEGraphKey* CEGraphUI::getKey(int curve, int seg)
+{
+    if (!_curveListValid)
+        updateCurves();
+    if (curve < 0 || curve >= (int)_curves.size())
+        return 0;
     CEGraphKey* keyPtr = 0;
     CEGraphSeg* segPtr = 0;
     _curves[curve]->getSegAndKey(seg, segPtr, keyPtr);
     return keyPtr;
 }
 
-const CEGraphView& CEGraphUI::getView() {
-    if (!_viewValid) updateView();
+const CEGraphView& CEGraphUI::getView()
+{
+    if (!_viewValid)
+        updateView();
     return _view;
 }
 
-int CEGraphUI::doSelectModeRender(int x1, int x2, int y1, int y2, GLuint* buffer, int bufsize) {
+int CEGraphUI::doSelectModeRender(int x1, int x2, int y1, int y2, GLuint* buffer, int bufsize)
+{
     makeCurrent();
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-    if (x1 == x2) x2++;
-    if (y1 == y2) y2++;
+    if (x1 == x2)
+        x2++;
+    if (y1 == y2)
+        y2++;
 
     glOrtho(x1, x2, y1, y2, -1, 1);
     glSelectBuffer(bufsize, buffer);
@@ -157,9 +203,13 @@ int CEGraphUI::doSelectModeRender(int x1, int x2, int y1, int y2, GLuint* buffer
     return numHits;
 }
 
-void CEGraphUI::initializeGL() { QGLWidget::initializeGL(); }
+void CEGraphUI::initializeGL()
+{
+    QGLWidget::initializeGL();
+}
 
-void CEGraphUI::resizeGL(int w, int h) {
+void CEGraphUI::resizeGL(int w, int h)
+{
     glViewport(0, 0, w, h);
     // set GL projection matrix to map GL units to pixels
     glMatrixMode(GL_PROJECTION);
@@ -172,12 +222,14 @@ void CEGraphUI::resizeGL(int w, int h) {
     glLoadIdentity();
 }
 
-void CEGraphUI::resizeOverlayGL(int w, int h) {
+void CEGraphUI::resizeOverlayGL(int w, int h)
+{
     // we use the same coordinate system in the overlay
     resizeGL(w, h);
 }
 
-void CEGraphUI::paintGL() {
+void CEGraphUI::paintGL()
+{
     qglClearColor(_colors[BgColor]);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -191,14 +243,16 @@ void CEGraphUI::paintGL() {
     paintCurves();
 }
 
-void CEGraphUI::paintOverlayGL() {
+void CEGraphUI::paintOverlayGL()
+{
     qglClearColor(overlayContext()->overlayTransparentColor());
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     paintOverlay();
 }
 
-void CEGraphUI::getNextIncrement(double min, int timeMode, double& inc, int& decimals) {
+void CEGraphUI::getNextIncrement(double min, int timeMode, double& inc, int& decimals)
+{
     decimals = 0;
     if (min >= 1 && timeMode > 0) {
         // integer case - increments depend on mode
@@ -248,18 +302,24 @@ void CEGraphUI::getNextIncrement(double min, int timeMode, double& inc, int& dec
     }
     // default case, use 1's and 5's
     double temp = floor(log10(min));
-    if (min < 1) decimals = int(-temp);
+    if (min < 1)
+        decimals = int(-temp);
     inc = pow(10, temp);  // 1's
-    if (inc >= min) return;
+    if (inc >= min)
+        return;
     inc *= 2;  // 2's
-    if (inc >= min) return;
+    if (inc >= min)
+        return;
     inc *= 2.5;  // 5's
-    if (inc >= min) return;
+    if (inc >= min)
+        return;
     inc *= 2;  // 10's
-    if (decimals > 0) decimals--;
+    if (decimals > 0)
+        decimals--;
 }
 
-void CEGraphUI::getNextTickIncrement(double inc, int timeMode, double& tickInc) {
+void CEGraphUI::getNextTickIncrement(double inc, int timeMode, double& tickInc)
+{
     if (inc >= 2 && timeMode > 0) {
         if (timeMode == 1) {
             // feet-frames mode
@@ -300,7 +360,8 @@ void CEGraphUI::getNextTickIncrement(double inc, int timeMode, double& tickInc) 
     tickInc = pow(10, ceil(log10(inc * .1)));
 }
 
-void CEGraphUI::paintScales() {
+void CEGraphUI::paintScales()
+{
     // some handy values
     int w = width();
     int h = height();
@@ -337,10 +398,18 @@ void CEGraphUI::paintScales() {
     setColor(ScaleColor);
     const char* modeText;
     switch (timeMode) {
-        case 0: modeText = "f"; break;
-        case 1: modeText = "f-f"; break;
-        case 2: modeText = "s:f"; break;
-        default: modeText = "?"; break;
+    case 0:
+        modeText = "f";
+        break;
+    case 1:
+        modeText = "f-f";
+        break;
+    case 2:
+        modeText = "s:f";
+        break;
+    default:
+        modeText = "?";
+        break;
     }
 
     // draw box around time mode to indicate button
@@ -383,22 +452,22 @@ void CEGraphUI::paintScales() {
         char prefix[20];
         double frames;
         switch (timeMode) {
-            case 1:  // feet-frames
-            {
-                int feet = int(floor(x / 16));
-                frames = x - feet * 16;
-                sprintf(prefix, "%d-", feet);
-            } break;
-            case 2:  // seconds-frames
-            {
-                int seconds = int(floor(x / 24));
-                frames = x - seconds * 24;
-                sprintf(prefix, "%d:", seconds);
-            } break;
-            default:
-                frames = x;
-                prefix[0] = '\0';
-                break;
+        case 1:  // feet-frames
+        {
+            int feet = int(floor(x / 16));
+            frames = x - feet * 16;
+            sprintf(prefix, "%d-", feet);
+        } break;
+        case 2:  // seconds-frames
+        {
+            int seconds = int(floor(x / 24));
+            frames = x - seconds * 24;
+            sprintf(prefix, "%d:", seconds);
+        } break;
+        default:
+            frames = x;
+            prefix[0] = '\0';
+            break;
         }
 
         char buff[40];
@@ -437,7 +506,8 @@ void CEGraphUI::paintScales() {
         else
             sprintf(buff, "%d", int(y));
         int left = (_scalesWidth - fm.width(buff) - 7) / 2;
-        if (left < 0) left = 0;
+        if (left < 0)
+            left = 0;
         printStringAt(left, _view.py(y) - textOffsetY, buff);
     }
 
@@ -483,7 +553,8 @@ void CEGraphUI::paintScales() {
     glEnd();
 }
 
-void CEGraphUI::paintCurves() {
+void CEGraphUI::paintCurves()
+{
     int w = width();
     int h = height();
     int sw = _scalesWidth;
@@ -497,25 +568,32 @@ void CEGraphUI::paintCurves() {
 
     // paint curves w/ selected segs last to put them on top
     for (int selected = 0; selected <= 1; selected++)
-        for (int i = _curves.size() - 1; i >= 0; i--) _curves[i]->paint(selected);
+        for (int i = _curves.size() - 1; i >= 0; i--)
+            _curves[i]->paint(selected);
     glDisable(GL_SCISSOR_TEST);
 }
 
-void CEGraphUI::paintOverlay(bool erase) {
-    if (!overlayContext()) return;
+void CEGraphUI::paintOverlay(bool erase)
+{
+    if (!overlayContext())
+        return;
     // erase the overlay by re-drawing as transparent to reduce flicker
     qglColor(erase ? overlayContext()->overlayTransparentColor() : _colors[OverlayColor]);
-    if (_showCrossHairs) paintCrossHairs();
-    if (_showSelBox) paintSelBox();
+    if (_showCrossHairs)
+        paintCrossHairs();
+    if (_showSelBox)
+        paintSelBox();
     // paintTimeBar();
 }
 
-void CEGraphUI::paintCrossHairs() {
+void CEGraphUI::paintCrossHairs()
+{
     int x = _crossX;
     int y = _crossY;
     bool drawX = x >= _scalesWidth;
     bool drawY = y >= _scalesHeight;
-    if (!drawX || !drawY) return;
+    if (!drawX || !drawY)
+        return;
 
     glBegin(GL_LINES);
     if (drawX) {
@@ -529,7 +607,8 @@ void CEGraphUI::paintCrossHairs() {
     glEnd();
 }
 
-void CEGraphUI::moveCrossHairs(int x, int y) {
+void CEGraphUI::moveCrossHairs(int x, int y)
+{
     makeOverlayCurrent();
     if (!_showCrossHairs)
         _showCrossHairs = 1;
@@ -543,8 +622,10 @@ void CEGraphUI::moveCrossHairs(int x, int y) {
     glFlush();
 }
 
-void CEGraphUI::hideCrossHairs() {
-    if (!_showCrossHairs) return;
+void CEGraphUI::hideCrossHairs()
+{
+    if (!_showCrossHairs)
+        return;
     makeOverlayCurrent();
     paintOverlay(true);  // true => erase? yes.
     _showCrossHairs = 0;
@@ -554,7 +635,8 @@ void CEGraphUI::hideCrossHairs() {
     glFlush();
 }
 
-void CEGraphUI::pickActive(int x, int y) {
+void CEGraphUI::pickActive(int x, int y)
+{
     static const int bufsize = 1000;
     GLuint selbuff[bufsize];
     int numHits = doSelectModeRender(x - 4, x + 5, y - 4, y + 5, selbuff, bufsize);
@@ -597,7 +679,8 @@ void CEGraphUI::pickActive(int x, int y) {
     }
 }
 
-void CEGraphUI::paintSelBox() {
+void CEGraphUI::paintSelBox()
+{
     int x1 = _selBoxX1;
     int y1 = _selBoxY1;
     int x2 = _selBoxX2;
@@ -625,7 +708,8 @@ void CEGraphUI::paintSelBox() {
     glDisable(GL_SCISSOR_TEST);
 }
 
-void CEGraphUI::moveSelBox(int x1, int y1, int x2, int y2) {
+void CEGraphUI::moveSelBox(int x1, int y1, int x2, int y2)
+{
     makeOverlayCurrent();
     if (!_showSelBox)
         _showSelBox = 1;
@@ -642,8 +726,10 @@ void CEGraphUI::moveSelBox(int x1, int y1, int x2, int y2) {
     glFlush();
 }
 
-void CEGraphUI::hideSelBox() {
-    if (!_showSelBox) return;
+void CEGraphUI::hideSelBox()
+{
+    if (!_showSelBox)
+        return;
     makeOverlayCurrent();
     paintOverlay(true);  // true => erase? yes.
     _showSelBox = 0;
@@ -653,7 +739,8 @@ void CEGraphUI::hideSelBox() {
     glFlush();
 }
 
-void CEGraphUI::paintTimeBar(double frame) {
+void CEGraphUI::paintTimeBar(double frame)
+{
 #if 0
     setViewXForm(getView(),1,0);
     glBegin(GL_LINES);
@@ -663,7 +750,8 @@ void CEGraphUI::paintTimeBar(double frame) {
 #endif
 }
 
-void CEGraphUI::printStringAt(double x, double y, const char* str) {
+void CEGraphUI::printStringAt(double x, double y, const char* str)
+{
     // check for legal chars in string
     for (const char* cp = str; *cp; cp++) {
         if (*cp < ' ' || ((unsigned char)*cp) >= 128) {
@@ -678,21 +766,25 @@ void CEGraphUI::printStringAt(double x, double y, const char* str) {
     glDisable(GL_DEPTH_TEST);
 }
 
-void CEGraphUI::resizeEvent(QResizeEvent* e) {
+void CEGraphUI::resizeEvent(QResizeEvent* e)
+{
     invalidateView();
     QGLWidget::resizeEvent(e);
 }
 
-void CEGraphUI::keyPressEvent(QKeyEvent* event) {
+void CEGraphUI::keyPressEvent(QKeyEvent* event)
+{
     if (event->key() == Qt::Key_Backspace || event->key() == Qt::Key_Delete) {
         _tool->deleteSegments();
     }
 }
 
-void CEGraphUI::mousePressEvent(QMouseEvent* e) {
+void CEGraphUI::mousePressEvent(QMouseEvent* e)
+{
     setFocus();
     // ignore button press if a drag is already active
-    if (_dragHandler) return;
+    if (_dragHandler)
+        return;
 
     int x = e->pos().x();
     int y = height() - e->pos().y();
@@ -708,7 +800,8 @@ void CEGraphUI::mousePressEvent(QMouseEvent* e) {
                     e->modifiers() & (Qt::ShiftModifier | Qt::ControlModifier | Qt::AltModifier | Qt::MetaModifier);
                 if (keystate == Qt::ShiftModifier) {
                     // add segment to selection
-                    if (!selected) _tool->selectAddSegment(_activeCurve, _activeSeg);
+                    if (!selected)
+                        _tool->selectAddSegment(_activeCurve, _activeSeg);
                 } else if (keystate == Qt::ControlModifier) {
                     // toggle segment selection
                     if (selected)
@@ -719,7 +812,8 @@ void CEGraphUI::mousePressEvent(QMouseEvent* e) {
                     // select segment
                     int curve = -1, seg = -1;
                     _tool->getSelectedSegment(curve, seg).suppress();
-                    if (curve != _activeCurve || seg != _activeSeg) _tool->selectSegment(_activeCurve, _activeSeg);
+                    if (curve != _activeCurve || seg != _activeSeg)
+                        _tool->selectSegment(_activeCurve, _activeSeg);
                 }
                 // chose a handler for the seg
                 //_dragHandler =0; // seg->getDragHandler(_activePart, keystate);
@@ -748,26 +842,31 @@ void CEGraphUI::mousePressEvent(QMouseEvent* e) {
                 }
 
             } else {
-                if (!append && !toggle) _tool->clearSelection();
+                if (!append && !toggle)
+                    _tool->clearSelection();
                 _dragHandler = new CESelBoxHandler(toggle);
             }
         }
     } else if (e->button() == Qt::MidButton) {
         // pan/zoom
         switch (e->modifiers()) {
-            case 0: _dragHandler = new CEPanHandler; break;
-            case Qt::ControlModifier: {
-                bool zoomX = 1;  // TODO: zoomX = 0 if over y scale
-                bool zoomY = 1;  // TODO: zoomY = 0 if over x scale
-                _dragHandler = new CEZoomHandler(zoomX, zoomY);
-            } break;
-            default: break;
+        case 0:
+            _dragHandler = new CEPanHandler;
+            break;
+        case Qt::ControlModifier: {
+            bool zoomX = 1;  // TODO: zoomX = 0 if over y scale
+            bool zoomY = 1;  // TODO: zoomY = 0 if over x scale
+            _dragHandler = new CEZoomHandler(zoomX, zoomY);
+        } break;
+        default:
+            break;
         }
     }
 
     if (_dragHandler) {
         // hide crosshairs if suppressed by handler
-        if (!_dragHandler->showCrossHairs()) hideCrossHairs();
+        if (!_dragHandler->showCrossHairs())
+            hideCrossHairs();
 
         msg::list selections;
         std::vector<CEGraphKey*> graph_keys;
@@ -797,7 +896,8 @@ void CEGraphUI::mousePressEvent(QMouseEvent* e) {
     }
 }
 
-void CEGraphUI::mouseDoubleClickEvent(QMouseEvent* e) {
+void CEGraphUI::mouseDoubleClickEvent(QMouseEvent* e)
+{
     int x = e->pos().x();
     int y = height() - e->pos().y();
 
@@ -827,7 +927,8 @@ void CEGraphUI::mouseDoubleClickEvent(QMouseEvent* e) {
     }
 }
 
-void CEGraphUI::mouseMoveEvent(QMouseEvent* e) {
+void CEGraphUI::mouseMoveEvent(QMouseEvent* e)
+{
     int x = e->pos().x();
     int y = height() - e->pos().y();
 
@@ -847,9 +948,11 @@ void CEGraphUI::mouseMoveEvent(QMouseEvent* e) {
     }
 }
 
-void CEGraphUI::mouseReleaseEvent(QMouseEvent* e) {
+void CEGraphUI::mouseReleaseEvent(QMouseEvent* e)
+{
     // nothing to do if we have no handler
-    if (!_dragHandler) return;
+    if (!_dragHandler)
+        return;
 
     // ignore button release until all buttons are released
     // bsilva: NO! when the mouse button is up, we are done dragging.
@@ -871,27 +974,36 @@ void CEGraphUI::mouseReleaseEvent(QMouseEvent* e) {
     moveCrossHairs(x, y);
 }
 
-void CEGraphUI::enterEvent(QEvent* e) {}
+void CEGraphUI::enterEvent(QEvent* e)
+{
+}
 
-void CEGraphUI::leaveEvent(QEvent* e) { hideCrossHairs(); }
+void CEGraphUI::leaveEvent(QEvent* e)
+{
+    hideCrossHairs();
+}
 
-void CEGraphUI::invalidateCurve(int index) {
+void CEGraphUI::invalidateCurve(int index)
+{
     if (index >= 0 && index < (int)_curves.size()) {
         _curves[index]->invalidate();
         update();  // schedule repaint
     }
 }
 
-void CEGraphUI::invalidateCurveList() {
+void CEGraphUI::invalidateCurveList()
+{
     _curveListValid = 0;
     update();  // schedule repaint
 }
 
-void CEGraphUI::invalidateSelection() {
+void CEGraphUI::invalidateSelection()
+{
     update();  // schedule repaint
 }
 
-void CEGraphUI::invalidateView() {
+void CEGraphUI::invalidateView()
+{
     _viewValid = 0;
     for (int i = 0; i < (int)_curves.size(); i++) {
         _curves[i]->invalidateView();
@@ -899,17 +1011,20 @@ void CEGraphUI::invalidateView() {
     update();  // schedule repaint
 }
 
-void CEGraphUI::invalidateTimeMode() {
+void CEGraphUI::invalidateTimeMode()
+{
     update();  // schedule repaint
 }
 
-void CEGraphUI::updateView() {
+void CEGraphUI::updateView()
+{
     double vx, vy, vw, vh;
     _tool->getView(vx, vy, vw, vh);
     _view.setView(vx, vy, vw, vh, _scalesWidth, _scalesHeight, width() - _scalesWidth, height() - _scalesHeight);
 }
 
-void CEGraphUI::updateCurves() {
+void CEGraphUI::updateCurves()
+{
     // just clear and rebuild the curve list (optimize later if needed)
     clearCurves();
 

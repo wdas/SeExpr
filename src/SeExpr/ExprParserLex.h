@@ -36,18 +36,24 @@ struct ParseData {
        and free any nodes that were allocated before the error to avoid a
        memory leak. */
 
-    inline SeExpr2::ExprNode* Remember(SeExpr2::ExprNode* n, const int startPos, const int endPos) {
+    inline SeExpr2::ExprNode* Remember(SeExpr2::ExprNode* n, const int startPos, const int endPos)
+    {
         ParseNodes.push_back(n);
         n->setPosition(startPos, endPos);
         return n;
     }
 
     // Remove node from list -- but DON'T delete; it's been added elsewhere in parsetree
-    inline void Forget(SeExpr2::ExprNode* n) { ParseNodes.erase(std::find(ParseNodes.begin(), ParseNodes.end(), n)); }
+    inline void Forget(SeExpr2::ExprNode* n)
+    {
+        ParseNodes.erase(std::find(ParseNodes.begin(), ParseNodes.end(), n));
+    }
 };
 
 struct ParseState {
-    ParseState(std::vector<std::pair<int, int> >* comments) : yycolno(0), comments(comments) {}
+    ParseState(std::vector<std::pair<int, int> >* comments) : yycolno(0), comments(comments)
+    {
+    }
     int yycolno = 0;  // really buffer position
     std::vector<std::pair<int, int> >* comments = 0;
 };

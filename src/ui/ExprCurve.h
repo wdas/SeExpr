@@ -38,11 +38,14 @@
 class CurveGraphicsView : public QGraphicsView {
     Q_OBJECT
   public:
-    CurveGraphicsView() {
+    CurveGraphicsView()
+    {
         setTransformationAnchor(QGraphicsView::NoAnchor);
         setResizeAnchor(QGraphicsView::NoAnchor);
     }
-    ~CurveGraphicsView() {}
+    ~CurveGraphicsView()
+    {
+    }
 
     virtual void resizeEvent(QResizeEvent* event);
 
@@ -124,7 +127,9 @@ class ExprCurve : public QWidget {
               QString vLabel = "",
               QString iLabel = "",
               bool expandable = true);
-    ~ExprCurve() {}
+    ~ExprCurve()
+    {
+    }
 
     // Convenience Functions
     void addPoint(const double x, const double y, const T_INTERP interp, bool select = false);

@@ -19,7 +19,8 @@
 #include "typeTests.h"
 #include <SeExpr2/TypeIterator.h>
 
-void TypeTesterExpr::doTest(const std::string& testStr, ExprType expectedResult, ExprType actualResult) {
+void TypeTesterExpr::doTest(const std::string& testStr, ExprType expectedResult, ExprType actualResult)
+{
     setExpr(testStr);
     setDesiredReturnType(expectedResult);
     if (actualResult.isValid()) {
@@ -33,7 +34,8 @@ void TypeTesterExpr::doTest(const std::string& testStr, ExprType expectedResult,
 
 void TypeTesterExpr::testOneVar(const std::string& testStr,
                                 // SingleWholeTypeIterator::ProcType proc)
-                                ExprType (*proc)(const ExprType&)) {
+                                ExprType (*proc)(const ExprType&))
+{
     SingleWholeTypeIterator iter("v", proc, this);
     int remaining = iter.start();
     // std::cerr << "doTest for " << iter.givenString() << std::endl;
@@ -48,7 +50,8 @@ void TypeTesterExpr::testOneVar(const std::string& testStr,
 
 void TypeTesterExpr::testTwoVars(const std::string& testStr,
                                  // DoubleWholeTypeIterator::ProcType proc)
-                                 ExprType (*proc)(const ExprType&, const ExprType&)) {
+                                 ExprType (*proc)(const ExprType&, const ExprType&))
+{
     DoubleWholeTypeIterator iter("x", "y", proc, this);
     int remaining = iter.start();
     // std::cerr << "doTest for " << iter.givenString() << std::endl;
@@ -61,28 +64,37 @@ void TypeTesterExpr::testTwoVars(const std::string& testStr,
     };
 }
 
-ExprType identity(const ExprType& type) { return type; };
+ExprType identity(const ExprType& type)
+{
+    return type;
+};
 
-ExprType numeric(const ExprType& type) {
+ExprType numeric(const ExprType& type)
+{
     return type.isFP() ? type : ExprType().Error().Varying();
     return type;
 };
 
-ExprType numericToScalar(const ExprType& type) {
+ExprType numericToScalar(const ExprType& type)
+{
     ExprType ret = ExprType().Error().Varying();
-    if (type.isFP()) ret = ExprType().FP(1);
+    if (type.isFP())
+        ret = ExprType().FP(1);
     ret.setLifetime(type);
     return ret;
 };
 
-ExprType numericToScalar(const ExprType& first, const ExprType& second) {
+ExprType numericToScalar(const ExprType& first, const ExprType& second)
+{
     ExprType ret = ExprType().Error();
-    if (first.isFP() && second.isFP()) ret = ExprType().FP(1).Varying();
+    if (first.isFP() && second.isFP())
+        ret = ExprType().FP(1).Varying();
     ret.setLifetime(first, second);
     return ret;
 };
 
-ExprType generalComparison(const ExprType& first, const ExprType& second) {
+ExprType generalComparison(const ExprType& first, const ExprType& second)
+{
     if (ExprType::valuesCompatible(first, second)) {
         ExprType t = ExprType().FP(1);
         t.setLifetime(first, second);
@@ -91,7 +103,8 @@ ExprType generalComparison(const ExprType& first, const ExprType& second) {
         return ExprType().Error();
 };
 
-ExprType numericComparison(const ExprType& first, const ExprType& second) {
+ExprType numericComparison(const ExprType& first, const ExprType& second)
+{
     if (first.isFP() && second.isFP() && ExprType::valuesCompatible(first, second)) {
         ExprType t = ExprType().FP(1);
         t.setLifetime(first, second);
@@ -100,7 +113,8 @@ ExprType numericComparison(const ExprType& first, const ExprType& second) {
         return ExprType().Error();
 };
 
-ExprType numericToNumeric(const ExprType& first, const ExprType& second) {
+ExprType numericToNumeric(const ExprType& first, const ExprType& second)
+{
     ExprType type = ExprType().Error();
     if (first.isFP() && second.isFP()) {
         if (first.dim() == second.dim())
@@ -117,34 +131,41 @@ ExprType numericToNumeric(const ExprType& first, const ExprType& second) {
     return type;
 };
 
-ExprType numericTo2Vector(const ExprType& first, const ExprType& second) {
+ExprType numericTo2Vector(const ExprType& first, const ExprType& second)
+{
     ExprType ret = ExprType().Error();
-    if (first.isFP() & second.isFP()) ret = ExprType().FP(2);
+    if (first.isFP() & second.isFP())
+        ret = ExprType().FP(2);
     ret.setLifetime(first, second);
     return ret;
 };
 
-TEST(TypeTests, Assignment) {
+TEST(TypeTests, Assignment)
+{
     TypeTesterExpr expr;
     expr.testOneVar("$a = $v; $a", identity);
 }
 
-TEST(TypeTests, VectorIndex) {
+TEST(TypeTests, VectorIndex)
+{
     TypeTesterExpr expr;
     expr.testOneVar("[$v]", numericToScalar);
 }
 
-TEST(TypeTests, UnaryNegation) {
+TEST(TypeTests, UnaryNegation)
+{
     TypeTesterExpr expr;
     expr.testOneVar("-$v", numeric);
 }
 
-TEST(TypeTests, UnaryLogicalNOT) {
+TEST(TypeTests, UnaryLogicalNOT)
+{
     TypeTesterExpr expr;
     expr.testOneVar("!$v", numeric);
 }
 
-TEST(TypeTests, UnaryInversion) {
+TEST(TypeTests, UnaryInversion)
+{
     TypeTesterExpr expr;
     expr.testOneVar("~$v", numeric);
 }
@@ -167,7 +188,8 @@ TEST(TypeTests, UnaryInversion) {
 //     expr.testTwoVars("$x || $y", numericToScalar);
 // }
 
-TEST(TypeTests, VectorIndex2) {
+TEST(TypeTests, VectorIndex2)
+{
     TypeTesterExpr expr;
     expr.testTwoVars("$x[$y]", numericToScalar);
 }
@@ -188,57 +210,68 @@ TEST(TypeTests, VectorIndex2) {
 //     expr.testTwoVars("$x != $y", generalComparison);
 // }
 
-TEST(TypeTests, BinaryLessThan) {
+TEST(TypeTests, BinaryLessThan)
+{
     TypeTesterExpr expr;
     expr.testTwoVars("$x <  $y", numericComparison);
 }
 
-TEST(TypeTests, BinaryGreaterThan) {
+TEST(TypeTests, BinaryGreaterThan)
+{
     TypeTesterExpr expr;
     expr.testTwoVars("$x >  $y", numericComparison);
 }
 
-TEST(TypeTests, BinaryLessEqual) {
+TEST(TypeTests, BinaryLessEqual)
+{
     TypeTesterExpr expr;
     expr.testTwoVars("$x <= $y", numericComparison);
 }
 
-TEST(TypeTests, BinaryGreaterEqual) {
+TEST(TypeTests, BinaryGreaterEqual)
+{
     TypeTesterExpr expr;
     expr.testTwoVars("$x >= $y", numericComparison);
 }
 
-TEST(TypeTests, BinaryAddition) {
+TEST(TypeTests, BinaryAddition)
+{
     TypeTesterExpr expr;
     expr.testTwoVars("$x + $y", numericToNumeric);
 }
 
-TEST(TypeTests, BinarySubtraction) {
+TEST(TypeTests, BinarySubtraction)
+{
     TypeTesterExpr expr;
     expr.testTwoVars("$x - $y", numericToNumeric);
 }
 
-TEST(TypeTests, BinaryMultiplication) {
+TEST(TypeTests, BinaryMultiplication)
+{
     TypeTesterExpr expr;
     expr.testTwoVars("$x * $y", numericToNumeric);
 }
 
-TEST(TypeTests, BinaryDivision) {
+TEST(TypeTests, BinaryDivision)
+{
     TypeTesterExpr expr;
     expr.testTwoVars("$x / $y", numericToNumeric);
 }
 
-TEST(TypeTests, BinaryModulo) {
+TEST(TypeTests, BinaryModulo)
+{
     TypeTesterExpr expr;
     expr.testTwoVars("$x % $y", numericToNumeric);
 }
 
-TEST(TypeTests, BinaryPower) {
+TEST(TypeTests, BinaryPower)
+{
     TypeTesterExpr expr;
     expr.testTwoVars("$x ^ $y", numericToNumeric);
 }
 
-TEST(TypeTests, TupleIndex) {
+TEST(TypeTests, TupleIndex)
+{
     TypeTesterExpr expr;
     expr.testTwoVars("[$x, $y]", numericTo2Vector);
 }
