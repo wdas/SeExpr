@@ -2,7 +2,7 @@
 
 # External commands
 CMAKE ?= cmake
-CLANG_FORMAT ?= clang-format
+CLANG_FORMAT ?= ./src/build/disney-clang-format
 FIND ?= find
 MKDIR ?= mkdir -p
 PYTHON ?= python
