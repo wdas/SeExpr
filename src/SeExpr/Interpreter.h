@@ -143,7 +143,7 @@ class Interpreter : public Evaluator {
     }
 
     virtual inline void evalMultiple(VarBlock* varBlock,
-                                     int outputVarBlockOffset,
+                                     double* outputBuffer,
                                      size_t rangeStart,
                                      size_t rangeEnd) const override;
 

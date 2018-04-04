@@ -91,7 +91,7 @@ ExprShortEdit::ExprShortEdit(QWidget* parent, bool expanded, bool applyOnSelect)
 
     vboxlayout->addLayout(hboxlayout);
 
-    controls = 0;    
+    controls = 0;
 
     setLayout(vboxlayout);
     connect(controlRebuildTimer, SIGNAL(timeout()), SLOT(rebuildControls()));
@@ -133,9 +133,9 @@ void ExprShortEdit::expressionApplied() { setExpressionString(_dialog->getExpres
 void ExprShortEdit::dialogClosed() { setEnabled(true); }
 
 void ExprShortEdit::rebuildControls() {
-    if (!controls){
-      controls = new ExprControlCollection(0, false);
-      connect(controls, SIGNAL(controlChanged(int)), SLOT(controlChanged(int)));
+    if (!controls) {
+        controls = new ExprControlCollection(0, false);
+        connect(controls, SIGNAL(controlChanged(int)), SLOT(controlChanged(int)));
     }
     bool wasShown = !edit->completer->popup()->isHidden();
     bool newVariables = controls->rebuildControls(getExpression(), edit->completionModel->local_variables);
@@ -148,12 +148,12 @@ void ExprShortEdit::rebuildControls() {
     } else {
         vboxlayout->addWidget(controls);
         expandButton->setVisible(true);
-        if (_expanded){
-          controls->setVisible(true);
-          expandButton->setArrowType(Qt::DownArrow);
+        if (_expanded) {
+            controls->setVisible(true);
+            expandButton->setArrowType(Qt::DownArrow);
         } else {
-          controls->setVisible(false);
-          expandButton->setArrowType(Qt::RightArrow);
+            controls->setVisible(false);
+            expandButton->setArrowType(Qt::RightArrow);
         }
     }
     if (newVariables) edit->completer->setModel(edit->completionModel);
@@ -161,21 +161,21 @@ void ExprShortEdit::rebuildControls() {
 }
 
 void ExprShortEdit::expandPressed() {
-    if (_expanded){
+    if (_expanded) {
         _expanded = false;
         expandButton->setArrowType(Qt::RightArrow);
         if (controls) {
-          controls->setVisible(false);
+            controls->setVisible(false);
         }
     } else {
-      if (controls) {
-        controls->setVisible(true);
-        expandButton->setArrowType(Qt::DownArrow);
-        _expanded = true;
-      } else {        
-        _expanded = false;
-        expandButton->setArrowType(Qt::RightArrow);
-      }
+        if (controls) {
+            controls->setVisible(true);
+            expandButton->setArrowType(Qt::DownArrow);
+            _expanded = true;
+        } else {
+            _expanded = false;
+            expandButton->setArrowType(Qt::RightArrow);
+        }
     }
 }
 

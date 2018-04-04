@@ -113,7 +113,7 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType) {
 
     // write a new function
     Type* LOOPParamTys[] = {
-        Type::getInt8PtrTy(*_llvmContext), Type::getInt32Ty(*_llvmContext), Type::getInt32Ty(*_llvmContext),
+        Type::getInt8PtrTy(*_llvmContext), Type::getDoublePtrTy(*_llvmContext), Type::getInt32Ty(*_llvmContext),
         Type::getInt32Ty(*_llvmContext),
     };
     FunctionType* FTLOOP = FunctionType::get(Type::getVoidTy(*_llvmContext), LOOPParamTys, false);
@@ -121,7 +121,7 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType) {
     Function* FLOOP = Function::Create(FTLOOP, Function::ExternalLinkage, uniqueName + "_loopfunc", TheModule.get());
     {
         // label the function with names
-        const char* names[] = {"dataBlock", "outputVarBlockOffset", "rangeStart", "rangeEnd"};
+        const char* names[] = {"dataBlock", "outputBasePtr", "rangeStart", "rangeEnd"};
         int idx = 0;
         for (auto& arg : FLOOP->args()) {
             arg.setName(names[idx++]);
@@ -144,7 +144,7 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType) {
         // Value* outputDoublePtr=&*argIterator;++argIterator;
         Value* varBlockCharPtrPtrArg = &*argIterator;
         ++argIterator;
-        Value* outputVarBlockOffsetArg = &*argIterator;
+        Value* outputBasePtrArg = &*argIterator;
         ++argIterator;
         Value* rangeStartArg = &*argIterator;
         ++argIterator;
@@ -155,8 +155,6 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType) {
         Value* rangeStartVar = Builder.CreateAlloca(Type::getInt32Ty(*_llvmContext), oneValue, "rangeStartVar");
         Value* rangeEndVar = Builder.CreateAlloca(Type::getInt32Ty(*_llvmContext), oneValue, "rangeEndVar");
         Value* indexVar = Builder.CreateAlloca(Type::getInt32Ty(*_llvmContext), oneValue, "indexVar");
-        Value* outputVarBlockOffsetVar =
-            Builder.CreateAlloca(Type::getInt32Ty(*_llvmContext), oneValue, "outputVarBlockOffsetVar");
         Type* doublePtrPtrTy = llvm::PointerType::get(Type::getDoublePtrTy(*_llvmContext), 0);
         Value* varBlockDoublePtrPtrVar = Builder.CreateAlloca(doublePtrPtrTy, oneValue, "varBlockDoublePtrPtrVar");
         // Value*
@@ -167,12 +165,7 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType) {
         Builder.CreateStore(varBlockDoublePtrPtr, varBlockDoublePtrPtrVar);
         Builder.CreateStore(rangeStartArg, rangeStartVar);
         Builder.CreateStore(rangeEndArg, rangeEndVar);
-        Builder.CreateStore(outputVarBlockOffsetArg, outputVarBlockOffsetVar);
 
-        // TODO: we need char* support right here
-        Value* outputBasePtrPtr = Builder.CreateGEP(nullptr, Builder.CreateLoad(varBlockDoublePtrPtrVar),
-                                                    outputVarBlockOffsetArg, "outputBasePtrPtr");
-        Value* outputBasePtr = Builder.CreateLoad(outputBasePtrPtr, "outputBasePtr");
         // Value*
         // outputBasePtrOffset=Builder.CreateGEP(nullptr,outputBasePtr,Builder.CreateMul(dimValue,Builder.CreateLoad(rangeStartVar)),"outputPtr");
         // Builder.CreateStore(outputBasePtrOffset,currentOutputVar);
@@ -186,7 +179,7 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType) {
 
         Builder.SetInsertPoint(loopRepeatBlock);
         Value* myOutputPtr =
-            Builder.CreateGEP(nullptr, outputBasePtr, Builder.CreateMul(dimValue, Builder.CreateLoad(indexVar)));
+            Builder.CreateGEP(nullptr, outputBasePtrArg, Builder.CreateMul(dimValue, Builder.CreateLoad(indexVar)));
         Builder.CreateCall(F, {myOutputPtr, Builder.CreateLoad(varBlockDoublePtrPtrVar), Builder.CreateLoad(indexVar)});
         // Builder.CreateStore(ConstantFP::get(Type::getDoubleTy(*_llvmContext),
         // 3.14),Builder.CreateLoad(ptrVariable));

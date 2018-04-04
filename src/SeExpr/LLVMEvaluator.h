@@ -43,8 +43,8 @@ class LLVMEvaluator : public Evaluator {
     template <class T>
     class LLVMEvaluationContext {
       private:
-        typedef void (*FunctionPtr)(T*, char**, uint32_t);
-        typedef void (*FunctionPtrMultiple)(char**, uint32_t, uint32_t, uint32_t);
+        typedef void (*FunctionPtr)(T*, const char**, uint32_t);
+        typedef void (*FunctionPtrMultiple)(const char**, double*, uint32_t, uint32_t);
         FunctionPtr functionPtr;
         FunctionPtrMultiple functionPtrMultiple;
 
@@ -68,9 +68,9 @@ class LLVMEvaluator : public Evaluator {
             assert(functionPtr);
             functionPtr(dst, varBlock ? varBlock->data() : nullptr, varBlock ? varBlock->indirectIndex : 0);
         }
-        void operator()(VarBlock* varBlock, size_t outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) {
+        void operator()(VarBlock* varBlock, double* outputBuffer, size_t rangeStart, size_t rangeEnd) {
             assert(functionPtrMultiple);
-            functionPtrMultiple(varBlock ? varBlock->data() : nullptr, outputVarBlockOffset, rangeStart, rangeEnd);
+            functionPtrMultiple(varBlock ? varBlock->data() : nullptr, outputBuffer, rangeStart, rangeEnd);
         }
     };
 
@@ -102,10 +102,10 @@ class LLVMEvaluator : public Evaluator {
     virtual void evalStr(char* dst, VarBlock* varBlock) const override { (*_llvmEvalStr)(&dst, varBlock); }
 
     virtual void evalMultiple(VarBlock* varBlock,
-                              int outputVarBlockOffset,
+                              double* outputBuffer,
                               size_t rangeStart,
                               size_t rangeEnd) const override {
-        return (*_llvmEvalFP)(varBlock, outputVarBlockOffset, rangeStart, rangeEnd);
+        return (*_llvmEvalFP)(varBlock, outputBuffer, rangeStart, rangeEnd);
     }
 
     std::string getUniqueName() const {

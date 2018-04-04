@@ -17,18 +17,20 @@
 #ifndef Expression_h
 #define Expression_h
 
-#include <string>
-#include <map>
-#include <set>
-#include <mutex>
-#include <vector>
-#include <iomanip>
 #include <stdint.h>
-#include "ExprConfig.h"
-#include "Vec.h"
+
+#include <iomanip>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "Context.h"
 #include "Evaluator.h"
-#include "ExprEnv.h"
+#include "ExprConfig.h"
+#include "Vec.h"
 
 namespace llvm {
 class ExecutionEngine;
@@ -185,9 +187,11 @@ class Expression {
     const ExprType& returnType() const;
 
     /// Evaluate multiple blocks
-    inline void evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) const {
-        evaluator()->evalMultiple(varBlock, outputVarBlockOffset, rangeStart, rangeEnd);
+    inline void evalMultiple(VarBlock* varBlock, double* outputBuffer, size_t rangeStart, size_t rangeEnd) const {
+        evaluator()->evalMultiple(varBlock, outputBuffer, rangeStart, rangeEnd);
     }
+
+    void evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) const;
 
     // Evaluates and returns float (check returnType()!)
     // Not thread-safe
@@ -267,8 +271,6 @@ class Expression {
     /** Computed return type. */
     mutable ExprType _desiredReturnType;
 
-    /** Variable environment */
-    mutable ExprVarEnvBuilder _envBuilder;
     /** Parse tree (null if syntax is bad). */
     mutable std::unique_ptr<ExprNode> _parseTree;
 

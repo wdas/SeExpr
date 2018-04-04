@@ -94,7 +94,7 @@ class NullEvaluator : public Evaluator {
 
     virtual void evalFP(double*, VarBlock*) const override {}
     virtual void evalStr(char*, VarBlock*) const override {}
-    virtual void evalMultiple(VarBlock*, int, size_t, size_t) const override {}
+    virtual void evalMultiple(VarBlock*, double*, size_t, size_t) const override {}
 };
 
 Expression::Expression(Expression::EvaluationStrategy evaluationStrategyHint)
@@ -124,7 +124,6 @@ void Expression::reset() {
     _funcs.clear();
     //_localVars.clear();
     _errors.clear();
-    _envBuilder.reset();
     _threadUnsafeFunctionCalls.clear();
     _comments.clear();
     _results.resize(_desiredReturnType.dim());
@@ -197,11 +196,12 @@ void Expression::prep() const {
 
     bool error = false;
     Evaluator* evaluator = nullptr;
+    ExprVarEnvBuilder envBuilder;
 
     if (!_parseTree) {
         // parse error
         error = true;
-    } else if (!_parseTree->prep(_desiredReturnType.isFP(1), _envBuilder).isValid()) {
+    } else if (!_parseTree->prep(_desiredReturnType.isFP(1), envBuilder).isValid()) {
         // prep error
         error = true;
     } else if (!ExprType::valuesCompatible(_parseTree->type(), _desiredReturnType)) {
@@ -265,5 +265,11 @@ bool Expression::isVec() const { return syntaxOK() ? _parseTree->isVec() : _want
 const ExprType& Expression::returnType() const {
     prep();
     return _returnType;
+}
+
+void Expression::evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) const {
+    assert(varBlock);
+    double* outputPtr = const_cast<double*&>(varBlock->Pointer(outputVarBlockOffset));
+    evaluator()->evalMultiple(varBlock, outputPtr, rangeStart, rangeEnd);
 }
 }  // end namespace SeExpr2/

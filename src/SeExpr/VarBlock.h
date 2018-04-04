@@ -41,13 +41,15 @@ class VarBlockCreator;
 class VarBlock {
   private:
     /// Allocate an VarBlock
-    VarBlock(int size) : indirectIndex(0) { _dataPtrs.resize(size); }
+    VarBlock(int size) : indirectIndex(0), dummy{0.0} {
+        _dataPtrs.resize(size, (const char*)&dummy[0]);
+    }
 
   public:
     friend class VarBlockCreator;
 
     /// Move semantics is the only allowed way to change the structure
-    VarBlock(VarBlock&& other) : indirectIndex(std::move(other.indirectIndex)) {
+    VarBlock(VarBlock&& other) : indirectIndex(std::move(other.indirectIndex)), dummy{0.0} {
         _dataPtrs = std::move(other._dataPtrs);
     }
 
@@ -60,20 +62,21 @@ class VarBlock {
     inline size_t numSymbols() const { return _dataPtrs.size(); }
 
     /// Get a reference to the data block pointer which can be modified
-    double*& Pointer(uint32_t offset) { return reinterpret_cast<double*&>(_dataPtrs[offset]); }
-    char**& CharPointer(uint32_t offset) { return reinterpret_cast<char**&>(_dataPtrs[offset]); }
-    ExprFuncX*& Function(uint32_t offset) { return reinterpret_cast<ExprFuncX*&>(_dataPtrs[offset]); }
+    const double*& Pointer(uint32_t offset) { return reinterpret_cast<const double*&>(_dataPtrs[offset]); }
+    const char*& CharPointer(uint32_t offset) { return reinterpret_cast<const char*&>(_dataPtrs[offset]); }
+    const ExprFuncX*& Function(uint32_t offset) { return reinterpret_cast<const ExprFuncX*&>(_dataPtrs[offset]); }
 
     /// indirect index to add to pointer based data
     // i.e.  _dataPtrs[someAttributeOffset][indirectIndex]
     int indirectIndex;
 
     /// Raw data of the data block pointer (used by compiler)
-    char** data() { return _dataPtrs.data(); }
+    const char** data() { return _dataPtrs.data(); }
 
   private:
     /// This stores double* or char** ptrs
-    std::vector<char*> _dataPtrs;
+    double dummy[16];
+    std::vector<const char*> _dataPtrs;
 };
 
 // helper class for using VarBlocks
