@@ -104,7 +104,7 @@ class ExprNode {
     const Expression* expr() const { return _expr; }
 
     /// Access to original string representation of current expression
-    std::string toString() const { return expr()->getExpr().substr(startPos(), length()); };
+    std::string toString() const { return expr()->getExpr().substr(startPos(), length()+1); };
 
     /// @{ @name Relationship Queries and Manipulation
 
@@ -217,16 +217,16 @@ class ExprNode {
 
     inline void dump() const {
         if (_children.empty()) {
-            std::cout << _type.toString() << std::endl;
+            std::cout << toString() << " " << _type.toString() << std::endl;
         } else {
-            std::cout << "(" << _type.toString() << std::endl;
             {
+                std::cout << "(" << toString() << " " << _type.toString() << std::endl;
                 IndentedStreamBuf indent_os(std::cout);
                 for (const auto& child : _children) {
                     child->dump();
                 }
+                std::cout << ")\n";
             }
-            std::cout << ")" << std::endl;
         }
     }
 

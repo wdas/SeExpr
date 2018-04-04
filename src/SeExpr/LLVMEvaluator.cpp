@@ -224,6 +224,11 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType) {
     std::string errorStr;
     llvm::raw_string_ostream raw(errorStr);
     if (llvm::verifyModule(*altModule, &raw)) {
+        if (_debugging) {
+            std::cerr << "error in LLVM verifyModule\n";
+            parseTree->dump();
+            altModule->dump();
+        }
         parseTree->addError(raw.str());
         return false;
     }

@@ -828,7 +828,10 @@ LLVM_VALUE ExprFuncNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
         }
         ret.push_back(executeStandardFunction(Builder, seFuncType, realArgs, addrVal));
     }
-    return createVecVal(Builder, ret);
+    if (isReturnVector(seFuncType))
+        return createVecVal(Builder, ret);
+    else
+        return ret[0];
 }
 
 LLVM_VALUE ExprIfThenElseNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {

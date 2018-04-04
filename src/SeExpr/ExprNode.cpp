@@ -27,7 +27,6 @@
 #include "ExprFunc.h"
 #include "VarBlock.h"
 
-// TODO: add and other binary op demote to scalar if wantScalar
 // TODO: logical operations like foo<bar should they do vector returns... right now no... implicit demote
 // TODO: local function evaluation
 // TODO: buildInterpreter for higher level nodes so the return location can be routed back
@@ -458,8 +457,7 @@ ExprType ExprCompareNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-ExprType ExprBinaryOpNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
-    // TODO: aselle this probably should set the type to be FP1 if is true!
+ExprType ExprBinaryOpNode::prep(bool scalarWanted, ExprVarEnvBuilder& envBuilder) {
     // TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
     ExprType firstType, secondType;
 
@@ -473,6 +471,8 @@ ExprType ExprBinaryOpNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
 
     if (error)
         setType(ExprType().Error());
+    else if (scalarWanted)
+        setType(ExprType().FP(1).setLifetime(firstType, secondType));
     else
         setType((firstType.isFP(1) ? secondType : firstType).setLifetime(firstType, secondType));
 
