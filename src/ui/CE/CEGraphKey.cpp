@@ -22,10 +22,16 @@
 #include "CEDragHandlers.h"
 
 CEGraphKey::CEGraphKey(CEGraphCurve* curve, int index)
-    : _selected(false), _curve(curve), _index(index), _key(*(curve->animCurve().getFirstKey() + index)),
-      _weighted(curve->animCurve().isWeighted()) {}
+    : _selected(false)
+    , _curve(curve)
+    , _index(index)
+    , _key(*(curve->animCurve().getFirstKey() + index))
+    , _weighted(curve->animCurve().isWeighted())
+{
+}
 
-bool CEGraphKey::beginPart(Part part) {
+bool CEGraphKey::beginPart(Part part)
+{
     glPushName(part);
     CEGraphUI* ui = _curve->ui();
     int activeCurve, activeSeg, activePart;
@@ -37,9 +43,13 @@ bool CEGraphKey::beginPart(Part part) {
     return 1;
 }
 
-void CEGraphKey::endPart() { glPopName(); }
+void CEGraphKey::endPart()
+{
+    glPopName();
+}
 
-void CEGraphKey::paint(bool selected) {
+void CEGraphKey::paint(bool selected)
+{
     glPushName(_index);
 
     CEGraphUI* ui = _curve->ui();
@@ -71,9 +81,11 @@ void CEGraphKey::paint(bool selected) {
     glPopName();
 }
 
-void CEGraphKey::paintHandles() {
+void CEGraphKey::paintHandles()
+{
     double inWeight = _key.getInWeight(), outWeight = _key.getOutWeight();
-    if (!_weighted) inWeight = outWeight = 3;
+    if (!_weighted)
+        inWeight = outWeight = 3;
     double inAngle = M_PI * _key.getInAngle() / 180., outAngle = M_PI * _key.getOutAngle() / 180.;
     double time = _key.getTime(), value = _key.getValue();
     paintHandle(0, time, value, -inWeight * cos(inAngle), -inWeight * sin(inAngle),
@@ -83,9 +95,13 @@ void CEGraphKey::paintHandles() {
 }
 
 namespace {
-double sqr(double x) { return x * x; }
+double sqr(double x)
+{
+    return x * x;
 }
-void CEGraphKey::paintHandle(int num, double x, double y, double dx, double dy, bool fixedHandle) {
+}
+void CEGraphKey::paintHandle(int num, double x, double y, double dx, double dy, bool fixedHandle)
+{
     const CEGraphView& view = _curve->ui()->getView();
     double x1p = view.pxd(x), y1p = view.pyd(y);
     double x2p = view.pxd(x + dx), y2p = view.pyd(y + dy);
@@ -102,15 +118,19 @@ void CEGraphKey::paintHandle(int num, double x, double y, double dx, double dy, 
     _handleAnchorY[num] = view.vy(y2p) - y;
 
     glPushAttrib(GL_CURRENT_BIT);
-    if (!fixedHandle) glColor3f(1, 1, 1);
-    if (fixedHandle) beginPart(Part(HandleBase + num));
+    if (!fixedHandle)
+        glColor3f(1, 1, 1);
+    if (fixedHandle)
+        beginPart(Part(HandleBase + num));
     glBegin(GL_LINES);
     glVertex2d(x1p, y1p);
     glVertex2d(x2p, y2p);
     glEnd();
 
-    if (fixedHandle) endPart();
-    if (fixedHandle) beginPart(Part(KnobBase + num));
+    if (fixedHandle)
+        endPart();
+    if (fixedHandle)
+        beginPart(Part(KnobBase + num));
     if (fixedHandle)
         glRecti(int(x2p - 2), int(y2p - 2), int(x2p + 3), int(y2p + 3));
     else {
@@ -120,31 +140,39 @@ void CEGraphKey::paintHandle(int num, double x, double y, double dx, double dy, 
         glVertex2d(backx - offx, backy - offy);
         glEnd();
     }
-    if (fixedHandle) endPart();
+    if (fixedHandle)
+        endPart();
     glPopAttrib();
 }
 
-CEGraphKey::~CEGraphKey() {}
+CEGraphKey::~CEGraphKey()
+{
+}
 
-CEDragHandler* CEGraphKey::getDragHandler(int part, int keystate) {
+CEDragHandler* CEGraphKey::getDragHandler(int part, int keystate)
+{
     bool alt = keystate & Qt::AltModifier;
     switch (part) {
-        case NoPart: {
-            return 0;
-        }
-        case KeyTime: {
-            double hsnap = alt ? 0.0 : 1.0;
-            return new CEKeyMoveHandler(this, 1, 0, hsnap);
-        }
-        case Key: {
-            double hsnap = alt ? 0.0 : 1.0;
-            return new CEKeyMoveHandler(this, alt, 1, hsnap);
-        }
-        // new CEBezHandler(key,handle,dragAngle,dragLength)
-        case HandleBase + 0: return new CEBezHandler(this, 0, 1, 0, _weighted);
-        case HandleBase + 1: return new CEBezHandler(this, 1, 1, 0, _weighted);
-        case KnobBase + 0: return new CEBezHandler(this, 0, alt, 1, _weighted);
-        case KnobBase + 1: return new CEBezHandler(this, 1, alt, 1, _weighted);
+    case NoPart: {
+        return 0;
+    }
+    case KeyTime: {
+        double hsnap = alt ? 0.0 : 1.0;
+        return new CEKeyMoveHandler(this, 1, 0, hsnap);
+    }
+    case Key: {
+        double hsnap = alt ? 0.0 : 1.0;
+        return new CEKeyMoveHandler(this, alt, 1, hsnap);
+    }
+    // new CEBezHandler(key,handle,dragAngle,dragLength)
+    case HandleBase + 0:
+        return new CEBezHandler(this, 0, 1, 0, _weighted);
+    case HandleBase + 1:
+        return new CEBezHandler(this, 1, 1, 0, _weighted);
+    case KnobBase + 0:
+        return new CEBezHandler(this, 0, alt, 1, _weighted);
+    case KnobBase + 1:
+        return new CEBezHandler(this, 1, alt, 1, _weighted);
     }
     return 0;
 }

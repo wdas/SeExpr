@@ -38,7 +38,8 @@
 /**
  * Constructor.
  */
-CEMainUI::CEMainUI(QWidget* parent, CETool* tool) : QWidget(parent), _tool(tool) {
+CEMainUI::CEMainUI(QWidget* parent, CETool* tool) : QWidget(parent), _tool(tool)
+{
     setObjectName("CurveEditor");
 
     QVBoxLayout* layout = new QVBoxLayout(this);
@@ -89,6 +90,7 @@ CEMainUI::CEMainUI(QWidget* parent, CETool* tool) : QWidget(parent), _tool(tool)
 /**
  * Destructor.
  */
-CEMainUI::~CEMainUI() {
+CEMainUI::~CEMainUI()
+{
     // TODO - stash splitter sizes in tool for remapping
 }

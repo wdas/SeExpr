@@ -13,7 +13,8 @@ this software must include this legend and all copyright notices.
 
 class IndentedStreamBuf : public std::streambuf {
   protected:
-    virtual int overflow(int ch) {
+    virtual int overflow(int ch)
+    {
         if (_atNewline && ch != '\n') {
             _dst->sputn(_indentStr.data(), _indentStr.size());
         }
@@ -23,12 +24,16 @@ class IndentedStreamBuf : public std::streambuf {
 
   public:
     explicit IndentedStreamBuf(std::streambuf* dest, int indent = 4)
-        : _dst(dest), _atNewline(true), _indentStr(indent, ' '), _os(NULL) {}
+        : _dst(dest), _atNewline(true), _indentStr(indent, ' '), _os(NULL)
+    {
+    }
     explicit IndentedStreamBuf(std::ostream& dest, int indent = 4)
-        : _dst(dest.rdbuf()), _atNewline(true), _indentStr(indent, ' '), _os(&dest) {
+        : _dst(dest.rdbuf()), _atNewline(true), _indentStr(indent, ' '), _os(&dest)
+    {
         _os->rdbuf(this);
     }
-    virtual ~IndentedStreamBuf() {
+    virtual ~IndentedStreamBuf()
+    {
         if (_os != NULL) {
             _os->rdbuf(_dst);
         }

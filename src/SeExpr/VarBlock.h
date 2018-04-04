@@ -41,7 +41,8 @@ class VarBlockCreator;
 class VarBlock {
   private:
     /// Allocate an VarBlock
-    VarBlock(int size) : indirectIndex(0), dummy{0.0} {
+    VarBlock(int size) : indirectIndex(0), dummy{0.0}
+    {
         _dataPtrs.resize(size, (const char*)&dummy[0]);
     }
 
@@ -49,29 +50,47 @@ class VarBlock {
     friend class VarBlockCreator;
 
     /// Move semantics is the only allowed way to change the structure
-    VarBlock(VarBlock&& other) : indirectIndex(std::move(other.indirectIndex)), dummy{0.0} {
+    VarBlock(VarBlock&& other) : indirectIndex(std::move(other.indirectIndex)), dummy{0.0}
+    {
         _dataPtrs = std::move(other._dataPtrs);
     }
 
-    virtual ~VarBlock() {}
+    virtual ~VarBlock()
+    {
+    }
 
     /// Don't allow copying and operator='ing'
     VarBlock(const VarBlock&) = delete;
     VarBlock& operator=(const VarBlock&) = delete;
 
-    inline size_t numSymbols() const { return _dataPtrs.size(); }
+    inline size_t numSymbols() const
+    {
+        return _dataPtrs.size();
+    }
 
     /// Get a reference to the data block pointer which can be modified
-    const double*& Pointer(uint32_t offset) { return reinterpret_cast<const double*&>(_dataPtrs[offset]); }
-    const char*& CharPointer(uint32_t offset) { return reinterpret_cast<const char*&>(_dataPtrs[offset]); }
-    const ExprFuncX*& Function(uint32_t offset) { return reinterpret_cast<const ExprFuncX*&>(_dataPtrs[offset]); }
+    const double*& Pointer(uint32_t offset)
+    {
+        return reinterpret_cast<const double*&>(_dataPtrs[offset]);
+    }
+    const char*& CharPointer(uint32_t offset)
+    {
+        return reinterpret_cast<const char*&>(_dataPtrs[offset]);
+    }
+    const ExprFuncX*& Function(uint32_t offset)
+    {
+        return reinterpret_cast<const ExprFuncX*&>(_dataPtrs[offset]);
+    }
 
     /// indirect index to add to pointer based data
     // i.e.  _dataPtrs[someAttributeOffset][indirectIndex]
     int indirectIndex;
 
     /// Raw data of the data block pointer (used by compiler)
-    const char** data() { return _dataPtrs.data(); }
+    const char** data()
+    {
+        return _dataPtrs.data();
+    }
 
   private:
     /// This stores double* or char** ptrs
@@ -83,13 +102,17 @@ class VarBlock {
 template <typename FunctionCodeStorage = std::function<void(SeExpr2::ExprFuncSimple::ArgHandle)>>
 class SymbolTable : public VarBlock {
   public:
-    explicit SymbolTable(VarBlock&& block) : VarBlock(std::move(block)) {}
+    explicit SymbolTable(VarBlock&& block) : VarBlock(std::move(block))
+    {
+    }
 
     SymbolTable(SymbolTable&& other)
-        : _allocations(std::move(other._allocations)),
-          _function_code_segments(std::move(other._function_code_segments)) {}
+        : _allocations(std::move(other._allocations)), _function_code_segments(std::move(other._function_code_segments))
+    {
+    }
 
-    SymbolTable& operator=(SymbolTable&& other) {
+    SymbolTable& operator=(SymbolTable&& other)
+    {
         _allocations = std::move(other._allocations);
         _function_code_segments = std::move(other._function_code_segments);
     }
@@ -97,38 +120,48 @@ class SymbolTable : public VarBlock {
     SymbolTable(const SymbolTable&) = delete;
     SymbolTable& operator=(const SymbolTable&) = delete;
 
-    virtual ~SymbolTable() {
-        for (auto pair : _allocations) free(pair.second);
+    virtual ~SymbolTable()
+    {
+        for (auto pair : _allocations)
+            free(pair.second);
     }
 
     // Set code segment for some Function declared in the VarBlockCreator
-    void FunctionCode(uint32_t offset, FunctionCodeStorage f) {
+    void FunctionCode(uint32_t offset, FunctionCodeStorage f)
+    {
         _function_code_segments.emplace_back(new SeExpr2::ExprFuncClosure<FunctionCodeStorage>(f));
         Function(offset) = _function_code_segments.back().get();
     }
 
     // Set code segment for some Function declared in the VarBlockCreator
-    void FunctionCode(uint32_t offset, std::unique_ptr<SeExpr2::ExprFuncX> funcx) {
+    void FunctionCode(uint32_t offset, std::unique_ptr<SeExpr2::ExprFuncX> funcx)
+    {
         _function_code_segments.emplace_back(std::move(funcx));
         Function(offset) = _function_code_segments.back().get();
     }
 
     // dumb helper for integrations in apps that couldn't be bothered to have clean ownership of
     // their own variables with a guaranteed lifetime
-    double& Scalar(uint32_t offset) { return *alloc(offset, sizeof(double)); }
+    double& Scalar(uint32_t offset)
+    {
+        return *alloc(offset, sizeof(double));
+    }
 
     // dumb helper for integrations in apps that couldn't be bothered to have clean ownership of
     // their own variables with a guaranteed lifetime
     template <int d>
-    Vec<double, d, true> Vector(uint32_t offset) {
+    Vec<double, d, true> Vector(uint32_t offset)
+    {
         return Vec<double, d, true>(alloc(offset, d * sizeof(double)));
     }
 
   private:
     // TODO: small object optimization
-    double* alloc(uint32_t offset, size_t bytes) {
+    double* alloc(uint32_t offset, size_t bytes)
+    {
         auto iter = _allocations.find(offset);
-        if (iter != _allocations.end()) return iter->second;
+        if (iter != _allocations.end())
+            return iter->second;
 
         double* ptr = (double*)malloc(bytes);
         _allocations[offset] = ptr;
@@ -151,20 +184,34 @@ class VarBlockCreator {
         uint32_t _stride;
 
       public:
-        Ref(const ExprType& type, uint32_t offset, uint32_t stride)
-            : ExprVarRef(type), _offset(offset), _stride(stride) {}
+        Ref(const ExprType& type, uint32_t offset, uint32_t stride) : ExprVarRef(type), _offset(offset), _stride(stride)
+        {
+        }
 
-        uint32_t offset() const { return _offset; }
-        uint32_t stride() const { return _stride; }
+        uint32_t offset() const
+        {
+            return _offset;
+        }
+        uint32_t stride() const
+        {
+            return _stride;
+        }
 
-        void eval(double*) override { assert(false); }
-        void eval(const char**) override { assert(false); }
+        void eval(double*) override
+        {
+            assert(false);
+        }
+        void eval(const char**) override
+        {
+            assert(false);
+        }
     };
 
     class FuncSymbol : public ExprFuncSimple {
       public:
         FuncSymbol(const ExprFuncDeclaration& decl, uint32_t offset_)
-            : ExprFuncSimple(true), _decl(decl), _offset(offset_), _func(*this, decl.minArgs, decl.maxArgs) {
+            : ExprFuncSimple(true), _decl(decl), _offset(offset_), _func(*this, decl.minArgs, decl.maxArgs)
+        {
             assert(_decl.types.size() && "FuncSymbol missing type information");
         }
 
@@ -172,24 +219,44 @@ class VarBlockCreator {
         FuncSymbol& operator=(const FuncSymbol&) = delete;
 
         FuncSymbol(FuncSymbol&& other)
-            : ExprFuncSimple(true), _decl(std::move(other._decl)), _offset(std::move(other._offset)),
-              _func(*this, other._func.minArgs(), other._func.maxArgs()) {
+            : ExprFuncSimple(true)
+            , _decl(std::move(other._decl))
+            , _offset(std::move(other._offset))
+            , _func(*this, other._func.minArgs(), other._func.maxArgs())
+        {
             assert(_decl.types.size() && "FuncSymbol missing type information");
         }
 
-        inline uint32_t offset() const { return _offset; }
-        inline ExprFunc& func() const { return _func; }
+        inline uint32_t offset() const
+        {
+            return _offset;
+        }
+        inline ExprFunc& func() const
+        {
+            return _func;
+        }
 
-        inline ExprFuncDeclaration& signature() { return _decl; }
-        inline const ExprFuncDeclaration& signature() const { return _decl; }
+        inline ExprFuncDeclaration& signature()
+        {
+            return _decl;
+        }
+        inline const ExprFuncDeclaration& signature() const
+        {
+            return _decl;
+        }
 
-        virtual ExprType type() const override { return _type; }
-        virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& env) const override {
+        virtual ExprType type() const override
+        {
+            return _type;
+        }
+        virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& env) const override
+        {
             assert(_decl.types.size() && "FuncSymbol missing type information");
             return ExprFuncSimple::genericPrep(node, scalarWanted, env, _decl);
         }
 
-        virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const override {
+        virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const override
+        {
             assert(args.varBlock);
             ExprFuncSimple** funcs = reinterpret_cast<ExprFuncSimple**>(const_cast<char*>(args.varBlock));
             assert(funcs);
@@ -197,12 +264,14 @@ class VarBlockCreator {
             return funcsimple ? funcsimple->evalConstant(node, args) : nullptr;
         }
 
-        virtual void eval(ArgHandle args) override {
+        virtual void eval(ArgHandle args) override
+        {
             assert(args.varBlock);
             ExprFuncSimple** funcs = reinterpret_cast<ExprFuncSimple**>(const_cast<char*>(args.varBlock));
             assert(funcs);
             ExprFuncSimple* funcsimple = funcs[offset()];
-            if (funcsimple) funcsimple->eval(args);
+            if (funcsimple)
+                funcsimple->eval(args);
         }
 
       private:
@@ -212,7 +281,8 @@ class VarBlockCreator {
     };
 
     /// Register a variable and return a handle
-    int registerVariable(const std::string& name, const ExprType& type) {
+    int registerVariable(const std::string& name, const ExprType& type)
+    {
         if (_vars.find(name) != _vars.end()) {
             throw std::runtime_error("Already registered a variable named " + name);
         } else {
@@ -222,7 +292,8 @@ class VarBlockCreator {
         }
     }
 
-    int registerFunction(const std::string& name, const ExprFuncDeclaration& decl) {
+    int registerFunction(const std::string& name, const ExprFuncDeclaration& decl)
+    {
         if (_funcs.find(name) != _funcs.end()) {
             throw std::runtime_error("Already registered a function named " + name);
         } else {
@@ -232,30 +303,45 @@ class VarBlockCreator {
         }
     }
 
-    int registerFunction(const std::string& name, int minArgs, int maxArgs, const std::vector<ExprType>& types) {
+    int registerFunction(const std::string& name, int minArgs, int maxArgs, const std::vector<ExprType>& types)
+    {
         return registerFunction(name, ExprFuncDeclaration{minArgs, maxArgs, types});
     }
 
-    inline size_t numVariables() const { return _vars.size(); }
-    inline size_t numFunctions() const { return _funcs.size(); }
+    inline size_t numVariables() const
+    {
+        return _vars.size();
+    }
+    inline size_t numFunctions() const
+    {
+        return _funcs.size();
+    }
 
     /// Get an evaluation handle (one needed per thread)
-    VarBlock create() const { return VarBlock(_offset); }
+    VarBlock create() const
+    {
+        return VarBlock(_offset);
+    }
 
     /// Resolve the variable using anything in the data block (call from resolveVar in Expr subclass)
-    ExprVarRef* resolveVar(const std::string& name) const {
+    ExprVarRef* resolveVar(const std::string& name) const
+    {
         auto it = _vars.find(name);
-        if (it != _vars.end()) return const_cast<Ref*>(&it->second);
+        if (it != _vars.end())
+            return const_cast<Ref*>(&it->second);
         return nullptr;
     }
 
-    ExprFunc* resolveFunc(const std::string& name) const {
+    ExprFunc* resolveFunc(const std::string& name) const
+    {
         auto it = _funcs.find(name);
-        if (it != _funcs.end()) return &it->second.func();
+        if (it != _funcs.end())
+            return &it->second.func();
         return nullptr;
     }
 
-    void dump() const {
+    void dump() const
+    {
         for (const auto& pair : _vars) {
             printf("[%4d] %s :: ", pair.second.offset(), pair.first.c_str());
             std::cout << pair.second.type().toString() << std::endl;
@@ -264,7 +350,8 @@ class VarBlockCreator {
             printf("[%4d] %s() :: ", pair.second.offset(), pair.first.c_str());
             const ExprFuncDeclaration& signature = pair.second.signature();
             for (size_t i = 0; i < signature.types.size(); ++i) {
-                if (i > 0) std::cout << " -> ";
+                if (i > 0)
+                    std::cout << " -> ";
                 std::cout << signature.types[i].toString();
             }
             std::cout << std::endl;

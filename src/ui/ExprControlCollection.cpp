@@ -38,7 +38,8 @@
 #include "Editable.h"
 
 ExprControlCollection::ExprControlCollection(QWidget* parent, bool showAddButton)
-    : QWidget(parent), count(0), showAddButton(showAddButton), editableExpression(0) {
+    : QWidget(parent), count(0), showAddButton(showAddButton), editableExpression(0)
+{
     controlLayout = new QVBoxLayout();
     controlLayout->setMargin(0);
     controlLayout->setSpacing(0);
@@ -56,9 +57,13 @@ ExprControlCollection::ExprControlCollection(QWidget* parent, bool showAddButton
     setLayout(controlLayout);
 }
 
-ExprControlCollection::~ExprControlCollection() { delete editableExpression; }
+ExprControlCollection::~ExprControlCollection()
+{
+    delete editableExpression;
+}
 
-ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent) {
+ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent)
+{
     QHBoxLayout* mainLayout = new QHBoxLayout();
     QVBoxLayout* verticalLayout;
     verticalLayout = new QVBoxLayout();
@@ -260,9 +265,13 @@ ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent) {
     resize(500, 200);
 }
 
-void ExprAddDialog::listIndexChanged(int index) { stackWidget->setCurrentIndex(index); }
+void ExprAddDialog::listIndexChanged(int index)
+{
+    stackWidget->setCurrentIndex(index);
+}
 
-void ExprAddDialog::colorChooseClicked() {
+void ExprAddDialog::colorChooseClicked()
+{
     color = QColorDialog::getColor(color);
     if (color.isValid()) {
         QPixmap colorPix(30, 30);
@@ -271,7 +280,8 @@ void ExprAddDialog::colorChooseClicked() {
     }
 }
 
-const char* ExprAddDialog::initSwatch() {
+const char* ExprAddDialog::initSwatch()
+{
     if (rainbowPaletteBtn->isChecked())
         return ("[1,0,0],[1,.6,0],[1,1,0],[0,1,0],[0,1,1],[0,0,1],[.6,.1,.6],[1,0,1],[1,1,1],[0,0,0]");
     else if (grayPaletteBtn->isChecked())
@@ -281,77 +291,79 @@ const char* ExprAddDialog::initSwatch() {
         return ("[1,1,1],[.5,.5,.5],[0,0,0]");
 }
 
-void ExprControlCollection::addControlDialog() {
+void ExprControlCollection::addControlDialog()
+{
     ExprAddDialog* dialog = new ExprAddDialog(count, this);
     if (dialog->exec()) {
         QString s;
         switch (dialog->listWidget->currentRow()) {
-            case 0:
-                s = QString("%1 = curve(%2,0,0,4,1,1,4);\n")
-                        .arg(dialog->variableName->text())
-                        .arg(dialog->curveLookup->text());
-                break;
-            case 1:
-                s = QString("%1 = ccurve(%2,0,[0,0,0],4,1,[1,1,1],4);\n")
-                        .arg(dialog->variableName->text())
-                        .arg(dialog->colorCurveLookup->text());
-                break;
-            case 2:
-                s = dialog->variableName->text() + " = " + dialog->intDefault->text() + "; # " +
-                    dialog->intMin->text() + "," + dialog->intMax->text() + "\n";
-                break;
-            case 3:
-                s = QString("%1 = %2; # %3, %4\n")
-                        .arg(dialog->variableName->text())
-                        .arg(dialog->floatDefault->text())
-                        .arg(atof(dialog->floatMin->text().toStdString().c_str()), 0, 'f', 3)
-                        .arg(atof(dialog->floatMax->text().toStdString().c_str()), 0, 'f', 3);
-                break;
-            case 4:
-                s = QString("%1 = [%2,%3,%4]; # %5, %6\n")
-                        .arg(dialog->variableName->text())
-                        .arg(dialog->vectorDefault0->text())
-                        .arg(dialog->vectorDefault1->text())
-                        .arg(dialog->vectorDefault2->text())
-                        .arg(atof(dialog->vectorMin->text().toStdString().c_str()), 0, 'f', 3)
-                        .arg(atof(dialog->vectorMax->text().toStdString().c_str()), 0, 'f', 3);
-                break;
-            case 5:
-                s = QString("%1 = [%2,%3,%4];\n")
-                        .arg(dialog->variableName->text())
-                        .arg(dialog->color.redF())
-                        .arg(dialog->color.greenF())
-                        .arg(dialog->color.blueF());
-                break;
-            case 6:
-                s = QString("%1 = swatch(%2,%3);\n")
-                        .arg(dialog->variableName->text())
-                        .arg(dialog->swatchLookup->text())
-                        .arg(dialog->initSwatch());
-                break;
-            case 7:
-                s = QString("\"%1\" #%2 %3\n")
-                        .arg(dialog->stringDefaultWidget->text())
-                        .arg(dialog->stringTypeWidget->currentText())
-                        .arg(dialog->stringNameWidget->text());
-                break;
-            case 8:
-                s = QString("%1 = animCurve(%2,\"constant\",\"constant\",0,\"%3\");")
-                        .arg(dialog->variableName->text())
-                        .arg(dialog->animCurveLookup->text())
-                        .arg(dialog->animCurveLink->text());
-                break;
-            case 9:
-                s = QString("%1 = deepWater(%2,9,30,0,1,0,5,0,0,[0,0,0],0,0,0);\n")
-                        .arg(dialog->variableName->text())
-                        .arg(dialog->deepWaterLookup->text());
-                break;
+        case 0:
+            s = QString("%1 = curve(%2,0,0,4,1,1,4);\n")
+                    .arg(dialog->variableName->text())
+                    .arg(dialog->curveLookup->text());
+            break;
+        case 1:
+            s = QString("%1 = ccurve(%2,0,[0,0,0],4,1,[1,1,1],4);\n")
+                    .arg(dialog->variableName->text())
+                    .arg(dialog->colorCurveLookup->text());
+            break;
+        case 2:
+            s = dialog->variableName->text() + " = " + dialog->intDefault->text() + "; # " + dialog->intMin->text() +
+                "," + dialog->intMax->text() + "\n";
+            break;
+        case 3:
+            s = QString("%1 = %2; # %3, %4\n")
+                    .arg(dialog->variableName->text())
+                    .arg(dialog->floatDefault->text())
+                    .arg(atof(dialog->floatMin->text().toStdString().c_str()), 0, 'f', 3)
+                    .arg(atof(dialog->floatMax->text().toStdString().c_str()), 0, 'f', 3);
+            break;
+        case 4:
+            s = QString("%1 = [%2,%3,%4]; # %5, %6\n")
+                    .arg(dialog->variableName->text())
+                    .arg(dialog->vectorDefault0->text())
+                    .arg(dialog->vectorDefault1->text())
+                    .arg(dialog->vectorDefault2->text())
+                    .arg(atof(dialog->vectorMin->text().toStdString().c_str()), 0, 'f', 3)
+                    .arg(atof(dialog->vectorMax->text().toStdString().c_str()), 0, 'f', 3);
+            break;
+        case 5:
+            s = QString("%1 = [%2,%3,%4];\n")
+                    .arg(dialog->variableName->text())
+                    .arg(dialog->color.redF())
+                    .arg(dialog->color.greenF())
+                    .arg(dialog->color.blueF());
+            break;
+        case 6:
+            s = QString("%1 = swatch(%2,%3);\n")
+                    .arg(dialog->variableName->text())
+                    .arg(dialog->swatchLookup->text())
+                    .arg(dialog->initSwatch());
+            break;
+        case 7:
+            s = QString("\"%1\" #%2 %3\n")
+                    .arg(dialog->stringDefaultWidget->text())
+                    .arg(dialog->stringTypeWidget->currentText())
+                    .arg(dialog->stringNameWidget->text());
+            break;
+        case 8:
+            s = QString("%1 = animCurve(%2,\"constant\",\"constant\",0,\"%3\");")
+                    .arg(dialog->variableName->text())
+                    .arg(dialog->animCurveLookup->text())
+                    .arg(dialog->animCurveLink->text());
+            break;
+        case 9:
+            s = QString("%1 = deepWater(%2,9,30,0,1,0,5,0,0,[0,0,0],0,0,0);\n")
+                    .arg(dialog->variableName->text())
+                    .arg(dialog->deepWaterLookup->text());
+            break;
         }
         emit insertString(s.toStdString());
     }
 }
 
-bool ExprControlCollection::rebuildControls(const QString& expressionText, std::vector<QString>& variables) {
+bool ExprControlCollection::rebuildControls(const QString& expressionText, std::vector<QString>& variables)
+{
     // parse a new editable expression so  we can check if we need to make new controls
     EditableExpression* newEditable = new EditableExpression;
     newEditable->setExpr(expressionText.toStdString());
@@ -359,7 +371,8 @@ bool ExprControlCollection::rebuildControls(const QString& expressionText, std::
     // check for new variables
 
     bool newVariables = true;
-    if (editableExpression && editableExpression->getVariables() == newEditable->getVariables()) newVariables = false;
+    if (editableExpression && editableExpression->getVariables() == newEditable->getVariables())
+        newVariables = false;
     if (newVariables) {
         const std::vector<std::string>& vars = newEditable->getVariables();
         variables.clear();
@@ -368,7 +381,8 @@ bool ExprControlCollection::rebuildControls(const QString& expressionText, std::
         }
     }
 
-    if (newEditable->size() == 0 && !editableExpression) return false;
+    if (newEditable->size() == 0 && !editableExpression)
+        return false;
 
     if (editableExpression && editableExpression->controlsMatch(*newEditable)) {
         // controls match so we only need to update positions (i.e. if the user typed and shifted some controls)
@@ -416,7 +430,8 @@ bool ExprControlCollection::rebuildControls(const QString& expressionText, std::
             if (widget) {
                 // successfully made widget
                 int insertPoint = controlLayout->count() - 1;
-                if (showAddButton) insertPoint--;
+                if (showAddButton)
+                    insertPoint--;
                 controlLayout->insertWidget(insertPoint, widget);
                 _controls.push_back(widget);
                 connect(widget, SIGNAL(controlChanged(int)), SLOT(singleControlChanged(int)));
@@ -430,37 +445,50 @@ bool ExprControlCollection::rebuildControls(const QString& expressionText, std::
     return newVariables;
 }
 
-void ExprControlCollection::showEditor(int idx) {
-    if (idx < 0 || idx >= (int)_controls.size()) return;
+void ExprControlCollection::showEditor(int idx)
+{
+    if (idx < 0 || idx >= (int)_controls.size())
+        return;
 
     /* Right now we only launch the anim curve editor.
      * It would be better to launch them generically. */
     AnimCurveControl* control = dynamic_cast<AnimCurveControl*>(_controls[idx]);
-    if (!control) return;
+    if (!control)
+        return;
 
     control->editGraphClicked();
 }
 
-void ExprControlCollection::linkColorLink(int id) {
+void ExprControlCollection::linkColorLink(int id)
+{
     _linkedId = id;
     for (unsigned int i = 0; i < _controls.size(); i++) {
         _controls[i]->linkDisconnect(_linkedId);
     }
 }
 
-void ExprControlCollection::linkColorEdited(int id, QColor color) {
-    if (id == _linkedId) emit linkColorOutput(color);
+void ExprControlCollection::linkColorEdited(int id, QColor color)
+{
+    if (id == _linkedId)
+        emit linkColorOutput(color);
 }
 
-void ExprControlCollection::linkColorInput(QColor color) {
+void ExprControlCollection::linkColorInput(QColor color)
+{
     // TODO: fix
-    if (_linkedId < 0 || _linkedId >= (int)_controls.size()) return;
+    if (_linkedId < 0 || _linkedId >= (int)_controls.size())
+        return;
     _controls[_linkedId]->setColor(color);
 }
 
-void ExprControlCollection::updateText(const int id, QString& text) {
+void ExprControlCollection::updateText(const int id, QString& text)
+{
     Q_UNUSED(id);
-    if (editableExpression) text = QString(editableExpression->getEditedExpr().c_str());
+    if (editableExpression)
+        text = QString(editableExpression->getEditedExpr().c_str());
 }
 
-void ExprControlCollection::singleControlChanged(int id) { emit controlChanged(id); }
+void ExprControlCollection::singleControlChanged(int id)
+{
+    emit controlChanged(id);
+}

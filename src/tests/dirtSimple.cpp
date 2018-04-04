@@ -23,7 +23,8 @@
 #include <cstring>
 
 using namespace SeExpr2;
-int main() {
+int main()
+{
     Expression e("1+2");
 
     if (!e.isValid()) {

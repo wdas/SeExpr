@@ -25,8 +25,20 @@
 static double HandleMin = 20;
 
 CEGraphSeg::CEGraphSeg(CEGraphCurve* curve, int index)
-    : _viewValid(0), _curve(curve), _index(index), _unbounded(0), _numParams(0), _params(0), _keytime(0), _keyval(0),
-      _outtime(0), _outval(0), _nextval(0), _selected(0), _pendingSel(0) {
+    : _viewValid(0)
+    , _curve(curve)
+    , _index(index)
+    , _unbounded(0)
+    , _numParams(0)
+    , _params(0)
+    , _keytime(0)
+    , _keyval(0)
+    , _outtime(0)
+    , _outval(0)
+    , _nextval(0)
+    , _selected(0)
+    , _pendingSel(0)
+{
     auto it = curve->animCurve().getFirstKey() + index;
     _keytime = it->getTime();
     _keyval = it->getValue();
@@ -45,9 +57,13 @@ CEGraphSeg::CEGraphSeg(CEGraphCurve* curve, int index)
     // "<<animlib::AnimKeyframe::tangentTypeToString(it->getInTangentType())<<"  outang "<<it->getOutAngle()<<std::endl;
 }
 
-CEGraphSeg::~CEGraphSeg() { delete[] _params; }
+CEGraphSeg::~CEGraphSeg()
+{
+    delete[] _params;
+}
 
-void CEGraphSeg::paint(bool selected) {
+void CEGraphSeg::paint(bool selected)
+{
     selected = false;
     CEGraphUI* ui = _curve->ui();
     if (!selected) {
@@ -87,7 +103,8 @@ void CEGraphSeg::paint(bool selected) {
     glPopName();
 }
 
-bool CEGraphSeg::beginPart(Part part) {
+bool CEGraphSeg::beginPart(Part part)
+{
     glPushName(part);
     CEGraphUI* ui = _curve->ui();
     int activeCurve, activeSeg, activePart;
@@ -99,9 +116,13 @@ bool CEGraphSeg::beginPart(Part part) {
     return 1;
 }
 
-void CEGraphSeg::endPart() { glPopName(); }
+void CEGraphSeg::endPart()
+{
+    glPopName();
+}
 
-void CEGraphSeg::paintKey() {
+void CEGraphSeg::paintKey()
+{
     const CEGraphView& view = _curve->ui()->getView();
 
     int kt = view.px(_keytime);
@@ -122,17 +143,19 @@ void CEGraphSeg::paintKey() {
     }
 }
 
-CEDragHandler* CEGraphSeg::getDragHandler(int part, int keystate) {
+CEDragHandler* CEGraphSeg::getDragHandler(int part, int keystate)
+{
     bool alt = keystate & Qt::AltModifier;
     switch (part) {
-        case Seg: {
-            return alt ? new CENewKeyHandler(this) : 0;
-        }
+    case Seg: {
+        return alt ? new CENewKeyHandler(this) : 0;
+    }
     }
     return 0;
 }
 
-void CEGraphSeg::paintHandle(int num, double x, double y, double dx, double dy, double zx, double zy, bool joinKnob) {
+void CEGraphSeg::paintHandle(int num, double x, double y, double dx, double dy, double zx, double zy, bool joinKnob)
+{
     const CEGraphView& view = _curve->ui()->getView();
 
     // draw handle
@@ -188,20 +211,29 @@ void CEGraphSeg::paintHandle(int num, double x, double y, double dx, double dy, 
     endPart();
 }
 
-CEGraphUniformSeg::CEGraphUniformSeg(CEGraphCurve* curve, int index) : CEGraphSeg(curve, index), _samples(0) {}
+CEGraphUniformSeg::CEGraphUniformSeg(CEGraphCurve* curve, int index) : CEGraphSeg(curve, index), _samples(0)
+{
+}
 
-CEGraphUniformSeg::~CEGraphUniformSeg() { delete[] _samples; }
+CEGraphUniformSeg::~CEGraphUniformSeg()
+{
+    delete[] _samples;
+}
 
-void CEGraphUniformSeg::paintSeg() {
-    if (!_viewValid) updateView();
+void CEGraphUniformSeg::paintSeg()
+{
+    if (!_viewValid)
+        updateView();
     const CEGraphView& view = _curve->ui()->getView();
-    if (_numSamples == 0) return;
+    if (_numSamples == 0)
+        return;
     glPushAttrib(GL_CURRENT_BIT | GL_LINE_BIT);
     glLineWidth(2.);
     GLfloat color[4];
     glGetFloatv(GL_CURRENT_COLOR, &color[0]);
 
-    if (_unbounded || firstSeg()) glColor3f(.6f, .6f, .6f);
+    if (_unbounded || firstSeg())
+        glColor3f(.6f, .6f, .6f);
     // draw curve samples
     int sample = 0;
     if (firstSeg()) {
@@ -210,7 +242,8 @@ void CEGraphUniformSeg::paintSeg() {
             float x = _sampleStart + _sampleSpacing * sample;
             glVertex2d(view.pxd(x), view.pyd(_samples[sample]));
             sample++;
-            if (x >= _keytime) break;
+            if (x >= _keytime)
+                break;
         }
         glEnd();
         glColor3fv(&color[0]);
@@ -222,12 +255,14 @@ void CEGraphUniformSeg::paintSeg() {
         float x = _sampleStart + _sampleSpacing * sample;
         glVertex2d(view.pxd(x), view.pyd(_samples[sample]));
     }
-    if (!_unbounded) glVertex2d(view.pxd(_outtime), view.pyd(_outval));
+    if (!_unbounded)
+        glVertex2d(view.pxd(_outtime), view.pyd(_outval));
     glEnd();
     glPopAttrib();
 }
 
-void CEGraphUniformSeg::updateView() {
+void CEGraphUniformSeg::updateView()
+{
     // need to update samples based on view
     if (_samples) {
         // free previous samples
@@ -249,7 +284,8 @@ void CEGraphUniformSeg::updateView() {
     int start = int(floor(l / _sampleSpacing));
     if (!firstSeg()) {
         double keysamp = _keytime / _sampleSpacing;
-        if (start < keysamp) start = int(floor(keysamp) + 1);
+        if (start < keysamp)
+            start = int(floor(keysamp) + 1);
     }
     _sampleStart = start * _sampleSpacing;
 
@@ -257,7 +293,8 @@ void CEGraphUniformSeg::updateView() {
     int end = int(ceil(r / _sampleSpacing));
     if (!_unbounded) {
         double keysamp = _outtime / _sampleSpacing;
-        if (end > keysamp) end = int(ceil(keysamp) - 1);
+        if (end > keysamp)
+            end = int(ceil(keysamp) - 1);
     }
     _sampleEnd = end * _sampleSpacing;
 
@@ -285,7 +322,8 @@ void CEGraphUniformSeg::updateView() {
     _viewValid = 1;
 }
 
-CEGraphBezSeg::CEGraphBezSeg(CEGraphCurve* curve, int index) : CEGraphUniformSeg(curve, index) {
+CEGraphBezSeg::CEGraphBezSeg(CEGraphCurve* curve, int index) : CEGraphUniformSeg(curve, index)
+{
     _numParams = 4;
     _params = new double[4];
     auto it = curve->animCurve().getFirstKey() + index;
@@ -305,6 +343,11 @@ CEGraphBezSeg::CEGraphBezSeg(CEGraphCurve* curve, int index) : CEGraphUniformSeg
     _params[3] = weightOut * sin(thetaOut);
 }
 
-void CEGraphBezSeg::paintHandles() {}
+void CEGraphBezSeg::paintHandles()
+{
+}
 
-CEDragHandler* CEGraphBezSeg::getSegmentHandler(int part, int keystate) { return NULL; }
+CEDragHandler* CEGraphBezSeg::getSegmentHandler(int part, int keystate)
+{
+    return NULL;
+}

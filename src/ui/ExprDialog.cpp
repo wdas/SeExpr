@@ -46,7 +46,8 @@ static const char* arrow_right_xpm[] = {"16 16 9 1",        "g c #808080",      
                                         "..#######def#...", "........#df#....", "........#d#.....", "........##......",
                                         "................", "................"};
 
-ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0), currhistitem(0) {
+ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0), currhistitem(0)
+{
     this->setMinimumWidth(600);
     QVBoxLayout* rootLayout = new QVBoxLayout(0);
     rootLayout->setMargin(2);
@@ -183,44 +184,55 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0),
     connect(browser, SIGNAL(selectionChanged(const QString&)), SLOT(selectionChanged(const QString&)));
 }
 
-void ExprDialog::showEditor(int idx) {
+void ExprDialog::showEditor(int idx)
+{
     _currentEditorIdx = idx;
     showEditorTimer->setSingleShot(true);
     showEditorTimer->start();
 }
 
-void ExprDialog::_showEditor() { controls->showEditor(_currentEditorIdx); }
+void ExprDialog::_showEditor()
+{
+    controls->showEditor(_currentEditorIdx);
+}
 
-void ExprDialog::show() {
+void ExprDialog::show()
+{
     // populate the expressions
     browser->getExpressionDirs();
     browser->expandAll();
     QDialog::show();
 }
 
-int ExprDialog::exec() {
+int ExprDialog::exec()
+{
     // populate the expressions
     browser->getExpressionDirs();
     browser->expandAll();
     return QDialog::exec();
 }
 
-void ExprDialog::keyPressEvent(QKeyEvent* event) {
-    if (event->key() == Qt::Key_Escape) return;
+void ExprDialog::keyPressEvent(QKeyEvent* event)
+{
+    if (event->key() == Qt::Key_Escape)
+        return;
     return QDialog::keyPressEvent(event);
 }
 
-void ExprDialog::closeEvent(QCloseEvent* event) {
+void ExprDialog::closeEvent(QCloseEvent* event)
+{
     emit dialogClosed();
     QDialog::closeEvent(event);
 }
 
-void ExprDialog::reject() {
+void ExprDialog::reject()
+{
     emit dialogClosed();
     QDialog::reject();
 }
 
-void ExprDialog::verifiedApply() {
+void ExprDialog::verifiedApply()
+{
     applyExpression();
     if (grapher->expr.isValid()) {
         emit expressionApplied();
@@ -232,12 +244,14 @@ void ExprDialog::verifiedApply() {
         msgBox.addButton("Cancel", QMessageBox::AcceptRole);
         int ret = msgBox.exec();
         Q_UNUSED(ret);
-        if (msgBox.clickedButton() == okButton) emit expressionApplied();
+        if (msgBox.clickedButton() == okButton)
+            emit expressionApplied();
     }
     histAdd();
 }
 
-void ExprDialog::verifiedAccept() {
+void ExprDialog::verifiedAccept()
+{
     applyExpression();
     if (grapher->expr.isValid()) {
         emit expressionApplied();
@@ -259,8 +273,10 @@ void ExprDialog::verifiedAccept() {
     }
 }
 
-void ExprDialog::reloadExpression() {
-    if (currentexprfile == "") return;
+void ExprDialog::reloadExpression()
+{
+    if (currentexprfile == "")
+        return;
 
     std::ifstream file(currentexprfile.toStdString().c_str());
     std::string fileContents((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -268,7 +284,8 @@ void ExprDialog::reloadExpression() {
     histAdd();
 }
 
-void ExprDialog::setupHelp(QTabWidget* tab) {
+void ExprDialog::setupHelp(QTabWidget* tab)
+{
     QWidget* browserspace = new QWidget(tab);
     helpBrowser = new QTextBrowser(browserspace);
     tab->addTab(browserspace, "Help");
@@ -318,7 +335,8 @@ void ExprDialog::setupHelp(QTabWidget* tab) {
     connect(helpBrowser, SIGNAL(forwardAvailable(bool)), forwardPb, SLOT(setEnabled(bool)));
 }
 
-void ExprDialog::findHelper(QTextDocument::FindFlags flags) {
+void ExprDialog::findHelper(QTextDocument::FindFlags flags)
+{
     QTextDocument* doc = helpBrowser->document();
     if (prevFind != helpFindBox->text()) {
         prevFind = helpFindBox->text();
@@ -328,16 +346,24 @@ void ExprDialog::findHelper(QTextDocument::FindFlags flags) {
     helpBrowser->setTextCursor(blah);
 }
 
-void ExprDialog::findNextInHelp() { findHelper(0); }
+void ExprDialog::findNextInHelp()
+{
+    findHelper(0);
+}
 
-void ExprDialog::findPrevInHelp() { findHelper(QTextDocument::FindBackward); }
+void ExprDialog::findPrevInHelp()
+{
+    findHelper(QTextDocument::FindBackward);
+}
 
-void ExprDialog::previewExpression() {
+void ExprDialog::previewExpression()
+{
     applyExpression();
     emit preview();
 }
 
-void ExprDialog::applyExpression() {
+void ExprDialog::applyExpression()
+{
     editor->clearErrors();
     // set new expression
     grapher->expr.setExpr(editor->getExpr());
@@ -381,60 +407,79 @@ void ExprDialog::applyExpression() {
     }
 }
 
-void ExprDialog::clearExpression() {
+void ExprDialog::clearExpression()
+{
     browser->clearSelection();
     editor->setExpr("", false);
     applyExpression();
 }
 
-void removeDuplicates(QStringList& strlist) {
-    if (strlist.size() < 2) return;
+void removeDuplicates(QStringList& strlist)
+{
+    if (strlist.size() < 2)
+        return;
     QStringList::Iterator it = strlist.begin();
     QString last = *it;
     std::vector<QStringList::Iterator> deletelist;
     for (++it; it != strlist.end(); ++it) {
-        if (*it == last) deletelist.push_back(it);
+        if (*it == last)
+            deletelist.push_back(it);
         last = *it;
     }
-    for (int i = 0; i < deletelist.size(); i++) strlist.erase(deletelist[i]);
+    for (int i = 0; i < deletelist.size(); i++)
+        strlist.erase(deletelist[i]);
 }
 
-void ExprDialog::enableBackForwards() {
+void ExprDialog::enableBackForwards()
+{
     // std::cout << currhistitem << " " << history.size() << "\n";
-    if (currhistitem <= 0 || history.size() < 2) emit backwardAvailable(false);
-    if (currhistitem > 0 && history.size() >= 2) emit backwardAvailable(true);
+    if (currhistitem <= 0 || history.size() < 2)
+        emit backwardAvailable(false);
+    if (currhistitem > 0 && history.size() >= 2)
+        emit backwardAvailable(true);
 
-    if (currhistitem >= history.size() - 1 || history.size() < 2) emit forwardAvailable(false);
-    if (currhistitem < history.size() - 1 && history.size() >= 2) emit forwardAvailable(true);
+    if (currhistitem >= history.size() - 1 || history.size() < 2)
+        emit forwardAvailable(false);
+    if (currhistitem < history.size() - 1 && history.size() >= 2)
+        emit forwardAvailable(true);
 }
-void ExprDialog::selectionChanged(const QString& str) {
+void ExprDialog::selectionChanged(const QString& str)
+{
     currentexprfile = str;
     histAdd();
     previewExpression();
 }
 
-void ExprDialog::histBackward() {
-    if (history.isEmpty() || currhistitem <= 0) return;
+void ExprDialog::histBackward()
+{
+    if (history.isEmpty() || currhistitem <= 0)
+        return;
     QString oldtext = editor->getExpr().c_str();
-    if (currhistitem == history.size() - 1) history[currhistitem] = editor->getExpr().c_str();
+    if (currhistitem == history.size() - 1)
+        history[currhistitem] = editor->getExpr().c_str();
     currhistitem--;
     editor->setExpr(history[currhistitem].toStdString());
     emit forwardAvailable(true);
     removeDuplicates(history);
     currhistitem = std::min(currhistitem, (int)history.size() - 1);
     enableBackForwards();
-    if (oldtext == editor->getExpr().c_str() && currhistitem > 0) histBackward();
+    if (oldtext == editor->getExpr().c_str() && currhistitem > 0)
+        histBackward();
 }
 
-void ExprDialog::histForward() {
-    if (history.isEmpty() || currhistitem >= history.size() - 1) return;
+void ExprDialog::histForward()
+{
+    if (history.isEmpty() || currhistitem >= history.size() - 1)
+        return;
     currhistitem++;
     editor->setExpr(history[currhistitem].toStdString());
     enableBackForwards();
 }
 
-void ExprDialog::histAdd() {
-    if (history.isEmpty() || editor->getExpr() == "") return;
+void ExprDialog::histAdd()
+{
+    if (history.isEmpty() || editor->getExpr() == "")
+        return;
 
     history.last() = editor->getExpr().c_str();
     currhistitem = history.size();

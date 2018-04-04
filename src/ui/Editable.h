@@ -30,8 +30,12 @@
 #endif
 #include <ExprDeepWater.h>
 
-inline void printVal(std::stringstream& stream, double v) { stream << v; }
-inline void printVal(std::stringstream& stream, const SeExpr2::Vec3d& v) {
+inline void printVal(std::stringstream& stream, double v)
+{
+    stream << v;
+}
+inline void printVal(std::stringstream& stream, const SeExpr2::Vec3d& v)
+{
     stream << "[" << v[0] << "," << v[1] << "," << v[2] << "]";
 }
 
@@ -41,18 +45,26 @@ struct Editable {
     std::string name;
     int startPos, endPos;
 
-    Editable(const std::string& name, int startPos, int endPos) : name(name), startPos(startPos), endPos(endPos) {}
+    Editable(const std::string& name, int startPos, int endPos) : name(name), startPos(startPos), endPos(endPos)
+    {
+    }
 
-    void updatePositions(const Editable& other) {
+    void updatePositions(const Editable& other)
+    {
         startPos = other.startPos;
         endPos = other.endPos;
     }
 
-    virtual ~Editable() {}  // must have this to ensure destruction
+    virtual ~Editable()
+    {
+    }  // must have this to ensure destruction
 
     /// parses a comment. if false is returned then delete the control from the editable
     virtual bool parseComment(const std::string& comment) = 0;
-    virtual std::string str() const { return std::string("<unknown>"); }
+    virtual std::string str() const
+    {
+        return std::string("<unknown>");
+    }
     virtual void appendString(std::stringstream& stream) const = 0;
     virtual bool controlsMatch(const Editable&) const = 0;
 };
@@ -62,9 +74,12 @@ struct NumberEditable : public Editable {
     double min, max;
     bool isInt;
     NumberEditable(const std::string& name, int startPos, int endPos, double val)
-        : Editable(name, startPos, endPos), v(val), min(0), max(1), isInt(false) {}
+        : Editable(name, startPos, endPos), v(val), min(0), max(1), isInt(false)
+    {
+    }
 
-    bool parseComment(const std::string& comment) {
+    bool parseComment(const std::string& comment)
+    {
         if (comment.find('.') != std::string::npos || comment.find('e') != std::string::npos) {
             float fmin, fmax;
             if (sscanf(comment.c_str(), "#%f,%f", &fmin, &fmax) == 2) {
@@ -83,14 +98,19 @@ struct NumberEditable : public Editable {
         }
         return true;
     }
-    std::string str() const {
+    std::string str() const
+    {
         std::stringstream s;
         s << name << " " << v << " in [" << min << "," << max << "] subset " << (isInt ? "Integers" : "Reals");
         return s.str();
     }
-    void appendString(std::stringstream& stream) const { stream << v; }
+    void appendString(std::stringstream& stream) const
+    {
+        stream << v;
+    }
 
-    virtual bool controlsMatch(const Editable& other) const {
+    virtual bool controlsMatch(const Editable& other) const
+    {
         if (const NumberEditable* o = dynamic_cast<const NumberEditable*>(&other)) {
             return min == o->min && max == o->max && v == o->v && isInt == o->isInt && name == o->name;
         } else
@@ -103,9 +123,12 @@ struct VectorEditable : public Editable {
     double min, max;
     bool isColor;
     VectorEditable(const std::string& name, int startPos, int endPos, const SeExpr2::Vec3d& val)
-        : Editable(name, startPos, endPos), v(val), min(0), max(1), isColor(true) {}
+        : Editable(name, startPos, endPos), v(val), min(0), max(1), isColor(true)
+    {
+    }
 
-    bool parseComment(const std::string& comment) {
+    bool parseComment(const std::string& comment)
+    {
         float fmin, fmax;
         int numParsed = sscanf(comment.c_str(), "#%f,%f", &fmin, &fmax);
         if (numParsed == 2) {
@@ -115,15 +138,20 @@ struct VectorEditable : public Editable {
         }
         return true;
     }
-    std::string str() const {
+    std::string str() const
+    {
         std::stringstream s;
         s << name << " " << v << " in [" << min << "," << max << "]";
         return s.str();
     }
 
-    void appendString(std::stringstream& stream) const { printVal(stream, v); }
+    void appendString(std::stringstream& stream) const
+    {
+        printVal(stream, v);
+    }
 
-    virtual bool controlsMatch(const Editable& other) const {
+    virtual bool controlsMatch(const Editable& other) const
+    {
         if (const VectorEditable* o = dynamic_cast<const VectorEditable*>(&other)) {
             return min == o->min && max == o->max && v == o->v && name == o->name;
         } else
@@ -134,9 +162,12 @@ struct VectorEditable : public Editable {
 struct StringEditable : public Editable {
     std::string v;
     std::string type;
-    StringEditable(int startPos, int endPos, const std::string& val) : Editable("unknown", startPos, endPos), v(val) {}
+    StringEditable(int startPos, int endPos, const std::string& val) : Editable("unknown", startPos, endPos), v(val)
+    {
+    }
 
-    bool parseComment(const std::string& comment) {
+    bool parseComment(const std::string& comment)
+    {
         char namebuf[1024], typebuf[1024];
         int parsed = sscanf(comment.c_str(), "#%s %s", typebuf, namebuf);
         if (parsed == 2) {
@@ -148,17 +179,20 @@ struct StringEditable : public Editable {
         }
     }
 
-    void appendString(std::stringstream& stream) const {
+    void appendString(std::stringstream& stream) const
+    {
         // TODO: escape strs
         stream << "\"" << v << "\"";
     }
-    std::string str() const {
+    std::string str() const
+    {
         std::stringstream s;
         s << name << " " << type << " = " << v;
         return s.str();
     }
 
-    virtual bool controlsMatch(const Editable& other) const {
+    virtual bool controlsMatch(const Editable& other) const
+    {
         if (const StringEditable* o = dynamic_cast<const StringEditable*>(&other)) {
             return v == o->v && type == o->type && name == o->name;
         } else
@@ -173,12 +207,21 @@ struct GenericCurveEditable : public Editable {
     typedef typename Curve::InterpType InterpType;
 
     std::vector<CV> cvs;
-    GenericCurveEditable(const std::string& name, int startPos, int endPos) : Editable(name, startPos, endPos) {}
+    GenericCurveEditable(const std::string& name, int startPos, int endPos) : Editable(name, startPos, endPos)
+    {
+    }
 
-    void add(double x, const TVAL& y, int interp) { cvs.push_back(CV(x, y, InterpType(interp))); }
+    void add(double x, const TVAL& y, int interp)
+    {
+        cvs.push_back(CV(x, y, InterpType(interp)));
+    }
 
-    bool parseComment(const std::string& /*comment*/) { return true; }
-    std::string str() const {
+    bool parseComment(const std::string& /*comment*/)
+    {
+        return true;
+    }
+    std::string str() const
+    {
         std::stringstream s;
         s << name << " ccurve";
         return s.str();
@@ -186,7 +229,8 @@ struct GenericCurveEditable : public Editable {
 
   private:
   public:
-    void appendString(std::stringstream& stream) const {
+    void appendString(std::stringstream& stream) const
+    {
         for (size_t i = 0, sz = cvs.size(); i < sz; i++) {
             const CV& cv = cvs[i];
             stream << "," << cv._pos << ",";
@@ -195,7 +239,8 @@ struct GenericCurveEditable : public Editable {
         }
     }
 
-    virtual bool controlsMatch(const Editable& other) const {
+    virtual bool controlsMatch(const Editable& other) const
+    {
         if (const GenericCurveEditable* o = dynamic_cast<const GenericCurveEditable*>(&other)) {
             // TODO: fix  this
             //            return cvs==o->cvs && name==o->name;
@@ -221,24 +266,28 @@ struct AnimCurveEditable : public Editable {
     AnimCurveEditable(const std::string& name, int startPos, int endPos)
         : Editable(name, startPos, endPos)
 #ifdef SEEXPR_USE_ANIMLIB
-          ,
-          curve(animlib::AnimAttrID())
+        , curve(animlib::AnimAttrID())
 #endif
     {
     }
 
-    ~AnimCurveEditable() {}  // must have this to ensure destruction
+    ~AnimCurveEditable()
+    {
+    }  // must have this to ensure destruction
 
-    bool parseComment(const std::string& comment) {
+    bool parseComment(const std::string& comment)
+    {
         animationSystemCurve = comment;
         return true;
     }
-    std::string str() const {
+    std::string str() const
+    {
         std::stringstream s;
         s << name << " ccurve";
         return s.str();
     }
-    void appendString(std::stringstream& stream) const {
+    void appendString(std::stringstream& stream) const
+    {
 #ifdef SEEXPR_USE_ANIMLIB
         if (newText.length() > 0)
             stream << newText;
@@ -260,7 +309,8 @@ struct AnimCurveEditable : public Editable {
         UNUSED(stream);
 #endif
     }
-    virtual bool controlsMatch(const Editable& other) const {
+    virtual bool controlsMatch(const Editable& other) const
+    {
         if (const AnimCurveEditable* o = dynamic_cast<const AnimCurveEditable*>(&other)) {
             // TODO: fix  this
             //            return cvs==o->cvs && name==o->name;
@@ -275,9 +325,12 @@ struct ColorSwatchEditable : public Editable {
     std::vector<SeExpr2::Vec3d> colors;
     std::string labelType;
 
-    ColorSwatchEditable(const std::string& name, int startPos, int endPos) : Editable(name, startPos, endPos) {}
+    ColorSwatchEditable(const std::string& name, int startPos, int endPos) : Editable(name, startPos, endPos)
+    {
+    }
 
-    bool parseComment(const std::string& comment) {
+    bool parseComment(const std::string& comment)
+    {
         char labelbuf[1024];
         int parsed = sscanf(comment.c_str(), "#%s", labelbuf);
         if (parsed == 1) {
@@ -287,13 +340,15 @@ struct ColorSwatchEditable : public Editable {
         return true;
     }
 
-    std::string str() const {
+    std::string str() const
+    {
         std::stringstream s;
         s << name << " swatch";
         return s.str();
     }
 
-    void appendString(std::stringstream& stream) const {
+    void appendString(std::stringstream& stream) const
+    {
         for (size_t i = 0, sz = colors.size(); i < sz; i++) {
             const SeExpr2::Vec3d& color = colors[i];
             stream << ",";
@@ -301,7 +356,8 @@ struct ColorSwatchEditable : public Editable {
         }
     }
 
-    virtual bool controlsMatch(const Editable& other) const {
+    virtual bool controlsMatch(const Editable& other) const
+    {
         if (const ColorSwatchEditable* o = dynamic_cast<const ColorSwatchEditable*>(&other)) {
             // TODO: determine when controls match
             UNUSED(o);
@@ -310,13 +366,23 @@ struct ColorSwatchEditable : public Editable {
             return false;
     }
 
-    void add(const SeExpr2::Vec3d& value) { colors.push_back(value); }
+    void add(const SeExpr2::Vec3d& value)
+    {
+        colors.push_back(value);
+    }
 
-    void change(int index, const SeExpr2::Vec3d& value) { colors[index] = value; }
+    void change(int index, const SeExpr2::Vec3d& value)
+    {
+        colors[index] = value;
+    }
 
-    void remove(int index) { colors.erase(colors.begin() + index); }
+    void remove(int index)
+    {
+        colors.erase(colors.begin() + index);
+    }
 
-    void print() {
+    void print()
+    {
         std::cerr << "\nColorSwatchEditable:\n";
         for (unsigned int i = 0; i < colors.size(); i++) {
             std::cerr << colors[i][0] << ", " << colors[i][1] << ", " << colors[i][2] << std::endl;
@@ -327,19 +393,29 @@ struct ColorSwatchEditable : public Editable {
 struct DeepWaterEditable : public Editable {
     SeDeepWaterParams params;
 
-    DeepWaterEditable(const std::string& name, int startPos, int endPos) : Editable(name, startPos, endPos) {}
+    DeepWaterEditable(const std::string& name, int startPos, int endPos) : Editable(name, startPos, endPos)
+    {
+    }
 
-    void setParams(const SeDeepWaterParams& paramsIn) { params = paramsIn; }
+    void setParams(const SeDeepWaterParams& paramsIn)
+    {
+        params = paramsIn;
+    }
 
-    bool parseComment(const std::string& /*comment*/) { return true; }
+    bool parseComment(const std::string& /*comment*/)
+    {
+        return true;
+    }
 
-    std::string str() const {
+    std::string str() const
+    {
         std::stringstream s;
         s << name << " deepWater";
         return s.str();
     }
 
-    void appendString(std::stringstream& stream) const {
+    void appendString(std::stringstream& stream) const
+    {
         stream << "," << params.resolution;
         stream << "," << params.tileSize;
         stream << "," << params.lengthCutoff;
@@ -354,7 +430,8 @@ struct DeepWaterEditable : public Editable {
         stream << "," << params.filterWidth;
     }
 
-    virtual bool controlsMatch(const Editable& other) const {
+    virtual bool controlsMatch(const Editable& other) const
+    {
         if (const DeepWaterEditable* o = dynamic_cast<const DeepWaterEditable*>(&other)) {
             // TODO: determine when controls match
             UNUSED(o);

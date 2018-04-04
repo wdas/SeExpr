@@ -24,15 +24,19 @@
 using namespace SeExpr2;
 
 static int invocations = 0;
-static double countInvocations(double x) {
+static double countInvocations(double x)
+{
     invocations++;
     return x;
 }
 
 struct Func : public ExprFuncSimple {
-    Func() : ExprFuncSimple(true) {}
+    Func() : ExprFuncSimple(true)
+    {
+    }
 
-    virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const {
+    virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const
+    {
         bool valid = true;
         valid &= node->checkArg(0, ExprType().FP(3).Constant(), envBuilder);
         valid &= node->checkArg(1, ExprType().String().Varying(), envBuilder);
@@ -40,14 +44,20 @@ struct Func : public ExprFuncSimple {
         valid &= node->checkArg(3, ExprType().String().Constant(), envBuilder);
         return valid ? ExprType().FP(4) : ExprType().Error();
     }
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const { return nullptr; }
-    virtual void eval(ArgHandle args) {
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const
+    {
+        return nullptr;
+    }
+    virtual void eval(ArgHandle args)
+    {
         const char* s1 = args.inStr(1);
         const char* s2 = args.inStr(3);
         double sum1 = 0;
-        for (const char* p = s1; *p != 0; p++) sum1 += *p;
+        for (const char* p = s1; *p != 0; p++)
+            sum1 += *p;
         double sum2 = 0;
-        for (const char* p = s2; *p != 0; p++) sum2 += *p;
+        for (const char* p = s2; *p != 0; p++)
+            sum2 += *p;
         Vec3dRef foo(args.inFp<3>(0));
         Vec2dRef bar(args.inFp<2>(2));
         args.outFpHandle<4>() = Vec4d(foo[0] + foo[1] + foo[2], bar[0] + bar[1], sum1, sum2);
@@ -59,38 +69,58 @@ struct SimpleExpression : public Expression {
     // Define simple scalar variable type that just stores the value it returns
     struct Var : public ExprVarRef {
         double value;
-        Var() : ExprVarRef(ExprType().FP(1).Varying()) {}
-        void eval(double* result) { result[0] = value; }
-        void eval(const char**) {}
+        Var() : ExprVarRef(ExprType().FP(1).Varying())
+        {
+        }
+        void eval(double* result)
+        {
+            result[0] = value;
+        }
+        void eval(const char**)
+        {
+        }
     };
     mutable Var x, y;
 
     // Custom variable resolver, only allow ones we specify
-    ExprVarRef* resolveVar(const std::string& name) const {
-        if (name == "x") return &x;
-        if (name == "y") return &y;
+    ExprVarRef* resolveVar(const std::string& name) const
+    {
+        if (name == "x")
+            return &x;
+        if (name == "y")
+            return &y;
         return 0;
     }
 
     // Make a custom sum function
     mutable ExprFunc customFunc;
-    static double customFuncHelper(double x, double y) { return x + y; }
+    static double customFuncHelper(double x, double y)
+    {
+        return x + y;
+    }
     mutable ExprFunc countInvocationsFunc;
 
     // Custom function resolver
-    ExprFunc* resolveFunc(const std::string& name) const {
-        if (name == "custom") return &customFunc;
-        if (name == "testFunc") return &testFunc;
-        if (name == "countInvocations") return &countInvocationsFunc;
+    ExprFunc* resolveFunc(const std::string& name) const
+    {
+        if (name == "custom")
+            return &customFunc;
+        if (name == "testFunc")
+            return &testFunc;
+        if (name == "countInvocations")
+            return &countInvocationsFunc;
         return 0;
     }
 
     // Constructor
     SimpleExpression(const std::string& str)
-        : Expression(str), customFunc(customFuncHelper), countInvocationsFunc(countInvocations) {}
+        : Expression(str), customFunc(customFuncHelper), countInvocationsFunc(countInvocations)
+    {
+    }
 };
 
-TEST(BasicTests, AddConstant) {
+TEST(BasicTests, AddConstant)
+{
     Expression expr("8+4");
     EXPECT_TRUE(expr.isValid());
     EXPECT_TRUE(!expr.isVec());
@@ -99,7 +129,8 @@ TEST(BasicTests, AddConstant) {
     EXPECT_EQ(val[0], 12);
 }
 
-TEST(BasicTests, SubtractConstant) {
+TEST(BasicTests, SubtractConstant)
+{
     Expression expr("8-4");
     EXPECT_TRUE(expr.isValid());
     EXPECT_TRUE(!expr.isVec());
@@ -108,7 +139,8 @@ TEST(BasicTests, SubtractConstant) {
     EXPECT_EQ(val[0], 4);
 }
 
-TEST(BasicTests, MultiplyConstant) {
+TEST(BasicTests, MultiplyConstant)
+{
     Expression expr("8*4");
     EXPECT_TRUE(expr.isValid());
     EXPECT_TRUE(!expr.isVec());
@@ -117,7 +149,8 @@ TEST(BasicTests, MultiplyConstant) {
     EXPECT_EQ(val[0], 32);
 }
 
-TEST(BasicTests, DivideConstant) {
+TEST(BasicTests, DivideConstant)
+{
     Expression expr("8/4");
     EXPECT_TRUE(expr.isValid());
     EXPECT_TRUE(!expr.isVec());
@@ -126,7 +159,8 @@ TEST(BasicTests, DivideConstant) {
     EXPECT_EQ(val[0], 2);
 }
 
-TEST(BasicTests, ModConstant) {
+TEST(BasicTests, ModConstant)
+{
     Expression expr("8%4");
     EXPECT_TRUE(expr.isValid());
     EXPECT_TRUE(!expr.isVec());
@@ -135,7 +169,8 @@ TEST(BasicTests, ModConstant) {
     EXPECT_EQ(val[0], 0);
 }
 
-TEST(BasicTests, ExponentConstant) {
+TEST(BasicTests, ExponentConstant)
+{
     Expression expr("3^2");
     EXPECT_TRUE(expr.isValid());
     EXPECT_TRUE(!expr.isVec());
@@ -144,7 +179,8 @@ TEST(BasicTests, ExponentConstant) {
     EXPECT_EQ(val[0], 9);
 }
 
-TEST(BasicTests, ParensConstant) {
+TEST(BasicTests, ParensConstant)
+{
     Expression expr("(3+4)");
     EXPECT_TRUE(expr.isValid());
     EXPECT_TRUE(!expr.isVec());
@@ -153,7 +189,8 @@ TEST(BasicTests, ParensConstant) {
     EXPECT_EQ(val[0], 7);
 }
 
-TEST(BasicTests, VecValueConstant) {
+TEST(BasicTests, VecValueConstant)
+{
     Expression expr("[7+4,7*4,9-4]");
     EXPECT_TRUE(expr.isValid());
     EXPECT_TRUE(!expr.isVec());
@@ -165,7 +202,8 @@ TEST(BasicTests, VecValueConstant) {
     EXPECT_EQ(val[2], res[2]);
 }
 
-TEST(BasicTests, Vec) {
+TEST(BasicTests, Vec)
+{
     Vec3d a(1, 2, 3), b(2, 3, 4);
     ASSERT_EQ(a.dot(b), 20);
     ASSERT_EQ(a.length2(), a.dot(a));
@@ -174,7 +212,8 @@ TEST(BasicTests, Vec) {
     ASSERT_EQ(foo, aRef);
 }
 
-TEST(BasicTests, Variables) {
+TEST(BasicTests, Variables)
+{
     SimpleExpression expr("$x+y");
     expr.x.value = 3;
     expr.y.value = 4;
@@ -188,7 +227,8 @@ TEST(BasicTests, Variables) {
     EXPECT_EQ(val[0], 7);
 }
 
-TEST(BasicTests, Custom) {
+TEST(BasicTests, Custom)
+{
     SimpleExpression expr("custom(1,2)");
     EXPECT_TRUE(expr.isValid());
     EXPECT_TRUE(!expr.isVec());
@@ -197,14 +237,16 @@ TEST(BasicTests, Custom) {
     EXPECT_EQ(expr.evalFP()[0], 3);
 }
 
-TEST(BasicTests, Precedence) {
+TEST(BasicTests, Precedence)
+{
     SimpleExpression expr1("1+2*3");
     EXPECT_EQ(expr1.evalFP()[0], 7);
     SimpleExpression expr2("(1+2)*3");
     EXPECT_EQ(expr2.evalFP()[0], 9);
 }
 
-TEST(BasicTests, VectorAssignment) {
+TEST(BasicTests, VectorAssignment)
+{
     SimpleExpression expr1("$foo=[0,1,2]; $foo=3; $foo");
     double val1 = expr1.evalFP()[0];
     EXPECT_EQ(val1, 3);
@@ -216,10 +258,12 @@ TEST(BasicTests, VectorAssignment) {
     EXPECT_EQ(val3, val4);
 }
 
-TEST(BasicTests, LogicalShortCircuiting) {
+TEST(BasicTests, LogicalShortCircuiting)
+{
     auto testExpr = [&](const char* expr, int expectedOutput, int invocationsExpected) {
         SimpleExpression expr1(expr);
-        if (!expr1.isValid()) throw std::runtime_error(expr1.parseError());
+        if (!expr1.isValid())
+            throw std::runtime_error(expr1.parseError());
         invocations = 0;
         Vec<double, 1, true> val(const_cast<double*>(expr1.evalFP()));
         EXPECT_EQ(val[0], expectedOutput);
@@ -238,7 +282,8 @@ TEST(BasicTests, LogicalShortCircuiting) {
     testExpr("countInvocations(0)||countInvocations(0)||countInvocations(0)", 0, 3);
 }
 
-TEST(BasicTests, IfThenElse) {
+TEST(BasicTests, IfThenElse)
+{
     auto doTest = [](const std::string& eStr, ExprType desiredType, bool shouldBeValid,
                      std::function<void(const double*)> check) {
         SimpleExpression e(eStr);
@@ -310,40 +355,47 @@ TEST(BasicTests, IfThenElse) {
     });
 }
 
-TEST(BasicTests, NestedTernary) {
+TEST(BasicTests, NestedTernary)
+{
     SimpleExpression expr1("1?2:3?4:5");
     if (!expr1.isValid()) {
         throw std::runtime_error("parse error:\n" + expr1.parseError());
     }
-    if (!expr1.isValid()) throw std::runtime_error(expr1.parseError());
+    if (!expr1.isValid())
+        throw std::runtime_error(expr1.parseError());
     Vec<double, 1, true> val(const_cast<double*>(expr1.evalFP()));
     EXPECT_EQ(val[0], 2);
     // TODO: put this expr in foo=3?1:2;Cs*foo
 }
 
 template <int d>
-Vec<double, d> run(const std::string& a) {
+Vec<double, d> run(const std::string& a)
+{
     SimpleExpression e(a);
     e.setDesiredReturnType(TypeVec(d));
-    if (!e.isValid()) throw std::runtime_error(e.parseError());
+    if (!e.isValid())
+        throw std::runtime_error(e.parseError());
     Vec<const double, d, true> crud(e.evalFP());
     return crud;
 }
 
-TEST(BasicTests, TestFunc) {
+TEST(BasicTests, TestFunc)
+{
     EXPECT_EQ(run<4>("testFunc([33,44,55],\"a\",[22,33],\"b\")"),
               Vec4d(33 + 44 + 55, 22 + 33, int('a'), int('b')));  //,int('a'),int('b')));
     EXPECT_EQ(run<4>("testFunc(33,\"aa\",22,\"bc\")"), Vec4d(33 * 3, 22 * 2, 'a' + 'a', 'b' + 'c'));
 }
 
-TEST(BasicTests, GetVar) {
+TEST(BasicTests, GetVar)
+{
     EXPECT_EQ(run<3>("getVar(\"a\",[11,22,33])"), Vec3d(11, 22, 33));
     EXPECT_EQ(run<4>("a=[11,22,33,44];getVar(\"a\",[5,3,2])"), Vec4d(11, 22, 33, 44));
     EXPECT_EQ(run<3>("a=[11,22,33,44];getVar(\"aa\",[5,3,2])"), Vec3d(5, 3, 2));
     EXPECT_EQ(run<4>("[11,22,33,44]"), Vec4d(11, 22, 33, 44));
 }
 
-TEST(BasicTests, Modulo) {
+TEST(BasicTests, Modulo)
+{
     Expression expr("-0.3%2");
     EXPECT_TRUE(expr.isValid());
     EXPECT_TRUE(!expr.isVec());
@@ -352,14 +404,16 @@ TEST(BasicTests, Modulo) {
     EXPECT_EQ(val[0], 1.7);
 }
 
-TEST(BasicTests, BadSyntax) {
+TEST(BasicTests, BadSyntax)
+{
     Expression expr("!@#$%^)");
     EXPECT_FALSE(expr.syntaxOK());
     EXPECT_NO_THROW(SeExpr2::Vec3d::copy(expr.evalFP()));
     EXPECT_NO_THROW(expr.evalStr());
 }
 
-TEST(BasicTests, InvalidEvaluator) {
+TEST(BasicTests, InvalidEvaluator)
+{
     Expression expr("unregisteredVar");
     EXPECT_TRUE(expr.syntaxOK());
     EXPECT_FALSE(expr.isValid());
@@ -368,7 +422,8 @@ TEST(BasicTests, InvalidEvaluator) {
 }
 
 struct TestSymbols : public SeExpr2::VarBlockCreator {
-    TestSymbols() {
+    TestSymbols()
+    {
         centroid = registerVariable("centroid", SeExpr2::ExprType().FP(3).Varying());
         doStuff = registerFunction("doStuff", ExprFuncDeclaration(1, 1, {SeExpr2::ExprType().FP(3).Varying(),
                                                                          SeExpr2::ExprType().FP(3).Varying()}));
@@ -378,7 +433,8 @@ struct TestSymbols : public SeExpr2::VarBlockCreator {
     int doStuff;
 };
 
-TEST(BasicTests, UsesVar) {
+TEST(BasicTests, UsesVar)
+{
     TestSymbols testSymbols;
     Expression expr("doStuff($centroid)");
     expr.setVarBlockCreator(&testSymbols);

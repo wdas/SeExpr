@@ -33,17 +33,50 @@ class CEGraphSeg {
 #endif
     CEGraphSeg(CEGraphCurve* curve, int index);
     virtual ~CEGraphSeg();
-    CEGraphCurve* curve() { return _curve; }
-    int index() { return _index; }
-    bool firstSeg() { return _index == 0; }
-    bool unbounded() { return _unbounded; }
-    const char* type() { return _type.c_str(); }
-    int numParams() { return _numParams; }
-    double param(int n) { return n < 0 || n >= _numParams ? 0 : _params[n]; }
-    double keyTime() { return _keytime; }
-    double keyValue() { return _keyval; }
-    double outTime() { return _outtime; }
-    double outValue() { return _outval; }
+    CEGraphCurve* curve()
+    {
+        return _curve;
+    }
+    int index()
+    {
+        return _index;
+    }
+    bool firstSeg()
+    {
+        return _index == 0;
+    }
+    bool unbounded()
+    {
+        return _unbounded;
+    }
+    const char* type()
+    {
+        return _type.c_str();
+    }
+    int numParams()
+    {
+        return _numParams;
+    }
+    double param(int n)
+    {
+        return n < 0 || n >= _numParams ? 0 : _params[n];
+    }
+    double keyTime()
+    {
+        return _keytime;
+    }
+    double keyValue()
+    {
+        return _keyval;
+    }
+    double outTime()
+    {
+        return _outtime;
+    }
+    double outValue()
+    {
+        return _outval;
+    }
 
     enum Part {
         // these are listed in increasing grab priority
@@ -54,19 +87,33 @@ class CEGraphSeg {
         KeyTime = 300,
         Key,
     };
-    void invalidateView() { _viewValid = 0; }
+    void invalidateView()
+    {
+        _viewValid = 0;
+    }
 
     void paint(bool selected);
     CEDragHandler* getDragHandler(int part, int keystate);
-    virtual CEDragHandler* getSegmentHandler(int part, int keystate) { return 0; }
-    void setPendingSel(bool pendingSel) { _pendingSel = pendingSel; }
-    bool isPendingSel() { return _pendingSel; }
+    virtual CEDragHandler* getSegmentHandler(int part, int keystate)
+    {
+        return 0;
+    }
+    void setPendingSel(bool pendingSel)
+    {
+        _pendingSel = pendingSel;
+    }
+    bool isPendingSel()
+    {
+        return _pendingSel;
+    }
 
   protected:
     bool beginPart(Part part);
     void endPart();
     virtual void paintSeg() = 0;
-    virtual void paintHandles() {}
+    virtual void paintHandles()
+    {
+    }
     void paintHandle(int num, double x, double y, double dx, double dy, double zx, double zy, bool joinKnob = 1);
 
     bool _viewValid;

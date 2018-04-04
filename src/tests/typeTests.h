@@ -47,9 +47,15 @@ class TypeTesterExpr : public TypeBuilderExpr {
 
     TypeTesterExpr(const std::string& e) : TypeBuilderExpr(e), _walker(&_examiner){};
 
-    virtual ExprVarRef* resolveVar(const std::string& name) const { return TypeBuilderExpr::resolveVar(name); };
+    virtual ExprVarRef* resolveVar(const std::string& name) const
+    {
+        return TypeBuilderExpr::resolveVar(name);
+    };
 
-    ExprFunc* resolveFunc(const std::string& name) const { return TypeBuilderExpr::resolveFunc(name); };
+    ExprFunc* resolveFunc(const std::string& name) const
+    {
+        return TypeBuilderExpr::resolveFunc(name);
+    };
 
     void doTest(const std::string& testStr, ExprType expectedResult, ExprType actualResult);
 

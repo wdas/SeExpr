@@ -80,7 +80,9 @@ class ExprFuncStandard : public ExprFuncX {
 #endif
 
     //! No argument function
-    ExprFuncStandard(FuncType funcType, void* f) : ExprFuncX(true), _funcType(funcType), _func(f) {}
+    ExprFuncStandard(FuncType funcType, void* f) : ExprFuncX(true), _funcType(funcType), _func(f)
+    {
+    }
 #if 0
     //! User defined function with prototype double f(double)
     ExprFunc(Func1* f)
@@ -137,12 +139,20 @@ class ExprFuncStandard : public ExprFuncX {
 #endif
 
   public:
-    ExprFuncStandard() : ExprFuncX(true) {}
+    ExprFuncStandard() : ExprFuncX(true)
+    {
+    }
 
     virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const;
     virtual int buildInterpreter(const ExprFuncNode* node, Interpreter* interpreter) const;
-    void* getFuncPointer() const { return _func; }
-    FuncType getFuncType() const { return _funcType; }
+    void* getFuncPointer() const
+    {
+        return _func;
+    }
+    FuncType getFuncType() const
+    {
+        return _funcType;
+    }
 
   private:
     FuncType _funcType;

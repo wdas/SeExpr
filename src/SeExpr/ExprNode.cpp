@@ -35,35 +35,44 @@
 
 namespace SeExpr2 {
 
-ExprNode::ExprNode(const Expression* expr) : _expr(expr), _parent(0), _isVec(0) {}
+ExprNode::ExprNode(const Expression* expr) : _expr(expr), _parent(0), _isVec(0)
+{
+}
 
-ExprNode::ExprNode(const Expression* expr, const ExprType& type) : _expr(expr), _parent(0), _isVec(0), _type(type) {}
+ExprNode::ExprNode(const Expression* expr, const ExprType& type) : _expr(expr), _parent(0), _isVec(0), _type(type)
+{
+}
 
-ExprNode::ExprNode(const Expression* expr, ExprNode* a) : _expr(expr), _parent(0), _isVec(0) {
+ExprNode::ExprNode(const Expression* expr, ExprNode* a) : _expr(expr), _parent(0), _isVec(0)
+{
     _children.reserve(1);
     addChild(a);
 }
 
 ExprNode::ExprNode(const Expression* expr, ExprNode* a, const ExprType& type)
-    : _expr(expr), _parent(0), _isVec(0), _type(type) {
+    : _expr(expr), _parent(0), _isVec(0), _type(type)
+{
     _children.reserve(1);
     addChild(a);
 }
 
-ExprNode::ExprNode(const Expression* expr, ExprNode* a, ExprNode* b) : _expr(expr), _parent(0), _isVec(0) {
+ExprNode::ExprNode(const Expression* expr, ExprNode* a, ExprNode* b) : _expr(expr), _parent(0), _isVec(0)
+{
     _children.reserve(2);
     addChild(a);
     addChild(b);
 }
 
 ExprNode::ExprNode(const Expression* expr, ExprNode* a, ExprNode* b, const ExprType& type)
-    : _expr(expr), _parent(0), _isVec(0), _type(type) {
+    : _expr(expr), _parent(0), _isVec(0), _type(type)
+{
     _children.reserve(2);
     addChild(a);
     addChild(b);
 }
 
-ExprNode::ExprNode(const Expression* expr, ExprNode* a, ExprNode* b, ExprNode* c) : _expr(expr), _parent(0), _isVec(0) {
+ExprNode::ExprNode(const Expression* expr, ExprNode* a, ExprNode* b, ExprNode* c) : _expr(expr), _parent(0), _isVec(0)
+{
     _children.reserve(3);
     addChild(a);
     addChild(b);
@@ -71,25 +80,30 @@ ExprNode::ExprNode(const Expression* expr, ExprNode* a, ExprNode* b, ExprNode* c
 }
 
 ExprNode::ExprNode(const Expression* expr, ExprNode* a, ExprNode* b, ExprNode* c, const ExprType& type)
-    : _expr(expr), _parent(0), _isVec(0), _type(type) {
+    : _expr(expr), _parent(0), _isVec(0), _type(type)
+{
     _children.reserve(3);
     addChild(a);
     addChild(b);
     addChild(c);
 }
 
-ExprNode::~ExprNode() {
+ExprNode::~ExprNode()
+{
     // delete children
     std::vector<ExprNode*>::iterator iter;
-    for (iter = _children.begin(); iter != _children.end(); iter++) delete *iter;
+    for (iter = _children.begin(); iter != _children.end(); iter++)
+        delete *iter;
 }
 
-void ExprNode::addChild(ExprNode* child) {
+void ExprNode::addChild(ExprNode* child)
+{
     _children.push_back(child);
     child->_parent = this;
 }
 
-void ExprNode::addChildren(ExprNode* surrogate) {
+void ExprNode::addChildren(ExprNode* surrogate)
+{
     std::vector<ExprNode*>::iterator iter;
     for (iter = surrogate->_children.begin(); iter != surrogate->_children.end(); iter++) {
         addChild(*iter);
@@ -98,7 +112,8 @@ void ExprNode::addChildren(ExprNode* surrogate) {
     delete surrogate;
 }
 
-ExprType ExprNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprNode::prep(bool, ExprVarEnvBuilder& envBuilder)
+{
     /** Default is to call prep on children (giving AnyType as desired type).
      *  If all children return valid types, returns NoneType.
      *  Otherwise,                          returns ErrorType.
@@ -110,7 +125,8 @@ ExprType ExprNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     for (int c = 0; c < numChildren(); c++) {
         error |= !child(c)->prep(false, envBuilder).isValid();
         int childDim = child(c)->type().isFP() ? child(c)->type().dim() : 0;
-        if (childDim > _maxChildDim) _maxChildDim = childDim;
+        if (childDim > _maxChildDim)
+            _maxChildDim = childDim;
     }
 
     if (error)
@@ -121,10 +137,12 @@ ExprType ExprNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-ExprType ExprModuleNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprModuleNode::prep(bool, ExprVarEnvBuilder& envBuilder)
+{
     bool error = false;
 
-    for (int c = 0; c < numChildren(); c++) error |= !child(c)->prep(false, envBuilder).isValid();
+    for (int c = 0; c < numChildren(); c++)
+        error |= !child(c)->prep(false, envBuilder).isValid();
     if (error)
         setType(ExprType().Error());
     else
@@ -133,7 +151,8 @@ ExprType ExprModuleNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-ExprType ExprPrototypeNode::prep(bool, ExprVarEnvBuilder&) {
+ExprType ExprPrototypeNode::prep(bool, ExprVarEnvBuilder&)
+{
     bool error = false;
 
 #if 0  // TODO: implement prototype
@@ -160,14 +179,17 @@ ExprType ExprPrototypeNode::prep(bool, ExprVarEnvBuilder&) {
     return _type;
 }
 
-void ExprPrototypeNode::addArgTypes(ExprNode* surrogate) {
+void ExprPrototypeNode::addArgTypes(ExprNode* surrogate)
+{
     ExprNode::addChildren(surrogate);
 
     ExprType type;
-    for (int i = 0; i < numChildren(); i++) _argTypes.push_back(child(i)->type());
+    for (int i = 0; i < numChildren(); i++)
+        _argTypes.push_back(child(i)->type());
 }
 
-void ExprPrototypeNode::addArgs(ExprNode* surrogate) {
+void ExprPrototypeNode::addArgs(ExprNode* surrogate)
+{
     ExprNode::addChildren(surrogate);
 #if 0
     ExprNode * child;
@@ -182,7 +204,8 @@ void ExprPrototypeNode::addArgs(ExprNode* surrogate) {
 #endif
 }
 
-ExprType ExprLocalFunctionNode::prep(bool, ExprVarEnvBuilder&) {
+ExprType ExprLocalFunctionNode::prep(bool, ExprVarEnvBuilder&)
+{
     bool error = false;
 
 #if 0  // TODO: no local functions for now
@@ -232,7 +255,8 @@ ExprType ExprLocalFunctionNode::prep(bool, ExprVarEnvBuilder&) {
 }
 
 // TODO: write buildInterpreter for local function node
-ExprType ExprLocalFunctionNode::prep(ExprFuncNode* callerNode, bool, ExprVarEnvBuilder&) const {
+ExprType ExprLocalFunctionNode::prep(ExprFuncNode* callerNode, bool, ExprVarEnvBuilder&) const
+{
 #if 0
     bool error = false;
     callerNode->checkCondition(callerNode->numChildren() == prototype()->numChildren(),
@@ -252,7 +276,8 @@ ExprType ExprLocalFunctionNode::prep(ExprFuncNode* callerNode, bool, ExprVarEnvB
 #endif
 }
 
-ExprType ExprBlockNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprBlockNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder)
+{
     ExprType assignType = child(0)->prep(false, envBuilder);
     ExprType resultType = child(1)->prep(wantScalar, envBuilder);
 
@@ -264,7 +289,8 @@ ExprType ExprBlockNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-ExprType ExprIfThenElseNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprIfThenElseNode::prep(bool, ExprVarEnvBuilder& envBuilder)
+{
     ExprType condType, thenType, elseType;
 
     bool error = false;
@@ -301,7 +327,8 @@ ExprType ExprIfThenElseNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-ExprType ExprAssignNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprAssignNode::prep(bool, ExprVarEnvBuilder& envBuilder)
+{
     _assignedType = child(0)->prep(false, envBuilder);
 
     std::unique_ptr<ExprLocalVar> localVar(new ExprLocalVar(child(0)->type()));
@@ -318,7 +345,8 @@ ExprType ExprAssignNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-ExprType ExprVecNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprVecNode::prep(bool, ExprVarEnvBuilder& envBuilder)
+{
     bool error = false;
 
     int max_child_d = 0;
@@ -336,7 +364,8 @@ ExprType ExprVecNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-Vec3d ExprVecNode::value() const {
+Vec3d ExprVecNode::value() const
+{
     if (const ExprNumNode* f = dynamic_cast<const ExprNumNode*>(child(0))) {
         double first = f->value();
         if (const ExprNumNode* s = dynamic_cast<const ExprNumNode*>(child(1))) {
@@ -351,7 +380,8 @@ Vec3d ExprVecNode::value() const {
     return Vec3d(0.0);
 };
 
-ExprType ExprUnaryOpNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprUnaryOpNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder)
+{
     bool error = false;
 
     // TODO: aselle may want to implicitly demote to FP[1] if wantScalar is true!
@@ -364,7 +394,8 @@ ExprType ExprUnaryOpNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-ExprType ExprCondNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprCondNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder)
+{
     // TODO: determine if extra environments are necessary, currently not included
     ExprType condType, thenType, elseType;
 
@@ -394,7 +425,8 @@ ExprType ExprCondNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-ExprType ExprSubscriptNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprSubscriptNode::prep(bool, ExprVarEnvBuilder& envBuilder)
+{
     // TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
     ExprType vecType, scriptType;
 
@@ -414,7 +446,8 @@ ExprType ExprSubscriptNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-ExprType ExprCompareEqNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprCompareEqNode::prep(bool, ExprVarEnvBuilder& envBuilder)
+{
     // TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
     ExprType firstType, secondType;
 
@@ -425,7 +458,8 @@ ExprType ExprCompareEqNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     secondType = child(1)->prep(false, envBuilder);
     checkIsValue(secondType, error);
 
-    if (firstType.isValid() && secondType.isValid()) checkTypesCompatible(firstType, secondType, error);
+    if (firstType.isValid() && secondType.isValid())
+        checkTypesCompatible(firstType, secondType, error);
 
     if (error)
         setType(ExprType().Error());
@@ -435,7 +469,8 @@ ExprType ExprCompareEqNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-ExprType ExprCompareNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprCompareNode::prep(bool, ExprVarEnvBuilder& envBuilder)
+{
     // TODO: assume we want scalar
     // TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
     ExprType firstType, secondType;
@@ -447,7 +482,8 @@ ExprType ExprCompareNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     secondType = child(1)->prep(true, envBuilder);
     checkIsFP(secondType, error);
 
-    if (firstType.isValid() && secondType.isValid()) checkTypesCompatible(firstType, secondType, error);
+    if (firstType.isValid() && secondType.isValid())
+        checkTypesCompatible(firstType, secondType, error);
 
     if (error)
         setType(ExprType().Error());
@@ -457,7 +493,8 @@ ExprType ExprCompareNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-ExprType ExprBinaryOpNode::prep(bool scalarWanted, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprBinaryOpNode::prep(bool scalarWanted, ExprVarEnvBuilder& envBuilder)
+{
     // TODO: double-check order of evaluation - order MAY effect environment evaluation (probably not, though)
     ExprType firstType, secondType;
 
@@ -479,7 +516,8 @@ ExprType ExprBinaryOpNode::prep(bool scalarWanted, ExprVarEnvBuilder& envBuilder
     return _type;
 }
 
-ExprType ExprVarNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprVarNode::prep(bool, ExprVarEnvBuilder& envBuilder)
+{
     // ask expression to resolve var
     bool error = false;
     if ((_localVar = envBuilder.current()->find(name()))) {
@@ -514,11 +552,18 @@ ExprType ExprVarNode::prep(bool, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-ExprType ExprNumNode::prep(bool, ExprVarEnvBuilder&) { return _type; }
+ExprType ExprNumNode::prep(bool, ExprVarEnvBuilder&)
+{
+    return _type;
+}
 
-ExprType ExprStrNode::prep(bool, ExprVarEnvBuilder&) { return _type; }
+ExprType ExprStrNode::prep(bool, ExprVarEnvBuilder&)
+{
+    return _type;
+}
 
-ExprType ExprFuncNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
+ExprType ExprFuncNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder)
+{
     bool error = false;
 
     int nargs = numChildren();
@@ -532,14 +577,16 @@ ExprType ExprFuncNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
         setTypeWithChildLife(localFunction->prep(this, wantScalar, envBuilder));
         // TODO: we need to type check arguments here
     } else {
-        if (!_func) _func = _expr->resolveFunc(_name);
+        if (!_func)
+            _func = _expr->resolveFunc(_name);
         if (!_func) {
             if (const VarBlockCreator* creator = _expr->varBlockCreator()) {
                 // data block defined external function
                 _func = creator->resolveFunc(name());
             }
         }
-        if (!_func) _func = ExprFunc::lookup(_name);
+        if (!_func)
+            _func = ExprFunc::lookup(_name);
 
         // check that function exists and that the function has the right number of arguments
         if (checkCondition(_func, "Function " + _name + " has no definition", error) &&
@@ -558,7 +605,8 @@ ExprType ExprFuncNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-int ExprFuncNode::buildInterpreter(Interpreter* interpreter) const {
+int ExprFuncNode::buildInterpreter(Interpreter* interpreter) const
+{
     if (_localFunc)
         return _localFunc->buildInterpreterForCall(this, interpreter);
     else if (_func)
@@ -568,7 +616,8 @@ int ExprFuncNode::buildInterpreter(Interpreter* interpreter) const {
     return 0;
 }
 
-bool ExprFuncNode::checkArg(int arg, ExprType type, ExprVarEnvBuilder& envBuilder) {
+bool ExprFuncNode::checkArg(int arg, ExprType type, ExprVarEnvBuilder& envBuilder)
+{
     ExprType childType = child(arg)->prep(type.isFP(1), envBuilder);
     _promote[arg] = 0;
     if (ExprType::valuesCompatible(type, childType) && type.isLifeCompatible(childType)) {
@@ -581,11 +630,14 @@ bool ExprFuncNode::checkArg(int arg, ExprType type, ExprVarEnvBuilder& envBuilde
     return false;
 }
 
-const ExprFuncNode::Data* ExprFuncNode::getOrComputeData(ExprFuncSimple* f, void* args) const {
+const ExprFuncNode::Data* ExprFuncNode::getOrComputeData(ExprFuncSimple* f, void* args) const
+{
     const ExprFuncSimple::ArgHandle* args_ = (const ExprFuncSimple::ArgHandle*)args;
-    if (_data) return _data.get();
+    if (_data)
+        return _data.get();
     std::lock_guard<std::mutex> g(_data_mutex);
-    if (_data) return _data.get();
+    if (_data)
+        return _data.get();
     _data.reset(f->evalConstant(this, *args_));
     return _data.get();
 }

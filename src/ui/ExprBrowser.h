@@ -67,7 +67,10 @@ class ExprBrowser : public QWidget {
     void setSearchPath(const QString& context, const QString& path);
     void expandAll();
     void expandToDepth(int depth);
-    void setApplyOnSelect(bool on) { _applyOnSelect = on; }
+    void setApplyOnSelect(bool on)
+    {
+        _applyOnSelect = on;
+    }
 
   signals:
     void selectionChanged(const QString& str);

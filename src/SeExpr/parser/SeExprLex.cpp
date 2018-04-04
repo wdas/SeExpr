@@ -63,10 +63,14 @@ static const char* tokenNames[] = {"END_OF_BUFFER",
                                    "SEMICOLON",
                                    "COMMA"};
 
-std::string Lexer::getTokenName(Token tok) { return tokenNames[tok]; }
+std::string Lexer::getTokenName(Token tok)
+{
+    return tokenNames[tok];
+}
 
 std::map<std::string, Lexer::Token> Lexer::reservedWords;
-void Lexer::populateReservedWords() {
+void Lexer::populateReservedWords()
+{
     static bool initialized = false;
     if (!initialized) {
         // TODO: acquire mutex
@@ -87,7 +91,8 @@ void Lexer::populateReservedWords() {
 
 #if TEST_LEXER
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     std::ifstream ifs(argv[1]);
     std::string content((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
     Lexer lexer(content.c_str());

@@ -49,13 +49,22 @@ class EditableExpression {
     void updateString(const EditableExpression& other);
 
     /// Access an editable parameter
-    Editable* operator[](const int i) { return _editables[i]; }
+    Editable* operator[](const int i)
+    {
+        return _editables[i];
+    }
 
     /// Return the count of editable parameters
-    size_t size() const { return _editables.size(); }
+    size_t size() const
+    {
+        return _editables.size();
+    }
 
     /// Get list of commentsø
-    const std::vector<std::string>& getVariables() const { return _variables; }
+    const std::vector<std::string>& getVariables() const
+    {
+        return _variables;
+    }
 
   private:
     /// clean memeory

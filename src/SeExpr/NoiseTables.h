@@ -43,7 +43,8 @@ static const int p[514] = {
     188, 254, 253, 70,  109, 222, 37,  197};
 
 template <int d>
-struct NOISE_TABLES {};
+struct NOISE_TABLES {
+};
 template <>
 struct NOISE_TABLES<1> {
     static double g[514][1];

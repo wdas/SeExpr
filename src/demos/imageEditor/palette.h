@@ -18,7 +18,8 @@
 #pragma once
 
 #include <QtGui/QPalette>
-inline QPalette createDefaultColorPalette() {
+inline QPalette createDefaultColorPalette()
+{
     QPalette palette;
     QPalette::ColorGroup groups[2] = {QPalette::Active, QPalette::Inactive};
     for (QPalette::ColorGroup group : groups) {

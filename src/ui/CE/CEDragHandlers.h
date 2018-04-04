@@ -28,14 +28,29 @@ class CEGraphSeg;
 
 class CEDragHandler {
   public:
-    CEDragHandler() : _moved(false), _anchorX(0), _anchorY(0), _x(0), _y(0), _dx(0), _dy(0), _ui(0) {}
-    virtual ~CEDragHandler() {}
+    CEDragHandler() : _moved(false), _anchorX(0), _anchorY(0), _x(0), _y(0), _dx(0), _dy(0), _ui(0)
+    {
+    }
+    virtual ~CEDragHandler()
+    {
+    }
 
-    virtual void mouseDown() {}
-    virtual void mouseMove() {}
-    virtual void mouseUp() {}
-    virtual bool showCrossHairs() { return 0; }
-    virtual void setMultiDrag(std::vector<CEGraphKey*> graph_segments) {}
+    virtual void mouseDown()
+    {
+    }
+    virtual void mouseMove()
+    {
+    }
+    virtual void mouseUp()
+    {
+    }
+    virtual bool showCrossHairs()
+    {
+        return 0;
+    }
+    virtual void setMultiDrag(std::vector<CEGraphKey*> graph_segments)
+    {
+    }
 
     void setAnchor(CEGraphUI* ui, int anchorX, int anchorY);
     void movePoint(int x, int y);
@@ -51,9 +66,14 @@ class CEDragHandler {
 
 class CEPanHandler : public CEDragHandler {
   public:
-    virtual void mouseMove() { pan(false); }
-    virtual void mouseUp() {
-        if (_moved) pan(true);
+    virtual void mouseMove()
+    {
+        pan(false);
+    }
+    virtual void mouseUp()
+    {
+        if (_moved)
+            pan(true);
     }
 
   private:
@@ -62,10 +82,17 @@ class CEPanHandler : public CEDragHandler {
 
 class CEZoomHandler : public CEDragHandler {
   public:
-    CEZoomHandler(bool x, bool y) : _zoomX(x), _zoomY(y) {}
-    virtual void mouseMove() { zoom(false); }
-    virtual void mouseUp() {
-        if (_moved) zoom(true);
+    CEZoomHandler(bool x, bool y) : _zoomX(x), _zoomY(y)
+    {
+    }
+    virtual void mouseMove()
+    {
+        zoom(false);
+    }
+    virtual void mouseUp()
+    {
+        if (_moved)
+            zoom(true);
     }
 
   private:
@@ -76,16 +103,26 @@ class CEZoomHandler : public CEDragHandler {
 
 class CESelBoxHandler : public CEDragHandler {
   public:
-    CESelBoxHandler(bool toggle) : _toggle(toggle) {}
+    CESelBoxHandler(bool toggle) : _toggle(toggle)
+    {
+    }
     virtual void mouseMove();
     virtual void mouseUp();
 
   private:
     bool _toggle;
     struct Seg {
-        Seg(int curveIndex, int segIndex) : curveIndex(curveIndex), segIndex(segIndex) {}
-        bool operator==(const Seg& seg) const { return curveIndex == seg.curveIndex && segIndex == seg.segIndex; }
-        bool operator!=(const Seg& seg) const { return curveIndex != seg.curveIndex || segIndex != seg.segIndex; }
+        Seg(int curveIndex, int segIndex) : curveIndex(curveIndex), segIndex(segIndex)
+        {
+        }
+        bool operator==(const Seg& seg) const
+        {
+            return curveIndex == seg.curveIndex && segIndex == seg.segIndex;
+        }
+        bool operator!=(const Seg& seg) const
+        {
+            return curveIndex != seg.curveIndex || segIndex != seg.segIndex;
+        }
         int curveIndex;
         int segIndex;
     };
@@ -96,7 +133,10 @@ class CESelBoxHandler : public CEDragHandler {
 class CEKeyHandler : public CEDragHandler {
   public:
     CEKeyHandler(CEGraphKey* seg);
-    virtual bool showCrossHairs() { return 1; }
+    virtual bool showCrossHairs()
+    {
+        return 1;
+    }
 
   protected:
     animlib::AnimCurve* _animCurve;
@@ -107,9 +147,14 @@ class CEKeyHandler : public CEDragHandler {
 class CEKeyMoveHandler : public CEKeyHandler {
   public:
     CEKeyMoveHandler(CEGraphKey* key, bool dragTime, bool dragValue, double hSnap = 0, double vSnap = 0);
-    virtual void mouseMove() { moveKey(false); }
-    virtual void mouseUp() {
-        if (_moved) moveKey(true);
+    virtual void mouseMove()
+    {
+        moveKey(false);
+    }
+    virtual void mouseUp()
+    {
+        if (_moved)
+            moveKey(true);
     }
     virtual void setMultiDrag(std::vector<CEGraphKey*> graph_segments);
 
@@ -129,7 +174,9 @@ class CEKeyMoveHandler : public CEKeyHandler {
 
 class CENewKeyHandler : public CEDragHandler {
   public:
-    CENewKeyHandler(CEGraphSeg* key) : _key(key) {}
+    CENewKeyHandler(CEGraphSeg* key) : _key(key)
+    {
+    }
     virtual void mouseDown();
 
   private:
@@ -139,9 +186,14 @@ class CENewKeyHandler : public CEDragHandler {
 class CEBezHandler : public CEKeyHandler {
   public:
     CEBezHandler(CEGraphKey* key, int handle, bool dragAngle, bool dragLength, bool weighted);
-    virtual void mouseMove() { dragHandle(false); }
-    virtual void mouseUp() {
-        if (_moved) dragHandle(true);
+    virtual void mouseMove()
+    {
+        dragHandle(false);
+    }
+    virtual void mouseUp()
+    {
+        if (_moved)
+            dragHandle(true);
     }
     virtual void mouseDown();
     void dragHandle(bool useCommand);

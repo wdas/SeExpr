@@ -49,26 +49,34 @@ class LLVMEvaluator : public Evaluator {
         FunctionPtrMultiple functionPtrMultiple;
 
       public:
-        LLVMEvaluationContext() : functionPtr(nullptr) {}
-        ~LLVMEvaluationContext() {}
+        LLVMEvaluationContext() : functionPtr(nullptr)
+        {
+        }
+        ~LLVMEvaluationContext()
+        {
+        }
 
         LLVMEvaluationContext(const LLVMEvaluationContext&) = delete;
         LLVMEvaluationContext& operator=(const LLVMEvaluationContext&) = delete;
 
-        void init(void* fp, void* fpLoop, int) {
+        void init(void* fp, void* fpLoop, int)
+        {
             reset();
             functionPtr = reinterpret_cast<FunctionPtr>(fp);
             functionPtrMultiple = reinterpret_cast<FunctionPtrMultiple>(fpLoop);
         }
-        void reset() {
+        void reset()
+        {
             functionPtr = nullptr;
             functionPtrMultiple = nullptr;
         }
-        void operator()(T* dst, VarBlock* varBlock) {
+        void operator()(T* dst, VarBlock* varBlock)
+        {
             assert(functionPtr);
             functionPtr(dst, varBlock ? varBlock->data() : nullptr, varBlock ? varBlock->indirectIndex : 0);
         }
-        void operator()(VarBlock* varBlock, double* outputBuffer, size_t rangeStart, size_t rangeEnd) {
+        void operator()(VarBlock* varBlock, double* outputBuffer, size_t rangeStart, size_t rangeEnd)
+        {
             assert(functionPtrMultiple);
             functionPtrMultiple(varBlock ? varBlock->data() : nullptr, outputBuffer, rangeStart, rangeEnd);
         }
@@ -84,31 +92,51 @@ class LLVMEvaluator : public Evaluator {
 
   public:
     LLVMEvaluator()
-        : _debugging(false), _llvmEvalFP(nullptr), _llvmEvalStr(nullptr), _llvmContext(nullptr),
-          TheExecutionEngine(nullptr) {}
+        : _debugging(false)
+        , _llvmEvalFP(nullptr)
+        , _llvmEvalStr(nullptr)
+        , _llvmContext(nullptr)
+        , TheExecutionEngine(nullptr)
+    {
+    }
 
-    virtual void setDebugging(bool debugging) override { _debugging = debugging; }
+    virtual void setDebugging(bool debugging) override
+    {
+        _debugging = debugging;
+    }
 
-    virtual inline void dump() const override {
+    virtual inline void dump() const override
+    {
         // TheModule->dump();
     }
 
     virtual bool prep(ExprNode* parseTree, ExprType desiredReturnType) override;
 
-    virtual bool isValid() const override { return true; }
+    virtual bool isValid() const override
+    {
+        return true;
+    }
 
-    virtual void evalFP(double* dst, VarBlock* varBlock) const override { (*_llvmEvalFP)(dst, varBlock); }
+    virtual void evalFP(double* dst, VarBlock* varBlock) const override
+    {
+        (*_llvmEvalFP)(dst, varBlock);
+    }
 
-    virtual void evalStr(char* dst, VarBlock* varBlock) const override { (*_llvmEvalStr)(&dst, varBlock); }
+    virtual void evalStr(char* dst, VarBlock* varBlock) const override
+    {
+        (*_llvmEvalStr)(&dst, varBlock);
+    }
 
     virtual void evalMultiple(VarBlock* varBlock,
                               double* outputBuffer,
                               size_t rangeStart,
-                              size_t rangeEnd) const override {
+                              size_t rangeEnd) const override
+    {
         return (*_llvmEvalFP)(varBlock, outputBuffer, rangeStart, rangeEnd);
     }
 
-    std::string getUniqueName() const {
+    std::string getUniqueName() const
+    {
         std::ostringstream o;
         o << std::setbase(16) << (uint64_t)(this);
         return ("_" + o.str());
@@ -118,28 +146,41 @@ class LLVMEvaluator : public Evaluator {
 #else  // no LLVM support
 class LLVMEvaluator : public Evaluator {
   public:
-    void unsupported() { throw std::runtime_error("LLVM is not enabled in build"); }
+    void unsupported()
+    {
+        throw std::runtime_error("LLVM is not enabled in build");
+    }
 
-    virtual void setDebugging(bool debugging) override { unsupported(); }
+    virtual void setDebugging(bool debugging) override
+    {
+        unsupported();
+    }
 
-    virtual inline void dump() const override { unsupported(); }
+    virtual inline void dump() const override
+    {
+        unsupported();
+    }
 
-    virtual bool prep(ExprNode* parseTree, ExprType desiredReturnType) override {
+    virtual bool prep(ExprNode* parseTree, ExprType desiredReturnType) override
+    {
         unsupported();
         return false;
     }
 
-    virtual bool isValid() const override {
+    virtual bool isValid() const override
+    {
         unsupported();
         return false;
     }
 
-    virtual const double* evalFP(VarBlock* varBlock) const override {
+    virtual const double* evalFP(VarBlock* varBlock) const override
+    {
         unsupported();
         return 0;
     }
 
-    virtual const char* evalStr(VarBlock* varBlock) const override {
+    virtual const char* evalStr(VarBlock* varBlock) const override
+    {
         unsupported();
         return "";
     }
@@ -147,7 +188,8 @@ class LLVMEvaluator : public Evaluator {
     virtual void evalMultiple(VarBlock* varBlock,
                               int outputVarBlockOffset,
                               size_t rangeStart,
-                              size_t rangeEnd) const override {
+                              size_t rangeEnd) const override
+    {
         unsupported();
     }
 };

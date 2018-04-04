@@ -45,7 +45,10 @@ class Walker {
     typedef Examiner<constnode> T_EXAMINER;
     typedef typename T_EXAMINER::T_NODE T_NODE;
 
-    Walker(T_EXAMINER* examiner) : _examiner(examiner) { _examiner->reset(); };
+    Walker(T_EXAMINER* examiner) : _examiner(examiner)
+    {
+        _examiner->reset();
+    };
 
     /// Preorder walk
     void walk(T_NODE* examinee);

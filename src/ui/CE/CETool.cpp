@@ -28,7 +28,10 @@
 #include "CETool.h"
 
 namespace {
-inline double clamp(double x, double min, double max) { return x < min ? min : x > max ? max : x; }
+inline double clamp(double x, double min, double max)
+{
+    return x < min ? min : x > max ? max : x;
+}
 }
 
 void keyUpdated(animlib::AnimCurve* curve, int key);
@@ -37,7 +40,8 @@ void keysUpdated(animlib::AnimCurve* curve, int keyStart, int keyEnd, bool regen
 /**
  * Constructor
  */
-CETool::CETool() : _ui(0), _vx(50), _vy(50), _vw(100), _vh(100), _timeMode(0), _selectedCurve(-1), _selListValid(0) {
+CETool::CETool() : _ui(0), _vx(50), _vy(50), _vw(100), _vh(100), _timeMode(0), _selectedCurve(-1), _selListValid(0)
+{
     //    _rcvrid.addIRcvr(static_cast<iCurveEditorRcvr*>(this));
     //    _rcvrid.addIRcvr(static_cast<iObserverRcvr*>(this));
 }
@@ -45,7 +49,8 @@ CETool::CETool() : _ui(0), _vx(50), _vy(50), _vw(100), _vh(100), _timeMode(0), _
 /**
  * Destructor
  */
-CETool::~CETool() {
+CETool::~CETool()
+{
     // todo - consolidate removeObserver into CurveData dtor
     CurveList::iterator i;
     for (i = _curves.begin(); i != _curves.end(); i++) {
@@ -54,7 +59,8 @@ CETool::~CETool() {
     }
 }
 
-err::Result CETool::newCurve(msg::cstr name) {
+err::Result CETool::newCurve(msg::cstr name)
+{
 // TODO: add create curve back
 #if 0
     iSgExpr expr;
@@ -67,7 +73,8 @@ err::Result CETool::newCurve(msg::cstr name) {
 }
 
 // TODO: add curve
-err::Result CETool::addCurve(animlib::AnimCurve* curve) {
+err::Result CETool::addCurve(animlib::AnimCurve* curve)
+{
 #if 0
     // get name as "node.parameter"
     iSgParam param;
@@ -96,9 +103,11 @@ err::Result CETool::addCurve(animlib::AnimCurve* curve) {
     return errSUCCESS;
 }
 
-void CETool::addCurveInternal(animlib::AnimCurve* curve, const char* name) {
+void CETool::addCurveInternal(animlib::AnimCurve* curve, const char* name)
+{
     // TODO: add curve
-    if (!name || !name[0]) name = "Curve";
+    if (!name || !name[0])
+        name = "Curve";
 
     // uniquify name
     const char* basename = name;
@@ -126,8 +135,10 @@ void CETool::addCurveInternal(animlib::AnimCurve* curve, const char* name) {
     emit curveListChanged();
 }
 
-err::Result CETool::removeCurve(int curveIndex) {
-    if (curveIndex < 0 || curveIndex >= numCurves()) return errINDEX;
+err::Result CETool::removeCurve(int curveIndex)
+{
+    if (curveIndex < 0 || curveIndex >= numCurves())
+        return errINDEX;
 
     // CurveData* curve = _curves[curveIndex];
     // curve->expr.removeObserver(_rcvrid);
@@ -139,7 +150,8 @@ err::Result CETool::removeCurve(int curveIndex) {
     return errSUCCESS;
 }
 
-err::Result CETool::removeSelectedCurves() {
+err::Result CETool::removeSelectedCurves()
+{
     CurveList::iterator i;
     for (i = _curves.begin(); i != _curves.end();) {
         CurveData* curve = *i;
@@ -155,7 +167,8 @@ err::Result CETool::removeSelectedCurves() {
     return errSUCCESS;
 }
 
-err::Result CETool::removeAllCurves() {
+err::Result CETool::removeAllCurves()
+{
     if (_curves.size()) {
         CurveList::iterator i;
         for (i = _curves.begin(); i != _curves.end(); i++) {
@@ -170,7 +183,8 @@ err::Result CETool::removeAllCurves() {
     return errSUCCESS;
 }
 
-err::Result CETool::findCurve(int& curveIndex, msg::cstr name) {
+err::Result CETool::findCurve(int& curveIndex, msg::cstr name)
+{
     for (int i = 0; i < numCurves(); i++) {
         if (_curves[i]->name == name) {
             curveIndex = i;
@@ -180,13 +194,16 @@ err::Result CETool::findCurve(int& curveIndex, msg::cstr name) {
     return errNOTFOUND;
 }
 
-err::Result CETool::getCurve(animlib::AnimCurve*& animCurve, int curveIndex) {
-    if (curveIndex < 0 || curveIndex >= numCurves()) return errINDEX;
+err::Result CETool::getCurve(animlib::AnimCurve*& animCurve, int curveIndex)
+{
+    if (curveIndex < 0 || curveIndex >= numCurves())
+        return errINDEX;
     animCurve = _curves[curveIndex]->animCurve;
     return errSUCCESS;
 }
 
-err::Result CETool::getCurves(AnimCurveList& curves) {
+err::Result CETool::getCurves(AnimCurveList& curves)
+{
     curves.clear();
     curves.resize(numCurves());
     for (int i = 0; i < numCurves(); i++) {
@@ -195,7 +212,8 @@ err::Result CETool::getCurves(AnimCurveList& curves) {
     return errSUCCESS;
 }
 
-err::Result CETool::getCurveNames(std::vector<std::string>& names) {
+err::Result CETool::getCurveNames(std::vector<std::string>& names)
+{
     names.clear();
     for (int i = 0; i < numCurves(); i++) {
         names.push_back(_curves[i]->name);
@@ -203,25 +221,31 @@ err::Result CETool::getCurveNames(std::vector<std::string>& names) {
     return errSUCCESS;
 }
 
-err::Result CETool::selectCurve(int curveIndex) {
+err::Result CETool::selectCurve(int curveIndex)
+{
     ECHK(clearSelection());
     return selectAddCurve(curveIndex);
 }
 
-err::Result CETool::selectAddCurve(int curveIndex) {
-    if (curveIndex < 0 || curveIndex >= numCurves()) return errINDEX;
+err::Result CETool::selectAddCurve(int curveIndex)
+{
+    if (curveIndex < 0 || curveIndex >= numCurves())
+        return errINDEX;
     CurveData* curve = _curves[curveIndex];
     if (!curve->selected || (int)curve->segsSelected.size() != curve->numSegs) {
         _selListValid = 0;
         curve->selected = 1;
-        for (int i = 0; i < curve->numSegs; i++) curve->segsSelected.insert(i);
+        for (int i = 0; i < curve->numSegs; i++)
+            curve->segsSelected.insert(i);
         emit selectionChanged();
     }
     return errSUCCESS;
 }
 
-err::Result CETool::deselectCurve(int curveIndex) {
-    if (curveIndex < 0 || curveIndex >= numCurves()) return errINDEX;
+err::Result CETool::deselectCurve(int curveIndex)
+{
+    if (curveIndex < 0 || curveIndex >= numCurves())
+        return errINDEX;
     CurveData* curve = _curves[curveIndex];
     if (curve->selected) {
         curve->segsSelected.clear();
@@ -232,7 +256,8 @@ err::Result CETool::deselectCurve(int curveIndex) {
     return errSUCCESS;
 }
 
-err::Result CETool::clearSelection() {
+err::Result CETool::clearSelection()
+{
     bool changed = 0;
     for (int i = 0; i < numCurves(); i++) {
         CurveData* curve = _curves[i];
@@ -249,17 +274,21 @@ err::Result CETool::clearSelection() {
     return errSUCCESS;
 }
 
-err::Result CETool::selectSegment(int curveIndex, int segIndex) {
+err::Result CETool::selectSegment(int curveIndex, int segIndex)
+{
     ECHK(clearSelection());
     return selectAddSegment(curveIndex, segIndex);
 }
 
-err::Result CETool::selectAddSegment(int curveIndex, int segIndex) {
-    if (curveIndex < 0 || curveIndex >= numCurves()) return errINDEX;
+err::Result CETool::selectAddSegment(int curveIndex, int segIndex)
+{
+    if (curveIndex < 0 || curveIndex >= numCurves())
+        return errINDEX;
     CurveData* curve = _curves[curveIndex];
 
     // validate first
-    if (segIndex < 0 || segIndex >= curve->numSegs) return errINDEX;
+    if (segIndex < 0 || segIndex >= curve->numSegs)
+        return errINDEX;
 
     // then apply
     bool changed = 0;
@@ -275,8 +304,10 @@ err::Result CETool::selectAddSegment(int curveIndex, int segIndex) {
     return errSUCCESS;
 }
 
-err::Result CETool::deselectSegment(int curveIndex, int segIndex) {
-    if (curveIndex < 0 || curveIndex >= numCurves()) return errINDEX;
+err::Result CETool::deselectSegment(int curveIndex, int segIndex)
+{
+    if (curveIndex < 0 || curveIndex >= numCurves())
+        return errINDEX;
     CurveData* curve = _curves[curveIndex];
 
     bool changed = 0;
@@ -291,7 +322,8 @@ err::Result CETool::deselectSegment(int curveIndex, int segIndex) {
     return errSUCCESS;
 }
 
-err::Result CETool::selectCurves(msg::list curveIndices) {
+err::Result CETool::selectCurves(msg::list curveIndices)
+{
     // validate first
     int ncurves = numCurves();
     bool* newState = (bool*)alloca(sizeof(bool) * ncurves);
@@ -300,7 +332,8 @@ err::Result CETool::selectCurves(msg::list curveIndices) {
     int i;
     for (i = 0; i < curveIndices.size(); i++) {
         int curveIndex = curveIndices[i];
-        if (curveIndex < 0 || curveIndex >= ncurves) return errINDEX;
+        if (curveIndex < 0 || curveIndex >= ncurves)
+            return errINDEX;
         newState[curveIndex] = 1;
     }
     // apply
@@ -310,7 +343,8 @@ err::Result CETool::selectCurves(msg::list curveIndices) {
         if (newState[i]) {
             if (!curve->selected || (int)curve->segsSelected.size() != curve->numSegs) {
                 curve->selected = 1;
-                for (int i = 0; i < curve->numSegs; i++) curve->segsSelected.insert(i);
+                for (int i = 0; i < curve->numSegs; i++)
+                    curve->segsSelected.insert(i);
                 changed = 1;
             }
         } else {
@@ -329,9 +363,11 @@ err::Result CETool::selectCurves(msg::list curveIndices) {
     return errSUCCESS;
 }
 
-err::Result CETool::selectSegments(int curveIndex, msg::list segIndices) {
+err::Result CETool::selectSegments(int curveIndex, msg::list segIndices)
+{
     // validate first
-    if (curveIndex < 0 || curveIndex >= numCurves()) return errINDEX;
+    if (curveIndex < 0 || curveIndex >= numCurves())
+        return errINDEX;
     CurveData* curve = _curves[curveIndex];
     int numSegs = curve->numSegs;
     bool* newState = (bool*)alloca(sizeof(bool) * numSegs);
@@ -339,7 +375,8 @@ err::Result CETool::selectSegments(int curveIndex, msg::list segIndices) {
     int i;
     for (i = 0; i < segIndices.size(); i++) {
         int segIndex = segIndices[i];
-        if (segIndex < 0 || segIndex >= numSegs) return errINDEX;
+        if (segIndex < 0 || segIndex >= numSegs)
+            return errINDEX;
         newState[segIndex] = 1;
     }
     // apply
@@ -364,13 +401,15 @@ err::Result CETool::selectSegments(int curveIndex, msg::list segIndices) {
     return errSUCCESS;
 }
 
-err::Result CETool::getSelection(msg::list& selections) {
+err::Result CETool::getSelection(msg::list& selections)
+{
     if (!_selListValid) {
         // rebuild selectionList
         // first must count selections
         int numCurveSel = 0;
         for (int i = 0; i < numCurves(); i++)
-            if (_curves[i]->selected) numCurveSel++;
+            if (_curves[i]->selected)
+                numCurveSel++;
         // make an entry for each selected curve
         _selList.newlist(numCurveSel * 2);
         int index = 0;
@@ -395,7 +434,8 @@ err::Result CETool::getSelection(msg::list& selections) {
     return errSUCCESS;
 }
 
-err::Result CETool::getSelectedCurve(int& curve) {
+err::Result CETool::getSelectedCurve(int& curve)
+{
     msg::list sellist;
     ECHK(getSelection(sellist));
     int numcurves = sellist.size() / 2;
@@ -407,7 +447,8 @@ err::Result CETool::getSelectedCurve(int& curve) {
     return errSUCCESS;
 }
 
-err::Result CETool::getSelectedSegment(int& curve, int& seg) {
+err::Result CETool::getSelectedSegment(int& curve, int& seg)
+{
     ECHK(getSelectedCurve(curve));
     CurveData* cdata = _curves[curve];
     int numsegs = cdata->segsSelected.size();
@@ -417,17 +458,21 @@ err::Result CETool::getSelectedSegment(int& curve, int& seg) {
     return errSUCCESS;
 }
 
-err::Result CETool::isSegmentSelected(bool& selected, int curveIndex, int segIndex) {
-    if (curveIndex < 0 || curveIndex >= numCurves()) return errINDEX;
+err::Result CETool::isSegmentSelected(bool& selected, int curveIndex, int segIndex)
+{
+    if (curveIndex < 0 || curveIndex >= numCurves())
+        return errINDEX;
     CurveData* curve = _curves[curveIndex];
 
-    if (segIndex < 0 || segIndex >= curve->numSegs) return errINDEX;
+    if (segIndex < 0 || segIndex >= curve->numSegs)
+        return errINDEX;
 
     selected = curve->selected && curve->segsSelected.count(segIndex) != 0;
     return errSUCCESS;
 }
 
-int CETool::insertKey(double frame) {
+int CETool::insertKey(double frame)
+{
     // TODO: fix
     int curve;
     if (getSelectedCurve(curve) == errSUCCESS) {
@@ -445,7 +490,8 @@ int CETool::insertKey(double frame) {
     return -1;
 }
 
-void CETool::setSegmentStr(msg::cstr str) {
+void CETool::setSegmentStr(msg::cstr str)
+{
 // TODO: fix
 #if 0
     int curve;
@@ -456,7 +502,8 @@ void CETool::setSegmentStr(msg::cstr str) {
 }
 
 /* Operate on a selected segment */
-void CETool::setSelectedSegmentFrame(double frame) {
+void CETool::setSelectedSegmentFrame(double frame)
+{
     // TODO: fix
     int curve;
     int seg;
@@ -466,7 +513,8 @@ void CETool::setSelectedSegmentFrame(double frame) {
     }
 }
 
-void CETool::setSelectedSegmentValue(double value) {
+void CETool::setSelectedSegmentValue(double value)
+{
     // TODO: fix
     int curve;
     int seg;
@@ -475,7 +523,8 @@ void CETool::setSelectedSegmentValue(double value) {
     }
 }
 
-void keysUpdated(animlib::AnimCurve* curve, int keyStart, int keyEnd, bool regenerateWeights) {
+void keysUpdated(animlib::AnimCurve* curve, int keyStart, int keyEnd, bool regenerateWeights)
+{
     // compute derivatives based on spline rule (central differencing, left or right differencing)
     // we are iterating over keys and gathering left and right neighbor
     const double one_third = 1. / 3.;
@@ -513,26 +562,42 @@ void keysUpdated(animlib::AnimCurve* curve, int keyStart, int keyEnd, bool regen
                                            outTangentType = curr->getOutTangentType();
         double inDeriv = 0, outDeriv = 0;
         switch (inTangentType) {
-            case animlib::AnimKeyframe::kTangentFixed:
-                break;  // don't change them
-            case animlib::AnimKeyframe::kTangentSmooth: inDeriv = deriv; break;
-            case animlib::AnimKeyframe::kTangentAuto: inDeriv = clampedDeriv; break;
-            case animlib::AnimKeyframe::kTangentLinear: inDeriv = hPrev != 0 ? deltaPrev / hPrev : 0; break;
-            case animlib::AnimKeyframe::kTangentFlat: inDeriv = 0; break;
-            default:  // don't know how to do this type, so pretend it doesn't exist!
-                inDeriv = 0;
-                break;
+        case animlib::AnimKeyframe::kTangentFixed:
+            break;  // don't change them
+        case animlib::AnimKeyframe::kTangentSmooth:
+            inDeriv = deriv;
+            break;
+        case animlib::AnimKeyframe::kTangentAuto:
+            inDeriv = clampedDeriv;
+            break;
+        case animlib::AnimKeyframe::kTangentLinear:
+            inDeriv = hPrev != 0 ? deltaPrev / hPrev : 0;
+            break;
+        case animlib::AnimKeyframe::kTangentFlat:
+            inDeriv = 0;
+            break;
+        default:  // don't know how to do this type, so pretend it doesn't exist!
+            inDeriv = 0;
+            break;
         }
         switch (outTangentType) {
-            case animlib::AnimKeyframe::kTangentFixed:
-                break;  // don't change them
-            case animlib::AnimKeyframe::kTangentSmooth: outDeriv = deriv; break;
-            case animlib::AnimKeyframe::kTangentAuto: outDeriv = clampedDeriv; break;
-            case animlib::AnimKeyframe::kTangentLinear: outDeriv = hNext != 0 ? deltaNext / hNext : 0; break;
-            case animlib::AnimKeyframe::kTangentFlat: outDeriv = 0; break;
-            default:  // don't know how to do this type, so pretend it doesn't exist!
-                outDeriv = 0;
-                break;
+        case animlib::AnimKeyframe::kTangentFixed:
+            break;  // don't change them
+        case animlib::AnimKeyframe::kTangentSmooth:
+            outDeriv = deriv;
+            break;
+        case animlib::AnimKeyframe::kTangentAuto:
+            outDeriv = clampedDeriv;
+            break;
+        case animlib::AnimKeyframe::kTangentLinear:
+            outDeriv = hNext != 0 ? deltaNext / hNext : 0;
+            break;
+        case animlib::AnimKeyframe::kTangentFlat:
+            outDeriv = 0;
+            break;
+        default:  // don't know how to do this type, so pretend it doesn't exist!
+            outDeriv = 0;
+            break;
         }
 
         bool weighted = curve->isWeighted();
@@ -561,7 +626,8 @@ void keysUpdated(animlib::AnimCurve* curve, int keyStart, int keyEnd, bool regen
     }
 }
 
-void keyUpdated(animlib::AnimCurve* curve, int key) {
+void keyUpdated(animlib::AnimCurve* curve, int key)
+{
     int numKeys = curve->getNumKeys();
     // key position changes affect spline tangents of neighbors, so do two in each direction to be safe!
     if (numKeys == 1) {
@@ -579,7 +645,8 @@ void CETool::setSelectedSegment(double frame,
                                 double inWeight,
                                 double outWeight,
                                 animlib::AnimKeyframe::tangentType inType,
-                                animlib::AnimKeyframe::tangentType outType) {
+                                animlib::AnimKeyframe::tangentType outType)
+{
     // TODO: fix
     int curve;
     int seg;
@@ -596,7 +663,8 @@ void CETool::setSegment(int curve,
                         double inWeight,
                         double outWeight,
                         animlib::AnimKeyframe::tangentType inType,
-                        animlib::AnimKeyframe::tangentType outType) {
+                        animlib::AnimKeyframe::tangentType outType)
+{
     if (animlib::AnimKeyframe* key = (*_curves[curve]->animCurve)[seg]) {
         _curves[curve]->animCurve->setTime(seg, frame);
         key->setValue(val);
@@ -612,30 +680,37 @@ void CETool::setSegment(int curve,
 }
 
 /*Operate on a specified Segment */
-void CETool::setSegmentFrame(double frame, int curve, int seg) {
+void CETool::setSegmentFrame(double frame, int curve, int seg)
+{
     // prevent making key cross other keys
     animlib::AnimCurve& anim = *_curves[curve]->animCurve;
     animlib::AnimKeyframe *prev = anim[seg - 1], *next = anim[seg + 1];
     // TODO: next ulp?
-    if (prev && prev->getTime() >= frame) frame = prev->getTime() + .001;
-    if (next && frame >= next->getTime()) frame = next->getTime() - .001;
+    if (prev && prev->getTime() >= frame)
+        frame = prev->getTime() + .001;
+    if (next && frame >= next->getTime())
+        frame = next->getTime() - .001;
     _curves[curve]->animCurve->setTime(seg, frame);
     keyUpdated(_curves[curve]->animCurve, seg);
     emit curveChanged(curve);
 }
 
-void CETool::setSegmentValue(double value, int curve, int seg) {
+void CETool::setSegmentValue(double value, int curve, int seg)
+{
     (_curves[curve]->animCurve->getFirstKey() + seg)->setValue(value);
     keyUpdated(_curves[curve]->animCurve, seg);
     emit curveChanged(curve);
 }
 
-void CETool::setSelectedWeighted(bool val) {
+void CETool::setSelectedWeighted(bool val)
+{
     int curve;
-    if (getSelectedCurve(curve) == errSUCCESS) setWeighted(curve, val);
+    if (getSelectedCurve(curve) == errSUCCESS)
+        setWeighted(curve, val);
 }
 
-void CETool::setWeighted(int curve, bool val) {
+void CETool::setWeighted(int curve, bool val)
+{
     // now set all curves there had weights to 1.
     // if the curve changes from weighted to non, we set all weights to 1
     // if the curve changes from non-weighted to weighted, we set all weights to equivalent values to not change curve
@@ -644,12 +719,15 @@ void CETool::setWeighted(int curve, bool val) {
     emit curveChanged(curve);
 }
 
-void CETool::setSelectedLocked(bool val) {
+void CETool::setSelectedLocked(bool val)
+{
     int curve, seg;
-    if (getSelectedSegment(curve, seg) == errSUCCESS) setLocked(curve, seg, val);
+    if (getSelectedSegment(curve, seg) == errSUCCESS)
+        setLocked(curve, seg, val);
 }
 
-void CETool::setLocked(int curve, int segment, bool val) {
+void CETool::setLocked(int curve, int segment, bool val)
+{
     // now set all curves there had weights to 1.
     // if the curve changes from weighted to non, we set all weights to 1
     // if the curve changes from non-weighted to weighted, we set all weights to equivalent values to not change curve
@@ -663,7 +741,8 @@ void CETool::setLocked(int curve, int segment, bool val) {
     }
 }
 
-err::Result CETool::setSegmentType(msg::cstr type, msg::list params) {
+err::Result CETool::setSegmentType(msg::cstr type, msg::list params)
+{
 // TODO: fix
 #if 0
     int curve;
@@ -674,7 +753,8 @@ err::Result CETool::setSegmentType(msg::cstr type, msg::list params) {
     return errSUCCESS;
 }
 
-void CETool::setKeyIn(int curve, int seg, double ang, double weight) {
+void CETool::setKeyIn(int curve, int seg, double ang, double weight)
+{
     animlib::AnimKeyframe& key = *(_curves[curve]->animCurve->getFirstKey() + seg);
     bool weighted = _curves[curve]->animCurve->isWeighted();
     key.setInAngle(ang);
@@ -682,7 +762,8 @@ void CETool::setKeyIn(int curve, int seg, double ang, double weight) {
     emit curveChanged(curve);
 }
 
-void CETool::setKeyOut(int curve, int seg, double ang, double weight) {
+void CETool::setKeyOut(int curve, int seg, double ang, double weight)
+{
     animlib::AnimKeyframe& key = *(_curves[curve]->animCurve->getFirstKey() + seg);
     bool weighted = _curves[curve]->animCurve->isWeighted();
     key.setOutAngle(ang);
@@ -690,7 +771,8 @@ void CETool::setKeyOut(int curve, int seg, double ang, double weight) {
     emit curveChanged(curve);
 }
 
-void CETool::setSelectedInfinity(animlib::AnimCurve::infinityType preType, animlib::AnimCurve::infinityType postType) {
+void CETool::setSelectedInfinity(animlib::AnimCurve::infinityType preType, animlib::AnimCurve::infinityType postType)
+{
     int curve;
     int seg;
     getSelectedSegment(curve, seg);
@@ -699,14 +781,16 @@ void CETool::setSelectedInfinity(animlib::AnimCurve::infinityType preType, animl
 
 void CETool::setInfinity(int curveIndex,
                          animlib::AnimCurve::infinityType preType,
-                         animlib::AnimCurve::infinityType postType) {
+                         animlib::AnimCurve::infinityType postType)
+{
     animlib::AnimCurve& curve = *_curves[curveIndex]->animCurve;
     curve.setPreInfinity(preType);
     curve.setPostInfinity(postType);
     emit curveChanged(curveIndex);
 }
 
-err::Result CETool::changeSegmentType(msg::cstr newtype) {
+err::Result CETool::changeSegmentType(msg::cstr newtype)
+{
 // TODO: fix
 #if 0
     int curve;
@@ -724,7 +808,8 @@ err::Result CETool::changeSegmentType(msg::cstr newtype) {
     return errSUCCESS;
 }
 
-void CETool::deleteSegments() {
+void CETool::deleteSegments()
+{
     bool changed = 0;
     for (int i = 0; i < numCurves(); i++) {
         CurveData* curve = _curves[i];
@@ -746,26 +831,35 @@ void CETool::deleteSegments() {
     }
 }
 
-err::Result CETool::pan(double x, double y) {
-    if (x == 0 && y == 0) return errSUCCESS;
+err::Result CETool::pan(double x, double y)
+{
+    if (x == 0 && y == 0)
+        return errSUCCESS;
     _vx += x;
     _vy += y;
     emit viewChanged();
     return errSUCCESS;
 }
 
-err::Result CETool::zoom(double zoomX, double zoomY) { return zoomAroundPoint(zoomX, zoomY, _vx, _vy); }
+err::Result CETool::zoom(double zoomX, double zoomY)
+{
+    return zoomAroundPoint(zoomX, zoomY, _vx, _vy);
+}
 
-err::Result CETool::zoomAroundPoint(double zoomX, double zoomY, double x, double y) {
-    if (zoomX <= 0 || zoomY <= 0) return errINVPARM;
-    if (zoomX == 1 && zoomY == 1) return errSUCCESS;
+err::Result CETool::zoomAroundPoint(double zoomX, double zoomY, double x, double y)
+{
+    if (zoomX <= 0 || zoomY <= 0)
+        return errINVPARM;
+    if (zoomX == 1 && zoomY == 1)
+        return errSUCCESS;
     double sx = 1 / zoomX;
     double sy = 1 / zoomY;
 
     return setView(x + (_vx - x) * sx, y + (_vy - y) * sy, _vw * sx, _vh * sy);
 }
 
-err::Result CETool::setView(double x, double y, double w, double h) {
+err::Result CETool::setView(double x, double y, double w, double h)
+{
     w = clamp(w, 1e-3, 1e5);
     h = clamp(h, 1e-3, 1e5);
     x = clamp(x, -1e5, 1e5);
@@ -781,8 +875,10 @@ err::Result CETool::setView(double x, double y, double w, double h) {
     return errSUCCESS;
 }
 
-err::Result CETool::setCurveOffset(int curveIndex, double yPan, double yZoom) {
-    if (curveIndex < 0 || curveIndex >= numCurves()) return errINDEX;
+err::Result CETool::setCurveOffset(int curveIndex, double yPan, double yZoom)
+{
+    if (curveIndex < 0 || curveIndex >= numCurves())
+        return errINDEX;
     CurveData* curve = _curves[curveIndex];
     if (curve->ypan != yPan || curve->yzoom != yZoom) {
         curve->ypan = yPan;
@@ -792,10 +888,12 @@ err::Result CETool::setCurveOffset(int curveIndex, double yPan, double yZoom) {
     return errSUCCESS;
 }
 
-err::Result CETool::frameSelection() {
+err::Result CETool::frameSelection()
+{
     // TODO: fix
     // if no curves, do nothing
-    if (!numCurves()) return errSUCCESS;
+    if (!numCurves())
+        return errSUCCESS;
 
     // get current view and adjust
     double x = _vx, y = _vy, w = _vw, h = _vh;
@@ -817,17 +915,21 @@ err::Result CETool::frameSelection() {
 
     for (i = 0; i < numCurves(); i++) {
         CurveData* curve = _curves[i];
-        if (curve->numSegs <= 1) continue;
+        if (curve->numSegs <= 1)
+            continue;
         // find first/last selected seg
         int firstSeg = 1;
         int lastSeg = curve->numSegs - 1;
         if (!frameAll) {
-            if (!curve->selected) continue;
+            if (!curve->selected)
+                continue;
             if (curve->segsSelected.size()) {
                 firstSeg = *curve->segsSelected.begin();
                 lastSeg = *curve->segsSelected.rbegin() + 1;
-                if (lastSeg >= curve->numSegs) lastSeg = curve->numSegs - 1;
-                if (firstSeg < 1) firstSeg = 1;
+                if (lastSeg >= curve->numSegs)
+                    lastSeg = curve->numSegs - 1;
+                if (firstSeg < 1)
+                    firstSeg = 1;
             }
         }
         double min = curve->animCurve->getFirstKey()->getTime();
@@ -840,7 +942,8 @@ err::Result CETool::frameSelection() {
     // adjust horizontal view
     if (numCurves()) {
         x = (maxX + minX) / 2;
-        if (maxX > minX) w = (maxX - minX) * 1.1;  // add 10% margin
+        if (maxX > minX)
+            w = (maxX - minX) * 1.1;  // add 10% margin
     } else {
         minX = x - w / 2;
         maxX = x + w / 2;
@@ -853,7 +956,8 @@ err::Result CETool::frameSelection() {
     bool gotData = false;
     for (i = 0; i < numCurves(); i++) {
         CurveData* curve = _curves[i];
-        if (!frameAll && !curve->selected) continue;
+        if (!frameAll && !curve->selected)
+            continue;
         // TODO: this is not the correct bouds in the presence of oscillation
         for (int i = 0; i < (int)curve->animCurve->getNumKeys(); i++) {
             gotData = true;
@@ -866,7 +970,8 @@ err::Result CETool::frameSelection() {
     // adjust vertical view
     if (gotData) {
         y = (maxY + minY) / 2;
-        if (maxY > minY) h = (maxY - minY) * 1.1;
+        if (maxY > minY)
+            h = (maxY - minY) * 1.1;
     }
 
     // update to new view
@@ -875,7 +980,8 @@ err::Result CETool::frameSelection() {
     return errSUCCESS;
 }
 
-err::Result CETool::getView(double& x, double& y, double& w, double& h) {
+err::Result CETool::getView(double& x, double& y, double& w, double& h)
+{
     x = _vx;
     y = _vy;
     w = _vw;
@@ -883,16 +989,20 @@ err::Result CETool::getView(double& x, double& y, double& w, double& h) {
     return errSUCCESS;
 }
 
-err::Result CETool::getCurveOffset(double& yPan, double& yZoom, int curveIndex) {
-    if (curveIndex < 0 || curveIndex >= numCurves()) return errINDEX;
+err::Result CETool::getCurveOffset(double& yPan, double& yZoom, int curveIndex)
+{
+    if (curveIndex < 0 || curveIndex >= numCurves())
+        return errINDEX;
     CurveData* curve = _curves[curveIndex];
     yPan = curve->ypan;
     yZoom = curve->yzoom;
     return errSUCCESS;
 }
 
-err::Result CETool::setTimeMode(int mode) {
-    if (mode < 0 || mode > 2) return errINVPARM;
+err::Result CETool::setTimeMode(int mode)
+{
+    if (mode < 0 || mode > 2)
+        return errINVPARM;
     if (_timeMode != mode) {
         _timeMode = mode;
         emit timeModeChanged();
@@ -900,36 +1010,46 @@ err::Result CETool::setTimeMode(int mode) {
     return errSUCCESS;
 }
 
-err::Result CETool::getTimeMode(int& mode) {
+err::Result CETool::getTimeMode(int& mode)
+{
     mode = _timeMode;
     return errSUCCESS;
 }
 
-err::Result CETool::map(QWidget*& uiComponent, QWidget* parent) {
+err::Result CETool::map(QWidget*& uiComponent, QWidget* parent)
+{
     _ui = new CEMainUI(parent, this);
     uiComponent = _ui;
     return errSUCCESS;
 }
 
-err::Result CETool::postUnmapNotify() {
+err::Result CETool::postUnmapNotify()
+{
     _ui = 0;
     return errSUCCESS;
 }
 
-err::Result CETool::postMapNotify() { return errSUCCESS; }
+err::Result CETool::postMapNotify()
+{
+    return errSUCCESS;
+}
 
-int CETool::findCurve(animlib::AnimCurve* curve) {
+int CETool::findCurve(animlib::AnimCurve* curve)
+{
     // TODO - do something more efficient than linear search
     // could use dict, but must take care to keep indices current
     for (int i = 0; i < numCurves(); i++)
-        if (_curves[i]->animCurve == curve) return i;
+        if (_curves[i]->animCurve == curve)
+            return i;
     return -1;
 }
 
-int CETool::findCurve(const std::string& curveName) {
+int CETool::findCurve(const std::string& curveName)
+{
     // TODO - do something more efficient than linear search
     // could use dict, but must take care to keep indices current
     for (int i = 0; i < numCurves(); i++)
-        if (_curves[i]->name == curveName) return i;
+        if (_curves[i]->name == curveName)
+            return i;
     return -1;
 }

@@ -34,18 +34,29 @@ class PatternExpr : public Expression {
     struct DummyFuncX : ExprFuncX {
         DummyFuncX() : ExprFuncX(false){};
 
-        ExprType prep(ExprFuncNode* node, ExprType wanted, ExprVarEnv& env) {
+        ExprType prep(ExprFuncNode* node, ExprType wanted, ExprVarEnv& env)
+        {
             bool valid = true;
             for (int i = 0; i < node->numChildren(); i++) {
-                if (!node->isStrArg(i)) valid &= node->child(i)->prep(false, env).isValid();
+                if (!node->isStrArg(i))
+                    valid &= node->child(i)->prep(false, env).isValid();
             }
             return wanted;
         }
 
-        virtual bool isScalar() const { return true; };
-        virtual ExprType retType() const { return ExprType().FP(1).Varying(); };
+        virtual bool isScalar() const
+        {
+            return true;
+        };
+        virtual ExprType retType() const
+        {
+            return ExprType().FP(1).Varying();
+        };
 
-        void eval(const ExprFuncNode* node, Vec3d& result) const { result = Vec3d(); }
+        void eval(const ExprFuncNode* node, Vec3d& result) const
+        {
+            result = Vec3d();
+        }
     } dummyFuncX;
     mutable ExprFunc dummyFunc;
 
@@ -56,8 +67,12 @@ class PatternExpr : public Expression {
     //! Empty constructor
     PatternExpr() : Expression(), dummyFunc(dummyFuncX, 0, 16), _examiner(), _walker(&_examiner){};
 
-    inline void walk() { _walker.walk(_parseTree); };
-    void specs() {
+    inline void walk()
+    {
+        _walker.walk(_parseTree);
+    };
+    void specs()
+    {
         if (isValid()) {
             walk();
             printSpecs(_examiner);
@@ -69,23 +84,34 @@ class PatternExpr : public Expression {
     SeExpr2::ConstWalker _walker;
 
     template <typename Examiner>
-    void printSpecs(Examiner examiner) {
+    void printSpecs(Examiner examiner)
+    {
         if (isValid()) {
-            for (int i = 0; i < examiner.length(); ++i) std::cout << examiner.spec(i)->toString() << std::endl;
+            for (int i = 0; i < examiner.length(); ++i)
+                std::cout << examiner.spec(i)->toString() << std::endl;
         };
     };
 
     //! resolve function that only supports one external variable 'x'
-    ExprVarRef* resolveVar(const std::string& name) const { return 0; };
+    ExprVarRef* resolveVar(const std::string& name) const
+    {
+        return 0;
+    };
 
-    ExprFunc* resolveFunc(const std::string& name) const { return &dummyFunc; }
+    ExprFunc* resolveFunc(const std::string& name) const
+    {
+        return &dummyFunc;
+    }
 };
 
-void quit(const std::string& str) {
-    if (str == "quit" || str == "q") exit(0);
+void quit(const std::string& str)
+{
+    if (str == "quit" || str == "q")
+        exit(0);
 };
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     PatternExpr expr;
     std::string str;
 

@@ -107,12 +107,16 @@ class ExprControlCollection : public QWidget {
     bool rebuildControls(const QString& expressionText, std::vector<QString>& variables);
 
     /// Number of controls
-    int numControls() { return _controls.size(); }
+    int numControls()
+    {
+        return _controls.size();
+    }
 
     void showEditor(int idx);
 
     /// Anim curve callback
-    static void setAnimCurveCallback(AnimCurveControl::AnimCurveCallback callback) {
+    static void setAnimCurveCallback(AnimCurveControl::AnimCurveCallback callback)
+    {
         AnimCurveControl::setAnimCurveCallback(callback);
     }
 

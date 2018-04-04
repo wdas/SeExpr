@@ -27,7 +27,8 @@
 #include <QLabel>
 
 ExprGrapherWidget::ExprGrapherWidget(QWidget* parent, int width, int height)
-    : view(new ExprGrapherView(*this, this, width, height)), expr("", SeExpr2::ExprType().FP(1)) {
+    : view(new ExprGrapherView(*this, this, width, height)), expr("", SeExpr2::ExprType().FP(1))
+{
     Q_UNUSED(parent);
     setFixedSize(width, height + 30);
     QVBoxLayout* vbox = new QVBoxLayout;
@@ -56,7 +57,8 @@ ExprGrapherWidget::ExprGrapherWidget(QWidget* parent, int width, int height)
     hbox->addWidget(scale, 0);
 }
 
-void ExprGrapherWidget::scaleValueEdited() {
+void ExprGrapherWidget::scaleValueEdited()
+{
     float xmin, xmax, ymin, ymax, z;
     view->getWindow(xmin, xmax, ymin, ymax, z);
     float xdiff = xmax - xmin, ydiff = ymax - ymin;
@@ -72,19 +74,32 @@ void ExprGrapherWidget::scaleValueEdited() {
     view->setWindow(xmin, xmax, ymin, ymax, z);
 }
 
-void ExprGrapherWidget::scaleValueManipulated() {
+void ExprGrapherWidget::scaleValueManipulated()
+{
     float xmin, xmax, ymin, ymax, z;
     view->getWindow(xmin, xmax, ymin, ymax, z);
     scale->setText(QString("%1").arg(.5 * (xmax - xmin)));
 }
 
-void ExprGrapherWidget::update() { view->update(); }
+void ExprGrapherWidget::update()
+{
+    view->update();
+}
 
-void ExprGrapherWidget::forwardPreview() { emit preview(); }
+void ExprGrapherWidget::forwardPreview()
+{
+    emit preview();
+}
 
 ExprGrapherView::ExprGrapherView(ExprGrapherWidget& widget, QWidget* parent, int width, int height)
-    : QGLWidget(parent), widget(widget), _image(NULL), _width(width), _height(height), scaling(false),
-      translating(false) {
+    : QGLWidget(parent)
+    , widget(widget)
+    , _image(NULL)
+    , _width(width)
+    , _height(height)
+    , scaling(false)
+    , translating(false)
+{
     this->setFixedSize(width, height);
 
     _image = new float[3 * _width * _height];
@@ -94,9 +109,13 @@ ExprGrapherView::ExprGrapherView(ExprGrapherWidget& widget, QWidget* parent, int
     setCursor(Qt::OpenHandCursor);
 }
 
-ExprGrapherView::~ExprGrapherView() { delete[] _image; }
+ExprGrapherView::~ExprGrapherView()
+{
+    delete[] _image;
+}
 
-void ExprGrapherView::setWindow(float xmin, float xmax, float ymin, float ymax, float z) {
+void ExprGrapherView::setWindow(float xmin, float xmax, float ymin, float ymax, float z)
+{
     this->z = z;
     this->xmin = xmin;
     this->xmax = xmax;
@@ -107,7 +126,8 @@ void ExprGrapherView::setWindow(float xmin, float xmax, float ymin, float ymax, 
     dy = (ymax - ymin) / _height;
 }
 
-void ExprGrapherView::getWindow(float& xmin, float& xmax, float& ymin, float& ymax, float& z) {
+void ExprGrapherView::getWindow(float& xmin, float& xmax, float& ymin, float& ymax, float& z)
+{
     z = this->z;
     xmin = this->xmin;
     xmax = this->xmax;
@@ -115,7 +135,8 @@ void ExprGrapherView::getWindow(float& xmin, float& xmax, float& ymin, float& ym
     ymax = this->ymax;
 }
 
-void ExprGrapherView::clear() {
+void ExprGrapherView::clear()
+{
     for (int row = 0; row < _height; ++row) {
         for (int col = 0; col < _width; ++col) {
             int index = 3 * row * _width + 3 * col;
@@ -126,7 +147,8 @@ void ExprGrapherView::clear() {
     }
 }
 
-void ExprGrapherView::mousePressEvent(QMouseEvent* event) {
+void ExprGrapherView::mousePressEvent(QMouseEvent* event)
+{
     if (event->button() == Qt::MidButton) {
         setCursor(Qt::ClosedHandCursor);
         translating = true;
@@ -138,12 +160,15 @@ void ExprGrapherView::mousePressEvent(QMouseEvent* event) {
     event_oldx = event->x();
     event_oldy = event->y();
 }
-void ExprGrapherView::mouseReleaseEvent(QMouseEvent* event) {
-    if (event->button() == Qt::LeftButton) emit clicked();
+void ExprGrapherView::mouseReleaseEvent(QMouseEvent* event)
+{
+    if (event->button() == Qt::LeftButton)
+        emit clicked();
     scaling = translating = false;
     setCursor(Qt::OpenHandCursor);
 }
-void ExprGrapherView::mouseMoveEvent(QMouseEvent* event) {
+void ExprGrapherView::mouseMoveEvent(QMouseEvent* event)
+{
     int x = event->x(), y = event->y();
     float offsetx = dx * (x - event_oldx);
     float offsety = -dy * (y - event_oldy);
@@ -173,7 +198,8 @@ void ExprGrapherView::mouseMoveEvent(QMouseEvent* event) {
     event_oldy = y;
 }
 
-void ExprGrapherView::update() {
+void ExprGrapherView::update()
+{
     if (!widget.expr.isValid()) {
         clear();
         updateGL();
@@ -204,7 +230,8 @@ void ExprGrapherView::update() {
     updateGL();
 }
 
-void ExprGrapherView::paintGL() {
+void ExprGrapherView::paintGL()
+{
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0.0f, (GLfloat)_width, 0.0, (GLfloat)_height, -1.0, 1.0);

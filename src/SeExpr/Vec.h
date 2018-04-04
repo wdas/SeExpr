@@ -26,7 +26,8 @@
 namespace SeExpr2 {
 //! Static assert error case (false)
 template <bool b, class T>
-struct seexpr_static_assert {};
+struct seexpr_static_assert {
+};
 //! Static assert success case
 template <class T>
 struct seexpr_static_assert<true, T> {
@@ -40,7 +41,8 @@ struct my_enable_if {
 };
 //! Enable_if failure case (substitution failure is not an error)
 template <class T>
-struct my_enable_if<false, T> {};
+struct my_enable_if<false, T> {
+};
 
 //! Static conditional type true case
 template <bool c, class T1, class T2>
@@ -57,27 +59,41 @@ struct static_if<false, T1, T2> {
 // Reduction class (helps prevent linear data dependency on reduce unroll)
 template <class T, int d>
 struct Reducer {
-    static T sum(T* data) {
+    static T sum(T* data)
+    {
         T sum = 0;
-        for (int k = 0; k < d; k++) sum += data[k];
+        for (int k = 0; k < d; k++)
+            sum += data[k];
         return sum;
     }
 };
 template <class T>
 struct Reducer<T, 1> {
-    static T sum(T* data) { return data[0]; }
+    static T sum(T* data)
+    {
+        return data[0];
+    }
 };
 template <class T>
 struct Reducer<T, 2> {
-    static T sum(T* data) { return data[0] + data[1]; }
+    static T sum(T* data)
+    {
+        return data[0] + data[1];
+    }
 };
 template <class T>
 struct Reducer<T, 3> {
-    static T sum(T* data) { return data[0] + data[1] + data[2]; }
+    static T sum(T* data)
+    {
+        return data[0] + data[1] + data[2];
+    }
 };
 template <class T>
 struct Reducer<T, 4> {
-    static T sum(T* data) { return (data[0] + data[1]) + (data[2] + data[3]); }
+    static T sum(T* data)
+    {
+        return (data[0] + data[1]) + (data[2] + data[3]);
+    }
 };
 
 //! Vec class, generic dimension vector class
@@ -85,9 +101,12 @@ struct Reducer<T, 4> {
 template <class T, int d, bool ref = false>
 class Vec {
     // static error types
-    struct INVALID_WITH_VECTOR_VALUE {};
-    struct INVALID_WITH_VECTOR_REFERENCE {};
-    struct INVALID_WITH_DIMENSION {};
+    struct INVALID_WITH_VECTOR_VALUE {
+    };
+    struct INVALID_WITH_VECTOR_REFERENCE {
+    };
+    struct INVALID_WITH_DIMENSION {
+    };
 
     //! internal data (either an explicit arary or a pointer to raw data)
     typename static_if<ref, T*, T[d]>::TYPE x;
@@ -100,28 +119,37 @@ class Vec {
     template <class T2>
     static Vec<T, d, false> copy(
         T2* raw,
-        INVALID_WITH_VECTOR_REFERENCE = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
+        INVALID_WITH_VECTOR_REFERENCE = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE()))
+    {
         Vec<T, d, false> ret;
-        for (int k = 0; k < d; k++) ret[k] = static_cast<T>(raw[k]);
+        for (int k = 0; k < d; k++)
+            ret[k] = static_cast<T>(raw[k]);
         return ret;
     }
 
     //! Initialize vector to be reference to plain raw data
     explicit Vec(T* raw, INVALID_WITH_VECTOR_VALUE = (typename my_enable_if<ref, INVALID_WITH_VECTOR_VALUE>::TYPE()))
-        : x(raw) {}
+        : x(raw)
+    {
+    }
 
     //! Empty constructor (this is invalid for a reference type)
-    Vec(INVALID_WITH_VECTOR_REFERENCE = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {}
+    Vec(INVALID_WITH_VECTOR_REFERENCE = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE()))
+    {
+    }
 
     //! Convenience constant vector initialization (valid for any d)
-    Vec(T v0, INVALID_WITH_VECTOR_REFERENCE = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
-        for (int k = 0; k < d; k++) x[k] = v0;
+    Vec(T v0, INVALID_WITH_VECTOR_REFERENCE = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE()))
+    {
+        for (int k = 0; k < d; k++)
+            x[k] = v0;
     }
 
     //! Convenience 2 vector initialization (only for d==2)
     Vec(T v1,
         T v2,
-        INVALID_WITH_VECTOR_REFERENCE = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
+        INVALID_WITH_VECTOR_REFERENCE = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE()))
+    {
         typename seexpr_static_assert<d == 2, INVALID_WITH_DIMENSION>::TYPE();
         x[0] = v1;
         x[1] = v2;
@@ -131,7 +159,8 @@ class Vec {
     Vec(T v1,
         T v2,
         T v3,
-        INVALID_WITH_VECTOR_REFERENCE = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
+        INVALID_WITH_VECTOR_REFERENCE = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE()))
+    {
         typename seexpr_static_assert<d == 3, INVALID_WITH_DIMENSION>::TYPE();
         x[0] = v1;
         x[1] = v2;
@@ -143,7 +172,8 @@ class Vec {
         T v2,
         T v3,
         T v4,
-        INVALID_WITH_VECTOR_REFERENCE = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
+        INVALID_WITH_VECTOR_REFERENCE = (typename my_enable_if<!ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE()))
+    {
         typename seexpr_static_assert<d == 4, INVALID_WITH_DIMENSION>::TYPE();
         x[0] = v1;
         x[1] = v2;
@@ -160,131 +190,204 @@ class Vec {
     template <class T2, bool refother>
     Vec(const Vec<T2, d, refother>& other,
         INVALID_WITH_VECTOR_REFERENCE =
-            (typename my_enable_if<!ref && refother != ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE())) {
+            (typename my_enable_if<!ref && refother != ref, INVALID_WITH_VECTOR_REFERENCE>::TYPE()))
+    {
         *this = other;
     }
 
     template <class T2, bool refother>
-    inline Vec& operator=(const Vec<T2, d, refother>& other) {
-        for (int k = 0; k < d; k++) x[k] = other[k];
+    inline Vec& operator=(const Vec<T2, d, refother>& other)
+    {
+        for (int k = 0; k < d; k++)
+            x[k] = other[k];
         return *this;
     }
 
     template <class Tother, bool refother>
-    inline bool operator==(const Vec<Tother, d, refother>& other) const {
+    inline bool operator==(const Vec<Tother, d, refother>& other) const
+    {
         for (int k = 0; k < d; k++)
-            if (x[k] != other[k]) return false;
+            if (x[k] != other[k])
+                return false;
         return true;
     }
 
     template <bool refother>
-    inline bool operator==(const Vec<T, d, refother>& other) const {
+    inline bool operator==(const Vec<T, d, refother>& other) const
+    {
         bool equal = true;
-        for (int k = 0; k < d; k++) equal &= (x[k] == other[k]);
+        for (int k = 0; k < d; k++)
+            equal &= (x[k] == other[k]);
         return equal;
     }
 
     template <bool refother>
-    inline bool operator!=(const Vec<T, d, refother>& other) const {
+    inline bool operator!=(const Vec<T, d, refother>& other) const
+    {
         return !(*this == other);
     }
 
     template <class Tother, bool refother>
-    inline bool operator!=(const Vec<Tother, d, refother>& other) const {
+    inline bool operator!=(const Vec<Tother, d, refother>& other) const
+    {
         return !(*this != other);
     }
 
     // non-const element access
-    inline T& operator[](const int i) { return x[i]; }
+    inline T& operator[](const int i)
+    {
+        return x[i];
+    }
 
     // const element access
-    inline const T& operator[](const int i) const { return x[i]; }
+    inline const T& operator[](const int i) const
+    {
+        return x[i];
+    }
 
-    inline T_VEC_VALUE operator-() const {
+    inline T_VEC_VALUE operator-() const
+    {
         T_VEC_VALUE result;
-        for (int k = 0; k < d; k++) result[k] = -x[k];
+        for (int k = 0; k < d; k++)
+            result[k] = -x[k];
         return result;
     }
 
     template <bool refother>
-    inline T_VEC_VALUE operator+(const Vec<T, d, refother>& other) const {
+    inline T_VEC_VALUE operator+(const Vec<T, d, refother>& other) const
+    {
         T_VEC_VALUE result;
-        for (int k = 0; k < d; k++) result[k] = x[k] + other[k];
+        for (int k = 0; k < d; k++)
+            result[k] = x[k] + other[k];
         return result;
     }
 
     template <bool refother>
-    inline T_VEC_VALUE operator-(const Vec<T, d, refother>& other) const {
+    inline T_VEC_VALUE operator-(const Vec<T, d, refother>& other) const
+    {
         T_VEC_VALUE result;
-        for (int k = 0; k < d; k++) result[k] = x[k] - other[k];
+        for (int k = 0; k < d; k++)
+            result[k] = x[k] - other[k];
         return result;
     }
 
     template <bool refother>
-    inline T_VEC_VALUE operator*(const Vec<T, d, refother>& other) const {
+    inline T_VEC_VALUE operator*(const Vec<T, d, refother>& other) const
+    {
         T_VEC_VALUE result;
-        for (int k = 0; k < d; k++) result[k] = x[k] * other[k];
+        for (int k = 0; k < d; k++)
+            result[k] = x[k] * other[k];
         return result;
     }
 
     template <bool refother>
-    inline T_VEC_VALUE operator/(const Vec<T, d, refother>& other) const {
+    inline T_VEC_VALUE operator/(const Vec<T, d, refother>& other) const
+    {
         T_VEC_VALUE result;
-        for (int k = 0; k < d; k++) result[k] = x[k] / other[k];
+        for (int k = 0; k < d; k++)
+            result[k] = x[k] / other[k];
         return result;
     }
 
-    inline T_VEC_VALUE operator+(const T& s) const { return (*this) + T_VEC_VALUE(s); }
-    inline T_VEC_VALUE operator-(const T& s) const { return (*this) - T_VEC_VALUE(s); }
-    inline T_VEC_VALUE operator*(const T& s) const { return (*this) * T_VEC_VALUE(s); }
-    inline T_VEC_VALUE operator/(const T& s) const { return (*this) / T_VEC_VALUE(s); }
+    inline T_VEC_VALUE operator+(const T& s) const
+    {
+        return (*this) + T_VEC_VALUE(s);
+    }
+    inline T_VEC_VALUE operator-(const T& s) const
+    {
+        return (*this) - T_VEC_VALUE(s);
+    }
+    inline T_VEC_VALUE operator*(const T& s) const
+    {
+        return (*this) * T_VEC_VALUE(s);
+    }
+    inline T_VEC_VALUE operator/(const T& s) const
+    {
+        return (*this) / T_VEC_VALUE(s);
+    }
 
-    inline Vec& operator+=(const T& s) { return (*this) = (*this) + T_VEC_VALUE(s); }
-    inline Vec& operator-=(const T& s) { return (*this) = (*this) - T_VEC_VALUE(s); }
-    inline Vec& operator*=(const T& s) { return (*this) = (*this) * T_VEC_VALUE(s); }
-    inline Vec& operator/=(const T& s) { return (*this) = (*this) / T_VEC_VALUE(s); }
+    inline Vec& operator+=(const T& s)
+    {
+        return (*this) = (*this) + T_VEC_VALUE(s);
+    }
+    inline Vec& operator-=(const T& s)
+    {
+        return (*this) = (*this) - T_VEC_VALUE(s);
+    }
+    inline Vec& operator*=(const T& s)
+    {
+        return (*this) = (*this) * T_VEC_VALUE(s);
+    }
+    inline Vec& operator/=(const T& s)
+    {
+        return (*this) = (*this) / T_VEC_VALUE(s);
+    }
 
     template <bool refother>
-    inline Vec& operator+=(const Vec<T, d, refother>& other) {
+    inline Vec& operator+=(const Vec<T, d, refother>& other)
+    {
         return (*this) = (*this) + other;
     }
 
     template <bool refother>
-    inline Vec& operator-=(const Vec<T, d, refother>& other) {
+    inline Vec& operator-=(const Vec<T, d, refother>& other)
+    {
         return (*this) = (*this) - other;
     }
 
     template <bool refother>
-    inline Vec& operator*=(const Vec<T, d, refother>& other) {
+    inline Vec& operator*=(const Vec<T, d, refother>& other)
+    {
         return (*this) = (*this) * other;
     }
 
     template <bool refother>
-    inline Vec& operator/=(const Vec<T, d, refother>& other) {
+    inline Vec& operator/=(const Vec<T, d, refother>& other)
+    {
         return (*this) = (*this) / other;
     }
 
-    friend inline T_VEC_VALUE operator+(const T& s, const Vec& v) { return T_VEC_VALUE(s) + v; }
-    friend inline T_VEC_VALUE operator-(const T& s, const Vec& v) { return T_VEC_VALUE(s) - v; }
-    friend inline T_VEC_VALUE operator*(const T& s, const Vec& v) { return T_VEC_VALUE(s) * v; }
-    friend inline T_VEC_VALUE operator/(const T& s, const Vec& v) { return T_VEC_VALUE(s) / v; }
+    friend inline T_VEC_VALUE operator+(const T& s, const Vec& v)
+    {
+        return T_VEC_VALUE(s) + v;
+    }
+    friend inline T_VEC_VALUE operator-(const T& s, const Vec& v)
+    {
+        return T_VEC_VALUE(s) - v;
+    }
+    friend inline T_VEC_VALUE operator*(const T& s, const Vec& v)
+    {
+        return T_VEC_VALUE(s) * v;
+    }
+    friend inline T_VEC_VALUE operator/(const T& s, const Vec& v)
+    {
+        return T_VEC_VALUE(s) / v;
+    }
 
-    inline void fill(T val) {
-        for (int k = 0; k < d; ++k) x[k] = val;
+    inline void fill(T val)
+    {
+        for (int k = 0; k < d; ++k)
+            x[k] = val;
     }
 
     //! Square of euclidean (2) norm
-    inline T length2() const {
+    inline T length2() const
+    {
         T data[d];
-        for (int k = 0; k < d; k++) data[k] = x[k] * x[k];
+        for (int k = 0; k < d; k++)
+            data[k] = x[k] * x[k];
         return Reducer<T, d>::sum(data);
     }
 
     //! Euclidean (2) norm
-    inline T length() const { return sqrt(length2()); }
+    inline T length() const
+    {
+        return sqrt(length2());
+    }
 
     //! Normalize in place and return the 2-norm before normalization
-    inline T normalize() {
+    inline T normalize()
+    {
         T l = length2();
         if (l) {
             l = sqrt(l);
@@ -297,7 +400,8 @@ class Vec {
     }
 
     //! Return a copy of the vector that is normalized
-    inline Vec<T, d, false> normalized() const {
+    inline Vec<T, d, false> normalized() const
+    {
         Vec<T, d, false> other(*this);
         other.normalize();
         return other;
@@ -305,21 +409,25 @@ class Vec {
 
     /** Inner product. */
     template <bool refother>
-    inline T dot(const Vec<T, d, refother>& o) const {
+    inline T dot(const Vec<T, d, refother>& o) const
+    {
         T data[d];
-        for (int k = 0; k < d; k++) data[k] = x[k] * o[k];
+        for (int k = 0; k < d; k++)
+            data[k] = x[k] * o[k];
         return Reducer<T, d>::sum(data);
     }
 
     /** Cross product. */
     template <bool refother>
-    inline T_VEC_VALUE cross(const Vec<T, 3, refother>& o) const {
+    inline T_VEC_VALUE cross(const Vec<T, 3, refother>& o) const
+    {
         typename seexpr_static_assert<d == 3, INVALID_WITH_DIMENSION>::TYPE();
         return T_VEC_VALUE(x[1] * o[2] - x[2] * o[1], x[2] * o[0] - x[0] * o[2], x[0] * o[1] - x[1] * o[0]);
     }
 
     /** Return a vector orthogonal to the current vector. */
-    inline T_VEC_VALUE orthogonal() const {
+    inline T_VEC_VALUE orthogonal() const
+    {
         typename seexpr_static_assert<d == 3, INVALID_WITH_DIMENSION>::TYPE();
         return T_VEC_VALUE(x[1] + x[2], x[2] - x[0], -x[0] - x[1]);
     }
@@ -329,10 +437,12 @@ class Vec {
      * passed in vector.
      */
     template <bool refother>
-    inline T angle(const Vec<T, 3, refother>& o) const {
+    inline T angle(const Vec<T, 3, refother>& o) const
+    {
         typename seexpr_static_assert<d == 3, INVALID_WITH_DIMENSION>::TYPE();
         T l = length() * o.length();
-        if (l == 0) return 0;
+        if (l == 0)
+            return 0;
         return acos(dot(o) / l);
     }
 
@@ -341,7 +451,8 @@ class Vec {
      * the given axis. (Axis must be normalized)
      */
     template <bool refother>
-    inline T_VEC_VALUE rotateBy(const Vec<T, 3, refother>& axis, T angle_) const {
+    inline T_VEC_VALUE rotateBy(const Vec<T, 3, refother>& axis, T angle_) const
+    {
         typename seexpr_static_assert<d == 3, INVALID_WITH_DIMENSION>::TYPE();
         double c = cos(angle_), s = sin(angle_);
         return c * (*this) + (1 - c) * dot(axis) * axis - s * cross(axis);
@@ -350,9 +461,12 @@ class Vec {
 
 //! Output stream
 template <class T, int d, bool r>
-std::ostream& operator<<(std::ostream& out, const Vec<T, d, r>& val) {
-    if (d > 0) out << "(" << val[0];
-    for (int k = 1; k < d; k++) out << "," << val[k];
+std::ostream& operator<<(std::ostream& out, const Vec<T, d, r>& val)
+{
+    if (d > 0)
+        out << "(" << val[0];
+    for (int k = 1; k < d; k++)
+        out << "," << val[k];
     out << ")";
     return out;
 }

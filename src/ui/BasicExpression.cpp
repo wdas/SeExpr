@@ -22,27 +22,37 @@
 #include "BasicExpression.h"
 
 BasicExpression::BasicExpression(const std::string& expr, const SeExpr2::ExprType& type)
-    : Expression(expr, type), dummyFunc(dummyFuncX, 0, 16) {}
+    : Expression(expr, type), dummyFunc(dummyFuncX, 0, 16)
+{
+}
 
-BasicExpression::~BasicExpression() { clearVars(); }
+BasicExpression::~BasicExpression()
+{
+    clearVars();
+}
 
 template <class T_MAP>
-void deleteAndClear(T_MAP& map) {
-    for (typename T_MAP::iterator i = map.begin(); i != map.end(); ++i) delete i->second;
+void deleteAndClear(T_MAP& map)
+{
+    for (typename T_MAP::iterator i = map.begin(); i != map.end(); ++i)
+        delete i->second;
     map.clear();
 }
 
-void BasicExpression::clearVars() {
+void BasicExpression::clearVars()
+{
     deleteAndClear(varmap);
     funcmap.clear();
 }
 
-void BasicExpression::reset() {
+void BasicExpression::reset()
+{
     Expression::reset();
     clearVars();
 }
 
-SeExpr2::ExprVarRef* BasicExpression::resolveVar(const std::string& name) const {
+SeExpr2::ExprVarRef* BasicExpression::resolveVar(const std::string& name) const
+{
     if (name == "u")
         return &u;
     else if (name == "v")
@@ -61,9 +71,11 @@ SeExpr2::ExprVarRef* BasicExpression::resolveVar(const std::string& name) const 
     }
 }
 
-SeExpr2::ExprFunc* BasicExpression::resolveFunc(const std::string& name) const {
+SeExpr2::ExprFunc* BasicExpression::resolveFunc(const std::string& name) const
+{
     // check if it is builtin so we get proper behavior
-    if (SeExpr2::ExprFunc::lookup(name)) return 0;
+    if (SeExpr2::ExprFunc::lookup(name))
+        return 0;
 
     funcmap[name] = true;
     return &dummyFunc;

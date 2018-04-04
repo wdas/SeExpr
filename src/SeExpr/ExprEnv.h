@@ -41,22 +41,38 @@ class ExprLocalVar {
     mutable LLVM_VALUE _varPtr;
 
   public:
-    ExprLocalVar(const ExprType& type) : _type(type), _phi(0), _varPtr(nullptr) {}
+    ExprLocalVar(const ExprType& type) : _type(type), _phi(0), _varPtr(nullptr)
+    {
+    }
 
-    virtual ~ExprLocalVar() {}
+    virtual ~ExprLocalVar()
+    {
+    }
 
     //! get the primary representative phi node (i.e. the global parent of a dependent phi node)
-    const ExprLocalVar* getPhi() const { return _phi; }
+    const ExprLocalVar* getPhi() const
+    {
+        return _phi;
+    }
     //! returns type of the variable
-    ExprType type() const { return _type; }
+    ExprType type() const
+    {
+        return _type;
+    }
     //! sets the representative phi node (like a brute force set unioning operation) phi is the set representative
-    virtual void setPhi(ExprLocalVar* phi) { _phi = phi; }
+    virtual void setPhi(ExprLocalVar* phi)
+    {
+        _phi = phi;
+    }
 
     //! LLVM value that has been allocated
     virtual LLVM_VALUE codegen(LLVM_BUILDER, const std::string& name, LLVM_VALUE referenceType) LLVM_BODY;
 
     //! LLVM value that has been pre-done
-    virtual LLVM_VALUE varPtr() { return _varPtr; }
+    virtual LLVM_VALUE varPtr()
+    {
+        return _varPtr;
+    }
 
     //! Allocates variable for interpreter
     int buildInterpreter(Interpreter* interpreter) const;
@@ -67,7 +83,8 @@ class ExprLocalVar {
 class ExprLocalVarPhi : public ExprLocalVar {
   public:
     ExprLocalVarPhi(ExprType condLife, ExprLocalVar* thenVar, ExprLocalVar* elseVar)
-        : ExprLocalVar(ExprType()), _thenVar(thenVar), _elseVar(elseVar) {
+        : ExprLocalVar(ExprType()), _thenVar(thenVar), _elseVar(elseVar)
+    {
         // find the compatible common-denominator lifetime
         ExprType firstType = _thenVar->type(), secondType = _elseVar->type();
         if (ExprType::valuesCompatible(_thenVar->type(), _elseVar->type())) {
@@ -78,9 +95,13 @@ class ExprLocalVarPhi : public ExprLocalVar {
         _type.setLifetime(firstType, secondType, condLife);
     }
 
-    bool valid() const { return !_type.isError(); }
+    bool valid() const
+    {
+        return !_type.isError();
+    }
 
-    void setPhi(ExprLocalVar* phi) {
+    void setPhi(ExprLocalVar* phi)
+    {
         _phi = phi;
         _thenVar->setPhi(phi);
         _elseVar->setPhi(phi);
@@ -139,7 +160,10 @@ class ExprVarEnv {
     // Code generate merges.
     LLVM_VALUE codegenMerges(LLVM_BUILDER builder, int mergeIndex) LLVM_BODY;
     // Query merges
-    std::vector<std::pair<std::string, ExprLocalVarPhi*>>& merge(size_t index) { return _mergedVariables[index]; }
+    std::vector<std::pair<std::string, ExprLocalVarPhi*>>& merge(size_t index)
+    {
+        return _mergedVariables[index];
+    }
 };
 
 //! Variable scope builder is used by the type checking and code gen to track visiblity of variables and changing of
@@ -148,19 +172,30 @@ class ExprVarEnv {
 class ExprVarEnvBuilder {
   public:
     //! Creates an empty builder with one current scope entry
-    ExprVarEnvBuilder() { reset(); }
+    ExprVarEnvBuilder()
+    {
+        reset();
+    }
     //! Reset to factory state (one empty environment that is current)
-    void reset() {
+    void reset()
+    {
         std::unique_ptr<ExprVarEnv> newEnv(new ExprVarEnv);
         _currentEnv = newEnv.get();
         all.emplace_back(std::move(newEnv));
     }
     //! Return the current variable scope
-    ExprVarEnv* current() { return _currentEnv; }
+    ExprVarEnv* current()
+    {
+        return _currentEnv;
+    }
     //! Set a new current variable scope
-    void setCurrent(ExprVarEnv* env) { _currentEnv = env; }
+    void setCurrent(ExprVarEnv* env)
+    {
+        _currentEnv = env;
+    }
     //! Create a descendant scope from the provided parent, does not clobber current
-    ExprVarEnv* createDescendant(ExprVarEnv* parent) {
+    ExprVarEnv* createDescendant(ExprVarEnv* parent)
+    {
         std::unique_ptr<ExprVarEnv> newEnv(new ExprVarEnv);
         newEnv->resetAndSetParent(parent);
         all.emplace_back(std::move(newEnv));
@@ -176,10 +211,18 @@ class ExprVarEnvBuilder {
 
 //! Evaluation result.
 struct ExprEvalResult {
-    ExprEvalResult() : n(0), fp(0), str(0) {}
-    ExprEvalResult(int n_, double* fp_) : n(n_), fp(fp_), str(0) {}
-    ExprEvalResult(const char** c_) : n(1), fp(0), str(c_) {}
-    ExprEvalResult(int n_, double* fp_, const char** c_) : n(n_), fp(fp_), str(c_) {}
+    ExprEvalResult() : n(0), fp(0), str(0)
+    {
+    }
+    ExprEvalResult(int n_, double* fp_) : n(n_), fp(fp_), str(0)
+    {
+    }
+    ExprEvalResult(const char** c_) : n(1), fp(0), str(c_)
+    {
+    }
+    ExprEvalResult(int n_, double* fp_, const char** c_) : n(n_), fp(fp_), str(c_)
+    {
+    }
 
     int n;
     double* fp;

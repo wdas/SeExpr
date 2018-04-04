@@ -24,12 +24,17 @@
 #include "CEGraphKey.h"
 
 CEGraphCurve::CEGraphCurve(CEGraphUI* ui, animlib::AnimCurve* curveData, int index)
-    : _ui(ui), _animCurve(curveData), _index(index), _segsValid(0), _viewValid(0), _firstSegInView(0),
-      _lastSegInView(0) {}
+    : _ui(ui), _animCurve(curveData), _index(index), _segsValid(0), _viewValid(0), _firstSegInView(0), _lastSegInView(0)
+{
+}
 
-CEGraphCurve::~CEGraphCurve() { clearSegs(); }
+CEGraphCurve::~CEGraphCurve()
+{
+    clearSegs();
+}
 
-void CEGraphCurve::clearSegs() {
+void CEGraphCurve::clearSegs()
+{
     for (int i = 0; i < (int)_segs.size(); i++) {
         delete _segs[i].seg;
         delete _segs[i].key;
@@ -38,15 +43,23 @@ void CEGraphCurve::clearSegs() {
     _viewValid = 0;
 }
 
-void CEGraphCurve::invalidate() {
-    if (_segsValid) _segsValid = 0;
+void CEGraphCurve::invalidate()
+{
+    if (_segsValid)
+        _segsValid = 0;
 }
 
-void CEGraphCurve::invalidateView() { _viewValid = 0; }
+void CEGraphCurve::invalidateView()
+{
+    _viewValid = 0;
+}
 
-void CEGraphCurve::paint(bool selected) {
-    if (!_segsValid) buildSegPtrs();
-    if (!_viewValid) updateView();
+void CEGraphCurve::paint(bool selected)
+{
+    if (!_segsValid)
+        buildSegPtrs();
+    if (!_viewValid)
+        updateView();
 
     glPushName(_index);
     // paint segs, keys, handles
@@ -54,19 +67,25 @@ void CEGraphCurve::paint(bool selected) {
         CEGraphSeg* seg = 0;
         CEGraphKey* key = 0;
         getSegAndKey(i, seg, key);
-        if (seg) seg->paint(selected);
-        if (key) key->paint(selected);
+        if (seg)
+            seg->paint(selected);
+        if (key)
+            key->paint(selected);
     }
     glPopName();
 }
 
-int CEGraphCurve::numSegs() {
-    if (!_segsValid) buildSegPtrs();
+int CEGraphCurve::numSegs()
+{
+    if (!_segsValid)
+        buildSegPtrs();
     return _segs.size();
 }
 
-void CEGraphCurve::getSegAndKey(int n, CEGraphSeg*& seg, CEGraphKey*& key) {
-    if (!_segsValid) buildSegPtrs();
+void CEGraphCurve::getSegAndKey(int n, CEGraphSeg*& seg, CEGraphKey*& key)
+{
+    if (!_segsValid)
+        buildSegPtrs();
     if (n < 0 || n >= (int)_segs.size()) {
         seg = 0;
         key = 0;
@@ -74,11 +93,14 @@ void CEGraphCurve::getSegAndKey(int n, CEGraphSeg*& seg, CEGraphKey*& key) {
     };
     seg = _segs[n].seg;
     key = _segs[n].key;
-    if (!seg) seg = _segs[n].seg = new CEGraphBezSeg(this, n);
-    if (!key) key = _segs[n].key = new CEGraphKey(this, n);
+    if (!seg)
+        seg = _segs[n].seg = new CEGraphBezSeg(this, n);
+    if (!key)
+        key = _segs[n].key = new CEGraphKey(this, n);
 }
 
-void CEGraphCurve::buildSegPtrs() {
+void CEGraphCurve::buildSegPtrs()
+{
     clearSegs();
 
     // build seg info list
@@ -87,15 +109,18 @@ void CEGraphCurve::buildSegPtrs() {
     _segsValid = 1;
 }
 
-void CEGraphCurve::buildSeg(int n) {
-    if (n < 0 || n > (int)_segs.size()) return;
+void CEGraphCurve::buildSeg(int n)
+{
+    if (n < 0 || n > (int)_segs.size())
+        return;
     if (_segs[n].seg) {
         delete _segs[n].seg;
         _segs[n].seg = 0;
     }
 }
 
-void CEGraphCurve::updateView() {
+void CEGraphCurve::updateView()
+{
     _firstSegInView = 0;
     _lastSegInView = numSegs() - 1;
     // TODO: make this as adaptive as before
@@ -105,7 +130,8 @@ void CEGraphCurve::updateView() {
 
     if (_segsValid) {
         for (int i = _firstSegInView; i <= _lastSegInView; i++) {
-            if (auto seg = _segs[i].seg) seg->invalidateView();
+            if (auto seg = _segs[i].seg)
+                seg->invalidateView();
         }
     }
     _viewValid = 1;

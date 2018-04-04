@@ -37,7 +37,8 @@
  * Constructor.
  */
 CECurveListUI::CECurveListUI(QWidget* parent, CETool* tool)
-    : QWidget(parent), _tool(tool), _listValid(0), _selValid(0), _updating(0) {
+    : QWidget(parent), _tool(tool), _listValid(0), _selValid(0), _updating(0)
+{
     setObjectName("CurveList");
 
     QVBoxLayout* layout = new QVBoxLayout(this);
@@ -60,9 +61,12 @@ CECurveListUI::CECurveListUI(QWidget* parent, CETool* tool)
 /**
  * Destructor.
  */
-CECurveListUI::~CECurveListUI() {}
+CECurveListUI::~CECurveListUI()
+{
+}
 
-void CECurveListUI::invalidateCurveList() {
+void CECurveListUI::invalidateCurveList()
+{
     if (_listValid || _selValid) {
         _listValid = 0;
         _selValid = 0;
@@ -70,25 +74,32 @@ void CECurveListUI::invalidateCurveList() {
     }
 }
 
-void CECurveListUI::invalidateSelection() {
-    if (_updating) return;  // prevent circular update!
+void CECurveListUI::invalidateSelection()
+{
+    if (_updating)
+        return;  // prevent circular update!
     if (_selValid) {
         _selValid = 0;
         update();
     }
 }
 
-void CECurveListUI::paintEvent(QPaintEvent* event) {
-    if (!_listValid || !_selValid) doUpdate();
+void CECurveListUI::paintEvent(QPaintEvent* event)
+{
+    if (!_listValid || !_selValid)
+        doUpdate();
     QWidget::paintEvent(event);
 }
 
-void CECurveListUI::showEvent(QShowEvent* event) {
-    if (!_listValid || !_selValid) doUpdate();
+void CECurveListUI::showEvent(QShowEvent* event)
+{
+    if (!_listValid || !_selValid)
+        doUpdate();
     QWidget::showEvent(event);
 }
 
-void CECurveListUI::doUpdate() {
+void CECurveListUI::doUpdate()
+{
     _updating = 1;
 
     if (!_listValid) {
@@ -98,7 +109,8 @@ void CECurveListUI::doUpdate() {
         int i;
         for (i = 0; i < (int)names.size(); i++) {
             const char* name = names[i].c_str();
-            if (i >= (int)_list->count()) _list->addItem(name);
+            if (i >= (int)_list->count())
+                _list->addItem(name);
             // qt3            else if (_list->text(i) != name)
             else if (_list->currentItem() && _list->currentItem()->text() != name) {
                 // qt3                _list->changeItem(name, i);
@@ -124,8 +136,10 @@ void CECurveListUI::doUpdate() {
     _updating = 0;
 }
 
-void CECurveListUI::handleSelectionChanged() {
-    if (_updating) return;  // prevent circular update!
+void CECurveListUI::handleSelectionChanged()
+{
+    if (_updating)
+        return;  // prevent circular update!
     _updating = 1;
 
     // first count selections
@@ -152,7 +166,8 @@ void CECurveListUI::handleSelectionChanged() {
         for (i = 0; i < (int)_list->count(); i++) {
             // qt3            if (_list->isSelected(i))
             QListWidgetItem* curItem = _list->item(i);
-            if (curItem->isSelected()) selections.set(n++, i);
+            if (curItem->isSelected())
+                selections.set(n++, i);
         }
         _tool->selectCurves(selections);
     }

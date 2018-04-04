@@ -26,24 +26,60 @@ namespace SeExpr2 {
 void initPerlin();
 
 // trig
-inline double deg(double angle) { return angle * (180 / M_PI); }
-inline double rad(double angle) { return angle * (M_PI / 180); }
-inline double cosd(double x) { return cos(rad(x)); }
-inline double sind(double x) { return sin(rad(x)); }
-inline double tand(double x) { return tan(rad(x)); }
-inline double acosd(double x) { return deg(acos(x)); }
-inline double asind(double x) { return deg(asin(x)); }
-inline double atand(double x) { return deg(atan(x)); }
-inline double atan2d(double y, double x) { return deg(atan2(y, x)); }
+inline double deg(double angle)
+{
+    return angle * (180 / M_PI);
+}
+inline double rad(double angle)
+{
+    return angle * (M_PI / 180);
+}
+inline double cosd(double x)
+{
+    return cos(rad(x));
+}
+inline double sind(double x)
+{
+    return sin(rad(x));
+}
+inline double tand(double x)
+{
+    return tan(rad(x));
+}
+inline double acosd(double x)
+{
+    return deg(acos(x));
+}
+inline double asind(double x)
+{
+    return deg(asin(x));
+}
+inline double atand(double x)
+{
+    return deg(atan(x));
+}
+inline double atan2d(double y, double x)
+{
+    return deg(atan2(y, x));
+}
 
 // clamping
-inline double clamp(double x, double lo, double hi) { return x < lo ? lo : x > hi ? hi : x; }
-inline double round(double x) { return x < 0 ? ceil(x - 0.5) : floor(x + 0.5); }
+inline double clamp(double x, double lo, double hi)
+{
+    return x < lo ? lo : x > hi ? hi : x;
+}
+inline double round(double x)
+{
+    return x < 0 ? ceil(x - 0.5) : floor(x + 0.5);
+}
 double max(int n, double* args);
 double min(int n, double* args);
 
 // blending / remapping
-inline double invert(double x) { return 1 - x; }
+inline double invert(double x)
+{
+    return 1 - x;
+}
 double compress(double x, double lo, double hi);
 double expand(double x, double lo, double hi);
 double fit(double x, double a1, double b1, double a2, double b2);

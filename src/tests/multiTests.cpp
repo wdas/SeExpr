@@ -21,7 +21,8 @@
 using ::testing::ElementsAre;
 using namespace SeExpr2;
 
-TEST(MultiTests, ParabolaCubicE1) {
+TEST(MultiTests, ParabolaCubicE1)
+{
     Expressions ee;
 
     VariableHandle xHandle = ee.addExternalVariable("x", ExprType().FP(1).Varying());

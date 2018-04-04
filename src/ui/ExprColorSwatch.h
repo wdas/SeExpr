@@ -13,11 +13,16 @@ class ExprColorFrame : public QFrame {
     Q_OBJECT
   public:
     ExprColorFrame(SeExpr2::Vec3d value, QWidget* parent = 0);
-    ~ExprColorFrame() {}
+    ~ExprColorFrame()
+    {
+    }
 
     void setValue(const SeExpr2::Vec3d& value);
     SeExpr2::Vec3d getValue() const;
-    bool selected() { return _selected; };
+    bool selected()
+    {
+        return _selected;
+    };
 
   protected:
     virtual void paintEvent(QPaintEvent* event);
@@ -53,7 +58,9 @@ class ExprColorSwatchWidget : public QWidget {
 
   public:
     ExprColorSwatchWidget(bool indexLabel, QWidget* parent = 0);
-    ~ExprColorSwatchWidget() {}
+    ~ExprColorSwatchWidget()
+    {
+    }
 
     // Convenience Functions
     void addSwatch(SeExpr2::Vec3d& val, int index = -1);

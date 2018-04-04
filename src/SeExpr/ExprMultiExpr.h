@@ -55,7 +55,9 @@ class Expressions {
     std::set<GlobalVal*> AllExternalVars;
 
     // Expressions(int numberOfEvals=1);
-    Expressions() {}
+    Expressions()
+    {
+    }
     ~Expressions();
 
     VariableHandle addExternalVariable(const std::string& variableName, ExprType seTy);
@@ -63,11 +65,17 @@ class Expressions {
 
     VariableSetHandle getLoopVarSetHandle(VariableHandle vh);
     void setLoopVariable(VariableSetHandle handle, double* values, unsigned dim);
-    void setLoopVariable(VariableSetHandle handle, double value) { setLoopVariable(handle, &value, 1); }
+    void setLoopVariable(VariableSetHandle handle, double value)
+    {
+        setLoopVariable(handle, &value, 1);
+    }
     void setLoopVariable(VariableSetHandle handle, const char* values);
 
     void setVariable(VariableHandle handle, double* values, unsigned dim);
-    void setVariable(VariableHandle handle, double value) { setVariable(handle, &value, 1); }
+    void setVariable(VariableHandle handle, double value)
+    {
+        setVariable(handle, &value, 1);
+    }
     void setVariable(VariableHandle handle, const char* values);
 
     bool isValid() const;
@@ -78,12 +86,14 @@ class Expressions {
     const std::vector<double>& evalFP(ExprEvalHandle eeh);
     const char* evalStr(ExprEvalHandle eeh);
 
-    void resetEval() {
+    void resetEval()
+    {
         exprToEval.clear();
         exprEvaled.clear();
     }
 
-    void reset() {
+    void reset()
+    {
         resetEval();
         AllExprs.clear();
         AllExternalVars.clear();

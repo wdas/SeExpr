@@ -31,18 +31,24 @@
 
 #include "ExprDeepWater.h"
 
-void DeepWaterGraphicsView::resizeEvent(QResizeEvent* event) {
+void DeepWaterGraphicsView::resizeEvent(QResizeEvent* event)
+{
     emit resizeSignal(event->size().width(), event->size().height());
 }
 
 DeepWaterScene::DeepWaterScene()
-    : _curve(new T_CURVE), _width(320), _height(170), _curvePoly(0), _baseRect(0), _gridRect(0) {
+    : _curve(new T_CURVE), _width(320), _height(170), _curvePoly(0), _baseRect(0), _gridRect(0)
+{
     resize(_width, _height);
 }
 
-DeepWaterScene::~DeepWaterScene() { delete _curve; }
+DeepWaterScene::~DeepWaterScene()
+{
+    delete _curve;
+}
 
-void DeepWaterScene::resize(const int width, const int height) {
+void DeepWaterScene::resize(const int width, const int height)
+{
     // width and height already have the 8 px padding factored in
     _width = width - 16;
     _height = height - 16;
@@ -52,37 +58,44 @@ void DeepWaterScene::resize(const int width, const int height) {
     drawGrid();
 }
 
-void DeepWaterScene::resolutionChanged(int val) {
+void DeepWaterScene::resolutionChanged(int val)
+{
     params.resolution = val;
     setParams(params);
 }
 
-void DeepWaterScene::tileSizeChanged(double val) {
+void DeepWaterScene::tileSizeChanged(double val)
+{
     params.tileSize = val;
     setParams(params);
 }
 
-void DeepWaterScene::lengthCutoffChanged(double val) {
+void DeepWaterScene::lengthCutoffChanged(double val)
+{
     params.lengthCutoff = val;
     setParams(params);
 }
 
-void DeepWaterScene::amplitudeChanged(double val) {
+void DeepWaterScene::amplitudeChanged(double val)
+{
     params.amplitude = val;
     setParams(params);
 }
 
-void DeepWaterScene::windAngleChanged(double val) {
+void DeepWaterScene::windAngleChanged(double val)
+{
     params.windAngle = val;
     setParams(params);
 }
 
-void DeepWaterScene::windSpeedChanged(double val) {
+void DeepWaterScene::windSpeedChanged(double val)
+{
     params.windSpeed = val;
     setParams(params);
 }
 
-void DeepWaterScene::flowDirectionChanged(QString val) {
+void DeepWaterScene::flowDirectionChanged(QString val)
+{
     QString flowDirection = val.remove(0, 1);
     flowDirection = flowDirection.remove(flowDirection.size() - 1, 1);
     QStringList components = flowDirection.split(",");
@@ -90,22 +103,26 @@ void DeepWaterScene::flowDirectionChanged(QString val) {
     setParams(params);
 }
 
-void DeepWaterScene::directionalFactorExponentChanged(double val) {
+void DeepWaterScene::directionalFactorExponentChanged(double val)
+{
     params.directionalFactorExponent = val;
     setParams(params);
 }
 
-void DeepWaterScene::directionalReflectionDampingChanged(double val) {
+void DeepWaterScene::directionalReflectionDampingChanged(double val)
+{
     params.directionalReflectionDamping = val;
     setParams(params);
 }
 
-void DeepWaterScene::sharpenChanged(double val) {
+void DeepWaterScene::sharpenChanged(double val)
+{
     params.sharpen = val;
     setParams(params);
 }
 
-void DeepWaterScene::setParams(const SeDeepWaterParams& paramsIn) {
+void DeepWaterScene::setParams(const SeDeepWaterParams& paramsIn)
+{
     params = paramsIn;
     rebuildDeepWater();
     drawPoly();
@@ -113,7 +130,8 @@ void DeepWaterScene::setParams(const SeDeepWaterParams& paramsIn) {
     emitDeepWaterChanged();
 }
 
-void DeepWaterScene::rebuildDeepWater() {
+void DeepWaterScene::rebuildDeepWater()
+{
     delete _curve;
     _curve = new T_CURVE;
     _curve->setParams(params);
@@ -121,10 +139,14 @@ void DeepWaterScene::rebuildDeepWater() {
 }
 
 // return points in reverse order in order to use same parsing in editor
-void DeepWaterScene::emitDeepWaterChanged() { emit deepWaterChanged(); }
+void DeepWaterScene::emitDeepWaterChanged()
+{
+    emit deepWaterChanged();
+}
 
 // draws the base gray outline rectangle
-void DeepWaterScene::drawRect() {
+void DeepWaterScene::drawRect()
+{
     if (_baseRect == 0) {
         _baseRect = addRect(0, 0, _width, _height, QPen(Qt::black, 1.0), QBrush(Qt::gray));
     }
@@ -133,7 +155,8 @@ void DeepWaterScene::drawRect() {
 }
 
 // draws the poly curve representation
-void DeepWaterScene::drawPoly() {
+void DeepWaterScene::drawPoly()
+{
     if (_curvePoly == 0) {
         _curvePoly = addPolygon(QPolygonF(), QPen(Qt::black, 1.0), QBrush(Qt::darkGray));
     }
@@ -151,7 +174,8 @@ void DeepWaterScene::drawPoly() {
 }
 
 // draws the base gray outline rectangle
-void DeepWaterScene::drawGrid() {
+void DeepWaterScene::drawGrid()
+{
     if (_gridRect == 0) {
         _gridRect = addRect(0, 0, _width, _height, QPen(Qt::black, 1.0), QBrush(Qt::gray));
     }
@@ -163,9 +187,19 @@ void DeepWaterScene::drawGrid() {
 }
 
 ExprDeepWater::ExprDeepWater(QWidget* parent)
-    : QWidget(parent), _scene(0), _resolutionEdit(0), _tileSizeEdit(0), _lengthCutoffEdit(0), _amplitudeEdit(0),
-      _windAngleEdit(0), _windSpeedEdit(0), _flowDirectionEdit(0), _directionalFactorExponentEdit(0),
-      _directionalReflectionDampingEdit(0), _sharpenEdit(0) {
+    : QWidget(parent)
+    , _scene(0)
+    , _resolutionEdit(0)
+    , _tileSizeEdit(0)
+    , _lengthCutoffEdit(0)
+    , _amplitudeEdit(0)
+    , _windAngleEdit(0)
+    , _windSpeedEdit(0)
+    , _flowDirectionEdit(0)
+    , _directionalFactorExponentEdit(0)
+    , _directionalReflectionDampingEdit(0)
+    , _sharpenEdit(0)
+{
     QHBoxLayout* mainLayout = new QHBoxLayout();
     mainLayout->setSpacing(2);
     mainLayout->setMargin(4);
@@ -402,54 +436,67 @@ ExprDeepWater::ExprDeepWater(QWidget* parent)
     connect(curveView, SIGNAL(resizeSignal(int, int)), _scene, SLOT(resize(int, int)));
 }
 
-void ExprDeepWater::resolutionChanged() {
+void ExprDeepWater::resolutionChanged()
+{
     int val = QString(_resolutionEdit->text()).toInt();
     emit resolutionChangedSignal(val);
 }
 
-void ExprDeepWater::tileSizeChanged() {
+void ExprDeepWater::tileSizeChanged()
+{
     double val = QString(_tileSizeEdit->text()).toDouble();
     emit tileSizeChangedSignal(val);
 }
 
-void ExprDeepWater::lengthCutoffChanged() {
+void ExprDeepWater::lengthCutoffChanged()
+{
     double val = QString(_lengthCutoffEdit->text()).toDouble();
     emit lengthCutoffChangedSignal(val);
 }
 
-void ExprDeepWater::amplitudeChanged() {
+void ExprDeepWater::amplitudeChanged()
+{
     double val = QString(_amplitudeEdit->text()).toDouble();
     emit amplitudeChangedSignal(val);
 }
 
-void ExprDeepWater::windAngleChanged() {
+void ExprDeepWater::windAngleChanged()
+{
     double val = QString(_windAngleEdit->text()).toDouble();
     emit windAngleChangedSignal(val);
 }
 
-void ExprDeepWater::windSpeedChanged() {
+void ExprDeepWater::windSpeedChanged()
+{
     double val = QString(_windSpeedEdit->text()).toDouble();
     emit windSpeedChangedSignal(val);
 }
 
-void ExprDeepWater::flowDirectionChanged() { emit flowDirectionChangedSignal(_flowDirectionEdit->text()); }
+void ExprDeepWater::flowDirectionChanged()
+{
+    emit flowDirectionChangedSignal(_flowDirectionEdit->text());
+}
 
-void ExprDeepWater::directionalFactorExponentChanged() {
+void ExprDeepWater::directionalFactorExponentChanged()
+{
     double val = QString(_directionalFactorExponentEdit->text()).toDouble();
     emit directionalFactorExponentChangedSignal(val);
 }
 
-void ExprDeepWater::directionalReflectionDampingChanged() {
+void ExprDeepWater::directionalReflectionDampingChanged()
+{
     double val = QString(_directionalReflectionDampingEdit->text()).toDouble();
     emit directionalReflectionDampingChangedSignal(val);
 }
 
-void ExprDeepWater::sharpenChanged() {
+void ExprDeepWater::sharpenChanged()
+{
     double val = QString(_sharpenEdit->text()).toDouble();
     emit sharpenChangedSignal(val);
 }
 
-void ExprDeepWater::setParams(const SeDeepWaterParams& params) {
+void ExprDeepWater::setParams(const SeDeepWaterParams& params)
+{
     _scene->setParams(params);
     _resolutionEdit->setText(QString::number(params.resolution));
     _tileSizeEdit->setText(QString::number(params.tileSize));

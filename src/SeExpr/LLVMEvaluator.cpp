@@ -19,7 +19,8 @@
 
 namespace SeExpr2 {
 #ifdef SEEXPR_ENABLE_LLVM
-bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType) {
+bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType)
+{
     if (_debugging) {
         parseTree->dump();
         std::cerr << "Eval strategy is llvm" << std::endl;
@@ -73,7 +74,8 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType) {
         // label the function with names
         const char* names[] = {"outputPointer", "dataBlock", "indirectIndex"};
         int idx = 0;
-        for (auto& arg : F->args()) arg.setName(names[idx++]);
+        for (auto& arg : F->args())
+            arg.setName(names[idx++]);
     }
 
     unsigned int dimDesired = (unsigned)desiredReturnType.dim();

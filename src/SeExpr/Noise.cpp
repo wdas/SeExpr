@@ -25,18 +25,26 @@ namespace {
 #include "Noise.h"
 namespace SeExpr2 {
 
-inline double floorSSE(double val) { return _mm_cvtsd_f64(_mm_floor_sd(_mm_set_sd(0.0), _mm_set_sd(val))); }
+inline double floorSSE(double val)
+{
+    return _mm_cvtsd_f64(_mm_floor_sd(_mm_set_sd(0.0), _mm_set_sd(val)));
+}
 
-inline double roundSSE(double val) {
+inline double roundSSE(double val)
+{
     return _mm_cvtsd_f64(_mm_round_sd(_mm_set_sd(0.0), _mm_set_sd(val), _MM_FROUND_TO_NEAREST_INT));
 }
 
 //! This is the Quintic interpolant from Perlin's Improved Noise Paper
-double s_curve(double t) { return t * t * t * (t * (6 * t - 15) + 10); }
+double s_curve(double t)
+{
+    return t * t * t * (t * (6 * t - 15) + 10);
+}
 
 //! Does a hash reduce to a character
 template <int d>
-unsigned char hashReduceChar(int index[d]) {
+unsigned char hashReduceChar(int index[d])
+{
     uint32_t seed = 0;
     // blend with seed (constants from Numerical Recipes, attrib. from Knuth)
     for (int k = 0; k < d; k++) {
@@ -54,7 +62,8 @@ unsigned char hashReduceChar(int index[d]) {
 
 //! Does a hash reduce to an integer
 template <int d>
-uint32_t hashReduce(uint32_t index[d]) {
+uint32_t hashReduce(uint32_t index[d])
+{
     union {
         uint32_t i;
         unsigned char c[4];
@@ -80,23 +89,27 @@ uint32_t hashReduce(uint32_t index[d]) {
 }
 
 template <class T>
-const T& min(const T& a, const T& b) {
+const T& min(const T& a, const T& b)
+{
     return (b < a) ? b : a;
 }
 
 template <class T>
-const T& max(const T& a, const T& b) {
+const T& max(const T& a, const T& b)
+{
     return (b > a) ? b : a;
 }
 
 template <class T>
-constexpr const T& clamp(const T& v, const T& lo, const T& hi) {
+constexpr const T& clamp(const T& v, const T& lo, const T& hi)
+{
     return max(lo, min(v, hi));
 }
 
 //! Noise with d_in dimensional domain, 1 dimensional abcissa
 template <int d, class T, bool periodic>
-T noiseHelper(const T* X, const int* period = 0) {
+T noiseHelper(const T* X, const int* period = 0)
+{
     int period_[d];
     if (periodic) {
         for (int k = 0; k < d; k++) {
@@ -112,7 +125,8 @@ T noiseHelper(const T* X, const int* period = 0) {
         index[k] = (int)f;
         if (periodic) {
             index[k] %= period_[k];
-            if (index[k] < 0) index[k] += period_[k];
+            if (index[k] < 0)
+                index[k] += period_[k];
         }
         weights[0][k] = X[k] - f;
         weights[1][k] = weights[0][k] - 1;  // dist to cell with index one above
@@ -142,7 +156,8 @@ T noiseHelper(const T* X, const int* period = 0) {
     }
     // compute linear interpolation coefficients
     T alphas[d];
-    for (int k = 0; k < d; k++) alphas[k] = s_curve(weights[0][k]);
+    for (int k = 0; k < d; k++)
+        alphas[k] = s_curve(weights[0][k]);
     // perform multilinear interpolation (i.e. linear, bilinear, trilinear, quadralinear)
     for (int newd = d - 1; newd >= 0; newd--) {
         int newnum = 1 << newd;
@@ -165,63 +180,81 @@ namespace SeExpr2 {
 
 //! Computes cellular noise (non-interpolated piecewise constant cell random values)
 template <int d_in, int d_out, class T>
-void CellNoise(const T* in, T* out) {
+void CellNoise(const T* in, T* out)
+{
     uint32_t index[d_in];
     int dim = 0;
-    for (int k = 0; k < d_in; k++) index[k] = uint32_t(floorSSE(in[k]));
+    for (int k = 0; k < d_in; k++)
+        index[k] = uint32_t(floorSSE(in[k]));
     while (1) {
         out[dim] = hashReduce<d_in>(index) * (1.0 / 0xffffffffu);
-        if (++dim >= d_out) break;
-        for (int k = 0; k < d_in; k++) index[k] += 1000;
+        if (++dim >= d_out)
+            break;
+        for (int k = 0; k < d_in; k++)
+            index[k] += 1000;
     }
 }
 
 //! Noise with d_in dimensional domain, d_out dimensional abcissa
 template <int d_in, int d_out, class T>
-void Noise(const T* in, T* out) {
+void Noise(const T* in, T* out)
+{
     T P[d_in];
-    for (int i = 0; i < d_in; i++) P[i] = in[i];
+    for (int i = 0; i < d_in; i++)
+        P[i] = in[i];
 
     int i = 0;
     while (1) {
         out[i] = noiseHelper<d_in, T, false>(P);
-        if (++i >= d_out) break;
-        for (int k = 0; k < d_out; k++) P[k] += (T)1000;
+        if (++i >= d_out)
+            break;
+        for (int k = 0; k < d_out; k++)
+            P[k] += (T)1000;
     }
 }
 
 //! Periodic Noise with d_in dimensional domain, d_out dimensional abcissa
 template <int d_in, int d_out, class T>
-void PNoise(const T* in, const int* period, T* out) {
+void PNoise(const T* in, const int* period, T* out)
+{
     T P[d_in];
-    for (int i = 0; i < d_in; i++) P[i] = in[i];
+    for (int i = 0; i < d_in; i++)
+        P[i] = in[i];
 
     int i = 0;
     while (1) {
         out[i] = noiseHelper<d_in, T, true>(P, period) + 0.5;
-        if (++i >= d_out) break;
-        for (int k = 0; k < d_out; k++) P[k] += (T)1000;
+        if (++i >= d_out)
+            break;
+        for (int k = 0; k < d_out; k++)
+            P[k] += (T)1000;
     }
 }
 
 //! Noise with d_in dimensional domain, d_out dimensional abcissa
 //! If turbulence is true then Perlin's turbulence is computed
 template <int d_in, int d_out, bool turbulence, class T>
-void FBM(const T* in, T* out, int octaves, T lacunarity, T gain) {
+void FBM(const T* in, T* out, int octaves, T lacunarity, T gain)
+{
     T P[d_in];
-    for (int i = 0; i < d_in; i++) P[i] = in[i];
+    for (int i = 0; i < d_in; i++)
+        P[i] = in[i];
 
     T scale = 1;
-    for (int k = 0; k < d_out; k++) out[k] = 0;
+    for (int k = 0; k < d_out; k++)
+        out[k] = 0;
     int octave = 0;
     while (1) {
         T localResult[d_out];
         Noise<d_in, d_out>(P, localResult);
         if (turbulence)
-            for (int k = 0; k < d_out; k++) out[k] += fabs(localResult[k]) * scale;
+            for (int k = 0; k < d_out; k++)
+                out[k] += fabs(localResult[k]) * scale;
         else
-            for (int k = 0; k < d_out; k++) out[k] += localResult[k] * scale;
-        if (++octave >= octaves) break;
+            for (int k = 0; k < d_out; k++)
+                out[k] += localResult[k] * scale;
+        if (++octave >= octaves)
+            break;
         scale *= gain;
         for (int k = 0; k < d_in; k++) {
             P[k] *= lacunarity;
@@ -249,7 +282,8 @@ template void FBM<4, 3, false, double>(const double*, double*, int, double, doub
 }
 
 #ifdef MAINTEST
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     typedef double T;
     T sum = 0;
     for (int i = 0; i < 10000000; i++) {

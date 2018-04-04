@@ -31,40 +31,64 @@ class BasicExpression : public SeExpr2::Expression {
   public:
     struct ScalarRef : public SeExpr2::ExprVarRef {
         double value;
-        ScalarRef() : SeExpr2::ExprVarRef(SeExpr2::ExprType().FP(1).Varying()), value(0.0) {}
-        void eval(double* result) { result[0] = value; }
-        void eval(const char** result) { assert(false); }
+        ScalarRef() : SeExpr2::ExprVarRef(SeExpr2::ExprType().FP(1).Varying()), value(0.0)
+        {
+        }
+        void eval(double* result)
+        {
+            result[0] = value;
+        }
+        void eval(const char** result)
+        {
+            assert(false);
+        }
     };
 
     struct VectorRef : public SeExpr2::ExprVarRef {
         SeExpr2::Vec3d value;
-        VectorRef() : SeExpr2::ExprVarRef(SeExpr2::ExprType().FP(3).Varying()), value(0.0) {}
-        void eval(double* result) {
-            for (int k = 0; k < 3; k++) result[k] = value[k];
+        VectorRef() : SeExpr2::ExprVarRef(SeExpr2::ExprType().FP(3).Varying()), value(0.0)
+        {
+        }
+        void eval(double* result)
+        {
+            for (int k = 0; k < 3; k++)
+                result[k] = value[k];
         };
-        void eval(const char** result) { assert(false); };
+        void eval(const char** result)
+        {
+            assert(false);
+        };
     };
 
     struct DummyFuncX : SeExpr2::ExprFuncSimple {
-        DummyFuncX() : SeExpr2::ExprFuncSimple(true) {}
-        virtual ~DummyFuncX() {}
+        DummyFuncX() : SeExpr2::ExprFuncSimple(true)
+        {
+        }
+        virtual ~DummyFuncX()
+        {
+        }
 
         virtual SeExpr2::ExprType prep(SeExpr2::ExprFuncNode* node,
                                        bool scalarWanted,
-                                       SeExpr2::ExprVarEnvBuilder& envBuilder) const {
+                                       SeExpr2::ExprVarEnvBuilder& envBuilder) const
+        {
             bool valid = true;
             int nargs = node->numChildren();
-            for (int i = 0; i < nargs; i++) valid &= node->checkArg(i, SeExpr2::ExprType().FP(3).Varying(), envBuilder);
+            for (int i = 0; i < nargs; i++)
+                valid &= node->checkArg(i, SeExpr2::ExprType().FP(3).Varying(), envBuilder);
             return valid ? SeExpr2::ExprType().FP(3).Varying() : SeExpr2::ExprType().Error();
         }
 
-        virtual SeExpr2::ExprFuncNode::Data* evalConstant(const SeExpr2::ExprFuncNode* node, ArgHandle args) const {
+        virtual SeExpr2::ExprFuncNode::Data* evalConstant(const SeExpr2::ExprFuncNode* node, ArgHandle args) const
+        {
             return new SeExpr2::ExprFuncNode::Data();
         }
 
-        virtual void eval(ArgHandle args) {
+        virtual void eval(ArgHandle args)
+        {
             double* out = &args.outFp;
-            for (int i = 0; i < 3; i++) out[i] = 0.0;
+            for (int i = 0; i < 3; i++)
+                out[i] = 0.0;
         }
     } dummyFuncX;
     mutable SeExpr2::ExprFunc dummyFunc;

@@ -34,8 +34,10 @@ class TypePrinterExpr : public TypeBuilderExpr {
 
     TypePrinterExpr(const std::string& e) : TypeBuilderExpr(e), _examiner(), _walker(&_examiner){};
 
-    inline void walk() {
-        if (_parseTree) _walker.walk(_parseTree);
+    inline void walk()
+    {
+        if (_parseTree)
+            _walker.walk(_parseTree);
     };
 
   private:
@@ -43,18 +45,27 @@ class TypePrinterExpr : public TypeBuilderExpr {
     SeExpr2::ConstWalker _walker;
 
   protected:
-    ExprVarRef* resolveVar(const std::string& name) const { return TypeBuilderExpr::resolveVar(name); };
+    ExprVarRef* resolveVar(const std::string& name) const
+    {
+        return TypeBuilderExpr::resolveVar(name);
+    };
 
-    ExprFunc* resolveFunc(const std::string& name) const { return TypeBuilderExpr::resolveFunc(name); }
+    ExprFunc* resolveFunc(const std::string& name) const
+    {
+        return TypeBuilderExpr::resolveFunc(name);
+    }
 };
 
-void get_or_quit(std::string& str) {
+void get_or_quit(std::string& str)
+{
     getline(std::cin, str);
 
-    if (std::cin.eof()) exit(0);
+    if (std::cin.eof())
+        exit(0);
 };
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     TypePrinterExpr expr;
     std::string str;
     bool givenTest = false;

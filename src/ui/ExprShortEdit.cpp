@@ -55,7 +55,8 @@ static const char* stop_xpm[] = {"16 16 4 1",        "       c None",    ".     
                                  "                "};
 
 ExprShortEdit::ExprShortEdit(QWidget* parent, bool expanded, bool applyOnSelect)
-    : QWidget(parent), _dialog(0), _context(""), _searchPath(""), _applyOnSelect(applyOnSelect) {
+    : QWidget(parent), _dialog(0), _context(""), _searchPath(""), _applyOnSelect(applyOnSelect)
+{
     controlRebuildTimer = new QTimer(this);
     _expanded = false;
 
@@ -97,19 +98,27 @@ ExprShortEdit::ExprShortEdit(QWidget* parent, bool expanded, bool applyOnSelect)
     connect(controlRebuildTimer, SIGNAL(timeout()), SLOT(rebuildControls()));
     checkErrors();
     rebuildControls();
-    if (expanded) expandPressed();
+    if (expanded)
+        expandPressed();
 }
 
-ExprShortEdit::~ExprShortEdit() {}
+ExprShortEdit::~ExprShortEdit()
+{
+}
 
-void ExprShortEdit::setSearchPath(const QString& context, const QString& path) {
+void ExprShortEdit::setSearchPath(const QString& context, const QString& path)
+{
     _context = context.toStdString();
     _searchPath = path.toStdString();
 }
 
-void ExprShortEdit::detailPressed() { showDetails(-1); }
+void ExprShortEdit::detailPressed()
+{
+    showDetails(-1);
+}
 
-void ExprShortEdit::showDetails(int idx) {
+void ExprShortEdit::showDetails(int idx)
+{
     _dialog = new ExprDialog(this);
     _dialog->editor->replaceExtras(*edit->completionModel);
 
@@ -128,11 +137,18 @@ void ExprShortEdit::showDetails(int idx) {
     _dialog->setEnabled(true);
 }
 
-void ExprShortEdit::expressionApplied() { setExpressionString(_dialog->getExpressionString()); }
+void ExprShortEdit::expressionApplied()
+{
+    setExpressionString(_dialog->getExpressionString());
+}
 
-void ExprShortEdit::dialogClosed() { setEnabled(true); }
+void ExprShortEdit::dialogClosed()
+{
+    setEnabled(true);
+}
 
-void ExprShortEdit::rebuildControls() {
+void ExprShortEdit::rebuildControls()
+{
     if (!controls) {
         controls = new ExprControlCollection(0, false);
         connect(controls, SIGNAL(controlChanged(int)), SLOT(controlChanged(int)));
@@ -156,11 +172,14 @@ void ExprShortEdit::rebuildControls() {
             expandButton->setArrowType(Qt::RightArrow);
         }
     }
-    if (newVariables) edit->completer->setModel(edit->completionModel);
-    if (wasShown) edit->completer->popup()->show();
+    if (newVariables)
+        edit->completer->setModel(edit->completionModel);
+    if (wasShown)
+        edit->completer->popup()->show();
 }
 
-void ExprShortEdit::expandPressed() {
+void ExprShortEdit::expandPressed()
+{
     if (_expanded) {
         _expanded = false;
         expandButton->setArrowType(Qt::RightArrow);
@@ -179,16 +198,20 @@ void ExprShortEdit::expandPressed() {
     }
 }
 
-void ExprShortEdit::handleTextEdited() {}
+void ExprShortEdit::handleTextEdited()
+{
+}
 
-void ExprShortEdit::textFinished() {
+void ExprShortEdit::textFinished()
+{
     controlRebuildTimer->setSingleShot(true);
     controlRebuildTimer->start(0);
     checkErrors();
     emit exprChanged();
 }
 
-void ExprShortEdit::setExpressionString(const std::string& expression) {
+void ExprShortEdit::setExpressionString(const std::string& expression)
+{
     edit->setText(QString(expression.c_str()));
     controlRebuildTimer->setSingleShot(true);
     controlRebuildTimer->start(0);
@@ -196,11 +219,18 @@ void ExprShortEdit::setExpressionString(const std::string& expression) {
     emit exprChanged();
 }
 
-QString ExprShortEdit::getExpression() const { return edit->toPlainText(); }
+QString ExprShortEdit::getExpression() const
+{
+    return edit->toPlainText();
+}
 
-std::string ExprShortEdit::getExpressionString() const { return getExpression().toStdString(); }
+std::string ExprShortEdit::getExpressionString() const
+{
+    return getExpression().toStdString();
+}
 
-void ExprShortEdit::controlChanged(int id) {
+void ExprShortEdit::controlChanged(int id)
+{
     if (controls) {
         QString newText = getExpression();
         controls->updateText(id, newText);
@@ -210,54 +240,75 @@ void ExprShortEdit::controlChanged(int id) {
     }
 }
 
-void ExprShortEdit::clearExtraCompleters() {
+void ExprShortEdit::clearExtraCompleters()
+{
     edit->completionModel->clearFunctions();
     edit->completionModel->clearVariables();
 }
 
-void ExprShortEdit::registerExtraFunction(const std::string& name, const std::string& docString) {
+void ExprShortEdit::registerExtraFunction(const std::string& name, const std::string& docString)
+{
     edit->completionModel->addFunction(name.c_str(), docString.c_str());
 }
 
-void ExprShortEdit::registerExtraVariable(const std::string& name, const std::string& docString) {
+void ExprShortEdit::registerExtraVariable(const std::string& name, const std::string& docString)
+{
     edit->completionModel->addVariable(name.c_str(), docString.c_str());
 }
 
-void ExprShortEdit::updateCompleter() { edit->completer->setModel(edit->completionModel); }
+void ExprShortEdit::updateCompleter()
+{
+    edit->completer->setModel(edit->completionModel);
+}
 
-void ExprShortEdit::checkErrors() {
+void ExprShortEdit::checkErrors()
+{
     BasicExpression expr(getExpressionString());
     bool valid = expr.isValid();
     std::string err;
-    if (!valid) err = expr.parseError();
+    if (!valid)
+        err = expr.parseError();
 
     hideErrors(valid, err);
 }
 
-void ExprShortEdit::hideErrors(bool hidden, const std::string& err) {
+void ExprShortEdit::hideErrors(bool hidden, const std::string& err)
+{
     error->setHidden(hidden);
     if (!hidden) {
         error->setToolTip(QString::fromStdString(err));
     }
 }
 
-void ExprShortEdit::setSimple(bool enabled) {
+void ExprShortEdit::setSimple(bool enabled)
+{
     edit->setHidden(enabled);
     editDetail->setHidden(enabled);
     expandButton->setHidden(enabled);
 }
 
-void ExprShortEdit::setDetailsMenu(QMenu* menu) { editDetail->setMenu(menu); }
+void ExprShortEdit::setDetailsMenu(QMenu* menu)
+{
+    editDetail->setMenu(menu);
+}
 
-void ExprShortEdit::setVerticalScrollBarPolicy(Qt::ScrollBarPolicy policy) { edit->setVerticalScrollBarPolicy(policy); }
+void ExprShortEdit::setVerticalScrollBarPolicy(Qt::ScrollBarPolicy policy)
+{
+    edit->setVerticalScrollBarPolicy(policy);
+}
 
-void ExprShortEdit::setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy policy) {
+void ExprShortEdit::setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy policy)
+{
     edit->setHorizontalScrollBarPolicy(policy);
 }
 
-void ExprShortEdit::setLineWrapMode(QTextEdit::LineWrapMode mode) { edit->setLineWrapMode(mode); }
+void ExprShortEdit::setLineWrapMode(QTextEdit::LineWrapMode mode)
+{
+    edit->setLineWrapMode(mode);
+}
 
-ExprShortTextEdit::ExprShortTextEdit(QWidget* parent) : QTextEdit(parent), editing(false), _tip(0) {
+ExprShortTextEdit::ExprShortTextEdit(QWidget* parent) : QTextEdit(parent), editing(false), _tip(0)
+{
     lastStyleForHighlighter = 0;
     setMaximumHeight(25);
     highlighter = new ExprHighlighter(document());
@@ -282,13 +333,16 @@ ExprShortTextEdit::ExprShortTextEdit(QWidget* parent) : QTextEdit(parent), editi
     QObject::connect(completer, SIGNAL(activated(const QString&)), this, SLOT(insertCompletion(const QString&)));
 }
 
-void ExprShortTextEdit::focusInEvent(QFocusEvent* e) {
+void ExprShortTextEdit::focusInEvent(QFocusEvent* e)
+{
     // setTextCursor(QTextCursor(document()));
-    if (completer) completer->setWidget(this);
+    if (completer)
+        completer->setWidget(this);
     QTextEdit::focusInEvent(e);
 }
 
-void ExprShortTextEdit::focusOutEvent(QFocusEvent* e) {
+void ExprShortTextEdit::focusOutEvent(QFocusEvent* e)
+{
     // setTextCursor(QTextCursor());
     finishEdit();
     QTextCursor newCursor = textCursor();
@@ -299,17 +353,20 @@ void ExprShortTextEdit::focusOutEvent(QFocusEvent* e) {
     QTextEdit::focusOutEvent(e);
 }
 
-void ExprShortTextEdit::mousePressEvent(QMouseEvent* event) {
+void ExprShortTextEdit::mousePressEvent(QMouseEvent* event)
+{
     hideTip();
     QTextEdit::mousePressEvent(event);
 }
 
-void ExprShortTextEdit::mouseDoubleClickEvent(QMouseEvent* event) {
+void ExprShortTextEdit::mouseDoubleClickEvent(QMouseEvent* event)
+{
     hideTip();
     QTextEdit::mouseDoubleClickEvent(event);
 }
 
-void ExprShortTextEdit::paintEvent(QPaintEvent* e) {
+void ExprShortTextEdit::paintEvent(QPaintEvent* e)
+{
     if (lastStyleForHighlighter != style()) {
         lastStyleForHighlighter = style();
         highlighter->fixStyle(palette());
@@ -318,16 +375,20 @@ void ExprShortTextEdit::paintEvent(QPaintEvent* e) {
     QTextEdit::paintEvent(e);
 }
 
-void ExprShortTextEdit::keyPressEvent(QKeyEvent* e) {
+void ExprShortTextEdit::keyPressEvent(QKeyEvent* e)
+{
     // If the completer is active pass keys it needs down
     if (completer && completer->popup()->isVisible()) {
         switch (e->key()) {
-            case Qt::Key_Enter:
-            case Qt::Key_Return:
-            case Qt::Key_Escape:
-            case Qt::Key_Tab:
-            case Qt::Key_Backtab: e->ignore(); return;
-            default: break;
+        case Qt::Key_Enter:
+        case Qt::Key_Return:
+        case Qt::Key_Escape:
+        case Qt::Key_Tab:
+        case Qt::Key_Backtab:
+            e->ignore();
+            return;
+        default:
+            break;
         }
     }
 
@@ -356,7 +417,8 @@ void ExprShortTextEdit::keyPressEvent(QKeyEvent* e) {
         QTextEdit::keyPressEvent(e);
 
     const bool ctrlOrShift = e->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier);
-    if (!completer || (ctrlOrShift && e->text().isEmpty())) return;
+    if (!completer || (ctrlOrShift && e->text().isEmpty()))
+        return;
 
     bool hasModifier = (e->modifiers() != Qt::NoModifier) && !ctrlOrShift;
 
@@ -409,9 +471,11 @@ void ExprShortTextEdit::keyPressEvent(QKeyEvent* e) {
     }
 }
 
-void ExprShortTextEdit::showTip(const QString& string) {
+void ExprShortTextEdit::showTip(const QString& string)
+{
     // skip empty strings
-    if (string == "") return;
+    if (string == "")
+        return;
     // skip already shwon stuff
     // if(_tip && !_tip->isHidden() && _tip->label->text() == string) return;
 
@@ -425,28 +489,35 @@ void ExprShortTextEdit::showTip(const QString& string) {
     _tip = new ExprPopupDoc(this, mapToGlobal(cr.bottomLeft() + QPoint(0, 6)), string);
 }
 
-void ExprShortTextEdit::hideTip() {
-    if (_tip) _tip->hide();
+void ExprShortTextEdit::hideTip()
+{
+    if (_tip)
+        _tip->hide();
 }
 
-void ExprShortTextEdit::insertCompletion(const QString& completion) {
-    if (completer->widget() != this) return;
+void ExprShortTextEdit::insertCompletion(const QString& completion)
+{
+    if (completer->widget() != this)
+        return;
     QTextCursor tc = textCursor();
     int extra = completion.length() - completer->completionPrefix().length();
     tc.movePosition(QTextCursor::Left);
     tc.movePosition(QTextCursor::EndOfWord);
     tc.insertText(completion.right(extra));
-    if (completion[0] != '$') tc.insertText("(");
+    if (completion[0] != '$')
+        tc.insertText("(");
     setTextCursor(tc);
 }
 
-void ExprShortTextEdit::finishEdit() {
+void ExprShortTextEdit::finishEdit()
+{
     editing = false;
     setColor(false);
     emit editingFinished();
 }
 
-void ExprShortTextEdit::setColor(bool editing) {
+void ExprShortTextEdit::setColor(bool editing)
+{
     Q_UNUSED(editing);
     // todo: decorate when editing
 }

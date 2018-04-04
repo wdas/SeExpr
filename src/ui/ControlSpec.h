@@ -54,7 +54,10 @@ class ExprScalarAssignSpec : public ControlSpec {
   public:
     ExprScalarAssignSpec(const ExprAssignNode& node);
     virtual std::string toString() const;
-    inline double value() const { return _val; };
+    inline double value() const
+    {
+        return _val;
+    };
     static const ExprScalarAssignSpec* match(const ExprNode* node);
 
   private:
@@ -69,7 +72,10 @@ class ExprVectorAssignSpec : public ControlSpec {
   public:
     ExprVectorAssignSpec(const ExprAssignNode& node);
     virtual std::string toString() const;
-    inline const Vec3d& value() const { return _val; };
+    inline const Vec3d& value() const
+    {
+        return _val;
+    };
     static const ExprVectorAssignSpec* match(const ExprNode* node);
 
   private:
@@ -99,7 +105,8 @@ class ExprStrSpec : public ControlSpec {
 
   public:
     //! Takes name and type comments and takes ownership of them!
-    ExprStrSpec(const ExprStrNode& node, char* name, Type type) : ControlSpec(node), _str(node.str()), _type(type) {
+    ExprStrSpec(const ExprStrNode& node, char* name, Type type) : ControlSpec(node), _str(node.str()), _type(type)
+    {
         _name = name;
     }
 
@@ -117,9 +124,18 @@ class SpecExaminer : public Examiner<true> {
     ~SpecExaminer();
 
     virtual bool examine(const ExprNode* examinee);
-    virtual void reset() { _specList.clear(); };
-    inline int length() const { return _specList.size(); };
-    inline const ControlSpec* spec(int i) const { return _specList[i]; };
+    virtual void reset()
+    {
+        _specList.clear();
+    };
+    inline int length() const
+    {
+        return _specList.size();
+    };
+    inline const ControlSpec* spec(int i) const
+    {
+        return _specList[i];
+    };
     inline std::vector<const ControlSpec*>::const_iterator begin() const;
     inline std::vector<const ControlSpec*>::const_iterator const end() const;
 

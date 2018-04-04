@@ -23,7 +23,8 @@
 #include "ExprColorSwatch.h"
 
 // Simple color frame for swatch
-ExprColorFrame::ExprColorFrame(SeExpr2::Vec3d value, QWidget* parent) : QFrame(parent), _value(value) {
+ExprColorFrame::ExprColorFrame(SeExpr2::Vec3d value, QWidget* parent) : QFrame(parent), _value(value)
+{
     setValue(_value);
     setFrameStyle(QFrame::Box | QFrame::Plain);
     QPalette pal = palette();
@@ -32,21 +33,27 @@ ExprColorFrame::ExprColorFrame(SeExpr2::Vec3d value, QWidget* parent) : QFrame(p
     setAutoFillBackground(true);
 }
 
-void ExprColorFrame::setValue(const SeExpr2::Vec3d& value) {
+void ExprColorFrame::setValue(const SeExpr2::Vec3d& value)
+{
     _color = QColor(int(255 * value[0] + 0.5), int(255 * value[1] + 0.5), int(255 * value[2] + 0.5));
     _value = value;
     update();
 }
 
-SeExpr2::Vec3d ExprColorFrame::getValue() const { return _value; }
+SeExpr2::Vec3d ExprColorFrame::getValue() const
+{
+    return _value;
+}
 
-void ExprColorFrame::paintEvent(QPaintEvent* event) {
+void ExprColorFrame::paintEvent(QPaintEvent* event)
+{
     Q_UNUSED(event);
     QPainter p(this);
     p.fillRect(contentsRect(), _color);
 }
 
-void ExprColorFrame::mouseReleaseEvent(QMouseEvent* event) {
+void ExprColorFrame::mouseReleaseEvent(QMouseEvent* event)
+{
     if (event->button() == Qt::RightButton)
         deleteSwatchMenu(event->pos());
     else {
@@ -68,16 +75,19 @@ void ExprColorFrame::mouseReleaseEvent(QMouseEvent* event) {
     }
 }
 
-void ExprColorFrame::deleteSwatchMenu(const QPoint& pos) {
+void ExprColorFrame::deleteSwatchMenu(const QPoint& pos)
+{
     QMenu* menu = new QMenu(this);
     QAction* deleteAction = menu->addAction("Delete Swatch");
     menu->addAction("Cancel");
     QAction* action = menu->exec(mapToGlobal(pos));
-    if (action == deleteAction) emit deleteSwatch(this);
+    if (action == deleteAction)
+        emit deleteSwatch(this);
 }
 
 // Simple color widget with or without index label
-ExprColorWidget::ExprColorWidget(SeExpr2::Vec3d value, int index, bool indexLabel, QWidget* parent) : QWidget(parent) {
+ExprColorWidget::ExprColorWidget(SeExpr2::Vec3d value, int index, bool indexLabel, QWidget* parent) : QWidget(parent)
+{
     _colorFrame = new ExprColorFrame(value);
     _colorFrame->setFixedWidth(32);
     _colorFrame->setFixedHeight(16);
@@ -98,11 +108,15 @@ ExprColorWidget::ExprColorWidget(SeExpr2::Vec3d value, int index, bool indexLabe
     // emit swatchAdded(index, val);
 }
 
-ExprColorFrame* ExprColorWidget::getColorFrame() { return _colorFrame; }
+ExprColorFrame* ExprColorWidget::getColorFrame()
+{
+    return _colorFrame;
+}
 
 // Grid layout of color swatches
 ExprColorSwatchWidget::ExprColorSwatchWidget(bool indexLabel, QWidget* parent)
-    : QWidget(parent), _columns(8), _indexLabel(indexLabel) {
+    : QWidget(parent), _columns(8), _indexLabel(indexLabel)
+{
     QHBoxLayout* hboxLayout = new QHBoxLayout();
     hboxLayout->setContentsMargins(0, 0, 0, 0);
     setLayout(hboxLayout);
@@ -138,13 +152,16 @@ ExprColorSwatchWidget::ExprColorSwatchWidget(bool indexLabel, QWidget* parent)
     connect(addBtn, SIGNAL(clicked()), this, SLOT(addNewColor()));
 }
 
-void ExprColorSwatchWidget::addNewColor() {
+void ExprColorSwatchWidget::addNewColor()
+{
     SeExpr2::Vec3d val(.5);
     addSwatch(val, -1);
 }
 
-void ExprColorSwatchWidget::addSwatch(SeExpr2::Vec3d& val, int index) {
-    if (index == -1 || index > _gridLayout->count()) index = _gridLayout->count();
+void ExprColorSwatchWidget::addSwatch(SeExpr2::Vec3d& val, int index)
+{
+    if (index == -1 || index > _gridLayout->count())
+        index = _gridLayout->count();
     ExprColorWidget* widget = new ExprColorWidget(val, index, _indexLabel, this);
     ExprColorFrame* swatchFrame = widget->getColorFrame();
     _gridLayout->addWidget(widget, index / _columns, index % _columns);
@@ -153,7 +170,8 @@ void ExprColorSwatchWidget::addSwatch(SeExpr2::Vec3d& val, int index) {
     emit swatchAdded(index, val);
 }
 
-void ExprColorSwatchWidget::internalSwatchChanged(QColor newcolor) {
+void ExprColorSwatchWidget::internalSwatchChanged(QColor newcolor)
+{
     Q_UNUSED(newcolor);
     ExprColorFrame* swatchFrame = (ExprColorFrame*)sender();
     SeExpr2::Vec3d value = swatchFrame->getValue();
@@ -161,7 +179,8 @@ void ExprColorSwatchWidget::internalSwatchChanged(QColor newcolor) {
     emit swatchChanged(index, value);
 }
 
-void ExprColorSwatchWidget::removeSwatch(ExprColorFrame* widget) {
+void ExprColorSwatchWidget::removeSwatch(ExprColorFrame* widget)
+{
     QWidget* parentWidget = widget->parentWidget();
     // Find given widget to remove from grid layout
     for (int i = 0; i < _gridLayout->count(); i++) {
@@ -174,7 +193,8 @@ void ExprColorSwatchWidget::removeSwatch(ExprColorFrame* widget) {
     }
 }
 
-void ExprColorSwatchWidget::setSwatchColor(int index, QColor color) {
+void ExprColorSwatchWidget::setSwatchColor(int index, QColor color)
+{
     if (index >= 0 && index < _gridLayout->count()) {
         SeExpr2::Vec3d newColor(color.redF(), color.greenF(), color.blueF());
         QLayoutItem* layoutItem = _gridLayout->itemAt(index);
@@ -186,7 +206,8 @@ void ExprColorSwatchWidget::setSwatchColor(int index, QColor color) {
     }
 }
 
-QColor ExprColorSwatchWidget::getSwatchColor(int index) {
+QColor ExprColorSwatchWidget::getSwatchColor(int index)
+{
     if (index >= 0 && index < _gridLayout->count()) {
         QLayoutItem* layoutItem = _gridLayout->itemAt(index);
         if (layoutItem && layoutItem->widget()) {

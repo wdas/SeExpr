@@ -4,7 +4,8 @@
 
 using namespace SeExpr2;
 
-void printVec(const std::string& name, const std::vector<double>& v) {
+void printVec(const std::string& name, const std::vector<double>& v)
+{
     std::cerr << name << " data is at " << v.data() << " -- ";
     for (auto it : v) {
         std::cerr << " " << it;
@@ -12,7 +13,8 @@ void printVec(const std::string& name, const std::vector<double>& v) {
     std::cerr << std::endl;
 }
 
-bool compareVecs(const char* label, const std::vector<double>& a, const std::vector<double>& b) {
+bool compareVecs(const char* label, const std::vector<double>& a, const std::vector<double>& b)
+{
     bool isGood = true;
     for (size_t i = 0; i < a.size(); i++)
         if (a[i] != b[i]) {
@@ -21,7 +23,8 @@ bool compareVecs(const char* label, const std::vector<double>& a, const std::vec
         }
     return isGood;
 }
-int main() {
+int main()
+{
     VarBlockCreator creator;
     int offI = creator.registerVariable("i", ExprType().FP(3).Varying());
     int offA = creator.registerVariable("A", ExprType().FP(3).Varying());
@@ -32,8 +35,10 @@ int main() {
     std::vector<double> I(16 * 3);
     std::vector<double> I2(16 * 3);
     // for(int i=0;i<16*3;i+=3) I[i]=I[i+1]=I[i+2]=i+5;
-    for (int i = 0; i < 16 * 3; i++) I[i] = i;
-    for (int i = 0; i < 16 * 3; i++) I2[i] = i / 3;
+    for (int i = 0; i < 16 * 3; i++)
+        I[i] = i;
+    for (int i = 0; i < 16 * 3; i++)
+        I2[i] = i / 3;
     std::vector<double> A(16 * 3);
     std::vector<double> B(16);
     std::vector<double> C(16 * 3);
@@ -60,7 +65,8 @@ int main() {
                 eval.indirectIndex = index;
                 const double* data = e.evalFP(&eval);
                 int dim = type.dim();
-                for (int k = 0; k < dim; k++) eval.Pointer(output)[dim * index + k] = data[k];
+                for (int k = 0; k < dim; k++)
+                    eval.Pointer(output)[dim * index + k] = data[k];
             }
 #endif
         }

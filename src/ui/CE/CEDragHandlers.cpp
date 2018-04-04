@@ -23,7 +23,8 @@
 #include "CEGraphKey.h"
 #include "CEDragHandlers.h"
 
-static double RoundNicely(double val, double inc) {
+static double RoundNicely(double val, double inc)
+{
     // first make inc nice (i.e. [1, 2, or 5] * some power of 10)
     double nice = pow(10, floor(log10(inc)));
     if (nice < inc) {
@@ -40,7 +41,8 @@ static double RoundNicely(double val, double inc) {
     return floor(val / nice + .5) * nice;
 }
 
-void CEDragHandler::setAnchor(CEGraphUI* ui, int x, int y) {
+void CEDragHandler::setAnchor(CEGraphUI* ui, int x, int y)
+{
     _ui = ui;
     _anchorX = _x = x;
     _anchorY = _y = y;
@@ -48,7 +50,8 @@ void CEDragHandler::setAnchor(CEGraphUI* ui, int x, int y) {
     _dx = _dy = 0;
 }
 
-void CEDragHandler::movePoint(int x, int y) {
+void CEDragHandler::movePoint(int x, int y)
+{
     _x = x;
     _y = y;
     _dx = _x - _anchorX;
@@ -56,7 +59,8 @@ void CEDragHandler::movePoint(int x, int y) {
     _moved = true;
 }
 
-void CEPanHandler::pan(bool useCommand) {
+void CEPanHandler::pan(bool useCommand)
+{
     double x = _view.vx() - _dx * _view.pixelWidth();
     double y = _view.vy() - _dy * _view.pixelHeight();
     double w = _view.vw(), h = _view.vh();
@@ -64,7 +68,8 @@ void CEPanHandler::pan(bool useCommand) {
     _ui->tool()->setView(x, y, w, h);
 }
 
-void CEZoomHandler::zoom(bool useCommand) {
+void CEZoomHandler::zoom(bool useCommand)
+{
     double sx = 1, sy = 1;
     if (_zoomX) {
         double dx = _dx;
@@ -82,7 +87,8 @@ void CEZoomHandler::zoom(bool useCommand) {
     _ui->tool()->setView(x, y, w, h);
 }
 
-void CESelBoxHandler::mouseMove() {
+void CESelBoxHandler::mouseMove()
+{
     _ui->moveSelBox(_anchorX, _anchorY, _x, _y);
 
     // do a select-mode render to get the pending segments
@@ -106,20 +112,23 @@ void CESelBoxHandler::mouseMove() {
         SegIterator i;
         for (i = _segs.begin(); i != _segs.end(); i++) {
             CEGraphSeg* seg = _ui->getSeg(i->curveIndex, i->segIndex);
-            if (seg) seg->setPendingSel(0);
+            if (seg)
+                seg->setPendingSel(0);
         }
 
         _segs = newsegs;
         for (i = _segs.begin(); i != _segs.end(); i++) {
             CEGraphSeg* seg = _ui->getSeg(i->curveIndex, i->segIndex);
-            if (seg) seg->setPendingSel(1);
+            if (seg)
+                seg->setPendingSel(1);
         }
 
         _ui->update();
     }
 }
 
-void CESelBoxHandler::mouseUp() {
+void CESelBoxHandler::mouseUp()
+{
     _ui->hideSelBox();
     // iCurveEditor& ce = _ui->ce();
     CETool* tool = _ui->tool();
@@ -131,7 +140,8 @@ void CESelBoxHandler::mouseUp() {
             seg->setPendingSel(0);
 
             bool selected = 0;
-            if (_toggle) tool->isSegmentSelected(selected, i->curveIndex, i->segIndex);
+            if (_toggle)
+                tool->isSegmentSelected(selected, i->curveIndex, i->segIndex);
             if (selected)
                 tool->deselectSegment(i->curveIndex, i->segIndex);
             else
@@ -140,19 +150,22 @@ void CESelBoxHandler::mouseUp() {
     }
 }
 
-CEKeyHandler::CEKeyHandler(CEGraphKey* key) {
+CEKeyHandler::CEKeyHandler(CEGraphKey* key)
+{
     _animCurve = &key->curve()->animCurve();
     _curve = key->curve()->index();
     _seg = key->index();
 }
 
 CEKeyMoveHandler::CEKeyMoveHandler(CEGraphKey* key, bool dragTime, bool dragValue, double hSnap, double vSnap)
-    : CEKeyHandler(key), _dragTime(dragTime), _dragValue(dragValue), _hSnap(hSnap), _vSnap(vSnap) {
+    : CEKeyHandler(key), _dragTime(dragTime), _dragValue(dragValue), _hSnap(hSnap), _vSnap(vSnap)
+{
     _anchorTime = key->key().getTime();
     _anchorValue = key->key().getValue();
 }
 
-void CEKeyMoveHandler::setMultiDrag(std::vector<CEGraphKey*> graph_segments) {
+void CEKeyMoveHandler::setMultiDrag(std::vector<CEGraphKey*> graph_segments)
+{
     for (unsigned int i = 0; i < graph_segments.size(); i++) {
         CEGraphKey* segment = graph_segments[i];
         _anchorTimes.push_back(segment->key().getTime());
@@ -162,25 +175,30 @@ void CEKeyMoveHandler::setMultiDrag(std::vector<CEGraphKey*> graph_segments) {
     }
 }
 
-void CEKeyMoveHandler::moveKey(bool useCommand) {
+void CEKeyMoveHandler::moveKey(bool useCommand)
+{
     if (_anchorTimes.size() > 0) {
         // We are doing Multi-Drag!
         for (unsigned int i = 0; i < _anchorTimes.size(); i++) {
             if (_dragTime) {
                 double newtime = _anchorTimes[i] + _dx * _view.pixelWidth();
                 double snap = _view.pixelWidth();
-                if (snap < _hSnap) snap = _hSnap;
+                if (snap < _hSnap)
+                    snap = _hSnap;
                 newtime = RoundNicely(newtime, snap);
                 CEGraphSeg* prevseg = _ui->getSeg(_curves[i], _segs[i] - 1);
                 CEGraphSeg* nextseg = _ui->getSeg(_curves[i], _segs[i] + 1);
-                if (prevseg && !prevseg->firstSeg() && newtime < prevseg->keyTime()) newtime = prevseg->keyTime();
-                if (nextseg && newtime > nextseg->keyTime()) newtime = nextseg->keyTime();
+                if (prevseg && !prevseg->firstSeg() && newtime < prevseg->keyTime())
+                    newtime = prevseg->keyTime();
+                if (nextseg && newtime > nextseg->keyTime())
+                    newtime = nextseg->keyTime();
                 _ui->tool()->setSegmentFrame(newtime, _curves[i], _segs[i]);
             }
             if (_dragValue) {
                 double newval = _anchorValues[i] + _dy * _view.pixelHeight();
                 double snap = _view.pixelHeight();
-                if (snap < _vSnap) snap = _vSnap;
+                if (snap < _vSnap)
+                    snap = _vSnap;
                 newval = RoundNicely(newval, snap);
 
                 _ui->tool()->setSegmentValue(newval, _curves[i], _segs[i]);
@@ -191,38 +209,46 @@ void CEKeyMoveHandler::moveKey(bool useCommand) {
         if (_dragTime) {
             double newtime = _anchorTime + _dx * _view.pixelWidth();
             double snap = _view.pixelWidth();
-            if (snap < _hSnap) snap = _hSnap;
+            if (snap < _hSnap)
+                snap = _hSnap;
             newtime = RoundNicely(newtime, snap);
             CEGraphSeg* prevseg = _ui->getSeg(_curve, _seg - 1);
             CEGraphSeg* nextseg = _ui->getSeg(_curve, _seg + 1);
-            if (prevseg && !prevseg->firstSeg() && newtime < prevseg->keyTime()) newtime = prevseg->keyTime();
-            if (nextseg && newtime > nextseg->keyTime()) newtime = nextseg->keyTime();
+            if (prevseg && !prevseg->firstSeg() && newtime < prevseg->keyTime())
+                newtime = prevseg->keyTime();
+            if (nextseg && newtime > nextseg->keyTime())
+                newtime = nextseg->keyTime();
             _ui->tool()->setSelectedSegmentFrame(newtime);
         }
         if (_dragValue) {
             double newval = _anchorValue + _dy * _view.pixelHeight();
             double snap = _view.pixelHeight();
-            if (snap < _vSnap) snap = _vSnap;
+            if (snap < _vSnap)
+                snap = _vSnap;
             newval = RoundNicely(newval, snap);
             _ui->tool()->setSelectedSegmentValue(newval);
         }
     }
 }
 
-void CENewKeyHandler::mouseDown() {
+void CENewKeyHandler::mouseDown()
+{
     //_dragTime = _dragValue = 1;
     double snap = _view.pixelWidth();
-    if (snap < 0) snap = 0;
+    if (snap < 0)
+        snap = 0;
     double _anchorTime = RoundNicely(_view.vx(_x), snap);
     _ui->tool()->insertKey(_anchorTime);
 }
 
 CEBezHandler::CEBezHandler(CEGraphKey* key, int handle, bool dragAngle, bool dragLength, bool weighted)
-    : CEKeyHandler(key), _handle(handle), _dragAngle(dragAngle), _dragLength(dragLength), _weighted(weighted) {
+    : CEKeyHandler(key), _handle(handle), _dragAngle(dragAngle), _dragLength(dragLength), _weighted(weighted)
+{
     // lookup key parametersweights and angles
     _originalWeightIn = key->key().getInWeight();
     _originalWeightOut = key->key().getOutWeight();
-    if (!_weighted) _originalWeightIn = _originalWeightOut = 3;
+    if (!_weighted)
+        _originalWeightIn = _originalWeightOut = 3;
     _time = key->key().getTime();
     _value = key->key().getValue();
 }
@@ -261,16 +287,19 @@ CEBezHandler::CEBezHandler(CEGraphKey* key, int handle, bool dragAngle, bool dra
  }
 #endif
 
-void CEBezHandler::mouseDown() {
+void CEBezHandler::mouseDown()
+{
     // remember a reference point in view coordinates where the user started interacting
     double scale = _handle == 0 ? -1. : 1.;
     _refX = scale * (_view.vx(_x) - _time);
     _refY = scale * (_view.vy(_y) - _value);
 }
 
-void CEBezHandler::dragHandle(bool useCommand) {
+void CEBezHandler::dragHandle(bool useCommand)
+{
     CEGraphKey* key = _ui->getKey(_curve, _seg);
-    if (_handle != 0 && _handle != 1) return;
+    if (_handle != 0 && _handle != 1)
+        return;
 
     double pw = _view.pixelWidth();
     double ph = _view.pixelHeight();
@@ -296,8 +325,10 @@ void CEBezHandler::dragHandle(bool useCommand) {
 
     // figure out angles and clamp to be vertical
     double na = atan2(ny, nx);
-    if (na > M_PI_2) na = M_PI_2;
-    if (na < -M_PI_2) na = -M_PI_2;
+    if (na > M_PI_2)
+        na = M_PI_2;
+    if (na < -M_PI_2)
+        na = -M_PI_2;
 
     // TODO: clamp handle in non-weighted case
     double inWeight = nweight;
@@ -308,8 +339,10 @@ void CEBezHandler::dragHandle(bool useCommand) {
     }
     if (!key->weighted()) {
         double prevTime = 0, nextTime = 0;
-        if (CEGraphKey* prevKey = _ui->getKey(_curve, _seg - 1)) prevTime = prevKey->key().getTime();
-        if (CEGraphKey* nextKey = _ui->getKey(_curve, _seg + 1)) nextTime = nextKey->key().getTime();
+        if (CEGraphKey* prevKey = _ui->getKey(_curve, _seg - 1))
+            prevTime = prevKey->key().getTime();
+        if (CEGraphKey* nextKey = _ui->getKey(_curve, _seg + 1))
+            nextTime = nextKey->key().getTime();
         double currTime = key->key().getTime();
         // cos(na) = xlength / weight
         // we want xlength = (timeInterval) / 3
@@ -320,10 +353,14 @@ void CEBezHandler::dragHandle(bool useCommand) {
     // if we are weighted keep and we are locked we want old weight for
     // the matched guy
     if (key->weighted()) {
-        if (_handle == 0) outWeight = _originalWeightOut;
-        if (_handle == 1) inWeight = _originalWeightIn;
+        if (_handle == 0)
+            outWeight = _originalWeightOut;
+        if (_handle == 1)
+            inWeight = _originalWeightIn;
     }
     // set if we are locked or if it is our handle
-    if (_handle == 0 || key->key().isLocked()) _ui->tool()->setKeyIn(_curve, _seg, na * 180. / M_PI, inWeight);
-    if (_handle == 1 || key->key().isLocked()) _ui->tool()->setKeyOut(_curve, _seg, na * 180. / M_PI, outWeight);
+    if (_handle == 0 || key->key().isLocked())
+        _ui->tool()->setKeyIn(_curve, _seg, na * 180. / M_PI, inWeight);
+    if (_handle == 1 || key->key().isLocked())
+        _ui->tool()->setKeyOut(_curve, _seg, na * 180. / M_PI, outWeight);
 }

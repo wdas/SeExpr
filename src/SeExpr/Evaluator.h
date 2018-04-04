@@ -31,7 +31,9 @@ class VarBlock;
 //   to LLVM or an Interpreter
 class Evaluator {
   public:
-    virtual ~Evaluator() {}
+    virtual ~Evaluator()
+    {
+    }
 
     // dump debugging information to stderr
     virtual void setDebugging(bool debugging) = 0;

@@ -59,7 +59,8 @@
 #include "ExprControl.h"
 #include "ExprPopupDoc.h"
 
-void ExprEditor::controlChanged(int id) {
+void ExprEditor::controlChanged(int id)
+{
     QString newText = exprTe->toPlainText();
     controls->updateText(id, newText);
     _updatingText = 1;
@@ -73,15 +74,19 @@ void ExprEditor::controlChanged(int id) {
     previewTimer->start(0);
 }
 
-ExprEditor::~ExprEditor() {
+ExprEditor::~ExprEditor()
+{
     delete controlRebuildTimer;
     delete previewTimer;
 }
 
-ExprTextEdit::~ExprTextEdit() {}
+ExprTextEdit::~ExprTextEdit()
+{
+}
 
 ExprEditor::ExprEditor(QWidget* parent, ExprControlCollection* controls)
-    : QWidget(parent), _updatingText(0), errorHeight(0) {
+    : QWidget(parent), _updatingText(0), errorHeight(0)
+{
     // timers
     controlRebuildTimer = new QTimer();
     previewTimer = new QTimer();
@@ -104,8 +109,10 @@ ExprEditor::ExprEditor(QWidget* parent, ExprControlCollection* controls)
 
     // calibrate the font size
     int fontsize = 12;
-    while (QFontMetrics(QFont("Liberation Sans", fontsize)).width("abcdef") < 38 && fontsize < 20) fontsize++;
-    while (QFontMetrics(QFont("Liberation Sans", fontsize)).width("abcdef") > 44 && fontsize > 3) fontsize--;
+    while (QFontMetrics(QFont("Liberation Sans", fontsize)).width("abcdef") < 38 && fontsize < 20)
+        fontsize++;
+    while (QFontMetrics(QFont("Liberation Sans", fontsize)).width("abcdef") > 44 && fontsize > 3)
+        fontsize--;
 
     exprTe->setFont(QFont("Liberation Sans", fontsize));
 
@@ -129,7 +136,8 @@ ExprEditor::ExprEditor(QWidget* parent, ExprControlCollection* controls)
     connect(previewTimer, SIGNAL(timeout()), SLOT(sendPreview()));
 }
 
-void ExprEditor::selectError() {
+void ExprEditor::selectError()
+{
     int selected = errorWidget->currentRow();
     QListWidgetItem* item = errorWidget->item(selected);
     int start = item->data(Qt::UserRole).toInt();
@@ -141,33 +149,46 @@ void ExprEditor::selectError() {
     exprTe->setTextCursor(cursor);
 }
 
-void ExprEditor::sendApply() { emit apply(); }
+void ExprEditor::sendApply()
+{
+    emit apply();
+}
 
-void ExprEditor::sendPreview() { emit preview(); }
+void ExprEditor::sendPreview()
+{
+    emit preview();
+}
 
-void ExprEditor::exprChanged() {
-    if (_updatingText) return;
+void ExprEditor::exprChanged()
+{
+    if (_updatingText)
+        return;
 
     // schedule control rebuild
     controlRebuildTimer->setSingleShot(true);
     controlRebuildTimer->start(0);
 }
 
-void ExprEditor::rebuildControls() {
+void ExprEditor::rebuildControls()
+{
     bool wasShown = !exprTe->completer->popup()->isHidden();
     bool newVariables = controls->rebuildControls(exprTe->toPlainText(), exprTe->completionModel->local_variables);
-    if (newVariables) exprTe->completer->setModel(exprTe->completionModel);
-    if (wasShown) exprTe->completer->popup()->show();
+    if (newVariables)
+        exprTe->completer->setModel(exprTe->completionModel);
+    if (wasShown)
+        exprTe->completer->popup()->show();
 }
 
-void ExprTextEdit::updateStyle() {
+void ExprTextEdit::updateStyle()
+{
     lastStyleForHighlighter = 0;
     highlighter->fixStyle(palette());
     highlighter->rehighlight();
     repaint();
 }
 
-ExprTextEdit::ExprTextEdit(QWidget* parent) : QTextEdit(parent), lastStyleForHighlighter(0), _tip(0) {
+ExprTextEdit::ExprTextEdit(QWidget* parent) : QTextEdit(parent), lastStyleForHighlighter(0), _tip(0)
+{
     highlighter = new ExprHighlighter(document());
 
     // setup auto completion
@@ -191,29 +212,38 @@ ExprTextEdit::ExprTextEdit(QWidget* parent) : QTextEdit(parent), lastStyleForHig
     _popupEnabledAction->setChecked(true);
 }
 
-void ExprTextEdit::insertFromMimeData(const QMimeData* source) { QTextEdit::insertPlainText(source->text()); }
+void ExprTextEdit::insertFromMimeData(const QMimeData* source)
+{
+    QTextEdit::insertPlainText(source->text());
+}
 
-void ExprTextEdit::focusInEvent(QFocusEvent* e) {
-    if (completer) completer->setWidget(this);
+void ExprTextEdit::focusInEvent(QFocusEvent* e)
+{
+    if (completer)
+        completer->setWidget(this);
     QTextEdit::focusInEvent(e);
 }
 
-void ExprTextEdit::focusOutEvent(QFocusEvent* e) {
+void ExprTextEdit::focusOutEvent(QFocusEvent* e)
+{
     hideTip();
     QTextEdit::focusInEvent(e);
 }
 
-void ExprTextEdit::mousePressEvent(QMouseEvent* event) {
+void ExprTextEdit::mousePressEvent(QMouseEvent* event)
+{
     hideTip();
     QTextEdit::mousePressEvent(event);
 }
 
-void ExprTextEdit::mouseDoubleClickEvent(QMouseEvent* event) {
+void ExprTextEdit::mouseDoubleClickEvent(QMouseEvent* event)
+{
     hideTip();
     QTextEdit::mouseDoubleClickEvent(event);
 }
 
-void ExprTextEdit::paintEvent(QPaintEvent* event) {
+void ExprTextEdit::paintEvent(QPaintEvent* event)
+{
     if (lastStyleForHighlighter != style()) {
         lastStyleForHighlighter = style();
         highlighter->fixStyle(palette());
@@ -222,7 +252,8 @@ void ExprTextEdit::paintEvent(QPaintEvent* event) {
     QTextEdit::paintEvent(event);
 }
 
-void ExprTextEdit::wheelEvent(QWheelEvent* event) {
+void ExprTextEdit::wheelEvent(QWheelEvent* event)
+{
     if (event->modifiers() == Qt::ControlModifier) {
         if (event->delta() > 0)
             zoomIn();
@@ -232,7 +263,8 @@ void ExprTextEdit::wheelEvent(QWheelEvent* event) {
     return QTextEdit::wheelEvent(event);
 }
 
-void ExprTextEdit::keyPressEvent(QKeyEvent* e) {
+void ExprTextEdit::keyPressEvent(QKeyEvent* e)
+{
     // Accept expression
     if (e->key() == Qt::Key_Return && e->modifiers() == Qt::ControlModifier) {
         emit applyShortcut();
@@ -245,12 +277,15 @@ void ExprTextEdit::keyPressEvent(QKeyEvent* e) {
     // If the completer is active pass keys it needs down
     if (completer && completer->popup()->isVisible()) {
         switch (e->key()) {
-            case Qt::Key_Enter:
-            case Qt::Key_Return:
-            case Qt::Key_Escape:
-            case Qt::Key_Tab:
-            case Qt::Key_Backtab: e->ignore(); return;
-            default: break;
+        case Qt::Key_Enter:
+        case Qt::Key_Return:
+        case Qt::Key_Escape:
+        case Qt::Key_Tab:
+        case Qt::Key_Backtab:
+            e->ignore();
+            return;
+        default:
+            break;
         }
     }
 
@@ -260,7 +295,8 @@ void ExprTextEdit::keyPressEvent(QKeyEvent* e) {
         QTextEdit::keyPressEvent(e);
 
     const bool ctrlOrShift = e->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier);
-    if (!completer || (ctrlOrShift && e->text().isEmpty())) return;
+    if (!completer || (ctrlOrShift && e->text().isEmpty()))
+        return;
 
     bool hasModifier = (e->modifiers() != Qt::NoModifier) && !ctrlOrShift;
 
@@ -308,14 +344,16 @@ void ExprTextEdit::keyPressEvent(QKeyEvent* e) {
         for (int i = 1; i < tips.size(); i++) {
             tip += "<br>" + tips[i];
         }
-        if (_popupEnabledAction->isChecked()) showTip(tip);
+        if (_popupEnabledAction->isChecked())
+            showTip(tip);
         // QToolTip::showText(mapToGlobal(cr.bottomLeft()),tip,this,cr);
     } else {
         hideTip();
     }
 }
 
-void ExprTextEdit::contextMenuEvent(QContextMenuEvent* event) {
+void ExprTextEdit::contextMenuEvent(QContextMenuEvent* event)
+{
     QMenu* menu = createStandardContextMenu();
 
     if (!menu->actions().empty()) {
@@ -328,11 +366,14 @@ void ExprTextEdit::contextMenuEvent(QContextMenuEvent* event) {
     delete menu;
 }
 
-void ExprTextEdit::showTip(const QString& string) {
+void ExprTextEdit::showTip(const QString& string)
+{
     // skip empty strings
-    if (string == "") return;
+    if (string == "")
+        return;
     // skip already shown stuff
-    if (_tip && !_tip->isHidden() && _tip->label->text() == string) return;
+    if (_tip && !_tip->isHidden() && _tip->label->text() == string)
+        return;
 
     QRect cr = cursorRect();
     cr.setX(0);
@@ -344,37 +385,54 @@ void ExprTextEdit::showTip(const QString& string) {
     _tip = new ExprPopupDoc(this, mapToGlobal(cr.bottomLeft()) + QPoint(0, 6), string);
 }
 
-void ExprTextEdit::hideTip() {
-    if (_tip) _tip->hide();
+void ExprTextEdit::hideTip()
+{
+    if (_tip)
+        _tip->hide();
 }
 
-void ExprTextEdit::insertCompletion(const QString& completion) {
-    if (completer->widget() != this) return;
+void ExprTextEdit::insertCompletion(const QString& completion)
+{
+    if (completer->widget() != this)
+        return;
     QTextCursor tc = textCursor();
     int extra = completion.length() - completer->completionPrefix().length();
     tc.movePosition(QTextCursor::Left);
     tc.movePosition(QTextCursor::EndOfWord);
     tc.insertText(completion.right(extra));
-    if (completion[0] != '$') tc.insertText("(");
+    if (completion[0] != '$')
+        tc.insertText("(");
     setTextCursor(tc);
 }
 
-std::string ExprEditor::getExpr() { return exprTe->toPlainText().toStdString(); }
+std::string ExprEditor::getExpr()
+{
+    return exprTe->toPlainText().toStdString();
+}
 
-void ExprEditor::setExpr(const std::string& expression, const bool doApply) {
+void ExprEditor::setExpr(const std::string& expression, const bool doApply)
+{
     // exprTe->clear();
     exprTe->selectAll();
     exprTe->insertPlainText(QString::fromStdString(expression));
     clearErrors();
     exprTe->moveCursor(QTextCursor::Start);
-    if (doApply) emit apply();
+    if (doApply)
+        emit apply();
 }
 
-void ExprEditor::insertStr(const std::string& str) { exprTe->insertPlainText(QString::fromStdString(str)); }
+void ExprEditor::insertStr(const std::string& str)
+{
+    exprTe->insertPlainText(QString::fromStdString(str));
+}
 
-void ExprEditor::appendStr(const std::string& str) { exprTe->append(QString::fromStdString(str)); }
+void ExprEditor::appendStr(const std::string& str)
+{
+    exprTe->append(QString::fromStdString(str));
+}
 
-void ExprEditor::addError(const int startPos, const int endPos, const std::string& error) {
+void ExprEditor::addError(const int startPos, const int endPos, const std::string& error)
+{
     QListWidgetItem* item = new QListWidgetItem(("Error: " + error).c_str(), errorWidget);
     item->setData(Qt::UserRole, startPos);
     item->setData(Qt::UserRole + 1, endPos);
@@ -383,7 +441,8 @@ void ExprEditor::addError(const int startPos, const int endPos, const std::strin
     const char* c = error.c_str();
     int lines = 1;
     while (*c != '\0') {
-        if (*c == '\n') lines++;
+        if (*c == '\n')
+            lines++;
         c++;
     }
     errorHeight += 25 * lines;
@@ -391,33 +450,48 @@ void ExprEditor::addError(const int startPos, const int endPos, const std::strin
     errorWidget->setMaximumHeight(errorHeight);
 }
 
-void ExprEditor::nextError() {
+void ExprEditor::nextError()
+{
     int newRow = errorWidget->currentRow() + 1;
-    if (newRow >= errorWidget->count()) newRow = 0;
+    if (newRow >= errorWidget->count())
+        newRow = 0;
     errorWidget->setCurrentRow(newRow);
 }
 
-void ExprEditor::clearErrors() {
+void ExprEditor::clearErrors()
+{
     errorWidget->clear();
     errorWidget->setHidden(true);
     errorHeight = 0;
 }
 
-void ExprEditor::clearExtraCompleters() {
+void ExprEditor::clearExtraCompleters()
+{
     exprTe->completionModel->clearFunctions();
     exprTe->completionModel->clearVariables();
 }
 
-void ExprEditor::registerExtraFunction(const std::string& name, const std::string& docString) {
+void ExprEditor::registerExtraFunction(const std::string& name, const std::string& docString)
+{
     exprTe->completionModel->addFunction(name.c_str(), docString.c_str());
 }
 
-void ExprEditor::registerExtraVariable(const std::string& name, const std::string& docString) {
+void ExprEditor::registerExtraVariable(const std::string& name, const std::string& docString)
+{
     exprTe->completionModel->addVariable(name.c_str(), docString.c_str());
 }
 
-void ExprEditor::replaceExtras(const ExprCompletionModel& completer) { exprTe->completionModel->syncExtras(completer); }
+void ExprEditor::replaceExtras(const ExprCompletionModel& completer)
+{
+    exprTe->completionModel->syncExtras(completer);
+}
 
-void ExprEditor::updateCompleter() { exprTe->completer->setModel(exprTe->completionModel); }
+void ExprEditor::updateCompleter()
+{
+    exprTe->completer->setModel(exprTe->completionModel);
+}
 
-void ExprEditor::updateStyle() { exprTe->updateStyle(); }
+void ExprEditor::updateStyle()
+{
+    exprTe->updateStyle();
+}

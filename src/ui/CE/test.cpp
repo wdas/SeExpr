@@ -21,7 +21,8 @@
 
 #include <fenv.h>
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     fp();
     QApplication app(argc, argv);
     CETool* tool = new CETool();

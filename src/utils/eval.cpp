@@ -26,35 +26,56 @@ using namespace SeExpr2;
 
 class Expr : public Expression {
   public:
-    void walk() {}
+    void walk()
+    {
+    }
 
     struct Var : public ExprVarRef {
-        Var() : ExprVarRef(ExprType().Varying().FP(3)) {}
-        double val;
-        void eval(double* result) {
-            for (int k = 0; k < 3; k++) result[k] = val;
+        Var() : ExprVarRef(ExprType().Varying().FP(3))
+        {
         }
-        void eval(const char**) { assert(false); }
+        double val;
+        void eval(double* result)
+        {
+            for (int k = 0; k < 3; k++)
+                result[k] = val;
+        }
+        void eval(const char**)
+        {
+            assert(false);
+        }
     };
     mutable Var X;
 
     struct VarStr : public ExprVarRef {
-        VarStr() : ExprVarRef(ExprType().Varying().String()) {}
-        void eval(double*) { assert(false); }
+        VarStr() : ExprVarRef(ExprType().Varying().String())
+        {
+        }
+        void eval(double*)
+        {
+            assert(false);
+        }
 
-        void eval(const char** resultStr) { resultStr[0] = "testo"; }
+        void eval(const char** resultStr)
+        {
+            resultStr[0] = "testo";
+        }
     };
     mutable VarStr s;
 
-    ExprVarRef* resolveVar(const std::string& name) const {
+    ExprVarRef* resolveVar(const std::string& name) const
+    {
         std::cerr << "trying to resolve " << name << std::endl;
-        if (name == "X") return &X;
-        if (name == "s") return &s;
+        if (name == "X")
+            return &X;
+        if (name == "s")
+            return &s;
         return 0;
     }
 };
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     if (argc != 2) {
         std::cout << "usage: eval <expression>" << std::endl;
         exit(1);
@@ -78,7 +99,8 @@ int main(int argc, char* argv[]) {
             std::cerr << "eval iter " << i << " ";
             expr.X.val = (double)i;
             const double* d = expr.evalFP();
-            for (int k = 0; k < expr.returnType().dim(); k++) std::cerr << d[k] << " ";
+            for (int k = 0; k < expr.returnType().dim(); k++)
+                std::cerr << d[k] << " ";
             std::cerr << std::endl;
             sum += d[0];
         }
