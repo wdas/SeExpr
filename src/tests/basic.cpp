@@ -227,6 +227,32 @@ TEST(BasicTests, Variables)
     EXPECT_EQ(val[0], 7);
 }
 
+TEST(BasicTests, DemotionOfVarArgs)
+{
+    SimpleExpression expr("id=[x,y,1]; pscale = curve(hash(id*.612),0,0,4,1,1,4,0.93323,0.2,4); scaleMin = 0.02; scaleMax = 0.085; fit(pscale, 0, 1, scaleMin, scaleMax)");
+    expr.x.value = 0;
+    expr.y.value = .5;
+    EXPECT_TRUE(expr.isValid());
+    EXPECT_TRUE(!expr.isConstant());
+    EXPECT_TRUE(expr.returnType().isFP(1));
+    const double* val = expr.evalFP();
+    EXPECT_FLOAT_EQ(0.021805458, val[0]);
+}
+
+TEST(BasicTests, PromotionOfVarArgs)
+{
+    SimpleExpression expr("Cs=[x,y,1]; mix(Cs,Cs->hsi(-5,1.4,1),1)");
+    expr.x.value = 0;
+    expr.y.value = .5;
+    EXPECT_TRUE(expr.isValid());
+    EXPECT_TRUE(!expr.isConstant());
+    EXPECT_TRUE(expr.returnType().isFP(3));
+    const double* val = expr.evalFP();
+    EXPECT_FLOAT_EQ(-0.4, val[0]);
+    EXPECT_FLOAT_EQ(0.65, val[1]);
+    EXPECT_FLOAT_EQ(1.4, val[2]);
+}
+
 TEST(BasicTests, Custom)
 {
     SimpleExpression expr("custom(1,2)");
