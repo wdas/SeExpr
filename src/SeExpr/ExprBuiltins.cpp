@@ -300,7 +300,7 @@ static const char* hsi_docstring =
     "color  hsi(color x, float h, float s, float i, float map=1)\n"
     "The hsi function shifts the hue by h\n"
     "(in degrees) and scales the saturation and intensity by s and i\n"
-    "respectively.&nbsp; An map may be supplied which will control the shift\n"
+    "respectively.&nbsp; A map may be supplied which will control the shift\n"
     "- the full shift will happen when the map is one and no shift will\n"
     "happen when the map is zero.&nbsp; The shift will be scaled back for\n"
     "values between zero and one.";

@@ -484,37 +484,50 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode* funcNode, LLVM_BUILDER Builder
     unsigned strIdx = 1 + 1;         // skip functionptr and stirng ret val (which we always allocate)
     for (int argIndex = 0; argIndex < nargs; ++argIndex) {
         int opIndex = argIndex + 4;
-        ExprType argType = funcNode->child(argIndex)->type();
-        if (argType.isFP()) {
+        // What is the function expecting for this arg type?
+        ExprType desiredType = funcNode->child(argIndex)->type();
+        if (desiredType.isFP()) {
             unsigned operand = fpIdx;
             LLVM_VALUE operandVal = ConstantInt::get(Type::getInt32Ty(llvmContext), operand);
             LLVM_VALUE opDataPtr = Builder.CreateConstGEP1_32(opDataArg, opIndex);
             Builder.CreateStore(operandVal, opDataPtr);
-            if (argType.dim() > 1) {
-                for (int comp = 0; comp < argType.dim(); comp++) {
-                    LLVM_VALUE compIndex = ConstantInt::get(Type::getInt32Ty(llvmContext), comp);
-                    LLVM_VALUE val = Builder.CreateExtractElement(args[argIndex], compIndex);
-                    LLVM_VALUE fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx + comp);
-                    Builder.CreateStore(val, fpArgPtr);
-                }
-                fpIdx += argType.dim();
-            } else {
-                // TODO: this needs the promote!!!
-                int promote = funcNode->promote(argIndex);
-                if (promote) {
-                    LLVM_VALUE val = args[argIndex];
-                    for (int comp = 0; comp < promote; comp++) {
+
+            // What is the actual arg type being passed in?
+            LLVM_VALUE argValue = args[argIndex];
+            int argDim = argValue->getType()->isVectorTy() ?
+                         argValue->getType()->getVectorNumElements() :
+                         1;
+            if (argDim == desiredType.dim()) {
+                if (desiredType.dim() > 1) { // vector arg
+                    for (int comp = 0; comp < desiredType.dim(); comp++) {
+                        LLVM_VALUE compIndex = ConstantInt::get(Type::getInt32Ty(llvmContext), comp);
+                        LLVM_VALUE val = Builder.CreateExtractElement(argValue, compIndex);
                         LLVM_VALUE fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx + comp);
                         Builder.CreateStore(val, fpArgPtr);
                     }
-                    fpIdx += promote;
-                } else {
+                    fpIdx += desiredType.dim();
+                } else { // scalar arg
                     LLVM_VALUE fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx);
-                    Builder.CreateStore(args[argIndex], fpArgPtr);
+                    Builder.CreateStore(argValue, fpArgPtr);
                     fpIdx++;
                 }
+            } else if (argDim < desiredType.dim()) { // promote scalar to vector
+                int promote = funcNode->promote(argIndex);
+                if (promote) {
+                    for (int comp = 0; comp < promote; comp++) {
+                        LLVM_VALUE fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx + comp);
+                        Builder.CreateStore(argValue, fpArgPtr);
+                    }
+                    fpIdx += promote;
+                } 
+            } else { // demote vector to scalar
+                ConstantInt* zero = ConstantInt::get(Type::getInt32Ty(Builder.getContext()), 0);
+                LLVM_VALUE val = Builder.CreateExtractElement(argValue, zero);
+                LLVM_VALUE fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx);
+                Builder.CreateStore(val, fpArgPtr);
+                fpIdx++;
             }
-        } else if (argType.isString()) {
+        } else if (desiredType.isString()) {
             unsigned operand = strIdx;
             LLVM_VALUE operandVal = ConstantInt::get(Type::getInt32Ty(llvmContext), operand);
             LLVM_VALUE opDataPtr = Builder.CreateConstGEP1_32(opDataArg, opIndex);
@@ -917,10 +930,7 @@ LLVM_VALUE ExprFuncNode::codegen(LLVM_BUILDER Builder) LLVM_BODY
         }
         ret.push_back(executeStandardFunction(Builder, seFuncType, realArgs, addrVal));
     }
-    if (isReturnVector(seFuncType))
-        return createVecVal(Builder, ret);
-    else
-        return ret[0];
+    return createVecVal(Builder, ret);
 }
 
 LLVM_VALUE ExprIfThenElseNode::codegen(LLVM_BUILDER Builder) LLVM_BODY
