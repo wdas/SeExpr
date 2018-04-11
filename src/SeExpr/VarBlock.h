@@ -41,18 +41,17 @@ class VarBlockCreator;
 class VarBlock {
   private:
     /// Allocate an VarBlock
-    VarBlock(int size) : indirectIndex(0), dummy{0.0}
+    VarBlock(int size) : indirectIndex(0)
     {
-        _dataPtrs.resize(size, (const char*)&dummy[0]);
+        _dataPtrs.resize(size, 0);
     }
 
   public:
     friend class VarBlockCreator;
 
     /// Move semantics is the only allowed way to change the structure
-    VarBlock(VarBlock&& other) : indirectIndex(std::move(other.indirectIndex)), dummy{0.0}
+    VarBlock(VarBlock&& other) : indirectIndex(std::move(other.indirectIndex)), _dataPtrs(std::move(other._dataPtrs))
     {
-        _dataPtrs = std::move(other._dataPtrs);
     }
 
     virtual ~VarBlock()
@@ -94,7 +93,6 @@ class VarBlock {
 
   private:
     /// This stores double* or char** ptrs
-    double dummy[16];
     std::vector<const char*> _dataPtrs;
 };
 
