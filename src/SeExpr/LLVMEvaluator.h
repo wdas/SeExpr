@@ -72,11 +72,13 @@ class LLVMEvaluator : public Evaluator {
         }
         void operator()(T* dst, VarBlock* varBlock)
         {
+            VALIDATE_VARBLOCK(varBlock);
             assert(functionPtr);
             functionPtr(dst, varBlock ? varBlock->data() : nullptr, varBlock ? varBlock->indirectIndex : 0);
         }
         void operator()(VarBlock* varBlock, double* outputBuffer, size_t rangeStart, size_t rangeEnd)
         {
+            VALIDATE_VARBLOCK(varBlock);
             assert(functionPtrMultiple);
             functionPtrMultiple(varBlock ? varBlock->data() : nullptr, outputBuffer, rangeStart, rangeEnd);
         }

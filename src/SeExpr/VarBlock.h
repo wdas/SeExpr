@@ -91,10 +91,23 @@ class VarBlock {
         return _dataPtrs.data();
     }
 
+    void validate() {
+        for (auto ptr : _dataPtrs) {
+            (void)ptr;
+            assert(ptr && "VarBlock has undefined data pointer!");
+        }
+    }
+
   private:
     /// This stores double* or char** ptrs
     std::vector<const char*> _dataPtrs;
 };
+
+#ifdef DEBUG
+#define VALIDATE_VARBLOCK(varblock) if (varblock) varblock->validate();
+#else
+#define VALIDATE_VARBLOCK(varblock)
+#endif
 
 // helper class for using VarBlocks
 template <typename FunctionCodeStorage = std::function<void(SeExpr2::ExprFuncSimple::ArgHandle)>>
