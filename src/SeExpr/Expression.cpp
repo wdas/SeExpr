@@ -157,8 +157,10 @@ Expression::~Expression()
 void Expression::reset()
 {
     std::lock_guard<std::mutex> guard(_prepMutex);
-    _evaluator.reset(nullptr);
-    _parseTree.reset(nullptr);
+    delete _evaluator;
+    _evaluator = nullptr;
+    delete _parseTree;
+    _parseTree = nullptr;
     _parseError = "";
     _vars.clear();
     _funcs.clear();
@@ -232,8 +234,8 @@ void Expression::parse() const
         delete parseTree_;
     } else {
         // TODO: need promote
-        _parseTree.reset(parseTree_);
-        _returnType = _parseTree->type();
+        _parseTree = parseTree_;
+        _returnType = parseTree_->type();
     }
 }
 
@@ -256,29 +258,29 @@ void Expression::prep() const
     if (!_parseTree) {
         // parse error
         error = true;
-    } else if (!_parseTree->prep(_desiredReturnType.isFP(1), envBuilder).isValid()) {
+    } else if (!parseTree()->prep(_desiredReturnType.isFP(1), envBuilder).isValid()) {
         // prep error
         error = true;
-    } else if (!ExprType::valuesCompatible(_parseTree->type(), _desiredReturnType)) {
+    } else if (!ExprType::valuesCompatible(parseTree()->type(), _desiredReturnType)) {
         // incompatible type error
         error = true;
-        _parseTree->addError("Expression generated type " + _parseTree->type().toString() +
+        parseTree()->addError("Expression generated type " + parseTree()->type().toString() +
                              " incompatible with desired type " + _desiredReturnType.toString());
     } else {
-        _returnType = _parseTree->type();
+        _returnType = parseTree()->type();
         // optimize for constant values - if we have a module of just one constant float, avoid using LLVM.
         //   Querying typing information during prep()-time is a bit difficult. For the most part, our type
         //   information is uninitialized until after prep()-time. The only exception is for constant,
         //   single floating point values.
         //
         // TODO: separate Object Representation (ExprNode) from ParseTree (which should just be cheap tokens)
-        bool isConstant_ = _returnType.isLifetimeConstant() || (_parseTree && _parseTree->numChildren() == 1 &&
-                                                                _parseTree->child(0)->type().isLifetimeConstant());
+        bool isConstant_ = _returnType.isLifetimeConstant() || (_parseTree && parseTree()->numChildren() == 1 &&
+                                                                parseTree()->child(0)->type().isLifetimeConstant());
         EvaluationStrategy strategy = isConstant_ ? EvaluationStrategy::UseInterpreter : _evaluationStrategyHint;
 
         evaluator = (strategy == UseInterpreter) ? (Evaluator*)new Interpreter() : (Evaluator*)new LLVMEvaluator();
         evaluator->setDebugging(debugging);
-        error = !evaluator->prep(_parseTree.get(), _desiredReturnType);
+        error = !evaluator->prep(parseTree(), _desiredReturnType);
     }
 
     if (error) {
@@ -315,13 +317,13 @@ void Expression::prep() const
 
     if (!evaluator)
         evaluator = new NullEvaluator();
-    _evaluator.reset(evaluator);
+    _evaluator = evaluator;
     assert(_evaluator);
 }
 
 bool Expression::isVec() const
 {
-    return syntaxOK() ? _parseTree->isVec() : _wantVec;
+    return syntaxOK() ? parseTree()->isVec() : _wantVec;
 }
 const ExprType& Expression::returnType() const
 {
