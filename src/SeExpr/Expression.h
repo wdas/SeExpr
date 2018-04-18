@@ -19,6 +19,7 @@
 
 #include <stdint.h>
 
+#include <atomic>
 #include <iomanip>
 #include <map>
 #include <memory>
@@ -147,20 +148,20 @@ class Expression {
         return evaluator()->isValid();
     }
 
-    const ExprNode* parseTree() const
+    ExprNode* parseTree() const
     {
         if (_parseTree)
-            return _parseTree.get();
+            return _parseTree;
         parse();
-        return _parseTree.get();
+        return _parseTree;
     }
 
     Evaluator* evaluator() const
     {
         if (_evaluator)
-            return _evaluator.get();
+            return _evaluator;
         prep();
-        return _evaluator.get();
+        return _evaluator;
     }
 
     /** Get parse error (if any).  First call syntaxOK or isValid
@@ -341,7 +342,7 @@ class Expression {
     mutable ExprType _desiredReturnType;
 
     /** Parse tree (null if syntax is bad). */
-    mutable std::unique_ptr<ExprNode> _parseTree;
+    mutable std::atomic<ExprNode*> _parseTree;
 
     /** Prepare expression (bind vars/functions, etc.)
     and remember error if any */
@@ -369,7 +370,7 @@ class Expression {
     /** Whether or not we have unsafe functions */
     mutable std::vector<std::string> _threadUnsafeFunctionCalls;
 
-    mutable std::unique_ptr<Evaluator> _evaluator;
+    mutable std::atomic<Evaluator*> _evaluator;
 
     // Var block creator
     const VarBlockCreator* _varBlockCreator = 0;
