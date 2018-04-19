@@ -169,13 +169,13 @@ class ExprFuncClosure : public ExprFuncSimple {
     {
     }
 
-    virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const override
+    virtual ExprType prep(ExprFuncNode*, bool, ExprVarEnvBuilder&) const override
     {
         assert(false);
         return ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const override
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const override
     {
         return nullptr;
     }
