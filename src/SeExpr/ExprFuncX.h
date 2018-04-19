@@ -101,7 +101,7 @@ class ExprFuncSimple : public ExprFuncX {
             , data(reinterpret_cast<ExprFuncNode::Data*>(c_[opData_[1]]))
             , varBlock(v)
             , _nargs((int)fp_[opData_[3]])  // TODO: put the value in opData rather than fp
-            , opData(opData_ + 4)          // TODO: would be good not to have to convert to int!
+            , opData(opData_ + 4)           // TODO: would be good not to have to convert to int!
             , fp(fp_)
             , c(c_)
         {

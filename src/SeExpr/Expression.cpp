@@ -263,7 +263,7 @@ void Expression::prep() const
         // incompatible type error
         error = true;
         parseTree()->addError("Expression generated type " + parseTree()->type().toString() +
-                             " incompatible with desired type " + _desiredReturnType.toString());
+                              " incompatible with desired type " + _desiredReturnType.toString());
     } else {
         _returnType = parseTree()->type();
         // optimize for constant values - if we have a module of just one constant float, avoid using LLVM.

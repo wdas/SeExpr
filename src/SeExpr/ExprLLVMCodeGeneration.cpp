@@ -494,11 +494,9 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode* funcNode, LLVM_BUILDER Builder
 
             // What is the actual arg type being passed in?
             LLVM_VALUE argValue = args[argIndex];
-            int argDim = argValue->getType()->isVectorTy() ?
-                         argValue->getType()->getVectorNumElements() :
-                         1;
+            int argDim = argValue->getType()->isVectorTy() ? argValue->getType()->getVectorNumElements() : 1;
             if (argDim == desiredType.dim()) {
-                if (desiredType.dim() > 1) { // vector arg
+                if (desiredType.dim() > 1) {  // vector arg
                     for (int comp = 0; comp < desiredType.dim(); comp++) {
                         LLVM_VALUE compIndex = ConstantInt::get(Type::getInt32Ty(llvmContext), comp);
                         LLVM_VALUE val = Builder.CreateExtractElement(argValue, compIndex);
@@ -506,12 +504,12 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode* funcNode, LLVM_BUILDER Builder
                         Builder.CreateStore(val, fpArgPtr);
                     }
                     fpIdx += desiredType.dim();
-                } else { // scalar arg
+                } else {  // scalar arg
                     LLVM_VALUE fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx);
                     Builder.CreateStore(argValue, fpArgPtr);
                     fpIdx++;
                 }
-            } else if (argDim < desiredType.dim()) { // promote scalar to vector
+            } else if (argDim < desiredType.dim()) {  // promote scalar to vector
                 int promote = funcNode->promote(argIndex);
                 if (promote) {
                     for (int comp = 0; comp < promote; comp++) {
@@ -519,8 +517,8 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode* funcNode, LLVM_BUILDER Builder
                         Builder.CreateStore(argValue, fpArgPtr);
                     }
                     fpIdx += promote;
-                } 
-            } else { // demote vector to scalar
+                }
+            } else {  // demote vector to scalar
                 ConstantInt* zero = ConstantInt::get(Type::getInt32Ty(Builder.getContext()), 0);
                 LLVM_VALUE val = Builder.CreateExtractElement(argValue, zero);
                 LLVM_VALUE fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx);
@@ -1168,7 +1166,9 @@ struct VarCodeGeneration {
         }
     }
 
-    static LLVM_VALUE codegen(VarBlockCreator::DeferredRef* deferredRef, const std::string& varName, LLVM_BUILDER Builder)
+    static LLVM_VALUE codegen(VarBlockCreator::DeferredRef* deferredRef,
+                              const std::string& varName,
+                              LLVM_BUILDER Builder)
     {
         LLVMContext& llvmContext = Builder.getContext();
 

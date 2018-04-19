@@ -50,7 +50,8 @@ class VarBlock {
     friend class VarBlockCreator;
 
     /// Move semantics is the only allowed way to change the structure
-    VarBlock(VarBlock&& other) : indirectIndex(std::move(other.indirectIndex)), _creator(other._creator), _dataPtrs(std::move(other._dataPtrs))
+    VarBlock(VarBlock&& other)
+        : indirectIndex(std::move(other.indirectIndex)), _creator(other._creator), _dataPtrs(std::move(other._dataPtrs))
     {
     }
 
@@ -91,7 +92,8 @@ class VarBlock {
         return _dataPtrs.data();
     }
 
-    void validate() {
+    void validate()
+    {
         for (auto ptr : _dataPtrs) {
             (void)ptr;
             assert(ptr && "VarBlock has undefined data pointer!");
@@ -107,7 +109,9 @@ class VarBlock {
 };
 
 #ifdef DEBUG
-#define VALIDATE_VARBLOCK(varblock) if (varblock) varblock->validate();
+#define VALIDATE_VARBLOCK(varblock) \
+    if (varblock)                   \
+        varblock->validate();
 #else
 #define VALIDATE_VARBLOCK(varblock)
 #endif
@@ -250,7 +254,8 @@ class VarBlockCreator {
         uint32_t _stride;
 
       public:
-        DeferredRef(const ExprType& type, uint32_t offset, uint32_t stride) : ExprVarRef(type), _offset(offset), _stride(stride)
+        DeferredRef(const ExprType& type, uint32_t offset, uint32_t stride)
+            : ExprVarRef(type), _offset(offset), _stride(stride)
         {
         }
 
