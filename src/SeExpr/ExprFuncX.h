@@ -165,7 +165,7 @@ class ExprFuncClosure : public ExprFuncSimple {
     ExprFuncClosure() : ExprFuncSimple(true), _callable(nullptr)
     {
     }
-    explicit ExprFuncClosure(FunctionCodeStorage callable_) : ExprFuncSimple(true), _callable(callable_)
+    explicit ExprFuncClosure(FunctionCodeStorage&& callable_) : ExprFuncSimple(true), _callable(std::move(callable_))
     {
     }
 

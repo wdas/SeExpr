@@ -161,9 +161,9 @@ class SymbolTable : public VarBlock {
     }
 
     // Set code segment for some Function declared in the VarBlockCreator
-    void FunctionCode(uint32_t offset, FunctionCodeStorage f)
+    void FunctionCode(uint32_t offset, FunctionCodeStorage&& f)
     {
-        _function_code_segments.emplace_back(new SeExpr2::ExprFuncClosure<FunctionCodeStorage>(f));
+        _function_code_segments.emplace_back(new SeExpr2::ExprFuncClosure<FunctionCodeStorage>(std::move(f)));
         Function(offset) = _function_code_segments.back().get();
     }
 
