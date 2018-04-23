@@ -153,6 +153,7 @@ class SymbolTable : public VarBlock {
     {
         _allocations = std::move(other._allocations);
         _function_code_segments = std::move(other._function_code_segments);
+        return *this;
     }
 
     SymbolTable(const SymbolTable&) = delete;
