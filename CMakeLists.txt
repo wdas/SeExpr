@@ -193,6 +193,13 @@ if (DEFINED ANIMLIB_DIR)
     link_directories(${ANIMLIB_DIR}/${CMAKE_INSTALL_LIBDIR})
 endif()
 
+if (DEFINED FOLLY_DIR)
+    message(STATUS "FOLLY_DIR = ${FOLLY_DIR}")
+    add_definitions(-DSEEXPR_USE_FOLLY)
+    include_directories(/disney/users/nkagan/folly/include/)
+    link_directories(${FOLLY_DIR}/${CMAKE_INSTALL_LIBDIR})
+endif()
+
 if (DEFINED DERR_DIR)
     message(STATUS "DERR_DIR = ${DMSG_DIR}")
     include_directories(SYSTEM ${DERR_DIR}/include)

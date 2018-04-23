@@ -387,7 +387,7 @@ struct EvalDeferredVar {
             double* basePointer =
                 reinterpret_cast<double**>(c[0])[varBlockOffset] + (uniform ? 0 : (stride * indirectIndex));
             assert(basePointer && "Invalid VarBlock entry");
-            SymbolTable<>::DeferredVarRef* deferredRef = (SymbolTable<>::DeferredVarRef*)basePointer;
+            SymbolTable::DeferredVarRef* deferredRef = (SymbolTable::DeferredVarRef*)basePointer;
             deferredRef->eval(fp + opData[1]);
         }
         return 1;

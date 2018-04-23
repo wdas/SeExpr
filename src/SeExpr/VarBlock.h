@@ -17,10 +17,15 @@
 #ifndef VarBlock_h
 #define VarBlock_h
 
-#include <functional>
 #include <sstream>
 #include <vector>
 #include <unordered_map>
+
+#ifdef SEEXPR_USE_FOLLY
+#include <folly/Function.h>
+#else
+#include <functional>
+#endif
 
 #include "Expression.h"
 #include "ExprType.h"
@@ -117,10 +122,16 @@ class VarBlock {
 #endif
 
 // helper class for using VarBlocks
-template <typename FunctionCodeStorage = std::function<void(SeExpr2::ExprFuncSimple::ArgHandle)>, typename DeferredVarStorage = std::function<void(double*)>>
 class SymbolTable : public VarBlock {
-    struct DeferredVarRef : public ExprVarRef {
+#ifdef SEEXPR_USE_FOLLY
+    typedef folly::Function<void(SeExpr2::ExprFuncSimple::ArgHandle) const> FunctionCodeStorage;
+    typedef folly::Function<void(double*) const> DeferredVarStorage;
+#else
+    typedef std::function<void(SeExpr2::ExprFuncSimple::ArgHandle)> FunctionCodeStorage;
+    typedef std::function<void(double*)> DeferredVarStorage;
+#endif
 
+    struct DeferredVarRef : public ExprVarRef {
       public:
         DeferredVarRef(const ExprType& type_) : ExprVarRef(type_)
         {
@@ -145,7 +156,9 @@ class SymbolTable : public VarBlock {
     }
 
     SymbolTable(SymbolTable&& other)
-        : _allocations(std::move(other._allocations)), _function_code_segments(std::move(other._function_code_segments))
+        : VarBlock(std::move(other))
+        , _allocations(std::move(other._allocations))
+        , _function_code_segments(std::move(other._function_code_segments))
     {
     }
 
@@ -470,8 +483,7 @@ class VarBlockCreator {
     std::map<std::string, FuncSymbol> _funcs;
 };
 
-template <typename FunctionCodeStorage, typename DeferredVarStorage>
-DeferredVarStorage& SymbolTable<FunctionCodeStorage, DeferredVarStorage>::DeferredVar(uint32_t offset)
+inline SymbolTable::DeferredVarStorage& SymbolTable::DeferredVar(uint32_t offset)
 {
     auto iter = _deferred_vars.find(offset);
     if (iter != _deferred_vars.end())
