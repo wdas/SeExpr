@@ -397,7 +397,6 @@ class VarBlockCreator {
         } else {
             int offset = _offset++;
             auto iter = _funcs.emplace(name, FuncSymbol(decl, offset));
-            _funcPtrs[offset] = &iter.first->second;
             return offset;
         }
     }
@@ -451,11 +450,6 @@ class VarBlockCreator {
         return _varPtrs.at(offset);
     }
 
-    const ExprFuncX* getFunc(int offset) const
-    {
-        return _funcPtrs.at(offset);
-    }
-
     void dump() const
     {
         for (const auto& pair : _vars) {
@@ -479,7 +473,6 @@ class VarBlockCreator {
     std::map<int, const ExprVarRef*> _varPtrs;
     std::map<std::string, Ref> _vars;
     std::map<std::string, DeferredRef> _deferredVars;
-    std::map<int, const ExprFuncX*> _funcPtrs;
     std::map<std::string, FuncSymbol> _funcs;
 };
 
