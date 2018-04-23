@@ -60,6 +60,7 @@ endif()
 # TODO re-enable
 add_subdirectory(imageSynth)
 add_subdirectory(imageEditor)
+add_subdirectory(mandelbrot)
 #add_subdirectory(segraph)
 #add_subdirectory(rman)
 

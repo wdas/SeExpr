@@ -494,11 +494,9 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode* funcNode, LLVM_BUILDER Builder
 
             // What is the actual arg type being passed in?
             LLVM_VALUE argValue = args[argIndex];
-            int argDim = argValue->getType()->isVectorTy() ?
-                         argValue->getType()->getVectorNumElements() :
-                         1;
+            int argDim = argValue->getType()->isVectorTy() ? argValue->getType()->getVectorNumElements() : 1;
             if (argDim == desiredType.dim()) {
-                if (desiredType.dim() > 1) { // vector arg
+                if (desiredType.dim() > 1) {  // vector arg
                     for (int comp = 0; comp < desiredType.dim(); comp++) {
                         LLVM_VALUE compIndex = ConstantInt::get(Type::getInt32Ty(llvmContext), comp);
                         LLVM_VALUE val = Builder.CreateExtractElement(argValue, compIndex);
@@ -506,12 +504,12 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode* funcNode, LLVM_BUILDER Builder
                         Builder.CreateStore(val, fpArgPtr);
                     }
                     fpIdx += desiredType.dim();
-                } else { // scalar arg
+                } else {  // scalar arg
                     LLVM_VALUE fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx);
                     Builder.CreateStore(argValue, fpArgPtr);
                     fpIdx++;
                 }
-            } else if (argDim < desiredType.dim()) { // promote scalar to vector
+            } else if (argDim < desiredType.dim()) {  // promote scalar to vector
                 int promote = funcNode->promote(argIndex);
                 if (promote) {
                     for (int comp = 0; comp < promote; comp++) {
@@ -519,8 +517,8 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode* funcNode, LLVM_BUILDER Builder
                         Builder.CreateStore(argValue, fpArgPtr);
                     }
                     fpIdx += promote;
-                } 
-            } else { // demote vector to scalar
+                }
+            } else {  // demote vector to scalar
                 ConstantInt* zero = ConstantInt::get(Type::getInt32Ty(Builder.getContext()), 0);
                 LLVM_VALUE val = Builder.CreateExtractElement(argValue, zero);
                 LLVM_VALUE fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx);
@@ -1167,6 +1165,47 @@ struct VarCodeGeneration {
             return createVecVal(Builder, loadedValues, varName);
         }
     }
+
+    static LLVM_VALUE codegen(VarBlockCreator::DeferredRef* deferredRef,
+                              const std::string& varName,
+                              LLVM_BUILDER Builder)
+    {
+        LLVMContext& llvmContext = Builder.getContext();
+
+        Function* function = llvm_getFunction(Builder);
+        auto argIterator = function->arg_begin();
+        argIterator++;  // skip first arg
+        llvm::Argument* variableBlock = &*(argIterator++);
+
+        Type* ptrToPtrTy = variableBlock->getType();
+        Value* variableBlockAsPtrPtr = Builder.CreatePointerCast(variableBlock, ptrToPtrTy);
+        int variableOffset = deferredRef->offset();
+        Value* variableOffsetIndex = ConstantInt::get(Type::getInt32Ty(llvmContext), variableOffset);
+        Value* variableBlockIndirectPtrPtr = Builder.CreateInBoundsGEP(variableBlockAsPtrPtr, variableOffsetIndex);
+        Value* baseMemory = Builder.CreateLoad(variableBlockIndirectPtrPtr);
+        Type* voidPtrType = Type::getInt8PtrTy(llvmContext);
+        LLVM_VALUE addrVal = Builder.CreateBitCast(baseMemory, voidPtrType);
+
+        Function* evalVarFunc = llvm_getModule(Builder)->getFunction("SeExpr2LLVMEvalVarRef");
+        int dim = deferredRef->type().dim();
+        Type* doubleTy = Type::getDoubleTy(llvmContext);
+        AllocaInst* varAlloca = createAllocaInst(Builder, doubleTy, dim);
+        LLVM_VALUE params[2] = {addrVal, varAlloca};
+        Builder.CreateCall(evalVarFunc, params);
+
+        LLVM_VALUE ret = 0;
+        if (dim == 1) {
+            ret = Builder.CreateLoad(varAlloca);
+        } else {
+            // TODO: I don't really see how this requires dim==3... this assert should be removable
+            assert(dim == 3 && "future work.");
+            ret = createVecValFromAlloca(Builder, varAlloca, dim);
+        }
+
+        AllocaInst* thisvar = createAllocaInst(Builder, ret->getType(), 1, varName);
+        Builder.CreateStore(ret, thisvar);
+        return ret;
+    }
 };
 
 // This is the use of def-use chain
@@ -1181,6 +1220,8 @@ LLVM_VALUE ExprVarNode::codegen(LLVM_BUILDER Builder) LLVM_BODY
         //     return Builder.CreateLoad(valPtr);
         if (VarBlockCreator::Ref* varBlockRef = dynamic_cast<VarBlockCreator::Ref*>(_var))
             return VarCodeGeneration::codegen(varBlockRef, varName, Builder);
+        else if (VarBlockCreator::DeferredRef* deferredRef = dynamic_cast<VarBlockCreator::DeferredRef*>(_var))
+            return VarCodeGeneration::codegen(deferredRef, varName, Builder);
         else
             return VarCodeGeneration::codegen(_var, varName, Builder);
     } else if (_localVar) {

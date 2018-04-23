@@ -95,15 +95,15 @@ class ExprFuncSimple : public ExprFuncX {
 
     class ArgHandle {
       public:
-        ArgHandle(const int* opData, double* fp, char** c, std::vector<int>& /*callStack*/, const char* v)
-            : outFp(fp[opData[2]])
-            , outStr(c[opData[2]])
-            , data(reinterpret_cast<ExprFuncNode::Data*>(c[opData[1]]))
+        ArgHandle(const int* opData_, double* fp_, char** c_, std::vector<int>& /*callStack*/, const char* v)
+            : outFp(fp_[opData_[2]])
+            , outStr(c_[opData_[2]])
+            , data(reinterpret_cast<ExprFuncNode::Data*>(c_[opData_[1]]))
             , varBlock(v)
-            , _nargs((int)fp[opData[3]])  // TODO: put the value in opData rather than fp
-            , opData(opData + 4)          // TODO: would be good not to have to convert to int!
-            , fp(fp)
-            , c(c)
+            , _nargs((int)fp_[opData_[3]])  // TODO: put the value in opData rather than fp
+            , opData(opData_ + 4)           // TODO: would be good not to have to convert to int!
+            , fp(fp_)
+            , c(c_)
         {
         }
 
@@ -165,17 +165,17 @@ class ExprFuncClosure : public ExprFuncSimple {
     ExprFuncClosure() : ExprFuncSimple(true), _callable(nullptr)
     {
     }
-    explicit ExprFuncClosure(FunctionCodeStorage callable_) : ExprFuncSimple(true), _callable(callable_)
+    explicit ExprFuncClosure(FunctionCodeStorage&& callable_) : ExprFuncSimple(true), _callable(std::move(callable_))
     {
     }
 
-    virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const override
+    virtual ExprType prep(ExprFuncNode*, bool, ExprVarEnvBuilder&) const override
     {
         assert(false);
         return ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const override
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const override
     {
         return nullptr;
     }

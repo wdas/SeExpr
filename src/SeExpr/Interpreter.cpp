@@ -60,6 +60,7 @@ void Interpreter::evalMultiple(VarBlock* varBlock, double* outputBuffer, size_t 
 
 void Interpreter::eval(VarBlock* block, bool debug) const
 {
+    VALIDATE_VARBLOCK(block);
     if (block) {
         static_assert(sizeof(char*) == sizeof(size_t), "Expect to fit size_t in char*");
         state.s[0] = reinterpret_cast<char*>(block->data());
@@ -369,6 +370,25 @@ struct EvalVarBlock {
             assert(destPointer && "Corrupted interpreter stack");
             for (int i = 0; i < dim; i++)
                 destPointer[i] = basePointer[i];
+        }
+        return 1;
+    }
+};
+
+//! Evaluates an external variable using a variable block
+template <char uniform, int dim>
+struct EvalDeferredVar {
+    static int f(const int* opData, double* fp, char** c, std::vector<int>&)
+    {
+        if (c[0]) {
+            int stride = opData[2];
+            int varBlockOffset = opData[0];
+            size_t indirectIndex = reinterpret_cast<size_t>(c[1]);
+            double* basePointer =
+                reinterpret_cast<double**>(c[0])[varBlockOffset] + (uniform ? 0 : (stride * indirectIndex));
+            assert(basePointer && "Invalid VarBlock entry");
+            SymbolTable::DeferredVarRef* deferredRef = (SymbolTable::DeferredVarRef*)basePointer;
+            deferredRef->eval(fp + opData[1]);
         }
         return 1;
     }
@@ -707,6 +727,16 @@ int ExprVarNode::buildInterpreter(Interpreter* interpreter) const
             interpreter->addOperand(blockVarRef->offset());
             interpreter->addOperand(destLoc);
             interpreter->addOperand(blockVarRef->stride());
+            interpreter->endOp();
+        } else if (const auto* deferredRef = dynamic_cast<const VarBlockCreator::DeferredRef*>(var)) {
+            // TODO: handle strings
+            if (deferredRef->type().isLifetimeUniform())
+                interpreter->addOp(getTemplatizedOp2<1, EvalDeferredVar>(type.dim()));
+            else
+                interpreter->addOp(getTemplatizedOp2<0, EvalDeferredVar>(type.dim()));
+            interpreter->addOperand(deferredRef->offset());
+            interpreter->addOperand(destLoc);
+            interpreter->addOperand(deferredRef->stride());
             interpreter->endOp();
         } else {
             int varRefLoc = interpreter->allocPtr();

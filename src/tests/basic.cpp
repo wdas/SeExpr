@@ -229,7 +229,9 @@ TEST(BasicTests, Variables)
 
 TEST(BasicTests, DemotionOfVarArgs)
 {
-    SimpleExpression expr("id=[x,y,1]; pscale = curve(hash(id*.612),0,0,4,1,1,4,0.93323,0.2,4); scaleMin = 0.02; scaleMax = 0.085; fit(pscale, 0, 1, scaleMin, scaleMax)");
+    SimpleExpression expr(
+        "id=[x,y,1]; pscale = curve(hash(id*.612),0,0,4,1,1,4,0.93323,0.2,4); scaleMin = 0.02; scaleMax = 0.085; "
+        "fit(pscale, 0, 1, scaleMin, scaleMax)");
     expr.x.value = 0;
     expr.y.value = .5;
     EXPECT_TRUE(expr.isValid());

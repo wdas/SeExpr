@@ -17,10 +17,15 @@
 #ifndef VarBlock_h
 #define VarBlock_h
 
-#include <functional>
 #include <sstream>
 #include <vector>
 #include <unordered_map>
+
+#ifdef SEEXPR_USE_FOLLY
+#include <folly/Function.h>
+#else
+#include <functional>
+#endif
 
 #include "Expression.h"
 #include "ExprType.h"
@@ -41,18 +46,18 @@ class VarBlockCreator;
 class VarBlock {
   private:
     /// Allocate an VarBlock
-    VarBlock(int size) : indirectIndex(0), dummy{0.0}
+    VarBlock(const VarBlockCreator* creator, int size) : indirectIndex(0), _creator(creator)
     {
-        _dataPtrs.resize(size, (const char*)&dummy[0]);
+        _dataPtrs.resize(size, 0);
     }
 
   public:
     friend class VarBlockCreator;
 
     /// Move semantics is the only allowed way to change the structure
-    VarBlock(VarBlock&& other) : indirectIndex(std::move(other.indirectIndex)), dummy{0.0}
+    VarBlock(VarBlock&& other)
+        : indirectIndex(std::move(other.indirectIndex)), _creator(other._creator), _dataPtrs(std::move(other._dataPtrs))
     {
-        _dataPtrs = std::move(other._dataPtrs);
     }
 
     virtual ~VarBlock()
@@ -92,22 +97,68 @@ class VarBlock {
         return _dataPtrs.data();
     }
 
+    void validate()
+    {
+        for (auto ptr : _dataPtrs) {
+            (void)ptr;
+            assert(ptr && "VarBlock has undefined data pointer!");
+        }
+    }
+
+  protected:
+    const VarBlockCreator* _creator;
+
   private:
     /// This stores double* or char** ptrs
-    double dummy[16];
     std::vector<const char*> _dataPtrs;
 };
 
+#ifdef DEBUG
+#define VALIDATE_VARBLOCK(varblock) \
+    if (varblock)                   \
+        varblock->validate();
+#else
+#define VALIDATE_VARBLOCK(varblock)
+#endif
+
 // helper class for using VarBlocks
-template <typename FunctionCodeStorage = std::function<void(SeExpr2::ExprFuncSimple::ArgHandle)>>
 class SymbolTable : public VarBlock {
+#ifdef SEEXPR_USE_FOLLY
+    typedef folly::Function<void(SeExpr2::ExprFuncSimple::ArgHandle) const> FunctionCodeStorage;
+    typedef folly::Function<void(double*) const> DeferredVarStorage;
+#else
+    typedef std::function<void(SeExpr2::ExprFuncSimple::ArgHandle)> FunctionCodeStorage;
+    typedef std::function<void(double*)> DeferredVarStorage;
+#endif
+
+    struct DeferredVarRef : public ExprVarRef {
+      public:
+        DeferredVarRef(const ExprType& type_) : ExprVarRef(type_)
+        {
+        }
+
+        void eval(double* result) override
+        {
+            callable(result);
+        }
+
+        void eval(const char**) override
+        {
+            throw "DeferredVarRef not implemented for strings";
+        }
+
+        DeferredVarStorage callable;
+    };
+
   public:
     explicit SymbolTable(VarBlock&& block) : VarBlock(std::move(block))
     {
     }
 
     SymbolTable(SymbolTable&& other)
-        : _allocations(std::move(other._allocations)), _function_code_segments(std::move(other._function_code_segments))
+        : VarBlock(std::move(other))
+        , _allocations(std::move(other._allocations))
+        , _function_code_segments(std::move(other._function_code_segments))
     {
     }
 
@@ -115,6 +166,7 @@ class SymbolTable : public VarBlock {
     {
         _allocations = std::move(other._allocations);
         _function_code_segments = std::move(other._function_code_segments);
+        return *this;
     }
 
     SymbolTable(const SymbolTable&) = delete;
@@ -127,9 +179,9 @@ class SymbolTable : public VarBlock {
     }
 
     // Set code segment for some Function declared in the VarBlockCreator
-    void FunctionCode(uint32_t offset, FunctionCodeStorage f)
+    void FunctionCode(uint32_t offset, FunctionCodeStorage&& f)
     {
-        _function_code_segments.emplace_back(new SeExpr2::ExprFuncClosure<FunctionCodeStorage>(f));
+        _function_code_segments.emplace_back(new SeExpr2::ExprFuncClosure<FunctionCodeStorage>(std::move(f)));
         Function(offset) = _function_code_segments.back().get();
     }
 
@@ -155,6 +207,9 @@ class SymbolTable : public VarBlock {
         return Vec<double, d, true>(alloc(offset, d * sizeof(double)));
     }
 
+    // Set code segment for some Function declared in the VarBlockCreator
+    DeferredVarStorage& DeferredVar(uint32_t offset);
+
   private:
     // TODO: small object optimization
     double* alloc(uint32_t offset, size_t bytes)
@@ -171,6 +226,7 @@ class SymbolTable : public VarBlock {
 
     std::unordered_map<uint32_t, double*> _allocations;
     std::vector<std::unique_ptr<SeExpr2::ExprFuncX>> _function_code_segments;
+    std::unordered_map<uint32_t, DeferredVarRef> _deferred_vars;
 };
 
 /// A class that lets you register for the variables used by one or more expressions
@@ -185,6 +241,35 @@ class VarBlockCreator {
 
       public:
         Ref(const ExprType& type, uint32_t offset, uint32_t stride) : ExprVarRef(type), _offset(offset), _stride(stride)
+        {
+        }
+
+        uint32_t offset() const
+        {
+            return _offset;
+        }
+        uint32_t stride() const
+        {
+            return _stride;
+        }
+
+        void eval(double*) override
+        {
+            assert(false);
+        }
+        void eval(const char**) override
+        {
+            assert(false);
+        }
+    };
+
+    class DeferredRef : public ExprVarRef {
+        uint32_t _offset;
+        uint32_t _stride;
+
+      public:
+        DeferredRef(const ExprType& type, uint32_t offset, uint32_t stride)
+            : ExprVarRef(type), _offset(offset), _stride(stride)
         {
         }
 
@@ -287,7 +372,20 @@ class VarBlockCreator {
             throw std::runtime_error("Already registered a variable named " + name);
         } else {
             int offset = _offset++;
-            _vars.insert(std::make_pair(name, Ref(type, offset, type.dim())));
+            auto iter = _vars.insert(std::make_pair(name, Ref(type, offset, type.dim())));
+            _varPtrs[offset] = &iter.first->second;
+            return offset;
+        }
+    }
+
+    int registerDeferredVariable(const std::string& name, const ExprType& type)
+    {
+        if (_deferredVars.find(name) != _deferredVars.end()) {
+            throw std::runtime_error("Already registered a variable named " + name);
+        } else {
+            int offset = _offset++;
+            auto iter = _deferredVars.insert(std::make_pair(name, DeferredRef(type, offset, type.dim())));
+            _varPtrs[offset] = &iter.first->second;
             return offset;
         }
     }
@@ -298,7 +396,7 @@ class VarBlockCreator {
             throw std::runtime_error("Already registered a function named " + name);
         } else {
             int offset = _offset++;
-            _funcs.emplace(name, FuncSymbol(decl, offset));
+            auto iter = _funcs.emplace(name, FuncSymbol(decl, offset));
             return offset;
         }
     }
@@ -320,15 +418,22 @@ class VarBlockCreator {
     /// Get an evaluation handle (one needed per thread)
     VarBlock create() const
     {
-        return VarBlock(_offset);
+        return VarBlock(this, _offset);
     }
 
     /// Resolve the variable using anything in the data block (call from resolveVar in Expr subclass)
     ExprVarRef* resolveVar(const std::string& name) const
     {
-        auto it = _vars.find(name);
-        if (it != _vars.end())
-            return const_cast<Ref*>(&it->second);
+        {
+            auto it = _vars.find(name);
+            if (it != _vars.end())
+                return const_cast<Ref*>(&it->second);
+        }
+        {
+            auto it = _deferredVars.find(name);
+            if (it != _deferredVars.end())
+                return const_cast<DeferredRef*>(&it->second);
+        }
         return nullptr;
     }
 
@@ -338,6 +443,11 @@ class VarBlockCreator {
         if (it != _funcs.end())
             return &it->second.func();
         return nullptr;
+    }
+
+    const ExprVarRef* getVar(int offset) const
+    {
+        return _varPtrs.at(offset);
     }
 
     void dump() const
@@ -360,9 +470,22 @@ class VarBlockCreator {
 
   private:
     int _offset = 0;  // shared offset domain between vars and funcs
+    std::map<int, const ExprVarRef*> _varPtrs;
     std::map<std::string, Ref> _vars;
+    std::map<std::string, DeferredRef> _deferredVars;
     std::map<std::string, FuncSymbol> _funcs;
 };
+
+inline SymbolTable::DeferredVarStorage& SymbolTable::DeferredVar(uint32_t offset)
+{
+    auto iter = _deferred_vars.find(offset);
+    if (iter != _deferred_vars.end())
+        return iter->second.callable;
+
+    auto pair = _deferred_vars.emplace(offset, _creator->getVar(offset)->type());
+    Pointer(offset) = (double*)&pair.first->second;
+    return pair.first->second.callable;
+}
 
 }  // namespace
 
