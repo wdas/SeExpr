@@ -473,3 +473,12 @@ TEST(BasicTests, UsesVar)
     EXPECT_TRUE(expr.usesVar("centroid"));
     EXPECT_TRUE(expr.usesFunc("doStuff"));
 }
+
+TEST(BasicTests, AssignScalarToVector)
+{
+    Vec3d v(10.0, 20.0, 30.0);
+    v = 1.337;
+    EXPECT_DOUBLE_EQ(1.337, v[0]);
+    EXPECT_DOUBLE_EQ(1.337, v[1]);
+    EXPECT_DOUBLE_EQ(1.337, v[2]);
+}

@@ -203,6 +203,12 @@ class Vec {
         return *this;
     }
 
+    inline Vec& operator=(const T& val)
+    {
+        fill(val);
+        return *this;
+    }
+
     template <class Tother, bool refother>
     inline bool operator==(const Vec<Tother, d, refother>& other) const
     {
