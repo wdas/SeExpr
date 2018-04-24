@@ -37,22 +37,33 @@ all:
 	$(MKDIR) build/$(FLAVOR)
 	cd build/$(FLAVOR) && $(CMAKE) $(CMAKE_ARGS) $(EXTRA_CMAKE_ARGS) ../..
 	$(MAKE) -C build/$(FLAVOR) all
+.PHONY: all
 
 clean:
 	$(RM_R) build/$(FLAVOR) Linux-*
+.PHONY: clean
 
 install: all
 	$(MAKE) -C build/$(FLAVOR) install
+.PHONY: install
+
+checkDirty:
+	git diff --exit-code > /dev/null
+.PHONY: checkDirty
 
 format:
 	$(FIND) $(CURDIR)/src -name '*.cpp' | $(XARGS) $(CLANG_FORMAT) -i
 	$(FIND) $(CURDIR)/src -name '*.h' | $(XARGS) $(CLANG_FORMAT) -i
+.PHONY: format
 
 test: install
 	$(MAKE) -C build/$(FLAVOR) test
+.PHONY: test
 
 # TODO: run this via cmake
 imagetest: install
 	$(PYTHON) src/tests/imageTestsReportNew.py runall
+.PHONY: imagetest
 
-precommit: format test
+precommit: format checkDirty test
+.PHONY: precommit

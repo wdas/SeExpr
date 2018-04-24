@@ -63,7 +63,27 @@ struct Func : public ExprFuncSimple {
         args.outFpHandle<4>() = Vec4d(foo[0] + foo[1] + foo[2], bar[0] + bar[1], sum1, sum2);
     }
 } testFuncSimple;
+
+struct CounterFunc : public ExprFuncSimple {
+    CounterFunc() : ExprFuncSimple(true), i(0)
+    {
+    }
+
+    virtual ExprType prep(ExprFuncNode*, bool, ExprVarEnvBuilder&) const
+    {
+        return ExprType().FP(1).Varying();
+    }
+    virtual void eval(ArgHandle args)
+    {
+        args.outFp = i++;
+    }
+
+  private:
+    int i;
+} counterFuncSimple;
+
 ExprFunc testFunc(testFuncSimple, 4, 4);
+ExprFunc counterFunc(counterFuncSimple, 0, 0);
 
 struct SimpleExpression : public Expression {
     // Define simple scalar variable type that just stores the value it returns
@@ -107,6 +127,8 @@ struct SimpleExpression : public Expression {
             return &customFunc;
         if (name == "testFunc")
             return &testFunc;
+        if (name == "counter")
+            return &counterFunc;
         if (name == "countInvocations")
             return &countInvocationsFunc;
         return 0;
@@ -472,4 +494,19 @@ TEST(BasicTests, UsesVar)
 
     EXPECT_TRUE(expr.usesVar("centroid"));
     EXPECT_TRUE(expr.usesFunc("doStuff"));
+}
+
+TEST(BasicTests, AssignScalarToVector)
+{
+    Vec3d v(10.0, 20.0, 30.0);
+    v = 1.337;
+    EXPECT_DOUBLE_EQ(1.337, v[0]);
+    EXPECT_DOUBLE_EQ(1.337, v[1]);
+    EXPECT_DOUBLE_EQ(1.337, v[2]);
+}
+
+TEST(BasicTests, VaryingFunction)
+{
+    Expression expr("counter()");
+    EXPECT_FALSE(expr.isConstant());
 }
