@@ -396,7 +396,7 @@ class VarBlockCreator {
             throw std::runtime_error("Already registered a function named " + name);
         } else {
             int offset = _offset++;
-            auto iter = _funcs.emplace(name, FuncSymbol(decl, offset));
+            _funcs.emplace(name, FuncSymbol(decl, offset));
             return offset;
         }
     }
