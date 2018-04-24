@@ -43,6 +43,8 @@ clean:
 
 install: all
 	$(MAKE) -C build/$(FLAVOR) install
+checkDirty:
+	git diff --exit-code > /dev/null
 
 format:
 	$(FIND) $(CURDIR)/src -name '*.cpp' | $(XARGS) $(CLANG_FORMAT) -i
@@ -55,4 +57,4 @@ test: install
 imagetest: install
 	$(PYTHON) src/tests/imageTestsReportNew.py runall
 
-precommit: format test
+precommit: format checkDirty test
