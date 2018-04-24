@@ -217,8 +217,7 @@ class ExprNode {
             _type.setLifetime(child(0)->type());
             for (int i = 1; i < num; i++)
                 _type.setLifetime(_type, child(i)->type());
-        } else  // no children life is constant!
-            _type.Constant();
+        }
     };
 
     /// @{ @name Error Checking Helpers for Type Checking
