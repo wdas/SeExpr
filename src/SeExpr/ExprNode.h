@@ -214,7 +214,7 @@ class ExprNode {
         setType(t);
         int num = numChildren();
         if (num > 0) {
-            _type.setLifetime(child(0)->type());
+            _type.setLifetime(_type, child(0)->type());
             for (int i = 1; i < num; i++)
                 _type.setLifetime(_type, child(i)->type());
         }

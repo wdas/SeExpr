@@ -82,8 +82,29 @@ struct CounterFunc : public ExprFuncSimple {
     int i;
 } counterFuncSimple;
 
+struct FakeMapFunc : public ExprFuncSimple {
+    struct Data : public SeExpr2::ExprFuncNode::Data {};
+
+    FakeMapFunc() : ExprFuncSimple(true)
+    {
+    }
+
+    virtual ExprType prep(ExprFuncNode*, bool, ExprVarEnvBuilder&) const override
+    {
+        return ExprType().FP(3).Varying();
+    }
+    SeExpr2::ExprFuncNode::Data* evalConstant(const SeExpr2::ExprFuncNode* node, SeExpr2::ExprFuncSimple::ArgHandle args) const override
+    {
+        return new Data;
+    }
+    virtual void eval(ArgHandle args) override
+    {
+    }
+} fakeMapFuncSimple;
+
 ExprFunc testFunc(testFuncSimple, 4, 4);
 ExprFunc counterFunc(counterFuncSimple, 0, 0);
+ExprFunc fakeMapFunc(fakeMapFuncSimple, 1, 4);
 
 struct SimpleExpression : public Expression {
     // Define simple scalar variable type that just stores the value it returns
@@ -129,6 +150,8 @@ struct SimpleExpression : public Expression {
             return &testFunc;
         if (name == "counter")
             return &counterFunc;
+        if (name == "map")
+            return &fakeMapFunc;
         if (name == "countInvocations")
             return &countInvocationsFunc;
         return 0;
@@ -505,8 +528,14 @@ TEST(BasicTests, AssignScalarToVector)
     EXPECT_DOUBLE_EQ(1.337, v[2]);
 }
 
-TEST(BasicTests, VaryingFunction)
+TEST(BasicTests, VaryingNullaryFunction)
 {
-    Expression expr("counter()");
-    EXPECT_FALSE(expr.isConstant());
+    SimpleExpression expr("counter()");
+    ASSERT_FALSE(expr.isConstant());
+}
+
+TEST(BasicTests, VaryingMapFunction)
+{
+    SimpleExpression expr("map('/disk1/tmp/cube.ptx')");
+    ASSERT_FALSE(expr.isConstant());
 }
