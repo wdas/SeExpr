@@ -112,7 +112,7 @@ class ExprNode {
     /// Access to original string representation of current expression
     std::string toString() const
     {
-        return expr()->getExpr().substr(startPos(), length() + 1);
+        return length() ? expr()->getExpr().substr(startPos(), length() + 1) : "";
     };
 
     /// @{ @name Relationship Queries and Manipulation
@@ -191,7 +191,7 @@ class ExprNode {
     /// Access length of input string
     inline short int length() const
     {
-        return endPos() - startPos();
+        return startPos() < endPos() ? endPos() - startPos() : 0;
     };
 
     /// @}
