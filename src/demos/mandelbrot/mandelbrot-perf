@@ -4,9 +4,9 @@ rm -f plot.dat
 declare -a tests=(
     "mandelbrot-control"
     "mandelbrot-control2"
-    # "mandelbrot-seexpr2"
-    # "mandelbrot-seexpr2-varblock"
-    # "mandelbrot-seexpr2-varblock2"
+    "mandelbrot-seexpr2"
+    "mandelbrot-seexpr2-varblock"
+    "mandelbrot-seexpr2-varblock2"
 )
 
 i=0
