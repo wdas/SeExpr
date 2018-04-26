@@ -78,6 +78,20 @@ class ExprFuncX {
     {
     }
 
+    // This only exists because there is an outstanding bug in SeExpr2. A function call like map('/disk1/tmp/cube.ptx')
+    // is always marked by SeExpr2's type system as being constant, despite the plugin function specifying a return type
+    // of ExprType().FP(3).Varying() in it's prep() implementation. This is because SeExpr2 sees that it has a single
+    // constant string argument, and assumes it knows better than the plugin function and overrides the return type.
+    //
+    // This is a major issue for some calling applications that use expression constness as an indicator on whether or
+    // not to do data computation in preparation for expression evaluation. These sort of optimizations become either
+    // functionally broken, or undoable, under the coniditoins of this type system bug. This API is an escape hatch to
+    // keep calling application optimizations.
+    virtual bool forceReturnType() const
+    {
+        return false;
+    }
+
   protected:
     bool _isScalar;
     ExprType _type;
