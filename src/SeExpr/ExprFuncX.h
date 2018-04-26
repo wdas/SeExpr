@@ -112,10 +112,22 @@ class ExprFuncSimple : public ExprFuncX {
         {
             return Vec<double, d, true>(&fp[opData[i]]);
         }
+        template <int d>
+        Vec<const double, d, true> inFp(int i) const
+        {
+            return Vec<const double, d, true>(&fp[opData[i]]);
+        }
+
         char* inStr(int i)
         {
             return c[opData[i]];
         }
+
+        const char* inStr(int i) const
+        {
+            return c[opData[i]];
+        }
+
         int nargs() const
         {
             return _nargs;
