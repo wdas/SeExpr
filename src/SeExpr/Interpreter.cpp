@@ -521,18 +521,26 @@ int ExprLocalFunctionNode::buildInterpreterForCall(const ExprFuncNode* callerNod
         // evaluate the argument
         int operand = callerNode->child(c)->buildInterpreter(interpreter);
         if (child->type().isFP()) {
-            if (callerNode->promote(c) != 0) {
-                // promote the argument to the needed type
-                interpreter->addOp(getTemplatizedOp<Promote>(callerNode->promote(c)));
-                // int promotedOperand=interpreter->allocFP(callerNode->promote(c));
-                interpreter->addOperand(operand);
-                interpreter->addOperand(prototype()->interpreterOps(c));
-                interpreter->endOp();
-            } else {
-                interpreter->addOp(getTemplatizedOp<AssignOp>(child->type().dim()));
-                interpreter->addOperand(operand);
-                interpreter->addOperand(prototype()->interpreterOps(c));
-                interpreter->endOp();
+            const TypeConversion& conversion = callerNode->conversion(c);
+            switch(conversion) {
+                case TypeConversion::Undefined : {
+                    assert(false && "Undefined conversion");
+                } break;
+                case TypeConversion::NoConversion : {
+                    interpreter->addOp(getTemplatizedOp<AssignOp>(child->type().dim()));
+                    interpreter->addOperand(operand);
+                    interpreter->addOperand(prototype()->interpreterOps(c));
+                    interpreter->endOp();
+                } break;
+                case TypeConversion::ScalarToVector : {
+                    // promote the argument to the needed type
+                    interpreter->addOp(getTemplatizedOp<Promote>(conversion.final.dim()));
+                    // int promotedOperand=interpreter->allocFP(conversion.final.dim());
+                    interpreter->addOperand(operand);
+                    interpreter->addOperand(prototype()->interpreterOps(c));
+                    interpreter->endOp();
+                } break;
+                default: break; // TODO: need to handle VectorToScalar
             }
         } else {
             // TODO: string

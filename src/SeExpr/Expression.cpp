@@ -40,7 +40,7 @@
 namespace SeExpr2 {
 
 // Get debugging flag from environment
-bool Expression::debugging = getenv("SE_EXPR_DEBUG") != 0;
+bool Expression::debugging = true || getenv("SE_EXPR_DEBUG") != 0;
 // Choose the defeault strategy based on what we've compiled with (SEEXPR_ENABLE_LLVM)
 // And the environment variables SE_EXPR_DEBUG
 static Expression::EvaluationStrategy chooseDefaultEvaluationStrategy()
