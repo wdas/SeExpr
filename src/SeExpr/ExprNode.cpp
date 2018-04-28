@@ -594,8 +594,13 @@ ExprType ExprFuncNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder)
             checkCondition(nargs <= _func->maxArgs() || _func->maxArgs() < 0, "Too many args for function " + _name,
                            error)) {
             const ExprFuncX* funcx = _func->funcx();
+            assert(funcx);
             ExprType type = funcx->prep(this, wantScalar, envBuilder);
-            setTypeWithChildLife(type);
+            if (funcx->forceReturnType()) {
+                _type = type;
+            } else {
+                setTypeWithChildLife(type);
+            }
         } else {                                // didn't match num args or function not found
             ExprNode::prep(false, envBuilder);  // prep arguments anyways to catch as many errors as possible!
             setTypeWithChildLife(ExprType().Error());
