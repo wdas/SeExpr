@@ -124,10 +124,10 @@ class VarBlock {
 // helper class for using VarBlocks
 class SymbolTable : public VarBlock {
 #ifdef SEEXPR_USE_FOLLY
-    typedef folly::Function<void(SeExpr2::ExprFuncSimple::ArgHandle) const> FunctionCodeStorage;
+    typedef folly::Function<void(SeExpr2::ExprFuncSimple::ArgHandle&) const> FunctionCodeStorage;
     typedef folly::Function<void(double*) const> DeferredVarStorage;
 #else
-    typedef std::function<void(SeExpr2::ExprFuncSimple::ArgHandle)> FunctionCodeStorage;
+    typedef std::function<void(SeExpr2::ExprFuncSimple::ArgHandle&)> FunctionCodeStorage;
     typedef std::function<void(double*)> DeferredVarStorage;
 #endif
 
@@ -340,7 +340,7 @@ class VarBlockCreator {
             return ExprFuncSimple::genericPrep(node, scalarWanted, env, _decl);
         }
 
-        virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const override
+        virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle& args) const override
         {
             assert(args.varBlock);
             ExprFuncSimple** funcs = reinterpret_cast<ExprFuncSimple**>(const_cast<char*>(args.varBlock));
@@ -349,7 +349,7 @@ class VarBlockCreator {
             return funcsimple ? funcsimple->evalConstant(node, args) : nullptr;
         }
 
-        virtual void eval(ArgHandle args) override
+        virtual void eval(ArgHandle& args) override
         {
             assert(args.varBlock);
             ExprFuncSimple** funcs = reinterpret_cast<ExprFuncSimple**>(const_cast<char*>(args.varBlock));

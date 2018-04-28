@@ -170,11 +170,11 @@ class ExprFuncSimple : public ExprFuncX {
     virtual int buildInterpreter(const ExprFuncNode* node, Interpreter* interpreter) const;
 
     virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const = 0;
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle&) const
     {
         return nullptr;
     }
-    virtual void eval(ArgHandle args) = 0;
+    virtual void eval(ArgHandle& args) = 0;
 
     static ExprType genericPrep(ExprFuncNode* node,
                                 bool scalarWanted,
@@ -201,12 +201,12 @@ class ExprFuncClosure : public ExprFuncSimple {
         return ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const override
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle&) const override
     {
         return nullptr;
     }
 
-    virtual inline void eval(ArgHandle args) override
+    virtual inline void eval(ArgHandle& args) override
     {
         assert(_callable);
         _callable(args);

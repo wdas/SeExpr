@@ -44,11 +44,11 @@ struct Func : public ExprFuncSimple {
         valid &= node->checkArg(3, ExprType().String().Constant(), envBuilder);
         return valid ? ExprType().FP(4) : ExprType().Error();
     }
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle&) const
     {
         return nullptr;
     }
-    virtual void eval(ArgHandle args)
+    virtual void eval(ArgHandle& args)
     {
         const char* s1 = args.inStr(1);
         const char* s2 = args.inStr(3);
@@ -73,7 +73,7 @@ struct CounterFunc : public ExprFuncSimple {
     {
         return ExprType().FP(1).Varying();
     }
-    virtual void eval(ArgHandle args)
+    virtual void eval(ArgHandle& args)
     {
         args.outFp = i++;
     }
