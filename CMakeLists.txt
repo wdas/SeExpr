@@ -196,7 +196,7 @@ endif()
 if (DEFINED FOLLY_DIR)
     message(STATUS "FOLLY_DIR = ${FOLLY_DIR}")
     add_definitions(-DSEEXPR_USE_FOLLY)
-    include_directories(/disney/users/nkagan/folly/include/)
+    include_directories(SYSTEM ${FOLLY_DIR}/include)
     link_directories(${FOLLY_DIR}/${CMAKE_INSTALL_LIBDIR})
 endif()
 
