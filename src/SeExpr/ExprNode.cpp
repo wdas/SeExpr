@@ -643,7 +643,8 @@ const ExprFuncNode::Data* ExprFuncNode::getOrComputeData(ExprFuncSimple* f, void
     std::lock_guard<std::mutex> g(_data_mutex);
     if (_data)
         return _data.get();
-    _data.reset(f->evalConstant(this, *args_));
+    ExprFuncNode::Data* data = f->evalConstant(this, *args_);
+    _data.reset(data != ExprFuncNode::NoData() ? data : nullptr);
     return _data.get();
 }
 }

@@ -709,6 +709,11 @@ class ExprFuncNode : public ExprNode {
         }
     };
 
+    static ExprFuncNode::Data* NoData() {
+        static ExprFuncNode::Data nodata_;
+        return &nodata_;
+    }
+
     //! associate blind data with this node (subsequently owned by this object)
     /***
         Use this to set data associated with the node. Equivalently this is data

@@ -1188,11 +1188,6 @@ class CachedVoronoiFunc : public ExprFuncSimple {
         return valid ? ExprType().FP(3).Varying() : ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle&) const
-    {
-        return nullptr;
-    }
-
     virtual void eval(ArgHandle& args)
     {
         VoronoiPointData data;
