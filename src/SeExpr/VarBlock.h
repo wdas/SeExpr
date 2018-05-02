@@ -21,7 +21,10 @@
 #include <vector>
 #include <unordered_map>
 
-#ifdef SEEXPR_USE_FOLLY
+// this potentially sets SEEXPR_ENABLE_FOLLY
+#include "ExprConfig.h"
+
+#ifdef SEEXPR_ENABLE_FOLLY
 #include <folly/Function.h>
 #else
 #include <functional>
@@ -123,7 +126,7 @@ class VarBlock {
 
 // helper class for using VarBlocks
 class SymbolTable : public VarBlock {
-#ifdef SEEXPR_USE_FOLLY
+#ifdef SEEXPR_ENABLE_FOLLY
     typedef folly::Function<void(SeExpr2::ExprFuncSimple::ArgHandle&) const> FunctionCodeStorage;
     typedef folly::Function<void(double*) const> DeferredVarStorage;
 #else
