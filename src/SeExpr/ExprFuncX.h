@@ -109,7 +109,7 @@ class ExprFuncSimple : public ExprFuncX {
 
     class ArgHandle {
       public:
-        ArgHandle(const int* opData_, double* fp_, char** c_, std::vector<int>& /*callStack*/, const char* v)
+        ArgHandle(const int* opData_, double* fp_, char** c_, const char* v)
             : outFp(fp_[opData_[2]])
             , outStr(c_[opData_[2]])
             , data(reinterpret_cast<ExprFuncNode::Data*>(c_[opData_[1]]))
@@ -184,7 +184,7 @@ class ExprFuncSimple : public ExprFuncX {
                                 const ExprFuncDeclaration& decl);
 
   private:
-    static int EvalOp(const int* opData, double* fp, char** c, std::vector<int>& callStack);
+    static int EvalOp(const int* opData, double* fp, char** c);
 };
 
 template <typename FunctionCodeStorage>

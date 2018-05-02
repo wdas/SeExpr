@@ -77,7 +77,7 @@ void Interpreter::eval(VarBlock* block, bool debug) const
         }
         const std::pair<OpF, int>& op = ops[pc];
         const int* opCurr = &opData[0] + op.second;
-        pc += op.first(opCurr, fp, str, state.callStack);
+        pc += op.first(opCurr, fp, str);
     }
 }
 
@@ -178,7 +178,7 @@ struct BinaryOp {
         return a - floor(a / b) * b;
     }
 
-    static int f(const int* opData, double* fp, char**, std::vector<int>&)
+    static int f(const int* opData, double* fp, char**)
     {
         const double* in1 = fp + opData[0];
         const double* in2 = fp + opData[1];
@@ -237,7 +237,7 @@ struct BinaryOp {
 /// Computes a unary op on a FP[d]
 template <char op, int d>
 struct UnaryOp {
-    static int f(const int* opData, double* fp, char**, std::vector<int>&)
+    static int f(const int* opData, double* fp, char**)
     {
         const double* in = fp + opData[0];
         double* out = fp + opData[1];
@@ -265,7 +265,7 @@ struct UnaryOp {
 //! Subscripts
 template <int d>
 struct Subscript {
-    static int f(const int* opData, double* fp, char**, std::vector<int>&)
+    static int f(const int* opData, double* fp, char**)
     {
         int tuple = opData[0];
         int subscript = int(fp[opData[1]]);
@@ -281,7 +281,7 @@ struct Subscript {
 //! build a vector tuple from a bunch of numbers
 template <int d>
 struct Tuple {
-    static int f(const int* opData, double* fp, char**, std::vector<int>&)
+    static int f(const int* opData, double* fp, char**)
     {
         int out = opData[d];
         for (int k = 0; k < d; k++) {
@@ -294,7 +294,7 @@ struct Tuple {
 //! Assign a floating point to another (NOTE: if src and dest have different dimensions, use Promote)
 template <int d>
 struct AssignOp {
-    static int f(const int* opData, double* fp, char**, std::vector<int>&)
+    static int f(const int* opData, double* fp, char**)
     {
         int in = opData[0];
         int out = opData[1];
@@ -307,7 +307,7 @@ struct AssignOp {
 
 //! Assigns a string from one position to another
 struct AssignStrOp {
-    static int f(const int* opData, double*, char** c, std::vector<int>&)
+    static int f(const int* opData, double*, char** c)
     {
         int in = opData[0];
         int out = opData[1];
@@ -318,7 +318,7 @@ struct AssignStrOp {
 
 //! Jumps relative to current executing pc if cond is true
 struct CondJmpRelativeIfFalse {
-    static int f(const int* opData, double* fp, char**, std::vector<int>&)
+    static int f(const int* opData, double* fp, char**)
     {
         bool cond = (bool)fp[opData[0]];
         if (!cond)
@@ -330,7 +330,7 @@ struct CondJmpRelativeIfFalse {
 
 //! Jumps relative to current executing pc if cond is true
 struct CondJmpRelativeIfTrue {
-    static int f(const int* opData, double* fp, char**, std::vector<int>&)
+    static int f(const int* opData, double* fp, char**)
     {
         bool cond = (bool)fp[opData[0]];
         if (cond)
@@ -342,7 +342,7 @@ struct CondJmpRelativeIfTrue {
 
 //! Jumps relative to current executing pc unconditionally
 struct JmpRelative {
-    static int f(const int* opData, double*, char**, std::vector<int>&)
+    static int f(const int* opData, double*, char**)
     {
         return opData[0];
     }
@@ -350,7 +350,7 @@ struct JmpRelative {
 
 //! Evaluates an external variable
 struct EvalVar {
-    static int f(const int* opData, double* fp, char** c, std::vector<int>&)
+    static int f(const int* opData, double* fp, char** c)
     {
         ExprVarRef* ref = reinterpret_cast<ExprVarRef*>(c[opData[0]]);
         ref->eval(fp + opData[1]);  // ,c+opData[1]);
@@ -361,7 +361,7 @@ struct EvalVar {
 //! Evaluates an external variable using a variable block
 template <int dim>
 struct EvalVarBlock {
-    static int f(const int* opData, double* fp, char** c, std::vector<int>&)
+    static int f(const int* opData, double* fp, char** c)
     {
         if (c[0]) {
             double* basePointer = reinterpret_cast<double*>(c[0]) + opData[0];
@@ -378,7 +378,7 @@ struct EvalVarBlock {
 //! Evaluates an external variable using a variable block
 template <char uniform, int dim>
 struct EvalDeferredVar {
-    static int f(const int* opData, double* fp, char** c, std::vector<int>&)
+    static int f(const int* opData, double* fp, char** c)
     {
         if (c[0]) {
             int stride = opData[2];
@@ -397,7 +397,7 @@ struct EvalDeferredVar {
 //! Evaluates an external variable using a variable block
 template <char uniform, int dim>
 struct EvalVarBlockIndirect {
-    static int f(const int* opData, double* fp, char** c, std::vector<int>&)
+    static int f(const int* opData, double* fp, char** c)
     {
         if (c[0]) {
             int stride = opData[2];
@@ -422,7 +422,7 @@ struct EvalVarBlockIndirect {
 
 template <char op, int d>
 struct CompareEqOp {
-    static int f(const int* opData, double* fp, char**, std::vector<int>&)
+    static int f(const int* opData, double* fp, char**)
     {
         bool result = true;
         const double* in0 = fp + opData[0];
@@ -449,7 +449,7 @@ struct CompareEqOp {
 
 template <char op>
 struct CompareEqOp<op, 3> {
-    static int f(const int* opData, double* fp, char**, std::vector<int>&)
+    static int f(const int* opData, double* fp, char**)
     {
         bool eq = fp[opData[0]] == fp[opData[1]] && fp[opData[0] + 1] == fp[opData[1] + 1] &&
                   fp[opData[0] + 2] == fp[opData[1] + 2];
@@ -464,7 +464,7 @@ struct CompareEqOp<op, 3> {
 template <char op, int d>
 struct StrCompareEqOp {
     // TODO: this should rely on tokenization and not use strcmp
-    static int f(const int* opData, double* fp, char** c, std::vector<int>&)
+    static int f(const int* opData, double* fp, char** c)
     {
         switch (op) {
         case '=':
@@ -479,90 +479,18 @@ struct StrCompareEqOp {
 };
 }
 
-namespace {
-int ProcedureReturn(const int* opData, double*, char**, std::vector<int>& callStack)
-{
-    int newPC = callStack.back();
-    callStack.pop_back();
-    return newPC - opData[0];
-}
-}
-
-namespace {
-int ProcedureCall(const int* opData, double*, char**, std::vector<int>& callStack)
-{
-    callStack.push_back(opData[0]);
-    return opData[1];
-}
-}
-
 int ExprLocalFunctionNode::buildInterpreter(Interpreter* interpreter) const
 {
-    _procedurePC = interpreter->nextPC();
-    int lastOperand = 0;
-    for (int c = 0; c < numChildren(); c++)
-        lastOperand = child(c)->buildInterpreter(interpreter);
-    int basePC = interpreter->nextPC();
-    ;
-    interpreter->addOp(ProcedureReturn);
-    // int endPC =
-    interpreter->addOperand(basePC);
-    interpreter->endOp(false);
-    _returnedDataOp = lastOperand;
-
+    std::cerr << "Local Functions are deprecated" << std::endl;
+    exit(1);
     return 0;
 }
 
 int ExprLocalFunctionNode::buildInterpreterForCall(const ExprFuncNode* callerNode, Interpreter* interpreter) const
 {
-    std::vector<int> operands;
-    for (int c = 0; c < callerNode->numChildren(); c++) {
-        const ExprNode* child = callerNode->child(c);
-        // evaluate the argument
-        int operand = callerNode->child(c)->buildInterpreter(interpreter);
-        if (child->type().isFP()) {
-            if (callerNode->promote(c) != 0) {
-                // promote the argument to the needed type
-                interpreter->addOp(getTemplatizedOp<Promote>(callerNode->promote(c)));
-                // int promotedOperand=interpreter->allocFP(callerNode->promote(c));
-                interpreter->addOperand(operand);
-                interpreter->addOperand(prototype()->interpreterOps(c));
-                interpreter->endOp();
-            } else {
-                interpreter->addOp(getTemplatizedOp<AssignOp>(child->type().dim()));
-                interpreter->addOperand(operand);
-                interpreter->addOperand(prototype()->interpreterOps(c));
-                interpreter->endOp();
-            }
-        } else {
-            // TODO: string
-            assert(false);
-        }
-        operands.push_back(operand);
-    }
-    int outoperand = -1;
-    if (callerNode->type().isFP())
-        outoperand = interpreter->allocFP(callerNode->type().dim());
-    else if (callerNode->type().isString())
-        outoperand = interpreter->allocPtr();
-    else
-        assert(false);
-
-    int basePC = interpreter->nextPC();
-    interpreter->addOp(ProcedureCall);
-    int returnAddress = interpreter->addOperand(0);
-    interpreter->addOperand(_procedurePC - basePC);
-    interpreter->endOp(false);
-    // set return address
-    interpreter->opData[returnAddress] = interpreter->nextPC();
-
-    // TODO: copy result back and string
-    interpreter->addOp(getTemplatizedOp<AssignOp>(callerNode->type().dim()));
-    interpreter->addOperand(_returnedDataOp);
-    interpreter->addOperand(outoperand);
-    interpreter->endOp();
-
-    return outoperand;
+    std::cerr << "Local Functions are deprecated" << std::endl;
+    exit(1);
+    return 0;
 }
 
 int ExprNode::buildInterpreter(Interpreter* interpreter) const
