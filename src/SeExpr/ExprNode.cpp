@@ -637,13 +637,14 @@ bool ExprFuncNode::checkArg(int arg, ExprType type, ExprVarEnvBuilder& envBuilde
 
 const ExprFuncNode::Data* ExprFuncNode::getOrComputeData(ExprFuncSimple* f, void* args) const
 {
-    const ExprFuncSimple::ArgHandle* args_ = (const ExprFuncSimple::ArgHandle*)args;
+    ExprFuncSimple::ArgHandle* args_ = (ExprFuncSimple::ArgHandle*)args;
     if (_data)
         return _data.get();
     std::lock_guard<std::mutex> g(_data_mutex);
     if (_data)
         return _data.get();
-    _data.reset(f->evalConstant(this, *args_));
+    ExprFuncNode::Data* data = f->evalConstant(this, *args_);
+    _data.reset(data != ExprFuncNode::NoData() ? data : nullptr);
     return _data.get();
 }
 }

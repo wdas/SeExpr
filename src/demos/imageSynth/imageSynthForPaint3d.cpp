@@ -45,12 +45,7 @@ class RandFuncX : public ExprFuncSimple {
         return valid ? ExprType().FP(1).Varying() : ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const
-    {
-        return new Data;
-    }
-
-    virtual void eval(ArgHandle args)
+    virtual void eval(ArgHandle& args)
     {
         if (args.nargs() >= 2) {
             args.outFp = (args.inFp<1>(0)[0] - args.inFp<1>(1)[0]) / 2.0;
@@ -83,12 +78,7 @@ class MapFuncX : public ExprFuncSimple {
         return valid ? ExprType().FP(3).Varying() : ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const
-    {
-        return new Data;
-    }
-
-    virtual void eval(ArgHandle args)
+    virtual void eval(ArgHandle& args)
     {
         double* out = &args.outFp;
 
@@ -127,12 +117,7 @@ class TriplanarFuncX : public ExprFuncSimple {
         return valid ? ExprType().FP(3).Varying() : ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const
-    {
-        return new Data;
-    }
-
-    virtual void eval(ArgHandle args)
+    virtual void eval(ArgHandle& args)
     {
         double* out = &args.outFp;
 

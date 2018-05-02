@@ -1188,12 +1188,7 @@ class CachedVoronoiFunc : public ExprFuncSimple {
         return valid ? ExprType().FP(3).Varying() : ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const
-    {
-        return nullptr;
-    }
-
-    virtual void eval(ArgHandle args)
+    virtual void eval(ArgHandle& args)
     {
         VoronoiPointData data;
         int nargs = args.nargs();
@@ -1571,7 +1566,7 @@ class CurveFuncX : public ExprFuncSimple {
         return valid ? ExprType().FP(1).Varying() : ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle args) const
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle& args) const
     {
         CurveData<double>* data = new CurveData<double>;
         for (int i = 1; i < args.nargs() - 2; i += 3) {
@@ -1589,7 +1584,7 @@ class CurveFuncX : public ExprFuncSimple {
         return data;
     }
 
-    virtual void eval(ArgHandle args)
+    virtual void eval(ArgHandle& args)
     {
         const CurveData<double>* data = static_cast<const CurveData<double>*>(args.data);
         double param = args.inFp<1>(0)[0];
@@ -1624,12 +1619,12 @@ class CCurveFuncX : public ExprFuncSimple {
         return valid ? ExprType().FP(3).Varying() : ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle args) const
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle& args) const
     {
         CurveData<Vec3d>* data = new CurveData<Vec3d>;
         for (int i = 1; i < args.nargs() - 2; i += 3) {
             double pos = args.inFp<1>(i)[0];
-            Vec3dRef val(&args.inFp<3>(i + 1)[0]);
+            Vec3dConstRef val(&args.inFp<3>(i + 1)[0]);
             double interpDouble = args.inFp<1>(i + 2)[0];
             int interpInt = (int)interpDouble;
             Curve<Vec3d>::InterpType interpolant = (Curve<Vec3d>::InterpType)interpInt;
@@ -1642,7 +1637,7 @@ class CCurveFuncX : public ExprFuncSimple {
         return data;
     }
 
-    virtual void eval(ArgHandle args)
+    virtual void eval(ArgHandle& args)
     {
         const CurveData<Vec3d>* data = static_cast<const CurveData<Vec3d>*>(args.data);
         double param = args.inFp<1>(0)[0];
@@ -1669,7 +1664,7 @@ static const char* ccurve_docstring =
 
 class GetVar : public ExprFuncSimple {
     struct Data : public ExprFuncNode::Data {
-        typedef void (*func)(double* in, double* out);
+        typedef void (*func)(double* out, const double* in);
         Data(func fIn, int dim) : f(fIn), dim(dim)
         {
         }
@@ -1697,7 +1692,7 @@ class GetVar : public ExprFuncSimple {
         return varType.isValid() ? varType : ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle) const
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle&) const
     {
         return new Data(node->type().isFP() ? getTemplatizedOp<Assign, Data::func>(node->type().dim()) : nullptr,
                         node->type().dim());
@@ -1705,14 +1700,14 @@ class GetVar : public ExprFuncSimple {
 
     template <int d>
     struct Assign {
-        static void f(double* out, double* in)
+        static void f(double* out, const double* in)
         {
             for (int k = 0; k < d; k++)
                 out[k] = in[k];
         }
     };
 
-    virtual void eval(ArgHandle args)
+    virtual void eval(ArgHandle& args)
     {
         const Data* data = static_cast<const Data*>(args.data);
         assert(data);
@@ -1758,7 +1753,7 @@ class PrintFuncX : public ExprFuncSimple {
         return ExprType().FP(1).Constant();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle args) const
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle& args) const
     {
         // parse format string
         unsigned int bakeStart = 0;
@@ -1811,7 +1806,7 @@ class PrintFuncX : public ExprFuncSimple {
         return data;
     }
 
-    virtual void eval(ArgHandle args)
+    virtual void eval(ArgHandle& args)
     {
         const Data* data = (const Data*)args.data;
         int item = 1;
@@ -1864,12 +1859,12 @@ public:
         valid &= node->checkArg(1,ExprType().FP(1).Constant(),envBuilder);
         return valid ?ExprType().FP(3).Varying():ExprType().Error();
     }
-    virtual ExprFuncNode::Data* evalConstant(ArgHandle args) const
+    virtual ExprFuncNode::Data* evalConstant(ArgHandle& args) const
     {
         //std::cerr<<"evalling const "<<args.inFp<1>(1)<<std::endl;
         return new MyData(args.inFp<1>(1)[0]);
     }
-    virtual void eval(ArgHandle args)
+    virtual void eval(ArgHandle& args)
     {
         MyData* data=static_cast<MyData*>(args.data);
 

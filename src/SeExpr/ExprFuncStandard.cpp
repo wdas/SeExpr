@@ -66,45 +66,45 @@ ExprType ExprFuncStandard::prep(ExprFuncNode* node, bool scalarWanted, ExprVarEn
     }
 }
 
-int Func0Op(const int* opData, double* fp, char** c, std::vector<int>&)
+int Func0Op(const int* opData, double* fp, char** c)
 {
     fp[opData[1]] = ((ExprFuncStandard::Func0*)(c[opData[0]]))();
     return 1;
 }
-int Func1Op(const int* opData, double* fp, char** c, std::vector<int>&)
+int Func1Op(const int* opData, double* fp, char** c)
 {
     fp[opData[2]] = ((ExprFuncStandard::Func1*)(c[opData[0]]))(fp[opData[1]]);
     return 1;
 }
-int Func2Op(const int* opData, double* fp, char** c, std::vector<int>&)
+int Func2Op(const int* opData, double* fp, char** c)
 {
     fp[opData[3]] = ((ExprFuncStandard::Func2*)(c[opData[0]]))(fp[opData[1]], fp[opData[2]]);
     return 1;
 }
-int Func3Op(const int* opData, double* fp, char** c, std::vector<int>&)
+int Func3Op(const int* opData, double* fp, char** c)
 {
     fp[opData[4]] = ((ExprFuncStandard::Func3*)(c[opData[0]]))(fp[opData[1]], fp[opData[2]], fp[opData[3]]);
     return 1;
 }
-int Func4Op(const int* opData, double* fp, char** c, std::vector<int>&)
+int Func4Op(const int* opData, double* fp, char** c)
 {
     fp[opData[5]] =
         ((ExprFuncStandard::Func4*)(c[opData[0]]))(fp[opData[1]], fp[opData[2]], fp[opData[3]], fp[opData[4]]);
     return 1;
 }
-int Func5Op(const int* opData, double* fp, char** c, std::vector<int>&)
+int Func5Op(const int* opData, double* fp, char** c)
 {
     fp[opData[6]] = ((ExprFuncStandard::Func5*)(c[opData[0]]))(fp[opData[1]], fp[opData[2]], fp[opData[3]],
                                                                fp[opData[4]], fp[opData[5]]);
     return 1;
 }
-int Func6Op(const int* opData, double* fp, char** c, std::vector<int>&)
+int Func6Op(const int* opData, double* fp, char** c)
 {
     fp[opData[7]] = ((ExprFuncStandard::Func6*)(c[opData[0]]))(fp[opData[1]], fp[opData[2]], fp[opData[3]],
                                                                fp[opData[4]], fp[opData[5]], fp[opData[6]]);
     return 1;
 }
-int FuncNOp(const int* opData, double* fp, char** c, std::vector<int>&)
+int FuncNOp(const int* opData, double* fp, char** c)
 {
     int n = opData[1];
     double* vals = static_cast<double*>(alloca(n * sizeof(double)));
@@ -114,18 +114,18 @@ int FuncNOp(const int* opData, double* fp, char** c, std::vector<int>&)
     *out = ((ExprFuncStandard::Funcn*)(c[opData[0]]))(n, vals);
     return 1;
 }
-int Func1VOp(const int* opData, double* fp, char** c, std::vector<int>&)
+int Func1VOp(const int* opData, double* fp, char** c)
 {
     fp[opData[2]] = ((ExprFuncStandard::Func1v*)(c[opData[0]]))(Vec3d::copy(&fp[opData[1]]));
     return 1;
 }
-int Func2VOp(const int* opData, double* fp, char** c, std::vector<int>&)
+int Func2VOp(const int* opData, double* fp, char** c)
 {
     fp[opData[3]] =
         ((ExprFuncStandard::Func2v*)(c[opData[0]]))(Vec3d::copy(&fp[opData[1]]), Vec3d::copy(&fp[opData[2]]));
     return 1;
 }
-int Func1VVOp(const int* opData, double* fp, char** c, std::vector<int>&)
+int Func1VVOp(const int* opData, double* fp, char** c)
 {
     Vec3d v = ((ExprFuncStandard::Func1vv*)(c[opData[0]]))(Vec3d::copy(&fp[opData[1]]));
     double* out = &fp[opData[2]];
@@ -133,7 +133,7 @@ int Func1VVOp(const int* opData, double* fp, char** c, std::vector<int>&)
         out[k] = v[k];
     return 1;
 }
-int Func2VVOp(const int* opData, double* fp, char** c, std::vector<int>&)
+int Func2VVOp(const int* opData, double* fp, char** c)
 {
     Vec3d v = ((ExprFuncStandard::Func2vv*)(c[opData[0]]))(Vec3d::copy(&fp[opData[1]]), Vec3d::copy(&fp[opData[2]]));
     double* out = &fp[opData[3]];
@@ -141,7 +141,7 @@ int Func2VVOp(const int* opData, double* fp, char** c, std::vector<int>&)
         out[k] = v[k];
     return 1;
 }
-int FuncNVOp(const int* opData, double* fp, char** c, std::vector<int>&)
+int FuncNVOp(const int* opData, double* fp, char** c)
 {
     int n = opData[1];
     Vec3d* vals = static_cast<Vec3d*>(alloca(n * sizeof(Vec3d)));
@@ -151,7 +151,7 @@ int FuncNVOp(const int* opData, double* fp, char** c, std::vector<int>&)
     *out = ((ExprFuncStandard::Funcnv*)(c[opData[0]]))(n, vals);
     return 1;
 }
-int FuncNVVOp(const int* opData, double* fp, char** c, std::vector<int>&)
+int FuncNVVOp(const int* opData, double* fp, char** c)
 {
     int n = opData[1];
     Vec3d* vals = static_cast<Vec3d*>(alloca(n * sizeof(Vec3d)));

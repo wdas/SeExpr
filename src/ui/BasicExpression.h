@@ -79,12 +79,12 @@ class BasicExpression : public SeExpr2::Expression {
             return valid ? SeExpr2::ExprType().FP(3).Varying() : SeExpr2::ExprType().Error();
         }
 
-        virtual SeExpr2::ExprFuncNode::Data* evalConstant(const SeExpr2::ExprFuncNode* node, ArgHandle args) const
+        virtual SeExpr2::ExprFuncNode::Data* evalConstant(const SeExpr2::ExprFuncNode* node, ArgHandle& args) const
         {
             return new SeExpr2::ExprFuncNode::Data();
         }
 
-        virtual void eval(ArgHandle args)
+        virtual void eval(ArgHandle& args)
         {
             double* out = &args.outFp;
             for (int i = 0; i < 3; i++)

@@ -21,3 +21,6 @@
 #	define	SEEXPR_ENABLE_LLVM
 #endif
 
+#if @SEEXPR_ENABLE_FOLLY@
+#   define  SEEXPR_ENABLE_FOLLY
+#endif

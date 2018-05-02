@@ -109,7 +109,7 @@ class ExprFuncSimple : public ExprFuncX {
 
     class ArgHandle {
       public:
-        ArgHandle(const int* opData_, double* fp_, char** c_, std::vector<int>& /*callStack*/, const char* v)
+        ArgHandle(const int* opData_, double* fp_, char** c_, const char* v)
             : outFp(fp_[opData_[2]])
             , outStr(c_[opData_[2]])
             , data(reinterpret_cast<ExprFuncNode::Data*>(c_[opData_[1]]))
@@ -170,11 +170,13 @@ class ExprFuncSimple : public ExprFuncX {
     virtual int buildInterpreter(const ExprFuncNode* node, Interpreter* interpreter) const;
 
     virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const = 0;
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const
+
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle&) const
     {
-        return nullptr;
+        return ExprFuncNode::NoData();
     }
-    virtual void eval(ArgHandle args) = 0;
+
+    virtual void eval(ArgHandle& args) = 0;
 
     static ExprType genericPrep(ExprFuncNode* node,
                                 bool scalarWanted,
@@ -182,7 +184,7 @@ class ExprFuncSimple : public ExprFuncX {
                                 const ExprFuncDeclaration& decl);
 
   private:
-    static int EvalOp(const int* opData, double* fp, char** c, std::vector<int>& callStack);
+    static int EvalOp(const int* opData, double* fp, char** c);
 };
 
 template <typename FunctionCodeStorage>
@@ -201,12 +203,7 @@ class ExprFuncClosure : public ExprFuncSimple {
         return ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle) const override
-    {
-        return nullptr;
-    }
-
-    virtual inline void eval(ArgHandle args) override
+    virtual inline void eval(ArgHandle& args) override
     {
         assert(_callable);
         _callable(args);

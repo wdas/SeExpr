@@ -31,7 +31,7 @@ class VarBlock;
 template <int d>
 struct Promote {
     // TODO: this needs a name that is prefixed by Se!
-    static int f(const int* opData, double* fp, char**, std::vector<int>&)
+    static int f(const int* opData, double* fp, char**)
     {
         int posIn = opData[0];
         int posOut = opData[1];
@@ -50,7 +50,6 @@ class Interpreter : public Evaluator {
     struct State {
         std::vector<double> d;  // double data (constants and evaluated)
         std::vector<char*> s;   // constant and evaluated pointer data
-        std::vector<int> callStack;
     };
 
     mutable State state;
@@ -60,7 +59,7 @@ class Interpreter : public Evaluator {
     VarToLoc varToLoc;
 
     /// Op function pointer arguments are (int* currOpData,double* currD,char** c,std::stack<int>& callStackurrS)
-    typedef int (*OpF)(const int*, double*, char**, std::vector<int>&);
+    typedef int (*OpF)(const int*, double*, char**);
 
     std::vector<std::pair<OpF, int> > ops;
 
@@ -108,7 +107,7 @@ class Interpreter : public Evaluator {
             int pc = ops.size() - 1;
             const std::pair<OpF, int>& op = ops[pc];
             int* opCurr = &opData[0] + op.second;
-            pc += op.first(opCurr, fp, str, state.callStack);
+            pc += op.first(opCurr, fp, str);
         }
     }
 
