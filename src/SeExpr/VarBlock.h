@@ -154,20 +154,27 @@ class SymbolTable : public VarBlock {
     };
 
   public:
-    explicit SymbolTable(VarBlock&& block) : VarBlock(std::move(block))
+    explicit SymbolTable(VarBlock&& block, double* stack = nullptr, size_t stackSize = 0)
+        : VarBlock(std::move(block))
+        , _stack(stack)
+        , _stackRemaining(stackSize)
+        , _allocations(VarBlock::numSymbols(), nullptr)
     {
     }
 
-    SymbolTable(SymbolTable&& other)
+    SymbolTable(SymbolTable&& other, double* stack = nullptr, size_t stackSize = 0)
         : VarBlock(std::move(other))
-        , _allocations(std::move(other._allocations))
+        , _stack(stack)
+        , _stackRemaining(stackSize)
         , _function_code_segments(std::move(other._function_code_segments))
+        , _allocations(std::move(other._allocations))
     {
     }
 
     SymbolTable& operator=(SymbolTable&& other)
     {
-        _allocations = std::move(other._allocations);
+        _stack = std::move(other._stack);
+        _stackRemaining = std::move(other._stackRemaining);
         _function_code_segments = std::move(other._function_code_segments);
         return *this;
     }
@@ -177,8 +184,6 @@ class SymbolTable : public VarBlock {
 
     virtual ~SymbolTable()
     {
-        for (auto pair : _allocations)
-            free(pair.second);
     }
 
     // Set code segment for some Function declared in the VarBlockCreator
@@ -199,7 +204,7 @@ class SymbolTable : public VarBlock {
     // their own variables with a guaranteed lifetime
     double& Scalar(uint32_t offset)
     {
-        return *alloc(offset, sizeof(double));
+        return *alloc(offset, 1);
     }
 
     // dumb helper for integrations in apps that couldn't be bothered to have clean ownership of
@@ -207,29 +212,36 @@ class SymbolTable : public VarBlock {
     template <int d>
     Vec<double, d, true> Vector(uint32_t offset)
     {
-        return Vec<double, d, true>(alloc(offset, d * sizeof(double)));
+        return Vec<double, d, true>(alloc(offset, d));
     }
 
     // Set code segment for some Function declared in the VarBlockCreator
     DeferredVarStorage& DeferredVar(uint32_t offset);
 
   private:
-    // TODO: small object optimization
-    double* alloc(uint32_t offset, size_t bytes)
+    double* alloc(uint32_t offset, size_t doublesNeeded)
     {
-        auto iter = _allocations.find(offset);
-        if (iter != _allocations.end())
-            return iter->second;
+        if (_allocations[offset])
+            return _allocations[offset];
 
-        double* ptr = (double*)malloc(bytes);
-        _allocations[offset] = ptr;
+        assert(_stack && "Invalid stack provided");
+        if (!_stackRemaining) {
+            throw "SymbolTable has no stack space remaining";
+        }
+
+        double* ptr = _stack;
+        _stack += doublesNeeded;
+        _stackRemaining -= doublesNeeded;
         Pointer(offset) = ptr;
+        _allocations[offset] = ptr;
         return ptr;
     }
 
-    std::unordered_map<uint32_t, double*> _allocations;
+    double* _stack;
+    size_t _stackRemaining;
     std::vector<std::unique_ptr<SeExpr2::ExprFuncX>> _function_code_segments;
     std::unordered_map<uint32_t, DeferredVarRef> _deferred_vars;
+    std::vector<double*> _allocations;
 };
 
 /// A class that lets you register for the variables used by one or more expressions

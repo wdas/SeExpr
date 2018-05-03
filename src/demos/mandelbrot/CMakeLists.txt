@@ -18,3 +18,7 @@ target_link_libraries(mandelbrot-seexpr2-varblock SeExpr2)
 add_executable(mandelbrot-seexpr2-varblock2 mandelbrot-seexpr2-varblock2.cpp)
 install(TARGETS mandelbrot-seexpr2-varblock2 DESTINATION share/test/SeExpr2)
 target_link_libraries(mandelbrot-seexpr2-varblock2 SeExpr2)
+
+add_executable(mandelbrot-seexpr2-varblock3 mandelbrot-seexpr2-varblock3.cpp)
+install(TARGETS mandelbrot-seexpr2-varblock3 DESTINATION share/test/SeExpr2)
+target_link_libraries(mandelbrot-seexpr2-varblock3 SeExpr2)
