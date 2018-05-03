@@ -369,14 +369,16 @@ class VarBlockCreator {
         }
 
       private:
-        const ExprFuncSimple* funcSimple(ArgHandle& args) const {
+        const ExprFuncSimple* funcSimple(ArgHandle& args) const
+        {
             assert(args.varBlock);
             const ExprFuncSimple** funcs = reinterpret_cast<const ExprFuncSimple**>(const_cast<char*>(args.varBlock));
             assert(funcs);
             return funcs[offset()];
         }
 
-        ExprFuncSimple* funcSimple(ArgHandle& args) {
+        ExprFuncSimple* funcSimple(ArgHandle& args)
+        {
             assert(args.varBlock);
             ExprFuncSimple** funcs = reinterpret_cast<ExprFuncSimple**>(const_cast<char*>(args.varBlock));
             assert(funcs);

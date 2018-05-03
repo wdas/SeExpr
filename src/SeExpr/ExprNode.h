@@ -709,7 +709,8 @@ class ExprFuncNode : public ExprNode {
         }
     };
 
-    static ExprFuncNode::Data* NoData() {
+    static ExprFuncNode::Data* NoData()
+    {
         static ExprFuncNode::Data nodata_;
         return &nodata_;
     }
