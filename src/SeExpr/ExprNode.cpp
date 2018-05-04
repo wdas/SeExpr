@@ -132,7 +132,7 @@ ExprType ExprNode::prep(bool, ExprVarEnvBuilder& envBuilder)
     if (error)
         setType(ExprType().Error());
     else
-        setTypeWithChildLife(ExprType().None());
+        setTypeWithChildLife(ExprType().None().Varying());
 
     return _type;
 }
@@ -341,7 +341,7 @@ ExprType ExprAssignNode::prep(bool, ExprVarEnvBuilder& envBuilder)
     if (error)
         setType(ExprType().Error());
     else
-        setTypeWithChildLife(ExprType().None());
+        setTypeWithChildLife(ExprType().None().Varying());
     return _type;
 }
 

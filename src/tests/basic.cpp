@@ -508,3 +508,17 @@ TEST(BasicTests, VaryingFunction)
     Expression expr("counter()");
     EXPECT_FALSE(expr.isConstant());
 }
+
+TEST(BasicTests, IfStatement)
+{
+    Expression expr(
+        "foo=4;"
+        "if (1==1) { foo = 1337; }"
+        "foo");
+
+    EXPECT_TRUE(expr.syntaxOK());
+    EXPECT_TRUE(expr.isValid());
+
+    double result = expr.evalFP()[0];
+    EXPECT_DOUBLE_EQ(result, 1337);
+}
