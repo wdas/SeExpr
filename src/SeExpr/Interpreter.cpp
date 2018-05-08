@@ -928,6 +928,7 @@ int ExprCondNode::buildInterpreter(Interpreter* interpreter) const
 
     // true way of working
     int op1 = child(1)->buildInterpreter(interpreter);
+    op1 = promoteOperand(interpreter, child(1)->type(), type(), op1);
     if (type().isFP())
         interpreter->addOp(getTemplatizedOp<AssignOp>(dimout));
     else if (type().isString())
@@ -948,6 +949,7 @@ int ExprCondNode::buildInterpreter(Interpreter* interpreter) const
 
     // false way of working
     int op2 = child(2)->buildInterpreter(interpreter);
+    op2 = promoteOperand(interpreter, child(2)->type(), type(), op2);
     if (type().isFP())
         interpreter->addOp(getTemplatizedOp<AssignOp>(dimout));
     else if (type().isString())

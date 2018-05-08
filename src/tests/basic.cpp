@@ -522,3 +522,20 @@ TEST(BasicTests, IfStatement)
     double result = expr.evalFP()[0];
     EXPECT_DOUBLE_EQ(result, 1337);
 }
+
+TEST(BasicTests, VectorPromotionThroughTernary)
+{
+    SimpleExpression expr(
+        "vScale = x ? 0.1 : [0.2, 0.3, 0.4];"
+        "vScale");
+    expr.setDesiredReturnType(ExprType().FP(3).Varying());
+    expr.x.value = 1.0;
+
+    EXPECT_TRUE(expr.syntaxOK());
+    EXPECT_TRUE(expr.isValid());
+
+    const double* result = expr.evalFP();
+    EXPECT_DOUBLE_EQ(result[0], 0.1);
+    EXPECT_DOUBLE_EQ(result[1], 0.1);
+    EXPECT_DOUBLE_EQ(result[2], 0.1);
+}
