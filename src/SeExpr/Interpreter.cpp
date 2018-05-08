@@ -479,6 +479,21 @@ struct StrCompareEqOp {
 };
 }
 
+int promoteOperand(Interpreter* interpreter, const ExprType& operandType, const ExprType& desiredType, int operand)
+{
+    if (desiredType.isFP() && desiredType.dim() > 1 && operandType.isFP() && operandType.dim() == 1) {
+        interpreter->addOp(getTemplatizedOp<Promote>(desiredType.dim()));
+        int promoteOperand = interpreter->allocFP(desiredType.dim());
+        interpreter->addOperand(operand);
+        interpreter->addOperand(promoteOperand);
+        operand = promoteOperand;
+        interpreter->endOp();
+        return operand;
+    } else {
+        return operand;
+    }
+}
+
 int ExprLocalFunctionNode::buildInterpreter(Interpreter* interpreter) const
 {
     std::cerr << "Local Functions are deprecated" << std::endl;
@@ -533,28 +548,12 @@ int ExprVecNode::buildInterpreter(Interpreter* interpreter) const
 int ExprBinaryOpNode::buildInterpreter(Interpreter* interpreter) const
 {
     const ExprNode *child0 = child(0), *child1 = child(1);
-    int dim0 = child0->type().dim(), dim1 = child1->type().dim(), dimout = type().dim();
     int op0 = child0->buildInterpreter(interpreter);
     int op1 = child1->buildInterpreter(interpreter);
-    if (dimout > 1) {
-        if (dim0 != dimout) {
-            interpreter->addOp(getTemplatizedOp<Promote>(dimout));
-            int promoteOp0 = interpreter->allocFP(dimout);
-            interpreter->addOperand(op0);
-            interpreter->addOperand(promoteOp0);
-            op0 = promoteOp0;
-            interpreter->endOp();
-        }
-        if (dim1 != dimout) {
-            interpreter->addOp(getTemplatizedOp<Promote>(dimout));
-            int promoteOp1 = interpreter->allocFP(dimout);
-            interpreter->addOperand(op1);
-            interpreter->addOperand(promoteOp1);
-            op1 = promoteOp1;
-            interpreter->endOp();
-        }
-    }
+    op0 = promoteOperand(interpreter, child(0)->type(), type(), op0);
+    op1 = promoteOperand(interpreter, child(1)->type(), type(), op1);
 
+    int dimout = type().dim();
     switch (_op) {
     case '+':
         interpreter->addOp(getTemplatizedOp2<'+', BinaryOp>(dimout));
@@ -885,30 +884,15 @@ int ExprCompareEqNode::buildInterpreter(Interpreter* interpreter) const
     int op1 = child1->buildInterpreter(interpreter);
 
     if (child0->type().isFP()) {
-        int dim0 = child0->type().dim(), dim1 = child1->type().dim();
-        int dimCompare = std::max(dim0, dim1);
-        if (dimCompare > 1) {
-            if (dim0 == 1) {
-                interpreter->addOp(getTemplatizedOp<Promote>(dim1));
-                int promotedOp0 = interpreter->allocFP(dim1);
-                interpreter->addOperand(op0);
-                interpreter->addOperand(promotedOp0);
-                interpreter->endOp();
-                op0 = promotedOp0;
-            }
-            if (dim1 == 1) {
-                interpreter->addOp(getTemplatizedOp<Promote>(dim0));
-                int promotedOp1 = interpreter->allocFP(dim0);
-                interpreter->addOperand(op1);
-                interpreter->addOperand(promotedOp1);
-                interpreter->endOp();
-                op1 = promotedOp1;
-            }
-        }
+        const ExprType& type0 = child(0)->type();
+        const ExprType& type1 = child(1)->type();
+        ExprType desiredType = ExprType().FP(std::max(type0.dim(), type1.dim())).setLifetime(type0, type1);
+        op0 = promoteOperand(interpreter, type0, desiredType, op0);
+        op1 = promoteOperand(interpreter, type1, desiredType, op1);
         if (_op == '=')
-            interpreter->addOp(getTemplatizedOp2<'=', CompareEqOp>(dimCompare));
+            interpreter->addOp(getTemplatizedOp2<'=', CompareEqOp>(desiredType.dim()));
         else if (_op == '!')
-            interpreter->addOp(getTemplatizedOp2<'!', CompareEqOp>(dimCompare));
+            interpreter->addOp(getTemplatizedOp2<'!', CompareEqOp>(desiredType.dim()));
         else
             assert(false && "Invalid operation");
     } else if (child0->type().isString()) {
