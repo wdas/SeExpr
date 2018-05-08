@@ -488,10 +488,8 @@ int promoteOperand(Interpreter* interpreter, const ExprType& operandType, const 
         interpreter->addOperand(promoteOperand);
         operand = promoteOperand;
         interpreter->endOp();
-        return operand;
-    } else {
-        return operand;
     }
+    return operand;
 }
 
 int ExprLocalFunctionNode::buildInterpreter(Interpreter* interpreter) const
