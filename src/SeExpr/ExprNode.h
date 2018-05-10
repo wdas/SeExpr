@@ -35,6 +35,7 @@
 #include "Vec.h"
 #include "Interpreter.h"
 #include "IndentedStreamBuf.h"
+#include "TypeConversion.h"
 
 namespace SeExpr2 {
 class ExprFunc;
@@ -729,9 +730,9 @@ class ExprFuncNode : public ExprNode {
         Use this to get data associated in the prep() routine. This is typically
         used from ExprFuncX::eval()
     */
-    int promote(int i) const
+    const TypeConversion& conversion(int i) const
     {
-        return _promote[i];
+        return _conversions[i];
     }
     const ExprFunc* func() const
     {
@@ -747,7 +748,7 @@ class ExprFuncNode : public ExprNode {
                                               //    int _nargs;
                                               //    mutable std::vector<double> _scalarArgs;
                                               //    mutable std::vector<Vec3d> _vecArgs;
-    mutable std::vector<int> _promote;
+    mutable std::vector<TypeConversion> _conversions;
     mutable std::mutex _data_mutex;
     mutable std::unique_ptr<const Data> _data;
 };
