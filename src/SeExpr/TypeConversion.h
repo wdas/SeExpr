@@ -24,8 +24,6 @@ struct TypeConversion {
                 category = ScalarToVector;
             }
         }
-
-        std::cout << natural.toString() << " ==> " << final.toString() << " :: " << category << std::endl;
     }
 
     operator Category() const
