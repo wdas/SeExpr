@@ -434,16 +434,40 @@ LLVM_VALUE callPrintf(const ExprFuncNode* seFunc, LLVM_BUILDER Builder, Function
     return ConstantFP::get(Type::getDoubleTy(llvmContext), 0.0);
 }
 
-inline LLVM_VALUE codegen_expect_scalar(LLVM_VALUE value)
+LLVM_VALUE codegen_convert_vector_to_scalar(LLVM_BUILDER Builder, LLVM_VALUE vectorValue)
 {
-    assert(!value->getType()->isVectorTy());
+    ConstantInt* zero = ConstantInt::get(Type::getInt32Ty(Builder.getContext()), 0);
+    return Builder.CreateExtractElement(vectorValue, zero);
+}
+
+LLVM_VALUE codegen_convert_scalar_to_vector(LLVM_BUILDER Builder, LLVM_VALUE scalarValue, unsigned dim)
+{
+    LLVMContext& llvmContext = Builder.getContext();
+    VectorType* doubleVecTy = VectorType::get(Type::getDoubleTy(llvmContext), dim);
+    LLVM_VALUE vecVal = UndefValue::get(doubleVecTy);
+    for (unsigned i = 0; i < dim; i++)
+        vecVal = Builder.CreateInsertElement(vecVal, scalarValue, ConstantInt::get(Type::getInt32Ty(llvmContext), i));
+    return vecVal;
+}
+
+inline LLVM_VALUE codegen_expect_scalar(LLVM_BUILDER Builder, LLVM_VALUE value)
+{
+    // TODO: Fix SEEXPR-242: change LLVM code generation to honor inferred type demotions
+    // assert(!value->getType()->isVectorTy());
+    if (value->getType()->isVectorTy()) {
+        return codegen_convert_vector_to_scalar(Builder, value);
+    }
     return value;
 }
 
-inline LLVM_VALUE codegen_expect_vector(LLVM_VALUE value, unsigned dim)
+inline LLVM_VALUE codegen_expect_vector(LLVM_BUILDER Builder, LLVM_VALUE value, unsigned dim)
 {
-    assert(value->getType()->isVectorTy());
-    assert(value->getType()->getVectorNumElements() == dim);
+    // TODO: Fix SEEXPR-242: change LLVM code generation to honor inferred type demotions
+    // assert(value->getType()->isVectorTy());
+    // assert(value->getType()->getVectorNumElements() == dim);
+    if (!value->getType()->isVectorTy()) {
+        return codegen_convert_scalar_to_vector(Builder, value, dim);
+    }
     return value;
 }
 
@@ -513,7 +537,7 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode* funcNode, LLVM_BUILDER Builder
             } break;
             case TypeConversion::NoConversion: {
                 if (argType.dim() > 1) {  // vector arg
-                    argValue = codegen_expect_vector(argValue, argType.dim());
+                    argValue = codegen_expect_vector(Builder, argValue, argType.dim());
                     for (int comp = 0; comp < argType.dim(); comp++) {
                         LLVM_VALUE compIndex = ConstantInt::get(Type::getInt32Ty(llvmContext), comp);
                         LLVM_VALUE val = Builder.CreateExtractElement(argValue, compIndex);
@@ -522,14 +546,14 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode* funcNode, LLVM_BUILDER Builder
                     }
                     fpIdx += argType.dim();
                 } else {  // scalar arg
-                    argValue = codegen_expect_scalar(argValue);
+                    argValue = codegen_expect_scalar(Builder, argValue);
                     LLVM_VALUE fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx, "fpArgPtr-scalar");
                     Builder.CreateStore(argValue, fpArgPtr);
                     fpIdx++;
                 }
             } break;
             case TypeConversion::VectorToScalar: {
-                argValue = codegen_expect_vector(argValue, argType.dim());
+                argValue = codegen_expect_vector(Builder, argValue, argType.dim());
                 ConstantInt* zero = ConstantInt::get(Type::getInt32Ty(Builder.getContext()), 0);
                 LLVM_VALUE val = Builder.CreateExtractElement(argValue, zero, "vectorToScalar-extract");
                 LLVM_VALUE fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx, "fpArgPtr-vectorToScalar");
@@ -537,7 +561,7 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode* funcNode, LLVM_BUILDER Builder
                 fpIdx++;
             } break;
             case TypeConversion::ScalarToVector: {
-                argValue = codegen_expect_scalar(argValue);
+                argValue = codegen_expect_scalar(Builder, argValue);
                 for (int comp = 0; comp < conversion.final.dim(); comp++) {
                     LLVM_VALUE fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx + comp, "fpArgPtr-scalarToVector");
                     Builder.CreateStore(argValue, fpArgPtr);
