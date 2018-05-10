@@ -544,12 +544,10 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode* funcNode, LLVM_BUILDER Builder
                         LLVM_VALUE fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx + comp, "fpArgPtr-vector");
                         Builder.CreateStore(val, fpArgPtr);
                     }
-                    fpIdx += argType.dim();
                 } else {  // scalar arg
                     argValue = codegen_expect_scalar(Builder, argValue);
                     LLVM_VALUE fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx, "fpArgPtr-scalar");
                     Builder.CreateStore(argValue, fpArgPtr);
-                    fpIdx++;
                 }
             } break;
             case TypeConversion::VectorToScalar: {
@@ -558,7 +556,6 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode* funcNode, LLVM_BUILDER Builder
                 LLVM_VALUE val = Builder.CreateExtractElement(argValue, zero, "vectorToScalar-extract");
                 LLVM_VALUE fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx, "fpArgPtr-vectorToScalar");
                 Builder.CreateStore(val, fpArgPtr);
-                fpIdx++;
             } break;
             case TypeConversion::ScalarToVector: {
                 argValue = codegen_expect_scalar(Builder, argValue);
@@ -566,9 +563,9 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode* funcNode, LLVM_BUILDER Builder
                     LLVM_VALUE fpArgPtr = Builder.CreateConstGEP1_32(fpArg, fpIdx + comp, "fpArgPtr-scalarToVector");
                     Builder.CreateStore(argValue, fpArgPtr);
                 }
-                fpIdx += conversion.final.dim();
             } break;
             }
+            fpIdx += conversion.final.dim();
         } else if (argType.isString()) {
             unsigned operand = strIdx;
             LLVM_VALUE operandVal = ConstantInt::get(Type::getInt32Ty(llvmContext), operand);
