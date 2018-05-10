@@ -322,7 +322,6 @@ TEST(BasicTests, DemotionOfVarArgs)
     expr.x.value = 0;
     expr.y.value = .5;
     EXPECT_TRUE(expr.isValid());
-    std::cout << expr.parseError() << std::endl;
     EXPECT_TRUE(!expr.isConstant());
     EXPECT_TRUE(expr.returnType().isFP(1));
     const double* val = expr.evalFP();
