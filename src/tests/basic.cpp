@@ -197,7 +197,11 @@ struct SimpleExpression : public Expression {
 
     // Constructor
     SimpleExpression(const std::string& str)
-        : Expression(str), CsAsVal{1.f, 1.f, 1.f, 1.f}, CsVar(CsAsVal), customFunc(customFuncHelper), countInvocationsFunc(countInvocations)
+        : Expression(str)
+        , CsAsVal{1.f, 1.f, 1.f, 1.f}
+        , CsVar(CsAsVal)
+        , customFunc(customFuncHelper)
+        , countInvocationsFunc(countInvocations)
     {
     }
 };
