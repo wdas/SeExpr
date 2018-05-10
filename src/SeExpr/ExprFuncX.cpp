@@ -48,13 +48,21 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node, Interpreter* inte
         // debug
         std::cerr<<"we are "<<node->promote(c)<<" "<<c<<std::endl;
 #endif
-        if (node->promote(c) != 0) {
-            interpreter->addOp(getTemplatizedOp<Promote>(node->promote(c)));
-            int promotedOperand = interpreter->allocFP(node->promote(c));
+        const TypeConversion& conversion = node->conversion(c);
+        switch ((TypeConversion::Category)conversion) {
+        case TypeConversion::Undefined: {
+            assert(false && "Undefined conversion");
+        } break;
+        case TypeConversion::ScalarToVector: {
+            interpreter->addOp(getTemplatizedOp<Promote>(conversion.final.dim()));
+            int promotedOperand = interpreter->allocFP(conversion.final.dim());
             interpreter->addOperand(operand);
             interpreter->addOperand(promotedOperand);
             operand = promotedOperand;
             interpreter->endOp();
+        } break;
+        default:
+            break;  // TODO: need to handle VectorToScalar
         }
         operands.push_back(operand);
     }

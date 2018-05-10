@@ -567,7 +567,7 @@ ExprType ExprFuncNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder)
     bool error = false;
 
     int nargs = numChildren();
-    _promote.resize(nargs, 0);
+    _conversions.resize(nargs, TypeConversion::Undefined);
 
     // find function using per-expression callback and then global table
     // TODO: put lookup of local functions here
@@ -624,11 +624,8 @@ int ExprFuncNode::buildInterpreter(Interpreter* interpreter) const
 bool ExprFuncNode::checkArg(int arg, ExprType type, ExprVarEnvBuilder& envBuilder)
 {
     ExprType childType = child(arg)->prep(type.isFP(1), envBuilder);
-    _promote[arg] = 0;
     if (ExprType::valuesCompatible(type, childType) && type.isLifeCompatible(childType)) {
-        if (type.isFP() && type.dim() > childType.dim()) {
-            _promote[arg] = type.dim();
-        }
+        _conversions[arg] = TypeConversion(childType, type);
         return true;
     }
     child(arg)->addError("Expected " + type.toString() + " for argument, got " + childType.toString());

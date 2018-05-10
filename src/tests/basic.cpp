@@ -80,8 +80,44 @@ struct CounterFunc : public ExprFuncSimple {
     int i;
 } counterFuncSimple;
 
+struct FakeTriplanar : public ExprFuncSimple {
+    FakeTriplanar() : ExprFuncSimple(true)
+    {
+    }
+
+    virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const
+    {
+        bool valid = true;
+        valid &= node->checkArg(0, ExprType().String().Constant(), envBuilder);
+        valid &= node->checkArg(1, ExprType().FP(3).Varying(), envBuilder);
+        valid &= node->checkArg(2, ExprType().FP(1).Varying(), envBuilder);
+        return valid ? TypeVec(3) : ExprType().Error();
+    }
+
+    virtual void eval(ArgHandle& args)
+    {
+        Vec3dRef out = args.outFpHandle<3>();
+
+        double scalarArg = 0.001;
+        Vec3d vecArg(1.0, 1.0, 1.0);
+        switch (args.nargs()) {
+        default:
+        case 3:
+            scalarArg = args.inFp<1>(2)[0];
+        case 2:
+            vecArg = args.inFp<3>(1);
+        case 1:
+        case 0:  // If we are here, no optional arguments were given...
+            break;
+        }
+
+        out = vecArg + scalarArg;
+    }
+} fakeTriplanarFuncSimple;
+
 ExprFunc testFunc(testFuncSimple, 4, 4);
 ExprFunc counterFunc(counterFuncSimple, 0, 0);
+ExprFunc fakeTriplanarFunc(fakeTriplanarFuncSimple, 1, 3);
 
 struct SimpleExpression : public Expression {
     // Define simple scalar variable type that just stores the value it returns
@@ -98,7 +134,30 @@ struct SimpleExpression : public Expression {
         {
         }
     };
+
+    template <class T>
+    class VecRefType : public ExprVarRef {
+        const T* value;
+
+      public:
+        VecRefType(const T* value) : ExprVarRef(TypeVec(3)), value(value)
+        {
+        }
+
+        virtual void eval(double* result)
+        {
+            Vec3dRef{result} = Vec3d::copy(value);
+        }
+        virtual void eval(const char**)
+        {
+            assert(false);
+        }
+    };
+
     mutable Var x, y;
+
+    float CsAsVal[4];
+    mutable VecRefType<float> CsVar;
 
     // Custom variable resolver, only allow ones we specify
     ExprVarRef* resolveVar(const std::string& name) const
@@ -107,6 +166,8 @@ struct SimpleExpression : public Expression {
             return &x;
         if (name == "y")
             return &y;
+        if (name == "Cs")
+            return &CsVar;
         return 0;
     }
 
@@ -129,12 +190,18 @@ struct SimpleExpression : public Expression {
             return &counterFunc;
         if (name == "countInvocations")
             return &countInvocationsFunc;
+        if (name == "triplanar")
+            return &fakeTriplanarFunc;
         return 0;
     }
 
     // Constructor
     SimpleExpression(const std::string& str)
-        : Expression(str), customFunc(customFuncHelper), countInvocationsFunc(countInvocations)
+        : Expression(str)
+        , CsAsVal{1.f, 1.f, 1.f, 1.f}
+        , CsVar(CsAsVal)
+        , customFunc(customFuncHelper)
+        , countInvocationsFunc(countInvocations)
     {
     }
 };
@@ -538,4 +605,22 @@ TEST(BasicTests, VectorPromotionThroughTernary)
     EXPECT_DOUBLE_EQ(result[0], 0.1);
     EXPECT_DOUBLE_EQ(result[1], 0.1);
     EXPECT_DOUBLE_EQ(result[2], 0.1);
+}
+
+TEST(BasicTests, ScalarArgumentPromotion)
+{
+    SimpleExpression expr(
+        "$scale = 10;"
+        "$blend = 0.1;"
+        "$tri = triplanar('/disney/shows/default/rel/global/texture/triplanar//testPattern_01.ptx', $scale, $blend);"
+        "$tri*Cs");
+    expr.setDesiredReturnType(ExprType().FP(3).Varying());
+
+    EXPECT_TRUE(expr.syntaxOK());
+    EXPECT_TRUE(expr.isValid());
+
+    const double* result = expr.evalFP();
+    EXPECT_DOUBLE_EQ(result[0], 10.1);
+    EXPECT_DOUBLE_EQ(result[1], 10.1);
+    EXPECT_DOUBLE_EQ(result[2], 10.1);
 }
