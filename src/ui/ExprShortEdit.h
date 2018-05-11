@@ -99,6 +99,8 @@ class ExprShortEdit : public QWidget {
     }
     virtual void hideErrors(bool hidden, const std::string& err);
 
+    bool expanded() { return _expanded; }
+
     // Exposed via Python
     QToolButton* expandButton;
     ExprShortTextEdit* edit;

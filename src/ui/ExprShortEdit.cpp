@@ -55,11 +55,9 @@ static const char* stop_xpm[] = {"16 16 4 1",        "       c None",    ".     
                                  "                "};
 
 ExprShortEdit::ExprShortEdit(QWidget* parent, bool expanded, bool applyOnSelect)
-    : QWidget(parent), _dialog(0), _context(""), _searchPath(""), _applyOnSelect(applyOnSelect)
+    : QWidget(parent), controlRebuildTimer(new QTimer(this)), editDetail(new QToolButton()), controls(nullptr),
+      _expanded(nullptr), _dialog(nullptr), _context(""), _searchPath(""), _applyOnSelect(applyOnSelect)
 {
-    controlRebuildTimer = new QTimer(this);
-    _expanded = false;
-
     vboxlayout = new QVBoxLayout();
     vboxlayout->setSpacing(2);
     vboxlayout->setContentsMargins(0, 0, 0, 0);
@@ -78,9 +76,7 @@ ExprShortEdit::ExprShortEdit(QWidget* parent, bool expanded, bool applyOnSelect)
     expandButton->setArrowType(Qt::RightArrow);
     connect(expandButton, SIGNAL(clicked()), SLOT(expandPressed()));
 
-    QToolButton* button = new QToolButton();
-    editDetail = button;
-    button->setIcon(QIcon(QPixmap(sum_xpm)));
+    editDetail->setIcon(QIcon(QPixmap(sum_xpm)));
     hboxlayout->addWidget(expandButton);
     hboxlayout->addWidget(edit);
     hboxlayout->addWidget(error);
@@ -91,9 +87,6 @@ ExprShortEdit::ExprShortEdit(QWidget* parent, bool expanded, bool applyOnSelect)
     connect(edit, SIGNAL(editingFinished()), SLOT(textFinished()));
 
     vboxlayout->addLayout(hboxlayout);
-
-    controls = 0;
-
     setLayout(vboxlayout);
     connect(controlRebuildTimer, SIGNAL(timeout()), SLOT(rebuildControls()));
     checkErrors();
@@ -157,7 +150,7 @@ void ExprShortEdit::rebuildControls()
     bool newVariables = controls->rebuildControls(getExpression(), edit->completionModel->local_variables);
     if (controls->numControls() == 0) {
         controls->deleteLater();
-        controls = 0;
+        controls = nullptr;
         expandButton->setArrowType(Qt::RightArrow);
         expandButton->setVisible(false);
         _expanded = false;
