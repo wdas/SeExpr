@@ -408,7 +408,7 @@ void NumberControl::setValue(float value)
 }
 
 VectorControl::VectorControl(int id, VectorEditable* editable)
-    : ExprControl(id, editable, false), _numberEditable(editable)
+    : ExprControl(id, editable, false), _numberEditable(editable), _swatch(nullptr)
 {
     if (_numberEditable->isColor) {
         _swatch = new ExprCSwatchFrame(editable->v);
