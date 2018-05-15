@@ -134,11 +134,13 @@ class SymbolTable : public VarBlock {
     typedef std::function<void(double*)> DeferredVarStorage;
 #endif
 
-    struct DeferredVarRef : public ExprVarRef {
+    class DeferredVarRef : public ExprVarRef {
       public:
-        DeferredVarRef(const ExprType& type_) : ExprVarRef(type_)
+        DeferredVarRef(uint32_t offset_, const VarBlockCreator* creator_) : ExprVarRef(ExprType().Error()), offset(offset_), callable(), _creator(creator_)
         {
         }
+
+        virtual ExprType type() const override;
 
         void eval(double* result) override
         {
@@ -150,7 +152,11 @@ class SymbolTable : public VarBlock {
             throw "DeferredVarRef not implemented for strings";
         }
 
+        uint32_t offset;
         DeferredVarStorage callable;
+
+      private:
+        const VarBlockCreator* _creator;
     };
 
   public:
@@ -158,8 +164,13 @@ class SymbolTable : public VarBlock {
         : VarBlock(std::move(block))
         , _stack(stack)
         , _stackRemaining(stackSize)
+        , _deferred_vars()
         , _allocations(VarBlock::numSymbols(), nullptr)
     {
+        _deferred_vars.reserve(VarBlock::numSymbols());
+        for(size_t i = 0; i < VarBlock::numSymbols(); ++i) {
+            _deferred_vars.push_back(DeferredVarRef(i, _creator));
+        }
     }
 
     SymbolTable(SymbolTable&& other, double* stack = nullptr, size_t stackSize = 0)
@@ -167,6 +178,7 @@ class SymbolTable : public VarBlock {
         , _stack(stack)
         , _stackRemaining(stackSize)
         , _function_code_segments(std::move(other._function_code_segments))
+        , _deferred_vars(std::move(other._deferred_vars))
         , _allocations(std::move(other._allocations))
     {
     }
@@ -216,7 +228,11 @@ class SymbolTable : public VarBlock {
     }
 
     // Set code segment for some Function declared in the VarBlockCreator
-    DeferredVarStorage& DeferredVar(uint32_t offset);
+    DeferredVarStorage& DeferredVar(uint32_t offset) {
+        assert(offset < numSymbols() && "SymbolTable index out of bounds");
+        Pointer(offset) = (double*)&_deferred_vars[offset];
+        return _deferred_vars[offset].callable;
+    }
 
   private:
     double* alloc(uint32_t offset, size_t doublesNeeded)
@@ -240,7 +256,7 @@ class SymbolTable : public VarBlock {
     double* _stack;
     size_t _stackRemaining;
     std::vector<std::unique_ptr<SeExpr2::ExprFuncX>> _function_code_segments;
-    std::unordered_map<uint32_t, DeferredVarRef> _deferred_vars;
+    std::vector<DeferredVarRef> _deferred_vars;
     std::vector<double*> _allocations;
 };
 
@@ -501,16 +517,10 @@ class VarBlockCreator {
     std::map<std::string, FuncSymbol> _funcs;
 };
 
-inline SymbolTable::DeferredVarStorage& SymbolTable::DeferredVar(uint32_t offset)
+inline ExprType SymbolTable::DeferredVarRef::type() const
 {
-    auto iter = _deferred_vars.find(offset);
-    if (iter != _deferred_vars.end())
-        return iter->second.callable;
-
-    auto pair = _deferred_vars.emplace(offset, _creator->getVar(offset)->type());
-    Pointer(offset) = (double*)&pair.first->second;
-    return pair.first->second.callable;
-}
+    return _creator->getVar(offset)->type();
+};
 
 }  // namespace
 
