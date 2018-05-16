@@ -100,6 +100,7 @@ class ExprShortEdit : public QWidget {
     virtual void hideErrors(bool hidden, const std::string& err);
 
     bool expanded() { return _expanded; }
+    int numControls() const;
 
     // Exposed via Python
     QToolButton* expandButton;

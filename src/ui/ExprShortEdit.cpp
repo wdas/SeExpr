@@ -273,6 +273,11 @@ void ExprShortEdit::hideErrors(bool hidden, const std::string& err)
     }
 }
 
+int ExprShortEdit::numControls() const
+{
+    return controls ? controls->numControls() : 0;
+}
+
 void ExprShortEdit::setSimple(bool enabled)
 {
     edit->setHidden(enabled);
