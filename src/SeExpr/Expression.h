@@ -263,6 +263,16 @@ class Expression {
         evaluator()->evalFP(dst, varBlock);
     }
 
+    // Evaluates and returns float (check returnType()!)
+    // Robustly promotes from scalar to vector by filling the dst buffer with N values if necessary
+    inline void evalFP(double* dst, size_t N, VarBlock* varBlock = nullptr) const
+    {
+        evaluator()->evalFP(dst, varBlock);
+        size_t dimComputed = _desiredReturnType.dim();
+        if (dimComputed == 1 && N > dimComputed)
+            std::fill_n(dst + 1, N - 1, dst[0]);
+    }
+
     // Evaluates and returns string (check returnType()!)
     inline void evalStr(char* dst, VarBlock* varBlock = nullptr) const
     {

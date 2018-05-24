@@ -115,9 +115,29 @@ struct FakeTriplanar : public ExprFuncSimple {
     }
 } fakeTriplanarFuncSimple;
 
+struct RandFunc : public ExprFuncSimple {
+    RandFunc() : ExprFuncSimple(true)
+    {
+    }
+
+    virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const
+    {
+        return TypeVec(3);
+    }
+
+    virtual void eval(ArgHandle& args)
+    {
+        Vec3dRef result = args.outFpHandle<3>();
+        result[0] = rand();
+        result[1] = rand();
+        result[2] = rand();
+    }
+} randFuncSimple;
+
 ExprFunc testFunc(testFuncSimple, 4, 4);
 ExprFunc counterFunc(counterFuncSimple, 0, 0);
 ExprFunc fakeTriplanarFunc(fakeTriplanarFuncSimple, 1, 3);
+ExprFunc randFunc(randFuncSimple, 0, 0);
 
 struct SimpleExpression : public Expression {
     // Define simple scalar variable type that just stores the value it returns
@@ -192,6 +212,8 @@ struct SimpleExpression : public Expression {
             return &countInvocationsFunc;
         if (name == "triplanar")
             return &fakeTriplanarFunc;
+        if (name == "rand")
+            return &randFunc;
         return 0;
     }
 
@@ -623,4 +645,21 @@ TEST(BasicTests, ScalarArgumentPromotion)
     EXPECT_DOUBLE_EQ(result[0], 10.1);
     EXPECT_DOUBLE_EQ(result[1], 10.1);
     EXPECT_DOUBLE_EQ(result[2], 10.1);
+}
+
+TEST(BasicTests, ScalarReturnTypePromotion)
+{
+    SimpleExpression expr("rand()");
+    expr.setDesiredReturnType(ExprType().FP(1).Varying());
+
+    EXPECT_TRUE(expr.syntaxOK());
+    EXPECT_TRUE(expr.isValid());
+
+    double result[3] = {0.0};
+    expr.evalFP(&result[0], 3);
+
+    // Even though we specify a desired return type of FP(1), or scalar, if given a vector we should fill the vector
+    // with the scalar value to be robustly backwards compatibile with SeExpr behavior
+    EXPECT_DOUBLE_EQ(result[0], result[1]);
+    EXPECT_DOUBLE_EQ(result[1], result[2]);
 }
