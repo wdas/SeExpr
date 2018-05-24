@@ -136,7 +136,8 @@ class SymbolTable : public VarBlock {
 
     class DeferredVarRef : public ExprVarRef {
       public:
-        DeferredVarRef(uint32_t offset_, const VarBlockCreator* creator_) : ExprVarRef(ExprType().Error()), offset(offset_), callable(), _creator(creator_)
+        DeferredVarRef(uint32_t offset_, const VarBlockCreator* creator_)
+            : ExprVarRef(ExprType().Error()), offset(offset_), callable(), _creator(creator_)
         {
         }
 
@@ -168,7 +169,7 @@ class SymbolTable : public VarBlock {
         , _allocations(VarBlock::numSymbols(), nullptr)
     {
         _deferred_vars.reserve(VarBlock::numSymbols());
-        for(size_t i = 0; i < VarBlock::numSymbols(); ++i) {
+        for (size_t i = 0; i < VarBlock::numSymbols(); ++i) {
             _deferred_vars.push_back(DeferredVarRef(i, _creator));
         }
     }
@@ -228,7 +229,8 @@ class SymbolTable : public VarBlock {
     }
 
     // Set code segment for some Function declared in the VarBlockCreator
-    DeferredVarStorage& DeferredVar(uint32_t offset) {
+    DeferredVarStorage& DeferredVar(uint32_t offset)
+    {
         assert(offset < numSymbols() && "SymbolTable index out of bounds");
         Pointer(offset) = (double*)&_deferred_vars[offset];
         return _deferred_vars[offset].callable;

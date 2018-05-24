@@ -55,8 +55,15 @@ static const char* stop_xpm[] = {"16 16 4 1",        "       c None",    ".     
                                  "                "};
 
 ExprShortEdit::ExprShortEdit(QWidget* parent, bool expanded, bool applyOnSelect)
-    : QWidget(parent), controlRebuildTimer(new QTimer(this)), editDetail(new QToolButton()), controls(nullptr),
-      _expanded(nullptr), _dialog(nullptr), _context(""), _searchPath(""), _applyOnSelect(applyOnSelect)
+    : QWidget(parent)
+    , controlRebuildTimer(new QTimer(this))
+    , editDetail(new QToolButton())
+    , controls(nullptr)
+    , _expanded(nullptr)
+    , _dialog(nullptr)
+    , _context("")
+    , _searchPath("")
+    , _applyOnSelect(applyOnSelect)
 {
     vboxlayout = new QVBoxLayout();
     vboxlayout->setSpacing(2);
