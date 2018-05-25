@@ -110,6 +110,7 @@ if (ENABLE_LLVM_BACKEND)
 
         set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${LLVM_DIR}")
         include(LLVM-Config)
+        include(LLVMConfig)
         include(HandleLLVMOptions)
 
         message(STATUS "LLVM_DEFINITIONS =" ${LLVM_DEFINITIONS})
@@ -152,16 +153,20 @@ if (ENABLE_LLVM_BACKEND)
         message(STATUS "LLVM_LIB = ${LLVM_LIB}")
 
         if (LLVM_VERSION VERSION_LESS 3.8.0)
-            set(ENABLE_LLVM_BACKEND false)
-            set(SEEXPR_ENABLE_LLVM_BACKEND false)
+            set(ENABLE_LLVM_BACKEND off)
             message(STATUS "Not building with LLVM, version must be >= 3.8.0")
         endif()
 
     else()
          set(ENABLE_LLVM_BACKEND off)
-         set(SEEXPR_ENABLE_LLVM_BACKEND 0)
     endif()
 endif()
+
+# If LLVM is not enabled, set the SEEXPR_ENABLE_LLVM_BACKEND to 0 to fully disable
+# LLVM stuff in the ExprConfig.h sources.
+if (NOT ENABLE_LLVM_BACKEND)
+     set(SEEXPR_ENABLE_LLVM_BACKEND 0)
+endif ()
 
 ## Setup platform specific helper defines build variants
 if (WIN32)
