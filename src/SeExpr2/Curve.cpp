@@ -62,13 +62,13 @@ void Curve<T>::preparePoints() {
     // Setup boundary conditions on sentinel values
     CV& end = *(_cvData.end() - 1);
     CV& begin = *(_cvData.begin());
-    int realCVs = _cvData.size() - 2;
+    int realCVs = static_cast<int>(_cvData.size()) - 2;
     assert(realCVs >= 0);
     if (realCVs > 0) {
         begin._val = _cvData[1]._val;
         begin._deriv = T();
         begin._interp = kNone;
-        int lastIndex = _cvData.size() - 1;
+        int lastIndex = static_cast<int>(_cvData.size()) - 1;
         end._val = _cvData[lastIndex - 1]._val;
         end._deriv = T();
         end._interp = kNone;
@@ -104,16 +104,16 @@ template <class T>
 T Curve<T>::getValue(const double param) const {
     assert(prepared);
     // find the cv data point index just greater than the desired param
-    const int numPoints = _cvData.size();
+    const int numPoints = static_cast<int>(_cvData.size());
     const CV* cvDataBegin = &_cvData[0];
     int index =
-        std::upper_bound(cvDataBegin, cvDataBegin + numPoints, CV(param, T(), kLinear), cvLessThan) - cvDataBegin;
+        static_cast<int>(std::upper_bound(cvDataBegin, cvDataBegin + numPoints, CV(param, T(), kLinear), cvLessThan) - cvDataBegin);
     index = std::max(1, std::min(index, numPoints - 1));
 
-    const float t0 = _cvData[index - 1]._pos;
+    const float t0 = static_cast<float>(_cvData[index - 1]._pos);
     const T k0 = _cvData[index - 1]._val;
     const InterpType interp = _cvData[index - 1]._interp;
-    const float t1 = _cvData[index]._pos;
+    const float t1 = static_cast<float>(_cvData[index]._pos);
     const T k1 = _cvData[index]._val;
     switch (interp) {
         case kNone:
@@ -150,16 +150,16 @@ template <class T>
 double Curve<T>::getChannelValue(const double param, int channel) const {
     assert(prepared);
     // find the cv data point index just greater than the desired param
-    const int numPoints = _cvData.size();
+    const int numPoints = static_cast<int>(_cvData.size());
     const CV* cvDataBegin = &_cvData[0];
     int index =
-        std::upper_bound(cvDataBegin, cvDataBegin + numPoints, CV(param, T(), kLinear), cvLessThan) - cvDataBegin;
+        static_cast<int>(std::upper_bound(cvDataBegin, cvDataBegin + numPoints, CV(param, T(), kLinear), cvLessThan) - cvDataBegin);
     index = std::max(1, std::min(index, numPoints - 1));
 
-    const float t0 = _cvData[index - 1]._pos;
+    const float t0 = static_cast<float>(_cvData[index - 1]._pos);
     const double k0 = comp(_cvData[index - 1]._val, channel);
     const InterpType interp = _cvData[index - 1]._interp;
-    const float t1 = _cvData[index]._pos;
+    const float t1 = static_cast<float>(_cvData[index]._pos);
     const double k1 = comp(_cvData[index]._val, channel);
     switch (interp) {
         case kNone:
@@ -199,9 +199,9 @@ template <class T>
 typename Curve<T>::CV Curve<T>::getLowerBoundCV(const double param) const {
     assert(prepared);
     const CV* cvDataBegin = &_cvData[0];
-    int numPoints = _cvData.size();
+    int numPoints = static_cast<int>(_cvData.size());
     int index =
-        std::upper_bound(cvDataBegin, cvDataBegin + numPoints, CV(param, T(), kLinear), cvLessThan) - cvDataBegin;
+        static_cast<int>(std::upper_bound(cvDataBegin, cvDataBegin + numPoints, CV(param, T(), kLinear), cvLessThan) - cvDataBegin);
     index = std::max(1, std::min(index, numPoints - 1));
     if (index - 1 > 0) return _cvData[index - 1];
     return _cvData[index];

@@ -269,15 +269,15 @@ void Expression::prep() const {
         const char* start = _expression.c_str();
         const char* p = _expression.c_str();
         while (*p != 0) {
-            if (*p == '\n') lines.push_back(p - start);
+            if (*p == '\n') lines.push_back(static_cast<int>(p - start));
             p++;
         }
-        lines.push_back(p - start);
+        lines.push_back(static_cast<int>(p - start));
 
         std::stringstream sstream;
         for (unsigned int i = 0; i < _errors.size(); i++) {
             int* bound = std::lower_bound(&*lines.begin(), &*lines.end(), _errors[i].startPos);
-            int line = bound - &*lines.begin() + 1;
+            int line = static_cast<int>(bound - &*lines.begin() + 1);
             int lineStart = line == 1 ? 0 : lines[line - 1];
             int col = _errors[i].startPos - lineStart;
             sstream << "  Line " << line << " Col " << col << " - " << _errors[i].error << std::endl;
@@ -324,7 +324,7 @@ void Expression::evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size
             // double* iHack=reinterpret_cast<double**>(varBlock->data())[outputVarBlockOffset];
             double* destBase = reinterpret_cast<double**>(varBlock->data())[outputVarBlockOffset];
             for (size_t i = rangeStart; i < rangeEnd; i++) {
-                varBlock->indirectIndex = i;
+                varBlock->indirectIndex = static_cast<int>(i);
                 const double* f = evalFP(varBlock);
                 for (int k = 0; k < dim; k++) {
                     destBase[dim * i + k] = f[k];

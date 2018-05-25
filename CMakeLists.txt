@@ -166,6 +166,7 @@ endif()
 ## Setup platform specific helper defines build variants
 if (WIN32)
     add_definitions(-DSEEXPR_WIN32)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 else()
     add_definitions(-Wall -Wextra -Wno-unused-parameter)
     add_definitions(-pthread)
