@@ -67,7 +67,7 @@ class Interpreter {
     }
 
     /// Return the position that the next instruction will be placed at
-    int nextPC() { return ops.size(); }
+    int nextPC() { return static_cast<int>(ops.size()); }
 
     ///! adds an operator to the program (pointing to the data at the current location)
     int addOp(OpF op) {
@@ -75,8 +75,8 @@ class Interpreter {
             assert(false && "addOp called within another addOp");
         }
         _startedOp = true;
-        int pc = ops.size();
-        ops.push_back(std::make_pair(op, opData.size()));
+        int pc = static_cast<int>(ops.size());
+        ops.push_back(std::make_pair(op, static_cast<int>(opData.size())));
         return pc;
     }
 
@@ -85,7 +85,7 @@ class Interpreter {
         if (execute) {
             double* fp = &d[0];
             char** str = &s[0];
-            int pc = ops.size() - 1;
+            int pc = static_cast<int>(ops.size()) - 1;
             const std::pair<OpF, int>& op = ops[pc];
             int* opCurr = &opData[0] + op.second;
             pc += op.first(opCurr, fp, str, callStack);
@@ -95,21 +95,21 @@ class Interpreter {
     ///! Adds an operand. Note this should be done after doing the addOp!
     int addOperand(int param) {
         assert(_startedOp);
-        int ret = opData.size();
+        int ret = static_cast<int>(opData.size());
         opData.push_back(param);
         return ret;
     }
 
     ///! Allocate a floating point set of data of dimension n
     int allocFP(int n) {
-        int ret = d.size();
+        int ret = static_cast<int>(d.size());
         for (int k = 0; k < n; k++) d.push_back(0);
         return ret;
     }
 
     /// Allocate a pointer location (can be anything, but typically space for char*)
     int allocPtr() {
-        int ret = s.size();
+        int ret = static_cast<int>(s.size());
         s.push_back(0);
         return ret;
     }

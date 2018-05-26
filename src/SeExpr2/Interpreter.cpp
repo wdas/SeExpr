@@ -50,11 +50,11 @@ void Interpreter::eval(VarBlock* block, bool debug) {
 
         // set the variable evaluation data
         str[0] = reinterpret_cast<char*>(block->data());
-        str[1] = reinterpret_cast<char*>(block->indirectIndex);
+        str[1] = reinterpret_cast<char*>(static_cast<size_t>(block->indirectIndex));
     }
 
     int pc = _pcStart;
-    int end = ops.size();
+    int end = static_cast<int>(ops.size());
     while (pc < end) {
         if (debug) {
             std::cerr << "Running op at " << pc << std::endl;
@@ -75,7 +75,7 @@ void Interpreter::print(int pc) const {
         if (dladdr((void*)ops[i].first, &info)) name = info.dli_sname;
 #endif
         fprintf(stderr, "%s %s %p (", pc == (int)i ? "-->" : "   ", name, ops[i].first);
-        int nextGuy = (i == ops.size() - 1 ? opData.size() : ops[i + 1].second);
+        int nextGuy = (i == ops.size() - 1 ? static_cast<int>(opData.size()) : ops[i + 1].second);
         for (int k = ops[i].second; k < nextGuy; k++) {
             fprintf(stderr, " %d", opData[k]);
         }
@@ -162,8 +162,8 @@ struct BinaryStringOp {
         // delete previous data and allocate a new buffer, only if needed
         // NOTE: this is more efficient, but might consume more memory...
         // Maybe make this behaviour configurable ?
-        int len1 = strlen(in1);
-        int len2 = strlen(in2);
+        int len1 = static_cast<int>(strlen(in1));
+        int len2 = static_cast<int>(strlen(in2));
         if (out == 0 || len1 + len2 + 1 > strlen(out))
         {
             delete [] out;
