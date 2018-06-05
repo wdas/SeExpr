@@ -60,7 +60,6 @@ void Interpreter::evalMultiple(VarBlock* varBlock, double* outputBuffer, size_t 
 
 void Interpreter::eval(VarBlock* block, bool debug) const
 {
-    VALIDATE_VARBLOCK(block);
     if (block) {
         static_assert(sizeof(char*) == sizeof(size_t), "Expect to fit size_t in char*");
         state.s[0] = reinterpret_cast<char*>(block->data());
