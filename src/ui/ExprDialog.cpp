@@ -397,7 +397,7 @@ void ExprDialog::applyExpression()
     }
 
     // put errors into editor module
-    bool valid = grapher->expr.isValid();
+    bool valid = grapher->expr.getExpr().empty() || grapher->expr.isValid();
     if (!valid) {
         const std::vector<SeExpr2::Expression::Error>& errors = grapher->expr.getErrors();
         for (unsigned int i = 0; i < errors.size(); i++) {
