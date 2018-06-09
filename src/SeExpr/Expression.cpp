@@ -193,8 +193,7 @@ void Expression::setVarBlockCreator(const VarBlockCreator* creator)
 void Expression::setExpr(const std::string& e)
 {
     if (_expression != e) {
-        if (!_expression.empty())
-            reset();
+        reset();
         _expression = e;
     }
 }

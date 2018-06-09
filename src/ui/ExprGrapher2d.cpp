@@ -27,7 +27,7 @@
 #include <QLabel>
 
 ExprGrapherWidget::ExprGrapherWidget(QWidget* parent, int width, int height)
-    : view(new ExprGrapherView(*this, this, width, height)), expr("", SeExpr2::ExprType().FP(1))
+    : expr("", SeExpr2::ExprType().FP(1)), view(new ExprGrapherView(*this, this, width, height))
 {
     Q_UNUSED(parent);
     setFixedSize(width, height + 30);
@@ -104,7 +104,7 @@ ExprGrapherView::ExprGrapherView(ExprGrapherWidget& widget, QWidget* parent, int
 
     _image = new float[3 * _width * _height];
     setWindow(-1, 1, -1, 1, 0);
-    clear();
+    update();
 
     setCursor(Qt::OpenHandCursor);
 }
@@ -200,7 +200,7 @@ void ExprGrapherView::mouseMoveEvent(QMouseEvent* event)
 
 void ExprGrapherView::update()
 {
-    if (!widget.expr.isValid()) {
+    if (!widget.exprValid()) {
         clear();
         updateGL();
         return;
@@ -219,7 +219,8 @@ void ExprGrapherView::update()
         for (int col = 0; col < _width; col++, x += dy, u += du) {
             widget.expr.u.value = u;
             widget.expr.P.value = SeExpr2::Vec3d(x, y, z);
-            const double* value = widget.expr.evalFP();
+            double value[3] = {0.0};
+            widget.expr.evalFP(&value[0], 3);
             _image[index] = value[0];
             _image[index + 1] = value[1];
             _image[index + 2] = value[2];

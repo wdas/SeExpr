@@ -71,10 +71,14 @@ class ExprGrapherWidget : public QWidget {
     QLineEdit* scale;
 
   public:
-    ExprGrapherView* view;
     BasicExpression expr;
+    ExprGrapherView* view;
 
     ExprGrapherWidget(QWidget* parent, int width, int height);
+
+    inline bool exprValid() const {
+        return expr.getExpr().empty() || expr.isValid();
+    }
 
     void update();
   signals:
