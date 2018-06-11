@@ -74,7 +74,7 @@ ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent)
 
     horizontalLayout->addWidget(new QLabel("Variable"));
     // TODO would be nice to unique this over multiple sessions
-    variableName = new QLineEdit(QString("$var%1").arg(count++));
+    variableName = new QLineEdit(QString("var%1").arg(count++));
 
     horizontalLayout->addWidget(variableName);
     verticalLayout->addLayout(horizontalLayout);
@@ -87,7 +87,7 @@ ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent)
         QWidget* curveTab = new QWidget();
         QFormLayout* curveLayout = new QFormLayout(curveTab);
         curveLayout->setWidget(0, QFormLayout::LabelRole, new QLabel("Lookup"));
-        curveLookup = new QLineEdit("$u");
+        curveLookup = new QLineEdit("u");
         curveLayout->setWidget(0, QFormLayout::FieldRole, curveLookup);
         stackWidget->addWidget(curveTab);
         listWidget->addItem(QString("Curve"));
@@ -98,7 +98,7 @@ ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent)
         QWidget* colorCurveTab = new QWidget();
         QFormLayout* colorCurveLayout = new QFormLayout(colorCurveTab);
         colorCurveLayout->setWidget(0, QFormLayout::LabelRole, new QLabel("Lookup"));
-        colorCurveLookup = new QLineEdit("$u");
+        colorCurveLookup = new QLineEdit("u");
         colorCurveLayout->setWidget(0, QFormLayout::FieldRole, colorCurveLookup);
         stackWidget->addWidget(colorCurveTab);
         listWidget->addItem(QString("Color Curve"));
@@ -186,7 +186,7 @@ ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent)
     {
         QWidget* swatchTab = new QWidget();
         QFormLayout* swatchLayout = new QFormLayout(swatchTab);
-        swatchLookup = new QLineEdit("$u");
+        swatchLookup = new QLineEdit("u");
         swatchLayout->setWidget(0, QFormLayout::LabelRole, new QLabel("Lookup"));
         swatchLayout->setWidget(0, QFormLayout::FieldRole, swatchLookup);
         rainbowPaletteBtn = new QRadioButton("Rainbow");
@@ -241,7 +241,7 @@ ExprAddDialog::ExprAddDialog(int& count, QWidget* parent) : QDialog(parent)
         QWidget* deepWaterTab = new QWidget();
         QFormLayout* deepWaterLayout = new QFormLayout(deepWaterTab);
         deepWaterLayout->setWidget(0, QFormLayout::LabelRole, new QLabel("Lookup"));
-        deepWaterLookup = new QLineEdit("$u");
+        deepWaterLookup = new QLineEdit("P");
         deepWaterLayout->setWidget(0, QFormLayout::FieldRole, deepWaterLookup);
         stackWidget->addWidget(deepWaterTab);
         listWidget->addItem(QString("Deep Water"));

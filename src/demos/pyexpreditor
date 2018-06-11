@@ -1,0 +1,96 @@
+#!/usr/bin/env python
+
+import sys
+from Qt import QtCore
+from Qt import QtGui
+from Qt import QtWidgets
+from Qt.QtCore import Qt
+from SeExpr2 import expreditor2
+
+import signal
+signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+long_expr = '''$var0 = curve($u,0,0,4,1,1,4);
+$var1 = ccurve($u,0,[0,0,0],4,1,[1,1,1],4);
+$var2 = 0; # 0,10
+$var2b = 1; # 0,1
+$var3 = 0; # 0.000, 1.000
+$var4 = [0,0,0]; # 0.000, 1.000
+$var5 = [1,0,0];
+$var6 = swatch($u,[1,0,0],[1,.6,0],[1,1,0],[0,1,0],[0,1,1],[0,0,1],[.6,.1,.6],[1,0,1],[1,1,1],[0,0,0]);
+1'''
+
+def palette():
+    """returns a palatte with light text on a dark background"""
+    pal = QtGui.QPalette()
+    for group in [QtGui.QPalette.Active, QtGui.QPalette.Inactive]:
+        pal.setColor(group, QtGui.QPalette.Window, QtGui.QColor(32, 32, 32, 255))
+        pal.setColor(group, QtGui.QPalette.WindowText, QtGui.QColor(195, 195, 195, 255))
+        pal.setColor(group, QtGui.QPalette.Base, QtGui.QColor(44, 44, 44, 255))
+        pal.setColor(group, QtGui.QPalette.AlternateBase, QtGui.QColor(59, 59, 59, 255))
+        pal.setColor(group, QtGui.QPalette.ToolTipBase, QtGui.QColor(240, 240, 240, 255))
+        pal.setColor(group, QtGui.QPalette.ToolTipText, QtGui.QColor(0, 0, 0, 255))
+        pal.setColor(group, QtGui.QPalette.Text, QtGui.QColor(195, 195, 195, 255))
+        pal.setColor(group, QtGui.QPalette.ButtonText, QtGui.QColor(195, 195, 195, 255))
+        pal.setColor(group, QtGui.QPalette.BrightText, QtGui.QColor(252, 252, 252, 255))
+        pal.setColor(group, QtGui.QPalette.Light, QtGui.QColor(121, 121, 121, 255))
+        pal.setColor(group, QtGui.QPalette.Midlight, QtGui.QColor(71, 71, 71, 255))
+        pal.setColor(group, QtGui.QPalette.Button, QtGui.QColor(55, 55, 55, 255))
+        pal.setColor(group, QtGui.QPalette.Mid, QtGui.QColor(35, 35, 35, 255))
+        pal.setColor(group, QtGui.QPalette.Dark, QtGui.QColor(27, 27, 27, 255))
+        pal.setColor(group, QtGui.QPalette.Shadow, QtGui.QColor(0, 0, 0, 255))
+        pal.setColor(group, QtGui.QPalette.Highlight, QtGui.QColor(103, 95, 92, 255))
+        pal.setColor(group, QtGui.QPalette.HighlightedText, QtGui.QColor(252, 252, 252, 255))
+    # disabled colors
+    pal.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Window, QtGui.QColor(32, 32, 32, 255))
+    pal.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.WindowText, QtGui.QColor(140, 140, 140, 128))
+    pal.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Base, QtGui.QColor(44, 44, 44, 255))
+    pal.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.AlternateBase, QtGui.QColor(59, 59, 59, 255))
+    pal.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.ToolTipBase, QtGui.QColor(240, 240, 240, 255))
+    pal.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.ToolTipText, QtGui.QColor(0, 0, 0, 255))
+    pal.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Text, QtGui.QColor(140, 140, 140, 128))
+    pal.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.ButtonText, QtGui.QColor(182, 182, 182, 128))
+    pal.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.BrightText, QtGui.QColor(252, 252, 252, 128))
+    pal.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Light, QtGui.QColor(49, 49, 49, 255))
+    pal.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Midlight, QtGui.QColor(71, 71, 71, 255))
+    pal.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Button, QtGui.QColor(61, 61, 61, 255))
+    pal.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Mid, QtGui.QColor(15, 15, 15, 255))
+    pal.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Dark, QtGui.QColor(27, 27, 27, 255))
+    pal.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Shadow, QtGui.QColor(0, 0, 0, 128))
+    pal.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Highlight, QtGui.QColor(103, 95, 92, 255))
+    pal.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.HighlightedText, QtGui.QColor(252, 252, 252, 255))
+    return pal
+
+class ShortEdit(expreditor2.ExprShortEdit):
+    def __init__(self, parent = None):
+        expreditor2.ExprShortEdit.__init__(self, parent)
+        self.registerExtraVariable("$P", "position")
+        self.registerExtraVariable("$u", "u")
+        self.registerExtraVariable("$v", "v")
+
+class Example(QtWidgets.QWidget):
+    def __init__(self,parent = None):
+        QtWidgets.QWidget.__init__(self, parent)
+
+        layout = QtWidgets.QVBoxLayout()
+        self.setLayout(layout)
+
+        edit1 = ShortEdit(self)
+        edit1.setExpressionString(long_expr)
+        edit2 = ShortEdit(self)
+        edit2.setExpressionString("[1,.5,0]")
+        edit3 = ShortEdit(self)
+        edit3.setExpressionString(".5")
+        layout.addWidget(edit1)
+        layout.addWidget(edit2)
+        layout.addWidget(edit3)
+        layout.addStretch(1)
+
+if __name__ == '__main__':
+    app = QtWidgets.QApplication(sys.argv)
+    app.setStyle(QtWidgets.QStyleFactory.create("Fusion"))
+    app.setPalette(palette())
+    win = Example()
+    win.show()
+
+    sys.exit(app.exec_())

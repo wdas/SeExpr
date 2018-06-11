@@ -276,19 +276,20 @@ ExprControl::ExprControl(int id, Editable* editable, bool showColorLink)
     connect(_colorLinkCB, SIGNAL(stateChanged(int)), this, SLOT(linkStateChange(int)));
     hbox->addWidget(_colorLinkCB);
 
-    _label = new QLabel(QString("<b>") + editable->name.c_str() + "</b>");
-    _label->setFixedWidth(72);
+    _label = new QLabel(editable->name.c_str());
     _label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     _label->setIndent(2);
     _label->setAutoFillBackground(true);
+    _label->setWordWrap(true);
+    _label->setToolTip(editable->name.c_str());
     hbox->addWidget(_label);
-
+    int labelWidth = 120;
     if (!showColorLink) {
         _colorLinkCB->setHidden(true);
-        _label->setFixedWidth(84);
+        _label->setFixedWidth(labelWidth);
     } else {
         _colorLinkCB->setHidden(false);
-        _label->setFixedWidth(84 - _colorLinkCB->width() + 2);
+        _label->setFixedWidth(labelWidth - _colorLinkCB->width() + 2);
     }
 }
 

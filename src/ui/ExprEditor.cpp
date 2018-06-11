@@ -190,6 +190,18 @@ void ExprTextEdit::updateStyle()
 ExprTextEdit::ExprTextEdit(QWidget* parent) : QTextEdit(parent), lastStyleForHighlighter(0), _tip(0)
 {
     highlighter = new ExprHighlighter(document());
+    setWordWrapMode(QTextOption::NoWrap);
+
+    QFont font;
+    font.setFamily("Courier");
+    font.setStyleHint(QFont::Monospace);
+    font.setFixedPitch(true);
+    font.setPointSize(10);
+    setFont(font);
+    const int tabStop = 4;  // 4 characters
+
+    QFontMetrics metrics(font);
+    setTabStopWidth(tabStop * metrics.width(' '));
 
     // setup auto completion
     completer = new QCompleter();
@@ -210,6 +222,11 @@ ExprTextEdit::ExprTextEdit(QWidget* parent) : QTextEdit(parent), lastStyleForHig
     _popupEnabledAction = new QAction("Pop-up Help", this);
     _popupEnabledAction->setCheckable(true);
     _popupEnabledAction->setChecked(true);
+
+    _commentAction = new QAction("Toggle Comments", this);
+    _commentAction->setShortcut(Qt::Key_Slash | Qt::CTRL);
+    connect(_commentAction, SIGNAL(triggered()), this, SLOT(commentLines()));
+    this->addAction(_commentAction);
 }
 
 void ExprTextEdit::insertFromMimeData(const QMimeData* source)
@@ -259,6 +276,7 @@ void ExprTextEdit::wheelEvent(QWheelEvent* event)
             zoomIn();
         else if (event->delta() < 0)
             zoomOut();
+        return;
     }
     return QTextEdit::wheelEvent(event);
 }
@@ -287,6 +305,14 @@ void ExprTextEdit::keyPressEvent(QKeyEvent* e)
         default:
             break;
         }
+    }
+    if (e->key() == Qt::Key_Tab) {
+        tabLines(true);
+        return;
+    }
+    if (e->key() == Qt::Key_Backtab) {
+        tabLines(false);
+        return;
     }
 
     // use the values here as long as we are not using the shortcut to bring up the editor
@@ -360,6 +386,7 @@ void ExprTextEdit::contextMenuEvent(QContextMenuEvent* event)
         QAction* f = menu->actions().first();
         menu->insertAction(f, _popupEnabledAction);
         menu->insertSeparator(f);
+        menu->addAction(_commentAction);
     }
 
     menu->exec(event->globalPos());
@@ -403,6 +430,150 @@ void ExprTextEdit::insertCompletion(const QString& completion)
     if (completion[0] != '$')
         tc.insertText("(");
     setTextCursor(tc);
+}
+
+void ExprTextEdit::tabLines(bool indent)
+{
+    QTextCursor tc = textCursor();
+
+    tc.beginEditBlock();
+
+    int relativePos = tc.position() - tc.block().position();
+    bool hasSelection = tc.hasSelection();
+
+    int start = tc.anchor();
+    int end = tc.position();
+
+    if (start > end)
+        std::swap(start, end);
+
+    tc.setPosition(start, QTextCursor::MoveAnchor);
+    int startBlock = tc.block().blockNumber();
+
+    tc.setPosition(end, QTextCursor::MoveAnchor);
+    int endBlock = tc.block().blockNumber();
+
+    tc.setPosition(start, QTextCursor::MoveAnchor);
+    int range = endBlock - startBlock;
+
+    QString text;
+    for (int i = 0; i <= range; i++) {
+        tc.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+
+        if (indent) {
+            tc.insertText("\t");
+        } else {
+            tc.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+            text = tc.selectedText();
+            QString trimmedText = text.trimmed();
+            bool found = false;
+            if (text.startsWith("\t")) {
+                tc.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+                tc.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 1);
+                tc.removeSelectedText();
+                int index = text.indexOf("\t");
+            }
+        }
+
+        tc.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor);
+    }
+    tc = textCursor();
+    if (relativePos == 0 && indent)
+        tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, 1);
+    if (!hasSelection)
+        tc.clearSelection();
+
+    setTextCursor(tc);
+
+    tc.endEditBlock();
+}
+
+
+void ExprTextEdit::commentLines()
+{
+    QTextCursor tc = textCursor();
+
+    tc.beginEditBlock();
+
+    int relativePos = tc.position() - tc.block().position();
+    bool hasSelection = tc.hasSelection();
+
+    int start = tc.anchor();
+    int end = tc.position();
+
+    if (start > end)
+        std::swap(start, end);
+
+    tc.setPosition(start, QTextCursor::MoveAnchor);
+    int startBlock = tc.block().blockNumber();
+
+    tc.setPosition(end, QTextCursor::MoveAnchor);
+    int endBlock = tc.block().blockNumber();
+
+    tc.setPosition(start, QTextCursor::MoveAnchor);
+    int range = endBlock - startBlock;
+
+    bool addComments = true;
+    std::vector<bool> modes;
+
+    QString text;
+    for (int i = 0; i <= range; i++) {
+        tc.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+        tc.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+        text = tc.selectedText();
+        text = text.trimmed();
+        if (text.startsWith('#'))
+            modes.push_back(false);
+        else
+            modes.push_back(true);
+
+        tc.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor);
+    }
+
+    if (std::adjacent_find(modes.begin(), modes.end(), std::not_equal_to<int>()) == modes.end())
+        addComments = modes[0];
+
+    tc.setPosition(start, QTextCursor::MoveAnchor);
+    for (int i = 0; i <= range; i++) {
+        tc.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+
+        if (addComments) {
+            tc.insertText("# ");
+        } else {
+            tc.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+            text = tc.selectedText();
+            QString trimmedText = text.trimmed();
+            bool found = false;
+            if (trimmedText.startsWith('#')) {
+                tc.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+                int index = text.indexOf("# ");
+                if (index != -1) {
+                    tc.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, index);
+                    tc.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 2);
+                    tc.removeSelectedText();
+                } else {
+                    index = text.indexOf('#');
+                    if (index != -1) {
+                        tc.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, index);
+                        tc.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 1);
+                        tc.removeSelectedText();
+                    }
+                }
+            }
+        }
+
+        tc.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor);
+    }
+    tc = textCursor();
+    if (relativePos == 0 && addComments) {
+        tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, 2);
+    }
+    if (!hasSelection)
+        tc.clearSelection();
+
+    setTextCursor(tc);
+
+    tc.endEditBlock();
 }
 
 std::string ExprEditor::getExpr()

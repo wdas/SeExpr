@@ -54,6 +54,7 @@ endif()
     include_directories(SYSTEM ${PNG_INCLUDE_DIR})
     target_link_libraries(expreditor ${PNG_LIBRARIES})
     install(TARGETS expreditor DESTINATION ${CMAKE_INSTALL_BINDIR})
+    install(PROGRAMS pyexpreditor DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
 
 

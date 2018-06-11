@@ -60,6 +60,7 @@ class ExprTextEdit : public QTextEdit {
     QStyle* lastStyleForHighlighter;
     ExprPopupDoc* _tip;
     QAction* _popupEnabledAction;
+    QAction* _commentAction;
 
   public:
     QCompleter* completer;
@@ -86,6 +87,8 @@ class ExprTextEdit : public QTextEdit {
 
   private slots:
     void insertCompletion(const QString& completion);
+    void tabLines(bool indent = true);
+    void commentLines();
   signals:
     void applyShortcut();
     void nextError();
