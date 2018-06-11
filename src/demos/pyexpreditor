@@ -88,7 +88,7 @@ class Example(QtWidgets.QWidget):
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
-    app.setStyle(QtWidgets.QStyleFactory.create("Fusion+"))
+    app.setStyle(QtWidgets.QStyleFactory.create("Fusion"))
     app.setPalette(palette())
     win = Example()
     win.show()
