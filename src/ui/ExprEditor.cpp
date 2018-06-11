@@ -265,6 +265,7 @@ void ExprTextEdit::wheelEvent(QWheelEvent* event)
             zoomIn();
         else if (event->delta() < 0)
             zoomOut();
+        return;
     }
     return QTextEdit::wheelEvent(event);
 }
