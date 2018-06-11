@@ -66,7 +66,7 @@ imagetest: install
 .PHONY: imagetest
 
 precommit:
-	$(MAKE) format && \
-	$(MAKE) checkDirty && \
+	$(MAKE) format
+	$(MAKE) checkDirty
 	$(MAKE) test
 .PHONY: precommit
