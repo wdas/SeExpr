@@ -203,11 +203,6 @@ ExprTextEdit::ExprTextEdit(QWidget* parent) : QTextEdit(parent), lastStyleForHig
     QFontMetrics metrics(font);
     setTabStopWidth(tabStop * metrics.width(' '));
 
-    QPalette p = palette();
-    p.setColor(QPalette::Base, QColor(44, 44, 44));
-    p.setColor(QPalette::Text, QColor(149, 149, 149, 255));
-    setPalette(p);
-
     // setup auto completion
     completer = new QCompleter();
     completionModel = new ExprCompletionModel(this);
