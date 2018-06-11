@@ -191,6 +191,22 @@ ExprTextEdit::ExprTextEdit(QWidget* parent) : QTextEdit(parent), lastStyleForHig
 {
     highlighter = new ExprHighlighter(document());
     setWordWrapMode(QTextOption::NoWrap);
+        
+    QFont font;
+    font.setFamily("Courier");
+    font.setStyleHint(QFont::Monospace);
+    font.setFixedPitch(true);
+    font.setPointSize(10);
+    setFont(font);
+    const int tabStop = 4;  // 4 characters
+    
+    QFontMetrics metrics(font);
+    setTabStopWidth(tabStop * metrics.width(' '));
+    
+    QPalette p = palette();
+    p.setColor(QPalette::Base, QColor(44, 44, 44));
+    p.setColor(QPalette::Text, QColor(149, 149, 149, 255));
+    setPalette(p);
 
     // setup auto completion
     completer = new QCompleter();
