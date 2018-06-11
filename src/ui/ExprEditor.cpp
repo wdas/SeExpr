@@ -449,9 +449,6 @@ void ExprTextEdit::tabLines(bool indent)
     int start = tc.anchor();
     int end = tc.position();
 
-    int origStart = start;
-    int origEnd = end;
-
     if (start > end)
         std::swap(start, end);
 
@@ -465,8 +462,6 @@ void ExprTextEdit::tabLines(bool indent)
     int range = endBlock - startBlock;
 
     QString text;
-
-    tc.setPosition(start, QTextCursor::MoveAnchor);
     for (int i = 0; i <= range; i++) {
         tc.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
 
@@ -510,9 +505,6 @@ void ExprTextEdit::commentLines()
 
     int start = tc.anchor();
     int end = tc.position();
-
-    int origStart = start;
-    int origEnd = end;
 
     if (start > end)
         std::swap(start, end);
