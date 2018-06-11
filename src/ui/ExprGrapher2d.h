@@ -76,7 +76,8 @@ class ExprGrapherWidget : public QWidget {
 
     ExprGrapherWidget(QWidget* parent, int width, int height);
 
-    inline bool exprValid() const {
+    inline bool exprValid() const
+    {
         return expr.getExpr().empty() || expr.isValid();
     }
 
