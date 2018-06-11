@@ -210,6 +210,11 @@ ExprTextEdit::ExprTextEdit(QWidget* parent) : QTextEdit(parent), lastStyleForHig
     _popupEnabledAction = new QAction("Pop-up Help", this);
     _popupEnabledAction->setCheckable(true);
     _popupEnabledAction->setChecked(true);
+    
+    _commentAction = new QAction("Toggle Comments", this);
+    _commentAction->setShortcut(Qt::Key_Slash | Qt::CTRL);
+    connect(_commentAction, SIGNAL(triggered()), this, SLOT(commentLines()));
+    this->addAction(_commentAction);
 }
 
 void ExprTextEdit::insertFromMimeData(const QMimeData* source)
@@ -368,6 +373,7 @@ void ExprTextEdit::contextMenuEvent(QContextMenuEvent* event)
         QAction* f = menu->actions().first();
         menu->insertAction(f, _popupEnabledAction);
         menu->insertSeparator(f);
+        menu->addAction(_commentAction);
     }
 
     menu->exec(event->globalPos());
@@ -467,6 +473,101 @@ void ExprTextEdit::tabLines(bool indent)
     tc = textCursor();
     if (relativePos == 0 && indent)
         tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, 1);
+    if (!hasSelection)
+        tc.clearSelection();
+        
+    setTextCursor(tc);
+    
+    tc.endEditBlock();
+}
+
+
+void ExprTextEdit::commentLines()
+{
+    
+    QTextCursor tc = textCursor();
+      
+    tc.beginEditBlock();
+    
+    int relativePos = tc.position() - tc.block().position();
+    bool hasSelection = tc.hasSelection();
+    
+    int start = tc.anchor();
+    int end = tc.position();
+    
+    int origStart = start;
+    int origEnd = end;
+    
+    if(start > end)
+        std::swap(start, end);
+    
+    tc.setPosition(start, QTextCursor::MoveAnchor);
+    int startBlock = tc.block().blockNumber();
+    
+    tc.setPosition(end, QTextCursor::MoveAnchor);
+    int endBlock = tc.block().blockNumber();
+    
+    tc.setPosition(start, QTextCursor::MoveAnchor);
+    int range = endBlock-startBlock;
+    
+    bool addComments = true;
+    std::vector<bool> modes;
+
+    QString text;
+    for(int i = 0; i <= range; i++)
+    {
+        tc.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+        tc.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+        text = tc.selectedText();
+        text = text.trimmed();
+        if (text.startsWith('#'))
+            modes.push_back(false);
+        else
+            modes.push_back(true);
+        
+        tc.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor);
+    }
+    
+    if ( std::adjacent_find( modes.begin(), modes.end(), std::not_equal_to<int>() ) == modes.end() )
+        addComments = modes[0];
+    
+    tc.setPosition(start, QTextCursor::MoveAnchor);
+    for(int i = 0; i <= range; i++)
+    {
+        tc.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+        
+        if (addComments){
+            tc.insertText("# ");
+        } else {
+            tc.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+            text = tc.selectedText();
+            QString trimmedText = text.trimmed();
+            bool found = false;
+            if (trimmedText.startsWith('#')){
+                tc.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+                int index = text.indexOf("# ");
+                if (index != -1){
+                    tc.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, index);
+                    tc.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 2);
+                    tc.removeSelectedText();
+                } else {
+                    index = text.indexOf('#');
+                    if (index != -1){
+                        tc.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, index);
+                        tc.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 1);
+                        tc.removeSelectedText();
+                    }
+                }
+            }
+        }
+        
+        tc.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor);
+    }
+    tc = textCursor();
+    if (relativePos == 0 && addComments)
+    {
+        tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, 2);
+    }
     if (!hasSelection)
         tc.clearSelection();
         
