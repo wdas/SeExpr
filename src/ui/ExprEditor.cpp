@@ -288,7 +288,15 @@ void ExprTextEdit::keyPressEvent(QKeyEvent* e)
             break;
         }
     }
-
+    if (e->key() == Qt::Key_Tab) {
+        tabLines(true);
+        return;
+    }
+    if (e->key() == Qt::Key_Backtab) {
+        tabLines(false);
+        return;
+    }
+    
     // use the values here as long as we are not using the shortcut to bring up the editor
     bool isShortcut = ((e->modifiers() & Qt::ControlModifier) && e->key() == Qt::Key_E);  // CTRL+E
     if (!isShortcut)  // dont process the shortcut when we have a completer
@@ -403,6 +411,68 @@ void ExprTextEdit::insertCompletion(const QString& completion)
     if (completion[0] != '$')
         tc.insertText("(");
     setTextCursor(tc);
+}
+
+void ExprTextEdit::tabLines(bool indent)
+{
+    QTextCursor tc = textCursor();
+      
+    tc.beginEditBlock();
+    
+    int relativePos = tc.position() - tc.block().position();
+    bool hasSelection = tc.hasSelection();
+    
+    int start = tc.anchor();
+    int end = tc.position();
+    
+    int origStart = start;
+    int origEnd = end;
+    
+    if(start > end)
+        std::swap(start, end);
+    
+    tc.setPosition(start, QTextCursor::MoveAnchor);
+    int startBlock = tc.block().blockNumber();
+    
+    tc.setPosition(end, QTextCursor::MoveAnchor);
+    int endBlock = tc.block().blockNumber();
+    
+    tc.setPosition(start, QTextCursor::MoveAnchor);
+    int range = endBlock-startBlock;
+    
+    QString text;
+    
+    tc.setPosition(start, QTextCursor::MoveAnchor);
+    for(int i = 0; i <= range; i++)
+    {
+        tc.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+        
+        if (indent){
+            tc.insertText("\t");
+        } else {
+            tc.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+            text = tc.selectedText();
+            QString trimmedText = text.trimmed();
+            bool found = false;
+            if (text.startsWith("\t")){
+                tc.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+                tc.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 1);
+                tc.removeSelectedText();
+                int index = text.indexOf("\t");
+            }
+        }
+        
+        tc.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor);
+    }
+    tc = textCursor();
+    if (relativePos == 0 && indent)
+        tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, 1);
+    if (!hasSelection)
+        tc.clearSelection();
+        
+    setTextCursor(tc);
+    
+    tc.endEditBlock();
 }
 
 std::string ExprEditor::getExpr()

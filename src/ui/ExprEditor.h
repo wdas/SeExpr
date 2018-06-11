@@ -86,6 +86,7 @@ class ExprTextEdit : public QTextEdit {
 
   private slots:
     void insertCompletion(const QString& completion);
+    void tabLines(bool indent = true);
   signals:
     void applyShortcut();
     void nextError();
