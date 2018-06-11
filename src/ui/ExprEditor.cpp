@@ -190,6 +190,7 @@ void ExprTextEdit::updateStyle()
 ExprTextEdit::ExprTextEdit(QWidget* parent) : QTextEdit(parent), lastStyleForHighlighter(0), _tip(0)
 {
     highlighter = new ExprHighlighter(document());
+    setWordWrapMode(QTextOption::NoWrap);
 
     // setup auto completion
     completer = new QCompleter();
