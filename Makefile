@@ -65,5 +65,9 @@ imagetest: install
 	$(PYTHON) src/tests/imageTestsReportNew.py runall
 .PHONY: imagetest
 
-precommit: format checkDirty test
+precommit:
+	$(MAKE) format && \
+	$(MAKE) checkDirty && \
+	$(MAKE) -j install && \
+	$(MAKE) test
 .PHONY: precommit
