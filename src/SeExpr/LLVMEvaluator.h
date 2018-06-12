@@ -59,23 +59,23 @@ class LLVMEvaluator : public Evaluator {
         LLVMEvaluationContext(const LLVMEvaluationContext&) = delete;
         LLVMEvaluationContext& operator=(const LLVMEvaluationContext&) = delete;
 
-        void init(void* fp, void* fpLoop, int)
+        inline void init(void* fp, void* fpLoop, int)
         {
             reset();
             functionPtr = reinterpret_cast<FunctionPtr>(fp);
             functionPtrMultiple = reinterpret_cast<FunctionPtrMultiple>(fpLoop);
         }
-        void reset()
+        inline void reset()
         {
             functionPtr = nullptr;
             functionPtrMultiple = nullptr;
         }
-        void operator()(T* dst, VarBlock* varBlock)
+        inline void operator()(T* dst, VarBlock* varBlock)
         {
             assert(functionPtr);
             functionPtr(dst, varBlock ? varBlock->data() : nullptr, varBlock ? varBlock->indirectIndex : 0);
         }
-        void operator()(VarBlock* varBlock, double* outputBuffer, size_t rangeStart, size_t rangeEnd)
+        inline void operator()(VarBlock* varBlock, double* outputBuffer, size_t rangeStart, size_t rangeEnd)
         {
             assert(functionPtrMultiple);
             functionPtrMultiple(varBlock ? varBlock->data() : nullptr, outputBuffer, rangeStart, rangeEnd);
@@ -117,17 +117,17 @@ class LLVMEvaluator : public Evaluator {
         return true;
     }
 
-    virtual void evalFP(double* dst, VarBlock* varBlock) const override
+    virtual inline void evalFP(double* dst, VarBlock* varBlock) const override
     {
         (*_llvmEvalFP)(dst, varBlock);
     }
 
-    virtual void evalStr(char* dst, VarBlock* varBlock) const override
+    virtual inline void evalStr(char* dst, VarBlock* varBlock) const override
     {
         (*_llvmEvalStr)(&dst, varBlock);
     }
 
-    virtual void evalMultiple(VarBlock* varBlock,
+    virtual inline void evalMultiple(VarBlock* varBlock,
                               double* outputBuffer,
                               size_t rangeStart,
                               size_t rangeEnd) const override
