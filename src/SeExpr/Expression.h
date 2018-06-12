@@ -158,8 +158,8 @@ class Expression {
 
     Evaluator* evaluator() const
     {
-        if (_evaluator)
-            return _evaluator;
+        if (Evaluator* evaluator = _evaluator.load())
+            return evaluator;
         prep();
         return _evaluator;
     }
