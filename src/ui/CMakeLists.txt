@@ -43,6 +43,9 @@ set(CMAKE_INSTALL_PYTHON "${PYTHON_SITE}/SeExpr2" )
 # Other package dependencies...
 find_package(OpenGL)
 
+add_definitions(-DSEEXPR_EDITOR_INSTALL_PATH="${CMAKE_INSTALL_PREFIX}")
+add_definitions(-DSEEXPR_EDITOR_ICON_PATH="${CMAKE_INSTALL_PREFIX}/share/SeExpr2/img/")
+
 if(Qt5_FOUND OR QT4_FOUND)
 
     BuildParserScanner(ExprSpecParserLex ExprSpecParser ExprSpec
@@ -185,4 +188,8 @@ if(Qt5_FOUND OR QT4_FOUND)
     install(TARGETS expreditor2 DESTINATION ${CMAKE_INSTALL_PYTHON})
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
             DESTINATION ${CMAKE_INSTALL_PYTHON})
+    
+    file(GLOB icons "img/*.png")
+    install(FILES ${icons} DESTINATION share/SeExpr2/img)
+
 endif()
