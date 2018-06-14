@@ -583,9 +583,9 @@ void ExprTextEdit::insertCompletion(const QString& completion)
         return;
     QTextCursor tc = textCursor();
     int extra = completion.length() - completer->completionPrefix().length();
-    tc.movePosition(QTextCursor::Left);
-    tc.movePosition(QTextCursor::EndOfWord);
-    tc.insertText(completion.right(extra));
+    tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, completer->completionPrefix().length());
+    tc.removeSelectedText();
+    tc.insertText(completion);
     if (completion[0] != '$')
         tc.insertText("(");
     setTextCursor(tc);
