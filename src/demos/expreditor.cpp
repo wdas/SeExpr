@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
     app.setStyle(QStyleFactory::create("Fusion"));
     app.setPalette(createDefaultColorPalette());
-    app.setFont(QFont("Consolas", 12));
+    app.setFont(QFont("Consolas", 10));
 
     ExprDialog dialog(0);
     dialog.setWindowTitle("Expression Editor 2");
