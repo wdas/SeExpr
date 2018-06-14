@@ -28,6 +28,7 @@
 #include <QSplitter>
 #include <QPalette>
 #include <QPushButton>
+#include <QToolButton>
 #include <QFileDialog>
 #include <QSpacerItem>
 #include <QSizePolicy>

@@ -31,6 +31,7 @@
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QSlider>
+#include <QToolButton>
 
 class QLabel;
 class QPushButton;
@@ -147,12 +148,26 @@ class ExprEditor : public QWidget {
     ExprTextEdit* exprTe;
     ExprControlCollection* controls;
     QListWidget* errorWidget;
+    QWidget* searchBar;
+    QString prevFind;
+    QLineEdit* searchLine;
+    QLineEdit* replaceLine;
+    QToolButton* caseSensitive;
+    QToolButton* wholeWords;
 
     QTimer* controlRebuildTimer;
     QTimer* previewTimer;
 
     bool _updatingText;
     int errorHeight;
+  
+  private slots:
+      void showFind();
+      bool find();
+      void findAll();
+      void replace();
+      void replaceAll();
+      void closeFind();
 };
 
 #endif
