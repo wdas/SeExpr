@@ -294,14 +294,14 @@ ExprBrowser::ExprBrowser(QWidget* parent, ExprEditor* editor)
     QToolButton* clearFilterButton = toolButton(this);
     clearFilterButton->setToolTip("clear filter");
     clearFilterButton->setIcon(QIcon(SEEXPR_EDITOR_ICON_PATH "clearFilter.png"));
-    clearFilterButton->setFixedSize(24,24);
-    clearFilterButton->setIconSize(QSize(16,16));
+    clearFilterButton->setFixedSize(24, 24);
+    clearFilterButton->setIconSize(QSize(16, 16));
     searchAndClearLayout->addWidget(clearFilterButton, 1);
     QToolButton* refreshButton = toolButton(this);
     refreshButton->setToolTip("refresh library");
     refreshButton->setIcon(QIcon(SEEXPR_EDITOR_ICON_PATH "reload.png"));
-    refreshButton->setFixedSize(24,24);
-    refreshButton->setIconSize(QSize(16,16));
+    refreshButton->setFixedSize(24, 24);
+    refreshButton->setIconSize(QSize(16, 16));
     refreshButton->setFocusPolicy(Qt::NoFocus);
     searchAndClearLayout->addWidget(refreshButton);
     rootLayout->addLayout(searchAndClearLayout);

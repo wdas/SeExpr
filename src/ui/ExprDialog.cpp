@@ -108,7 +108,7 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0),
     connect(this, SIGNAL(forwardAvailable(bool)), histForw, SLOT(setEnabled(bool)));
     QToolButton* reloadExprPb = toolButton(this);
     reloadExprPb->setIcon(QIcon(SEEXPR_EDITOR_ICON_PATH "reload.png"));
-    reloadExprPb->setFixedSize(24,24);
+    reloadExprPb->setFixedSize(24, 24);
     reloadExprPb->setToolTip("Reload current expression");
     buttonBarLayout->addWidget(reloadExprPb);
     connect(reloadExprPb, SIGNAL(clicked()), this, SLOT(reloadExpression()));

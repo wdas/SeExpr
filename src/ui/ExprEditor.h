@@ -160,14 +160,14 @@ class ExprEditor : public QWidget {
 
     bool _updatingText;
     int errorHeight;
-  
+
   private slots:
-      void showFind();
-      bool find();
-      void findAll();
-      void replace();
-      void replaceAll();
-      void closeFind();
+    void showFind();
+    bool find();
+    void findAll();
+    void replace();
+    void replaceAll();
+    void closeFind();
 };
 
 #endif

@@ -116,20 +116,20 @@ ExprEditor::ExprEditor(QWidget* parent, ExprControlCollection* controls)
     QPushButton* replaceAll = new QPushButton("Replace All");
     caseSensitive = toolButton(this, true);
     caseSensitive->setIcon(QIcon(SEEXPR_EDITOR_ICON_PATH "caseSensitive.png"));
-    caseSensitive->setFixedSize(20,20);
-    caseSensitive->setIconSize(QSize(16,16));
+    caseSensitive->setFixedSize(20, 20);
+    caseSensitive->setIconSize(QSize(16, 16));
     caseSensitive->setCheckable(true);
     caseSensitive->setToolTip("Match Case");
     wholeWords = toolButton(this, true);
     wholeWords->setIcon(QIcon(SEEXPR_EDITOR_ICON_PATH "wholeWord.png"));
-    wholeWords->setFixedSize(20,20);
-    wholeWords->setIconSize(QSize(16,16));
+    wholeWords->setFixedSize(20, 20);
+    wholeWords->setIconSize(QSize(16, 16));
     wholeWords->setCheckable(true);
     wholeWords->setToolTip("Whole Word");
     QToolButton* closeSearch = toolButton(this);
     closeSearch->setIcon(QIcon(SEEXPR_EDITOR_ICON_PATH "close.png"));
-    closeSearch->setFixedSize(20,20);
-    closeSearch->setIconSize(QSize(16,16));
+    closeSearch->setFixedSize(20, 20);
+    closeSearch->setIconSize(QSize(16, 16));
 
     searchBarLayout->addWidget(findButton);
     searchBarLayout->addWidget(searchLine);
@@ -140,8 +140,8 @@ ExprEditor::ExprEditor(QWidget* parent, ExprControlCollection* controls)
     searchBarLayout->addWidget(wholeWords);
     searchBarLayout->addWidget(closeSearch);
     searchBar->setLayout(searchBarLayout);
-    
-    
+
+
     searchBar->setVisible(false);
     connect(findButton, SIGNAL(clicked()), this, SLOT(find()));
     connect(replace, SIGNAL(clicked()), this, SLOT(replace()));
@@ -183,14 +183,14 @@ ExprEditor::ExprEditor(QWidget* parent, ExprControlCollection* controls)
     connect(controls, SIGNAL(insertString(const std::string&)), SLOT(insertStr(const std::string&)));
     connect(controlRebuildTimer, SIGNAL(timeout()), SLOT(rebuildControls()));
     connect(previewTimer, SIGNAL(timeout()), SLOT(sendPreview()));
-    
-    QAction *find = new QAction(this);
-    find->setShortcut(Qt::Key_F | Qt::CTRL);    
+
+    QAction* find = new QAction(this);
+    find->setShortcut(Qt::Key_F | Qt::CTRL);
     connect(find, SIGNAL(triggered()), this, SLOT(showFind()));
     this->addAction(find);
-    
-    QAction *closeFind = new QAction(this);
-    closeFind->setShortcut(Qt::Key_Escape);    
+
+    QAction* closeFind = new QAction(this);
+    closeFind->setShortcut(Qt::Key_Escape);
     connect(closeFind, SIGNAL(triggered()), this, SLOT(closeFind()));
     this->addAction(closeFind);
 }
@@ -243,7 +243,7 @@ void ExprEditor::rebuildControls()
 void ExprEditor::showFind()
 {
     QTextCursor tc = exprTe->textCursor();
-    if (tc.hasSelection()){
+    if (tc.hasSelection()) {
         searchLine->setText(tc.selectedText());
     }
     searchLine->setFocus();
@@ -251,7 +251,7 @@ void ExprEditor::showFind()
     findAll();
 }
 
-bool ExprEditor::find() 
+bool ExprEditor::find()
 {
     findAll();
     QTextDocument::FindFlags flags = 0;
@@ -259,15 +259,15 @@ bool ExprEditor::find()
         flags |= QTextDocument::FindCaseSensitively;
     if (wholeWords->isChecked())
         flags |= QTextDocument::FindWholeWords;
-    
+
     bool found = exprTe->find(searchLine->text(), flags);
-    if (!found){
-      QTextCursor tc = exprTe->textCursor();
-      tc.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor,1);
-      exprTe->setTextCursor(tc);
-      found = exprTe->find(searchLine->text(), flags);
+    if (!found) {
+        QTextCursor tc = exprTe->textCursor();
+        tc.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor, 1);
+        exprTe->setTextCursor(tc);
+        found = exprTe->find(searchLine->text(), flags);
     }
-    
+
     return found;
 }
 
@@ -278,19 +278,19 @@ void ExprEditor::findAll()
         flags |= QTextDocument::FindCaseSensitively;
     if (wholeWords->isChecked())
         flags |= QTextDocument::FindWholeWords;
-    
+
     QTextDocument* doc = exprTe->document();
     QTextCursor* tc = new QTextCursor(doc);
-    
-    tc->movePosition(QTextCursor::Start, QTextCursor::MoveAnchor,1);
-    
+
+    tc->movePosition(QTextCursor::Start, QTextCursor::MoveAnchor, 1);
+
     QList<QTextEdit::ExtraSelection> extraSelections;
     QTextEdit::ExtraSelection sel;
-    
+
     bool found = true;
     while (found) {
         QTextCursor blah = doc->find(searchLine->text(), *tc, flags);
-        if (!blah.hasSelection()){
+        if (!blah.hasSelection()) {
             found = false;
         } else {
             QTextEdit::ExtraSelection sel;
@@ -304,11 +304,11 @@ void ExprEditor::findAll()
     exprTe->setExtraSelections(extraSelections);
 }
 
-void ExprEditor::replace() 
+void ExprEditor::replace()
 {
     QTextCursor tc = exprTe->textCursor();
     if (!tc.hasSelection())
-      return;
+        return;
     QString replaceText = replaceLine->text();
 
     tc.beginEditBlock();
@@ -318,8 +318,8 @@ void ExprEditor::replace()
     find();
 }
 
-void ExprEditor::replaceAll() 
-{    
+void ExprEditor::replaceAll()
+{
     int pos = exprTe->verticalScrollBar()->value();
     QTextCursor tc = exprTe->textCursor();
     tc.beginEditBlock();
@@ -327,7 +327,7 @@ void ExprEditor::replaceAll()
         replace();
     }
     tc.endEditBlock();
-     exprTe->verticalScrollBar()->setValue(pos);
+    exprTe->verticalScrollBar()->setValue(pos);
 }
 
 void ExprEditor::closeFind()
