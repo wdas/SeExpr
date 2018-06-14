@@ -63,7 +63,7 @@ if(Qt5_FOUND OR QT4_FOUND)
         EditableExpression.cpp ExprPopupDoc.cpp
         ExprCompletionModel.cpp ExprDialog.cpp
         ExprControlCollection.cpp ExprGrapher2d.cpp ExprBrowser.cpp
-        BasicExpression.cpp ExprDeepWater.cpp)
+        BasicExpression.cpp ExprDeepWater.cpp ExprWidgets.cpp)
 
     if (ENABLE_QT5)
         qt5_wrap_cpp(EDITOR_MOC_SRCS ${EDITOR_MOC_HDRS})

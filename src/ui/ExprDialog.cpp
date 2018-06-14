@@ -23,6 +23,7 @@
 #include "ExprGrapher2d.h"
 #include "ExprDialog.h"
 #include "ExprControlCollection.h"
+#include "ExprWidgets.h"
 
 #include <QDir>
 #include <QApplication>
@@ -31,20 +32,6 @@
 #include <fstream>
 
 #define P3D_CONFIG_ENVVAR "P3D_CONFIG_PATH"
-static const char* arrow_left_xpm[] = {"16 16 9 1",        "g c #808080",      "b c #c0c000",      "e c #808080",
-                                       "# c #000000",      "c c #ffff00",      ". c None",         "a c #585858",
-                                       "f c #606060",      "d c #a0a0a0",      "................", "................",
-                                       "......##........", ".....#d#........", "....#de#........", "...#dee#######..",
-                                       "..#deeeeddddd#..", ".#deeeeeeeeef#..", ".#eeeeeeeeeef#..", "..#eeefffffff#..",
-                                       "...#eef#######..", "....#ef#........", ".....#f#........", "......##........",
-                                       "................", "................"};
-static const char* arrow_right_xpm[] = {"16 16 9 1",        "g c #808080",      "b c #c0c000",      "e c #808080",
-                                        "# c #000000",      "c c #ffff00",      ". c None",         "a c #585858",
-                                        "f c #606060",      "d c #a0a0a0",      "................", "................",
-                                        "........##......", "........#d#.....", "........#de#....", "..#######eee#...",
-                                        "..#dddddeeeee#..", "..#deeeeeeeeee#.", "..#deeeeeeeeef#.", "..#dfffffeeef#..",
-                                        "..#######def#...", "........#df#....", "........#d#.....", "........##......",
-                                        "................", "................"};
 
 ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0), currhistitem(0)
 {
@@ -100,29 +87,33 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0),
     previewButton = new QPushButton("Preview");
     buttonBarLayout->addWidget(previewButton);
 
-    QPushButton* histBack = new QPushButton(this);
+    QToolButton* histBack = toolButton(this);
     buttonBarLayout->addWidget(histBack);
-    histBack->setIcon(QPixmap(arrow_left_xpm));
+    histBack->setIcon(QIcon(SEEXPR_EDITOR_ICON_PATH "back.png"));
     histBack->setToolTip("Previous In History");
     histBack->setEnabled(0);
     histBack->setFixedSize(24, 24);
+    histBack->setIconSize(QSize(16, 16));
     histBack->setFocusPolicy(Qt::NoFocus);
-    QPushButton* histForw = new QPushButton(this);
+    QToolButton* histForw = toolButton(this);
     buttonBarLayout->addWidget(histForw);
-    histForw->setIcon(QPixmap(arrow_right_xpm));
+    histForw->setIcon(QIcon(SEEXPR_EDITOR_ICON_PATH "forward.png"));
     histForw->setToolTip("Next In History");
     histForw->setEnabled(0);
     histForw->setFixedSize(24, 24);
+    histForw->setIconSize(QSize(16, 16));
     histForw->setFocusPolicy(Qt::NoFocus);
     history.push_back("");
     connect(this, SIGNAL(backwardAvailable(bool)), histBack, SLOT(setEnabled(bool)));
     connect(this, SIGNAL(forwardAvailable(bool)), histForw, SLOT(setEnabled(bool)));
-    QPushButton* reloadExprPb = new QPushButton("Reload");
-    reloadExprPb->setFixedHeight(24);
+    QToolButton* reloadExprPb = toolButton(this);
+    reloadExprPb->setIcon(QIcon(SEEXPR_EDITOR_ICON_PATH "reload.png"));
+    reloadExprPb->setFixedSize(24,24);
     reloadExprPb->setToolTip("Reload current expression");
     buttonBarLayout->addWidget(reloadExprPb);
     connect(reloadExprPb, SIGNAL(clicked()), this, SLOT(reloadExpression()));
 
+    buttonBarLayout->addStretch(1);
     saveButton = new QPushButton("Save");
     buttonBarLayout->addWidget(saveButton);
     saveAsButton = new QPushButton("Save As");
