@@ -18,6 +18,4 @@
 #include <QToolButton>
 #include <QtGui/QPalette>
 
-// namespace seexpr2 {
 QToolButton* toolButton(QWidget* parent, bool solid = false);
-//}
