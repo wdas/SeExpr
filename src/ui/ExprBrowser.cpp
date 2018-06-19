@@ -37,6 +37,7 @@
 #include <cassert>
 #include "ExprEditor.h"
 #include "ExprBrowser.h"
+#include "ExprWidgets.h"
 
 #define P3D_CONFIG_ENVVAR "P3D_CONFIG_PATH"
 
@@ -286,15 +287,21 @@ ExprBrowser::ExprBrowser(QWidget* parent, ExprEditor* editor)
     this->setLayout(rootLayout);
     // search and clear widgets
     QHBoxLayout* searchAndClearLayout = new QHBoxLayout();
+    searchAndClearLayout->setSpacing(1);
     exprFilter = new QLineEdit();
     connect(exprFilter, SIGNAL(textChanged(const QString&)), SLOT(filterChanged(const QString&)));
     searchAndClearLayout->addWidget(exprFilter, 2);
-    QPushButton* clearFilterButton = new QPushButton("X");
-    clearFilterButton->setFixedWidth(24);
+    QToolButton* clearFilterButton = toolButton(this);
+    clearFilterButton->setToolTip("clear filter");
+    clearFilterButton->setIcon(QIcon(SEEXPR_EDITOR_ICON_PATH "clearFilter.png"));
+    clearFilterButton->setFixedSize(24, 24);
+    clearFilterButton->setIconSize(QSize(16, 16));
     searchAndClearLayout->addWidget(clearFilterButton, 1);
-    // TODO: use icon for reload button
-    QPushButton* refreshButton = new QPushButton("reload");
-    refreshButton->setFixedHeight(20);
+    QToolButton* refreshButton = toolButton(this);
+    refreshButton->setToolTip("refresh library");
+    refreshButton->setIcon(QIcon(SEEXPR_EDITOR_ICON_PATH "reload.png"));
+    refreshButton->setFixedSize(24, 24);
+    refreshButton->setIconSize(QSize(16, 16));
     refreshButton->setFocusPolicy(Qt::NoFocus);
     searchAndClearLayout->addWidget(refreshButton);
     rootLayout->addLayout(searchAndClearLayout);

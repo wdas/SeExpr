@@ -378,6 +378,7 @@ bool ExprControlCollection::rebuildControls(const QString& expressionText, std::
         variables.clear();
         for (size_t k = 0; k < vars.size(); k++) {
             variables.push_back(("$" + vars[k]).c_str());
+            variables.push_back((vars[k]).c_str());
         }
     }
 
