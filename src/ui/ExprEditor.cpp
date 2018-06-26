@@ -376,7 +376,8 @@ ExprTextEdit::ExprTextEdit(QWidget* parent) : QTextEdit(parent), lastStyleForHig
     completer->setWidget(this);
     completer->setCompletionMode(QCompleter::PopupCompletion);
     completer->setCaseSensitivity(Qt::CaseInsensitive);
-    QObject::connect(completer, SIGNAL(activated(const QModelIndex&)), this, SLOT(insertCompletion(const QModelIndex&)));
+    QObject::connect(completer, SIGNAL(activated(const QModelIndex&)), this,
+                     SLOT(insertCompletion(const QModelIndex&)));
 
     _popupEnabledAction = new QAction("Pop-up Help", this);
     _popupEnabledAction->setCheckable(true);
