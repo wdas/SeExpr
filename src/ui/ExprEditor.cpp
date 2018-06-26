@@ -376,7 +376,7 @@ ExprTextEdit::ExprTextEdit(QWidget* parent) : QTextEdit(parent), lastStyleForHig
     completer->setWidget(this);
     completer->setCompletionMode(QCompleter::PopupCompletion);
     completer->setCaseSensitivity(Qt::CaseInsensitive);
-    QObject::connect(completer, SIGNAL(activated(const QString&)), this, SLOT(insertCompletion(const QString&)));
+    QObject::connect(completer, SIGNAL(activated(const QModelIndex&)), this, SLOT(insertCompletion(const QModelIndex&)));
 
     _popupEnabledAction = new QAction("Pop-up Help", this);
     _popupEnabledAction->setCheckable(true);
@@ -577,8 +577,10 @@ void ExprTextEdit::hideTip()
         _tip->hide();
 }
 
-void ExprTextEdit::insertCompletion(const QString& completion)
+void ExprTextEdit::insertCompletion(const QModelIndex& completionIndex)
 {
+    QString completion = completionIndex.data().toString();
+    bool isFunc = completionIndex.data(Qt::UserRole).toBool();
     if (completer->widget() != this)
         return;
     QTextCursor tc = textCursor();
@@ -586,7 +588,7 @@ void ExprTextEdit::insertCompletion(const QString& completion)
     tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, completer->completionPrefix().length());
     tc.removeSelectedText();
     tc.insertText(completion);
-    if (completion[0] != '$')
+    if (isFunc)
         tc.insertText("(");
     setTextCursor(tc);
 }

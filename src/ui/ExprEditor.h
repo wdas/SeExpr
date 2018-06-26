@@ -87,7 +87,7 @@ class ExprTextEdit : public QTextEdit {
     void contextMenuEvent(QContextMenuEvent* event);
 
   private slots:
-    void insertCompletion(const QString& completion);
+    void insertCompletion(const QModelIndex& completionIndex);
     void tabLines(bool indent = true);
     void commentLines();
   signals:
