@@ -51,19 +51,43 @@ if(Qt5_FOUND OR QT4_FOUND)
     BuildParserScanner(ExprSpecParserLex ExprSpecParser ExprSpec
                        editor_parser_cpp)
 
-    set(EDITOR_MOC_HDRS ExprBrowser.h ExprColorCurve.h
-        ExprColorSwatch.h ExprControlCollection.h
-        ExprControl.h ExprCurve.h ExprDialog.h ExprEditor.h
-        ExprFileDialog.h ExprGrapher2d.h ExprPopupDoc.h
-        ExprShortEdit.h ExprDeepWater.h)
+    set(EDITOR_MOC_HDRS
+        ExprBrowser.h
+        ExprColorCurve.h
+        ExprColorSwatch.h
+        ExprControl.h
+        ExprControlCollection.h
+        ExprCurve.h
+        ExprDeepWater.h
+        ExprDialog.h
+        ExprEditor.h
+        ExprHelp.h
+        ExprFileDialog.h
+        ExprGrapher2d.h
+        ExprPopupDoc.h
+        ExprShortEdit.h
+    )
 
-    set(EDITOR_CPPS ExprFileDialog.cpp ExprControl.cpp
-        ExprEditor.cpp ExprShortEdit.cpp
-        ExprCurve.cpp  ExprColorCurve.cpp ExprColorSwatch.cpp
-        EditableExpression.cpp ExprPopupDoc.cpp
-        ExprCompletionModel.cpp ExprDialog.cpp
-        ExprControlCollection.cpp ExprGrapher2d.cpp ExprBrowser.cpp
-        BasicExpression.cpp ExprDeepWater.cpp ExprWidgets.cpp)
+    set(EDITOR_CPPS
+        BasicExpression.cpp
+        EditableExpression.cpp
+        ExprBrowser.cpp
+        ExprColorCurve.cpp
+        ExprColorSwatch.cpp
+        ExprCompletionModel.cpp
+        ExprControl.cpp
+        ExprControlCollection.cpp
+        ExprCurve.cpp
+        ExprDeepWater.cpp
+        ExprDialog.cpp
+        ExprEditor.cpp
+        ExprHelp.cpp
+        ExprFileDialog.cpp
+        ExprGrapher2d.cpp
+        ExprPopupDoc.cpp
+        ExprShortEdit.cpp
+        ExprWidgets.cpp
+    )
 
     if (ENABLE_QT5)
         qt5_wrap_cpp(EDITOR_MOC_SRCS ${EDITOR_MOC_HDRS})

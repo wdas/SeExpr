@@ -21,26 +21,28 @@
 #ifndef _MY_EXPR_EDITOR_H
 #define _MY_EXPR_EDITOR_H
 
-#include <QObject>
-#include <QMessageBox>
-#include <QGLWidget>
-#include <QHBoxLayout>
-#include <QSplitter>
-#include <QPalette>
-#include <QPushButton>
-#include <QToolButton>
-#include <QFileDialog>
-#include <QSpacerItem>
-#include <QSizePolicy>
-
 #include <iostream>
 #include <fstream>
 
+#include <QFileDialog>
+#include <QGLWidget>
+#include <QHBoxLayout>
+#include <QMessageBox>
+#include <QObject>
+#include <QPalette>
+#include <QPushButton>
+#include <QSizePolicy>
+#include <QSpacerItem>
+#include <QSplitter>
+#include <QToolButton>
+
 #include "ExprEditor.h"
 
-class ExprGrapherWidget;
-class ExprBrowser;
 class QTabWidget;
+
+class ExprBrowser;
+class ExprGrapherWidget;
+class ExprHelp;
 
 class ExprDialog : public QDialog {
     Q_OBJECT
@@ -55,14 +57,12 @@ class ExprDialog : public QDialog {
     QPushButton* acceptButton;
     QPushButton* cancelButton;
     ExprControlCollection* controls;
+    ExprHelp* exprHelp;
 
     QPushButton *applyButton, *previewButton, *saveButton, *saveAsButton;
     QPushButton *saveLocalButton, *clearButton;
-    QLineEdit* helpFindBox;
     QTimer* showEditorTimer;
-    QTextBrowser* helpBrowser;
     QTextCursor cursor;
-    QString prevFind;
     int _currentEditorIdx;
     QStringList history;
     int currhistitem;
@@ -88,12 +88,10 @@ class ExprDialog : public QDialog {
     void showEditor(int idx);
 
   private:
-    void setupHelp(QTabWidget* tab);
     void enableBackForwards();
 
   protected:
     void keyPressEvent(QKeyEvent* event);
-    void findHelper(QTextDocument::FindFlags flags);
     void closeEvent(QCloseEvent* event);
 
   signals:
@@ -102,20 +100,19 @@ class ExprDialog : public QDialog {
     void dialogClosed();
     void forwardAvailable(bool);
     void backwardAvailable(bool);
+
   private slots:
     void previewExpression();
     void verifiedApply();
     void verifiedAccept();
     void reloadExpression();
-    void findNextInHelp();
-    void findPrevInHelp();
     void _showEditor();
     void selectionChanged(const QString& str);
     void histBackward();
     void histForward();
     void histAdd();
-  public slots:
 
+  public slots:
     void applyExpression();
 
     void clearExpression();
