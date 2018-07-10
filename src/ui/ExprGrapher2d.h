@@ -21,6 +21,7 @@
 #ifndef ExprGrapher2d_h
 #define ExprGrapher2d_h
 
+#include <QLabel>
 #include <QObject>
 #include <QPalette>
 #include <QGLWidget>
@@ -43,17 +44,23 @@ class ExprGrapherView : public QGLWidget {
     void setWindow(float xmin, float xmax, float ymin, float ymax, float z);
     void getWindow(float& xmin, float& xmax, float& ymin, float& ymax, float& z);
 
+    inline float* pixel(int x, int y)
+    {
+        return &_image[3 * (x + y * _height)];
+    }
+
   protected:
     void clear();
     void paintGL();
+    void mouseMoveEvent(QMouseEvent* event);
     void mousePressEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent* event);
-    void mouseMoveEvent(QMouseEvent* event);
     int event_oldx, event_oldy;
 
   signals:
     void scaleValueManipulated();
     void clicked();
+    void pixelHovered(int, int);
 
   private:
     float* _image;
@@ -69,6 +76,7 @@ class ExprGrapherView : public QGLWidget {
 class ExprGrapherWidget : public QWidget {
     Q_OBJECT
     QLineEdit* scale;
+    QLabel* _pixelLabel;
 
   public:
     BasicExpression expr;
@@ -82,12 +90,14 @@ class ExprGrapherWidget : public QWidget {
     }
 
     void update();
+
   signals:
     void preview();
   private slots:
     void scaleValueEdited();
     void scaleValueManipulated();
     void forwardPreview();
+    void updatePixelLabel(int, int);
 };
 
 #endif

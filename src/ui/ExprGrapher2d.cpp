@@ -27,10 +27,10 @@
 #include <QLabel>
 
 ExprGrapherWidget::ExprGrapherWidget(QWidget* parent, int width, int height)
-    : expr("", SeExpr2::ExprType().FP(1)), view(new ExprGrapherView(*this, this, width, height))
+    : expr("", SeExpr2::ExprType().FP(1)), view(new ExprGrapherView(*this, this, width, height)), _pixelLabel(nullptr)
 {
     Q_UNUSED(parent);
-    setFixedSize(width, height + 30);
+    setMinimumSize(width, height + 30);
     QVBoxLayout* vbox = new QVBoxLayout;
     vbox->setMargin(0);
     vbox->setMargin(2);
@@ -46,15 +46,22 @@ ExprGrapherWidget::ExprGrapherWidget(QWidget* parent, int width, int height)
     scale->setToolTip("sets the preview scale");
     QDoubleValidator* valValidator = new QDoubleValidator(0.0, 10000000.0, 6, scale);
     scale->setValidator(valValidator);
-    scale->setValidator(valValidator);
     scaleValueManipulated();
 
     connect(scale, SIGNAL(returnPressed()), this, SLOT(scaleValueEdited()));
     connect(view, SIGNAL(scaleValueManipulated()), this, SLOT(scaleValueManipulated()));
     connect(view, SIGNAL(clicked()), this, SLOT(forwardPreview()));
+    connect(view, SIGNAL(pixelHovered(int, int)), this, SLOT(updatePixelLabel(int, int)));
 
     hbox->addWidget(new QLabel("scale"), 0);
     hbox->addWidget(scale, 0);
+
+    hbox->addStretch(1);
+
+    _pixelLabel = new QLabel();
+    _pixelLabel->show();
+    hbox->addWidget(_pixelLabel, 0);
+    updatePixelLabel(0, 0);
 }
 
 void ExprGrapherWidget::scaleValueEdited()
@@ -81,6 +88,15 @@ void ExprGrapherWidget::scaleValueManipulated()
     scale->setText(QString("%1").arg(.5 * (xmax - xmin)));
 }
 
+void ExprGrapherWidget::updatePixelLabel(int x, int y)
+{
+    float* pixel = view->pixel(x, y);
+    QString rgbstr = QString("[ %1, %2, %3 ]")
+                         .arg(QString::number(pixel[0], 'f', 3), QString::number(pixel[1], 'f', 3),
+                              QString::number(pixel[2], 'f', 3));
+    _pixelLabel->setText(rgbstr);
+}
+
 void ExprGrapherWidget::update()
 {
     view->update();
@@ -100,13 +116,15 @@ ExprGrapherView::ExprGrapherView(ExprGrapherWidget& widget, QWidget* parent, int
     , scaling(false)
     , translating(false)
 {
-    this->setFixedSize(width, height);
+    this->setMinimumSize(width, height);
 
     _image = new float[3 * _width * _height];
     setWindow(-1, 1, -1, 1, 0);
     update();
 
     setCursor(Qt::OpenHandCursor);
+
+    setMouseTracking(true);
 }
 
 ExprGrapherView::~ExprGrapherView()
@@ -193,6 +211,10 @@ void ExprGrapherView::mouseMoveEvent(QMouseEvent* event)
         emit scaleValueManipulated();
         update();
         repaint();
+    } else {
+        // flip y because Qt places origin at top left, but we store image data with origin at bottom left
+        y = _height - y;
+        emit pixelHovered(x, y);
     }
     event_oldx = x;
     event_oldy = y;
