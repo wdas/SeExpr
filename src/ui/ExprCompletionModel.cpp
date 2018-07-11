@@ -112,8 +112,11 @@ QVariant ExprCompletionModel::data(const QModelIndex& index, int role) const
                 return QVariant(variables[index]);
             else if (column == 1)
                 return QVariant(variables_comment[index]);
-        } else if (role == Qt::ForegroundRole)
+        } else if (role == Qt::ForegroundRole) {
             return variableColor;
+        } else if (role == Qt::UserRole) {
+            return QVariant(false);
+        }
     } else if (row < builtin_funcs_offset) {
         int index = row - local_variables_offset;
         if (role == Qt::DisplayRole || role == Qt::EditRole) {
@@ -121,8 +124,11 @@ QVariant ExprCompletionModel::data(const QModelIndex& index, int role) const
                 return QVariant(local_variables[index]);
             else if (column == 1)
                 return QVariant("Local");
-        } else if (role == Qt::ForegroundRole)
+        } else if (role == Qt::ForegroundRole) {
             return variableColor;
+        } else if (role == Qt::UserRole) {
+            return QVariant(false);
+        }
     } else if (row < local_funcs_offset) {
         int index = row - builtin_funcs_offset;
         if (role == Qt::DisplayRole || role == Qt::EditRole) {
@@ -130,8 +136,11 @@ QVariant ExprCompletionModel::data(const QModelIndex& index, int role) const
                 return QVariant(builtins[index]);
             else if (column == 1)
                 return QVariant(getFirstLine(SeExpr2::ExprFunc::getDocString(builtins[index].toStdString().c_str())));
-        } else if (role == Qt::ForegroundRole)
+        } else if (role == Qt::ForegroundRole) {
             return functionColor;  // darkGreen;
+        } else if (role == Qt::UserRole) {
+            return QVariant(true);
+        }
     } else if (row < local_funcs_offset + functions.size()) {
         int index = row - local_funcs_offset;
         if (role == Qt::DisplayRole || role == Qt::EditRole) {
@@ -139,8 +148,11 @@ QVariant ExprCompletionModel::data(const QModelIndex& index, int role) const
                 return QVariant(functions[index]);
             else if (column == 1)
                 return QVariant(getFirstLine(functions_comment[index].toStdString()));
-        } else if (role == Qt::ForegroundRole)
+        } else if (role == Qt::ForegroundRole) {
             return functionColor;  // darkGreen;
+        } else if (role == Qt::UserRole) {
+            return QVariant(true);
+        }
     }
     return QVariant();
 }
