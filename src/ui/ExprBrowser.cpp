@@ -20,12 +20,14 @@
 */
 
 #include <cassert>
+#include <functional>
 
 #include <QDir>
-#include <QLineEdit>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QLineEdit>
 #include <QMessageBox>
+#include <QtConcurrentRun>
 #include <QTreeView>
 #include <QVBoxLayout>
 
@@ -36,7 +38,7 @@
 #define P3D_CONFIG_ENVVAR "P3D_CONFIG_PATH"
 
 ExprTreeItem::ExprTreeItem(ExprTreeItem* parent, const QString& label, const QString& path)
-    : row(-1), parent(parent), label(label), path(path), populated(parent == 0)
+    : row(-1), parent(parent), label(label), path(path), populated(parent == nullptr)
 {
 }
 
@@ -48,10 +50,11 @@ ExprTreeItem::~ExprTreeItem()
 
 ExprTreeItem* ExprTreeItem::find(QString path)
 {
+    ExprTreeItem* item = nullptr;
     if (this->path == path)
-        return this;
+        item = this;
     else {
-        populate();
+        assert(populated);
         for (unsigned int i = 0; i < children.size(); i++) {
             ExprTreeItem* ret = children[i]->find(path);
             if (ret)
@@ -69,10 +72,14 @@ void ExprTreeItem::clear()
     children.clear();
 }
 
-void ExprTreeItem::populate()
+void ExprTreeItem::populate(std::atomic<bool>& cancelRequested)
 {
     if (populated)
         return;
+
+    if (cancelRequested)
+        return;
+
     populated = true;
     QFileInfo info(path);
     if (info.isDir()) {
@@ -80,9 +87,14 @@ void ExprTreeItem::populate()
 
         // std::cerr<<"is dir and populating "<<path.toStdString()<<std::endl;
         for (QList<QFileInfo>::ConstIterator it = infos.constBegin(); it != infos.constEnd(); ++it) {
+            if (cancelRequested)
+                return;
+
             const QFileInfo* fi = &*it;
             if (fi->isDir() || fi->fileName().endsWith(".se")) {
-                addChild(new ExprTreeItem(this, fi->fileName(), fi->filePath()));
+                ExprTreeItem* item = new ExprTreeItem(this, fi->fileName(), fi->filePath());
+                addChild(item);
+                item->populate(cancelRequested);
             }
         }
     }
@@ -96,17 +108,13 @@ void ExprTreeItem::addChild(ExprTreeItem* child)
 
 ExprTreeItem* ExprTreeItem::getChild(const int row)
 {
-    populate();
-    if (row < 0 || row > (int)children.size()) {
-        assert(false);
-    }
-    return children[row];
+    assert(!(row < 0 || row > (int)children.size()) && "child index out of range");
+    return populated ? children[row] : nullptr;
 }
 
 int ExprTreeItem::getChildCount()
 {
-    populate();
-    return children.size();
+    return populated ? children.size() : 0;
 }
 
 void ExprTreeItem::regen()
@@ -125,6 +133,7 @@ void ExprTreeItem::regen()
 
 ExprTreeModel::ExprTreeModel() : root(new ExprTreeItem(0, "", ""))
 {
+    cancelRequested = false;
 }
 
 ExprTreeModel::~ExprTreeModel()
@@ -136,20 +145,26 @@ void ExprTreeModel::update()
 {
     beginResetModel();
     endResetModel();
+    emit(updated());
 }
 
 void ExprTreeModel::clear()
 {
     beginResetModel();
+    cancelRequested = true;
+    for (auto& future : futures) {
+        future.waitForFinished();
+    }
+    cancelRequested = false;
+    futures.clear();
+    watchers.clear();
     root->clear();
     endResetModel();
 }
 
 void ExprTreeModel::addPath(const char* label, const char* path)
 {
-    ExprTreeItem* item = new ExprTreeItem(root, label, path);
-    root->addChild(item);
-    item->populate();
+    root->addChild(new ExprTreeItem(root, label, path));
 }
 
 QModelIndex ExprTreeModel::parent(const QModelIndex& index) const
@@ -225,6 +240,18 @@ QModelIndex ExprTreeModel::find(QString path)
     return QModelIndex();
 }
 
+void ExprTreeModel::populate() {
+    int N = root->getChildCount();
+    for (int i = 0; i < N; ++i) {
+        QFutureWatcher<void>* watcher = new QFutureWatcher<void>();
+        watchers.emplace_back(watcher);
+        futures.push_back(QtConcurrent::run(root->getChild(i), &ExprTreeItem::populate, std::ref(cancelRequested)));
+        QFuture<void>& future = futures.back();
+        connect(watcher, SIGNAL(finished()), this, SLOT(update()));
+        watcher->setFuture(future);
+    }
+}
+
 ExprTreeFilterModel::ExprTreeFilterModel(QWidget* parent) : QSortFilterProxyModel(parent)
 {
 }
@@ -294,6 +321,8 @@ ExprBrowser::ExprBrowser(QWidget* parent, ExprEditor* editor)
     rootLayout->addWidget(treeNew);
     // selection mode and signal
     treeNew->setSelectionMode(QAbstractItemView::SingleSelection);
+
+    connect(treeModel, SIGNAL(updated()), this, SLOT(modelUpdatedSLOT()));
     connect(refreshButton, SIGNAL(clicked()), SLOT(reload()));
     connect(treeNew->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)),
             SLOT(handleSelection(const QModelIndex&, const QModelIndex&)));
@@ -360,6 +389,10 @@ void ExprBrowser::clear()
 void ExprBrowser::clearSelection()
 {
     treeNew->clearSelection();
+}
+
+void ExprBrowser::modelUpdatedSLOT() {
+    treeNew->expandAll();
 }
 
 void ExprBrowser::clearFilter()
@@ -460,6 +493,7 @@ void ExprBrowser::addUserExpressionPath(const std::string& context)
 void ExprBrowser::reload()
 {
     clear();
+    _populated = false;
     populate();
 }
 
@@ -577,6 +611,8 @@ void ExprBrowser::populate()
     for (const auto& pair : paths) {
         treeModel->addPath(pair.first.c_str(), pair.second.c_str());
     }
+
+    treeModel->populate();
 
     update();
     return;

@@ -21,12 +21,17 @@
 #ifndef ExprBrowser_h
 #define ExprBrowser_h
 
+#include <atomic>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <unordered_map>
+#include <vector>
 
 #include <QAbstractItemModel>
+#include <QFuture>
+#include <QFutureWatcher>
 #include <QSortFilterProxyModel>
 #include <QWidget>
 
@@ -41,7 +46,7 @@ class ExprTreeItem {
 
     ExprTreeItem* find(QString path);
     void clear();
-    void populate();
+    void populate(std::atomic<bool>& cancelRequested);
     void addChild(ExprTreeItem* child);
     ExprTreeItem* getChild(const int row);
     int getChildCount();
@@ -54,17 +59,19 @@ class ExprTreeItem {
 
   private:
     std::vector<ExprTreeItem*> children;
-    bool populated;
+    std::atomic<bool> populated;
 };
 
 class ExprTreeModel : public QAbstractItemModel {
+    Q_OBJECT
+
     ExprTreeItem* root;
 
   public:
     ExprTreeModel();
     ~ExprTreeModel();
 
-    void update();
+    void populate();
     void clear();
     void addPath(const char* label, const char* path);
     QModelIndex parent(const QModelIndex& index) const;
@@ -73,9 +80,22 @@ class ExprTreeModel : public QAbstractItemModel {
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
     QModelIndex find(QString path);
+
+  signals:
+    void updated();
+
+  public slots:
+    void update();
+
+  public:
+    std::atomic<bool> cancelRequested;
+    std::vector<QFuture<void>> futures;
+    std::vector<std::unique_ptr<QFutureWatcher<void>>> watchers;
 };
 
 class ExprTreeFilterModel : public QSortFilterProxyModel {
+    Q_OBJECT
+
   public:
     ExprTreeFilterModel(QWidget* parent = 0);
 
@@ -128,6 +148,7 @@ class ExprBrowser : public QWidget {
     void saveLocalExpressionAs();
     void saveExpressionAs();
   private slots:
+    void modelUpdatedSLOT();
     void clearFilter();
     void filterChanged(const QString& str);
 };

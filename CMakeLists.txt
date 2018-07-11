@@ -164,22 +164,25 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 if (ENABLE_QT5)
-    find_package(Qt5 COMPONENTS Core Gui OpenGL)
+    find_package(Qt5 COMPONENTS Core Gui OpenGL Concurrent)
     if (Qt5_FOUND)
         message(STATUS "Qt5 Enabled")
+        message(STATUS "Qt5Concurrent_INCLUDE_DIRS = ${Qt5Concurrent_INCLUDE_DIRS}")
         message(STATUS "Qt5Core_INCLUDE_DIRS = ${Qt5Core_INCLUDE_DIRS}")
         message(STATUS "Qt5Gui_INCLUDE_DIRS = ${Qt5Gui_INCLUDE_DIRS}")
         message(STATUS "Qt5OpenGL_INCLUDE_DIRS = ${Qt5OpenGL_INCLUDE_DIRS}")
+        include_directories(SYSTEM ${Qt5Concurrent_INCLUDE_DIRS})
         include_directories(SYSTEM ${Qt5Core_INCLUDE_DIRS})
         include_directories(SYSTEM ${Qt5Gui_INCLUDE_DIRS})
         include_directories(SYSTEM ${Qt5OpenGL_INCLUDE_DIRS})
     endif()
 else()
-    find_package(Qt4 COMPONENTS QtCore QtGui QtOpenGL)
+    find_package(Qt4 COMPONENTS QtCore QtGui QtOpenGL QtConcurrent)
     if (QT4_FOUND)
         message(STATUS "Qt4 Enabled")
         message(STATUS "QT_INCLUDE_DIR = ${QT_INCLUDE_DIR}")
         include_directories(SYSTEM ${QT_INCLUDE_DIR}
+                                   ${QT_INCLUDE_DIR}/QtConcurrent
                                    ${QT_INCLUDE_DIR}/QtCore
                                    ${QT_INCLUDE_DIR}/QtGui
                                    ${QT_INCLUDE_DIR}/QtOpenGL)
