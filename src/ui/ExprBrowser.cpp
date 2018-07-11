@@ -147,7 +147,9 @@ void ExprTreeModel::clear()
 
 void ExprTreeModel::addPath(const char* label, const char* path)
 {
-    root->addChild(new ExprTreeItem(root, label, path));
+    ExprTreeItem* item = new ExprTreeItem(root, label, path);
+    root->addChild(item);
+    item->populate();
 }
 
 QModelIndex ExprTreeModel::parent(const QModelIndex& index) const
@@ -254,7 +256,7 @@ ExprBrowser::~ExprBrowser()
 }
 
 ExprBrowser::ExprBrowser(QWidget* parent, ExprEditor* editor)
-    : QWidget(parent), editor(editor), _context(""), _searchPath(""), _applyOnSelect(false)
+    : QWidget(parent), editor(editor), _context(""), _searchPath(""), _applyOnSelect(false), _populated(false)
 {
     QVBoxLayout* rootLayout = new QVBoxLayout;
     rootLayout->setMargin(0);
@@ -457,7 +459,8 @@ void ExprBrowser::addUserExpressionPath(const std::string& context)
 
 void ExprBrowser::reload()
 {
-    getExpressionDirs();
+    clear();
+    populate();
 }
 
 /*
@@ -465,8 +468,13 @@ void ExprBrowser::reload()
  * it (and bonsai?) are adjusted to call setSearchPath(context, path)
  */
 
-bool ExprBrowser::getExpressionDirs()
+void ExprBrowser::populate()
 {
+    if (_populated)
+        return;
+
+    _populated = true;
+
     const char* env;
     bool enableLocal = false;
     /*bool homeFound = false; -- for xgen's config.txt UserRepo section below */
@@ -477,7 +485,7 @@ bool ExprBrowser::getExpressionDirs()
         env = getenv(P3D_CONFIG_ENVVAR); /* For backwards compatibility */
 
     if (!env)
-        return enableLocal;
+        return;
 
     std::string context;
     if (_context.length() > 0) {
@@ -485,8 +493,6 @@ bool ExprBrowser::getExpressionDirs()
     } else {
         context = "paint3d"; /* For backwards compatibility */
     }
-
-    clear();
 
     std::string configFile = std::string(env) + "/config.txt";
     std::ifstream file(configFile.c_str());
@@ -573,5 +579,5 @@ bool ExprBrowser::getExpressionDirs()
     }
 
     update();
-    return enableLocal;
+    return;
 }

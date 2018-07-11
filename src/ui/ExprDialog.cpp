@@ -192,7 +192,7 @@ void ExprDialog::_showEditor()
 void ExprDialog::show()
 {
     // populate the expressions
-    browser->getExpressionDirs();
+    browser->populate();
     browser->expandAll();
     QDialog::show();
 }
@@ -200,7 +200,7 @@ void ExprDialog::show()
 int ExprDialog::exec()
 {
     // populate the expressions
-    browser->getExpressionDirs();
+    browser->populate();
     browser->expandAll();
     return QDialog::exec();
 }
