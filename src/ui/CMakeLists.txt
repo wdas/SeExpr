@@ -159,6 +159,10 @@ if(Qt5_FOUND OR QT4_FOUND)
         target_link_libraries(SeExpr2Editor qdcolorwidgets)
     endif()
 
+    if (DEFINED TBB_DIR)
+        target_link_libraries(SeExpr2Editor tbb)
+    endif()
+
     if (WIN32)
         target_link_libraries(SeExpr2Editor opengl32)
     endif()

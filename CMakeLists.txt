@@ -221,6 +221,16 @@ if (DEFINED QDGUI_DIR)
     link_directories(${QDGUI_DIR}/${CMAKE_INSTALL_LIBDIR})
 endif()
 
+if (DEFINED TBB_DIR)
+    message(STATUS "TBB_DIR = ${TBB_DIR}")
+    add_definitions(-DSEEXPR_USE_TBB)
+    include_directories(SYSTEM ${TBB_DIR}/include)
+    link_directories(${TBB_DIR}/${CMAKE_INSTALL_LIBDIR})
+    set(SEEXPR_ENABLE_TBB 1)
+else()
+    set(SEEXPR_ENABLE_TBB 0)
+endif()
+
 ## Install location for html documentation
 set(SEEXPR_HTML_DOC_PATH "share/doc/SeExpr2")
 

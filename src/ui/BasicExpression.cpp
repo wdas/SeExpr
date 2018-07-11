@@ -21,6 +21,8 @@
 
 #include "BasicExpression.h"
 
+#include <SeExpr2/VarBlock.h>
+
 BasicExpression::BasicExpression(const std::string& expr, const SeExpr2::ExprType& type)
     : Expression(expr, type), dummyFunc(dummyFuncX, 0, 16)
 {
@@ -53,13 +55,8 @@ void BasicExpression::reset()
 
 SeExpr2::ExprVarRef* BasicExpression::resolveVar(const std::string& name) const
 {
-    if (name == "u")
-        return &u;
-    else if (name == "v")
-        return &v;
-    else if (name == "P")
-        return &P;
-    else {
+    const SeExpr2::VarBlockCreator* symbols = varBlockCreator();
+    if (!symbols || !symbols->resolveVar(name)) {
         // make a variable to resolve any unknown
         VARMAP::iterator i = varmap.find(name);
         if (i != varmap.end())

@@ -27,6 +27,8 @@
 #include <QGLWidget>
 #include <QMouseEvent>
 
+#include <SeExpr2/VarBlock.h>
+
 #include "BasicExpression.h"
 
 class ExprGrapherWidget;
@@ -71,6 +73,19 @@ class ExprGrapherView : public QGLWidget {
     float dx, dy;
 
     bool scaling, translating;
+};
+
+struct ExprGrapherSymbols : public SeExpr2::VarBlockCreator {
+    ExprGrapherSymbols()
+    {
+        u = registerVariable("u", SeExpr2::ExprType().FP(1).Varying());
+        v = registerVariable("v", SeExpr2::ExprType().FP(1).Varying());
+        P = registerVariable("P", SeExpr2::ExprType().FP(3).Varying());
+    }
+
+    int u;
+    int v;
+    int P;
 };
 
 class ExprGrapherWidget : public QWidget {
