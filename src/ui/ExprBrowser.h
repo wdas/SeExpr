@@ -21,25 +21,67 @@
 #ifndef ExprBrowser_h
 #define ExprBrowser_h
 
-#include <QWidget>
-#include <QAbstractItemModel>
-
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <unordered_map>
 
-class QLineEdit;
-class QTreeWidget;
-class QTreeView;
-class QTreeWidgetItem;
-class QTextBrowser;
-class ExprEditor;
-class QSortFilterProxyModel;
-class QDir;
+#include <QAbstractItemModel>
+#include <QSortFilterProxyModel>
+#include <QWidget>
 
-class ExprTreeModel;
-class ExprTreeFilterModel;
+class QLineEdit;
+class QTreeView;
+class ExprEditor;
+
+class ExprTreeItem {
+  public:
+    ExprTreeItem(ExprTreeItem* parent, const QString& label, const QString& path);
+    ~ExprTreeItem();
+
+    ExprTreeItem* find(QString path);
+    void clear();
+    void populate();
+    void addChild(ExprTreeItem* child);
+    ExprTreeItem* getChild(const int row);
+    int getChildCount();
+    void regen();
+
+    int row;
+    ExprTreeItem* parent;
+    QString label;
+    QString path;
+
+  private:
+    std::vector<ExprTreeItem*> children;
+    bool populated;
+};
+
+class ExprTreeModel : public QAbstractItemModel {
+    ExprTreeItem* root;
+
+  public:
+    ExprTreeModel();
+    ~ExprTreeModel();
+
+    void update();
+    void clear();
+    void addPath(const char* label, const char* path);
+    QModelIndex parent(const QModelIndex& index) const;
+    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
+    int columnCount(const QModelIndex& parent) const;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
+    QModelIndex find(QString path);
+};
+
+class ExprTreeFilterModel : public QSortFilterProxyModel {
+  public:
+    ExprTreeFilterModel(QWidget* parent = 0);
+
+    void update();
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const;
+};
 
 class ExprBrowser : public QWidget {
     Q_OBJECT
