@@ -19,16 +19,21 @@
 * @author  jlacewel
 */
 
-#include "ExprGrapher2d.h"
-#include <QGridLayout>
-#include <QLineEdit>
 #include <QDoubleValidator>
+#include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QLineEdit>
+
+#include "ExprGrapher2d.h"
+#include "../utils/concurrent-for.h"
 
 ExprGrapherWidget::ExprGrapherWidget(QWidget* parent, int width, int height)
     : expr("", SeExpr2::ExprType().FP(1)), view(new ExprGrapherView(*this, this, width, height)), _pixelLabel(nullptr)
 {
+    static ExprGrapherSymbols symbols;
+    expr.setVarBlockCreator(&symbols);
+
     Q_UNUSED(parent);
     setMinimumSize(width, height + 30);
     QVBoxLayout* vbox = new QVBoxLayout;
@@ -230,25 +235,35 @@ void ExprGrapherView::update()
 
     float dv = 1.0f / _height;
     float du = 1.0f / _width;
+    CONCURRENT_FOR(0, _height, 1, [&dv, &du, this](int row) {
+        static ExprGrapherSymbols symbols;
+        thread_local SeExpr2::SymbolTable symtab(symbols.create());
 
-    float y = .5 * dy + ymin;
-    float v = .5 * dv;
-    int index = 0;
-    for (int row = 0; row < _height; row++, y += dy, v += dv) {
+        float y = .5 * dy + ymin + dy * row;
+        float v = .5 * dv + dv * row;
+
         float x = .5 * dx + xmin;
         float u = .5 * du;
-        widget.expr.v.value = v;
+
+        double v_ = (double)v;
+        symtab.Pointer(symbols.v) = &v_;
         for (int col = 0; col < _width; col++, x += dy, u += du) {
-            widget.expr.u.value = u;
-            widget.expr.P.value = SeExpr2::Vec3d(x, y, z);
+            int index = (row * _width + col) * 3;
+
+            double u_ = (double)u;
+            SeExpr2::Vec3d P(x, y, z);
+            symtab.Pointer(symbols.u) = &u_;
+            symtab.Pointer(symbols.P) = &P[0];
+
             double value[3] = {0.0};
-            widget.expr.evalFP(&value[0], 3);
+            widget.expr.evalFP(&value[0], 3, &symtab);
+
             _image[index] = value[0];
             _image[index + 1] = value[1];
             _image[index + 2] = value[2];
             index += 3;
         }
-    }
+    });
 
     updateGL();
 }

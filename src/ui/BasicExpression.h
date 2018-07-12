@@ -29,21 +29,6 @@
 
 class BasicExpression : public SeExpr2::Expression {
   public:
-    struct ScalarRef : public SeExpr2::ExprVarRef {
-        double value;
-        ScalarRef() : SeExpr2::ExprVarRef(SeExpr2::ExprType().FP(1).Varying()), value(0.0)
-        {
-        }
-        void eval(double* result)
-        {
-            result[0] = value;
-        }
-        void eval(const char** result)
-        {
-            assert(false);
-        }
-    };
-
     struct VectorRef : public SeExpr2::ExprVarRef {
         SeExpr2::Vec3d value;
         VectorRef() : SeExpr2::ExprVarRef(SeExpr2::ExprType().FP(3).Varying()), value(0.0)
@@ -92,10 +77,6 @@ class BasicExpression : public SeExpr2::Expression {
         }
     } dummyFuncX;
     mutable SeExpr2::ExprFunc dummyFunc;
-
-    mutable ScalarRef u;
-    mutable ScalarRef v;
-    mutable VectorRef P;
 
     typedef std::map<std::string, VectorRef*> VARMAP;
     mutable VARMAP varmap;

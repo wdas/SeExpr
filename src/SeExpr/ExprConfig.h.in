@@ -24,3 +24,7 @@
 #if @SEEXPR_ENABLE_FOLLY@
 #   define  SEEXPR_ENABLE_FOLLY
 #endif
+
+#if @SEEXPR_ENABLE_TBB@
+#   define  SEEXPR_ENABLE_TBB
+#endif
