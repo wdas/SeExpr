@@ -20,11 +20,11 @@ http://www.apache.org/licenses/LICENSE-2.0
 #include <QTextDocument>
 #include <QWidget>
 
-class ExprHelp : public QWidget{
+class ExprHelp : public QWidget {
     Q_OBJECT
 
   public:
-    ExprHelp(QWidget* parent=nullptr);
+    ExprHelp(QWidget* parent = nullptr);
 
   protected:
     void findHelper(QTextDocument::FindFlags flags);

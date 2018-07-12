@@ -21,9 +21,15 @@ inline void serial_for(T begin, T end, T incr, CallableT f)
 
 #undef SEEXPR_ENABLE_TBB
 #ifdef SEEXPR_ENABLE_TBB
-template<typename ...Params>
-inline void CONCURRENT_FOR(Params&& ...params) { tbb::parallel_for(std::forward<Params>(params)...); }
+template <typename... Params>
+inline void CONCURRENT_FOR(Params&&... params)
+{
+    tbb::parallel_for(std::forward<Params>(params)...);
+}
 #else
-template<typename ...Params>
-inline void CONCURRENT_FOR(Params&& ...params) { serial_for(std::forward<Params>(params)...); }
+template <typename... Params>
+inline void CONCURRENT_FOR(Params&&... params)
+{
+    serial_for(std::forward<Params>(params)...);
+}
 #endif

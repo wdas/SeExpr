@@ -240,7 +240,8 @@ QModelIndex ExprTreeModel::find(QString path)
     return QModelIndex();
 }
 
-void ExprTreeModel::populate() {
+void ExprTreeModel::populate()
+{
     int N = root->getChildCount();
     for (int i = 0; i < N; ++i) {
         QFutureWatcher<void>* watcher = new QFutureWatcher<void>();
@@ -391,7 +392,8 @@ void ExprBrowser::clearSelection()
     treeNew->clearSelection();
 }
 
-void ExprBrowser::modelUpdatedSLOT() {
+void ExprBrowser::modelUpdatedSLOT()
+{
     treeNew->expandAll();
 }
 
