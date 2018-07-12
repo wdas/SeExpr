@@ -116,14 +116,6 @@ class VarBlock {
     std::vector<const char*> _dataPtrs;
 };
 
-#ifdef DEBUG
-#define VALIDATE_VARBLOCK(varblock) \
-    if (varblock)                   \
-        varblock->validate();
-#else
-#define VALIDATE_VARBLOCK(varblock)
-#endif
-
 // helper class for using VarBlocks
 class SymbolTable : public VarBlock {
 #ifdef SEEXPR_ENABLE_FOLLY
