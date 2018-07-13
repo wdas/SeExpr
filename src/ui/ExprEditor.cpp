@@ -102,9 +102,19 @@ ExprEditor::ExprEditor(QWidget* parent, ExprControlCollection* controls)
     this->controls = controls;
 
     // make layout
-    QVBoxLayout* exprAndErrors = new QVBoxLayout;
-    exprAndErrors->setMargin(0);
-    setLayout(exprAndErrors);
+    QVBoxLayout* mainLayout = new QVBoxLayout;
+    mainLayout->setMargin(0);
+    setLayout(mainLayout);
+
+    QWidget* textAndSearchWidget = new QWidget();
+    QVBoxLayout* textAndSearchLayout = new QVBoxLayout();
+    textAndSearchLayout->setMargin(0);
+    textAndSearchWidget->setLayout(textAndSearchLayout);
+
+    QSplitter* vsplitter = new QSplitter(Qt::Vertical);
+    vsplitter->addWidget(textAndSearchWidget);
+    vsplitter->setCollapsible(0, false);
+    mainLayout->addWidget(vsplitter);
 
     searchBar = new QWidget();
     QHBoxLayout* searchBarLayout = new QHBoxLayout();
@@ -164,7 +174,8 @@ ExprEditor::ExprEditor(QWidget* parent, ExprControlCollection* controls)
 
     exprTe->setFont(QFont("Liberation Sans", fontsize));
 
-    exprAndErrors->addWidget(exprTe);
+    textAndSearchLayout->addWidget(searchBar);
+    textAndSearchLayout->addWidget(exprTe);
 
     // create error widget
     errorWidget = new QListWidget();
@@ -172,8 +183,8 @@ ExprEditor::ExprEditor(QWidget* parent, ExprControlCollection* controls)
     errorWidget->setSizePolicy(QSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Maximum));
     connect(errorWidget, SIGNAL(itemSelectionChanged()), SLOT(selectError()));
     clearErrors();
-    exprAndErrors->addWidget(errorWidget);
-    exprAndErrors->addWidget(searchBar);
+    vsplitter->addWidget(errorWidget);
+    vsplitter->setCollapsible(1, true);
 
     // wire up signals
     connect(exprTe, SIGNAL(applyShortcut()), SLOT(sendApply()));
