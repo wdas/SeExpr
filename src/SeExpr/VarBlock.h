@@ -17,9 +17,10 @@
 #ifndef VarBlock_h
 #define VarBlock_h
 
+#include <deque>
 #include <sstream>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 // this potentially sets SEEXPR_ENABLE_FOLLY
 #include "ExprConfig.h"
@@ -153,12 +154,8 @@ class SymbolTable : public VarBlock {
     };
 
   public:
-    explicit SymbolTable(VarBlock&& block, double* stack = nullptr, size_t stackSize = 0)
-        : VarBlock(std::move(block))
-        , _stack(stack)
-        , _stackRemaining(stackSize)
-        , _deferred_vars()
-        , _allocations(VarBlock::numSymbols(), nullptr)
+    explicit SymbolTable(VarBlock&& block)
+        : VarBlock(std::move(block)), _stack(), _deferred_vars(), _allocations(VarBlock::numSymbols(), nullptr)
     {
         _deferred_vars.reserve(VarBlock::numSymbols());
         for (size_t i = 0; i < VarBlock::numSymbols(); ++i) {
@@ -166,10 +163,9 @@ class SymbolTable : public VarBlock {
         }
     }
 
-    SymbolTable(SymbolTable&& other, double* stack = nullptr, size_t stackSize = 0)
+    SymbolTable(SymbolTable&& other)
         : VarBlock(std::move(other))
-        , _stack(stack)
-        , _stackRemaining(stackSize)
+        , _stack()
         , _function_code_segments(std::move(other._function_code_segments))
         , _deferred_vars(std::move(other._deferred_vars))
         , _allocations(std::move(other._allocations))
@@ -179,7 +175,6 @@ class SymbolTable : public VarBlock {
     SymbolTable& operator=(SymbolTable&& other)
     {
         _stack = std::move(other._stack);
-        _stackRemaining = std::move(other._stackRemaining);
         _function_code_segments = std::move(other._function_code_segments);
         return *this;
     }
@@ -231,24 +226,20 @@ class SymbolTable : public VarBlock {
   private:
     double* alloc(uint32_t offset, size_t doublesNeeded)
     {
+        assert(doublesNeeded);
+
         if (_allocations[offset])
             return _allocations[offset];
 
-        assert(_stack && "Invalid stack provided");
-        if (!_stackRemaining) {
-            throw "SymbolTable has no stack space remaining";
-        }
-
-        double* ptr = _stack;
-        _stack += doublesNeeded;
-        _stackRemaining -= doublesNeeded;
+        size_t idx = _stack.size();
+        _stack.resize(_stack.size() + doublesNeeded);
+        double* ptr = &_stack[idx];
         Pointer(offset) = ptr;
         _allocations[offset] = ptr;
         return ptr;
     }
 
-    double* _stack;
-    size_t _stackRemaining;
+    std::deque<double> _stack;
     std::vector<std::unique_ptr<SeExpr2::ExprFuncX>> _function_code_segments;
     std::vector<DeferredVarRef> _deferred_vars;
     std::vector<double*> _allocations;

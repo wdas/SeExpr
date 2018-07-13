@@ -36,8 +36,7 @@ inline void calcSum(Vec* r, Vec* i, Vec* sum, const Vec* init_r, const Vec& init
     static StaticExpression rExpr(creator, "r*r - i*i + r0");
     static StaticExpression iExpr(creator, "2*r*i + i0");
     static StaticExpression sumExpr(creator, "r*r + i*i");
-    thread_local double stack[4];
-    thread_local SeExpr2::SymbolTable symtab(creator.create(), stack, 4);
+    thread_local SeExpr2::SymbolTable symtab(creator.create());
 
     for (int vec = 0; vec < 8 / VEC_SIZE; vec++) {
         Vec r_ = r[vec];
