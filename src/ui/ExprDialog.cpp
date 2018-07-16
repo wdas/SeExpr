@@ -34,6 +34,37 @@
 
 #define P3D_CONFIG_ENVVAR "P3D_CONFIG_PATH"
 
+ClickableLabel::ClickableLabel(QWidget* parent) : QLabel(parent)
+{
+}
+
+ClickableLabel::ClickableLabel(const QString& label) : QLabel(label)
+{
+}
+
+void ClickableLabel::enterEvent(QEvent* event)
+{
+    pressed = false;
+}
+
+void ClickableLabel::leaveEvent(QEvent* event)
+{
+    pressed = false;
+}
+
+void ClickableLabel::mousePressEvent(QMouseEvent* event)
+{
+    pressed = true;
+}
+
+void ClickableLabel::mouseReleaseEvent(QMouseEvent* event)
+{
+    if (pressed) {
+        emit(clicked());
+    }
+    pressed = false;
+}
+
 ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0), currhistitem(0)
 {
     this->setMinimumWidth(600);
@@ -74,11 +105,8 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0),
     QHBoxLayout* previewLayout = new QHBoxLayout();
     grapher = new ExprGrapherWidget(this, 256, 256);
     previewLayout->addWidget(grapher, 0);
-    previewCommentLabel = new QLabel();
-    previewCommentLabel->setWordWrap(true);
-    previewLayout->addWidget(previewCommentLabel, 1, Qt::AlignLeft | Qt::AlignTop);
     leftLayout->addLayout(previewLayout);
-    previewLibraryLayout->addWidget(leftWidget);
+    previewLibraryLayout->addWidget(leftWidget, 1);
 
     // setup button bar
     // QWidget* buttonBarWidget=new QWidget();
@@ -151,7 +179,12 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0),
 
     // dialog buttons
     QHBoxLayout* buttonLayout = new QHBoxLayout(0);
-    buttonLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::MinimumExpanding, QSizePolicy::Minimum));
+    errorCountLabel = new ClickableLabel("0 Errors");
+    warningCountLabel = new ClickableLabel("0 Warnings");
+    buttonLayout->addWidget(errorCountLabel, 0);
+    buttonLayout->addSpacing(10);
+    buttonLayout->addWidget(warningCountLabel, 0);
+    buttonLayout->addStretch(1);
     applyButton = new QPushButton("Apply");
     buttonLayout->addWidget(applyButton);
     acceptButton = new QPushButton("Accept");
@@ -167,6 +200,8 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0),
     topTabWidget->addTab(exprHelp, "Help");
 
     // connect buttons
+    connect(errorCountLabel, SIGNAL(clicked()), editor, SLOT(nextError()));
+    connect(warningCountLabel, SIGNAL(clicked()), editor, SLOT(nextError()));
     connect(previewButton, SIGNAL(clicked()), SLOT(previewExpression()));
     connect(clearButton, SIGNAL(clicked()), SLOT(clearExpression()));
     connect(saveButton, SIGNAL(clicked()), browser, SLOT(saveExpression()));
@@ -291,40 +326,43 @@ void ExprDialog::applyExpression()
     grapher->expr.setDesiredReturnType(SeExpr2::ExprType().FP(3));
     grapher->update();
 
+    int numWarnings = 0;
+    int numErrors = 0;
     // set the label widget to mention that functions and variables will not be previewed
     bool empty = true;
-    std::stringstream s;
     if (grapher->expr.varmap.size() > 0 || grapher->expr.funcmap.size() > 0) {
-        s << "<b>Variables/Functions not supported in preview (assumed zero):</b><br>";
         if (grapher->expr.varmap.size() > 0) {
             for (BasicExpression::VARMAP::iterator i = grapher->expr.varmap.begin(); i != grapher->expr.varmap.end();
                  ++i) {
-                s << "$" << i->first << " ";
+                std::stringstream ss;
+                ss << "Warning: variable \"" << i->first << "\" not defined, assumed zero";
+                editor->addError(-1, -1, ss.str());
+                ++numWarnings;
             }
             empty = false;
         }
         if (grapher->expr.funcmap.size() > 0) {
             for (BasicExpression::FUNCMAP::iterator i = grapher->expr.funcmap.begin(); i != grapher->expr.funcmap.end();
                  ++i) {
-                s << "" << i->first << "() ";
+                std::stringstream ss;
+                ss << "Warning: function \"" << i->first << "\" not defined, assumed zero";
+                editor->addError(-1, -1, ss.str());
+                ++numWarnings;
             }
             empty = false;
         }
-    }
-    if (empty) {
-        previewCommentLabel->setText("");
-    } else {
-        previewCommentLabel->setText(s.str().c_str());
     }
 
     // put errors into editor module
     if (!grapher->exprValid()) {
         const std::vector<SeExpr2::Expression::Error>& errors = grapher->expr.getErrors();
         for (unsigned int i = 0; i < errors.size(); i++) {
-            editor->addError(errors[i].startPos, errors[i].endPos, errors[i].error);
+            editor->addError(errors[i].startPos, errors[i].endPos, std::string("Error: " + errors[i].error));
+            ++numErrors;
         }
-        editor->nextError();
     }
+    warningCountLabel->setText(QString("%1 Warnings").arg(numWarnings));
+    errorCountLabel->setText(QString("%1 Errors").arg(numErrors));
 }
 
 void ExprDialog::clearExpression()

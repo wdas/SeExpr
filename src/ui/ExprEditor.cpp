@@ -18,34 +18,26 @@
 * @brief This provides an expression editor for SeExpr syntax with auto ui features
 * @author  aselle
 */
-#include <QRegExp>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QToolButton>
-#include <QSplitter>
-#include <QLabel>
-#include <QMouseEvent>
-#include <QKeyEvent>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QPaintEvent>
-#include <QPainter>
-#include <QScrollArea>
-#include <QSpacerItem>
-#include <QSizePolicy>
-#include <QTextCharFormat>
-#include <QCompleter>
 #include <QAbstractItemView>
-#include <QStandardItemModel>
-#include <QStringListModel>
-#include <QScrollBar>
-#include <QToolTip>
-#include <QListWidget>
-#include <QTreeView>
 #include <QAction>
+#include <QCompleter>
+#include <QHBoxLayout>
+#include <QKeyEvent>
+#include <QLabel>
+#include <QLineEdit>
+#include <QListWidget>
 #include <QMenu>
 #include <QMimeData>
-#include <QAction>
+#include <QMouseEvent>
+#include <QPaintEvent>
+#include <QPushButton>
+#include <QRegExp>
+#include <QScrollBar>
+#include <QSizePolicy>
+#include <QToolButton>
+#include <QToolTip>
+#include <QTreeView>
+#include <QVBoxLayout>
 
 #include <SeExpr2/Expression.h>
 #include <SeExpr2/ExprNode.h>
@@ -111,7 +103,7 @@ ExprEditor::ExprEditor(QWidget* parent, ExprControlCollection* controls)
     textAndSearchLayout->setMargin(0);
     textAndSearchWidget->setLayout(textAndSearchLayout);
 
-    QSplitter* vsplitter = new QSplitter(Qt::Vertical);
+    vsplitter = new QSplitter(Qt::Vertical);
     vsplitter->addWidget(textAndSearchWidget);
     vsplitter->setCollapsible(0, false);
     mainLayout->addWidget(vsplitter);
@@ -212,11 +204,13 @@ void ExprEditor::selectError()
     QListWidgetItem* item = errorWidget->item(selected);
     int start = item->data(Qt::UserRole).toInt();
     int end = item->data(Qt::UserRole + 1).toInt();
-    QTextCursor cursor = exprTe->textCursor();
-    cursor.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor);
-    cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, start);
-    cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, end - start + 1);
-    exprTe->setTextCursor(cursor);
+    if (start >= 0 && end >= 0 && end > start) {
+        QTextCursor cursor = exprTe->textCursor();
+        cursor.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor);
+        cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, start);
+        cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, end - start + 1);
+        exprTe->setTextCursor(cursor);
+    }
 }
 
 void ExprEditor::sendApply()
@@ -777,7 +771,7 @@ void ExprEditor::appendStr(const std::string& str)
 
 void ExprEditor::addError(const int startPos, const int endPos, const std::string& error)
 {
-    QListWidgetItem* item = new QListWidgetItem(("Error: " + error).c_str(), errorWidget);
+    QListWidgetItem* item = new QListWidgetItem(error.c_str(), errorWidget);
     item->setData(Qt::UserRole, startPos);
     item->setData(Qt::UserRole + 1, endPos);
     errorWidget->setHidden(false);
@@ -796,10 +790,28 @@ void ExprEditor::addError(const int startPos, const int endPos, const std::strin
 
 void ExprEditor::nextError()
 {
-    int newRow = errorWidget->currentRow() + 1;
-    if (newRow >= errorWidget->count())
-        newRow = 0;
-    errorWidget->setCurrentRow(newRow);
+    assert(errorWidget && "expects static layout containing an errorWidget");
+    assert(exprTe && "expects static layout containing an exprTe");
+    assert(vsplitter && vsplitter->sizes().size() == 2 &&
+           "expects static vsplitter layout containing an exprTe and errorWidget");
+
+    QList<int> splitterSizes = vsplitter->sizes();
+    if (!splitterSizes[1]) {
+        int heightHint = errorWidget->sizeHint().height();
+        splitterSizes[0] = exprTe->sizeHint().height();
+        splitterSizes[1] = errorWidget->sizeHint().height();
+        vsplitter->setSizes(splitterSizes);
+    }
+
+    if (!errorWidget->isVisible()) {
+        errorWidget->setVisible(true);
+        errorWidget->setCurrentRow(0);
+    } else {
+        int newRow = errorWidget->currentRow() + 1;
+        if (newRow >= errorWidget->count())
+            newRow = 0;
+        errorWidget->setCurrentRow(newRow);
+    }
 }
 
 void ExprEditor::clearErrors()

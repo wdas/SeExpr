@@ -21,33 +21,21 @@
 #ifndef ExprEditor_h
 #define ExprEditor_h
 
-#include <vector>
-
-#include <QTextBrowser>
-#include <QPlainTextEdit>
-#include <QDialog>
-#include <QTimer>
-#include <QRegExp>
 #include <QLineEdit>
-#include <QCheckBox>
-#include <QSlider>
+#include <QSplitter>
+#include <QTextEdit>
+#include <QTimer>
 #include <QToolButton>
 
-class QLabel;
-class QPushButton;
-class QLineEdit;
 class QMouseEvent;
 class QPaintEvent;
 class QKeyEvent;
 class QCompleter;
 class QToolTip;
 class QListWidget;
-class QListWidgetItem;
 class ExprCompletionModel;
-class ExprControl;
 class ExprControlCollection;
 
-class ExprEditor;
 class ExprCompletionModel;
 class ExprHighlighter;
 class ExprPopupDoc;
@@ -154,6 +142,7 @@ class ExprEditor : public QWidget {
     QLineEdit* replaceLine;
     QToolButton* caseSensitive;
     QToolButton* wholeWords;
+    QSplitter* vsplitter;
 
     QTimer* controlRebuildTimer;
     QTimer* previewTimer;
