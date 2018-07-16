@@ -40,7 +40,7 @@ ExprGrapherWidget::ExprGrapherWidget(QWidget* parent, int width, int height)
     vbox->setMargin(0);
     vbox->setMargin(2);
     setLayout(vbox);
-    vbox->addWidget(view, 0, Qt::AlignLeft | Qt::AlignTop);
+    vbox->addWidget(view, 0, Qt::AlignCenter | Qt::AlignTop);
     QHBoxLayout* hbox = new QHBoxLayout;
     vbox->addLayout(hbox);
     hbox->setMargin(0);

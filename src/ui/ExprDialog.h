@@ -27,6 +27,7 @@
 #include <QFileDialog>
 #include <QGLWidget>
 #include <QHBoxLayout>
+#include <QLabel>
 #include <QMessageBox>
 #include <QObject>
 #include <QPalette>
@@ -44,6 +45,27 @@ class ExprBrowser;
 class ExprGrapherWidget;
 class ExprHelp;
 
+class ClickableLabel : public QLabel {
+    Q_OBJECT
+
+  public:
+    explicit ClickableLabel(QWidget* parent = nullptr);
+    explicit ClickableLabel(const QString& label);
+
+  signals:
+    void clicked();
+
+  protected:
+    virtual void enterEvent(QEvent* event) override;
+    virtual void leaveEvent(QEvent* event) override;
+
+    virtual void mousePressEvent(QMouseEvent* event) override;
+    virtual void mouseReleaseEvent(QMouseEvent* event) override;
+
+  private:
+    bool pressed{false};
+};
+
 class ExprDialog : public QDialog {
     Q_OBJECT
 
@@ -53,12 +75,12 @@ class ExprDialog : public QDialog {
 
   private:
     ExprGrapherWidget* grapher;
-    QLabel* previewCommentLabel;
     QPushButton* acceptButton;
     QPushButton* cancelButton;
     ExprControlCollection* controls;
     ExprHelp* exprHelp;
 
+    ClickableLabel *errorCountLabel, *warningCountLabel;
     QPushButton *applyButton, *previewButton, *saveButton, *saveAsButton;
     QPushButton *saveLocalButton, *clearButton;
     QTimer* showEditorTimer;
