@@ -1,0 +1,5 @@
+title: SeExpr
+logo: /assets/img/logo.png
+description: Arithmetic expressions appear in almost every animation system ever created. Being able to embed an expression language in a piece of custom software allows an amazing degree of artistic freedom. At Disney artists have enjoyed using expressions because they allow just enough flexibility without being overwhelming to non-programmer users. Developers have enjoyed them too for quick prototyping and deployment of fixes to production needs.
+show_downloads: true
+theme: jekyll-theme-minimal
