@@ -451,8 +451,8 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/../SeExpr \
-			 @CMAKE_CURRENT_SOURCE_DIR@/../ui \
+INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/../SeExpr2 \
+			 @CMAKE_CURRENT_SOURCE_DIR@/../SeExpr2/UI \
 			 @CMAKE_CURRENT_SOURCE_DIR@/../demos \
 			 @CMAKE_CURRENT_SOURCE_DIR@/../demos/imageEditor \
 			 @CMAKE_CURRENT_SOURCE_DIR@/../demos/imageSynth \

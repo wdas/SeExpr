@@ -13,10 +13,11 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
-if(EXISTS ${GTEST_DIR}/include)
+include_directories(${CMAKE_BINARY_DIR}/src/SeExpr2)
+
+if (GTEST_DIR)
     # Google test framework
-    include_directories(BEFORE ${GTEST_DIR}/include)
-    include_directories(${CMAKE_BINARY_DIR}/src/SeExpr)
+    include_directories(AFTER ${GTEST_DIR}/include)
     link_directories(${GTEST_DIR}/${CMAKE_INSTALL_LIBDIR})
 
     # Uncomment below to print performance stats
@@ -27,6 +28,8 @@ if(EXISTS ${GTEST_DIR}/include)
         include_directories(${PNG_DIR}/include)
         find_library(PNG_LIBRARIES png PATHS ${PNG_DIR}/${CMAKE_INSTALL_LIBDIR})
         set(PNG_FOUND 1)
+    else()
+        find_package(PNG QUIET)
     endif()
 
     if (PNG_FOUND)
@@ -65,14 +68,16 @@ if(EXISTS ${GTEST_DIR}/include)
         target_link_libraries(testmain2 SeExpr2 gtest ${PNG_LIBRARIES})
         install(TARGETS testmain2 DESTINATION share/test/SeExpr2)
         install(PROGRAMS imagediff.py DESTINATION share/test/SeExpr2)
-
-        add_test(NAME basic COMMAND testmain2 --gtest_filter="BasicTests.*")
+        add_test(NAME basic COMMAND testmain2 --gtest_filter=BasicTests.*)
     else()
         message(STATUS "Couldn't find PNG -- not doing tests")
     endif()
 else()
     message(STATUS "Couldn't find gtest framework -- not building main tests")
 endif()
+
+add_test(NAME imageTestsReport
+         COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/imageTestsReportNew.py runall)
 
 add_executable(dirtSimple "dirtSimple.cpp")
 target_link_libraries(dirtSimple SeExpr2 ${PNG_LIBRARIES})

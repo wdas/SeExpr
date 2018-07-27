@@ -111,7 +111,7 @@ class ExprNode {
     /// Access parent node - root node has no parent
     const ExprNode* parent() const { return _parent; }
     /// Number of children
-    int numChildren() const { return _children.size(); }
+    int numChildren() const { return static_cast<int>(_children.size()); }
 
     /// Get 0 indexed child
     const ExprNode* child(size_t i) const { return _children[i]; }

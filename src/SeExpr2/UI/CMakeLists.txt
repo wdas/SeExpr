@@ -13,45 +13,15 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
-# Find python includes and libs. cmake doesn't seem to handle automatically
-
-find_package(PythonInterp)
-find_package(PythonLibs)
-
-macro(get_build_info NAME STORAGE)
-    execute_process(
-        COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/src/build/build-info ${NAME}
-        OUTPUT_VARIABLE ${STORAGE}
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-endmacro()
-
-get_build_info(python-site PYTHON_SITE)
-get_build_info(python-inc PYTHON_INCLUDE_DIR)
-get_build_info(sip-inc SIP_INCLUDE_DIR)
-
 if (EXISTS "/usr/share/apps/cmake/modules")
     # Needed for some versions of CMake, which only look in version-specific module path
     list(APPEND CMAKE_MODULE_PATH "/usr/share/apps/cmake/modules")
 endif()
 
-if (NOT DEFINED PYQT_SIP_FLAGS)
-    get_build_info(pyqt-sip-flags PYQT_SIP_FLAGS)
-    separate_arguments(PYQT_SIP_FLAGS)
-endif()
-
-if (NOT DEFINED PYQT_SIP_DIR)
-    get_build_info(pyqt4-sip PYQT_SIP_DIR)
-    if (NOT DEFINED PYQT_SIP_DIR)
-       message(FATAL_ERROR "PYQT_SIP_DIR must be defined")
-    endif()
-endif()
-
-set(CMAKE_INSTALL_PYTHON "${PYTHON_SITE}/SeExpr2" )
-
 # Other package dependencies...
 find_package(OpenGL)
 
-if(Qt5_FOUND OR QT4_FOUND)
+if (Qt5_FOUND OR QT4_FOUND)
 
     BuildParserScanner(ExprSpecParserLex ExprSpecParser ExprSpec
                        editor_parser_cpp)
@@ -109,6 +79,14 @@ if(Qt5_FOUND OR QT4_FOUND)
                     ${editor_parser_cpp})
     endif()
 
+    set_property(TARGET SeExpr2Editor PROPERTY VERSION ${SeExpr2_VERSION})
+    set_property(TARGET SeExpr2Editor PROPERTY SOVERSION 3)
+    set_property(TARGET SeExpr2Editor PROPERTY
+                 INTERFACE_SeExpr2Editor_MAJOR_VERSION ${SeExpr2_MAJOR_VERSION})
+    set_property(TARGET SeExpr2Editor APPEND PROPERTY
+                 COMPATIBLE_INTERFACE_STRING ${SeExpr2_MAJOR_VERSION})
+
+    include_directories(${CMAKE_BINARY_DIR}/src/SeExpr2)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(SeExpr2Editor SeExpr2)
 
@@ -148,51 +126,82 @@ if(Qt5_FOUND OR QT4_FOUND)
 
     ## Install library and includes
     install(TARGETS SeExpr2Editor DESTINATION ${CMAKE_INSTALL_LIBDIR})
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ DESTINATION include/SeExpr2/UI
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ DESTINATION ${INCLUDE_DIR}/UI
             FILES_MATCHING PATTERN "*.h")
 
-    # Setup header files
-    file(GLOB public_includes "*.h")
-    file(COPY ${public_includes} DESTINATION ${CMAKE_BINARY_DIR}/include/SeExpr2/UI)
+    if(USE_PYTHON)
+        # Generate python module expreditor2, using sip
+        find_program(SIP_EXEC sip)
 
-    # Generate python module expreditor2, using sip
-    find_program(SIP_EXEC sip)
+        # Find python includes and libs. cmake doesn't seem to handle automatically
+        find_package(PythonInterp)
+        find_package(PythonLibs)
 
-    set(CMAKE_CXX_FLAGS "-std=c++11")
-    include_directories(${SIP_INCLUDE_DIR}
-                        ${PYQT_SIP_DIR}
-                        ${PYTHON_INCLUDE_DIR})
+        macro(get_build_info NAME STORAGE)
+            execute_process(
+                COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/src/build/build-info ${NAME}
+                OUTPUT_VARIABLE ${STORAGE}
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        endmacro()
 
-    add_custom_command(OUTPUT sipexpreditor2part0.cpp
-                       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/SeExpr2Editor.sip
-                       COMMENT 'Processing SeExpr2Editor.sip'
-                       COMMAND ${SIP_EXEC} -w -c .
-                       ${PYQT_SIP_FLAGS}
-                       -j 1
-                       -I. -I${PYQT_SIP_DIR} -I${SIP_INCLUDE_DIR}
-                       ${CMAKE_CURRENT_SOURCE_DIR}/SeExpr2Editor.sip
-                       VERBATIM)
+        get_build_info(python-site PYTHON_SITE)
+        get_build_info(python-inc PYTHON_INCLUDE_DIR)
+        get_build_info(sip-inc SIP_INCLUDE_DIR)
 
-    add_library(expreditor2 SHARED sipexpreditor2part0.cpp)
-    target_link_libraries(expreditor2 SeExpr2Editor ${SEEXPR_LIBRARIES}
-                          ${OPENGL_LIBRARY} ${GLUT_LIBRARY} ${PYTHON_LIBRARIES})
+        if (NOT DEFINED PYQT_SIP_FLAGS)
+            if (ENABLE_QT5)
+                get_build_info(pyqt5-sip-flags PYQT_SIP_FLAGS)
+            else()
+                get_build_info(pyqt4-sip-flags PYQT_SIP_FLAGS)
+            endif()
+            separate_arguments(PYQT_SIP_FLAGS)
+        endif()
 
-    if (ENABLE_QT5)
-        target_link_libraries(expreditor2 SeExpr2Editor
-                              Qt5::Core
-                              Qt5::Gui
-                              Qt5::Widgets
-                              Qt5::OpenGL)
-    else()
-        target_link_libraries(expreditor2 SeExpr2Editor
-                              ${QT_QTCORE_LIBRARY}
-                              ${QT_QTGUI_LIBRARY}
-                              ${QT_QTOPENGL_LIBRARY})
+        if (NOT DEFINED PYQT_SIP_DIR)
+            get_build_info(pyqt4-sip PYQT_SIP_DIR)
+            if (NOT DEFINED PYQT_SIP_DIR)
+               message(FATAL_ERROR "PYQT_SIP_DIR must be defined")
+            endif()
+        endif()
+
+        set(CMAKE_INSTALL_PYTHON "${PYTHON_SITE}/SeExpr2" )
+
+        set(CMAKE_CXX_FLAGS "-std=c++11")
+        include_directories(${SIP_INCLUDE_DIR}
+                            ${PYQT_SIP_DIR}
+                            ${PYTHON_INCLUDE_DIR})
+
+        add_custom_command(OUTPUT sipexpreditor2part0.cpp
+                           DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/SeExpr2Editor.sip
+                           COMMENT 'Processing SeExpr2Editor.sip'
+                           COMMAND ${SIP_EXEC} -w -c .
+                           ${PYQT_SIP_FLAGS}
+                           -j 1
+                           -I. -I${PYQT_SIP_DIR} -I${SIP_INCLUDE_DIR}
+                           ${CMAKE_CURRENT_SOURCE_DIR}/SeExpr2Editor.sip
+                           VERBATIM)
+
+        add_library(expreditor2 SHARED sipexpreditor2part0.cpp)
+        target_link_libraries(expreditor2 SeExpr2Editor ${SEEXPR_LIBRARIES}
+                              ${OPENGL_LIBRARY} ${GLUT_LIBRARY} ${PYTHON_LIBRARIES})
+
+        if (ENABLE_QT5)
+            target_link_libraries(expreditor2 SeExpr2Editor
+                                  Qt5::Core
+                                  Qt5::Gui
+                                  Qt5::Widgets
+                                  Qt5::OpenGL)
+        else()
+            target_link_libraries(expreditor2 SeExpr2Editor
+                                  ${QT_QTCORE_LIBRARY}
+                                  ${QT_QTGUI_LIBRARY}
+                                  ${QT_QTOPENGL_LIBRARY})
+        endif()
+
+        # No prefix on python module name
+        set_target_properties(expreditor2 PROPERTIES PREFIX "")
+        install(TARGETS expreditor2 DESTINATION ${CMAKE_INSTALL_PYTHON})
+        install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
+                DESTINATION ${CMAKE_INSTALL_PYTHON})
     endif()
-
-    # No prefix on python module name
-    set_target_properties(expreditor2 PROPERTIES PREFIX "")
-    install(TARGETS expreditor2 DESTINATION ${CMAKE_INSTALL_PYTHON})
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
-            DESTINATION ${CMAKE_INSTALL_PYTHON})
 endif()

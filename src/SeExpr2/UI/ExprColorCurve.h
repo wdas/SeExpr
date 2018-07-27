@@ -30,8 +30,7 @@
 #include <QGraphicsView>
 #include <QLineEdit>
 
-#include <SeExpr2/Vec.h>
-
+#include "../Vec.h"
 #include "ExprCurve.h"
 
 /*

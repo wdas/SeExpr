@@ -13,7 +13,9 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
-find_package(PNG)
+if (NOT PNG_DIR)
+    find_package(PNG QUIET)
+endif()
 if (PNG_FOUND)
     include_directories(SYSTEM ${PNG_INCLUDE_DIR})
 

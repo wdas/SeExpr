@@ -30,7 +30,7 @@
 #include <QGraphicsView>
 #include <QLineEdit>
 
-#include <SeExpr2/Curve.h>
+#include "../Curve.h"
 
 /*
   This class overrides QGraphicsView so we can get resize events

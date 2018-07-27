@@ -21,14 +21,15 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
-#include <Expression.h>
-#include <Vec.h>
-#include <Interpreter.h>
-#include <ExprFunc.h>
-#include <ExprFuncX.h>
-#include <Platform.h>
 #include <png.h>
 #include <fstream>
+
+#include <SeExpr2/Expression.h>
+#include <SeExpr2/Vec.h>
+#include <SeExpr2/Interpreter.h>
+#include <SeExpr2/ExprFunc.h>
+#include <SeExpr2/ExprFuncX.h>
+#include <SeExpr2/Platform.h>
 
 namespace SeExpr2 {
 class RandFuncX : public ExprFuncSimple {
