@@ -52,9 +52,12 @@ src/
 
 ## SeExpr Developers
 
+ * David Aguilar
  * Janet Berlin
  * Brent Burley
  * Lawrence Chai
+ * Noah Kagan
+ * Jared Reisweber
  * Andrew Selle
  * Dan Teece
  * Tom Thompson
