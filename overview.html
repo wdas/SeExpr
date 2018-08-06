@@ -1,0 +1,77 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>SeExpr Overview</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <nav>
+    <div class="software">
+      <a href="index.html" class="software"><img src="./images/seexpr-logo-white.png" border=0 width=125></a>
+    </div>
+    <div class="navigation">
+      <a href="./overview.html">Overview</a>
+      <a href="./doc-overview.html">Documentation</a>
+      <a href="./examples.html">Examples</a>
+      <a href="https://github.com/wdas/seexpr">Download</a>
+      <a href="./discussion.html">Discussion</a>
+    </div>
+  </nav>
+
+  <section>
+    <div class="left">
+      <h1>Overview </h1>
+      <br><br><a href="images/seexpr-editor.png"><img src="images/seexpr-editor-sm.png"
+                                              width=160></a>
+    </div>
+    <div class="right">
+
+<p>
+Arithmetic expressions appear in almost every animation system ever
+created. Being able to embed an expression language in a piece of custom
+software allows an amazing degree of artistic freedom. At Disney artists have
+enjoyed using expressions because they allow just enough flexibility without
+being overwhelming to non-programmer users. Developers have enjoyed them too for
+quick prototyping and deployment of fixes to production needs.
+
+
+<h2>History</h2>
+
+<p>
+At Disney there have been various expression languages. SeExpr started as a
+language for our procedural geometry instancing tool, XGen. Work was done to
+generalize it into something that could be used in other contexts. Later it was
+integrated into paint3d, our texture painting facility, which opened the door to
+procedural synthesis. More recently, we have integrated it as a way of defining
+procedural controls to physical dynamical simulations and render time particle
+instancing.</p>
+
+<p>
+Expressions can be seen as a way of allowing customization of inner loops. This
+is contrast to scripting which is mostly aimed at gluing large parts of code
+base together. So in this sense, C++ forms the center of your application,
+python could be used to put pieces of it together, and SeExpr is used to
+customize tight inner loops. </p>
+
+
+<h2>Major Features</h2>
+
+<ul>
+<li>Arithmetic expression of scalar/vector types
+<li>Large library of builtin functions
+<li>Extensible variables and functions (including with DSOs)
+<li>Simple to embed in any program
+<li>High-level UI components to manipulate and visualize expressions:
+          <ul>
+            <li>an expression editor, with auto-completion
+            <li>a panel for control widgets, eg, sliders, ramp widgets, color widgets
+            <li>an image previewer
+            <li>an expression library browser
+          </ul>
+</ul>
+
+    </div>
+  </section>
+</body>
+</html>

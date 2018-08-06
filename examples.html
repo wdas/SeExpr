@@ -1,0 +1,174 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>SeExpr Examples</title>
+  <link rel="stylesheet" href="./style.css">
+  <style>
+    pre
+    {
+    font-weight:bold;
+    color:black;
+    font-family: courier;
+    }
+  </style>
+</head>
+
+<body>
+  <nav>
+    <div class="software">
+      <a href="index.html" class="software"><img src="./images/seexpr-logo-white.png" border=0 width=125></a>
+    </div>
+    <div class="navigation">
+      <a href="./overview.html">Overview</a>
+      <a href="./doc-overview.html">Documentation</a>
+      <a href="./examples.html">Examples</a>
+      <a href="https://github.com/wdas/seexpr">Download</a>
+      <a href="./discussion.html">Discussion</a>
+    </div>
+  </nav>
+  <section>
+    <div class="left">
+      <h1>Demos</h1>
+    </div>
+    <div class="right">
+
+      <p>
+        We have packaged several demo applications with the source code to show some potential
+        uses. These are all available in the src/demos directory and include:
+      </p>
+      <ul>
+        <li><a href="movs/asciigraph.mov">asciiGraph (.mov)</a>, a simple ASCII graphing calculator  
+          <br><a href="movs/asciigraph.mov"><img 
+                                               src="movs/asciigraph-icon.png" alt="asciigraph"></a>
+        <li><a href="movs/segraph.mov">segraph (.mov)</a>, a Qt graphing calculator  
+          <br><a href="movs/segraph.mov"><img 
+                                            src="movs/segraph-icon.png" alt="segraph"></a>
+        <li><a href="movs/shadeop.mov">shadeop (.mov)</a>, a RenderMan shader and shadeop  
+          <br><a href="movs/shadeop.mov"><img  
+                                            src="movs/shadeop-icon.png" alt="shadeop"></a>
+      </ul>
+
+      <p>
+        Artistic control is very important for film making. Expressions though
+        essentially a mathematical concept can readily be used to create artist directed
+        procedural content.  
+      </p>
+
+      <p>
+        One key we found was creating an interface around the
+        expression language that automatically exposed parameters on defined variables.
+      </p>
+
+      <p>
+        We have included in src/demos 
+        a <a href="movs/editor.mov">simple Qt image editor (.mov)</a> to illustrate this functionality. 
+      </p>
+      <p> <a href="movs/editor.mov"><img src="movs/editor-icon.png" alt="editor" ></a></p>
+
+      <p>
+        In the example, you can see a color ramp, slider, and spline ramp that are
+        all automatically generated from just typing the expression below the widgets. 
+      </p>
+
+      <p>Also, libraries of expressions can be created by expert users and shared with other
+        users. Take a look at our <a href="movs/library.mov">expression library (.mov)</a> in action.
+      </p>
+      <p><a href="movs/library.mov"><img src="movs/library-icon.png" alt="library" ></a></p>
+
+      <p>
+        Another demonstration of the expression editor can be seen
+        in <a href="http://www.youtube.com/watch?v=GxNlAlOuQQQ&feature=player_detailpage#t=199s">this
+          video (YouTube)</a> at time 3:18. 
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="left">
+      <h2>Usage Examples</h2>
+    </div>
+    <div class="right">
+
+<h3>Noise Driving Color Interpolation</h3>
+
+<p>
+SeExpr can be used in many evaluation contexts, and in each context it may have
+different bound variables, different customizable functions.  As an example, a
+programmer could allow a user to generate an image by evaluating an expression
+at each point of the image and binding a u and v variable for the u,v parameter of the
+image.  Then the user could write examples like the following:
+</p>
+
+<h4>Noise Example 1</h4>
+<pre>
+$val=noise(10*$u,10*$v);
+$color=ccurve($val,  
+    0.000, [1.000, 1.000, 0.498], 4,  
+    0.590, [0.333, 0.000, 0.000], 4,  
+    0.665, [1.000, 1.000, 0.000], 4);
+
+$color
+</pre>
+
+<p><img src="images/example2.png"></p>
+
+<h4>Noise Example 2</h4>
+<pre>
+$val=voronoi(5*[$u,$v,.5],4,.6,.2);
+$color=ccurve($val,
+    0.000, [0.141, 0.059, 0.051], 4, 
+    0.185, [0.302, 0.176, 0.122], 4, 
+    0.301, [0.651, 0.447, 0.165], 4,  
+    0.462, [0.976, 0.976, 0.976], 4);
+$color
+</pre>
+<img src="images/example2b.png">
+<p>
+
+<h3>Ray Tracing Sphere</h3>
+
+<p>
+This is an example of something you probably should not do with expressions. At
+the same time it is sometimes nice to prototype functions and techniques in
+expressions because of the interactivity. 
+</p>
+
+<pre>
+$Cs=[1.000, 0.000, 1.000]; # Sphere Color
+$L1=norm([-1.3,-.3,0]); # Light Direction 1
+$L2=norm([.8,-1,-1]); # Light Direction 2
+$sp=[0.000, 0.000, -3.000]; # Sphere center
+$d=norm([$u-.5,$v-.5,-1]); # ray direction
+$o=[0.000, 0.000, 0.000]; # ray origin
+$r=1.000; # sphere radius
+# quadratic coefficients
+$a=dot($d,$d);
+$ominussp=$o-$sp;
+$b=2*dot($d,$ominussp);
+$c=dot($ominussp,$ominussp)-$r*$r;
+# discriminant
+$disc=$b*$b-4*$a*$c;
+$color=0.000;
+if($disc>0){ # two hit case
+  # minimum ray parameter
+  $t=min((-$b+sqrt($disc))/(2*$a),(-$b-sqrt($disc))/(2*$a))[0];
+  if($t>=0){ # if we are in front of camera
+      $Pintersect=$o+$d*$t;  # point of intersection
+      $N=norm($Pintersect-$sp); # intersection normal
+      # lighting
+      $H1=(-$L1+-$d)/length($L1+$d);
+      $color=max(dot($N,-$L1),0)*($Cs*.3+.5*max(0,dot($H1,$N))^80);
+      $H2=(-$L2+-$d)/length($L2+$d);
+      $color+=max(dot($N,-$L2),0)*($Cs*.3+.5*max(0,dot($H2,$N))^80);
+   }
+}
+# return color
+$color
+</pre>
+
+<img src="images/example3.png">
+
+    </div>
+  </section>
+</body>
+</html>
