@@ -268,7 +268,7 @@ bool ExprEditor::find(const bool loop)
     bool found = exprTe->find(searchLine->text(), flags);
     QTextCursor tc = exprTe->textCursor();
     if (!found) {
-        if (loop){
+        if (loop) {
             tc.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor, 1);
             exprTe->setTextCursor(tc);
         }
