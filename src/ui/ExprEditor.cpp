@@ -256,7 +256,7 @@ void ExprEditor::showFind()
     findAll();
 }
 
-bool ExprEditor::find()
+bool ExprEditor::find(const bool loop)
 {
     findAll();
     QTextDocument::FindFlags flags = 0;
@@ -266,10 +266,12 @@ bool ExprEditor::find()
         flags |= QTextDocument::FindWholeWords;
 
     bool found = exprTe->find(searchLine->text(), flags);
+    QTextCursor tc = exprTe->textCursor();
     if (!found) {
-        QTextCursor tc = exprTe->textCursor();
-        tc.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor, 1);
-        exprTe->setTextCursor(tc);
+        if (loop){
+            tc.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor, 1);
+            exprTe->setTextCursor(tc);
+        }
         found = exprTe->find(searchLine->text(), flags);
     }
 
@@ -309,7 +311,7 @@ void ExprEditor::findAll()
     exprTe->setExtraSelections(extraSelections);
 }
 
-void ExprEditor::replace()
+void ExprEditor::replace(const bool loop)
 {
     QTextCursor tc = exprTe->textCursor();
     if (!tc.hasSelection())
@@ -320,7 +322,8 @@ void ExprEditor::replace()
     tc.removeSelectedText();
     tc.insertText(replaceText);
     tc.endEditBlock();
-    find();
+    if (loop)
+        find();
 }
 
 void ExprEditor::replaceAll()
@@ -328,8 +331,10 @@ void ExprEditor::replaceAll()
     int pos = exprTe->verticalScrollBar()->value();
     QTextCursor tc = exprTe->textCursor();
     tc.beginEditBlock();
-    while (find()) {
-        replace();
+    tc.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor, 1);
+    exprTe->setTextCursor(tc);
+    while (find(false)) {
+        replace(false);
     }
     tc.endEditBlock();
     exprTe->verticalScrollBar()->setValue(pos);

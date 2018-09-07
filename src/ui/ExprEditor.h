@@ -152,9 +152,9 @@ class ExprEditor : public QWidget {
 
   private slots:
     void showFind();
-    bool find();
+    bool find(const bool loop = true);
     void findAll();
-    void replace();
+    void replace(const bool loop = true);
     void replaceAll();
     void closeFind();
 };
