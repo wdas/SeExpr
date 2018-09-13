@@ -334,7 +334,7 @@ void ExprEditor::replaceSingle()
             find();
         }
     }
-    
+
     replace();
     find();
 }
