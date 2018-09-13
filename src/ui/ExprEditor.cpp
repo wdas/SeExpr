@@ -146,7 +146,7 @@ ExprEditor::ExprEditor(QWidget* parent, ExprControlCollection* controls)
 
     searchBar->setVisible(false);
     connect(findButton, SIGNAL(clicked()), this, SLOT(find()));
-    connect(replace, SIGNAL(clicked()), this, SLOT(replace()));
+    connect(replace, SIGNAL(clicked()), this, SLOT(replaceSingle()));
     connect(replaceAll, SIGNAL(clicked()), this, SLOT(replaceAll()));
     connect(closeSearch, SIGNAL(clicked()), this, SLOT(closeFind()));
     connect(caseSensitive, SIGNAL(toggled(bool)), this, SLOT(findAll()));
@@ -266,12 +266,10 @@ bool ExprEditor::find(const bool loop)
         flags |= QTextDocument::FindWholeWords;
 
     bool found = exprTe->find(searchLine->text(), flags);
-    QTextCursor tc = exprTe->textCursor();
-    if (!found) {
-        if (loop) {
-            tc.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor, 1);
-            exprTe->setTextCursor(tc);
-        }
+    if (!found && loop) {
+        QTextCursor tc = exprTe->textCursor();
+        tc.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor, 1);
+        exprTe->setTextCursor(tc);
         found = exprTe->find(searchLine->text(), flags);
     }
 
@@ -311,7 +309,7 @@ void ExprEditor::findAll()
     exprTe->setExtraSelections(extraSelections);
 }
 
-void ExprEditor::replace(const bool loop)
+void ExprEditor::replace()
 {
     QTextCursor tc = exprTe->textCursor();
     if (!tc.hasSelection())
@@ -322,8 +320,23 @@ void ExprEditor::replace(const bool loop)
     tc.removeSelectedText();
     tc.insertText(replaceText);
     tc.endEditBlock();
-    if (loop)
+}
+
+void ExprEditor::replaceSingle()
+{
+    QTextCursor tc = exprTe->textCursor();
+    if (!tc.hasSelection()) {
         find();
+    } else {
+        QString selText = tc.selectedText();
+        QString replaceText = searchLine->text();
+        if (selText != replaceText) {
+            find();
+        }
+    }
+    
+    replace();
+    find();
 }
 
 void ExprEditor::replaceAll()
@@ -334,7 +347,7 @@ void ExprEditor::replaceAll()
     tc.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor, 1);
     exprTe->setTextCursor(tc);
     while (find(false)) {
-        replace(false);
+        replace();
     }
     tc.endEditBlock();
     exprTe->verticalScrollBar()->setValue(pos);

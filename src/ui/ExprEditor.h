@@ -154,7 +154,8 @@ class ExprEditor : public QWidget {
     void showFind();
     bool find(const bool loop = true);
     void findAll();
-    void replace(const bool loop = true);
+    void replace();
+    void replaceSingle();
     void replaceAll();
     void closeFind();
 };
