@@ -1599,6 +1599,62 @@ static const char* curve_docstring =
     "0 - none, 1 - linear, 2 - smooth, 3 - spline, \n"
     "4-monotone (non oscillating spline)";
 
+class VCurveFuncX : public ExprFuncSimple {
+  public:
+    VCurveFuncX() : ExprFuncSimple(true)
+    {
+    }
+
+    virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const
+    {
+        // check number of arguments
+        int nargs = node->numChildren();
+        if ((nargs - 1) % 3) {
+            node->addError("Wrong number of arguments, should be multiple of 3 plus 1");
+            return ExprType().Error();
+        }
+
+        bool valid = true;
+        valid &= node->checkArg(0, ExprType().FP(1).Varying(), envBuilder);
+        for (int i = 1; i < nargs; i += 3) {
+            valid &= node->checkArg(i, ExprType().FP(1).Constant(), envBuilder);
+            valid &= node->checkArg(i + 1, ExprType().FP(1).Constant(), envBuilder);
+            valid &= node->checkArg(i + 2, ExprType().FP(1).Constant(), envBuilder);
+        }
+        return valid ? ExprType().FP(1).Varying() : ExprType().Error();
+    }
+
+    virtual void eval(ArgHandle& args)
+    {
+        Curve<double> curve;
+        for (int i = 1; i < args.nargs() - 2; i += 3) {
+            double pos = args.inFp<1>(i)[0];
+            double val = args.inFp<1>(i + 1)[0];
+            double interpDouble = args.inFp<1>(i + 2)[0];
+            int interpInt = (int)interpDouble;
+            Curve<double>::InterpType interpolant = (Curve<double>::InterpType)interpInt;
+            if (!Curve<double>::interpTypeValid(interpolant)) {
+                // TODO: fix error checking!
+            }
+            curve.addPoint(pos, val, interpolant);
+        }
+        curve.preparePoints();
+
+        double param = args.inFp<1>(0)[0];
+        args.outFp = curve.getValue(param);
+    }
+
+} vcurve;
+static const char* vcurve_docstring =
+    "float vcurve(float param,float pos0,float val0,int interp0,float pos1,float val1,int interp1,[...])\n\n"
+    "Interpolates a 1D ramp defined by control points at 'param'. Control points are specified \n"
+    "by triples of parameters pos_i, val_i, and interp_i. Interpolation codes are \n"
+    "0 - none, 1 - linear, 2 - smooth, 3 - spline, \n"
+    "4-monotone (non oscillating spline)\n"
+    "\n"
+    "This is a variant of curve(...) that allows varying position and value parameters.\n"
+    "It is significantly slower than curve(...), so should only be used when varying parameters are needed.\n";
+
 class CCurveFuncX : public ExprFuncSimple {
     virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const
     {
@@ -2004,6 +2060,7 @@ void defineBuiltins(ExprFunc::Define, ExprFunc::Define3 define3)
     FUNCNDOC(pvoronoi, 1, 8);
     // variations
     FUNCNDOC(curve, 1, -1);
+    FUNCNDOC(vcurve, 1, -1);
     FUNCNDOC(ccurve, 1, -1);
     FUNCNDOC(getVar, 2, 2);
     FUNCNDOC(printf, 1, -1);
