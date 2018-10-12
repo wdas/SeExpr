@@ -1617,9 +1617,9 @@ class VCurveFuncX : public ExprFuncSimple {
         bool valid = true;
         valid &= node->checkArg(0, ExprType().FP(1).Varying(), envBuilder);
         for (int i = 1; i < nargs; i += 3) {
-            valid &= node->checkArg(i, ExprType().FP(1).Constant(), envBuilder);
-            valid &= node->checkArg(i + 1, ExprType().FP(1).Constant(), envBuilder);
-            valid &= node->checkArg(i + 2, ExprType().FP(1).Constant(), envBuilder);
+            valid &= node->checkArg(i, ExprType().FP(1).Varying(), envBuilder);
+            valid &= node->checkArg(i + 1, ExprType().FP(1).Varying(), envBuilder);
+            valid &= node->checkArg(i + 2, ExprType().FP(1).Varying(), envBuilder);
         }
         return valid ? ExprType().FP(1).Varying() : ExprType().Error();
     }
