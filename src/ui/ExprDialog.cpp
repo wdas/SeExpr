@@ -106,7 +106,7 @@ ExprDialog::ExprDialog(QWidget* parent, bool graphMode) : QDialog(parent), _curr
     QHBoxLayout* previewLayout = new QHBoxLayout();
     int widgetIdx = 0;
     grapher = new ExprGrapherWidget(this, 256, 256);
-    if (graph) {
+    if (graph) {//flag for controlling whether expr gets eval'd for image preview
         previewLayout->addWidget(grapher, widgetIdx);
         widgetIdx += 1;
     }
@@ -118,9 +118,10 @@ ExprDialog::ExprDialog(QWidget* parent, bool graphMode) : QDialog(parent), _curr
     QHBoxLayout* buttonBarLayout = new QHBoxLayout();
     // buttonBarWidget->setLayout(buttonBarLayout);
     buttonBarLayout->setMargin(1);
-    previewButton = new QPushButton("Preview");
-    buttonBarLayout->addWidget(previewButton);
-
+    if(graph){
+        previewButton = new QPushButton("Preview");
+        buttonBarLayout->addWidget(previewButton);
+    }
     QToolButton* histBack = toolButton(this);
     buttonBarLayout->addWidget(histBack);
     histBack->setIcon(QIcon(SEEXPR_EDITOR_ICON_PATH "back.png"));
@@ -208,7 +209,8 @@ ExprDialog::ExprDialog(QWidget* parent, bool graphMode) : QDialog(parent), _curr
     // connect buttons
     connect(errorCountLabel, SIGNAL(clicked()), editor, SLOT(nextError()));
     connect(warningCountLabel, SIGNAL(clicked()), editor, SLOT(nextError()));
-    connect(previewButton, SIGNAL(clicked()), SLOT(previewExpression()));
+    if(graph)
+        connect(previewButton, SIGNAL(clicked()), SLOT(previewExpression()));
     connect(clearButton, SIGNAL(clicked()), SLOT(clearExpression()));
     connect(saveButton, SIGNAL(clicked()), browser, SLOT(saveExpression()));
     connect(saveAsButton, SIGNAL(clicked()), browser, SLOT(saveExpressionAs()));

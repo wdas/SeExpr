@@ -72,7 +72,7 @@ class ExprDialog : public QDialog {
   public:
     ExprEditor* editor;
     ExprBrowser* browser;
-    bool graph;
+    bool graph;//flag for controlling whether expr gets eval'd for image preview
 
   private:
     ExprGrapherWidget* grapher;
