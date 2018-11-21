@@ -65,8 +65,9 @@ void ClickableLabel::mouseReleaseEvent(QMouseEvent* event)
     pressed = false;
 }
 
-ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0), currhistitem(0)
+ExprDialog::ExprDialog(QWidget* parent, bool graphMode) : QDialog(parent), _currentEditorIdx(0), currhistitem(0)
 {
+    graph = graphMode;
     this->setMinimumWidth(600);
     QVBoxLayout* rootLayout = new QVBoxLayout(0);
     rootLayout->setMargin(2);
@@ -103,19 +104,24 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0),
     leftLayout->setSpacing(2);
     leftWidget->setLayout(leftLayout);
     QHBoxLayout* previewLayout = new QHBoxLayout();
+    int widgetIdx = 0;
     grapher = new ExprGrapherWidget(this, 256, 256);
-    previewLayout->addWidget(grapher, 0);
+    if (graph) {//flag for controlling whether expr gets eval'd for image preview
+        previewLayout->addWidget(grapher, widgetIdx);
+        widgetIdx += 1;
+    }
     leftLayout->addLayout(previewLayout);
-    previewLibraryLayout->addWidget(leftWidget, 1);
+    previewLibraryLayout->addWidget(leftWidget, widgetIdx);
 
     // setup button bar
     // QWidget* buttonBarWidget=new QWidget();
     QHBoxLayout* buttonBarLayout = new QHBoxLayout();
     // buttonBarWidget->setLayout(buttonBarLayout);
     buttonBarLayout->setMargin(1);
-    previewButton = new QPushButton("Preview");
-    buttonBarLayout->addWidget(previewButton);
-
+    if(graph){
+        previewButton = new QPushButton("Preview");
+        buttonBarLayout->addWidget(previewButton);
+    }
     QToolButton* histBack = toolButton(this);
     buttonBarLayout->addWidget(histBack);
     histBack->setIcon(QIcon(SEEXPR_EDITOR_ICON_PATH "back.png"));
@@ -170,7 +176,8 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0),
     editor = new ExprEditor(this, controls);
     connect(editor, SIGNAL(apply()), SLOT(verifiedApply()));
     connect(editor, SIGNAL(preview()), SLOT(previewExpression()));
-    connect(grapher, SIGNAL(preview()), SLOT(previewExpression()));
+    if (graph)
+        connect(grapher, SIGNAL(preview()), SLOT(previewExpression()));
     bottomLayout->addWidget(editor);
 
     // make expression library browser
@@ -202,7 +209,8 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0),
     // connect buttons
     connect(errorCountLabel, SIGNAL(clicked()), editor, SLOT(nextError()));
     connect(warningCountLabel, SIGNAL(clicked()), editor, SLOT(nextError()));
-    connect(previewButton, SIGNAL(clicked()), SLOT(previewExpression()));
+    if(graph)
+        connect(previewButton, SIGNAL(clicked()), SLOT(previewExpression()));
     connect(clearButton, SIGNAL(clicked()), SLOT(clearExpression()));
     connect(saveButton, SIGNAL(clicked()), browser, SLOT(saveExpression()));
     connect(saveAsButton, SIGNAL(clicked()), browser, SLOT(saveExpressionAs()));
@@ -324,7 +332,8 @@ void ExprDialog::applyExpression()
     // set new expression
     grapher->expr.setExpr(editor->getExpr());
     grapher->expr.setDesiredReturnType(SeExpr2::ExprType().FP(3));
-    grapher->update();
+    if (graph)
+        grapher->update();
 
     int numWarnings = 0;
     int numErrors = 0;
