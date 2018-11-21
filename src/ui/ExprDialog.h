@@ -72,6 +72,7 @@ class ExprDialog : public QDialog {
   public:
     ExprEditor* editor;
     ExprBrowser* browser;
+    bool graph;
 
   private:
     ExprGrapherWidget* grapher;
@@ -91,7 +92,7 @@ class ExprDialog : public QDialog {
     QString currentexprfile;
 
   public:
-    ExprDialog(QWidget* parent);
+    ExprDialog(QWidget* parent, bool graphMode = true);
 
     std::string getExpressionString()
     {
@@ -102,6 +103,7 @@ class ExprDialog : public QDialog {
     {
         editor->setExpr(str);
     }
+    
 
     void show();
     int exec();

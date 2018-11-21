@@ -61,8 +61,7 @@ public:
     ExprBrowser* browser;
     ExprEditor* editor;
 
-
-    ExprDialog(QWidget* parent /TransferThis/ = NULL);
+    ExprDialog(QWidget* parent /TransferThis/ = NULL, bool graphMode = true);
     std::string getExpressionString();
     void setExpressionString(const std::string&);
     void show();

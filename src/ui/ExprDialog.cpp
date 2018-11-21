@@ -65,8 +65,9 @@ void ClickableLabel::mouseReleaseEvent(QMouseEvent* event)
     pressed = false;
 }
 
-ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0), currhistitem(0)
+ExprDialog::ExprDialog(QWidget* parent, bool graphMode) : QDialog(parent), _currentEditorIdx(0), currhistitem(0)
 {
+    graph = graphMode;
     this->setMinimumWidth(600);
     QVBoxLayout* rootLayout = new QVBoxLayout(0);
     rootLayout->setMargin(2);
@@ -103,10 +104,14 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0),
     leftLayout->setSpacing(2);
     leftWidget->setLayout(leftLayout);
     QHBoxLayout* previewLayout = new QHBoxLayout();
+    int widgetIdx = 0;
     grapher = new ExprGrapherWidget(this, 256, 256);
-    previewLayout->addWidget(grapher, 0);
+    if(graph){
+        previewLayout->addWidget(grapher, widgetIdx);
+	widgetIdx += 1;
+    }
     leftLayout->addLayout(previewLayout);
-    previewLibraryLayout->addWidget(leftWidget, 1);
+    previewLibraryLayout->addWidget(leftWidget, widgetIdx);
 
     // setup button bar
     // QWidget* buttonBarWidget=new QWidget();
@@ -170,7 +175,8 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0),
     editor = new ExprEditor(this, controls);
     connect(editor, SIGNAL(apply()), SLOT(verifiedApply()));
     connect(editor, SIGNAL(preview()), SLOT(previewExpression()));
-    connect(grapher, SIGNAL(preview()), SLOT(previewExpression()));
+    if(graph)
+        connect(grapher, SIGNAL(preview()), SLOT(previewExpression()));
     bottomLayout->addWidget(editor);
 
     // make expression library browser
@@ -324,7 +330,8 @@ void ExprDialog::applyExpression()
     // set new expression
     grapher->expr.setExpr(editor->getExpr());
     grapher->expr.setDesiredReturnType(SeExpr2::ExprType().FP(3));
-    grapher->update();
+    if(graph)
+        grapher->update();
 
     int numWarnings = 0;
     int numErrors = 0;
