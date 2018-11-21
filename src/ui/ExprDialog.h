@@ -103,7 +103,7 @@ class ExprDialog : public QDialog {
     {
         editor->setExpr(str);
     }
-    
+
 
     void show();
     int exec();

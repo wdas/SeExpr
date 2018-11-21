@@ -106,9 +106,9 @@ ExprDialog::ExprDialog(QWidget* parent, bool graphMode) : QDialog(parent), _curr
     QHBoxLayout* previewLayout = new QHBoxLayout();
     int widgetIdx = 0;
     grapher = new ExprGrapherWidget(this, 256, 256);
-    if(graph){
+    if (graph) {
         previewLayout->addWidget(grapher, widgetIdx);
-	widgetIdx += 1;
+        widgetIdx += 1;
     }
     leftLayout->addLayout(previewLayout);
     previewLibraryLayout->addWidget(leftWidget, widgetIdx);
@@ -175,7 +175,7 @@ ExprDialog::ExprDialog(QWidget* parent, bool graphMode) : QDialog(parent), _curr
     editor = new ExprEditor(this, controls);
     connect(editor, SIGNAL(apply()), SLOT(verifiedApply()));
     connect(editor, SIGNAL(preview()), SLOT(previewExpression()));
-    if(graph)
+    if (graph)
         connect(grapher, SIGNAL(preview()), SLOT(previewExpression()));
     bottomLayout->addWidget(editor);
 
@@ -330,7 +330,7 @@ void ExprDialog::applyExpression()
     // set new expression
     grapher->expr.setExpr(editor->getExpr());
     grapher->expr.setDesiredReturnType(SeExpr2::ExprType().FP(3));
-    if(graph)
+    if (graph)
         grapher->update();
 
     int numWarnings = 0;
