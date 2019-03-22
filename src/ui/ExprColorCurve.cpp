@@ -478,7 +478,7 @@ ExprColorCurve::ExprColorCurve(QWidget* parent, QString pLabel, QString vLabel, 
         expandButton->setFixedWidth(15);
         mainLayout->addWidget(expandButton);
         // open a the detail widget when clicked
-        connect(expandButton, SIGNAL(clicked()), this, SLOT(openDetail()));
+        connect(expandButton, &QPushButton::clicked, this, &ExprColorCurve::openDetail);
     }
     mainLayout->setStretchFactor(curveFrame, 100);
     setLayout(mainLayout);
@@ -486,18 +486,18 @@ ExprColorCurve::ExprColorCurve(QWidget* parent, QString pLabel, QString vLabel, 
     // SIGNALS
 
     // when a user selects a cv, update the fields on left
-    connect(_scene, SIGNAL(cvSelected(double, SeExpr2::Vec3d, T_INTERP)), this,
-            SLOT(cvSelectedSlot(double, SeExpr2::Vec3d, T_INTERP)));
+    connect(_scene, &CCurveScene::cvSelected, this, &ExprColorCurve::cvSelectedSlot);
     // when a user selects a different interp, the curve has to redraw
-    connect(_interpComboBox, SIGNAL(activated(int)), _scene, SLOT(interpChanged(int)));
+    connect(_interpComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), _scene,
+            &CCurveScene::interpChanged);
     // when a user types a different position, the curve has to redraw
-    connect(_selPosEdit, SIGNAL(returnPressed()), this, SLOT(selPosChanged()));
-    connect(this, SIGNAL(selPosChangedSignal(double)), _scene, SLOT(selPosChanged(double)));
+    connect(_selPosEdit, &QLineEdit::returnPressed, this, &ExprColorCurve::selPosChanged);
+    connect(this, &ExprColorCurve::selPosChangedSignal, _scene, &CCurveScene::selPosChanged);
     // when a user selects a different color, the ramp has to redraw
-    connect(_selValEdit, SIGNAL(selValChangedSignal(SeExpr2::Vec3d)), _scene, SLOT(selValChanged(SeExpr2::Vec3d)));
-    connect(_selValEdit, SIGNAL(swatchChanged(QColor)), this, SLOT(internalSwatchChanged(QColor)));
+    connect(_selValEdit, &ExprCSwatchFrame::selValChangedSignal, _scene, &CCurveScene::selValChanged);
+    connect(_selValEdit, &ExprCSwatchFrame::swatchChanged, this, &ExprColorCurve::internalSwatchChanged);
     // when the widget is resized, resize the curve widget
-    connect(curveView, SIGNAL(resizeSignal(int, int)), _scene, SLOT(resize(int, int)));
+    connect(curveView, &CurveGraphicsView::resizeSignal, _scene, &CCurveScene::resize);
 }
 
 // CV selected, update the user interface fields.
@@ -565,8 +565,8 @@ void ExprColorCurve::openDetail()
     layout->addWidget(curve);
     QDialogButtonBox* buttonbar = new QDialogButtonBox();
     buttonbar->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
-    connect(buttonbar, SIGNAL(accepted()), dialog, SLOT(accept()));
-    connect(buttonbar, SIGNAL(rejected()), dialog, SLOT(reject()));
+    connect(buttonbar, &QDialogButtonBox::accepted, dialog, &QDialog::accept);
+    connect(buttonbar, &QDialogButtonBox::rejected, dialog, &QDialog::reject);
     layout->addWidget(buttonbar);
 
     if (dialog->exec() == QDialog::Accepted) {
