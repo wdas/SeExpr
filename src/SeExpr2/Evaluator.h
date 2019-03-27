@@ -288,8 +288,10 @@ class LLVMEvaluator {
         }
 
         if (Expression::debugging) {
+            #ifdef DEBUG
             std::cerr << "Pre verified LLVM byte code " << std::endl;
             TheModule->dump();
+            #endif
         }
 
         // TODO: Find out if there is a new way to veirfy
@@ -361,8 +363,10 @@ class LLVMEvaluator {
         }
 
         if (Expression::debugging) {
+            #ifdef DEBUG
             std::cerr << "Pre verified LLVM byte code " << std::endl;
             altModule->dump();
+            #endif
         }
 
         return true;
