@@ -172,7 +172,7 @@ class LLVMEvaluator {
         };
         FunctionType *FT = FunctionType::get(voidTy, ParamTys, false);
         Function *F = Function::Create(FT, Function::ExternalLinkage, uniqueName + "_func", TheModule.get());
-        F->addAttribute(llvm::AttributeSet::FunctionIndex, llvm::Attribute::AlwaysInline);
+        F->addAttribute(llvm::AttributeList::FunctionIndex, llvm::Attribute::AlwaysInline);
         {
             // label the function with names
             const char *names[] = {"outputPointer", "dataBlock", "indirectIndex"};
@@ -288,8 +288,10 @@ class LLVMEvaluator {
         }
 
         if (Expression::debugging) {
+            #ifdef DEBUG
             std::cerr << "Pre verified LLVM byte code " << std::endl;
             TheModule->dump();
+            #endif
         }
 
         // TODO: Find out if there is a new way to veirfy
@@ -361,8 +363,10 @@ class LLVMEvaluator {
         }
 
         if (Expression::debugging) {
+            #ifdef DEBUG
             std::cerr << "Pre verified LLVM byte code " << std::endl;
             altModule->dump();
+            #endif
         }
 
         return true;
