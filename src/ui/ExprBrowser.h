@@ -37,6 +37,9 @@
 
 class QLineEdit;
 class QTreeView;
+
+namespace SeExpr2 {
+
 class ExprEditor;
 
 class ExprTreeItem {
@@ -152,5 +155,6 @@ class ExprBrowser : public QWidget {
     void clearFilter();
     void filterChanged(const QString& str);
 };
+}
 
 #endif

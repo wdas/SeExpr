@@ -7,6 +7,8 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
+using namespace SeExpr2;
+
 ExprHelp::ExprHelp(QWidget* parent) : QWidget(parent)
 {
     helpBrowser = new QTextBrowser(this);

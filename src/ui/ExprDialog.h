@@ -41,6 +41,8 @@
 
 class QTabWidget;
 
+namespace SeExpr2 {
+
 class ExprBrowser;
 class ExprGrapherWidget;
 class ExprHelp;
@@ -143,5 +145,6 @@ class ExprDialog : public QDialog {
 
     void reject();
 };
+}
 
 #endif

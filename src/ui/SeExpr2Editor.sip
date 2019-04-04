@@ -56,6 +56,7 @@
 class ExprDialog:QDialog{
 %TypeHeaderCode
 #include "ExprDialog.h"
+using namespace SeExpr2;
 %End
 public:
     ExprBrowser* browser;
@@ -79,6 +80,7 @@ public slots:
 class ExprControlCollection:QWidget{
 %TypeHeaderCode
 #include "ExprControlCollection.h"
+using namespace SeExpr2;
 %End
 public:
         ExprControlCollection(QWidget* parent /TransferThis/=NULL);
@@ -148,6 +150,7 @@ void animCurveCallbackPyWrapper(const std::string& arg,animlib::AnimCurve& curve
 class ExprEditor:QWidget{
 %TypeHeaderCode
 #include "ExprEditor.h"
+using namespace SeExpr2;
 %End
 
 public:
@@ -194,6 +197,7 @@ class ExprBrowser : QWidget
 {
 %TypeHeaderCode
 #include "ExprBrowser.h"
+using namespace SeExpr2;
 %End
 
 
@@ -219,6 +223,7 @@ class ExprShortTextEdit:QTextEdit
 {
 %TypeHeaderCode
 #include "ExprShortEdit.h"
+using namespace SeExpr2;
 %End
 
 public:
@@ -233,6 +238,7 @@ class ExprShortEdit:QWidget
 {
 %TypeHeaderCode
 #include "ExprShortEdit.h"
+using namespace SeExpr2;
 %End
 
 public:
@@ -270,6 +276,7 @@ signals:
 class ExprCurve:QWidget{
 %TypeHeaderCode
 #include "ExprCurve.h"
+using namespace SeExpr2;
 %End
 public:
     ExprCurve(QWidget* parent = NULL, QString pLabel = "", QString vLabel = "", QString iLabel = "");
@@ -278,6 +285,7 @@ public:
 class ExprColorCurve:QWidget{
 %TypeHeaderCode
 #include "ExprColorCurve.h"
+using namespace SeExpr2;
 %End
 public:
     ExprColorCurve(QWidget* parent = NULL, QString pLabel = "", QString vLabel = "", QString iLabel = "");
@@ -287,6 +295,7 @@ public:
 class ExprColorSwatchWidget:QWidget{
 %TypeHeaderCode
 #include "ExprColorSwatch.h"
+using namespace SeExpr2;
 %End
 public:
     ExprColorSwatchWidget(bool indexLabel = false, QWidget* parent = NULL);
@@ -295,6 +304,7 @@ public:
 class ExprDeepWater:QWidget{
 %TypeHeaderCode
 #include "ExprDeepWater.h"
+using namespace SeExpr2;
 %End
 public:
     ExprDeepWater(QWidget* parent = NULL);

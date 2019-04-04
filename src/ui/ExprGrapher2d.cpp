@@ -28,6 +28,8 @@
 #include "ExprGrapher2d.h"
 #include "../utils/concurrent-for.h"
 
+using namespace SeExpr2;
+
 ExprGrapherWidget::ExprGrapherWidget(QWidget* parent, int width, int height)
     : expr("", SeExpr2::ExprType().FP(1)), view(new ExprGrapherView(*this, this, width, height)), _pixelLabel(nullptr)
 {

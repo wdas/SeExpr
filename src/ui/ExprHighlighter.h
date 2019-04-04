@@ -24,6 +24,8 @@
 #include <QPalette>
 #include <iostream>
 
+namespace SeExpr2 {
+
 class ExprHighlighter : public QSyntaxHighlighter {
     struct HighlightingRule {
         QRegExp pattern;
@@ -106,4 +108,6 @@ class ExprHighlighter : public QSyntaxHighlighter {
         setCurrentBlockState(0);
     }
 };
+}
+
 #endif

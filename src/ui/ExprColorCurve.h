@@ -34,6 +34,8 @@
 
 #include "ExprCurve.h"
 
+namespace SeExpr2 {
+
 /*
   This class overrides QGraphicsScene so we can handle mouse
   press, drag and keyboard events
@@ -182,4 +184,6 @@ class ExprColorCurve : public QWidget {
     ExprCSwatchFrame* _selValEdit;
     QComboBox* _interpComboBox;
 };
+}
+
 #endif

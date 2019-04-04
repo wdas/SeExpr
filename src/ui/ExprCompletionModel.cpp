@@ -23,6 +23,8 @@
 #include <SeExpr2/ExprFunc.h>
 #include "ExprCompletionModel.h"
 
+using namespace SeExpr2;
+
 std::vector<QString> ExprCompletionModel::builtins;
 
 ExprCompletionModel::ExprCompletionModel(QObject* parent) : QAbstractItemModel(parent)

@@ -31,8 +31,11 @@
 
 #include "BasicExpression.h"
 
-class ExprGrapherWidget;
 class QLineEdit;
+
+namespace SeExpr2 {
+
+class ExprGrapherWidget;
 
 class ExprGrapherView : public QGLWidget {
     Q_OBJECT;
@@ -114,5 +117,6 @@ class ExprGrapherWidget : public QWidget {
     void forwardPreview();
     void updatePixelLabel(int, int);
 };
+}
 
 #endif

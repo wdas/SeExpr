@@ -29,16 +29,19 @@
 #include <QTextEdit>
 #include <QWheelEvent>
 
-class ExprControlCollection;
 class QToolButton;
 class QVBoxLayout;
 class QHBoxLayout;
 class QTextEdit;
-class ExprHighlighter;
 class QCompleter;
+class QLabel;
+
+namespace SeExpr2 {
+
+class ExprControlCollection;
+class ExprHighlighter;
 class ExprCompletionModel;
 class ExprShortTextEdit;
-class QLabel;
 class ExprPopupDoc;
 class ExprDialog;
 
@@ -164,5 +167,6 @@ class ExprShortTextEdit : public QTextEdit {
   private slots:
     void insertCompletion(const QString& completion);
 };
+}
 
 #endif
