@@ -51,6 +51,8 @@
 #include "ExprFileDialog.h"
 #include "Editable.h"
 
+using namespace SeExpr2;
+
 /* XPM */
 static const char* refreshXPM[] = {"20 20 4 1",
                                    "# c #303030",
@@ -645,7 +647,7 @@ void CCurveControl::setColor(QColor color)
     _curve->setSwatchColor(color);
 }
 
-struct ExprGraphPreview : public QWidget {
+struct SeExpr2::ExprGraphPreview : public QWidget {
     std::vector<float> x, y;
     std::vector<float> cpx, cpy;
     float xmin, xmax, ymin, ymax, dx, dy;

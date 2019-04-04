@@ -14,6 +14,7 @@
 * You may obtain a copy of the License at
 * http://www.apache.org/licenses/LICENSE-2.0
 */
+#pragma once
 
 /**
    @file ImageEditorDialog.h
@@ -24,7 +25,11 @@
 #include "../common/ImageSynthesizer.h"
 
 class QLabel;
+
+namespace SeExpr2 {
+
 class ExprEditor;
+};
 
 class ImageEditorDialog : public QDialog {
     Q_OBJECT
@@ -33,7 +38,7 @@ class ImageEditorDialog : public QDialog {
 
   private:
     QLabel* _imageLabel;
-    ExprEditor* _editor;
+    SeExpr2::ExprEditor* _editor;
     png::Image<png::RGB32Pixel> _image;
     ImageSynthesizer<png::Image<png::RGB32Pixel>> _imageSynthesizer;
   private slots:

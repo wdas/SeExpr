@@ -38,6 +38,8 @@ class QVBoxLayout;
 class QRadioButton;
 class EditableExpression;
 
+namespace SeExpr2 {
+
 /// This class is the UI for adding widgets
 class ExprAddDialog : public QDialog {
     Q_OBJECT;
@@ -142,5 +144,6 @@ class ExprControlCollection : public QWidget {
     /// and should be forwarded to any linked controls
     void linkColorInput(QColor color);
 };
+}
 
 #endif

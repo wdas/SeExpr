@@ -50,6 +50,8 @@ namespace animlib {
 class AnimCurve;
 }
 
+namespace SeExpr2 {
+
 /// Base class for all controls for Expressions
 class ExprControl : public QWidget {
     Q_OBJECT;
@@ -358,5 +360,6 @@ class DeepWaterControl : public ExprControl {
   private slots:
     void deepWaterChanged();
 };
+}
 
 #endif

@@ -38,6 +38,8 @@
 #include "ExprPopupDoc.h"
 #include "BasicExpression.h"
 
+using namespace SeExpr2;
+
 /* XPM */
 static const char* sum_xpm[] = {"16 16 6 1",        "# c None",         ". c None",         "b c #808080",
                                 "d c #010000",      "c c #aaaaaa",      "a c #303030",      "................",

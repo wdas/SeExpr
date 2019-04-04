@@ -20,6 +20,8 @@
 #include <QWidget>
 
 class QLabel;
+
+namespace SeExpr2 {
 class ExprPopupDoc : public QWidget {
     Q_OBJECT;
 
@@ -30,5 +32,6 @@ class ExprPopupDoc : public QWidget {
   protected:
     void mousePressEvent(QMouseEvent* event);
 };
+}
 
 #endif

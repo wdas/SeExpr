@@ -37,6 +37,8 @@
 #include "EditableExpression.h"
 #include "Editable.h"
 
+using namespace SeExpr2;
+
 ExprControlCollection::ExprControlCollection(QWidget* parent, bool showAddButton)
     : QWidget(parent), count(0), showAddButton(showAddButton), editableExpression(0)
 {

@@ -34,6 +34,8 @@
 
 #define P3D_CONFIG_ENVVAR "P3D_CONFIG_PATH"
 
+using namespace SeExpr2;
+
 ClickableLabel::ClickableLabel(QWidget* parent) : QLabel(parent)
 {
 }

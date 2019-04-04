@@ -41,6 +41,8 @@
 #include "../common/palette.h"
 #include "ImageEditorDialog.h"
 
+using namespace SeExpr2;
+
 //-- IMAGE EDITOR DIALOG METHODS --//
 
 ImageEditorDialog::ImageEditorDialog(QWidget* parent) : QDialog(parent), _image(256, 256), _imageSynthesizer(_image)

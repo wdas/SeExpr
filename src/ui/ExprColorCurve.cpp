@@ -40,6 +40,8 @@
 
 #include "ExprColorCurve.h"
 
+using namespace SeExpr2;
+
 CCurveScene::CCurveScene()
     : _curve(new T_CURVE)
     , _width(320)

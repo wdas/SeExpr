@@ -54,6 +54,8 @@
 #include "ExprPopupDoc.h"
 #include "ExprWidgets.h"
 
+using namespace SeExpr2;
+
 void ExprEditor::controlChanged(int id)
 {
     QString newText = exprTe->toPlainText();

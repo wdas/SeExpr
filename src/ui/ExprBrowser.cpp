@@ -37,6 +37,8 @@
 
 #define P3D_CONFIG_ENVVAR "P3D_CONFIG_PATH"
 
+using namespace SeExpr2;
+
 ExprTreeItem::ExprTreeItem(ExprTreeItem* parent, const QString& label, const QString& path)
     : row(-1), parent(parent), label(label), path(path), populated(parent == nullptr)
 {

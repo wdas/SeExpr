@@ -23,6 +23,8 @@
 #include <ExprDialog.h>
 #include "common/palette.h"
 
+using namespace SeExpr2;
+
 int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);

@@ -27,6 +27,8 @@
 #include <QtCore/QSize>
 #include <vector>
 
+namespace SeExpr2 {
+
 class ExprCompletionModel : public QAbstractItemModel  // ItemModel
 {
   public:
@@ -100,5 +102,6 @@ class ExprCompletionModel : public QAbstractItemModel  // ItemModel
     std::map<QString, int> functionNameToFunction;
     std::vector<QString> variables, variables_comment;
 };
+}
 
 #endif

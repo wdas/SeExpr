@@ -14,11 +14,14 @@ the content of the NOTICE file.
 You may obtain a copy of the License at
 http://www.apache.org/licenses/LICENSE-2.0
 */
+#pragma once
 
 #include <QLineEdit>
 #include <QTextBrowser>
 #include <QTextDocument>
 #include <QWidget>
+
+namespace SeExpr2 {
 
 class ExprHelp : public QWidget {
     Q_OBJECT
@@ -38,3 +41,4 @@ class ExprHelp : public QWidget {
     QTextBrowser* helpBrowser;
     QString prevFind;
 };
+}

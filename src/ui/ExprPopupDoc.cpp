@@ -18,6 +18,8 @@
 #include <QLabel>
 #include <QHBoxLayout>
 
+using namespace SeExpr2;
+
 ExprPopupDoc::ExprPopupDoc(QWidget* parent, const QPoint& placecr, const QString& msg)
 {
     Q_UNUSED(parent);

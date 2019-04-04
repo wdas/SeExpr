@@ -33,6 +33,9 @@ class QKeyEvent;
 class QCompleter;
 class QToolTip;
 class QListWidget;
+
+namespace SeExpr2 {
+
 class ExprCompletionModel;
 class ExprControlCollection;
 
@@ -158,5 +161,6 @@ class ExprEditor : public QWidget {
     void replaceAll();
     void closeFind();
 };
+}
 
 #endif
