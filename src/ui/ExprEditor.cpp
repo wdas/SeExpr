@@ -148,7 +148,7 @@ ExprEditor::ExprEditor(QWidget* parent, ExprControlCollection* controls)
 
     searchBar->setVisible(false);
     connect(findButton, SIGNAL(clicked()), this, SLOT(find()));
-    connect(replace, SIGNAL(clicked()), this, SLOT(replace()));
+    connect(replace, SIGNAL(clicked()), this, SLOT(replaceSingle()));
     connect(replaceAll, SIGNAL(clicked()), this, SLOT(replaceAll()));
     connect(closeSearch, SIGNAL(clicked()), this, SLOT(closeFind()));
     connect(caseSensitive, SIGNAL(toggled(bool)), this, SLOT(findAll()));
@@ -258,7 +258,7 @@ void ExprEditor::showFind()
     findAll();
 }
 
-bool ExprEditor::find()
+bool ExprEditor::find(const bool loop)
 {
     findAll();
     QTextDocument::FindFlags flags = 0;
@@ -268,7 +268,7 @@ bool ExprEditor::find()
         flags |= QTextDocument::FindWholeWords;
 
     bool found = exprTe->find(searchLine->text(), flags);
-    if (!found) {
+    if (!found && loop) {
         QTextCursor tc = exprTe->textCursor();
         tc.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor, 1);
         exprTe->setTextCursor(tc);
@@ -322,6 +322,22 @@ void ExprEditor::replace()
     tc.removeSelectedText();
     tc.insertText(replaceText);
     tc.endEditBlock();
+}
+
+void ExprEditor::replaceSingle()
+{
+    QTextCursor tc = exprTe->textCursor();
+    if (!tc.hasSelection()) {
+        find();
+    } else {
+        QString selText = tc.selectedText();
+        QString replaceText = searchLine->text();
+        if (selText != replaceText) {
+            find();
+        }
+    }
+
+    replace();
     find();
 }
 
@@ -330,7 +346,9 @@ void ExprEditor::replaceAll()
     int pos = exprTe->verticalScrollBar()->value();
     QTextCursor tc = exprTe->textCursor();
     tc.beginEditBlock();
-    while (find()) {
+    tc.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor, 1);
+    exprTe->setTextCursor(tc);
+    while (find(false)) {
         replace();
     }
     tc.endEditBlock();
