@@ -446,7 +446,7 @@ struct StrCompareEqOp {
                 fp[opData[2]] = strcmp(c[opData[0]], c[opData[1]]) == 0;
                 break;
             case '!':
-                fp[opData[2]] = strcmp(c[opData[0]], c[opData[1]]) == 0;
+                fp[opData[2]] = strcmp(c[opData[0]], c[opData[1]]) != 0;
                 break;
         }
         return 1;
@@ -756,7 +756,7 @@ int ExprAssignNode::buildInterpreter(Interpreter* interpreter) const {
     }
     interpreter->addOperand(op0);
     interpreter->addOperand(loc);
-    interpreter->endOp();
+    interpreter->endOp(child0Type.isString() == false);
     return loc;
 }
 
@@ -973,7 +973,7 @@ int ExprCompareEqNode::buildInterpreter(Interpreter* interpreter) const {
     interpreter->addOperand(op0);
     interpreter->addOperand(op1);
     interpreter->addOperand(op2);
-    interpreter->endOp();
+    interpreter->endOp(child0->type().isString() == false);
     return op2;
 }
 
