@@ -579,8 +579,7 @@ void StringControl::dropEvent(QDropEvent* e)
             }
             _edit->setText(url);
         }
-    }
-    else if (mimeData->hasText()) {
+    } else if (mimeData->hasText()) {
         _edit->setText(e->mimeData()->text());
     }
 }

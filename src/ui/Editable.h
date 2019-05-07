@@ -162,7 +162,8 @@ struct VectorEditable : public Editable {
 struct StringEditable : public Editable {
     std::string v;
     std::string type;
-    StringEditable(const std::string& name, int startPos, int endPos, const std::string& val) : Editable(name, startPos, endPos), v(val)
+    StringEditable(const std::string& name, int startPos, int endPos, const std::string& val)
+        : Editable(name, startPos, endPos), v(val)
     {
     }
 
@@ -183,8 +184,7 @@ struct StringEditable : public Editable {
             int parsed = sscanf(comment.c_str(), "#%s", typebuf);
             if (parsed == 1) {
                 type = typebuf;
-            }
-            else {
+            } else {
                 type = "string";
             }
             return true;
