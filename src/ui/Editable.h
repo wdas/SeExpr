@@ -167,12 +167,17 @@ struct StringEditable : public Editable {
     {
     }
 
+    static bool isValidType(const std::string& type)
+    {
+        return type == "file" || type == "directory" || type == "string";
+    }
+
     bool parseComment(const std::string& comment)
     {
         if (name == "") {
             char namebuf[1024], typebuf[1024];
             int parsed = sscanf(comment.c_str(), "#%s %s", typebuf, namebuf);
-            if (parsed == 2) {
+            if (parsed == 2 && isValidType(typebuf)) {
                 name = namebuf;
                 type = typebuf;
                 return true;
@@ -182,12 +187,12 @@ struct StringEditable : public Editable {
         } else {
             char typebuf[1024];
             int parsed = sscanf(comment.c_str(), "#%s", typebuf);
-            if (parsed == 1) {
+            if (parsed == 1 && isValidType(typebuf)) {
                 type = typebuf;
+                return true;
             } else {
-                type = "string";
+                return false;
             }
-            return true;
         }
     }
 
