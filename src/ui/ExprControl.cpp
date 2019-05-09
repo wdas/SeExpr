@@ -573,11 +573,7 @@ void StringControl::dropEvent(QDropEvent* e)
     if (mimeData->hasUrls()) {
         QList<QUrl> urls = mimeData->urls();
         if (!urls.isEmpty()) {
-            QString url = urls.first().toString();
-            if (url.startsWith("file://")) {
-                url.remove(0, 7);
-            }
-            _edit->setText(url);
+            _edit->setText(urls.first().path());
         }
     } else if (mimeData->hasText()) {
         _edit->setText(e->mimeData()->text());

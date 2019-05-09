@@ -174,7 +174,7 @@ struct StringEditable : public Editable {
 
     bool parseComment(const std::string& comment)
     {
-        if (name == "") {
+        if (name.empty()) {
             char namebuf[1024], typebuf[1024];
             int parsed = sscanf(comment.c_str(), "#%s %s", typebuf, namebuf);
             if (parsed == 2 && isValidType(typebuf)) {
