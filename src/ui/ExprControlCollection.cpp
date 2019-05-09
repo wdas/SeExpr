@@ -343,10 +343,10 @@ void ExprControlCollection::addControlDialog()
                     .arg(dialog->initSwatch());
             break;
         case 7:
-            s = QString("\"%1\" #%2 %3\n")
+            s = QString("%1 = \"%2\"; #%3\n")
+                    .arg(dialog->stringNameWidget->text())
                     .arg(dialog->stringDefaultWidget->text())
-                    .arg(dialog->stringTypeWidget->currentText())
-                    .arg(dialog->stringNameWidget->text());
+                    .arg(dialog->stringTypeWidget->currentText());
             break;
         case 8:
             s = QString("%1 = animCurve(%2,\"constant\",\"constant\",0,\"%3\");")

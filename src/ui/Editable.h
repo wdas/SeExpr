@@ -174,26 +174,14 @@ struct StringEditable : public Editable {
 
     bool parseComment(const std::string& comment)
     {
-        if (name.empty()) {
-            char namebuf[1024], typebuf[1024];
-            int parsed = sscanf(comment.c_str(), "#%s %s", typebuf, namebuf);
-            if (parsed == 2 && isValidType(typebuf)) {
-                name = namebuf;
-                type = typebuf;
-                return true;
-            } else {
-                return false;
-            }
+        char typebuf[1024];
+        int parsed = sscanf(comment.c_str(), "#%s", typebuf);
+        if (parsed == 1 && isValidType(typebuf)) {
+            type = typebuf;
         } else {
-            char typebuf[1024];
-            int parsed = sscanf(comment.c_str(), "#%s", typebuf);
-            if (parsed == 1 && isValidType(typebuf)) {
-                type = typebuf;
-                return true;
-            } else {
-                return false;
-            }
+            type = "string";
         }
+        return true;
     }
 
     void appendString(std::stringstream& stream) const
