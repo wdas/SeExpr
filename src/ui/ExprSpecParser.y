@@ -114,10 +114,10 @@ static void specRegisterEditable(const char* var,ExprSpecNode* node)
         editables->push_back(new StringEditable(var,node->startPos,node->endPos,n->v));
     }else if(ExprSpecCCurveNode* n=dynamic_cast<ExprSpecCCurveNode*>(node)){
         if(ExprSpecListNode* args=dynamic_cast<ExprSpecListNode*>(n->args)){
-            if((args->nodes.size())%3==0){
+            if((args->nodes.size())%3==1){
                 ColorCurveEditable* ccurve=new ColorCurveEditable(var,node->startPos,node->endPos);
                 bool valid=true;
-                for(size_t i=0;i<args->nodes.size();i+=3){
+                for(size_t i=1;i<args->nodes.size();i+=3){
                     ExprSpecScalarNode* xnode=dynamic_cast<ExprSpecScalarNode*>(args->nodes[i]);
                     ExprSpecVectorNode* ynode=dynamic_cast<ExprSpecVectorNode*>(args->nodes[i+1]);
                     ExprSpecScalarNode* interpnode=dynamic_cast<ExprSpecScalarNode*>(args->nodes[i+2]);
@@ -135,10 +135,10 @@ static void specRegisterEditable(const char* var,ExprSpecNode* node)
         }
     }else if(ExprSpecCurveNode* n=dynamic_cast<ExprSpecCurveNode*>(node)){
         if(ExprSpecListNode* args=dynamic_cast<ExprSpecListNode*>(n->args)){
-            if((args->nodes.size())%3==0){
+            if((args->nodes.size())%3==1){
                 CurveEditable* ccurve=new CurveEditable(var,node->startPos,node->endPos);
                 bool valid=true;
-                for(size_t i=0;i<args->nodes.size();i+=3){
+                for(size_t i=1;i<args->nodes.size();i+=3){
                     ExprSpecScalarNode* xnode=dynamic_cast<ExprSpecScalarNode*>(args->nodes[i]);
                     ExprSpecScalarNode* ynode=dynamic_cast<ExprSpecScalarNode*>(args->nodes[i+1]);
                     ExprSpecScalarNode* interpnode=dynamic_cast<ExprSpecScalarNode*>(args->nodes[i+2]);
@@ -156,10 +156,10 @@ static void specRegisterEditable(const char* var,ExprSpecNode* node)
         }
     }else if(ExprSpecColorSwatchNode* n=dynamic_cast<ExprSpecColorSwatchNode*>(node)){
         if(ExprSpecListNode* args=dynamic_cast<ExprSpecListNode*>(n->args)){
-            if(args->nodes.size()>0){
+            if(args->nodes.size()>1){
                 ColorSwatchEditable* swatch=new ColorSwatchEditable(var,node->startPos,node->endPos);
                 bool valid=true;
-                for(size_t i=0;i<args->nodes.size();i++){
+                for(size_t i=1;i<args->nodes.size();i++){
                     ExprSpecVectorNode* colornode=dynamic_cast<ExprSpecVectorNode*>(args->nodes[i]);
                     if(colornode){
                         swatch->add(colornode->v);
@@ -174,26 +174,26 @@ static void specRegisterEditable(const char* var,ExprSpecNode* node)
     }else if(ExprSpecAnimCurveNode* n=dynamic_cast<ExprSpecAnimCurveNode*>(node)){
         if(ExprSpecListNode* args=dynamic_cast<ExprSpecListNode*>(n->args)){
             // need 3 items for pre inf and post inf and weighting, plus 9 items per key
-            if((args->nodes.size()-4)%9==0){
+            if((args->nodes.size()-4)%9==1){
                 AnimCurveEditable* animCurve=new AnimCurveEditable(var,node->startPos,node->endPos);
                 bool valid=true;
 
 
 #ifdef SEEXPR_USE_ANIMLIB
-                if(ExprSpecStringNode* s=dynamic_cast<ExprSpecStringNode*>(args->nodes[0])){
+                if(ExprSpecStringNode* s=dynamic_cast<ExprSpecStringNode*>(args->nodes[1])){
                     animCurve->curve.setPreInfinity(animlib::AnimCurve::stringToInfinityType(s->v));
                 }else valid=false;
-                if(ExprSpecStringNode* s=dynamic_cast<ExprSpecStringNode*>(args->nodes[1])){
+                if(ExprSpecStringNode* s=dynamic_cast<ExprSpecStringNode*>(args->nodes[2])){
                     animCurve->curve.setPostInfinity(animlib::AnimCurve::stringToInfinityType(s->v));
                 }else valid=false;
-                if(ExprSpecScalarNode* v=dynamic_cast<ExprSpecScalarNode*>(args->nodes[2])){
+                if(ExprSpecScalarNode* v=dynamic_cast<ExprSpecScalarNode*>(args->nodes[3])){
                     animCurve->curve.setWeighted(bool(v->v));
                 }
-                if(ExprSpecStringNode* v=dynamic_cast<ExprSpecStringNode*>(args->nodes[3])){
+                if(ExprSpecStringNode* v=dynamic_cast<ExprSpecStringNode*>(args->nodes[4])){
                     animCurve->link=v->v;
                 }
 
-                for(size_t i=4;i<args->nodes.size();i+=9){
+                for(size_t i=5;i<args->nodes.size();i+=9){
                     ExprSpecScalarNode* xnode=dynamic_cast<ExprSpecScalarNode*>(args->nodes[i]);
                     ExprSpecScalarNode* ynode=dynamic_cast<ExprSpecScalarNode*>(args->nodes[i+1]);
                     ExprSpecScalarNode* inWeight=dynamic_cast<ExprSpecScalarNode*>(args->nodes[i+2]);
@@ -227,22 +227,22 @@ static void specRegisterEditable(const char* var,ExprSpecNode* node)
         }
     }else if(ExprSpecDeepWaterNode* n=dynamic_cast<ExprSpecDeepWaterNode*>(node)){
         if(ExprSpecListNode* args=dynamic_cast<ExprSpecListNode*>(n->args)){
-            if(args->nodes.size()==12){
+            if(args->nodes.size()==13){
                 DeepWaterEditable* deepWater=new DeepWaterEditable(var,node->startPos,node->endPos);
                 bool valid=true;
 
-                ExprSpecScalarNode* resolution=dynamic_cast<ExprSpecScalarNode*>(args->nodes[0]);
-                ExprSpecScalarNode* tileSize=dynamic_cast<ExprSpecScalarNode*>(args->nodes[1]);
-                ExprSpecScalarNode* lengthCutoff=dynamic_cast<ExprSpecScalarNode*>(args->nodes[2]);
-                ExprSpecScalarNode* amplitude=dynamic_cast<ExprSpecScalarNode*>(args->nodes[3]);
-                ExprSpecScalarNode* windAngle=dynamic_cast<ExprSpecScalarNode*>(args->nodes[4]);
-                ExprSpecScalarNode* windSpeed=dynamic_cast<ExprSpecScalarNode*>(args->nodes[5]);
-                ExprSpecScalarNode* directionalFactorExponent=dynamic_cast<ExprSpecScalarNode*>(args->nodes[6]);
-                ExprSpecScalarNode* directionalReflectionDamping=dynamic_cast<ExprSpecScalarNode*>(args->nodes[7]);
-                ExprSpecVectorNode* flowDirection=dynamic_cast<ExprSpecVectorNode*>(args->nodes[8]);
-                ExprSpecScalarNode* sharpen=dynamic_cast<ExprSpecScalarNode*>(args->nodes[9]);
-                ExprSpecScalarNode* time=dynamic_cast<ExprSpecScalarNode*>(args->nodes[10]);
-                ExprSpecScalarNode* filterWidth=dynamic_cast<ExprSpecScalarNode*>(args->nodes[11]);
+                ExprSpecScalarNode* resolution=dynamic_cast<ExprSpecScalarNode*>(args->nodes[1]);
+                ExprSpecScalarNode* tileSize=dynamic_cast<ExprSpecScalarNode*>(args->nodes[2]);
+                ExprSpecScalarNode* lengthCutoff=dynamic_cast<ExprSpecScalarNode*>(args->nodes[3]);
+                ExprSpecScalarNode* amplitude=dynamic_cast<ExprSpecScalarNode*>(args->nodes[4]);
+                ExprSpecScalarNode* windAngle=dynamic_cast<ExprSpecScalarNode*>(args->nodes[5]);
+                ExprSpecScalarNode* windSpeed=dynamic_cast<ExprSpecScalarNode*>(args->nodes[6]);
+                ExprSpecScalarNode* directionalFactorExponent=dynamic_cast<ExprSpecScalarNode*>(args->nodes[7]);
+                ExprSpecScalarNode* directionalReflectionDamping=dynamic_cast<ExprSpecScalarNode*>(args->nodes[8]);
+                ExprSpecVectorNode* flowDirection=dynamic_cast<ExprSpecVectorNode*>(args->nodes[9]);
+                ExprSpecScalarNode* sharpen=dynamic_cast<ExprSpecScalarNode*>(args->nodes[10]);
+                ExprSpecScalarNode* time=dynamic_cast<ExprSpecScalarNode*>(args->nodes[11]);
+                ExprSpecScalarNode* filterWidth=dynamic_cast<ExprSpecScalarNode*>(args->nodes[12]);
                 if(resolution && tileSize && lengthCutoff && amplitude && windAngle && windSpeed && directionalFactorExponent && directionalReflectionDamping && flowDirection && sharpen && time && filterWidth){
                     deepWater->setParams(SeDeepWaterParams(resolution->v, tileSize->v, lengthCutoff->v, amplitude->v, windAngle->v, windSpeed->v, directionalFactorExponent->v, directionalReflectionDamping->v, flowDirection->v, sharpen->v, time->v, filterWidth->v));
                 }else{
@@ -310,16 +310,8 @@ static void yyerror(const char* msg);
 
 /* The root expression rule */
 expr:
-      assigns e                 {
-        ParseResult = 0;
-        specRegisterVariable("");
-        specRegisterEditable("",$2);
-      }
-    | e                         {
-        ParseResult = 0;
-        specRegisterVariable("");
-        specRegisterEditable("",$1);
-      }
+      assigns e                 { ParseResult = 0; }
+    | e                         { ParseResult = 0; }
     ;
 
 /* local variable assignments */
@@ -418,22 +410,23 @@ e:
             $$=remember(new ExprSpecDeepWaterNode($3));
         }else if($3){
             // function arguments not parse of curve, ccurve, or animCurve
-            // check if first arg is a string to be made into a control
-            // but be sure to return 0 as this parseable
-            if(ExprSpecStringNode* str=dynamic_cast<ExprSpecStringNode*>($3)){
-                specRegisterEditable("",str);
+            // check if first arg is a string which can be made into a control
+            if(ExprSpecListNode* list=dynamic_cast<ExprSpecListNode*>($3)){
+                ExprSpecStringNode* str;
+                if (!list->nodes.empty() && (str=dynamic_cast<ExprSpecStringNode*>(list->nodes[0]))) {
+                    $$=str;
+                }
+                else {
+                    $$=0;
+                }
             }
-            $$=0;
         }else $$=0;
       }
     | e ARROW NAME '(' optargs ')'{$$ = 0; }
     | VAR			{  $$ = 0; }
     | NAME			{  $$ = 0; }
     | NUMBER			{ $$=remember(new ExprSpecScalarNode(@$.first_column,@$.last_column,$1)); }
-    | STR			{
-        ExprSpecStringNode* str=new ExprSpecStringNode(@$.first_column,@$.last_column,$1);
-        $$ = remember(str);
-      }
+    | STR			{ $$=remember(new ExprSpecStringNode(@$.first_column,@$.last_column,$1)); }
     ;
 
 /* An optional argument list */
@@ -445,11 +438,16 @@ optargs:
 /* Argument list (comma-separated expression list) */
 args:
    arg	{
-       $$=$1;
+       ExprSpecListNode* list=new ExprSpecListNode(@$.last_column,@$.last_column);
+       list->add($1);
+       remember(list);
+       $$=list;
    }
    | args ',' arg {
-      // we only need to keep the first arg
-      $$=$1;
+       $$=$1;
+       if (ExprSpecListNode*list = dynamic_cast<ExprSpecListNode*>($1)) {
+           list->add($3);
+       }
     }
     ;
 
