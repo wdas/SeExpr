@@ -162,20 +162,37 @@ struct VectorEditable : public Editable {
 struct StringEditable : public Editable {
     std::string v;
     std::string type;
-    StringEditable(int startPos, int endPos, const std::string& val) : Editable("unknown", startPos, endPos), v(val)
+    StringEditable(const std::string& name, int startPos, int endPos, const std::string& val)
+        : Editable(name, startPos, endPos), v(val)
     {
+    }
+
+    static bool isValidType(const std::string& type)
+    {
+        return type == "file" || type == "directory" || type == "string";
     }
 
     bool parseComment(const std::string& comment)
     {
-        char namebuf[1024], typebuf[1024];
-        int parsed = sscanf(comment.c_str(), "#%s %s", typebuf, namebuf);
-        if (parsed == 2) {
-            name = namebuf;
-            type = typebuf;
-            return true;
+        if (name.empty()) {
+            char namebuf[1024], typebuf[1024];
+            int parsed = sscanf(comment.c_str(), "#%s %s", typebuf, namebuf);
+            if (parsed == 2 && isValidType(typebuf)) {
+                name = namebuf;
+                type = typebuf;
+                return true;
+            } else {
+                return false;
+            }
         } else {
-            return false;
+            char typebuf[1024];
+            int parsed = sscanf(comment.c_str(), "#%s", typebuf);
+            if (parsed == 1 && isValidType(typebuf)) {
+                type = typebuf;
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 

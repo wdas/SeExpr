@@ -44,6 +44,7 @@
 #include <QToolTip>
 #include <QListWidget>
 #include <QTreeView>
+#include <QMimeData>
 
 #include "ExprControl.h"
 #include "ExprColorCurve.h"
@@ -536,8 +537,10 @@ StringControl::StringControl(int id, StringEditable* editable)
     _edit = new QLineEdit();
     _edit->setFixedHeight(20);
     connect(_edit, SIGNAL(textChanged(const QString&)), SLOT(textChanged(const QString&)));
+    _edit->setAcceptDrops(false);
     // make a button if we are a file or directory
     if (_stringEditable->type == "file" || _stringEditable->type == "directory") {
+        setAcceptDrops(true);
         QPushButton* button = new QPushButton();
         button->setFixedSize(20, 20);
 
@@ -556,6 +559,25 @@ StringControl::StringControl(int id, StringEditable* editable)
     }
     // update controls
     updateControl();
+}
+
+void StringControl::dragEnterEvent(QDragEnterEvent* e)
+{
+    e->acceptProposedAction();
+}
+
+void StringControl::dropEvent(QDropEvent* e)
+{
+    e->acceptProposedAction();
+    const QMimeData* mimeData = e->mimeData();
+    if (mimeData->hasUrls()) {
+        QList<QUrl> urls = mimeData->urls();
+        if (!urls.isEmpty()) {
+            _edit->setText(urls.first().path());
+        }
+    } else if (mimeData->hasText()) {
+        _edit->setText(e->mimeData()->text());
+    }
 }
 
 void StringControl::fileBrowse()

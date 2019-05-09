@@ -111,7 +111,7 @@ static void specRegisterEditable(const char* var,ExprSpecNode* node)
     }else if(ExprSpecVectorNode* n=dynamic_cast<ExprSpecVectorNode*>(node)){
         editables->push_back(new VectorEditable(var,node->startPos,node->endPos,n->v));
     }else if(ExprSpecStringNode* n=dynamic_cast<ExprSpecStringNode*>(node)){
-        editables->push_back(new StringEditable(node->startPos,node->endPos,n->v));
+        editables->push_back(new StringEditable(var,node->startPos,node->endPos,n->v));
     }else if(ExprSpecCCurveNode* n=dynamic_cast<ExprSpecCCurveNode*>(node)){
         if(ExprSpecListNode* args=dynamic_cast<ExprSpecListNode*>(n->args)){
             if((args->nodes.size())%3==0){
@@ -310,8 +310,16 @@ static void yyerror(const char* msg);
 
 /* The root expression rule */
 expr:
-      assigns e                 { ParseResult = 0; }
-    | e                         { ParseResult = 0; }
+      assigns e                 {
+        ParseResult = 0;
+        specRegisterVariable("");
+        specRegisterEditable("",$2);
+      }
+    | e                         {
+        ParseResult = 0;
+        specRegisterVariable("");
+        specRegisterEditable("",$1);
+      }
     ;
 
 /* local variable assignments */
@@ -410,14 +418,10 @@ e:
             $$=remember(new ExprSpecDeepWaterNode($3));
         }else if($3){
             // function arguments not parse of curve, ccurve, or animCurve
-            // check if there are any string args that need to be made into controls
+            // check if first arg is a string to be made into a control
             // but be sure to return 0 as this parseable
-            if(ExprSpecListNode* list=dynamic_cast<ExprSpecListNode*>($3)){
-                for(size_t i=0;i<list->nodes.size();i++){
-                    if(ExprSpecStringNode* str=dynamic_cast<ExprSpecStringNode*>(list->nodes[i])){
-                        specRegisterEditable("<UNKNOWN>",str);
-                    }
-                }
+            if(ExprSpecStringNode* str=dynamic_cast<ExprSpecStringNode*>($3)){
+                specRegisterEditable("",str);
             }
             $$=0;
         }else $$=0;
@@ -426,6 +430,10 @@ e:
     | VAR			{  $$ = 0; }
     | NAME			{  $$ = 0; }
     | NUMBER			{ $$=remember(new ExprSpecScalarNode(@$.first_column,@$.last_column,$1)); }
+    | STR			{
+        ExprSpecStringNode* str=new ExprSpecStringNode(@$.first_column,@$.last_column,$1);
+        $$ = remember(str);
+      }
     ;
 
 /* An optional argument list */
@@ -437,33 +445,16 @@ optargs:
 /* Argument list (comma-separated expression list) */
 args:
    arg	{
-       // ignore first argument unless it is a string (because we parse strings in weird ways)
-       ExprSpecListNode* list=new ExprSpecListNode(@$.last_column,@$.last_column);
-       if($1 && SPEC_IS_STR($1)){
-           list->add($1);
-       }
-       remember(list);
-       $$=list;
+       $$=$1;
    }
-  | args ',' arg {
-
-      if($1 && $3 && ((SPEC_IS_NUMBER($3) || SPEC_IS_VECTOR($3) || SPEC_IS_STR($3)))){
-          $$=$1;
-          dynamic_cast<ExprSpecListNode*>($1)->add($3);
-      }else{
-          $$=0;
-      }
+   | args ',' arg {
+      // we only need to keep the first arg
+      $$=$1;
     }
     ;
 
 arg:
       e				{ $$ = $1;}
-    | STR			{
-        ExprSpecStringNode* str=new ExprSpecStringNode(@$.first_column,@$.last_column,$1);
-        //specRegisterEditable("<UNKNOWN>",str);
-        // TODO: move string stuff out
-        $$ = remember(str);
-      }
     ;
 
 %%

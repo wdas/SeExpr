@@ -261,6 +261,8 @@ class StringControl : public ExprControl {
 
   public:
     StringControl(int id, StringEditable* stringEditable);
+    void dragEnterEvent(QDragEnterEvent* e);
+    void dropEvent(QDropEvent* e);
 
   private:
     void updateControl();
