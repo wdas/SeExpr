@@ -82,8 +82,8 @@ if (USE_PYTHON)
     endif()
     link_directories(${BOOST_LIB_DIR})
 
-    include_directories(../SeExpr/parser)
-    add_library(core SHARED SeExprPy.cpp ../SeExpr/parser/SeExprParse.cpp ../SeExpr/parser/SeExprLex.cpp)
+    include_directories(../SeExpr2/parser)
+    add_library(core SHARED SeExprPy.cpp ../SeExpr2/parser/SeExprParse.cpp ../SeExpr2/parser/SeExprLex.cpp)
 
     if (APPLE)
         # TODO: figure out how to get this to work

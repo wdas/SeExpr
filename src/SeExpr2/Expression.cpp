@@ -30,12 +30,11 @@
 #include "ExprType.h"
 #include "ExprEnv.h"
 #include "Platform.h"
-
 #include "LLVMEvaluator.h"
+#include "ExprWalker.h"
 
 #include <cstdio>
 #include <typeinfo>
-#include <ExprWalker.h>
 
 namespace SeExpr2 {
 

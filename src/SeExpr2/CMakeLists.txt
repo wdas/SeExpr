@@ -75,9 +75,6 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ DESTINATION include/SeExpr2
         FILES_MATCHING PATTERN "*.h")
 
 # Setup header files
-file(GLOB public_includes "*.h")
-file(COPY ${public_includes} DESTINATION ${CMAKE_BINARY_DIR}/include/SeExpr2)
-
 configure_file(ExprConfig.h.in ExprConfig.h)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ExprConfig.h DESTINATION include/SeExpr2)
 

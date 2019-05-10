@@ -20,7 +20,7 @@
 #include <algorithm>
 #include <limits>
 
-#include <SeExpr2/VarBlock.h>
+#include "VarBlock.h"
 
 #include "png++.h"
 

@@ -18,10 +18,11 @@
 * @brief This provides an expression editor for SeExpr syntax with auto ui features
 * @author  aselle
 */
-#include <QLineEdit>
-#include <Expression.h>
-#include <SeExpr2/ExprFunc.h>
+#include "ExprFunc.h"
+#include "Expression.h"
 #include "ExprCompletionModel.h"
+
+#include <QLineEdit>
 
 using namespace SeExpr2;
 
