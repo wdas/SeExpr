@@ -62,6 +62,10 @@ struct ExprSpecListNode : public ExprSpecNode {
 
     void add(ExprSpecNode* node)
     {
+        if (node) {
+            startPos = std::min(node->startPos, startPos);
+            endPos = std::max(node->endPos, endPos);
+        }
         nodes.push_back(node);
     }
 };
