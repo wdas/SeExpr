@@ -203,18 +203,24 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType)
         TheModule->dump();
     }
 
-    // TODO: Find out if there is a new way to veirfy
+    // TODO: Find out if there is a new way to verify
     // if (verifyModule(*TheModule)) {
     //     std::cerr << "Logic error in code generation of LLVM alert developers" << std::endl;
     //     TheModule->dump();
     // }
     Module* altModule = TheModule.get();
+
+    // Create the JIT.  This takes ownership of the module.
     std::string ErrStr;
     TheExecutionEngine.reset(EngineBuilder(std::move(TheModule))
                                  .setErrorStr(&ErrStr)
                                  //     .setUseMCJIT(true)
                                  .setOptLevel(CodeGenOpt::Aggressive)
                                  .create());
+    if (!TheExecutionEngine) {
+        fprintf(stderr, "Could not create ExecutionEngine: %s\n", ErrStr.c_str());
+        exit(1);
+    }
 
     altModule->setDataLayout(TheExecutionEngine->getDataLayout());
 
@@ -247,13 +253,6 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType)
     fpm->run(*F);
     fpm->run(*FLOOP);
     pm->run(*altModule);
-
-    // Create the JIT.  This takes ownership of the module.
-
-    if (!TheExecutionEngine) {
-        fprintf(stderr, "Could not create ExecutionEngine: %s\n", ErrStr.c_str());
-        exit(1);
-    }
 
     TheExecutionEngine->finalizeObject();
     void* fp = TheExecutionEngine->getPointerToFunction(F);
