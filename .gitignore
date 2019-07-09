@@ -6,6 +6,7 @@
 /Darwin-*
 /src/SeExpr2/parser
 /src/SeExprEditor/generated
+/env*
 CMakeCache.txt
 CMakeLists.txt.user
 CMakeSettings.json
