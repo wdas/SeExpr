@@ -24,7 +24,7 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Intrinsics.h>
-#include <llvm/IR/TypeBuilder.h>
+#include <llvm/IR/Type.h>
 #include <llvm/Transforms/Utils/BasicBlockUtils.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 #include <llvm/ADT/ArrayRef.h>
