@@ -27,7 +27,6 @@ html, body {
   background: #443E3A;
   width: 100%;
   height: 100%;
-
 }
 
 nav {
@@ -158,6 +157,10 @@ section:nth-child(odd) li {
 
 .btn-dark {
   color: #443E3A;
+}
+
+.dark * {
+  color: #383330;
 }
 
 .btn:hover {
