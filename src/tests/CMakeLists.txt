@@ -100,3 +100,7 @@ add_test(NAME BlockTests COMMAND BlockTests)
 add_executable(VarBlockExample VarBlockExample.cpp)
 target_link_libraries(VarBlockExample SeExpr2)
 install(TARGETS VarBlockExample DESTINATION ${TEST_DEST})
+
+if (ENABLE_SLOW_TESTS)
+    add_test(NAME VarBlockExample COMMAND VarBlockExample)
+endif()

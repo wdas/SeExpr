@@ -89,6 +89,7 @@ option(BUILD_UTILS "Whether to build the utilities" TRUE)
 option(BUILD_DEMOS "Whether to build the demos" TRUE)
 option(BUILD_DOC "Whether to build the documentation" TRUE)
 option(BUILD_TESTS "Whether to build the tests" TRUE)
+option(ENABLE_SLOW_TESTS "Whether to enable slow tests" FALSE)
 
 set(LLVM_LIB "")
 if (ENABLE_LLVM_BACKEND)
