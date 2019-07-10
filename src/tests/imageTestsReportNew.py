@@ -41,17 +41,17 @@ def run(filterString):
 
     with os.popen(versions["v2-llvm"]+" --gtest_list_tests --gtest_filter=%s"%filterString) as pipe:
         testCount=len([line for line in pipe if not line.endswith(".")])
-    print "tests to run %d"%testCount
+    print("tests to run %d"%testCount)
     for version in versions.keys():
-        print " "
+        print(" ")
         count=0
         exe=versions[version]
         cmd=[exe,"--gtest_output=xml:tmp/%s"%(version+".xml"),"--gtest_filter=%s"%filterString]
         cmd=" ".join(cmd)
-        print cmd
+        print(cmd)
         process=subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,shell=True)
         pipe=iter(process.stdout.readline,b"")
-        print " "
+        print(" ")
         for line in pipe:
             fpLog.write(line)
             line=line.strip()
@@ -63,7 +63,7 @@ def run(filterString):
                     print ("\r%30s %10d/%10d -- %d%% "%(version,count,testCount,percent)),
         errorCode=process.wait()
         if errorCode != 0:
-            print "\n%s ERROR CODE %d\n"%(exe,errorCode)
+            print("\n%s ERROR CODE %d\n"%(exe,errorCode))
             exitCode=1
     return exitCode
 
@@ -84,9 +84,9 @@ def view(x):
         if fullTest==x:
             path=elementData.get("path")
             if path:
-                print path
-                print "="*len(path)
-                print open(path).read()
+                print(path)
+                print("="*len(path))
+                print(open(path).read())
                 sys.exit(0)
     iterateXML(find)
 
@@ -129,14 +129,14 @@ def process():
     for v in versionKeys:
         line+="|"
         line+="%18s"%v
-    print line
+    print(line)
     line="%-50s"%"Test Name"
     for v in versionKeys:
         line+="|"
         for c in attrsShort:
             line+=" %5s"%c
-    print line
-    print "-"*len(line)
+    print(line)
+    print("-"*len(line))
     for entryName,entryData in table.items():
         csvLine=[entryName]
         line="%-50s"%entryName
@@ -155,7 +155,7 @@ def process():
                     line+=" -----"
                     csvLine.append("")
         fpData.write(",".join(csvLine)+"\n")
-        print line
+        print(line)
 
 
 
@@ -168,8 +168,8 @@ if __name__=="__main__":
         pass
 
     if cmd=="help":
-        print "Usage:\n\t%s run [optional filter]"%sys.argv[0]
-        print "\t%s process"%sys.argv[0]
+        print("Usage:\n\t%s run [optional filter]"%sys.argv[0])
+        print("\t%s process"%sys.argv[0])
     elif cmd=="view":
         view(sys.argv[2])
     elif cmd=="run":
@@ -182,6 +182,4 @@ if __name__=="__main__":
     elif cmd=="runall":
         run("*")
         process()
-        os.system("python src/tests/htmlReport.py tmp/data.csv")
-
-    
+        os.system("%s src/tests/htmlReport.py tmp/data.csv" % sys.executable)

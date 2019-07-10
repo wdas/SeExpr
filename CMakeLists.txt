@@ -69,7 +69,10 @@ set(INCLUDE_DIR "include/${PROJECT_NAME}")
 # Configuration options
 # TODO: find GTEST and boost and python the proper ways
 set(BOOST_DIR /usr CACHE PATH "where boost is located")
+
 find_package(PythonInterp) # provides Python version check
+find_package(PythonLibs)
+
 if(PYTHON_VERSION_MAJOR LESS 3)
     set(BOOST_PYTHON_LIBNAME boost_python CACHE STRING "what library name for boost python")
 else()

@@ -40,7 +40,7 @@ if __name__=="__main__":
 					edits.addEdit(childs[0],"testo/%s"%childs[0].value) # add to the edit structure
 	SeExprPy.traverseCallback(expr.root(),editAllMapsToHavePrefix)
 	SeExprPy.printTree(expr,s)
-	print edits.makeNewString()
+	print(edits.makeNewString())
 	
 	print "--All Function calls----------------------------"
 	def printAllFunctionsAndTheirArguments(node,childs):

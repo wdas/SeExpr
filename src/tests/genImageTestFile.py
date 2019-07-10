@@ -21,10 +21,16 @@ import re
 
 ###################################
 def printUsage():
-    print "Usage: genImageTestFile.py <dir> <outfile>"
-    print "       traverse given dir for expr examples, write tests to outfile\n"
-    print "       ex: genImageTestFile.py ./src/demos/imageSynth/examples src/tests/testSeExprExamples.cpp"
+    print("Usage: genImageTestFile.py <dir> <outfile>")
+    print("       traverse given dir for expr examples, write tests to outfile\n")
+    print("       ex: genImageTestFile.py ./src/demos/imageSynth/examples src/tests/testSeExprExamples.cpp")
     sys.exit()
+
+
+def translate(string):
+    """strip out invalid chars"""
+    return string.replace('&', '').replace('.', '').replace('#', '')
+
 ###################################
 
 ### MAIN ###
@@ -38,8 +44,8 @@ outfile = sys.argv[2]
 
 # open outfile
 f = open(outfile, 'w')
-print >> f, "#include <gtest/gtest.h>\n"
-print >> f, "void evalExpressionFile(const char *filepath);\n"
+f.write("#include <gtest/gtest.h>\n")
+f.write("void evalExpressionFile(const char *filepath);\n")
 
 for dir_name, sub_dirs, se_files in os.walk(rootdir):
     for se_file in se_files:
@@ -48,12 +54,11 @@ for dir_name, sub_dirs, se_files in os.walk(rootdir):
         (head, parent_dir) = os.path.split(dir_name)
         (head, gparent_dir) = os.path.split(head)
         (filename,ext) = os.path.splitext(se_file)
-        # strip out invalid chars
-        filename = filename.translate(None, " &.#")
+        filename = translate(filename)
         if(re.match('\.se$', ext)):
-            print >> f, "TEST(" + parent_dir.lstrip('.') +'_' + gparent_dir.lstrip('.') + ", " + filename + ")"
-            print >> f, "{"
-            print >> f, "    evalExpressionFile(\"" + fullpath + "\");"
-            print >> f, "}\n"
+            f.write("TEST(" + parent_dir.lstrip('.') +'_' + gparent_dir.lstrip('.') + ", " + filename + ")")
+            f.write("{")
+            f.write("    evalExpressionFile(\"" + fullpath + "\");")
+            f.write("}\n")
 
 f.close()

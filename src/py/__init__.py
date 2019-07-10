@@ -25,6 +25,9 @@ help(SeExprPy.utils)
   - interesting helper functions/classes
 
 """
-from core import *
-from utils import *
+
+from __future__ import absolute_import
+
+from .core import *
+from .utils import *
 

@@ -15,10 +15,12 @@
 
 include_directories(${CMAKE_BINARY_DIR}/src/SeExpr2)
 
+set(TEST_DEST "share/test/SeExpr2")
+
 if (GTEST_DIR)
     # Google test framework
     include_directories(AFTER ${GTEST_DIR}/include)
-    link_directories(${GTEST_DIR}/${CMAKE_INSTALL_LIBDIR})
+    find_library(GTEST_LIBRARIES gtest PATHS ${GTEST_DIR}/${CMAKE_INSTALL_LIBDIR})
 
     # Uncomment below to print performance stats
     # add_definitions(-DSEEXPR_PERFORMANCE)
@@ -63,11 +65,14 @@ if (GTEST_DIR)
                 DEPENDS ${GENERATE_SCRIPT} ${PAINT3D_DIR})
         endif()
 
-        add_executable(testmain2 "testmain.cpp" "imageTests.cpp" ${EXAMPLE_TESTS} ${PAINT3D_TESTS} "basic.cpp" "string.cpp")
+        add_executable(testmain2
+            "testmain.cpp" "imageTests.cpp"
+            ${EXAMPLE_TESTS} ${PAINT3D_TESTS}
+            "basic.cpp" "string.cpp")
         add_dependencies(testmain2 imageSynth2)
-        target_link_libraries(testmain2 SeExpr2 gtest ${PNG_LIBRARIES})
-        install(TARGETS testmain2 DESTINATION share/test/SeExpr2)
-        install(PROGRAMS imagediff.py DESTINATION share/test/SeExpr2)
+        target_link_libraries(testmain2 SeExpr2 ${GTEST_LIBRARIES} ${PNG_LIBRARIES})
+        install(TARGETS testmain2 DESTINATION ${TEST_DEST})
+        install(PROGRAMS imagediff.py DESTINATION ${TEST_DEST})
         add_test(NAME basic COMMAND testmain2 --gtest_filter=BasicTests.*)
     else()
         message(STATUS "Couldn't find PNG -- not doing tests")
@@ -77,16 +82,21 @@ else()
 endif()
 
 add_test(NAME imageTestsReport
-         COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/imageTestsReportNew.py runall)
+         COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/imageTestsReportNew.py runall)
+
+add_test(NAME basicPython
+         COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/basicPython.py)
 
 add_executable(dirtSimple "dirtSimple.cpp")
 target_link_libraries(dirtSimple SeExpr2 ${PNG_LIBRARIES})
-install(TARGETS dirtSimple DESTINATION bin)
+install(TARGETS dirtSimple DESTINATION ${TEST_DEST})
+add_test(NAME dirtSimple COMMAND dirtSimple)
 
 add_executable(BlockTests "BlockTests.cpp")
 target_link_libraries(BlockTests SeExpr2 ${PNG_LIBRARIES})
-install(TARGETS BlockTests DESTINATION bin)
+install(TARGETS BlockTests DESTINATION ${TEST_DEST})
+add_test(NAME BlockTests COMMAND BlockTests)
 
 add_executable(VarBlockExample VarBlockExample.cpp)
 target_link_libraries(VarBlockExample SeExpr2)
-install(TARGETS VarBlockExample DESTINATION bin)
+install(TARGETS VarBlockExample DESTINATION ${TEST_DEST})

@@ -200,6 +200,11 @@ if (Qt5_FOUND OR QT4_FOUND)
 
         # No prefix on python module name
         set_target_properties(expreditor2 PROPERTIES PREFIX "")
+        # Python modules require a ".so" suffix on macOS
+        if (APPLE)
+            set_target_properties(expreditor2 PROPERTIES SUFFIX ".so")
+        endif()
+
         install(TARGETS expreditor2 DESTINATION ${CMAKE_INSTALL_PYTHON})
         install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
                 DESTINATION ${CMAKE_INSTALL_PYTHON})

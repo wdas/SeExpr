@@ -22,15 +22,6 @@ if (USE_PYTHON)
             set(CMAKE_LINK_FLAGS "${CMAKE_CXX_FLAGS} ${CUSTOM_PYTHON_FRAMEWORK}")
         #endif()
     else()
-        IF (NOT DEFINED PYTHON_VERSION)
-            execute_process(
-                COMMAND
-                python -c "import sys; print('%s.%s' % sys.version_info[:2])"
-                OUTPUT_VARIABLE PYTHON_VERSION
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-        endif()
-        message(STATUS "PYTHON_VERSION = ${PYTHON_VERSION}")
-
         if (NOT DEFINED PYTHON_INCLUDE_DIR)
             execute_process(
                 COMMAND
@@ -69,7 +60,7 @@ if (USE_PYTHON)
 
     endif()
 
-    set(PYTHON_DEST "${CMAKE_INSTALL_LIBDIR}/python${PYTHON_VERSION}/site-packages/SeExprPy")
+    set(PYTHON_DEST "${CMAKE_INSTALL_LIBDIR}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages/SeExprPy")
     message(STATUS "PYTHON_DEST = ${PYTHON_DEST}")
 
     if (NOT DEFINED BOOST_INCLUDE_DIR)
@@ -87,13 +78,13 @@ if (USE_PYTHON)
     include_directories(../SeExpr2/parser)
     add_library(core SHARED SeExprPy.cpp ../SeExpr2/parser/SeExprParse.cpp ../SeExpr2/parser/SeExprLex.cpp)
 
-    if (APPLE)
-        # TODO: figure out how to get this to work
-    else()
-        target_link_libraries(core ${PYTHON_LIBRARIES})
-    endif()
+    target_link_libraries(core ${PYTHON_LIBRARIES})
     target_link_libraries(core ${BOOST_PYTHON_LIBNAME})
     set_target_properties(core PROPERTIES PREFIX "")
+    # Python modules require a ".so" suffix on macOS
+    if (APPLE)
+        set_target_properties(core PROPERTIES SUFFIX ".so")
+    endif()
 
     install(TARGETS core DESTINATION ${PYTHON_DEST})
     install(FILES utils.py DESTINATION ${PYTHON_DEST})

@@ -43,7 +43,7 @@ all: $(BUILD)
 install: all
 	$(MAKE) -C $(BUILD) $@
 
-test: all
+test: install
 	$(MAKE) -C $(BUILD) $@
 
 clean:
