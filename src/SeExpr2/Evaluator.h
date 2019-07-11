@@ -93,7 +93,7 @@ class LLVMEvaluator {
     }
 
     void debugPrint() {
-        // TheModule->dump();
+        // TheModule->print(llvm::errs(), nullptr);
     }
 
     bool prepLLVM(ExprNode *parseTree, ExprType desiredReturnType) {
@@ -295,14 +295,14 @@ class LLVMEvaluator {
         if (Expression::debugging) {
             #ifdef DEBUG
             std::cerr << "Pre verified LLVM byte code " << std::endl;
-            TheModule->dump();
+            TheModule->print(llvm::errs(), nullptr);
             #endif
         }
 
         // TODO: Find out if there is a new way to veirfy
         // if (verifyModule(*TheModule)) {
         //     std::cerr << "Logic error in code generation of LLVM alert developers" << std::endl;
-        //     TheModule->dump();
+        //     TheModule->print(llvm::errs(), nullptr);
         // }
         Module *altModule = TheModule.get();
         std::string ErrStr;
@@ -370,7 +370,7 @@ class LLVMEvaluator {
         if (Expression::debugging) {
             #ifdef DEBUG
             std::cerr << "Pre verified LLVM byte code " << std::endl;
-            altModule->dump();
+            altModule->print(llvm::errs(), nullptr);
             #endif
         }
 
