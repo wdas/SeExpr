@@ -16,7 +16,9 @@
 */
 
 #include <iostream>
+#ifdef __SSE4_1__
 #include <smmintrin.h>
+#endif
 #include "ExprBuiltins.h"
 
 namespace {
@@ -25,11 +27,16 @@ namespace {
 #include "Noise.h"
 namespace SeExpr2 {
 
-inline double floorSSE(double val) { return _mm_cvtsd_f64(_mm_floor_sd(_mm_set_sd(0.0), _mm_set_sd(val))); }
+#ifdef __SSE4_1__
+inline double floorSSE(double val) { return _mm_floor_sd(_mm_set_sd(0.0), _mm_set_sd(val))[0]; }
 
 inline double roundSSE(double val) {
-    return _mm_cvtsd_f64(_mm_round_sd(_mm_set_sd(0.0), _mm_set_sd(val), _MM_FROUND_TO_NEAREST_INT));
+    return _mm_round_sd(_mm_set_sd(0.0), _mm_set_sd(val), _MM_FROUND_TO_NEAREST_INT)[0];
 }
+#else
+#define floorSSE floor
+#define roundSSE round
+#endif
 
 //! This is the Quintic interpolant from Perlin's Improved Noise Paper
 double s_curve(double t) { return t * t * t * (t * (6 * t - 15) + 10); }
