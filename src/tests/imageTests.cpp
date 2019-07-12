@@ -23,8 +23,7 @@
 #include <cstring>
 #include <fstream>
 #include <assert.h>
-#include <dirent.h>
-//#include <gtest/pcrecpp.h>
+#include <sys/stat.h>
 
 #include <png.h>
 
@@ -37,6 +36,7 @@
 #include <SeExpr2/ExprFuncX.h>
 #include <SeExpr2/Platform.h>  // performance timing
 #include <memory>
+#include <vector>
 
 #include <gtest/gtest.h>
 
@@ -310,11 +310,11 @@ bool TestImage::writePNGImage(const char* imageFile) {
                      PNG_INTERLACE_NONE,
                      PNG_COMPRESSION_TYPE_DEFAULT,
                      PNG_FILTER_TYPE_DEFAULT);
-        const unsigned char* ptrs[_height];
+        std::vector<unsigned char *> ptrs(_height);
         for (int i = 0; i < _height; i++) {
             ptrs[i] = &_image[_width * i * 4];
         }
-        png_set_rows(png_ptr, info_ptr, (png_byte**)ptrs);
+        png_set_rows(png_ptr, info_ptr, (png_byte**)&ptrs[0]);
         png_write_png(png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, 0);
 
         fclose(fp);
@@ -448,13 +448,22 @@ void evalExpressionFile(const char* filepath) {
 
         // make outDir if it doesn't already exist
         std::string outDir("./build/images/");
-#include <sys/stat.h>
         struct stat info;
         if (stat(outDir.c_str(), &info) != 0) {
+#if defined(_MSC_VER)
+            int status = mkdir(outDir.c_str());
+#else
             int status = mkdir(outDir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+#endif
             ASSERT_EQ(status, 0) << "Failure to mkdir: " << outDir.c_str();
         }
+#if defined(_MSC_VER)
+        char basename[256];
+        _splitpath(filepath, nullptr, nullptr, basename, nullptr);
+        std::string outFile(outDir + basename + ".png");
+#else
         std::string outFile(outDir + basename(const_cast<char*>(filepath)) + ".png");
+#endif
         _testImage->writePNGImage(outFile.c_str());
     }
 }
