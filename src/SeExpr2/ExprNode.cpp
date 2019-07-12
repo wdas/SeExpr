@@ -27,6 +27,7 @@
 #include "ExprNode.h"
 #include "ExprFunc.h"
 #include "VarBlock.h"
+#include "StringUtils.h"
 
 // TODO: add and other binary op demote to scalar if wantScalar
 // TODO: logical operations like foo<bar should they do vector returns... right now no... implicit demote
@@ -521,33 +522,7 @@ ExprType ExprNumNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
     return _type;
 }
 
-ExprStrNode::ExprStrNode(const Expression* expr, const char* str)  : ExprNode(expr), _str(str) {
-    // unescape a few common special characters
-    int index = 0;
-    bool special = false;
-    for (char c : _str) {
-        if (c == '\\') {
-            special = true;
-        } else {
-            if (special == true) {
-                special = false;
-                switch (c) {
-                    case 'n':   _str[index++] = '\n'; break;
-                    case 'r':   _str[index++] = '\r'; break;
-                    case 't':   _str[index++] = '\t'; break;
-                    case '\\':  _str[index++] = '\\'; break;
-                    case '"':   _str[index++] = '\"'; break;
-                    default:
-                        // leave the escape sequence as it was. We should probably issue a warning or something though.
-                        _str[index++] = '\\';
-                        _str[index++] = c;
-                }
-            } else {
-                _str[index++] = c;
-            }
-        }
-    }
-    _str.resize(index);
+ExprStrNode::ExprStrNode(const Expression* expr, const char* str)  : ExprNode(expr), _str(unescapeString(str)) {
 }
 
 ExprType ExprStrNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder) {
