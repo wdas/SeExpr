@@ -22,6 +22,7 @@
 #include "ExprNode.h"
 #include "ExprFunc.h"
 #include "VarBlock.h"
+#include "StringUtils.h"
 #include <array>
 using namespace llvm;
 using namespace SeExpr2;
@@ -1010,7 +1011,9 @@ LLVM_VALUE ExprPrototypeNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     return F;
 }
 
-LLVM_VALUE ExprStrNode::codegen(LLVM_BUILDER Builder) LLVM_BODY { return Builder.CreateGlobalStringPtr(_str); }
+LLVM_VALUE ExprStrNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
+    return Builder.CreateGlobalStringPtr(unescapeString(_str));
+}
 
 LLVM_VALUE ExprSubscriptNode::codegen(LLVM_BUILDER Builder) LLVM_BODY {
     LLVM_VALUE op1 = child(0)->codegen(Builder);

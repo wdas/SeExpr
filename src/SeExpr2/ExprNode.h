@@ -501,7 +501,7 @@ class ExprNumNode : public ExprNode {
 /// Node that stores a string
 class ExprStrNode : public ExprNode {
   public:
-    ExprStrNode(const Expression* expr, const char* str) : ExprNode(expr), _str(str) {}
+    ExprStrNode(const Expression* expr, const char* str);
 
     virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
