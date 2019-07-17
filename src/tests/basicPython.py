@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 import sys
 import unittest
-
-import SeExprPy
+try:
+    import SeExprPy
+except ImportError:
+    sys.stderr.write(
+        'WARNING: SeExprPy is not importable: Python support is disabled\n')
+    sys.exit(0)
 
 
 class SeExprTestCase(unittest.TestCase):
