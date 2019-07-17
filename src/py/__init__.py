@@ -28,6 +28,8 @@ help(SeExprPy.utils)
 
 from __future__ import absolute_import
 
-from .core import *
-from .utils import *
+from .core import AST as _AST, ASTHandle, ASTType
+from .utils import (
+    getComment, Edits, traverseCallback, traverseFilter, printTree
+)
 

@@ -94,6 +94,7 @@ class Edits:
             s=s[:r[0]]+self.formatNewValue(newVal)+s[r[1]:]
         return s
 
+
 def printTreeHelper(x,indent,mask,sorig):
     "Helper for printTree() (internal function)"
     children=x.children()
@@ -114,6 +115,7 @@ def printTreeHelper(x,indent,mask,sorig):
         isEnd=(i==len(children)-1)
         newMask=mask | (isEnd << indent)
         printTreeHelper(child,indent+1,newMask,sorig)
+
 def printTree(x,sorig):
     "Print the parse tree of an ASTHandle"
     printTreeHelper(x.root(),1,1,sorig)
