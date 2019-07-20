@@ -13,7 +13,7 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
-include_directories(${CMAKE_BINARY_DIR}/src/SeExpr)
+include_directories(${CMAKE_BINARY_DIR}/src/SeExpr2)
 
 add_executable(asciiGraph2 "asciiGraph.cpp")
 target_link_libraries(asciiGraph2 SeExpr2)

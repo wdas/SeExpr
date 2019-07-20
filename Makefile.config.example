@@ -5,10 +5,18 @@ uname_S := $(shell uname -s)
 # Example Linux config
 ifeq ($(uname_S),Linux)
 
-    EXTRA_CMAKE_ARGS += -DGTEST_DIR=/usr
+    ifdef RP_gtest
+        EXTRA_CMAKE_ARGS += -DGTEST_DIR=$(RP_gtest)
+    else
+        EXTRA_CMAKE_ARGS += -DGTEST_DIR=/usr
+    endif
 
-    ifdef RP_animlib
+    # only build animlib if soure directory exists and env var set
+    CE_dir = $(wildcard "src/ui/CE")
+    ifneq ("$(CE_dir)", "")
+	ifdef RP_animlib
         EXTRA_CMAKE_ARGS += -DANIMLIB_DIR=$(RP_animlib)
+    endif
     endif
 
     ifdef RP_boost_disney
@@ -37,6 +45,17 @@ ifeq ($(uname_S),Linux)
         EXTRA_CMAKE_ARGS += -DQDGUI_DIR=$(RP_qdgui)
     endif
 
+    ifdef RP_qt5
+        EXTRA_CMAKE_ARGS += -DENABLE_QT5=true
+    endif
+
+    ifdef RP_pyqt5
+        EXTRA_CMAKE_ARGS += -DPYQT_SIP_DIR=$(RP_pyqt5)/share/sip/PyQt5
+    endif
+
+    ifdef RP_pyqt4
+        EXTRA_CMAKE_ARGS += -DPYQT_SIP_DIR=$(RP_pyqt4)/share/sip
+    endif
 endif
 
 

@@ -76,13 +76,12 @@ void ExprTreeItem::clear()
 
 void ExprTreeItem::populate(std::atomic<bool>& cancelRequested)
 {
-    if (populated)
+    if (populated.exchange(true))
         return;
 
     if (cancelRequested)
         return;
 
-    populated = true;
     QFileInfo info(path);
     if (info.isDir()) {
         QFileInfoList infos = QDir(path).entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);

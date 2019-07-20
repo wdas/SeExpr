@@ -26,7 +26,7 @@
 #include <QLineEdit>
 
 #include "ExprGrapher2d.h"
-#include "../utils/concurrent-for.h"
+#include "utils/concurrent-for.h"
 
 using namespace SeExpr2;
 

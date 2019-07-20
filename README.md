@@ -1,4 +1,5 @@
 ===================================================================
+
   For info on using new v3 features and porting your code, see:
 
   http://wdas.github.io/SeExpr/doxygen/html/SeExpr_FAQ.html
@@ -42,7 +43,7 @@ http://wdas.github.io/SeExpr/doxygen/v1 (for older documentation)
 
 ```
 src/
-   SeExpr/   Library code
+   SeExpr2/  Library code
    ui/       User Interface components for editing
    demos/    Demo Applications
    tests/    Regression Tests
@@ -51,9 +52,12 @@ src/
 
 ## SeExpr Developers
 
+ * David Aguilar
  * Janet Berlin
  * Brent Burley
  * Lawrence Chai
+ * Noah Kagan
+ * Jared Reisweber
  * Andrew Selle
  * Dan Teece
  * Tom Thompson

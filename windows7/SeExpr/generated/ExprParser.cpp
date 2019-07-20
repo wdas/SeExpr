@@ -1030,7 +1030,6 @@ while (SeExprYYID (0))
 
 /* Print *SeExprYYLOCP on SeExprYYO.  Private, do not rely on its existence. */
 
-__attribute__((__unused__))
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static unsigned

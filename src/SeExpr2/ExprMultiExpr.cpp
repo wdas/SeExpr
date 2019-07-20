@@ -205,7 +205,7 @@ ExprHandle Expressions::addExpression(const std::string& varName, ExprType seTy,
 VariableSetHandle Expressions::getLoopVarSetHandle(VariableHandle vh)
 {
     GlobalVal* thisvar = *vh;
-    unsigned initSize = thisvar->users.size();
+    unsigned initSize = static_cast<unsigned>(thisvar->users.size());
     if (!initSize)
         return AllExternalVars.end();
 

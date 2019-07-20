@@ -20,7 +20,7 @@
 
 #include <QApplication>
 #include <QStyleFactory>
-#include <ExprDialog.h>
+#include <SeExpr2/UI/ExprDialog.h>
 #include "common/palette.h"
 
 using namespace SeExpr2;

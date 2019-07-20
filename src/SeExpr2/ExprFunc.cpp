@@ -128,8 +128,7 @@ void ExprFunc::cleanup()
     SeExprInternal2::AutoMutex locker(mutex);
     delete Functions;
     Functions = nullptr;
-#ifdef SEEXPR_WIN32
-#else
+#ifndef SEEXPR_WIN32
     for (size_t i = 0; i < dynlib.size(); i++) {
         dlclose(dynlib[i]);
     }

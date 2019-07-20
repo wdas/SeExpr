@@ -15,21 +15,21 @@
 
 find_package(Doxygen)
 if (DOXYGEN_FOUND AND NOT WIN32)
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
-  file(GLOB (DOCUMENTED_FILES ../lib/*.h))
+    configure_file("Doxyfile.in" "Doxyfile" @ONLY)
+    file(GLOB (DOCUMENTED_FILES ../SeExpr2/*.h))
 
-  add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/doxygen.txt
-    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile >doxygen.txt
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
+    set(DOXYGEN ${DOXYGEN_EXECUTABLE})
+    add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/doxygen.txt
+        COMMAND ${DOXYGEN} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile >doxygen.txt
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        DEPENDS Doxyfile.in)
 
-  add_custom_target(doc ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/doxygen.txt)
+    add_custom_target(doc ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/doxygen.txt)
 
-  install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html/ DESTINATION share/doc/SeExpr2)
-  install(FILES userdoc.txt DESTINATION share/doc/SeExpr2/ RENAME SeExpressions.html)
+    install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/html/" DESTINATION ${DOC_DIR})
+    install(FILES userdoc.txt DESTINATION ${DOC_DIR} RENAME SeExpressions.html)
 
-  file(GLOB "*.png" PNG_FILES)
-  install(FILES ${PNG_FILES} DESTINATION share/doc/SeExpr2)
-
+    file(GLOB "*.png" PNG_FILES)
+    install(FILES ${PNG_FILES} DESTINATION ${DOC_DIR})
 endif()

@@ -34,10 +34,16 @@
 #endif
 #define _CRT_NONSTDC_NO_DEPRECATE 1
 #define _CRT_SECURE_NO_DEPRECATE 1
+#if !defined(NOMINMAX)
 #define NOMINMAX 1
+#endif
 
-// windows - defined for both Win32 and Win64
-#include <Windows.h>
+// note: because there are some conflicts preventing the use of
+// windows.h and COFF.h (one of LLVM include files) in the same
+// compilation unit (https://groups.google.com/forum/#!topic/llvm-dev/6n5Q0pFdaSA)
+// do NOT include windows.h here. The Windows implementation is
+// done on the Platform.cpp file, using opaque types.
+
 #include <malloc.h>
 #include <io.h>
 #include <tchar.h>
@@ -51,6 +57,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <inttypes.h>
+#include <sys/time.h>
 // OS for spinlock
 #ifdef __APPLE__
 #include <libkern/OSAtomic.h>
@@ -62,7 +69,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <assert.h>
-#include <sys/time.h>
 
 // missing functions on Windows
 #ifdef WINDOWS
@@ -80,8 +86,12 @@ inline double log2(double x)
 typedef unsigned int uint32_t;
 #define M_E (2.7182818284590452354)
 #define M_PI (3.141592653589793238)
+#if !defined(UINT32_MAX)
 #define UINT32_MAX (0xffffffff)
+#endif
+#if !defined(UINT32_MAX)
 #define UINT32_MIN (0)
+#endif
 #else
 typedef off_t FilePos;
 #endif
@@ -136,6 +146,10 @@ class Timer {
     Timer() : started(false)
     {
     }
+    __int64 time();
+    __int64 ticksPerSeconds;
+    __int64 startTime, stopTime;
+    bool started;
 
     void start()
     {
@@ -157,7 +171,7 @@ class PrintTiming {
 
     ~PrintTiming()
     {
-        std::cout << _s << " (" << _timer.elapsedTime() << " ms)" << std::endl;
+        std::cout << _s.c_str() << " (" << _timer.elapsedTime() << " ms)" << std::endl;
     }
 
   private:
@@ -192,9 +206,8 @@ class _Mutex {
     {
         ReleaseMutex(_mutex);
     }
-
   private:
-    HANDLE _mutex;
+    void* _mutex;
 };
 
 class _SpinLock {
@@ -215,9 +228,8 @@ class _SpinLock {
     {
         LeaveCriticalSection(&_spinlock);
     }
-
   private:
-    CRITICAL_SECTION _spinlock;
+    void* _spinlock;
 };
 
 #else

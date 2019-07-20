@@ -14,20 +14,24 @@
  You may obtain a copy of the License at
  http://www.apache.org/licenses/LICENSE-2.0
 */
+#ifndef ExprParser_h
+#define ExprParser_h
 
-#include <stdio.h>
-#include <gtest/gtest.h>
-#include <SeExpr2/ExprFunc.h>
+#ifndef MAKEDEPEND
+#include <string>
+#endif
 
-using ::testing::InitGoogleTest;
-
-int main(int argc, char **argv) {
-    int result = 0;
-
-    {
-        InitGoogleTest(&argc, argv);
-        result = RUN_ALL_TESTS();
-        SeExpr2::ExprFunc::cleanup();
-    }
-    return result;
+namespace SeExpr2 {
+class ExprNode;
+class Expression;
+bool ExprParse(SeExpr2::ExprNode*& parseTree,
+               std::string& error,
+               int& errorStart,
+               int& errorEnd,
+               std::vector<std::pair<int, int> >& _comments,
+               const SeExpr2::Expression* expr,
+               const char* str,
+               bool wantVec = true);
 }
+
+#endif

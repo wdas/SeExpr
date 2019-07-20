@@ -18,6 +18,7 @@
 #ifndef MAKEDEPEND
 #include <math.h>
 #include <sstream>
+#include <algorithm>
 #endif
 #include "Vec.h"
 #include "ExprType.h"
@@ -500,12 +501,13 @@ ExprType ExprBinaryOpNode::prep(bool scalarWanted, ExprVarEnvBuilder& envBuilder
 
     bool error = false;
 
+    // prep children and get their types
     firstType = child(0)->prep(false, envBuilder);
-    checkIsFP(firstType, error);
     secondType = child(1)->prep(false, envBuilder);
-    checkIsFP(secondType, error);
-    checkTypesCompatible(firstType, secondType, error);
 
+    // check compatibility and get return type
+    // TODO: handle string + fp or fp + string, the same as in Python or equivalent
+    checkTypesCompatible(firstType, secondType, error);
     if (error)
         setType(ExprType().Error());
     else if (scalarWanted)
@@ -590,7 +592,7 @@ ExprType ExprFuncNode::prep(bool wantScalar, ExprVarEnvBuilder& envBuilder)
 
         // check that function exists and that the function has the right number of arguments
         if (checkCondition(_func, "Function " + _name + " has no definition", error) &&
-            checkCondition(nargs >= _func->minArgs(), "Too few args for function" + _name, error) &&
+            checkCondition(nargs >= _func->minArgs(), "Too few args for function " + _name, error) &&
             checkCondition(nargs <= _func->maxArgs() || _func->maxArgs() < 0, "Too many args for function " + _name,
                            error)) {
             const ExprFuncX* funcx = _func->funcx();

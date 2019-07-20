@@ -331,7 +331,7 @@ Vec3d midhsi(int n, const Vec3d* args)
 
         // scale hsi values according to mask (both directions)
         h *= m;
-        float absm = fabs(m);
+        float absm = fabs(static_cast<float>(m));
         s = s * absm + 1 - absm;
         i = i * absm + 1 - absm;
         if (m < 0) {
@@ -780,7 +780,7 @@ double fbm4(int n, const Vec3d* args)
     case 3:
         octaves = int(clamp(args[2][0], 1, 8));
     case 2:
-        time = args[1][0];
+        time = static_cast<float>(args[1][0]);
     case 1:
         p = args[0];
     }
@@ -816,7 +816,7 @@ Vec3d vfbm4(int n, const Vec3d* args)
     case 3:
         octaves = int(clamp(args[2][0], 1, 8));
     case 2:
-        time = args[1][0];
+        time = static_cast<float>(args[1][0]);
     case 1:
         p = args[0];
     }
@@ -1079,7 +1079,7 @@ Vec3d voronoiUtil(VoronoiPointData& data, int n, const Vec3d* args, bool color)
     case 4:
         return (f2 - f1) * col;
     case 5: {
-        float scalefactor = (pos2 - pos1).length() / ((pos1 - p).length() + (pos2 - p).length());
+        float scalefactor = static_cast<float>((pos2 - pos1).length() / ((pos1 - p).length() + (pos2 - p).length()));
         return smoothstep(f2 - f1, 0, 0.1 * scalefactor) * col;
     }
     }
@@ -1172,7 +1172,7 @@ class CachedVoronoiFunc : public ExprFuncSimple {
     {
     }
 
-    virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const
+    virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const override
     {
         // check number of arguments
         int nargs = node->numChildren();
@@ -1188,7 +1188,12 @@ class CachedVoronoiFunc : public ExprFuncSimple {
         return valid ? ExprType().FP(3).Varying() : ExprType().Error();
     }
 
-    virtual void eval(ArgHandle& args)
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* /*node*/, ArgHandle& /*args*/) const override
+    {
+        return new VoronoiPointData();
+    }
+
+    virtual void eval(ArgHandle& args) override
     {
         VoronoiPointData data;
         int nargs = args.nargs();
@@ -1319,7 +1324,7 @@ Vec3d rotate(int n, const Vec3d* args)
         return 0.0;
     const Vec3d& P = args[0];
     const Vec3d& axis = args[1];
-    float angle = args[2][0];
+    float angle = static_cast<float>(args[2][0]);
     double len = axis.length();
     if (!len)
         return P;
@@ -1431,7 +1436,7 @@ double choose(int n, double* params)
         return 0;
     double key = params[0];
     // NaN protection
-    if (key != key)
+    if (std::isnan(key))
         return 0;
     int nvals = n - 1;
     return params[1 + int(clamp(key * nvals, 0, nvals - 1))];
@@ -1446,7 +1451,7 @@ double chooseIndex(int n, double* params)
         return 0;
     int key = params[0];
     // NaN protection
-    if (key != key)
+    if (std::isnan(key))
         return 0;
     int nvals = n - 1;
     return params[int(cycle(key, 1, nvals))];
@@ -1829,17 +1834,17 @@ class PrintFuncX : public ExprFuncSimple {
                 delete data;
                 assert(false);
             } else if (format[percentStart + 1] == '%') {
-                searchStart = percentStart + 2;
+                searchStart = static_cast<int>(percentStart + 2);
                 continue;
             } else if (format[percentStart + 1] == 'v' || format[percentStart + 1] == 'f') {
                 char c = format[percentStart + 1];
                 int code = (c == 'v') ? -1 : -2;
                 needed++;
                 if (bakeStart != percentStart)
-                    ranges.push_back(std::pair<int, int>(bakeStart, percentStart));
+                    ranges.push_back(std::pair<int, int>(bakeStart, static_cast<int>(percentStart)));
                 ranges.push_back(std::pair<int, int>(code, code));
                 items++;
-                searchStart = percentStart + 2;
+                searchStart = static_cast<int>(percentStart + 2);
                 bakeStart = searchStart;
             } else {
                 delete data;
@@ -1848,7 +1853,7 @@ class PrintFuncX : public ExprFuncSimple {
             }
         }
         if (bakeStart != format.length())
-            ranges.push_back(std::pair<int, int>(bakeStart, format.length()));
+            ranges.push_back(std::pair<int, int>(bakeStart, static_cast<int>(format.length())));
 
         if (items != args.nargs() - 1) {
             // node->addError("Wrong number of arguments for format string");

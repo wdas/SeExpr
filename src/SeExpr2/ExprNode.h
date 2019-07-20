@@ -126,7 +126,7 @@ class ExprNode {
     /// Number of children
     int numChildren() const
     {
-        return _children.size();
+        return static_cast<int>(_children.size());
     }
 
     /// Get 0 indexed child
@@ -554,15 +554,16 @@ class ExprCompareNode : public ExprNode {
 /// Node that implements an binary operator
 class ExprBinaryOpNode : public ExprNode {
   public:
-    ExprBinaryOpNode(const Expression* expr, ExprNode* a, ExprNode* b, char op) : ExprNode(expr, a, b), _op(op)
+    ExprBinaryOpNode(const Expression* expr, ExprNode* a, ExprNode* b, char op) : ExprNode(expr, a, b), _op(op), _out(nullptr)
     {
     }
-
+    virtual ~ExprBinaryOpNode() { free(_out); }
     virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
     virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;
 
     char _op;
+    char* _out;
 };
 
 /// Node that references a variable
@@ -705,9 +706,13 @@ class ExprFuncNode : public ExprNode {
 
     //! base class for custom instance data
     struct Data {
+        Data(bool cleanup = false) : _cleanup(cleanup)
+        {
+        }
         virtual ~Data()
         {
         }
+        bool _cleanup;
     };
 
     static ExprFuncNode::Data* NoData()

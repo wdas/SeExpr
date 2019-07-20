@@ -57,7 +57,7 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType)
             Type* ParamTys[2] = {i8PtrTy, doublePtrTy};
             FunctionType* FT = FunctionType::get(Type::getVoidTy(*_llvmContext), ParamTys, false);
             SeExpr2LLVMEvalVarRefFunc =
-                Function::Create(FT, GlobalValue::ExternalLinkage, "SeExpr2LLVMEvalVarRef", TheModule.get());
+                Function::Create(FT, GlobalValue::ExternalLinkage, "SeExpr2LLVMEvalFPVarRef", TheModule.get());
         }
     }
 
@@ -219,7 +219,7 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType)
     altModule->setDataLayout(TheExecutionEngine->getDataLayout());
 
     // Add bindings to C linkage helper functions
-    TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalVarRefFunc, (void*)SeExpr2LLVMEvalVarRef);
+    TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalVarRefFunc, (void*)SeExpr2LLVMEvalFPVarRef);
     TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalCustomFunctionFunc, (void*)SeExpr2LLVMEvalCustomFunction);
 
     // [verify]

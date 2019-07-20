@@ -13,10 +13,11 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
-if(EXISTS ${GTEST_DIR}/include)
+include_directories(${CMAKE_BINARY_DIR}/src/SeExpr2)
+
+if (GTEST_DIR)
     # Google test framework
-    include_directories(BEFORE ${GTEST_DIR}/include)
-    include_directories(${CMAKE_BINARY_DIR}/src/SeExpr)
+    include_directories(AFTER ${GTEST_DIR}/include)
     link_directories(${GTEST_DIR}/${CMAKE_INSTALL_LIBDIR})
 
     # Uncomment below to print performance stats
@@ -24,10 +25,11 @@ if(EXISTS ${GTEST_DIR}/include)
 
     if (DEFINED PNG_DIR)
         message(STATUS "PNG_DIR = ${PNG_DIR}")
-        include_directories(SYSTEM ${PNG_DIR}/include)
-        find_library(PNG_LIBRARIES png PATHS ${PNG_DIR}/${CMAKE_INSTALL_LIBDIR}
-                     NO_DEFAULT_PATH)
+        include_directories(${PNG_DIR}/include)
+        find_library(PNG_LIBRARIES png PATHS ${PNG_DIR}/${CMAKE_INSTALL_LIBDIR})
         set(PNG_FOUND 1)
+    else()
+        find_package(PNG QUIET)
     endif()
 
     if (PNG_FOUND)
@@ -61,22 +63,21 @@ if(EXISTS ${GTEST_DIR}/include)
                 DEPENDS ${GENERATE_SCRIPT} ${PAINT3D_DIR})
         endif()
 
-        add_executable(testmain2 "testmain.cpp" "imageTests.cpp" ${EXAMPLE_TESTS} ${PAINT3D_TESTS} "basic.cpp")
-        add_dependencies(testmain2 imageSynth2)
+        add_executable(testmain2 "testmain.cpp" "imageTests.cpp" ${EXAMPLE_TESTS} ${PAINT3D_TESTS} "basic.cpp" "string.cpp")
         target_link_libraries(testmain2 SeExpr2 gtest ${PNG_LIBRARIES})
         install(TARGETS testmain2 DESTINATION share/test/SeExpr2)
         install(PROGRAMS imagediff.py DESTINATION share/test/SeExpr2)
-
-        add_test(NAME Interpreter COMMAND testmain2 --gtest_filter=BasicTests.*)
-        set_property(TEST Interpreter PROPERTY ENVIRONMENT "SE_EXPR_EVAL=INTERPRETER")
-        add_test(NAME LLVM COMMAND testmain2 --gtest_filter=BasicTests.*)
-        set_property(TEST LLVM PROPERTY ENVIRONMENT "SE_EXPR_EVAL=LLVM")
+        add_test(NAME basic COMMAND testmain2 --gtest_filter=BasicTests.*)
+        add_test(NAME strings COMMAND testmain2 --gtest_filter=StringTests.*)
     else()
         message(STATUS "Couldn't find PNG -- not doing tests")
     endif()
 else()
     message(STATUS "Couldn't find gtest framework -- not building main tests")
 endif()
+
+add_test(NAME imageTestsReport
+         COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/imageTestsReportNew.py runall)
 
 add_executable(dirtSimple "dirtSimple.cpp")
 target_link_libraries(dirtSimple SeExpr2 ${PNG_LIBRARIES})

@@ -16,8 +16,8 @@
 */
 
 #include <SeExpr2/Expression.h>
+#include <SeExpr2/Vec.h>
 
-#include <Vec.h>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>

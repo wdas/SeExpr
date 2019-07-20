@@ -50,7 +50,8 @@ class VarBlockCreator;
 class VarBlock {
   private:
     /// Allocate an VarBlock
-    VarBlock(const VarBlockCreator* creator, int size) : indirectIndex(0), _creator(creator)
+    VarBlock(const VarBlockCreator* creator, int size, bool makeThreadSafe)
+        : indirectIndex(0), threadSafe(makeThreadSafe), _creator(creator)
     {
         _dataPtrs.resize(size, 0);
     }
@@ -59,9 +60,13 @@ class VarBlock {
     friend class VarBlockCreator;
 
     /// Move semantics is the only allowed way to change the structure
-    VarBlock(VarBlock&& other)
-        : indirectIndex(std::move(other.indirectIndex)), _creator(other._creator), _dataPtrs(std::move(other._dataPtrs))
-    {
+    VarBlock(VarBlock&& other) {
+        threadSafe = other.threadSafe;
+        d = std::move(other.d);
+        s = std::move(other.s);
+        indirectIndex = other.indirectIndex;
+        _dataPtrs = std::move(other._dataPtrs);
+        _creator = other._creator;
     }
 
     virtual ~VarBlock()
@@ -94,6 +99,15 @@ class VarBlock {
     /// indirect index to add to pointer based data
     // i.e.  _dataPtrs[someAttributeOffset][indirectIndex]
     int indirectIndex;
+
+    /// if true, interpreter's data will be copied to this instance before evaluation.
+    bool threadSafe;
+
+    /// copy of Interpreter's double data
+    std::vector<double> d;
+
+    /// copy of Interpreter's str data
+    std::vector<char*> s;
 
     /// Raw data of the data block pointer (used by compiler)
     const char** data()
@@ -442,9 +456,16 @@ class VarBlockCreator {
     }
 
     /// Get an evaluation handle (one needed per thread)
-    VarBlock create() const
-    {
-        return VarBlock(this, _offset);
+    /// \param makeThreadSafe
+    ///     If true, right before evaluating the expression, all data used
+    ///     by the interpreter will be copied to the var block, to make the
+    ///     evaluation thread safe (assuming there's one var block instead
+    ///     per thread)
+    ///     If false or not specified, the old behavior occurs (var block
+    ///     will only hold variables sources and optionally output data,
+    ///     and the interpreter will work on its internal data)
+    VarBlock create(bool makeThreadSafe = false) {
+        return VarBlock(this, _offset, makeThreadSafe);
     }
 
     /// Resolve the variable using anything in the data block (call from resolveVar in Expr subclass)

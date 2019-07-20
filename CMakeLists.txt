@@ -14,13 +14,15 @@
 # http://www.apache.org/licenses/LICENSE-2.0
 
 ## CMake compatibility issues: don't modify this, please!
-cmake_minimum_required(VERSION 2.4.6)
+cmake_minimum_required(VERSION 3.8.0)
 
 ## project name & version
 project(SeExpr2)
-set(${PROJECT_NAME}_MAJOR_VERSION 0)
-set(${PROJECT_NAME}_MINOR_VERSION 1)
-set(${PROJECT_NAME}_PATCH_LEVEL 0)
+
+# "API" version
+set(${PROJECT_NAME}_VERSION "2.0")
+set(${PROJECT_NAME}_MAJOR_VERSION 2)
+set(${PROJECT_NAME}_MINOR_VERSION 0)
 
 enable_testing()
 
@@ -28,6 +30,8 @@ mark_as_advanced(CMAKE_BACKWARDS_COMPATIBILITY)
 
 ## allow more human readable "if then else" constructs
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
+set(CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS true)
+set(CMAKE_INSTALL_MESSAGE LAZY)
 
 ## Use verbose make file
 #set(CMAKE_VERBOSE_MAKEFILE true)
@@ -40,6 +44,8 @@ endif()
 
 # macros
 include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+include(GenerateExportHeader)
 include(src/build/macros.cmake)
 
 # Default installation prefix
@@ -69,23 +75,40 @@ endif()
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "CMAKE_INSTALL_LIBDIR = ${CMAKE_INSTALL_LIBDIR}")
 
+## Install locations
+set(DOC_DIR "share/doc/${PROJECT_NAME}")
+set(CMAKE_DIR "share/cmake/${PROJECT_NAME}")
+set(INCLUDE_DIR "include/${PROJECT_NAME}")
+
 # Configuration options
 # TODO: find GTEST and boost and python the proper ways
 set(BOOST_DIR /usr CACHE PATH "where boost is located")
-set(BOOST_PYTHON_LIBNAME boost_python CACHE STRING "what library name for boost python")
-set(GTEST_DIR /usr CACHE PATH "Where to find GTEST") # /usr/include/gtest)
-set(ENABLE_LLVM_BACKEND ON CACHE BOOL "Whether to build with LLVM backend")
-set(USE_PYTHON ON CACHE BOOL "Whether to compile python libraries")
+find_package(PythonInterp) # provides Python version check
+if(PYTHON_VERSION_MAJOR LESS 3)
+    set(BOOST_PYTHON_LIBNAME boost_python CACHE STRING "what library name for boost python")
+else()
+    # try to find boost_python3 in a way compatible with most distributions
+    find_library(BOOST_PYTHON3_LIB NAMES "boost_python3" "boost_python3${PYTHON_VERSION_MINOR}")
+    SET (BOOST_PYTHON_LIBNAME ${BOOST_PYTHON3_LIB} CACHE STRING "what library name for boost python")
+endif()
+
+set(GTEST_DIR "" CACHE STRING "Where to find GTEST")
+option(ENABLE_LLVM_BACKEND "Whether to build with LLVM backend" ON)
+option(USE_PYTHON "Whether to compile python libraries" ON)
+option(BUILD_UTILS "Whether to build the utilities" ON)
+option(BUILD_DEMOS "Whether to build the demos" ON)
+option(BUILD_DOC "Whether to build the documentation" ON)
+option(BUILD_TESTS "Whether to build the tests" ON)
 
 set(LLVM_LIB "")
 if (ENABLE_LLVM_BACKEND)
     set(LLVM_DIR /usr/share/llvm/cmake CACHE PATH "Where to search for LLVM i.e. ")
 
-    find_package(LLVM CONFIG NAMES LLVM CONFIGS LLVM-Config.cmake)
+    find_package(LLVM CONFIG NAMES LLVM CONFIGS LLVM-Config.cmake LLVMConfig.cmake)
     if (LLVM_FOUND)
         set(SEEXPR_ENABLE_LLVM_BACKEND 1)
-        message(STATUS "Using LLVM-Config.cmake in: ${LLVM_DIR}")
-        find_program(LLVM_CONFIG_EXECUTABLE NAMES llvm-config-3.8 llvm-config)
+        message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+        find_program(LLVM_CONFIG_EXECUTABLE NAMES ${LLVM_TOOLS_BINARY_DIR}/llvm-config)
 
         # Uncomment to use clang++
         #set(CMAKE_CXX_COMPILER clang++)
@@ -93,20 +116,29 @@ if (ENABLE_LLVM_BACKEND)
 
         set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${LLVM_DIR}")
         include(LLVM-Config)
+        include(LLVMConfig)
         include(HandleLLVMOptions)
 
         message(STATUS "LLVM_DEFINITIONS =" ${LLVM_DEFINITIONS})
         add_definitions(${LLVM_DEFINITIONS})
 
-        execute_process(
-            COMMAND ${LLVM_CONFIG_EXECUTABLE} --includedir
-            OUTPUT_VARIABLE LLVM_INCLUDE_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if (NOT LLVM_CONFIG_EXECUTABLE STREQUAL "LLVM_CONFIG_EXECUTABLE-NOTFOUND")
+            execute_process(
+                COMMAND ${LLVM_CONFIG_EXECUTABLE} --includedir
+                OUTPUT_VARIABLE LLVM_INCLUDE_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+        else ()
+            set(LLVM_INCLUDE_DIR ${LLVM_INCLUDE_DIRS})
+        endif ()
         message(STATUS "LLVM_INCLUDE_DIR =" ${LLVM_INCLUDE_DIR})
         include_directories(SYSTEM ${LLVM_INCLUDE_DIR})
 
-        execute_process(
-            COMMAND ${LLVM_CONFIG_EXECUTABLE} --libdir
-            OUTPUT_VARIABLE LLVM_LIBRARY_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if (NOT LLVM_CONFIG_EXECUTABLE STREQUAL "LLVM_CONFIG_EXECUTABLE-NOTFOUND")
+            execute_process(
+                COMMAND ${LLVM_CONFIG_EXECUTABLE} --libdir
+                OUTPUT_VARIABLE LLVM_LIBRARY_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+        else ()
+            set(LLVM_LIBRARY_DIR ${LLVM_LIBRARY_DIRS})
+        endif ()
         message(STATUS "LLVM_LIBRARY_DIR =" ${LLVM_LIBRARY_DIR})
         link_directories(${LLVM_LIBRARY_DIR})
 
@@ -114,30 +146,38 @@ if (ENABLE_LLVM_BACKEND)
         #llvm_map_components_to_libraries(REQ_LLVM_LIBRARIES jit native)
 
         # construct library name
-        execute_process(
-            COMMAND ${LLVM_CONFIG_EXECUTABLE} --version
-            OUTPUT_VARIABLE LLVM_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if (NOT LLVM_CONFIG_EXECUTABLE STREQUAL "LLVM_CONFIG_EXECUTABLE-NOTFOUND")
+            execute_process(
+                COMMAND ${LLVM_CONFIG_EXECUTABLE} --version
+                OUTPUT_VARIABLE LLVM_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+        else ()
+            set(LLVM_VERSION ${LLVM_PACKAGE_VERSION})
+        endif ()
         message(STATUS "LLVM_VERSION = ${LLVM_VERSION}")
 
         set(LLVM_LIB LLVM)
         message(STATUS "LLVM_LIB = ${LLVM_LIB}")
 
         if (LLVM_VERSION VERSION_LESS 3.8.0)
-            set(ENABLE_LLVM_BACKEND false)
-            set(SEEXPR_ENABLE_LLVM_BACKEND false)
+            set(ENABLE_LLVM_BACKEND off)
             message(STATUS "Not building with LLVM, version must be >= 3.8.0")
         endif()
 
     else()
          set(ENABLE_LLVM_BACKEND off)
-         set(SEEXPR_ENABLE_LLVM_BACKEND 0)
     endif()
 endif()
 
+# If LLVM is not enabled, set the SEEXPR_ENABLE_LLVM_BACKEND to 0 to fully disable
+# LLVM stuff in the ExprConfig.h sources.
+if (NOT ENABLE_LLVM_BACKEND)
+     set(SEEXPR_ENABLE_LLVM_BACKEND 0)
+endif ()
+
 ## Setup platform specific helper defines build variants
 if (WIN32)
-    include (GenerateExportHeader)
     add_definitions(-DSEEXPR_WIN32)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
@@ -245,15 +285,38 @@ set(SEEXPR_EDITOR_LIBRARIES SeExpr2Editor)
 
 # This entry is for the generated ExprConfig.h
 include_directories(BEFORE ${CMAKE_BINARY_DIR}/src/SeExpr2)
-# These entries point to the source tree for building the flex/bison parser
-include_directories(BEFORE ${CMAKE_SOURCE_DIR}/src/SeExpr2)
-include_directories(BEFORE ${CMAKE_SOURCE_DIR}/src/SeExpr2/UI)
+# This entry allows finding the source tree for headers
+include_directories(BEFORE ${CMAKE_SOURCE_DIR}/src)
 
 ## Traverse subdirectories
 add_subdirectory(src/SeExpr2)
 add_subdirectory(src/SeExpr2/UI)
 add_subdirectory(src/py)
-add_subdirectory(src/utils)
-add_subdirectory(src/demos)
-add_subdirectory(src/doc)
-add_subdirectory(src/tests)
+if (${BUILD_UTILS})
+    add_subdirectory(src/utils)
+endif ()
+if (${BUILD_DEMOS})
+    add_subdirectory(src/demos)
+endif ()
+if (${BUILD_DOC})
+    add_subdirectory(src/doc)
+endif ()
+if (${BUILD_TESTS})
+    add_subdirectory(src/tests)
+endif ()
+
+# cmake packaging -- this is done after adding subdirectories so that
+# all exported targets are found by export() below.
+configure_file("src/build/seexpr2.pc.in" "seexpr2.pc" @ONLY)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/seexpr2.pc"
+    COMPONENT devel DESTINATION share/pkgconfig)
+
+write_basic_package_version_file("seexpr2-version.cmake" VERSION ${SeExpr2_VERSION} COMPATIBILITY AnyNewerVersion)
+
+configure_package_config_file(
+    "src/build/seexpr2-config.cmake" "seexpr2-config.cmake"
+    INSTALL_DESTINATION ${CMAKE_DIR}
+    PATH_VARS CMAKE_INSTALL_PREFIX CMAKE_INSTALL_LIBDIR CMAKE_INSTALL_INCLUDEDIR)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/seexpr2-config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/seexpr2-version.cmake"
+    COMPONENT devel DESTINATION ${CMAKE_DIR})

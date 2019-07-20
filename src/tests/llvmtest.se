@@ -230,8 +230,8 @@
 ; CHECK: 5 7 9
 "def testfun(FLOAT[3] a, FLOAT[3] b) {a+b} testfun([1,2,3],[4,5,6])" 3
 
-; CHECK: 1 1 1
-"extern FLOAT sin(FLOAT) sin(3.14/2)" 3
+; CHECK: undefined
+"extern FLOAT sin(FLOAT) sin(u)" 3
 
 "printf("test %v %v", [.1,.2,.3], [.4,.5,.6])" 1
 

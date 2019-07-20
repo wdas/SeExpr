@@ -230,7 +230,7 @@ int ExprFuncStandard::buildInterpreter(const ExprFuncNode* node, Interpreter* in
             interpreter->addOp(op);
             interpreter->addOperand(funcPtrLoc);
             if (_funcType == FUNCN)
-                interpreter->addOperand(argOps.size());
+                interpreter->addOperand(static_cast<int>(argOps.size()));
             for (size_t c = 0; c < argOps.size(); c++) {
                 if (node->child(c)->type().isFP(1))
                     interpreter->addOperand(argOps[c]);
@@ -256,7 +256,7 @@ int ExprFuncStandard::buildInterpreter(const ExprFuncNode* node, Interpreter* in
         interpreter->addOp(op);
         interpreter->addOperand(funcPtrLoc);
         if (_funcType == FUNCNV || _funcType == FUNCNVV)
-            interpreter->addOperand(argOps.size());
+            interpreter->addOperand(static_cast<int>(argOps.size()));
         for (size_t c = 0; c < argOps.size(); c++) {
             interpreter->addOperand(argOps[c]);
         }

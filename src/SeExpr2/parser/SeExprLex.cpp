@@ -15,62 +15,43 @@
  http://www.apache.org/licenses/LICENSE-2.0
 */
 #include "SeExprLex.h"
-static const char* tokenNames[] = {"END_OF_BUFFER",
-                                   "NUM",
-                                   "IDENT",
-                                   "EXTERN",
-                                   "DEF",
-                                   "FLOAT",
-                                   "STRING",
-                                   "CONSTANT",
-                                   "UNIFORM",
-                                   "VARYING",
-                                   "ERROR",
-                                   "IF",
-                                   "ELSE",
-                                   "NOT",            // !
-                                   "OR",             // ||
-                                   "AND",            // &&
-                                   "EQUALS",         // ==
-                                   "NOT_EQUALS",     // !=
-                                   "ASSIGN",         // =
-                                   "GREATER",        // >
-                                   "LESS",           // <
-                                   "GREATER_EQUAL",  // >=
-                                   "LESS_EQUAL",     // <=
-                                   "PLUS",           //+
-                                   "PLUS_EQUAL",     //+=
-                                   "MINUS",          //-
-                                   "MINUS_EQUAL",    //-=
-                                   "TIMES",          //*
-                                   "TIMES_EQUAL",    //*=
-                                   "DIVIDE",         //*
-                                   "DIVIDE_EQUAL",   // /=
-                                   "MOD",            //^
-                                   "MOD_EQUAL",      // ^=
-                                   "POWER",          //^
-                                   "POWER_EQUAL",    // ^=
-                                   "ARROW",          //->
-                                   "TWIDLE",         //~
-                                   "BRACKET_OPEN",   //[
-                                   "BRACKET_CLOSE",  //]
-                                   "BRACE_OPEN",     //{
-                                   "BRACE_CLOSE",    //}
-                                   "PAREN_OPEN",     //(
-                                   "PAREN_CLOSE",    //)
-                                   "QUESTION",
-                                   "COLON",
-                                   "SEMICOLON",
-                                   "COMMA"};
+static const char* tokenNames[] = {"END_OF_BUFFER", "NUM",     "IDENT",     "EXTERN", "DEF", "FLOAT", "STRING",
+                                   "CONSTANT",      "UNIFORM", "VARYING",   "ERROR",  "IF",  "ELSE",  "NOT",  // !
+                                   "OR",                                                                      // ||
+                                   "AND",                                                                     // &&
+                                   "EQUALS",                                                                  // ==
+                                   "NOT_EQUALS",                                                              // !=
+                                   "ASSIGN",                                                                  // =
+                                   "GREATER",                                                                 // >
+                                   "LESS",                                                                    // <
+                                   "GREATER_EQUAL",                                                           // >=
+                                   "LESS_EQUAL",                                                              // <=
+                                   "PLUS",                                                                    //+
+                                   "PLUS_EQUAL",                                                              //+=
+                                   "MINUS",                                                                   //-
+                                   "MINUS_EQUAL",                                                             //-=
+                                   "TIMES",                                                                   //*
+                                   "TIMES_EQUAL",                                                             //*=
+                                   "DIVIDE",                                                                  //*
+                                   "DIVIDE_EQUAL",                                                            // /=
+                                   "MOD",                                                                     //^
+                                   "MOD_EQUAL",                                                               // ^=
+                                   "POWER",                                                                   //^
+                                   "POWER_EQUAL",                                                             // ^=
+                                   "ARROW",                                                                   //->
+                                   "TWIDLE",                                                                  //~
+                                   "BRACKET_OPEN",                                                            //[
+                                   "BRACKET_CLOSE",                                                           //]
+                                   "BRACE_OPEN",                                                              //{
+                                   "BRACE_CLOSE",                                                             //}
+                                   "PAREN_OPEN",                                                              //(
+                                   "PAREN_CLOSE",                                                             //)
+                                   "QUESTION",      "COLON",   "SEMICOLON", "COMMA"};
 
-std::string Lexer::getTokenName(Token tok)
-{
-    return tokenNames[tok];
-}
+std::string Lexer::getTokenName(Token tok) { return tokenNames[tok]; }
 
 std::map<std::string, Lexer::Token> Lexer::reservedWords;
-void Lexer::populateReservedWords()
-{
+void Lexer::populateReservedWords() {
     static bool initialized = false;
     if (!initialized) {
         // TODO: acquire mutex
@@ -91,8 +72,7 @@ void Lexer::populateReservedWords()
 
 #if TEST_LEXER
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     std::ifstream ifs(argv[1]);
     std::string content((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
     Lexer lexer(content.c_str());

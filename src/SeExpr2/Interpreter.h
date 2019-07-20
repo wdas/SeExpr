@@ -93,8 +93,8 @@ class Interpreter : public Evaluator {
             assert(false && "addOp called within another addOp");
         }
         _startedOp = true;
-        int pc = ops.size();
-        ops.push_back(std::make_pair(op, opData.size()));
+        int pc = static_cast<int>(ops.size());
+        ops.push_back(std::make_pair(op, static_cast<int>(opData.size())));
         return pc;
     }
 
@@ -104,7 +104,7 @@ class Interpreter : public Evaluator {
         if (execute) {
             double* fp = &state.d[0];
             char** str = &state.s[0];
-            int pc = ops.size() - 1;
+            int pc = static_cast<int>(ops.size()) - 1;
             const std::pair<OpF, int>& op = ops[pc];
             int* opCurr = &opData[0] + op.second;
             pc += op.first(opCurr, fp, str);
@@ -115,7 +115,7 @@ class Interpreter : public Evaluator {
     int addOperand(int param)
     {
         assert(_startedOp);
-        int ret = opData.size();
+        int ret = static_cast<int>(opData.size());
         opData.push_back(param);
         return ret;
     }
@@ -123,7 +123,7 @@ class Interpreter : public Evaluator {
     ///! Allocate a floating point set of data of dimension n
     int allocFP(int n)
     {
-        int ret = state.d.size();
+        int ret = static_cast<int>(state.d.size());
         for (int k = 0; k < n; k++)
             state.d.push_back(0);
         return ret;
@@ -132,7 +132,7 @@ class Interpreter : public Evaluator {
     /// Allocate a pointer location (can be anything, but typically space for char*)
     int allocPtr()
     {
-        int ret = state.s.size();
+        int ret = static_cast<int>(state.s.size());
         state.s.push_back(nullptr);
         return ret;
     }
@@ -187,44 +187,43 @@ class Interpreter : public Evaluator {
 
 //! Return the function f encapsulated in class T for the dynamic i converted to a static d.
 template <template <int d> class T, class T_FUNCTYPE = Interpreter::OpF>
-T_FUNCTYPE getTemplatizedOp(int i)
-{
+T_FUNCTYPE getTemplatizedOp(int i) {
     switch (i) {
-    case 1:
-        return T<1>::f;
-    case 2:
-        return T<2>::f;
-    case 3:
-        return T<3>::f;
-    case 4:
-        return T<4>::f;
-    case 5:
-        return T<5>::f;
-    case 6:
-        return T<6>::f;
-    case 7:
-        return T<7>::f;
-    case 8:
-        return T<8>::f;
-    case 9:
-        return T<9>::f;
-    case 10:
-        return T<10>::f;
-    case 11:
-        return T<11>::f;
-    case 12:
-        return T<12>::f;
-    case 13:
-        return T<13>::f;
-    case 14:
-        return T<14>::f;
-    case 15:
-        return T<15>::f;
-    case 16:
-        return T<16>::f;
-    default:
-        assert(false && "Invalid dynamic parameter (not supported template)");
-        break;
+        case 1:
+            return T<1>::f;
+        case 2:
+            return T<2>::f;
+        case 3:
+            return T<3>::f;
+        case 4:
+            return T<4>::f;
+        case 5:
+            return T<5>::f;
+        case 6:
+            return T<6>::f;
+        case 7:
+            return T<7>::f;
+        case 8:
+            return T<8>::f;
+        case 9:
+            return T<9>::f;
+        case 10:
+            return T<10>::f;
+        case 11:
+            return T<11>::f;
+        case 12:
+            return T<12>::f;
+        case 13:
+            return T<13>::f;
+        case 14:
+            return T<14>::f;
+        case 15:
+            return T<15>::f;
+        case 16:
+            return T<16>::f;
+        default:
+            assert(false && "Invalid dynamic parameter (not supported template)");
+            break;
     }
     return 0;
 }

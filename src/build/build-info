@@ -21,7 +21,8 @@ def main():
         ('python-site', python_site),
         ('python-inc', python_inc),
         ('pyqt4-sip', pyqt4_sip),
-        ('pyqt-sip-flags', pyqt_sip_flags),
+        ('pyqt4-sip-flags', pyqt4_sip_flags),
+        ('pyqt5-sip-flags', pyqt5_sip_flags),
         ('sip-inc', sip_inc),
     )
 
@@ -61,14 +62,15 @@ def pyqt4_sip(args):
     return pkg_cfg['pyqt_sip_dir']
 
 
-def pyqt_sip_flags(args):
-    try:
-        import PyQt5.Qt
-        return PyQt5.Qt.PYQT_CONFIGURATION['sip_flags']
-    except ImportError:
-        from PyQt4 import pyqtconfig
-        pkg_cfg = pyqtconfig._pkg_config
-        return pkg_cfg['pyqt_sip_flags']
+def pyqt5_sip_flags(args):
+    import PyQt5.Qt
+    return PyQt5.Qt.PYQT_CONFIGURATION['sip_flags']
+
+
+def pyqt4_sip_flags(args):
+    from PyQt4 import pyqtconfig
+    pkg_cfg = pyqtconfig._pkg_config
+    return pkg_cfg['pyqt_sip_flags']
 
 
 def sip_inc(args):
