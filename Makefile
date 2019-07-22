@@ -62,7 +62,7 @@ format:
 .PHONY: format
 
 test: install
-	$(MAKE) -C $(BUILD) $@
+	$(MAKE) -C $(BUILD) ARGS="--output-on-failure $(ARGS)" $@
 .PHONY: test
 
 # TODO: run this via cmake
