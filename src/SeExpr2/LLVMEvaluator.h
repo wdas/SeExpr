@@ -24,6 +24,7 @@
 #include "ExprNode.h"
 
 extern "C" void SeExpr2LLVMEvalFPVarRef(SeExpr2::ExprVarRef* seVR, double* result);
+extern "C" void SeExpr2LLVMEvalStrVarRef(SeExpr2::ExprVarRef* seVR, char** result);
 extern "C" void SeExpr2LLVMEvalCustomFunction(const int* opDataArg,
                                               double* fpArg,
                                               char** strArg,

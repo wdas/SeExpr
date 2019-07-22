@@ -648,6 +648,7 @@ int ExprBinaryOpNode::buildInterpreter(Interpreter* interpreter) const
             }
             default:
                 assert(false);
+                break;
         }
     }
     // allocate the output

@@ -38,26 +38,56 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType)
 
     std::unique_ptr<Module> TheModule(new Module(uniqueName + "_module", *_llvmContext));
 
-    // create bindings to helper functions for variables and functions
-    Function *SeExpr2LLVMEvalCustomFunctionFunc = nullptr, *SeExpr2LLVMEvalVarRefFunc = nullptr;
+    // create all needed types
+    Type        *i8PtrTy        = Type::getInt8PtrTy(*_llvmContext);        // char *
+    PointerType *i8PtrPtrTy     = PointerType::getUnqual(i8PtrTy);          // char **
+    Type        *i32Ty          = Type::getInt32Ty(*_llvmContext);          // int
+    Type        *i32PtrTy       = Type::getInt32PtrTy(*_llvmContext);       // int *
+    Type        *i64Ty          = Type::getInt64Ty(*_llvmContext);          // int64 *
+    Type        *doublePtrTy    = Type::getDoublePtrTy(*_llvmContext);      // double *
+    Type        *voidTy         = Type::getVoidTy(*_llvmContext);           // void
+
+    // create bindings to helper functions for variables and fucntions
+    Function *SeExpr2LLVMEvalCustomFunctionFunc = nullptr;
+    Function *SeExpr2LLVMEvalFPVarRefFunc = nullptr;
+    Function *SeExpr2LLVMEvalStrVarRefFunc = nullptr;
+    Function *SeExpr2LLVMEvalstrlenFunc = nullptr;
+    Function *SeExpr2LLVMEvalmallocFunc = nullptr;
+    Function *SeExpr2LLVMEvalfreeFunc = nullptr;
+    Function *SeExpr2LLVMEvalmemsetFunc = nullptr;
+    Function *SeExpr2LLVMEvalstrcatFunc = nullptr;
     {
-        Type* i8PtrTy = Type::getInt8PtrTy(*_llvmContext);
-        Type* i32PtrTy = Type::getInt32PtrTy(*_llvmContext);
-        Type* i64Ty = Type::getInt64Ty(*_llvmContext);
-        Type* doublePtrTy = Type::getDoublePtrTy(*_llvmContext);
-        PointerType* i8PtrPtr = PointerType::getUnqual(i8PtrTy);
-        Type* doublePtrPtrTy = PointerType::getUnqual(doublePtrTy);
-        Type* ParamTys[] = {i32PtrTy, doublePtrTy, i8PtrPtr, i8PtrPtr, i64Ty, doublePtrPtrTy};
         {
-            FunctionType* FT = FunctionType::get(Type::getVoidTy(*_llvmContext), ParamTys, false);
-            SeExpr2LLVMEvalCustomFunctionFunc =
-                Function::Create(FT, GlobalValue::ExternalLinkage, "SeExpr2LLVMEvalCustomFunction", TheModule.get());
+            FunctionType *FT = FunctionType::get(voidTy, {i32PtrTy, doublePtrTy, i8PtrPtrTy, i8PtrPtrTy, i64Ty}, false);
+            SeExpr2LLVMEvalCustomFunctionFunc = Function::Create(FT, GlobalValue::ExternalLinkage, "SeExpr2LLVMEvalCustomFunction", TheModule.get());
         }
         {
-            Type* ParamTys[2] = {i8PtrTy, doublePtrTy};
-            FunctionType* FT = FunctionType::get(Type::getVoidTy(*_llvmContext), ParamTys, false);
-            SeExpr2LLVMEvalVarRefFunc =
-                Function::Create(FT, GlobalValue::ExternalLinkage, "SeExpr2LLVMEvalFPVarRef", TheModule.get());
+            FunctionType *FT = FunctionType::get(voidTy, {i8PtrTy, doublePtrTy}, false);
+            SeExpr2LLVMEvalFPVarRefFunc = Function::Create(FT, GlobalValue::ExternalLinkage, "SeExpr2LLVMEvalFPVarRef", TheModule.get());
+        }
+        {
+            FunctionType *FT = FunctionType::get(voidTy, {i8PtrTy, i8PtrPtrTy}, false);
+            SeExpr2LLVMEvalStrVarRefFunc = Function::Create(FT, GlobalValue::ExternalLinkage, "SeExpr2LLVMEvalStrVarRef", TheModule.get());
+        }
+        {
+            FunctionType *FT = FunctionType::get(i32Ty, { i8PtrTy }, false);
+            SeExpr2LLVMEvalstrlenFunc = Function::Create(FT, Function::ExternalLinkage, "strlen", TheModule.get());
+        }
+        {
+            FunctionType *FT = FunctionType::get(i8PtrTy, { i32Ty }, false);
+            SeExpr2LLVMEvalmallocFunc = Function::Create(FT, Function::ExternalLinkage, "malloc", TheModule.get());
+        }
+        {
+            FunctionType *FT = FunctionType::get(voidTy, { i8PtrTy }, false);
+            SeExpr2LLVMEvalfreeFunc = Function::Create(FT, Function::ExternalLinkage, "free", TheModule.get());
+        }
+        {
+            FunctionType *FT = FunctionType::get(voidTy, { i8PtrTy, i32Ty, i32Ty }, false);
+            SeExpr2LLVMEvalmemsetFunc = Function::Create(FT, Function::ExternalLinkage, "memset", TheModule.get());
+        }
+        {
+            FunctionType *FT = FunctionType::get(i8PtrTy, { i8PtrTy, i8PtrTy }, false);
+            SeExpr2LLVMEvalstrcatFunc = Function::Create(FT, Function::ExternalLinkage, "strcat", TheModule.get());
         }
     }
 
@@ -69,7 +99,11 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType)
     };
     FunctionType* FT = FunctionType::get(Type::getVoidTy(*_llvmContext), ParamTys, false);
     Function* F = Function::Create(FT, Function::ExternalLinkage, uniqueName + "_func", TheModule.get());
-    F->addAttribute(llvm::AttributeSet::FunctionIndex, llvm::Attribute::AlwaysInline);
+#if LLVM_VERSION_MAJOR > 4
+        F->addAttribute(llvm::AttributeList::FunctionIndex, llvm::Attribute::AlwaysInline);
+#else
+        F->addAttribute(llvm::AttributeSet::FunctionIndex, llvm::Attribute::AlwaysInline);
+#endif
     {
         // label the function with names
         const char* names[] = {"outputPointer", "dataBlock", "indirectIndex"};
@@ -219,8 +253,15 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType)
     altModule->setDataLayout(TheExecutionEngine->getDataLayout());
 
     // Add bindings to C linkage helper functions
-    TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalVarRefFunc, (void*)SeExpr2LLVMEvalFPVarRef);
+    TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalFPVarRefFunc, (void*)SeExpr2LLVMEvalFPVarRef);
+    TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalStrVarRefFunc, (void*)SeExpr2LLVMEvalStrVarRef);
     TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalCustomFunctionFunc, (void*)SeExpr2LLVMEvalCustomFunction);
+
+    TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalstrlenFunc, (void *)strlen);
+    TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalstrcatFunc, (void *)strcat);
+    TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalmemsetFunc, (void *)memset);
+    TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalmallocFunc, (void *)malloc);
+    TheExecutionEngine->addGlobalMapping(SeExpr2LLVMEvalfreeFunc, (void *)free);
 
     // [verify]
     std::string errorStr;

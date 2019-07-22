@@ -505,9 +505,9 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode* funcNode, LLVM_BUILDER Builder
     }
 
     // a few types that are reused throughout this function
-    Type*           int32Ty     = Type::getInt32Ty(llvmContext);        // int
-    Type*           doubleTy    = Type::getDoubleTy(llvmContext);       // double
-    PointerType*    int8PtrTy   = Type::getInt8PtrTy(llvmContext);      // char*
+    Type* int32Ty = Type::getInt32Ty(llvmContext);             // int
+    Type* doubleTy = Type::getDoubleTy(llvmContext);           // double
+    PointerType* int8PtrTy = Type::getInt8PtrTy(llvmContext);  // char*
 
     // opDataArg will be [functionIndex, returnIndex, ]
     AllocaInst* opDataArg = createAllocaInst(Builder, int32Ty, (unsigned)nargs + 4, "opDataArgPtr");
@@ -525,8 +525,7 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode* funcNode, LLVM_BUILDER Builder
     Builder.CreateStore(ConstantInt::get(int32Ty, 1),
                         opDataPtr1);  // data ptr! doesn't matter because the binding overrites it
     LLVM_VALUE opDataPtr2 = Builder.CreateConstGEP1_32(opDataArg, 2);
-    Builder.CreateStore(ConstantInt::get(int32Ty, 1),
-                        opDataPtr2);  // return slot index (either fp[1] ors s[1])
+    Builder.CreateStore(ConstantInt::get(int32Ty, 1), opDataPtr2);  // return slot index (either fp[1] ors s[1])
     LLVM_VALUE opDataPtr3 = Builder.CreateConstGEP1_32(opDataArg, 3);
     Builder.CreateStore(ConstantInt::get(int32Ty, 0), opDataPtr3);  // nargs i.e. fp[0]
 
@@ -594,8 +593,7 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode* funcNode, LLVM_BUILDER Builder
     ConstantPointerNull* nullPtrVal = ConstantPointerNull::get(int8PtrTy);
     Module* M = llvm_getModule(Builder);
     // TODO: This leaks!
-    GlobalVariable* dataGV =
-        new GlobalVariable(*M, int8PtrTy, false, GlobalValue::InternalLinkage, nullPtrVal);
+    GlobalVariable* dataGV = new GlobalVariable(*M, int8PtrTy, false, GlobalValue::InternalLinkage, nullPtrVal);
 
     std::vector<LLVM_VALUE> params;
     params.push_back(opDataArg);
@@ -637,16 +635,16 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode* funcNode, LLVM_BUILDER Builder
     assert(false);
     return 0;
 }
-}
+}  // anonymous namespace
 
 extern "C" void SeExpr2LLVMEvalFPVarRef(SeExpr2::ExprVarRef* seVR, double* result)
 {
     seVR->eval(result);
 }
 
-extern "C" void SeExpr2LLVMEvalStrVarRef(SeExpr2::ExprVarRef *seVR, char **result)
+extern "C" void SeExpr2LLVMEvalStrVarRef(SeExpr2::ExprVarRef* seVR, char** result)
 {
-    seVR->eval(const_cast<const char **>(result));
+    seVR->eval(const_cast<const char**>(result));
 }
 
 namespace SeExpr2 {
@@ -733,40 +731,42 @@ LLVM_VALUE ExprBinaryOpNode::codegen(LLVM_BUILDER Builder) LLVM_BODY
         }
     } else {
         // precompute a few things
-        LLVMContext &context    = Builder.getContext();
-        Module      *module     = llvm_getModule(Builder);
-        PointerType *i8PtrPtrTy = PointerType::getUnqual(Type::getInt8PtrTy(context));
-        Type        *i32Ty      = Type::getInt32Ty(context);
-        Function    *strlen     = module->getFunction("strlen");
-        Function    *malloc     = module->getFunction("malloc");
-        Function    *free       = module->getFunction("free");
-        Function    *memset     = module->getFunction("memset");
-        Function    *strcat     = module->getFunction("strcat");
+        LLVMContext& context = Builder.getContext();
+        Module* module = llvm_getModule(Builder);
+        PointerType* i8PtrPtrTy = PointerType::getUnqual(Type::getInt8PtrTy(context));
+        Type* i32Ty = Type::getInt32Ty(context);
+        Function* strlen = module->getFunction("strlen");
+        Function* malloc = module->getFunction("malloc");
+        Function* free = module->getFunction("free");
+        Function* memset = module->getFunction("memset");
+        Function* strcat = module->getFunction("strcat");
 
         // do magic (see the pseudo C code on the comments at the end
         // of each LLVM instruction)
 
         // compute the length of the operand strings
-        LLVM_VALUE len1 = Builder.CreateCall(strlen, { op1 });              // len1 = strlen(op1);
-        LLVM_VALUE len2 = Builder.CreateCall(strlen, { op2 });              // len2 = strlen(op2);
-        LLVM_VALUE len = Builder.CreateAdd(len1, len2);                     // len = len1 + len2;
+        LLVM_VALUE len1 = Builder.CreateCall(strlen, {op1});  // len1 = strlen(op1);
+        LLVM_VALUE len2 = Builder.CreateCall(strlen, {op2});  // len2 = strlen(op2);
+        LLVM_VALUE len = Builder.CreateAdd(len1, len2);       // len = len1 + len2;
+        LLVM_VALUE one = ConstantInt::get(i32Ty, 1);          // one = 1;
+        LLVM_VALUE lenZ = Builder.CreateAdd(len, one);        // len = len1 + one;  (for null)
 
         // allocate and clear memory
-        LLVM_VALUE alloc = Builder.CreateCall(malloc, { len });             // alloc = malloc(len1 + len2);
-        LLVM_VALUE zero = ConstantInt::get(i32Ty, 0);                       // zero = 0;
-        Builder.CreateCall(memset, { alloc, zero, len });                   // memset(alloc, zero, len);
+        LLVM_VALUE alloc = Builder.CreateCall(malloc, {lenZ});  // alloc = malloc(len1 + len2);
+        LLVM_VALUE zero = ConstantInt::get(i32Ty, 0);          // zero = 0;
+        Builder.CreateCall(memset, {alloc, zero, lenZ});        // memset(alloc, zero, len);
 
         // concatenate operand strings into output string
-        Builder.CreateCall(strcat, { alloc, op1 });                         // strcat(alloc, op1);
-        LLVM_VALUE newAlloc = Builder.CreateGEP(nullptr, alloc, len1);      // newAlloc = alloc + len1
-        Builder.CreateCall(strcat, { newAlloc, op2 });                      // strcat(alloc, op2);
+        Builder.CreateCall(strcat, {alloc, op1});                       // strcat(alloc, op1);
+        LLVM_VALUE newAlloc = Builder.CreateGEP(nullptr, alloc, len1);  // newAlloc = alloc + len1
+        Builder.CreateCall(strcat, {newAlloc, op2});                    // strcat(alloc, op2);
 
         // store the address in the node's _out member so that it will be
         // cleaned up when the expression is destroyed.
         APInt outAddr = APInt(64, (uint64_t)&_out);
-        LLVM_VALUE out = Constant::getIntegerValue(i8PtrPtrTy, outAddr);    // out = &_out;
-        Builder.CreateCall(free, { Builder.CreateLoad(out) });              // free(*out);
-        Builder.CreateStore(alloc, out);                                    // *out = alloc
+        LLVM_VALUE out = Constant::getIntegerValue(i8PtrPtrTy, outAddr);  // out = &_out;
+        Builder.CreateCall(free, {Builder.CreateLoad(out)});              // free(*out);
+        Builder.CreateStore(alloc, out);                                  // *out = alloc
         return alloc;
     }
 
@@ -1200,26 +1200,27 @@ LLVM_VALUE ExprUnaryOpNode::codegen(LLVM_BUILDER Builder) LLVM_BODY
 struct VarCodeGeneration {
     static LLVM_VALUE codegen(ExprVarRef* varRef, const std::string& varName, LLVM_BUILDER Builder)
     {
-        LLVMContext &llvmContext = Builder.getContext();
+        LLVMContext& llvmContext = Builder.getContext();
 
         // a few types
-        Type *int64Ty           = Type::getInt64Ty(llvmContext);    // int64_t
-        Type *doubleTy          = Type::getDoubleTy(llvmContext);   // double
-        PointerType *int8PtrTy  = Type::getInt8PtrTy(llvmContext);  // char *
+        Type* int64Ty = Type::getInt64Ty(llvmContext);             // int64_t
+        Type* doubleTy = Type::getDoubleTy(llvmContext);           // double
+        PointerType* int8PtrTy = Type::getInt8PtrTy(llvmContext);  // char *
 
         // get var informations
         bool isDouble = varRef->type().isFP();
         int dim = varRef->type().dim();
 
         // create the return value on the stack
-        AllocaInst *returnValue = createAllocaInst(Builder, isDouble ? doubleTy : int8PtrTy, dim);
+        AllocaInst* returnValue = createAllocaInst(Builder, isDouble ? doubleTy : int8PtrTy, dim);
 
         // get our eval var function, and call it with a pointer to our var ref and a ref to the return value
-        Function *evalVarFunc = llvm_getModule(Builder)->getFunction(isDouble == true ? "SeExpr2LLVMEvalFPVarRef" : "SeExpr2LLVMEvalStrVarRef");
-        Builder.CreateCall(evalVarFunc, {
-           Builder.CreateIntToPtr(ConstantInt::get(int64Ty, (uint64_t)varRef), int8PtrTy),
-           returnValue
-        });
+        Function* evalVarFunc = llvm_getModule(Builder)->getFunction(isDouble == true ? "SeExpr2LLVMEvalFPVarRef"
+                                                                                      : "SeExpr2LLVMEvalStrVarRef");
+        assert(evalVarFunc);
+
+        Builder.CreateCall(
+            evalVarFunc, {Builder.CreateIntToPtr(ConstantInt::get(int64Ty, (uint64_t)varRef), int8PtrTy), returnValue});
 
         // load our return value
         LLVM_VALUE ret = 0;
@@ -1231,7 +1232,7 @@ struct VarCodeGeneration {
             ret = createVecValFromAlloca(Builder, returnValue, dim);
         }
 
-        AllocaInst *thisvar = createAllocaInst(Builder, ret->getType(), 1, varName);
+        AllocaInst* thisvar = createAllocaInst(Builder, ret->getType(), 1, varName);
         Builder.CreateStore(ret, thisvar);
         return ret;
     }

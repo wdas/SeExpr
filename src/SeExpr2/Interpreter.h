@@ -58,7 +58,7 @@ class Interpreter : public Evaluator {
     typedef std::map<const ExprLocalVar*, int> VarToLoc;
     VarToLoc varToLoc;
 
-    /// Op function pointer arguments are (int* currOpData,double* currD,char** c,std::stack<int>& callStackurrS)
+    /// Op function pointer arguments are (int* currOpData,double* currD,char** c)
     typedef int (*OpF)(const int*, double*, char**);
 
     std::vector<std::pair<OpF, int> > ops;

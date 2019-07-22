@@ -61,10 +61,10 @@ class VarBlock {
 
     /// Move semantics is the only allowed way to change the structure
     VarBlock(VarBlock&& other) {
+        indirectIndex = other.indirectIndex;
         threadSafe = other.threadSafe;
         d = std::move(other.d);
         s = std::move(other.s);
-        indirectIndex = other.indirectIndex;
         _dataPtrs = std::move(other._dataPtrs);
         _creator = other._creator;
     }

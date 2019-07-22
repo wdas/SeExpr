@@ -167,7 +167,7 @@ class ExprFuncSimple : public ExprFuncX {
         // std::stack<int>& callStack;
     };
 
-    virtual int buildInterpreter(const ExprFuncNode* node, Interpreter* interpreter) const;
+    virtual int buildInterpreter(const ExprFuncNode* node, Interpreter* interpreter) const override;
 
     virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const = 0;
 

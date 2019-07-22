@@ -1051,7 +1051,7 @@ Vec3d voronoiUtil(VoronoiPointData& data, int n, const Vec3d* args, bool color)
         p += fbmScale * vfbm(4, fbmArgs);
     }
 
-    double f1, f2;
+    double f1, f2{1.0};
     Vec3d pos1, pos2;
     if (type >= 3)
         voronoi_f1f2_3d(data, p, jitter, f1, pos1, f2, pos2, distance, exponent);
