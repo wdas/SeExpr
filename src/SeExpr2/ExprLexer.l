@@ -143,7 +143,7 @@ ${IDENT}"::"{IDENT} { yylval->s = strdup(&yytext[1]); return VAR; }
 
 
 // Gets the current token, replaces yytext
-char* getText(yyscan_t scanner) 
+char* SeExpr2getScannerText(yyscan_t scanner) 
 {
     return yyget_text(scanner);
 }

@@ -38,7 +38,7 @@
 // forward declarations
 int SeExpr2lex(YYSTYPE* yylval_param, YYLTYPE* yyloc, void* yyscanner, SeExpr2::ParseState *state, SeExpr2::ParseData *parseData);
 void SeExpr2error(YYLTYPE* yyloc, void* scanner, SeExpr2::ParseState *state, SeExpr2::ParseData* parseData, char const* msg);
-char* getText (void* yyscanner);
+char* SeExpr2getScannerText (void* yyscanner);
 
 /* These are handy node constructors for 0-3 arguments */
 #define NODE(startPos,endPos,name) parseData->Remember(new SeExpr2::Expr##name(parseData->Expr),startPos,endPos)
@@ -373,7 +373,7 @@ void SeExpr2error(YYLTYPE*,
         multiline=1; 
     }
 
-    char *yytext = getText(scanner);
+    char *yytext = SeExpr2getScannerText(scanner);
     parseData->ParseError = yytext[0] ? "Syntax error" : "Unexpected end of expression";
     if (multiline) {
         char buff[30];
