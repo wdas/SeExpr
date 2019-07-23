@@ -202,9 +202,9 @@ struct BinaryStringOp {
         // Maybe make this behaviour configurable ?
         int len1 = static_cast<int>(strlen(in1));
         int len2 = static_cast<int>(strlen(in2));
-        if (out == 0 || len1 + len2 + 1 > static_cast<int>(strlen(out))) {
-            delete [] out;
-            out = new char [len1 + len2 + 1];
+        if (!out || len1 + len2 + 1 > static_cast<int>(strlen(out))) {
+            free(out);
+            out = (char*)malloc(len1 + len2 + 1);
         }
 
         // clear previous evaluation content
@@ -642,7 +642,7 @@ int ExprBinaryOpNode::buildInterpreter(Interpreter* interpreter) const
             case '+': {
                 interpreter->addOp(BinaryStringOp::f);
                 int intermediateOp = interpreter->allocPtr();
-                interpreter->state.s[intermediateOp] = _out;
+                interpreter->state.s[intermediateOp] = const_cast<char*>(reinterpret_cast<const char*>(&_out));
                 interpreter->addOperand(intermediateOp);
                 break;
             }

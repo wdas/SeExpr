@@ -519,15 +519,18 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode* funcNode, LLVM_BUILDER Builder
 
     // fill opDataArgPtr
     // TODO:MEME
+    // function index (s[0])
     LLVM_VALUE opDataPtr0 = Builder.CreateConstGEP1_32(opDataArg, 0);
-    Builder.CreateStore(ConstantInt::get(int32Ty, 0), opDataPtr0);  // function index (s[0])
+    Builder.CreateStore(ConstantInt::get(int32Ty, 0), opDataPtr0);
+    // data ptr! doesn't matter because the binding overrites it
     LLVM_VALUE opDataPtr1 = Builder.CreateConstGEP1_32(opDataArg, 1);
-    Builder.CreateStore(ConstantInt::get(int32Ty, 1),
-                        opDataPtr1);  // data ptr! doesn't matter because the binding overrites it
+    Builder.CreateStore(ConstantInt::get(int32Ty, 1), opDataPtr1);
+    // return slot index (either fp[1] ors s[1])
     LLVM_VALUE opDataPtr2 = Builder.CreateConstGEP1_32(opDataArg, 2);
-    Builder.CreateStore(ConstantInt::get(int32Ty, 1), opDataPtr2);  // return slot index (either fp[1] ors s[1])
+    Builder.CreateStore(ConstantInt::get(int32Ty, 1), opDataPtr2);
+    // nargs i.e. fp[0]
     LLVM_VALUE opDataPtr3 = Builder.CreateConstGEP1_32(opDataArg, 3);
-    Builder.CreateStore(ConstantInt::get(int32Ty, 0), opDataPtr3);  // nargs i.e. fp[0]
+    Builder.CreateStore(ConstantInt::get(int32Ty, 0), opDataPtr3);
 
     // Load arguments into the pseudo interpreter data structure
     unsigned fpIdx = 1 + sizeOfRet;  // skip nargs and return val
@@ -581,9 +584,13 @@ LLVM_VALUE callCustomFunction(const ExprFuncNode* funcNode, LLVM_BUILDER Builder
             }
             fpIdx += conversion.final.dim();
         } else if (argType.isString()) {
-            // store the strArgPtr indirection index
-            Builder.CreateStore(ConstantInt::get(int32Ty, strIdx), Builder.CreateConstGEP1_32(opDataArg, opIndex));
-            Builder.CreateStore(args[argIndex], Builder.CreateConstGEP1_32(strArg, strIdx));
+            unsigned operand = strIdx;
+            LLVM_VALUE operandVal = ConstantInt::get(Type::getInt32Ty(llvmContext), operand);
+            LLVM_VALUE opDataPtr = Builder.CreateConstGEP1_32(opDataArg, opIndex);
+            Builder.CreateStore(operandVal, opDataPtr);
+            LLVM_VALUE strArgPtr = Builder.CreateConstGEP1_32(strArg, strIdx);
+            Builder.CreateStore(args[argIndex], strArgPtr);
+
             strIdx++;
         }
     }

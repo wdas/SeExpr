@@ -243,18 +243,21 @@ class Expression {
     // Not thread-safe
     inline const double* evalFP(VarBlock* varBlock = nullptr) const
     {
-        _results.resize(_desiredReturnType.dim());
-        evaluator()->evalFP(_results.data(), varBlock);
-        return _results.data();
+        _fpResults.resize(_desiredReturnType.dim());
+        evaluator()->evalFP(_fpResults.data(), varBlock);
+        return _fpResults.data();
     }
 
     // Evaluates and returns string (check returnType()!)
     // Not thread-safe
     inline const char* evalStr(VarBlock* varBlock = nullptr) const
     {
-        _results.resize(_desiredReturnType.dim());
-        evaluator()->evalStr((char*)_results.data(), varBlock);
-        return (const char*)_results.data();
+        _strResults.resize(_desiredReturnType.dim(), nullptr);  // assumed to be 1
+        free(_strResults[0]);
+        _strResults[0] = (char*)malloc(1024);  // max string size
+
+        evaluator()->evalStr(_strResults[0], varBlock);
+        return reinterpret_cast<const char*>(_strResults[0]);
     }
 
     // Evaluates and returns float (check returnType()!)
@@ -385,7 +388,8 @@ class Expression {
     // Var block creator
     const VarBlockCreator* _varBlockCreator = 0;
 
-    mutable std::vector<double> _results;
+    mutable std::vector<double> _fpResults;
+    mutable std::vector<char*> _strResults;
 
     /* internal */ public:
 

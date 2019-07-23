@@ -148,7 +148,10 @@ class Interpreter : public Evaluator {
     {
         std::lock_guard<std::mutex> guard(_m);
         eval(varBlock, _debugging);
-        memcpy((char*)dst, (const char*)&state.s[_returnSlot], sizeof(char*));
+        if (state.s[_returnSlot]) {
+            //memcpy((char*)dst, (const char*)state.s[_returnSlot], sizeof(char*));
+            strcpy(dst, state.s[_returnSlot]);
+        }
     }
 
     virtual inline void evalFP(double* dst, VarBlock* varBlock) const override

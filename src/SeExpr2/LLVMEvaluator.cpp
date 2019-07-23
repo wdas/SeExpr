@@ -45,6 +45,7 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType)
     Type        *i32PtrTy       = Type::getInt32PtrTy(*_llvmContext);       // int *
     Type        *i64Ty          = Type::getInt64Ty(*_llvmContext);          // int64 *
     Type        *doublePtrTy    = Type::getDoublePtrTy(*_llvmContext);      // double *
+    PointerType *doublePtrPtrTy = PointerType::getUnqual(doublePtrTy);      // double **
     Type        *voidTy         = Type::getVoidTy(*_llvmContext);           // void
 
     // create bindings to helper functions for variables and fucntions
@@ -58,7 +59,7 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType)
     Function *SeExpr2LLVMEvalstrcatFunc = nullptr;
     {
         {
-            FunctionType *FT = FunctionType::get(voidTy, {i32PtrTy, doublePtrTy, i8PtrPtrTy, i8PtrPtrTy, i64Ty}, false);
+            FunctionType *FT = FunctionType::get(voidTy, {i32PtrTy, doublePtrTy, i8PtrPtrTy, i8PtrPtrTy, i64Ty, doublePtrPtrTy}, false);
             SeExpr2LLVMEvalCustomFunctionFunc = Function::Create(FT, GlobalValue::ExternalLinkage, "SeExpr2LLVMEvalCustomFunction", TheModule.get());
         }
         {

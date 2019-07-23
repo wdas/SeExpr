@@ -168,7 +168,7 @@ void Expression::reset()
     _errors.clear();
     _threadUnsafeFunctionCalls.clear();
     _comments.clear();
-    _results.resize(_desiredReturnType.dim());
+    _fpResults.resize(_desiredReturnType.dim());
 }
 
 void Expression::setContext(const Context& context)
@@ -309,10 +309,9 @@ void Expression::prep() const
             sstream << (line + 1) << ":" << col << ": error: " << _errors[i].error << std::endl;
         }
         _parseError = std::string(sstream.str());
-    }
-
-    if (debugging) {
-        std::cerr << "parse error \n" << parseError() << std::endl;
+        if (debugging) {
+            std::cerr << "parse error: \n" << parseError() << std::endl;
+        }
     }
 
     if (!evaluator)
