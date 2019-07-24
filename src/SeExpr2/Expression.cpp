@@ -276,7 +276,9 @@ void Expression::prep() const
         // TODO: separate Object Representation (ExprNode) from ParseTree (which should just be cheap tokens)
         bool isConstant_ = _returnType.isLifetimeConstant() || (_parseTree && parseTree()->numChildren() == 1 &&
                                                                 parseTree()->child(0)->type().isLifetimeConstant());
-        EvaluationStrategy strategy = isConstant_ ? EvaluationStrategy::UseInterpreter : _evaluationStrategyHint;
+        bool useInterp = isConstant_ || _returnType.isString();
+        EvaluationStrategy strategy = useInterp ? EvaluationStrategy::UseInterpreter : _evaluationStrategyHint;
+
 
         evaluator = (strategy == UseInterpreter) ? (Evaluator*)new Interpreter() : (Evaluator*)new LLVMEvaluator();
         evaluator->setDebugging(debugging);
