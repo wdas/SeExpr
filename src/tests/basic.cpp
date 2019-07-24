@@ -120,12 +120,12 @@ struct RandFunc : public ExprFuncSimple {
     {
     }
 
-    virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const
+    virtual ExprType prep(ExprFuncNode* /*node*/, bool, ExprVarEnvBuilder& /*envBuilder*/) const override
     {
         return TypeVec(3);
     }
 
-    virtual void eval(ArgHandle& args)
+    virtual void eval(ArgHandle& args) override
     {
         Vec3dRef result = args.outFpHandle<3>();
         result[0] = rand();
@@ -180,7 +180,7 @@ struct SimpleExpression : public Expression {
     mutable VecRefType<float> CsVar;
 
     // Custom variable resolver, only allow ones we specify
-    ExprVarRef* resolveVar(const std::string& name) const
+    ExprVarRef* resolveVar(const std::string& name) const override
     {
         if (name == "x")
             return &x;
@@ -200,7 +200,7 @@ struct SimpleExpression : public Expression {
     mutable ExprFunc countInvocationsFunc;
 
     // Custom function resolver
-    ExprFunc* resolveFunc(const std::string& name) const
+    ExprFunc* resolveFunc(const std::string& name) const override
     {
         if (name == "custom")
             return &customFunc;

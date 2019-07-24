@@ -76,13 +76,13 @@ struct StringExpression : public Expression {
     mutable Var stringVar;
 
     // Custom variable resolver, only allow ones we specify
-    ExprVarRef* resolveVar(const std::string& name) const {
+    ExprVarRef* resolveVar(const std::string& name) const  override {
         if (name == "stringVar") return &stringVar;
-        return 0;
+        return nullptr;
     }
 
     // Custom function resolver
-    ExprFunc* resolveFunc(const std::string& name) const {
+    ExprFunc* resolveFunc(const std::string& name) const override{
         if (name == "join_path") return &joinPathFunc;
         return 0;
     }
