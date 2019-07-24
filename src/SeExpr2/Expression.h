@@ -289,13 +289,13 @@ class Expression {
     /** override resolveVar to add external variables */
     virtual ExprVarRef* resolveVar(const std::string& /*name*/) const
     {
-        return 0;
+        return nullptr;
     }
 
     /** override resolveFunc to add external functions */
     virtual ExprFunc* resolveFunc(const std::string& /*name*/) const
     {
-        return 0;
+        return nullptr;
     }
 
     /** records an error in prep or parse stage */
