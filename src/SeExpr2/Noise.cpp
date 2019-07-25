@@ -28,10 +28,14 @@ namespace {
 namespace SeExpr2 {
 
 #ifdef __SSE4_1__
-inline double floorSSE(double val) { return _mm_floor_sd(_mm_set_sd(0.0), _mm_set_sd(val))[0]; }
+inline double floorSSE(double val)
+{
+    return _mm_cvtsd_f64(_mm_floor_sd(_mm_set_sd(0.0), _mm_set_sd(val)));
+}
 
-inline double roundSSE(double val) {
-    return _mm_round_sd(_mm_set_sd(0.0), _mm_set_sd(val), _MM_FROUND_TO_NEAREST_INT)[0];
+inline double roundSSE(double val)
+{
+    return _mm_cvtsd_f64(_mm_round_sd(_mm_set_sd(0.0), _mm_set_sd(val), _MM_FROUND_TO_NEAREST_INT));
 }
 #else
 #define floorSSE floor
