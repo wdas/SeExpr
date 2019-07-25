@@ -9,7 +9,7 @@ class Vec {
     typedef double __attribute__((vector_size(32), aligned(16))) __m128d_aligned;
     union {
         struct {
-            double x{0.}, y{0.}, z{0.}, w{0.};
+            double x, y, z, w;
         };
         __m128d_aligned v;
     };
