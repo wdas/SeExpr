@@ -78,8 +78,8 @@ if (GTEST_DIR)
                 ARGS "${PAINT3D_DIR}" "${PAINT3D_TESTS}"
                 OUTPUT ${PAINT3D_TESTS}
                 DEPENDS ${GENERATE_SCRIPT} ${PAINT3D_DIR})
-            add_executable(test-p3d-examples testmain.cpp ${PAINT3D_TESTS})
-            target_link_libraries(test-p3d-examples SeExpr2 ${GTEST_LIBRARIES})
+            add_executable(test-p3d-examples testmain.cpp imageTests.cpp ${PAINT3D_TESTS})
+            target_link_libraries(test-p3d-examples SeExpr2 ${GTEST_LIBRARIES} ${PNG_LIBRARIES})
             install(TARGETS test-p3d-examples DESTINATION ${TEST_DEST})
             add_test(NAME p3d-examples COMMAND test-p3d-examples)
         endif()
