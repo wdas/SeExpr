@@ -87,16 +87,20 @@ public:
         static void setAnimCurveCallback(SIP_PYCALLABLE /AllowNone/);
 %MethodCode
         {
+#ifdef SEEXPR_USE_ANIMLIB
             ExprControlCollection::setAnimCurveCallback((a0!=Py_None) ? animCurveCallbackPyWrapper : 0);
             Py_XDECREF(animCurveCallbackPy);
             animCurveCallbackPy=a0;
             Py_INCREF(animCurveCallbackPy);
+#endif
         }
 %End
 };
 
 %ModuleCode
 #include <iostream>
+
+#ifdef SEEXPR_USE_ANIMLIB
 #include <animlib/AnimCurve.h>
 static PyObject* animCurveCallbackPy=0;
 void animCurveCallbackPyWrapper(const std::string& arg,animlib::AnimCurve& curve)
@@ -145,6 +149,8 @@ void animCurveCallbackPyWrapper(const std::string& arg,animlib::AnimCurve& curve
     }
     SIP_UNBLOCK_THREADS;
 }
+#endif
+
 %End
 
 class ExprEditor:QWidget{
