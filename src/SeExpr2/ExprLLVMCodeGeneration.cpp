@@ -80,11 +80,11 @@ FunctionType* getSeExprFuncStandardLLVMType(ExprFuncStandard::FuncType sft, LLVM
 {
     assert(sft != ExprFuncStandard::NONE);
 
-    Type *intType = Type::getInt32Ty(llvmContext);
-    Type *doubleType = Type::getDoubleTy(llvmContext);
-    Type *doublePtrType = PointerType::getUnqual(Type::getDoubleTy(llvmContext));
-    Type *voidType = Type::getVoidTy(llvmContext);
-    FunctionType *FT = nullptr;
+    Type* intType = Type::getInt32Ty(llvmContext);
+    Type* doubleType = Type::getDoubleTy(llvmContext);
+    Type* doublePtrType = PointerType::getUnqual(Type::getDoubleTy(llvmContext));
+    Type* voidType = Type::getVoidTy(llvmContext);
+    FunctionType* FT = nullptr;
 
     if (sft <= ExprFuncStandard::FUNC6) {
         std::vector<Type*> paramTypes;
@@ -761,7 +761,7 @@ LLVM_VALUE ExprBinaryOpNode::codegen(LLVM_BUILDER Builder) LLVM_BODY
 
         // allocate and clear memory
         LLVM_VALUE alloc = Builder.CreateCall(malloc, {lenZ});  // alloc = malloc(len1 + len2);
-        LLVM_VALUE zero = ConstantInt::get(i32Ty, 0);          // zero = 0;
+        LLVM_VALUE zero = ConstantInt::get(i32Ty, 0);           // zero = 0;
         Builder.CreateCall(memset, {alloc, zero, lenZ});        // memset(alloc, zero, len);
 
         // concatenate operand strings into output string

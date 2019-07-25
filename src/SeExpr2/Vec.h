@@ -24,9 +24,9 @@
 
 // To fix differences in template TYPENAME resolution between MSVC and other compilers
 #if defined(WINDOWS)
-#   define TYPENAME
+#define TYPENAME
 #else
-#   define TYPENAME typename
+#define TYPENAME typename
 #endif
 
 //#############################################################################

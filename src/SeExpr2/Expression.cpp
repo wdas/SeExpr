@@ -43,7 +43,8 @@ namespace SeExpr2 {
 bool Expression::debugging = getenv("SE_EXPR_DEBUG") != 0;
 // Choose the defeault strategy based on what we've compiled with (SEEXPR_ENABLE_LLVM)
 // And the environment variables SE_EXPR_DEBUG
-static Expression::EvaluationStrategy chooseDefaultEvaluationStrategy() {
+static Expression::EvaluationStrategy chooseDefaultEvaluationStrategy()
+{
     if (Expression::debugging) {
         std::cerr << "SeExpr2 Debug Mode Enabled " <<
 #if defined(WINDOWS)
@@ -51,11 +52,12 @@ static Expression::EvaluationStrategy chooseDefaultEvaluationStrategy() {
 #else
             __VERSION__
 #endif
-            << std::endl;
+                  << std::endl;
     }
 #ifdef SEEXPR_ENABLE_LLVM
     if (char* env = getenv("SE_EXPR_EVAL")) {
-        if (Expression::debugging) std::cerr << "Overriding SeExpr Evaluation Default to be " << env << std::endl;
+        if (Expression::debugging)
+            std::cerr << "Overriding SeExpr Evaluation Default to be " << env << std::endl;
         return !strcmp(env, "LLVM") ? Expression::UseLLVM : !strcmp(env, "INTERPRETER") ? Expression::UseInterpreter
                                                                                         : Expression::UseInterpreter;
     } else
@@ -69,10 +71,11 @@ Expression::EvaluationStrategy Expression::defaultEvaluationStrategy = chooseDef
 class TypePrintExaminer : public SeExpr2::Examiner<true> {
   public:
     virtual bool examine(const SeExpr2::ExprNode* examinee);
-    virtual void reset() {};
+    virtual void reset(){};
 };
 
-bool TypePrintExaminer::examine(const ExprNode* examinee) {
+bool TypePrintExaminer::examine(const ExprNode* examinee)
+{
     const ExprNode* curr = examinee;
     int depth = 0;
     char buf[1024];
@@ -322,7 +325,8 @@ void Expression::prep() const
     assert(_evaluator);
 }
 
-bool Expression::isVec() const {
+bool Expression::isVec() const
+{
     return syntaxOK() ? parseTree()->isVec() : _wantVec;
 }
 

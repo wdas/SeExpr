@@ -191,7 +191,8 @@ namespace {
 
 //! Binary operator for strings. Currently only handle '+'
 struct BinaryStringOp {
-    static int f(const int* opData, double* /*fp*/, char** c) {
+    static int f(const int* opData, double* /*fp*/, char** c)
+    {
         // get the operand data
         char*& out = *(char**)c[opData[0]];
         char* in1 = c[opData[1]];
@@ -557,7 +558,8 @@ int ExprLocalFunctionNode::buildInterpreter(Interpreter* /*interpreter*/) const
     return 0;
 }
 
-int ExprLocalFunctionNode::buildInterpreterForCall(const ExprFuncNode* /*callerNode*/, Interpreter* /*interpreter*/) const
+int ExprLocalFunctionNode::buildInterpreterForCall(const ExprFuncNode* /*callerNode*/,
+                                                   Interpreter* /*interpreter*/) const
 {
     std::cerr << "Local Functions are deprecated" << std::endl;
     exit(1);
@@ -639,16 +641,16 @@ int ExprBinaryOpNode::buildInterpreter(Interpreter* interpreter) const
         }
     } else {
         switch (_op) {
-            case '+': {
-                interpreter->addOp(BinaryStringOp::f);
-                int intermediateOp = interpreter->allocPtr();
-                interpreter->state.s[intermediateOp] = const_cast<char*>(reinterpret_cast<const char*>(&_out));
-                interpreter->addOperand(intermediateOp);
-                break;
-            }
-            default:
-                assert(false);
-                break;
+        case '+': {
+            interpreter->addOp(BinaryStringOp::f);
+            int intermediateOp = interpreter->allocPtr();
+            interpreter->state.s[intermediateOp] = const_cast<char*>(reinterpret_cast<const char*>(&_out));
+            interpreter->addOperand(intermediateOp);
+            break;
+        }
+        default:
+            assert(false);
+            break;
         }
     }
     // allocate the output

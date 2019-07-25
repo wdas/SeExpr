@@ -112,8 +112,8 @@ T Curve<T>::getValue(const double param) const
     // find the cv data point index just greater than the desired param
     const int numPoints = static_cast<int>(_cvData.size());
     const CV* cvDataBegin = &_cvData[0];
-    int index =
-        static_cast<int>(std::upper_bound(cvDataBegin, cvDataBegin + numPoints, CV(param, T(), kLinear), cvLessThan) - cvDataBegin);
+    int index = static_cast<int>(
+        std::upper_bound(cvDataBegin, cvDataBegin + numPoints, CV(param, T(), kLinear), cvLessThan) - cvDataBegin);
     index = std::max(1, std::min(index, numPoints - 1));
 
     const float t0 = static_cast<float>(_cvData[index - 1]._pos);
@@ -159,8 +159,8 @@ double Curve<T>::getChannelValue(const double param, int channel) const
     // find the cv data point index just greater than the desired param
     const int numPoints = static_cast<int>(_cvData.size());
     const CV* cvDataBegin = &_cvData[0];
-    int index =
-        static_cast<int>(std::upper_bound(cvDataBegin, cvDataBegin + numPoints, CV(param, T(), kLinear), cvLessThan) - cvDataBegin);
+    int index = static_cast<int>(
+        std::upper_bound(cvDataBegin, cvDataBegin + numPoints, CV(param, T(), kLinear), cvLessThan) - cvDataBegin);
     index = std::max(1, std::min(index, numPoints - 1));
 
     const float t0 = static_cast<float>(_cvData[index - 1]._pos);
@@ -207,8 +207,8 @@ typename Curve<T>::CV Curve<T>::getLowerBoundCV(const double param) const
     assert(prepared);
     const CV* cvDataBegin = &_cvData[0];
     int numPoints = static_cast<int>(_cvData.size());
-    int index =
-        static_cast<int>(std::upper_bound(cvDataBegin, cvDataBegin + numPoints, CV(param, T(), kLinear), cvLessThan) - cvDataBegin);
+    int index = static_cast<int>(
+        std::upper_bound(cvDataBegin, cvDataBegin + numPoints, CV(param, T(), kLinear), cvLessThan) - cvDataBegin);
     index = std::max(1, std::min(index, numPoints - 1));
     if (index - 1 > 0)
         return _cvData[index - 1];

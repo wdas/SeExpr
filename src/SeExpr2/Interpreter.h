@@ -149,7 +149,7 @@ class Interpreter : public Evaluator {
         std::lock_guard<std::mutex> guard(_m);
         eval(varBlock, _debugging);
         if (state.s[_returnSlot]) {
-            //memcpy((char*)dst, (const char*)state.s[_returnSlot], sizeof(char*));
+            // memcpy((char*)dst, (const char*)state.s[_returnSlot], sizeof(char*));
             strcpy(dst, state.s[_returnSlot]);
         }
     }
@@ -190,43 +190,44 @@ class Interpreter : public Evaluator {
 
 //! Return the function f encapsulated in class T for the dynamic i converted to a static d.
 template <template <int d> class T, class T_FUNCTYPE = Interpreter::OpF>
-T_FUNCTYPE getTemplatizedOp(int i) {
+T_FUNCTYPE getTemplatizedOp(int i)
+{
     switch (i) {
-        case 1:
-            return T<1>::f;
-        case 2:
-            return T<2>::f;
-        case 3:
-            return T<3>::f;
-        case 4:
-            return T<4>::f;
-        case 5:
-            return T<5>::f;
-        case 6:
-            return T<6>::f;
-        case 7:
-            return T<7>::f;
-        case 8:
-            return T<8>::f;
-        case 9:
-            return T<9>::f;
-        case 10:
-            return T<10>::f;
-        case 11:
-            return T<11>::f;
-        case 12:
-            return T<12>::f;
-        case 13:
-            return T<13>::f;
-        case 14:
-            return T<14>::f;
-        case 15:
-            return T<15>::f;
-        case 16:
-            return T<16>::f;
-        default:
-            assert(false && "Invalid dynamic parameter (not supported template)");
-            break;
+    case 1:
+        return T<1>::f;
+    case 2:
+        return T<2>::f;
+    case 3:
+        return T<3>::f;
+    case 4:
+        return T<4>::f;
+    case 5:
+        return T<5>::f;
+    case 6:
+        return T<6>::f;
+    case 7:
+        return T<7>::f;
+    case 8:
+        return T<8>::f;
+    case 9:
+        return T<9>::f;
+    case 10:
+        return T<10>::f;
+    case 11:
+        return T<11>::f;
+    case 12:
+        return T<12>::f;
+    case 13:
+        return T<13>::f;
+    case 14:
+        return T<14>::f;
+    case 15:
+        return T<15>::f;
+    case 16:
+        return T<16>::f;
+    default:
+        assert(false && "Invalid dynamic parameter (not supported template)");
+        break;
     }
     return 0;
 }

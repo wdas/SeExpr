@@ -554,10 +554,14 @@ class ExprCompareNode : public ExprNode {
 /// Node that implements an binary operator
 class ExprBinaryOpNode : public ExprNode {
   public:
-    ExprBinaryOpNode(const Expression* expr, ExprNode* a, ExprNode* b, char op) : ExprNode(expr, a, b), _op(op), _out(nullptr)
+    ExprBinaryOpNode(const Expression* expr, ExprNode* a, ExprNode* b, char op)
+        : ExprNode(expr, a, b), _op(op), _out(nullptr)
     {
     }
-    virtual ~ExprBinaryOpNode() { free(_out); }
+    virtual ~ExprBinaryOpNode()
+    {
+        free(_out);
+    }
     virtual ExprType prep(bool wantScalar, ExprVarEnvBuilder& envBuilder);
     virtual int buildInterpreter(Interpreter* interpreter) const;
     virtual LLVM_VALUE codegen(LLVM_BUILDER) LLVM_BODY;

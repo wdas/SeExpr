@@ -34,29 +34,32 @@
 
 namespace SeExpr2 {
 
-__int64 Timer::time() {
+__int64 Timer::time()
+{
     LARGE_INTEGER perfCounter;
     QueryPerformanceCounter(&perfCounter);
     return perfCounter.QuadPart;
 }
 
-Timer::Timer() : started(false) {
+Timer::Timer() : started(false)
+{
     // get the timer frequency
     LARGE_INTEGER frequency;
     QueryPerformanceFrequency(&frequency);
     ticksPerSeconds = frequency.QuadPart;
 }
 
-void Timer::start() {
+void Timer::start()
+{
     started = true;
     startTime = this->time();
 }
 
-long Timer::elapsedTime() {
+long Timer::elapsedTime()
+{
     stopTime = this->time();
     return static_cast<long>(((stopTime - startTime) * 1000000) / ticksPerSeconds);
 }
-
 }
 
 namespace SeExprInternal2 {
@@ -65,41 +68,48 @@ namespace SeExprInternal2 {
  * Mutex/SpinLock classes
  */
 
-_Mutex::_Mutex() {
+_Mutex::_Mutex()
+{
     _mutex = CreateMutex(NULL, FALSE, NULL);
 }
 
-_Mutex::~_Mutex() {
+_Mutex::~_Mutex()
+{
     CloseHandle(_mutex);
 }
 
-void _Mutex::lock() {
+void _Mutex::lock()
+{
     WaitForSingleObject(_mutex, INFINITE);
 }
 
-void _Mutex::unlock() {
+void _Mutex::unlock()
+{
     ReleaseMutex(_mutex);
 }
 
-_SpinLock::_SpinLock() {
+_SpinLock::_SpinLock()
+{
     _spinlock = new CRITICAL_SECTION;
     InitializeCriticalSection(reinterpret_cast<CRITICAL_SECTION*>(_spinlock));
 }
 
-_SpinLock::~_SpinLock() {
+_SpinLock::~_SpinLock()
+{
     DeleteCriticalSection(reinterpret_cast<CRITICAL_SECTION*>(_spinlock));
     delete _spinlock;
     _spinlock = nullptr;
 }
 
-void _SpinLock::lock() {
+void _SpinLock::lock()
+{
     EnterCriticalSection(reinterpret_cast<CRITICAL_SECTION*>(_spinlock));
 }
 
-void _SpinLock::unlock() {
+void _SpinLock::unlock()
+{
     LeaveCriticalSection(reinterpret_cast<CRITICAL_SECTION*>(_spinlock));
 }
-
 }
 
-#endif // defined(WINDOWS)
+#endif  // defined(WINDOWS)

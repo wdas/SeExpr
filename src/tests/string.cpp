@@ -24,14 +24,15 @@ using namespace SeExpr2;
 
 
 struct StringFunc : public ExprFuncSimple {
-    StringFunc() : ExprFuncSimple(true) {
+    StringFunc() : ExprFuncSimple(true)
+    {
     }
 
-    struct StringData : public SeExpr2::ExprFuncNode::Data, public std::string
-    {
+    struct StringData : public SeExpr2::ExprFuncNode::Data, public std::string {
     };
 
-    virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const override {
+    virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const override
+    {
         bool constant = true;
         for (int i = 0, iend = node->numChildren(); i < iend; ++i) {
             SeExpr2::ExprType t = node->child(i)->prep(!scalarWanted, envBuilder);
@@ -45,11 +46,13 @@ struct StringFunc : public ExprFuncSimple {
         return constant == true ? SeExpr2::ExprType().String().Constant() : SeExpr2::ExprType().String().Varying();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* /*node*/, ArgHandle& /*args*/) const override {
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* /*node*/, ArgHandle& /*args*/) const override
+    {
         return new StringData();
     }
 
-    virtual void eval(ArgHandle& args) override {
+    virtual void eval(ArgHandle& args) override
+    {
         StringData& data = *reinterpret_cast<StringData*>(const_cast<ExprFuncNode::Data*>(args.data));
         data.clear();
         for (int i = 0, iend = args.nargs(); i < iend; ++i) {
@@ -68,31 +71,48 @@ struct StringExpression : public Expression {
     // Define simple string variable type that just stores the value it returns
     struct Var : public ExprVarRef {
         std::string value;
-        Var() : ExprVarRef(ExprType().String().Varying()) {}
-        void eval(double*) { }
-        void eval(const char** result) { result[0] = value.c_str(); }
-        Var& operator = (const char* input) { value = input; return *this; }
+        Var() : ExprVarRef(ExprType().String().Varying())
+        {
+        }
+        void eval(double*)
+        {
+        }
+        void eval(const char** result)
+        {
+            result[0] = value.c_str();
+        }
+        Var& operator=(const char* input)
+        {
+            value = input;
+            return *this;
+        }
     };
     mutable Var stringVar;
 
     // Custom variable resolver, only allow ones we specify
-    ExprVarRef* resolveVar(const std::string& name) const  override {
-        if (name == "stringVar") return &stringVar;
+    ExprVarRef* resolveVar(const std::string& name) const override
+    {
+        if (name == "stringVar")
+            return &stringVar;
         return nullptr;
     }
 
     // Custom function resolver
-    ExprFunc* resolveFunc(const std::string& name) const override{
-        if (name == "join_path") return &joinPathFunc;
+    ExprFunc* resolveFunc(const std::string& name) const override
+    {
+        if (name == "join_path")
+            return &joinPathFunc;
         return 0;
     }
 
     // Constructor
-    StringExpression(const std::string& str)
-        : Expression(str, ExprType().String()) {}
+    StringExpression(const std::string& str) : Expression(str, ExprType().String())
+    {
+    }
 };
 
-TEST(StringTests, Constant) {
+TEST(StringTests, Constant)
+{
     StringExpression expr("\"hello world !\"");
     EXPECT_TRUE(expr.isValid() == true);
     EXPECT_TRUE(expr.returnType().isString() == true);
@@ -107,7 +127,8 @@ TEST(StringTests, Constant) {
     EXPECT_STREQ(expr7.evalStr(), "hello\t\n\"world\"");
 }
 
-TEST(StringTests, Variable) {
+TEST(StringTests, Variable)
+{
     StringExpression expr("stringVar");
     expr.stringVar = "hey, it's working !";
     EXPECT_TRUE(expr.isValid());
@@ -116,7 +137,8 @@ TEST(StringTests, Variable) {
     EXPECT_STREQ(expr.evalStr(), "hey, it's working !");
 }
 
-TEST(StringTests, FunctionConst) {
+TEST(StringTests, FunctionConst)
+{
     StringExpression expr("join_path(\"/home/foo\", \"some\", \"relative\", \"path\")");
     EXPECT_TRUE(expr.isValid() == true);
     EXPECT_TRUE(expr.returnType().isString() == true);
@@ -124,7 +146,8 @@ TEST(StringTests, FunctionConst) {
     EXPECT_STREQ(expr.evalStr(), "/home/foo/some/relative/path");
 }
 
-TEST(StringTests, FunctionVarying) {
+TEST(StringTests, FunctionVarying)
+{
     StringExpression expr("join_path(stringVar, \"some\", \"relative\", \"path\")");
     expr.stringVar = "/home/foo";
     EXPECT_TRUE(expr.isValid() == true);
@@ -133,7 +156,8 @@ TEST(StringTests, FunctionVarying) {
     EXPECT_STREQ(expr.evalStr(), "/home/foo/some/relative/path");
 }
 
-TEST(StringTests, BinaryOp) {
+TEST(StringTests, BinaryOp)
+{
     StringExpression expr1("\"hello \" + \"world!\"");
     EXPECT_TRUE(expr1.isValid() == true);
     EXPECT_TRUE(expr1.returnType().isString() == true);

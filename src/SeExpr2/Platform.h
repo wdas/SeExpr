@@ -206,6 +206,7 @@ class _Mutex {
     {
         ReleaseMutex(_mutex);
     }
+
   private:
     void* _mutex;
 };
@@ -228,6 +229,7 @@ class _SpinLock {
     {
         LeaveCriticalSection(&_spinlock);
     }
+
   private:
     void* _spinlock;
 };

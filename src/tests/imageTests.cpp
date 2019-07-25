@@ -347,16 +347,9 @@ bool TestImage::writePNGImage(const char* imageFile)
         info_ptr = png_create_info_struct(png_ptr);
         png_init_io(png_ptr, fp);
         int color_type = PNG_COLOR_TYPE_RGBA;
-        png_set_IHDR(png_ptr,
-                     info_ptr,
-                     _width,
-                     _height,
-                     8,
-                     color_type,
-                     PNG_INTERLACE_NONE,
-                     PNG_COMPRESSION_TYPE_DEFAULT,
-                     PNG_FILTER_TYPE_DEFAULT);
-        std::vector<unsigned char *> ptrs(_height);
+        png_set_IHDR(png_ptr, info_ptr, _width, _height, 8, color_type, PNG_INTERLACE_NONE,
+                     PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+        std::vector<unsigned char*> ptrs(_height);
         for (int i = 0; i < _height; i++) {
             ptrs[i] = &_image[_width * i * 4];
         }

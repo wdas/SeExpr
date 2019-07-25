@@ -21,7 +21,8 @@
 
 //! Unescape a few common special characters in the input @p string and return
 //! the result as a new one.
-inline std::string unescapeString(const std::string& string) {
+inline std::string unescapeString(const std::string& string)
+{
     std::string output(string);
     int index = 0;
     bool special = false;
@@ -32,15 +33,25 @@ inline std::string unescapeString(const std::string& string) {
             if (special == true) {
                 special = false;
                 switch (c) {
-                    case 'n':   output[index++] = '\n'; break;
-                    case 'r':   output[index++] = '\r'; break;
-                    case 't':   output[index++] = '\t'; break;
-                    case '\\':  output[index++] = '\\'; break;
-                    case '"':   output[index++] = '\"'; break;
-                    default:
-                        // leave the escape sequence as it was
-                        output[index++] = '\\';
-                        output[index++] = c;
+                case 'n':
+                    output[index++] = '\n';
+                    break;
+                case 'r':
+                    output[index++] = '\r';
+                    break;
+                case 't':
+                    output[index++] = '\t';
+                    break;
+                case '\\':
+                    output[index++] = '\\';
+                    break;
+                case '"':
+                    output[index++] = '\"';
+                    break;
+                default:
+                    // leave the escape sequence as it was
+                    output[index++] = '\\';
+                    output[index++] = c;
                 }
             } else {
                 output[index++] = c;

@@ -14,7 +14,9 @@ class Vec {
         __m128d_aligned v;
     };
 
-    Vec() { }
+    Vec()
+    {
+    }
 
     Vec(__m128d_aligned v_) : v(v_)
     {
@@ -45,14 +47,14 @@ class Vec {
     inline double& operator[](size_t i)
     {
         switch (i % 4) {
-            case 0:
-                return x;
-            case 1:
-                return y;
-            case 2:
-                return z;
-            case 3:
-                return w;
+        case 0:
+            return x;
+        case 1:
+            return y;
+        case 2:
+            return z;
+        case 3:
+            return w;
         }
     }
     inline const double& operator[](size_t i) const

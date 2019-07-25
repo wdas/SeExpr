@@ -60,7 +60,8 @@ class VarBlock {
     friend class VarBlockCreator;
 
     /// Move semantics is the only allowed way to change the structure
-    VarBlock(VarBlock&& other) {
+    VarBlock(VarBlock&& other)
+    {
         indirectIndex = other.indirectIndex;
         threadSafe = other.threadSafe;
         d = std::move(other.d);
@@ -133,7 +134,7 @@ class VarBlock {
 
 // helper class for using VarBlocks
 class SymbolTable : public VarBlock {
-public:
+  public:
 #ifdef SEEXPR_ENABLE_FOLLY
     typedef folly::Function<void(SeExpr2::ExprFuncSimple::ArgHandle&) const> FunctionCodeStorage;
     typedef folly::Function<void(double*) const> DeferredVarStorage;
@@ -465,7 +466,8 @@ class VarBlockCreator {
     ///     If false or not specified, the old behavior occurs (var block
     ///     will only hold variables sources and optionally output data,
     ///     and the interpreter will work on its internal data)
-    VarBlock create(bool makeThreadSafe = false) {
+    VarBlock create(bool makeThreadSafe = false)
+    {
         return VarBlock(this, _offset, makeThreadSafe);
     }
 
