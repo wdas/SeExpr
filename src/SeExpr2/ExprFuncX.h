@@ -22,7 +22,7 @@
 #include "ExprNode.h"
 
 namespace SeExpr2 {
-class ExprFuncDeclaration;
+struct ExprFuncDeclaration;
 class ExprFuncNode;
 class ExprFuncSimple;
 class ExprVarEnv;
