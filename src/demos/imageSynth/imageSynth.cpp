@@ -19,9 +19,9 @@
 */
 #include <map>
 #include <iostream>
-#include <Expression.h>
-#include <Interpreter.h>
-#include <Platform.h>
+#include <SeExpr2/Expression.h>
+#include <SeExpr2/Interpreter.h>
+#include <SeExpr2/Platform.h>
 #include <fstream>
 #include "../common/ImageSynthesizer.h"
 

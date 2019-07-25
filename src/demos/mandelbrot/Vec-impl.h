@@ -9,14 +9,13 @@ class Vec {
     typedef double __attribute__((vector_size(32), aligned(16))) __m128d_aligned;
     union {
         struct {
-            double x, y, z, w;
+            double x{0.}, y{0.}, z{0.}, w{0.};
         };
         __m128d_aligned v;
     };
 
-    Vec() : x(0.0), y(0.0), z(0.0), w(0.0)
-    {
-    }
+    Vec() { }
+
     Vec(__m128d_aligned v_) : v(v_)
     {
     }
@@ -45,7 +44,16 @@ class Vec {
     }
     inline double& operator[](size_t i)
     {
-        return v[i];
+        switch (i % 4) {
+            case 0:
+                return x;
+            case 1:
+                return y;
+            case 2:
+                return z;
+            case 3:
+                return w;
+        }
     }
     inline const double& operator[](size_t i) const
     {

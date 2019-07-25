@@ -1,4 +1,6 @@
+if(NOT APPLE)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx")
 
 add_executable(mandelbrot-control mandelbrot-control.cpp)

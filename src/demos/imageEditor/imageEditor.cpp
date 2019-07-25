@@ -33,10 +33,10 @@
 #include <QMessageBox>
 #include <QStyleFactory>
 
-#include "ExprControlCollection.h"
-#include "ExprEditor.h"
-#include "ExprBrowser.h"
-#include "Expression.h"
+#include <SeExpr2/UI/ExprControlCollection.h>
+#include <SeExpr2/UI/ExprEditor.h>
+#include <SeExpr2/UI/ExprBrowser.h>
+#include <SeExpr2/Expression.h>
 
 #include "../common/palette.h"
 #include "ImageEditorDialog.h"
