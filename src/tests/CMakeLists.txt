@@ -33,7 +33,7 @@ if (GTEST_DIR)
     add_executable(test-string testmain.cpp string.cpp)
     target_link_libraries(test-string SeExpr2 ${GTEST_LIBRARIES})
     install(TARGETS test-string DESTINATION ${TEST_DEST})
-    add_test(NAME string COMMAND test-main)
+    add_test(NAME string COMMAND test-string)
 
     if (DEFINED PNG_DIR)
         message(STATUS "PNG_DIR = ${PNG_DIR}")
@@ -51,7 +51,7 @@ if (GTEST_DIR)
 
         # generate test cases for example developer expressions
         set (GENERATE_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/genImageTestFile.py")
-        set (EXAMPLE_DIR ${CMAKE_INSTALL_PREFIX}/share/SeExpr2/demos/imageSynth/examples)
+        set (EXAMPLE_DIR ${PROJECT_SOURCE_DIR}/src/demos/imageSynth/examples)
         if (EXISTS ${EXAMPLE_DIR})
             set(EXAMPLE_TESTS testSeExprExamples.cpp)
             add_custom_command(
@@ -61,8 +61,8 @@ if (GTEST_DIR)
                 OUTPUT ${EXAMPLE_TESTS}
                 DEPENDS ${GENERATE_SCRIPT} ${EXAMPLE_DIR})
 
-            add_executable(test-examples testmain.cpp ${EXAMPLE_TESTS})
-            target_link_libraries(test-examples SeExpr2 ${GTEST_LIBRARIES})
+            add_executable(test-examples testmain.cpp imageTests.cpp ${EXAMPLE_TESTS})
+            target_link_libraries(test-examples SeExpr2 ${GTEST_LIBRARIES} ${PNG_LIBRARIES})
 
             install(TARGETS test-examples DESTINATION ${TEST_DEST})
             add_test(NAME examples COMMAND test-examples)
@@ -100,10 +100,10 @@ endif()
 add_test(NAME basicPython
          COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/basicPython.py)
 
-add_executable(dirtSimple "dirtSimple.cpp")
-target_link_libraries(dirtSimple SeExpr2 ${PNG_LIBRARIES})
-install(TARGETS dirtSimple DESTINATION ${TEST_DEST})
-add_test(NAME dirtSimple COMMAND dirtSimple)
+add_executable(test-simple dirtSimple.cpp)
+target_link_libraries(test-simple SeExpr2)
+install(TARGETS test-simple DESTINATION ${TEST_DEST})
+add_test(NAME simple COMMAND test-simple)
 
 add_executable(BlockTests "BlockTests.cpp")
 target_link_libraries(BlockTests SeExpr2 ${PNG_LIBRARIES})
