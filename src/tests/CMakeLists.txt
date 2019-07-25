@@ -25,6 +25,16 @@ if (GTEST_DIR)
     # Uncomment below to print performance stats
     # add_definitions(-DSEEXPR_PERFORMANCE)
 
+    add_executable(test-basic testmain.cpp basic.cpp)
+    target_link_libraries(test-basic SeExpr2 ${GTEST_LIBRARIES})
+    install(TARGETS test-basic DESTINATION ${TEST_DEST})
+    add_test(NAME basic COMMAND test-basic)
+
+    add_executable(test-string testmain.cpp string.cpp)
+    target_link_libraries(test-string SeExpr2 ${GTEST_LIBRARIES})
+    install(TARGETS test-string DESTINATION ${TEST_DEST})
+    add_test(NAME string COMMAND test-main)
+
     if (DEFINED PNG_DIR)
         message(STATUS "PNG_DIR = ${PNG_DIR}")
         include_directories(${PNG_DIR}/include)
@@ -36,7 +46,6 @@ if (GTEST_DIR)
 
     if (PNG_FOUND)
         message("-- Found PNG library: " ${PNG_LIBRARIES})
-
         include_directories(SYSTEM ${PNG_INCLUDE_DIR})
         include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -44,38 +53,45 @@ if (GTEST_DIR)
         set (GENERATE_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/genImageTestFile.py")
         set (EXAMPLE_DIR ${CMAKE_INSTALL_PREFIX}/share/SeExpr2/demos/imageSynth/examples)
         if (EXISTS ${EXAMPLE_DIR})
-            set (EXAMPLE_TESTS "testSeExprExamples.cpp")
+            set(EXAMPLE_TESTS testSeExprExamples.cpp)
             add_custom_command(
                 SOURCE ${EXAMPLE_DIR}
                 COMMAND ${GENERATE_SCRIPT}
                 ARGS "${EXAMPLE_DIR}" "${EXAMPLE_TESTS}"
                 OUTPUT ${EXAMPLE_TESTS}
                 DEPENDS ${GENERATE_SCRIPT} ${EXAMPLE_DIR})
+
+            add_executable(test-examples testmain.cpp ${EXAMPLE_TESTS})
+            target_link_libraries(test-examples SeExpr2 ${GTEST_LIBRARIES})
+
+            install(TARGETS test-examples DESTINATION ${TEST_DEST})
+            add_test(NAME examples COMMAND test-examples)
         endif()
 
         # generate test cases for paint3d show examples
         set (PAINT3D_DIR /disney/shows/default/rel/global/expressions)
         if (EXISTS ${PAINT3D_DIR})
-            set (PAINT3D_TESTS "testPaint3dExamples.cpp")
+            set(PAINT3D_TESTS  testPaint3dExamples.cpp)
             add_custom_command(
                 SOURCE ${PAINT3D_DIR}
                 COMMAND ${GENERATE_SCRIPT}
                 ARGS "${PAINT3D_DIR}" "${PAINT3D_TESTS}"
                 OUTPUT ${PAINT3D_TESTS}
                 DEPENDS ${GENERATE_SCRIPT} ${PAINT3D_DIR})
+            add_executable(test-p3d-examples testmain.cpp ${PAINT3D_TESTS})
+            target_link_libraries(test-p3d-examples SeExpr2 ${GTEST_LIBRARIES})
+            install(TARGETS test-p3d-examples DESTINATION ${TEST_DEST})
+            add_test(NAME p3d-examples COMMAND test-p3d-examples)
         endif()
 
-        add_executable(testmain2
-            "testmain.cpp" "imageTests.cpp"
-            ${EXAMPLE_TESTS} ${PAINT3D_TESTS}
-            "basic.cpp" "string.cpp")
-        target_link_libraries(testmain2 SeExpr2 ${GTEST_LIBRARIES} ${PNG_LIBRARIES})
-        install(TARGETS testmain2 DESTINATION ${TEST_DEST})
+        add_executable(test-images testmain.cpp imageTests.cpp)
+        target_link_libraries(test-images SeExpr2 ${GTEST_LIBRARIES} ${PNG_LIBRARIES})
+        install(TARGETS test-images DESTINATION ${TEST_DEST})
+        add_test(NAME images COMMAND test-images)
+
         install(PROGRAMS imagediff.py DESTINATION ${TEST_DEST})
-        add_test(NAME basic COMMAND testmain2 --gtest_filter=BasicTests.*)
-        add_test(NAME strings COMMAND testmain2 --gtest_filter=StringTests.*)
     else()
-        message(STATUS "Couldn't find PNG -- not doing tests")
+        message(STATUS "Couldn't find PNG -- not image doing tests")
     endif()
 else()
     message(STATUS "Couldn't find gtest framework -- not building main tests")
