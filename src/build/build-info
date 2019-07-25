@@ -10,8 +10,6 @@ if 'MACOSX_DEPLOYMENT_TARGET' in os.environ:
     del os.environ['MACOSX_DEPLOYMENT_TARGET']
 from distutils import sysconfig as sc
 
-import sipconfig
-
 def main():
     parser = argparse.ArgumentParser()
     subp = parser.add_subparsers()
@@ -63,8 +61,11 @@ def pyqt4_sip(args):
 
 
 def pyqt5_sip_flags(args):
-    import PyQt5.Qt
-    return PyQt5.Qt.PYQT_CONFIGURATION['sip_flags']
+    # pylint: ignore=unused-imports
+    # these are needed to workaround an issue with the macOS/brew PyQt
+    from PyQt5 import QtWidgets
+    from PyQt5 import Qt
+    return Qt.PYQT_CONFIGURATION['sip_flags']
 
 
 def pyqt4_sip_flags(args):
@@ -74,6 +75,7 @@ def pyqt4_sip_flags(args):
 
 
 def sip_inc(args):
+    import sipconfig
     pkg_cfg = sipconfig._pkg_config
     return pkg_cfg['sip_inc_dir']
 
