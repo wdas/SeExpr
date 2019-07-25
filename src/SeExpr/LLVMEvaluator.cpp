@@ -208,13 +208,13 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType)
 
     if (_debugging) {
         std::cerr << "Pre verified LLVM byte code " << std::endl;
-        TheModule->dump();
+        TheModule->print(llvm::errs(), nullptr);
     }
 
     // TODO: Find out if there is a new way to verify
     // if (verifyModule(*TheModule)) {
     //     std::cerr << "Logic error in code generation of LLVM alert developers" << std::endl;
-    //     TheModule->dump();
+    //     TheModule->print(llvm::errs(), nullptr);
     // }
     Module* altModule = TheModule.get();
 
@@ -243,7 +243,7 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType)
         if (_debugging) {
             std::cerr << "error in LLVM verifyModule\n";
             parseTree->dump();
-            altModule->dump();
+            altModule->print(llvm::errs(), nullptr);
         }
         parseTree->addError(raw.str());
         return false;
@@ -279,7 +279,7 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType)
 
     if (_debugging) {
         std::cerr << "Pre verified LLVM byte code " << std::endl;
-        altModule->dump();
+        altModule->print(llvm::errs(), nullptr);
     }
 
     return true;
