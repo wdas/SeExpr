@@ -81,9 +81,6 @@ else()
     message(STATUS "Couldn't find gtest framework -- not building main tests")
 endif()
 
-add_test(NAME imageTestsReport
-         COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/imageTestsReportNew.py runall)
-
 add_test(NAME basicPython
          COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/basicPython.py)
 
@@ -102,5 +99,8 @@ target_link_libraries(VarBlockExample SeExpr2)
 install(TARGETS VarBlockExample DESTINATION ${TEST_DEST})
 
 if (ENABLE_SLOW_TESTS)
+    add_test(NAME imageTestsReport
+             COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/imageTestsReportNew.py runall)
+
     add_test(NAME VarBlockExample COMMAND VarBlockExample)
 endif()
