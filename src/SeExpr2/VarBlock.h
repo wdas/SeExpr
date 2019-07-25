@@ -133,6 +133,7 @@ class VarBlock {
 
 // helper class for using VarBlocks
 class SymbolTable : public VarBlock {
+public:
 #ifdef SEEXPR_ENABLE_FOLLY
     typedef folly::Function<void(SeExpr2::ExprFuncSimple::ArgHandle&) const> FunctionCodeStorage;
     typedef folly::Function<void(double*) const> DeferredVarStorage;

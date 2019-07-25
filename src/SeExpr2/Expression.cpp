@@ -157,9 +157,9 @@ Expression::~Expression()
 void Expression::reset()
 {
     std::lock_guard<std::mutex> guard(_prepMutex);
-    delete _evaluator;
+    delete _evaluator.load();
     _evaluator = nullptr;
-    delete _parseTree;
+    delete _parseTree.load();
     _parseTree = nullptr;
     _parseError = "";
     _vars.clear();
