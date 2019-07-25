@@ -31,10 +31,11 @@ using namespace SeExpr2;
 class TypePrintExaminer : public SeExpr2::Examiner<true> {
   public:
     virtual bool examine(const ExprNode* examinee);
-    virtual void reset() {};
+    virtual void reset(){};
 };
 
-bool TypePrintExaminer::examine(const ExprNode* examinee) {
+bool TypePrintExaminer::examine(const ExprNode* examinee)
+{
     const ExprNode* curr = examinee;
     int depth = 0;
     char buf[1024];

@@ -33,5 +33,7 @@ typedef llvm::IRBuilder<>& LLVM_BUILDER;
 typedef double LLVM_VALUE;
 typedef double LLVM_BUILDER;
 #define LLVM_BODY \
-    { return 0; }
+    {             \
+        return 0; \
+    }
 #endif

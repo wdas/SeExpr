@@ -24,7 +24,8 @@ namespace SeExpr2 {
 class Context {
   public:
     /// Lookup a Context parameter by name.
-    bool lookupParameter(const std::string& parameterName, std::string& value) const {
+    bool lookupParameter(const std::string& parameterName, std::string& value) const
+    {
         ParameterMap::const_iterator it = _parameters.find(parameterName);
         if (it != _parameters.end()) {
             value = it->second;
@@ -40,12 +41,21 @@ class Context {
     Context* createChildContext() const;
 
     // Parent access uses pointers as it is acceptable to set/get a NULL parent
-    void setParent(const Context* context) { _parent = context; }
-    const Context* getParent() const { return _parent; }
+    void setParent(const Context* context)
+    {
+        _parent = context;
+    }
+    const Context* getParent() const
+    {
+        return _parent;
+    }
 
-    bool hasContext(const Context* context) const {
-        if (this == context) return true;
-        if (_parent) return _parent->hasContext(context);
+    bool hasContext(const Context* context) const
+    {
+        if (this == context)
+            return true;
+        if (_parent)
+            return _parent->hasContext(context);
         return false;
     }
 

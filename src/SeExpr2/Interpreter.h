@@ -20,57 +20,75 @@
 #include <vector>
 #include <stack>
 
+#include "Evaluator.h"
+#include "ExprNode.h"
+
 namespace SeExpr2 {
 class ExprLocalVar;
+class VarBlock;
 
 //! Promotes a FP[1] to FP[d]
 template <int d>
 struct Promote {
     // TODO: this needs a name that is prefixed by Se!
-    static int f(int* opData, double* fp, char** c, std::vector<int>& callStack) {
+    static int f(const int* opData, double* fp, char**)
+    {
         int posIn = opData[0];
         int posOut = opData[1];
-        for (int k = posOut; k < posOut + d; k++) fp[k] = fp[posIn];
+        for (int k = posOut; k < posOut + d; k++)
+            fp[k] = fp[posIn];
         return 1;
     }
 };
 
 /// Non-LLVM manual interpreter. This is a simple computation machine. There are no dynamic activation records
 /// just fixed locations, because we have no recursion!
-class Interpreter {
+class Interpreter : public Evaluator {
   public:
-    /// Double data (constants and evaluated)
-    std::vector<double> d;
-    /// constant and evaluated pointer data
-    std::vector<char*> s;
-    /// Ooperands to op
-    std::vector<int> opData;
+    // TODO: To make the Interpreter thread-safe, State must
+    // be able to be thread-local (or if tbb is used, task-local).
+    struct State {
+        std::vector<double> d;  // double data (constants and evaluated)
+        std::vector<char*> s;   // constant and evaluated pointer data
+    };
+
+    mutable State state;
 
     /// Not needed for eval only building
     typedef std::map<const ExprLocalVar*, int> VarToLoc;
     VarToLoc varToLoc;
 
-    /// Op function pointer arguments are (int* currOpData,double* currD,char** c,std::stack<int>& callStackurrS)
-    typedef int (*OpF)(int*, double*, char**, std::vector<int>&);
+    /// Op function pointer arguments are (int* currOpData,double* currD,char** c)
+    typedef int (*OpF)(const int*, double*, char**);
 
     std::vector<std::pair<OpF, int> > ops;
-    std::vector<int> callStack;
+
+    std::vector<int> opData;  // operands to op
 
   private:
+    mutable std::mutex _m;
+    bool _debugging;
+    int _returnSlot;
+    ExprType _desiredReturnType;
     bool _startedOp;
     int _pcStart;
 
   public:
-    Interpreter() : _startedOp(false) {
-        s.push_back(nullptr);  // reserved for double** of variable block
-        s.push_back(nullptr);  // reserved for double** of variable block
+    Interpreter() : _debugging(false), _returnSlot(0), _desiredReturnType(), _startedOp(false), _pcStart(0)
+    {
+        allocPtr();  // reserved for double** of variable block
+        allocPtr();  // reserved for indirectIndex of variable block
     }
 
     /// Return the position that the next instruction will be placed at
-    int nextPC() { return static_cast<int>(ops.size()); }
+    int nextPC()
+    {
+        return ops.size();
+    }
 
     ///! adds an operator to the program (pointing to the data at the current location)
-    int addOp(OpF op) {
+    int addOp(OpF op)
+    {
         if (_startedOp) {
             assert(false && "addOp called within another addOp");
         }
@@ -80,20 +98,22 @@ class Interpreter {
         return pc;
     }
 
-    void endOp(bool execute = true) {
+    void endOp(bool execute = true)
+    {
         _startedOp = false;
         if (execute) {
-            double* fp = &d[0];
-            char** str = &s[0];
+            double* fp = &state.d[0];
+            char** str = &state.s[0];
             int pc = static_cast<int>(ops.size()) - 1;
             const std::pair<OpF, int>& op = ops[pc];
             int* opCurr = &opData[0] + op.second;
-            pc += op.first(opCurr, fp, str, callStack);
+            pc += op.first(opCurr, fp, str);
         }
     }
 
     ///! Adds an operand. Note this should be done after doing the addOp!
-    int addOperand(int param) {
+    int addOperand(int param)
+    {
         assert(_startedOp);
         int ret = static_cast<int>(opData.size());
         opData.push_back(param);
@@ -101,25 +121,71 @@ class Interpreter {
     }
 
     ///! Allocate a floating point set of data of dimension n
-    int allocFP(int n) {
-        int ret = static_cast<int>(d.size());
-        for (int k = 0; k < n; k++) d.push_back(0);
+    int allocFP(int n)
+    {
+        int ret = static_cast<int>(state.d.size());
+        for (int k = 0; k < n; k++)
+            state.d.push_back(0);
         return ret;
     }
 
     /// Allocate a pointer location (can be anything, but typically space for char*)
-    int allocPtr() {
-        int ret = static_cast<int>(s.size());
-        s.push_back(0);
+    int allocPtr()
+    {
+        int ret = static_cast<int>(state.s.size());
+        state.s.push_back(nullptr);
         return ret;
     }
 
-    /// Evaluate program
-    void eval(VarBlock* varBlock, bool debug = false);
+    virtual void setDebugging(bool debugging) override
+    {
+        _debugging = debugging;
+    }
+
+    virtual bool prep(ExprNode* parseTree, ExprType desiredReturnType) override;
+
+    virtual inline void evalStr(char* dst, VarBlock* varBlock) const override
+    {
+        std::lock_guard<std::mutex> guard(_m);
+        eval(varBlock, _debugging);
+        if (state.s[_returnSlot]) {
+            //memcpy((char*)dst, (const char*)state.s[_returnSlot], sizeof(char*));
+            strcpy(dst, state.s[_returnSlot]);
+        }
+    }
+
+    virtual inline void evalFP(double* dst, VarBlock* varBlock) const override
+    {
+        std::lock_guard<std::mutex> guard(_m);
+        eval(varBlock, _debugging);
+        memcpy((char*)dst, (const char*)&state.d[_returnSlot], sizeof(double) * _desiredReturnType.dim());
+    }
+
+    virtual inline void evalMultiple(VarBlock* varBlock,
+                                     double* outputBuffer,
+                                     size_t rangeStart,
+                                     size_t rangeEnd) const override;
+
+    virtual bool isValid() const override
+    {
+        return true;
+    }
+
+    virtual inline void dump() const override
+    {
+        print();
+    }
+
     /// Debug by printing program
     void print(int pc = -1) const;
 
-    void setPCStart(int pcStart) { _pcStart = pcStart; }
+    void setPCStart(int pcStart)
+    {
+        _pcStart = pcStart;
+    }
+
+  private:
+    void eval(VarBlock* varBlock, bool debug = false) const;
 };
 
 //! Return the function f encapsulated in class T for the dynamic i converted to a static d.

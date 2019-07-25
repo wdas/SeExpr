@@ -29,16 +29,19 @@
 #include <QTextEdit>
 #include <QWheelEvent>
 
-class ExprControlCollection;
 class QToolButton;
 class QVBoxLayout;
 class QHBoxLayout;
 class QTextEdit;
-class ExprHighlighter;
 class QCompleter;
+class QLabel;
+
+namespace SeExpr2 {
+
+class ExprControlCollection;
+class ExprHighlighter;
 class ExprCompletionModel;
 class ExprShortTextEdit;
-class QLabel;
 class ExprPopupDoc;
 class ExprDialog;
 
@@ -49,6 +52,7 @@ class ExprShortEdit : public QWidget {
     QTimer* controlRebuildTimer;
     QToolButton* editDetail;
     ExprControlCollection* controls;
+    bool _expanded;
     ExprDialog* _dialog;
     QVBoxLayout* vboxlayout;
     QHBoxLayout* hboxlayout;
@@ -58,7 +62,7 @@ class ExprShortEdit : public QWidget {
     bool _applyOnSelect;
 
   public:
-    ExprShortEdit(QWidget* parent, bool expanded = true, bool applyOnSelect = true);
+    ExprShortEdit(QWidget* parent, bool expanded = true, bool applyOnSelect = false);
     virtual ~ExprShortEdit();
 
     // Gets the string that is in the edit widget
@@ -92,8 +96,17 @@ class ExprShortEdit : public QWidget {
     //  Pass -1 to not show the editor
     void showDetails(int idx);
 
-    virtual QSize sizeHint() const { return QSize(400, 50); }
+    virtual QSize sizeHint() const
+    {
+        return QSize(400, 25);
+    }
     virtual void hideErrors(bool hidden, const std::string& err);
+
+    bool expanded()
+    {
+        return _expanded;
+    }
+    int numControls() const;
 
     // Exposed via Python
     QToolButton* expandButton;
@@ -102,8 +115,7 @@ class ExprShortEdit : public QWidget {
   protected:
     void checkErrors();
 
-  protected
-slots:
+  protected slots:
     virtual void detailPressed();
     virtual void expandPressed();
     virtual void textFinished();
@@ -113,7 +125,7 @@ slots:
     virtual void expressionApplied();
     virtual void dialogClosed();
 
-signals:
+  signals:
     void exprChanged();
 };
 
@@ -143,15 +155,18 @@ class ExprShortTextEdit : public QTextEdit {
     virtual void focusOutEvent(QFocusEvent* e);
     virtual void mousePressEvent(QMouseEvent* event);
     virtual void mouseDoubleClickEvent(QMouseEvent* event);
-    virtual void wheelEvent(QWheelEvent* e) { e->ignore(); }
+    virtual void wheelEvent(QWheelEvent* e)
+    {
+        e->ignore();
+    }
 
     void setColor(bool editing);
     void finishEdit();
-signals:
+  signals:
     void editingFinished();
-  private
-slots:
+  private slots:
     void insertCompletion(const QString& completion);
 };
+}
 
 #endif

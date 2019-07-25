@@ -19,23 +19,61 @@
 * @author  jlacewel
 */
 
-#include "ExprBrowser.h"
-#include "ExprGrapher2d.h"
-#include "ExprDialog.h"
-#include "ExprControlCollection.h"
-
-#include <QDir>
-#include <QApplication>
-#include <QLabel>
 #include <iostream>
 #include <fstream>
 
+#include <QDir>
+#include <QLabel>
+
+#include "ExprBrowser.h"
+#include "ExprControlCollection.h"
+#include "ExprDialog.h"
+#include "ExprGrapher2d.h"
+#include "ExprHelp.h"
+#include "ExprWidgets.h"
+
 #define P3D_CONFIG_ENVVAR "P3D_CONFIG_PATH"
 
-ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0) {
+using namespace SeExpr2;
+
+ClickableLabel::ClickableLabel(QWidget* parent) : QLabel(parent)
+{
+}
+
+ClickableLabel::ClickableLabel(const QString& label) : QLabel(label)
+{
+}
+
+void ClickableLabel::enterEvent(QEvent* event)
+{
+    pressed = false;
+}
+
+void ClickableLabel::leaveEvent(QEvent* event)
+{
+    pressed = false;
+}
+
+void ClickableLabel::mousePressEvent(QMouseEvent* event)
+{
+    pressed = true;
+}
+
+void ClickableLabel::mouseReleaseEvent(QMouseEvent* event)
+{
+    if (pressed) {
+        emit(clicked());
+    }
+    pressed = false;
+}
+
+ExprDialog::ExprDialog(QWidget* parent, bool graphMode) : QDialog(parent), _currentEditorIdx(0), currhistitem(0)
+{
+    graph = graphMode;
     this->setMinimumWidth(600);
     QVBoxLayout* rootLayout = new QVBoxLayout(0);
     rootLayout->setMargin(2);
+    rootLayout->setSpacing(2);
     this->setLayout(rootLayout);
 
     showEditorTimer = new QTimer();
@@ -49,6 +87,8 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0) 
 
     QWidget* previewLibraryWidget = new QWidget();
     QHBoxLayout* previewLibraryLayout = new QHBoxLayout();
+    previewLibraryLayout->setSpacing(2);
+    previewLibraryLayout->setMargin(2);
     previewLibraryWidget->setLayout(previewLibraryLayout);
     topTabWidget->addTab(previewLibraryWidget, "Preview / Library");
 
@@ -63,22 +103,54 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0) 
     leftWidget->setFixedWidth(450);
     QVBoxLayout* leftLayout = new QVBoxLayout();
     leftLayout->setMargin(0);
+    leftLayout->setSpacing(2);
     leftWidget->setLayout(leftLayout);
     QHBoxLayout* previewLayout = new QHBoxLayout();
-    grapher = new ExprGrapherWidget(this, 200, 200);
-    previewLayout->addWidget(grapher, 0);
-    previewCommentLabel = new QLabel();
-    previewLayout->addWidget(previewCommentLabel, 1, Qt::AlignLeft | Qt::AlignTop);
+    int widgetIdx = 0;
+    grapher = new ExprGrapherWidget(this, 256, 256);
+    if (graph) {  // flag for controlling whether expr gets eval'd for image preview
+        previewLayout->addWidget(grapher, widgetIdx);
+        widgetIdx += 1;
+    }
     leftLayout->addLayout(previewLayout);
-    previewLibraryLayout->addWidget(leftWidget);
+    previewLibraryLayout->addWidget(leftWidget, widgetIdx);
 
     // setup button bar
     // QWidget* buttonBarWidget=new QWidget();
     QHBoxLayout* buttonBarLayout = new QHBoxLayout();
     // buttonBarWidget->setLayout(buttonBarLayout);
     buttonBarLayout->setMargin(1);
-    previewButton = new QPushButton("Preview");
-    buttonBarLayout->addWidget(previewButton);
+    if (graph) {
+        previewButton = new QPushButton("Preview");
+        buttonBarLayout->addWidget(previewButton);
+    }
+    QToolButton* histBack = toolButton(this);
+    buttonBarLayout->addWidget(histBack);
+    histBack->setIcon(QIcon(SEEXPR_EDITOR_ICON_PATH "back.png"));
+    histBack->setToolTip("Previous In History");
+    histBack->setEnabled(0);
+    histBack->setFixedSize(24, 24);
+    histBack->setIconSize(QSize(16, 16));
+    histBack->setFocusPolicy(Qt::NoFocus);
+    QToolButton* histForw = toolButton(this);
+    buttonBarLayout->addWidget(histForw);
+    histForw->setIcon(QIcon(SEEXPR_EDITOR_ICON_PATH "forward.png"));
+    histForw->setToolTip("Next In History");
+    histForw->setEnabled(0);
+    histForw->setFixedSize(24, 24);
+    histForw->setIconSize(QSize(16, 16));
+    histForw->setFocusPolicy(Qt::NoFocus);
+    history.push_back("");
+    connect(this, SIGNAL(backwardAvailable(bool)), histBack, SLOT(setEnabled(bool)));
+    connect(this, SIGNAL(forwardAvailable(bool)), histForw, SLOT(setEnabled(bool)));
+    QToolButton* reloadExprPb = toolButton(this);
+    reloadExprPb->setIcon(QIcon(SEEXPR_EDITOR_ICON_PATH "reload.png"));
+    reloadExprPb->setFixedSize(24, 24);
+    reloadExprPb->setToolTip("Reload current expression");
+    buttonBarLayout->addWidget(reloadExprPb);
+    connect(reloadExprPb, SIGNAL(clicked()), this, SLOT(reloadExpression()));
+
+    buttonBarLayout->addStretch(1);
     saveButton = new QPushButton("Save");
     buttonBarLayout->addWidget(saveButton);
     saveAsButton = new QPushButton("Save As");
@@ -93,9 +165,9 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0) 
     controls = new ExprControlCollection();
 
     // controls
+    // leftLayout->addWidget(controls, 1);
     QScrollArea* scrollArea = new QScrollArea();
     scrollArea->setWidget(controls);
-    // scrollArea->setWidget(new QLabel("test\nweird\nfds\nfdsahsha\nfsdajdlsa\nfasdjjhsafd\nfasdhjdfsa\nfdasjdfsha"));
     scrollArea->setFocusPolicy(Qt::NoFocus);
     scrollArea->setMinimumHeight(100);
     scrollArea->setFixedWidth(450);
@@ -106,7 +178,8 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0) 
     editor = new ExprEditor(this, controls);
     connect(editor, SIGNAL(apply()), SLOT(verifiedApply()));
     connect(editor, SIGNAL(preview()), SLOT(previewExpression()));
-    connect(grapher, SIGNAL(preview()), SLOT(previewExpression()));
+    if (graph)
+        connect(grapher, SIGNAL(preview()), SLOT(previewExpression()));
     bottomLayout->addWidget(editor);
 
     // make expression library browser
@@ -115,7 +188,12 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0) 
 
     // dialog buttons
     QHBoxLayout* buttonLayout = new QHBoxLayout(0);
-    buttonLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::MinimumExpanding, QSizePolicy::Minimum));
+    errorCountLabel = new ClickableLabel("0 Errors");
+    warningCountLabel = new ClickableLabel("0 Warnings");
+    buttonLayout->addWidget(errorCountLabel, 0);
+    buttonLayout->addSpacing(10);
+    buttonLayout->addWidget(warningCountLabel, 0);
+    buttonLayout->addStretch(1);
     applyButton = new QPushButton("Apply");
     buttonLayout->addWidget(applyButton);
     acceptButton = new QPushButton("Accept");
@@ -127,54 +205,72 @@ ExprDialog::ExprDialog(QWidget* parent) : QDialog(parent), _currentEditorIdx(0) 
     connect(cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
     rootLayout->addLayout(buttonLayout);
 
-    setupHelp(topTabWidget);
+    exprHelp = new ExprHelp();
+    topTabWidget->addTab(exprHelp, "Help");
 
     // connect buttons
-    connect(previewButton, SIGNAL(clicked()), SLOT(previewExpression()));
+    connect(errorCountLabel, SIGNAL(clicked()), editor, SLOT(nextError()));
+    connect(warningCountLabel, SIGNAL(clicked()), editor, SLOT(nextError()));
+    if (graph)
+        connect(previewButton, SIGNAL(clicked()), SLOT(previewExpression()));
     connect(clearButton, SIGNAL(clicked()), SLOT(clearExpression()));
     connect(saveButton, SIGNAL(clicked()), browser, SLOT(saveExpression()));
     connect(saveAsButton, SIGNAL(clicked()), browser, SLOT(saveExpressionAs()));
     connect(saveLocalButton, SIGNAL(clicked()), browser, SLOT(saveLocalExpressionAs()));
+    connect(histBack, SIGNAL(clicked()), SLOT(histBackward()));
+    connect(histForw, SIGNAL(clicked()), SLOT(histForward()));
+    connect(browser, SIGNAL(selectionChanged(const QString&)), SLOT(selectionChanged(const QString&)));
 }
 
-void ExprDialog::showEditor(int idx) {
+void ExprDialog::showEditor(int idx)
+{
     _currentEditorIdx = idx;
     showEditorTimer->setSingleShot(true);
     showEditorTimer->start();
 }
 
-void ExprDialog::_showEditor() { controls->showEditor(_currentEditorIdx); }
+void ExprDialog::_showEditor()
+{
+    controls->showEditor(_currentEditorIdx);
+}
 
-void ExprDialog::show() {
+void ExprDialog::show()
+{
     // populate the expressions
-    browser->getExpressionDirs();
+    browser->populate();
     browser->expandAll();
     QDialog::show();
 }
 
-int ExprDialog::exec() {
+int ExprDialog::exec()
+{
     // populate the expressions
-    browser->getExpressionDirs();
+    browser->populate();
     browser->expandAll();
     return QDialog::exec();
 }
 
-void ExprDialog::keyPressEvent(QKeyEvent* event) {
-    if (event->key() == Qt::Key_Escape) return;
+void ExprDialog::keyPressEvent(QKeyEvent* event)
+{
+    if (event->key() == Qt::Key_Escape)
+        return;
     return QDialog::keyPressEvent(event);
 }
 
-void ExprDialog::closeEvent(QCloseEvent* event) {
+void ExprDialog::closeEvent(QCloseEvent* event)
+{
     emit dialogClosed();
     QDialog::closeEvent(event);
 }
 
-void ExprDialog::reject() {
+void ExprDialog::reject()
+{
     emit dialogClosed();
     QDialog::reject();
 }
 
-void ExprDialog::verifiedApply() {
+void ExprDialog::verifiedApply()
+{
     applyExpression();
     if (grapher->expr.isValid()) {
         emit expressionApplied();
@@ -186,11 +282,14 @@ void ExprDialog::verifiedApply() {
         msgBox.addButton("Cancel", QMessageBox::AcceptRole);
         int ret = msgBox.exec();
         Q_UNUSED(ret);
-        if (msgBox.clickedButton() == okButton) emit expressionApplied();
+        if (msgBox.clickedButton() == okButton)
+            emit expressionApplied();
     }
+    histAdd();
 }
 
-void ExprDialog::verifiedAccept() {
+void ExprDialog::verifiedAccept()
+{
     applyExpression();
     if (grapher->expr.isValid()) {
         emit expressionApplied();
@@ -212,126 +311,149 @@ void ExprDialog::verifiedAccept() {
     }
 }
 
-void ExprDialog::setupHelp(QTabWidget* tab) {
-    QWidget* browserspace = new QWidget(tab);
-    helpBrowser = new QTextBrowser(browserspace);
-    tab->addTab(browserspace, "Help");
+void ExprDialog::reloadExpression()
+{
+    if (currentexprfile == "")
+        return;
 
-    // Locate help docs relative to location of the app itself
-    QFile* helpDoc = new QFile(QCoreApplication::applicationDirPath() + "/../share/doc/SeExpr2/SeExpressions.html");
-    if (helpDoc->exists()) {
-        QString sheet =
-            "body {background-color: #eeeeee; color: #000000;} \na {color: #3333ff; text-decoration: none;}\n";
-        helpBrowser->document()->setDefaultStyleSheet(sheet);
-        helpBrowser->setSource(helpDoc->fileName());
-    }
-
-    QPushButton* backPb = new QPushButton("Back");
-    // backPb->setIcon(QApplication::style()->standardIcon(QStyle::SP_ArrowLeft));
-    backPb->setEnabled(false);
-    QPushButton* forwardPb = new QPushButton("Forward");
-    //    forwardPb->setIcon(QApplication::style()->standardIcon(QStyle::SP_ArrowRight));
-    forwardPb->setEnabled(false);
-
-    QVBoxLayout* helpLayout = new QVBoxLayout(browserspace);
-    QHBoxLayout* helpPbLayout = new QHBoxLayout;
-    helpLayout->addLayout(helpPbLayout);
-    helpPbLayout->addWidget(backPb);
-    helpPbLayout->addWidget(forwardPb);
-    // helpPbLayout->addItem(new QSpacerItem(0,0, QSizePolicy::MinimumExpanding,
-    //                            QSizePolicy::Minimum));
-    QHBoxLayout* findBar = new QHBoxLayout();
-    helpPbLayout->addWidget(new QLabel("Find"), /*stretch*/ false);
-    helpFindBox = new QLineEdit;
-    helpPbLayout->addWidget(helpFindBox, /*stretch*/ false);
-    connect(helpFindBox, SIGNAL(returnPressed()), this, SLOT(findNextInHelp()));
-    QPushButton* nextButton = new QPushButton("Find Next");
-    QPushButton* prevButton = new QPushButton("Find Prev");
-    helpPbLayout->addWidget(nextButton, /*stretch*/ false);
-    helpPbLayout->addWidget(prevButton, /*stretch*/ false);
-    connect(nextButton, SIGNAL(clicked()), this, SLOT(findNextInHelp()));
-    connect(prevButton, SIGNAL(clicked()), this, SLOT(findPrevInHelp()));
-    helpPbLayout->addLayout(findBar, /*stretch*/ false);
-    helpLayout->addWidget(helpBrowser, /*stretch*/ true);
-    helpBrowser->setMinimumHeight(120);
-
-    // wire up help browser forward/back buttons
-    connect(backPb, SIGNAL(clicked()), helpBrowser, SLOT(backward()));
-    connect(forwardPb, SIGNAL(clicked()), helpBrowser, SLOT(forward()));
-    connect(helpBrowser, SIGNAL(backwardAvailable(bool)), backPb, SLOT(setEnabled(bool)));
-    connect(helpBrowser, SIGNAL(forwardAvailable(bool)), forwardPb, SLOT(setEnabled(bool)));
+    std::ifstream file(currentexprfile.toStdString().c_str());
+    std::string fileContents((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    editor->setExpr(fileContents, false);
+    histAdd();
 }
 
-void ExprDialog::findHelper(QTextDocument::FindFlags flags) {
-    QTextDocument* doc = helpBrowser->document();
-    if (prevFind != helpFindBox->text()) {
-        prevFind = helpFindBox->text();
-        helpBrowser->setTextCursor(QTextCursor(doc));
-    }
-    QTextCursor blah = doc->find(helpFindBox->text(), helpBrowser->textCursor(), flags);
-    helpBrowser->setTextCursor(blah);
-}
-
-void ExprDialog::findNextInHelp() { findHelper(0); }
-
-void ExprDialog::findPrevInHelp() { findHelper(QTextDocument::FindBackward); }
-
-void ExprDialog::previewExpression() {
+void ExprDialog::previewExpression()
+{
     applyExpression();
     emit preview();
 }
 
-void ExprDialog::applyExpression() {
+void ExprDialog::applyExpression()
+{
     editor->clearErrors();
     // set new expression
     grapher->expr.setExpr(editor->getExpr());
-    grapher->update();
+    grapher->expr.setDesiredReturnType(SeExpr2::ExprType().FP(3));
+    if (graph)
+        grapher->update();
 
-    // set the label widget to mention that variables will not be previewed
+    int numWarnings = 0;
+    int numErrors = 0;
+    // set the label widget to mention that functions and variables will not be previewed
     bool empty = true;
-    if (grapher->expr.varmap.size() > 0) {
-        std::stringstream s;
-        s << "<b>Variables not supported in preview (assumed zero):</b><br>";
-        int count = 0;
-        for (BasicExpression::VARMAP::iterator i = grapher->expr.varmap.begin(); i != grapher->expr.varmap.end(); ++i) {
-            count++;
-            s << "$" << i->first << " ";
-            if (count % 4 == 0) s << "<br>";
+    if (grapher->expr.varmap.size() > 0 || grapher->expr.funcmap.size() > 0) {
+        if (grapher->expr.varmap.size() > 0) {
+            for (BasicExpression::VARMAP::iterator i = grapher->expr.varmap.begin(); i != grapher->expr.varmap.end();
+                 ++i) {
+                std::stringstream ss;
+                ss << "Warning: variable \"" << i->first << "\" not defined, assumed zero";
+                editor->addError(-1, -1, ss.str());
+                ++numWarnings;
+            }
+            empty = false;
         }
-        previewCommentLabel->setText(s.str().c_str());
-        empty = false;
-    } else
-        previewCommentLabel->setText("");
-    // set the label widget to mention that variables will not be previewed
-    if (grapher->expr.funcmap.size() > 0) {
-        std::stringstream s;
-        s << "<b>Functions not supported in preview (assumed zero):</b><br>";
-        int count = 0;
-        for (BasicExpression::FUNCMAP::iterator i = grapher->expr.funcmap.begin(); i != grapher->expr.funcmap.end();
-             ++i) {
-            count++;
-            s << "" << i->first << "() ";
-            if (count % 4 == 0) s << "<br>";
+        if (grapher->expr.funcmap.size() > 0) {
+            for (BasicExpression::FUNCMAP::iterator i = grapher->expr.funcmap.begin(); i != grapher->expr.funcmap.end();
+                 ++i) {
+                std::stringstream ss;
+                ss << "Warning: function \"" << i->first << "\" not defined, assumed zero";
+                editor->addError(-1, -1, ss.str());
+                ++numWarnings;
+            }
+            empty = false;
         }
-        previewCommentLabel->setText(s.str().c_str());
-        empty = false;
     }
-    if (empty) previewCommentLabel->setText("");
 
     // put errors into editor module
-    bool valid = grapher->expr.isValid();
-    if (!valid) {
+    if (!grapher->exprValid()) {
         const std::vector<SeExpr2::Expression::Error>& errors = grapher->expr.getErrors();
         for (unsigned int i = 0; i < errors.size(); i++) {
-            editor->addError(errors[i].startPos, errors[i].endPos, errors[i].error);
+            editor->addError(errors[i].startPos, errors[i].endPos, std::string("Error: " + errors[i].error));
+            ++numErrors;
         }
-        editor->nextError();
     }
+    warningCountLabel->setText(QString("%1 Warnings").arg(numWarnings));
+    errorCountLabel->setText(QString("%1 Errors").arg(numErrors));
 }
 
-void ExprDialog::clearExpression() {
+void ExprDialog::clearExpression()
+{
     browser->clearSelection();
     editor->setExpr("", false);
-    grapher->expr.setExpr("");
-    grapher->update();
+    applyExpression();
+}
+
+void removeDuplicates(QStringList& strlist)
+{
+    if (strlist.size() < 2)
+        return;
+    QStringList::Iterator it = strlist.begin();
+    QString last = *it;
+    std::vector<QStringList::Iterator> deletelist;
+    for (++it; it != strlist.end(); ++it) {
+        if (*it == last)
+            deletelist.push_back(it);
+        last = *it;
+    }
+    for (int i = 0; i < deletelist.size(); i++)
+        strlist.erase(deletelist[i]);
+}
+
+void ExprDialog::enableBackForwards()
+{
+    // std::cout << currhistitem << " " << history.size() << "\n";
+    if (currhistitem <= 0 || history.size() < 2)
+        emit backwardAvailable(false);
+    if (currhistitem > 0 && history.size() >= 2)
+        emit backwardAvailable(true);
+
+    if (currhistitem >= history.size() - 1 || history.size() < 2)
+        emit forwardAvailable(false);
+    if (currhistitem < history.size() - 1 && history.size() >= 2)
+        emit forwardAvailable(true);
+}
+void ExprDialog::selectionChanged(const QString& str)
+{
+    currentexprfile = str;
+    histAdd();
+    previewExpression();
+}
+
+void ExprDialog::histBackward()
+{
+    if (history.isEmpty() || currhistitem <= 0)
+        return;
+    QString oldtext = editor->getExpr().c_str();
+    if (currhistitem == history.size() - 1)
+        history[currhistitem] = editor->getExpr().c_str();
+    currhistitem--;
+    editor->setExpr(history[currhistitem].toStdString());
+    emit forwardAvailable(true);
+    removeDuplicates(history);
+    currhistitem = std::min(currhistitem, (int)history.size() - 1);
+    enableBackForwards();
+    if (oldtext == editor->getExpr().c_str() && currhistitem > 0)
+        histBackward();
+}
+
+void ExprDialog::histForward()
+{
+    if (history.isEmpty() || currhistitem >= history.size() - 1)
+        return;
+    currhistitem++;
+    editor->setExpr(history[currhistitem].toStdString());
+    enableBackForwards();
+}
+
+void ExprDialog::histAdd()
+{
+    if (history.isEmpty() || editor->getExpr() == "")
+        return;
+
+    history.last() = editor->getExpr().c_str();
+    currhistitem = history.size();
+    history.push_back("");
+    removeDuplicates(history);
+    currhistitem = std::min(currhistitem, (int)history.size() - 1);
+    enableBackForwards();
 }

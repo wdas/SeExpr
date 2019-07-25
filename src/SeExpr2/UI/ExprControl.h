@@ -50,6 +50,8 @@ namespace animlib {
 class AnimCurve;
 }
 
+namespace SeExpr2 {
+
 /// Base class for all controls for Expressions
 class ExprControl : public QWidget {
     Q_OBJECT;
@@ -65,22 +67,26 @@ class ExprControl : public QWidget {
 
   public:
     ExprControl(int id, Editable* editable, bool showColorLink);
-    virtual ~ExprControl() {}
+    virtual ~ExprControl()
+    {
+    }
 
     /// Interface for getting the color (used for linked color picking)
-    virtual QColor getColor() { return QColor(); }
+    virtual QColor getColor()
+    {
+        return QColor();
+    }
     /// Interface for setting the color (used for linked color picking)
-    virtual void setColor(QColor color) {Q_UNUSED(color)};
+    virtual void setColor(QColor color){Q_UNUSED(color)};
 
-signals:
+  signals:
     // sends that the control has been changed to the control collection
     void controlChanged(int id);
     // sends the new color to the control collection
     void linkColorEdited(int id, QColor color);
     // sends that a color link is desired to the control collection
     void linkColorLink(int id);
-  public
-slots:
+  public slots:
     // receives that the link should be changed to the given state (0=off,1=on)
     void linkStateChange(int state);
 
@@ -91,7 +97,8 @@ slots:
 
 /// clamp val to the specified range [minval,maxval]
 template <class T, class T2, class T3>
-T clamp(const T val, const T2 minval, const T3 maxval) {
+T clamp(const T val, const T2 minval, const T3 maxval)
+{
     if (val < minval)
         return minval;
     else if (val > maxval)
@@ -105,16 +112,17 @@ class ExprLineEdit : public QLineEdit {
     Q_OBJECT
   public:
     ExprLineEdit(int id, QWidget* parent);
-    virtual void setText(const QString& t) {
-        if (_signaling) return;
+    virtual void setText(const QString& t)
+    {
+        if (_signaling)
+            return;
         QLineEdit::setText(t);
     }
 
-signals:
+  signals:
     void textChanged(int id, const QString& text);
 
-  private
-slots:
+  private slots:
     void textChangedCB(const QString& text);
 
   private:
@@ -126,20 +134,29 @@ slots:
 class ExprSlider : public QSlider {
     Q_OBJECT
   public:
-    ExprSlider(QWidget* parent = 0) : QSlider(parent) {}
-    ExprSlider(Qt::Orientation orientation, QWidget* parent = 0) : QSlider(orientation, parent) {}
+    ExprSlider(QWidget* parent = 0) : QSlider(parent)
+    {
+    }
+    ExprSlider(Qt::Orientation orientation, QWidget* parent = 0) : QSlider(orientation, parent)
+    {
+    }
     virtual void mousePressEvent(QMouseEvent* e);
     virtual void mouseMoveEvent(QMouseEvent* e);
     virtual void paintEvent(QPaintEvent* e);
-    virtual void leaveEvent(QEvent* event) {
+    virtual void leaveEvent(QEvent* event)
+    {
         Q_UNUSED(event);
         update();
     }
-    virtual void enterEvent(QEvent* event) {
+    virtual void enterEvent(QEvent* event)
+    {
         Q_UNUSED(event);
         update();
     }
-    virtual void wheelEvent(QWheelEvent* e) { e->ignore(); }
+    virtual void wheelEvent(QWheelEvent* e)
+    {
+        e->ignore();
+    }
 };
 
 /// Channel Slider (i.e. for colors)
@@ -150,15 +167,23 @@ class ExprChannelSlider : public QWidget {
     virtual void paintEvent(QPaintEvent* e);
     virtual void mousePressEvent(QMouseEvent* e);
     virtual void mouseMoveEvent(QMouseEvent* e);
-    virtual void wheelEvent(QWheelEvent* e) { e->ignore(); }
-    float value() const { return _value; }
-    void setDisplayColor(QColor c) { _col = c; }
+    virtual void wheelEvent(QWheelEvent* e)
+    {
+        e->ignore();
+    }
+    float value() const
+    {
+        return _value;
+    }
+    void setDisplayColor(QColor c)
+    {
+        _col = c;
+    }
 
-  public
-slots:
+  public slots:
     void setValue(float value);
 
-signals:
+  signals:
     void valueChanged(int id, float value);
 
   private:
@@ -177,17 +202,20 @@ class NumberControl : public ExprControl {
     ExprSlider* _slider;
     /// Text box for the number
     ExprLineEdit* _edit;
+    QCheckBox* _checkBox;
+    bool _isBool;
 
   public:
     NumberControl(int id, NumberEditable* number);
 
   private:
+    bool isBool();
     /// Update the model with the value and notify the collection
     void setValue(float value);
     /// Update values in slider and textbox  given what the model contains
     void updateControl();
-  private
-slots:
+  private slots:
+    void checkChanged(bool checked);
     void sliderChanged(int val);
     void editChanged(int id, const QString& text);
 };
@@ -216,8 +244,7 @@ class VectorControl : public ExprControl {
     void setValue(int id, float value);
     /// update the individual slider and eidt box controls
     void updateControl();
-  private
-slots:
+  private slots:
     void sliderChanged(int id, float val);
     void editChanged(int id, const QString& text);
     void swatchChanged(QColor color);
@@ -234,11 +261,12 @@ class StringControl : public ExprControl {
 
   public:
     StringControl(int id, StringEditable* stringEditable);
+    void dragEnterEvent(QDragEnterEvent* e);
+    void dropEvent(QDropEvent* e);
 
   private:
     void updateControl();
-  private
-slots:
+  private slots:
     void textChanged(const QString& newText);
     void fileBrowse();
     void directoryBrowse();
@@ -255,8 +283,7 @@ class CurveControl : public ExprControl {
 
   public:
     CurveControl(int id, CurveEditable* stringEditable);
-  private
-slots:
+  private slots:
     void curveChanged();
 };
 
@@ -273,8 +300,7 @@ class CCurveControl : public ExprControl {
     CCurveControl(int id, ColorCurveEditable* stringEditable);
     QColor getColor();
     void setColor(QColor color);
-  private
-slots:
+  private slots:
     void curveChanged();
 };
 
@@ -291,12 +317,10 @@ class AnimCurveControl : public ExprControl {
     typedef void (*AnimCurveCallback)(const std::string&, animlib::AnimCurve& curve);
     static void setAnimCurveCallback(AnimCurveCallback callback);
 
-  public
-slots:
+  public slots:
     void editGraphClicked();
 
-  private
-slots:
+  private slots:
     void refreshClicked();
 
   private:
@@ -314,8 +338,7 @@ class ColorSwatchControl : public ExprControl {
 
   public:
     ColorSwatchControl(int id, ColorSwatchEditable* swatchEditable);
-  private
-slots:
+  private slots:
     void buildSwatchWidget();
     void colorChanged(int index, SeExpr2::Vec3d value);
     void colorAdded(int index, SeExpr2::Vec3d value);
@@ -336,9 +359,9 @@ class DeepWaterControl : public ExprControl {
 
   public:
     DeepWaterControl(int id, DeepWaterEditable* stringEditable);
-  private
-slots:
+  private slots:
     void deepWaterChanged();
 };
+}
 
 #endif

@@ -24,6 +24,8 @@
 #include <QPalette>
 #include <iostream>
 
+namespace SeExpr2 {
+
 class ExprHighlighter : public QSyntaxHighlighter {
     struct HighlightingRule {
         QRegExp pattern;
@@ -32,22 +34,31 @@ class ExprHighlighter : public QSyntaxHighlighter {
     QVector<HighlightingRule> highlightingRules;
     QTextCharFormat singleLineCommentFormat;
     QTextCharFormat variableFormat;
+    QTextCharFormat functionFormat;
     QTextCharFormat numberFormat;
     QTextCharFormat operatorFormat;
 
     int lightness;
 
   public:
-    ExprHighlighter(QTextDocument* parent) : QSyntaxHighlighter(parent), lightness(130) { init(); }
+    ExprHighlighter(QTextDocument* parent) : QSyntaxHighlighter(parent), lightness(130)
+    {
+        init();
+    }
 
-    ExprHighlighter(QTextEdit* edit) : QSyntaxHighlighter(edit), lightness(130) { init(); }
+    ExprHighlighter(QTextEdit* edit) : QSyntaxHighlighter(edit), lightness(130)
+    {
+        init();
+    }
 
-    void fixStyle(const QPalette& palette) {
+    void fixStyle(const QPalette& palette)
+    {
         lightness = palette.color(QPalette::Base).value() < 127 ? 250 : 130;
         init();
     }
 
-    void init() {
+    void init()
+    {
         HighlightingRule rule;
         highlightingRules.clear();
 
@@ -68,18 +79,24 @@ class ExprHighlighter : public QSyntaxHighlighter {
 
         variableFormat.setForeground(QColor::fromHsv(200, 153, lightness));
         // variableFormat.setFontWeight(QFont::Bold);
-        rule.pattern = QRegExp("\\$[A-Za-z][A-Za-z0-9]*\\b");
+        rule.pattern = QRegExp("\\$?[A-Za-z_][A-Za-z0-9_.]*\\b(?!\\()");
         rule.format = variableFormat;
         highlightingRules.append(rule);
 
-        singleLineCommentFormat.setForeground(QColor::fromHsv(210, 128, lightness));
+        functionFormat.setForeground(QColor::fromHsv(140, 153, lightness));
+        rule.pattern = QRegExp("[A-Za-z][A-Za-z0-9]*\\b(?=\\()");
+        rule.format = functionFormat;
+        highlightingRules.append(rule);
+
+        singleLineCommentFormat.setForeground(QColor::fromHsv(210, 64, lightness * .5));
         rule.pattern = QRegExp("#[^\n]*");
         rule.format = singleLineCommentFormat;
         highlightingRules.append(rule);
     }
 
-    void highlightBlock(const QString& text) {
-        foreach(HighlightingRule rule, highlightingRules) {
+    void highlightBlock(const QString& text)
+    {
+        foreach (HighlightingRule rule, highlightingRules) {
             QRegExp expression(rule.pattern);
             int index = text.indexOf(expression);
             while (index >= 0) {
@@ -91,4 +108,6 @@ class ExprHighlighter : public QSyntaxHighlighter {
         setCurrentBlockState(0);
     }
 };
+}
+
 #endif

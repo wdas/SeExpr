@@ -21,6 +21,9 @@ endif()
 # Other package dependencies...
 find_package(OpenGL)
 
+add_definitions(-DSEEXPR_EDITOR_INSTALL_PATH="${CMAKE_INSTALL_PREFIX}")
+add_definitions(-DSEEXPR_EDITOR_ICON_PATH="${CMAKE_INSTALL_PREFIX}/share/SeExpr2/img/")
+
 if (Qt5_FOUND OR QT4_FOUND)
 
     BuildParserScanner(ExprSpecParserLex ExprSpecParser ExprSpec
@@ -29,11 +32,12 @@ if (Qt5_FOUND OR QT4_FOUND)
     set(EDITOR_MOC_HDRS ExprBrowser.h ExprColorCurve.h
         ExprColorSwatch.h ExprControlCollection.h
         ExprControl.h ExprCurve.h ExprDialog.h ExprEditor.h
-        ExprFileDialog.h ExprGrapher2d.h ExprPopupDoc.h
+        ExprFileDialog.h ExprGrapher2d.h ExprHelp.h ExprPopupDoc.h
         ExprShortEdit.h ExprDeepWater.h)
 
     set(EDITOR_CPPS ExprFileDialog.cpp ExprControl.cpp
-        ExprEditor.cpp ExprMain.cpp ExprShortEdit.cpp
+        ExprEditor.cpp ExprShortEdit.cpp
+        ExprWidgets.cpp ExprHelp.cpp
         ExprCurve.cpp  ExprColorCurve.cpp ExprColorSwatch.cpp
         EditableExpression.cpp ExprPopupDoc.cpp
         ExprCompletionModel.cpp ExprDialog.cpp
@@ -61,7 +65,7 @@ if (Qt5_FOUND OR QT4_FOUND)
         else()
             qt4_wrap_cpp(CE_MOC_SRCS ${CE_MOC_HDRS})
         endif()
-        set(ANIMLIB_SRCS "${CE_CPPS} ${CE_MOC_SRCS}")
+        set(ANIMLIB_SRCS ${CE_CPPS} ${CE_MOC_SRCS})
     endif()
 
     if (WIN32)
@@ -105,7 +109,7 @@ if (Qt5_FOUND OR QT4_FOUND)
 
     if (DEFINED ANIMLIB_DIR)
         include_directories(${CMAKE_CURRENT_SOURCE_DIR}/CE)
-        target_link_libraries(SeExpr2Editor animlib)
+        target_link_libraries(SeExpr2Editor animlib tbb)
     endif()
 
     if (DEFINED DERR_DIR)

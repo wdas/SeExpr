@@ -23,12 +23,7 @@
     newstring = PyUnicode_DecodeUTF8(sipCpp->c_str(), sipCpp->length(), NULL);
     if(newstring == NULL) {
         PyErr_Clear();
-
-#if PY_MAJOR_VERSION < 3
         newstring = PyString_FromString(sipCpp->c_str());
-#else
-        newstring = PyUnicode_FromString(sipCpp->c_str());
-#endif
     }
     return newstring;
 %End
@@ -39,31 +34,21 @@
      // If argument is a Unicode string, just decode it to UTF-8
      // If argument is a Python string, assume it's UTF-8
      if (sipIsErr == NULL)
-#if PY_MAJOR_VERSION < 3
                 return (PyString_Check(sipPy) || PyUnicode_Check(sipPy));
-#else
-                return PyUnicode_Check(sipPy);
-#endif
         if (sipPy == Py_None) {
                 *sipCppPtr = new std::string;
                 return 1;
         }
         if (PyUnicode_Check(sipPy))        {
         PyObject* s = PyUnicode_AsEncodedString(sipPy, "UTF-8", "");
-#if PY_MAJOR_VERSION < 3
         *sipCppPtr = new std::string(PyString_AS_STRING(s));
-#else
-        *sipCppPtr = new std::string(PyUnicode_AS_DATA(s));
-#endif
         Py_DECREF(s);
         return 1;
         }
-#if PY_MAJOR_VERSION < 3
         if (PyString_Check(sipPy)) {
         *sipCppPtr = new std::string(PyString_AS_STRING(sipPy));
             return 1;
         }
-#endif
     return 0;
 %End
 };
@@ -71,12 +56,13 @@
 class ExprDialog:QDialog{
 %TypeHeaderCode
 #include "ExprDialog.h"
+using namespace SeExpr2;
 %End
 public:
+    ExprBrowser* browser;
     ExprEditor* editor;
 
-
-    ExprDialog(QWidget* parent /TransferThis/ = NULL);
+    ExprDialog(QWidget* parent /TransferThis/ = NULL, bool graphMode = true);
     std::string getExpressionString();
     void setExpressionString(const std::string&);
     void show();
@@ -94,14 +80,77 @@ public slots:
 class ExprControlCollection:QWidget{
 %TypeHeaderCode
 #include "ExprControlCollection.h"
+using namespace SeExpr2;
 %End
 public:
         ExprControlCollection(QWidget* parent /TransferThis/=NULL);
+        static void setAnimCurveCallback(SIP_PYCALLABLE /AllowNone/);
+%MethodCode
+        {
+            ExprControlCollection::setAnimCurveCallback((a0!=Py_None) ? animCurveCallbackPyWrapper : 0);
+            Py_XDECREF(animCurveCallbackPy);
+            animCurveCallbackPy=a0;
+            Py_INCREF(animCurveCallbackPy);
+        }
+%End
 };
+
+%ModuleCode
+#include <iostream>
+#include <animlib/AnimCurve.h>
+static PyObject* animCurveCallbackPy=0;
+void animCurveCallbackPyWrapper(const std::string& arg,animlib::AnimCurve& curve)
+{
+    PyObject* res;
+    SIP_BLOCK_THREADS;
+    res=sipCallMethod(0,animCurveCallbackPy,"s",arg.c_str());
+    if(res != NULL){
+        const int argsPerItem=9;
+        if(!PyTuple_Check(res))
+            std::cerr<<"python callback for anim curve did not yield tuple of args"<<std::endl;
+        else if((PyTuple_Size(res)-4)%argsPerItem != 0){
+            std::cerr<<"did not get argument count of form 4+9i we got "<<PyTuple_Size(res)<<std::endl;
+        }else{
+            curve.clearKeys();
+            if(PyObject* preInf=PyTuple_GetItem(res,0))
+                if(char* s=PyString_AsString(preInf))
+                    curve.setPreInfinity(curve.stringToInfinityType(s));
+            if(PyObject* postInf=PyTuple_GetItem(res,1))
+                if(char* s=PyString_AsString(postInf)) 
+                    if(s) curve.setPostInfinity(curve.stringToInfinityType(s));
+            if(PyObject* weighted=PyTuple_GetItem(res,2))
+                if(PyLong_Check(weighted))
+                    curve.setWeighted(PyLong_AsLong(weighted));
+            int count=PyTuple_Size(res);
+            for(int base=4;base<count;base+=argsPerItem){
+                // this would be super easy if pytuple supported slicing
+                PyObject* slice=PyTuple_GetSlice(res,base,base+9);
+                double pos,val,inWeight,outWeight,inAngle,outAngle;
+                char *inTang,*outTang;
+                int locked;
+                if(!PyArg_ParseTuple(slice,"ddddddssi",&pos,&val,&inWeight,&outWeight,&inAngle,&outAngle,&inTang,&outTang,&locked)){
+                    std::cerr<<"expreditor: unable to parse anim key\n";
+                }
+                animlib::AnimKeyframe key(pos,val);
+                key.setInWeight(inWeight);key.setOutWeight(outWeight);
+                key.setInAngle(inAngle);key.setOutAngle(outAngle);
+                key.setInTangentType(key.stringToTangentType(inTang));
+                key.setOutTangentType(key.stringToTangentType(outTang));
+                curve.addKey(key);
+            }
+        }
+
+        Py_XDECREF(res);
+        
+    }
+    SIP_UNBLOCK_THREADS;
+}
+%End
 
 class ExprEditor:QWidget{
 %TypeHeaderCode
 #include "ExprEditor.h"
+using namespace SeExpr2;
 %End
 
 public:
@@ -148,6 +197,7 @@ class ExprBrowser : QWidget
 {
 %TypeHeaderCode
 #include "ExprBrowser.h"
+using namespace SeExpr2;
 %End
 
 
@@ -173,6 +223,7 @@ class ExprShortTextEdit:QTextEdit
 {
 %TypeHeaderCode
 #include "ExprShortEdit.h"
+using namespace SeExpr2;
 %End
 
 public:
@@ -187,6 +238,7 @@ class ExprShortEdit:QWidget
 {
 %TypeHeaderCode
 #include "ExprShortEdit.h"
+using namespace SeExpr2;
 %End
 
 public:
@@ -224,6 +276,7 @@ signals:
 class ExprCurve:QWidget{
 %TypeHeaderCode
 #include "ExprCurve.h"
+using namespace SeExpr2;
 %End
 public:
     ExprCurve(QWidget* parent = NULL, QString pLabel = "", QString vLabel = "", QString iLabel = "");
@@ -232,6 +285,7 @@ public:
 class ExprColorCurve:QWidget{
 %TypeHeaderCode
 #include "ExprColorCurve.h"
+using namespace SeExpr2;
 %End
 public:
     ExprColorCurve(QWidget* parent = NULL, QString pLabel = "", QString vLabel = "", QString iLabel = "");
@@ -241,6 +295,7 @@ public:
 class ExprColorSwatchWidget:QWidget{
 %TypeHeaderCode
 #include "ExprColorSwatch.h"
+using namespace SeExpr2;
 %End
 public:
     ExprColorSwatchWidget(bool indexLabel = false, QWidget* parent = NULL);
@@ -249,6 +304,7 @@ public:
 class ExprDeepWater:QWidget{
 %TypeHeaderCode
 #include "ExprDeepWater.h"
+using namespace SeExpr2;
 %End
 public:
     ExprDeepWater(QWidget* parent = NULL);

@@ -27,6 +27,16 @@ enable_testing()
 
 ## Silence installation messages
 set(CMAKE_INSTALL_MESSAGE LAZY)
+# Prefer libglvnd for OpenGL
+set(OpenGL_GL_PREFERENCE GLVND)
+
+## allow more human readable "if then else" constructs
+set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
+set(CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS true)
+set(CMAKE_INSTALL_MESSAGE LAZY)
+
+## Use verbose make file
+#set(CMAKE_VERBOSE_MAKEFILE true)
 
 # macros
 include(GNUInstallDirs)
@@ -122,7 +132,7 @@ if (ENABLE_LLVM_BACKEND)
             set(LLVM_INCLUDE_DIR ${LLVM_INCLUDE_DIRS})
         endif ()
         message(STATUS "LLVM_INCLUDE_DIR =" ${LLVM_INCLUDE_DIR})
-        include_directories(${LLVM_INCLUDE_DIR})
+        include_directories(SYSTEM ${LLVM_INCLUDE_DIR})
 
         if (NOT LLVM_CONFIG_EXECUTABLE STREQUAL "LLVM_CONFIG_EXECUTABLE-NOTFOUND")
             execute_process(
@@ -171,7 +181,11 @@ if (WIN32)
     add_definitions(-DSEEXPR_WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 else()
-    add_definitions(-Wall -Wextra -Wno-unused-parameter)
+    add_definitions(-Wall)
+    add_definitions(-Wextra)
+    add_definitions(-Werror=cast-qual)
+    add_definitions(-Wno-unused-parameter)
+    add_definitions(-Wvla)
     add_definitions(-pthread)
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -g -std=c++11")
@@ -179,9 +193,9 @@ else()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.1")
     endif()
     if (NOT APPLE)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -rdynamic")
+        add_definitions(-rdynamic)
     else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-date-time")
+        add_definitions(-Wno-date-time)
     endif()
 endif()
 
@@ -193,53 +207,78 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 if (ENABLE_QT5)
-    find_package(Qt5 COMPONENTS Core Gui OpenGL)
+    find_package(Qt5 COMPONENTS Core Gui OpenGL Concurrent)
     if (Qt5_FOUND)
         message(STATUS "Qt5 Enabled")
+        message(STATUS "Qt5Concurrent_INCLUDE_DIRS = ${Qt5Concurrent_INCLUDE_DIRS}")
         message(STATUS "Qt5Core_INCLUDE_DIRS = ${Qt5Core_INCLUDE_DIRS}")
         message(STATUS "Qt5Gui_INCLUDE_DIRS = ${Qt5Gui_INCLUDE_DIRS}")
         message(STATUS "Qt5OpenGL_INCLUDE_DIRS = ${Qt5OpenGL_INCLUDE_DIRS}")
-        include_directories(${Qt5Core_INCLUDE_DIRS})
-        include_directories(${Qt5Gui_INCLUDE_DIRS})
-        include_directories(${Qt5OpenGL_INCLUDE_DIRS})
+        include_directories(SYSTEM ${Qt5Concurrent_INCLUDE_DIRS})
+        include_directories(SYSTEM ${Qt5Core_INCLUDE_DIRS})
+        include_directories(SYSTEM ${Qt5Gui_INCLUDE_DIRS})
+        include_directories(SYSTEM ${Qt5OpenGL_INCLUDE_DIRS})
     endif()
 else()
-    find_package(Qt4 COMPONENTS QtCore QtGui QtOpenGL)
+    find_package(Qt4 COMPONENTS QtCore QtGui QtOpenGL QtConcurrent)
     if (Qt4_FOUND)
         message(STATUS "Qt4 Enabled")
         message(STATUS "QT_INCLUDE_DIR = ${QT_INCLUDE_DIR}")
-        include_directories(${QT_INCLUDE_DIR}
-                            ${QT_INCLUDE_DIR}/QtCore
-                            ${QT_INCLUDE_DIR}/QtGui
-                            ${QT_INCLUDE_DIR}/QtOpenGL)
+        include_directories(SYSTEM ${QT_INCLUDE_DIR}
+                                   ${QT_INCLUDE_DIR}/QtConcurrent
+                                   ${QT_INCLUDE_DIR}/QtCore
+                                   ${QT_INCLUDE_DIR}/QtGui
+                                   ${QT_INCLUDE_DIR}/QtOpenGL)
     endif()
 endif()
 
 if (DEFINED ANIMLIB_DIR)
     message(STATUS "ANIMLIB_DIR = ${ANIMLIB_DIR}")
     add_definitions(-DSEEXPR_USE_ANIMLIB)
-    include_directories(${ANIMLIB_DIR}/include)
+    include_directories(SYSTEM ${ANIMLIB_DIR}/include)
     link_directories(${ANIMLIB_DIR}/${CMAKE_INSTALL_LIBDIR})
+endif()
+
+if (DEFINED FOLLY_DIR)
+    message(STATUS "FOLLY_DIR = ${FOLLY_DIR}")
+    include_directories(SYSTEM ${FOLLY_DIR}/include)
+    link_directories(${FOLLY_DIR}/${CMAKE_INSTALL_LIBDIR})
+    set(SEEXPR_ENABLE_FOLLY 1)
+else()
+    set(SEEXPR_ENABLE_FOLLY 0)
 endif()
 
 if (DEFINED DERR_DIR)
     message(STATUS "DERR_DIR = ${DMSG_DIR}")
-    include_directories(${DERR_DIR}/include)
+    include_directories(SYSTEM ${DERR_DIR}/include)
     link_directories(${DERR_DIR}/${CMAKE_INSTALL_LIBDIR})
 endif()
 
 if (DEFINED DMSG_DIR)
     message(STATUS "DMSG_DIR = ${DMSG_DIR}")
-    include_directories(${DMSG_DIR}/include)
+    include_directories(SYSTEM ${DMSG_DIR}/include)
     link_directories(${DMSG_DIR}/${CMAKE_INSTALL_LIBDIR})
 endif()
 
 if (DEFINED QDGUI_DIR)
     message(STATUS "QDGUI_DIR = ${QDGUI_DIR}")
     add_definitions(-DSEEXPR_USE_QDGUI)
-    include_directories(${QDGUI_DIR}/include)
+    include_directories(SYSTEM ${QDGUI_DIR}/include)
     link_directories(${QDGUI_DIR}/${CMAKE_INSTALL_LIBDIR})
 endif()
+
+if (DEFINED TBB_DIR)
+    message(STATUS "TBB_DIR = ${TBB_DIR}")
+    add_definitions(-DSEEXPR_USE_TBB)
+    include_directories(SYSTEM ${TBB_DIR}/include)
+    link_directories(${TBB_DIR}/${CMAKE_INSTALL_LIBDIR})
+    set(SEEXPR_ENABLE_TBB 1)
+else()
+    set(SEEXPR_ENABLE_TBB 0)
+endif()
+
+## Install location for html documentation
+set(SEEXPR_HTML_DOC_PATH "share/doc/SeExpr2")
 
 ## Make modules able to see seexpr library
 # Setup environment variable to link seexpr
@@ -247,7 +286,9 @@ set(SEEXPR_LIBRARIES SeExpr2)
 set(SEEXPR_LLVM_LIBRARIES SeExpr2LLVM)
 set(SEEXPR_EDITOR_LIBRARIES SeExpr2Editor)
 
-# make it so seexpr can be found
+# This entry is for the generated ExprConfig.h
+include_directories(BEFORE ${CMAKE_BINARY_DIR}/src/SeExpr2)
+# This entry allows finding the source tree for headers
 include_directories(BEFORE ${CMAKE_SOURCE_DIR}/src)
 
 ## Traverse subdirectories

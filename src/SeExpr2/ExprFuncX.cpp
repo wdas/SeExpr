@@ -14,22 +14,33 @@
  You may obtain a copy of the License at
  http://www.apache.org/licenses/LICENSE-2.0
 */
+#include <cstdio>
+#include <stdexcept>
+
 #include "ExprFunc.h"
 #include "ExprFuncX.h"
-#include "Interpreter.h"
 #include "ExprNode.h"
-#include <cstdio>
+#include "Interpreter.h"
+#include "VarBlock.h"
 
 namespace SeExpr2 {
-int ExprFuncSimple::EvalOp(int *opData, double *fp, char **c, std::vector<int> &callStack) {
-    ExprFuncSimple *simple = reinterpret_cast<ExprFuncSimple *>(c[opData[0]]);
-    //    ExprFuncNode::Data* simpleData=reinterpret_cast<ExprFuncNode::Data*>(c[opData[1]]);
-    ArgHandle args(opData, fp, c, callStack);
+int ExprFuncSimple::EvalOp(const int* opData, double* fp, char** c)
+{
+    const ExprFuncNode* node = reinterpret_cast<const ExprFuncNode*>(c[opData[0]]);
+    ExprFuncSimple* simple =
+        const_cast<ExprFuncSimple*>(reinterpret_cast<const ExprFuncSimple*>(node->func()->funcx()));
+    ArgHandle args(opData, fp, c, c[0]);
+
+    if (!args.data) {
+        args.data = node->getOrComputeData(simple, (void*)&args);
+    }
+
     simple->eval(args);
     return 1;
 }
 
-int ExprFuncSimple::buildInterpreter(const ExprFuncNode *node, Interpreter *interpreter) const {
+int ExprFuncSimple::buildInterpreter(const ExprFuncNode* node, Interpreter* interpreter) const
+{
     std::vector<int> operands;
     for (int c = 0; c < node->numChildren(); c++) {
         int operand = node->child(c)->buildInterpreter(interpreter);
@@ -37,19 +48,29 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode *node, Interpreter *inte
         // debug
         std::cerr<<"we are "<<node->promote(c)<<" "<<c<<std::endl;
 #endif
-        if (node->promote(c) != 0) {
-            interpreter->addOp(getTemplatizedOp<Promote>(node->promote(c)));
-            int promotedOperand = interpreter->allocFP(node->promote(c));
-            interpreter->addOperand(operand);
-            interpreter->addOperand(promotedOperand);
-            operand = promotedOperand;
-            interpreter->endOp();
+        if (node->type().isFP()) {
+            const TypeConversion& conversion = node->conversion(c);
+            switch ((TypeConversion::Category)conversion) {
+            case TypeConversion::Undefined: {
+                assert(false && "Undefined conversion");
+            } break;
+            case TypeConversion::ScalarToVector: {
+                interpreter->addOp(getTemplatizedOp<Promote>(conversion.final.dim()));
+                int promotedOperand = interpreter->allocFP(conversion.final.dim());
+                interpreter->addOperand(operand);
+                interpreter->addOperand(promotedOperand);
+                operand = promotedOperand;
+                interpreter->endOp();
+            } break;
+            default:
+                break;  // TODO: need to handle VectorToScalar
+            }
         }
         operands.push_back(operand);
     }
     int outoperand = -1;
     int nargsData = interpreter->allocFP(1);
-    interpreter->d[nargsData] = node->numChildren();
+    interpreter->state.d[nargsData] = node->numChildren();
     if (node->type().isFP())
         outoperand = interpreter->allocFP(node->type().dim());
     else if (node->type().isString())
@@ -57,10 +78,10 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode *node, Interpreter *inte
     else
         assert(false);
 
+    int ptrDataLoc = interpreter->allocPtr();
     interpreter->addOp(EvalOp);
     int ptrLoc = interpreter->allocPtr();
-    int ptrDataLoc = interpreter->allocPtr();
-    interpreter->s[ptrLoc] = (char *)this;
+    interpreter->state.s[ptrLoc] = const_cast<char*>(reinterpret_cast<const char*>(node));
     interpreter->addOperand(ptrLoc);
     interpreter->addOperand(ptrDataLoc);
     interpreter->addOperand(outoperand);
@@ -69,17 +90,27 @@ int ExprFuncSimple::buildInterpreter(const ExprFuncNode *node, Interpreter *inte
         interpreter->addOperand(operands[c]);
     }
     interpreter->endOp(false);  // do not eval because the function may not be evaluatable!
-
-    // call into interpreter eval
-    int pc = interpreter->nextPC() - 1;
-    int *opCurr = (&interpreter->opData[0]) + interpreter->ops[pc].second;
-
-    ArgHandle args(opCurr, &interpreter->d[0], &interpreter->s[0], interpreter->callStack);
-    ExprFuncNode::Data* data = evalConstant(node, args);
-    node->setData(data);
-    interpreter->s[ptrDataLoc] = reinterpret_cast<char *>(data);
-
     return outoperand;
+}
+
+ExprType ExprFuncSimple::genericPrep(ExprFuncNode* node, bool, ExprVarEnvBuilder& env, const ExprFuncDeclaration& decl)
+{
+    assert(node);
+
+    int nargs = node->numChildren();
+    if (nargs < decl.minArgs || nargs > decl.maxArgs) {
+        std::stringstream msg;
+        msg << "Wrong number of arguments, should be " << decl.minArgs << " to " << decl.maxArgs;
+        node->addError(msg.str());
+        return SeExpr2::ExprType().Error();
+    }
+    for (int i = 0; i < nargs; ++i) {
+        if (!node->checkArg(i, decl.types[i], env)) {
+            return SeExpr2::ExprType().Error();
+        }
+    }
+
+    return decl.types.back();
 }
 }
 
@@ -107,28 +138,26 @@ extern "C" {
 // opdata[2] points to return value
 // opdata[3] points to number of args
 // opdata[4] points to beginning of arguments in
-void SeExpr2LLVMEvalCustomFunction(int *opDataArg,
-                                   double *fpArg,
-                                   char **strArg,
-                                   void **funcdata,
-                                   const SeExpr2::ExprFuncNode *node) {
-    const SeExpr2::ExprFunc *func = node->func();
-    SeExpr2::ExprFuncX *funcX = const_cast<SeExpr2::ExprFuncX *>(func->funcx());
-    SeExpr2::ExprFuncSimple *funcSimple = static_cast<SeExpr2::ExprFuncSimple *>(funcX);
+void SeExpr2LLVMEvalCustomFunction(const int* opDataArg,
+                                   double* fpArg,
+                                   char** strArg,
+                                   void** funcdata,
+                                   const SeExpr2::ExprFuncNode* node,
+                                   double** varBlockData)
+{
+    SeExpr2::ExprFuncSimple* funcSimple =
+        const_cast<SeExpr2::ExprFuncSimple*>((const SeExpr2::ExprFuncSimple*)node->func()->funcx());
 
-    strArg[0] = reinterpret_cast<char *>(funcSimple);
+    strArg[0] = reinterpret_cast<char*>(funcSimple);
 
-    std::vector<int> callStack;
-    SeExpr2::ExprFuncSimple::ArgHandle handle(opDataArg, fpArg, strArg, callStack);
+    SeExpr2::ExprFuncSimple::ArgHandle handle(opDataArg, fpArg, strArg, (const char*)varBlockData);
     if (!*funcdata) {
-        handle.data = funcSimple->evalConstant(node, handle);
-        *funcdata = reinterpret_cast<void *>(handle.data);
-        node->setData(handle.data);
+        handle.data = node->getOrComputeData(funcSimple, (void*)&handle);
+        *funcdata = const_cast<void*>(reinterpret_cast<const void*>(handle.data));
     } else {
-        handle.data = reinterpret_cast<SeExpr2::ExprFuncNode::Data *>(*funcdata);
+        handle.data = reinterpret_cast<SeExpr2::ExprFuncNode::Data*>(*funcdata);
     }
 
     funcSimple->eval(handle);
-    // for (int i = 0; i < retSize; ++i) result[i] = fp[1 + i];
 }
 }

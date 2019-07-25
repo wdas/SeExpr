@@ -29,12 +29,14 @@
 
 namespace {
 RixTokenStorage* tokenizer;
-inline const char* tokenize(const char* str) {
+inline const char* tokenize(const char* str)
+{
     const char* result = tokenizer->GetToken(str);
     return result;
 }
 
-int SeTokenize(RslContext* ctx, int argc, const RslArg* argv[]) {
+int SeTokenize(RslContext* ctx, int argc, const RslArg* argv[])
+{
     RslStringIter result(argv[0]);
     const char* str = *RslStringIter(argv[1]);
     *result = (RtString)tokenize(str);
@@ -48,13 +50,17 @@ struct SeRmanVarMap {
     std::vector<int> groupIndices;
 
     SeRmanVarMap(int nvars, const char** varnames, int* varindices, int* groupstarts)
-        : indexMap(varnames, varindices, nvars), groupStarts(groupstarts, groupstarts + nvars), groupCounts(nvars),
-          groupIndices(nvars) {
+        : indexMap(varnames, varindices, nvars)
+        , groupStarts(groupstarts, groupstarts + nvars)
+        , groupCounts(nvars)
+        , groupIndices(nvars)
+    {
         int groupIndex = 0, i, j;
         for (i = 0; i < nvars;) {
             // determine size of current group
             for (j = i + 1; j < nvars; j++) {
-                if (groupStarts[j] != groupStarts[i]) break;
+                if (groupStarts[j] != groupStarts[i])
+                    break;
             }
             int groupCount = j - i;
             // assign group size and index to group members
@@ -78,14 +84,14 @@ class SeRmanExpr;
 
 //! Store per thread caches of expressions and the variable bindings
 struct ThreadData {
-
     // rix message interface
     RixMessages* msgs;
 
     // all variable maps accessed by this thread
     SeRmanVarMapMap varmaps;
 
-    SeRmanVarMap& getVarMap(const char* varMapHandle) {
+    SeRmanVarMap& getVarMap(const char* varMapHandle)
+    {
         SeRmanVarMap*& varmap = varmaps[varMapHandle];
         if (!varmap) {
             // parse var list and make a new varmap
@@ -119,7 +125,8 @@ struct ThreadData {
         return *varmap;
     }
 
-    void ptError(char* fmt, ...) {
+    void ptError(char* fmt, ...)
+    {
         static char strbuf[1024];
         va_list ap;
         va_start(ap, fmt);
@@ -128,7 +135,8 @@ struct ThreadData {
         va_end(ap);
     }
 
-    void ptWarn(char* fmt, ...) {
+    void ptWarn(char* fmt, ...)
+    {
         static char strbuf[1024];
         va_list ap;
         va_start(ap, fmt);
@@ -143,14 +151,16 @@ struct ThreadData {
     RtColor* varValues;  // value of every var at current grid point
     float* Ci;           // current value of Ci
 
-    ThreadData() {
+    ThreadData()
+    {
         msgs = (RixMessages*)RxGetRixContext()->GetRixInterface(k_RixMessages);
         exprs.push_back(0);  // dummy entry; index 0 means uninitialized
     }
 };
 
 //! Gets the per thread specific data from the rsl evaluation context
-ThreadData& getThreadData(RslContext* ctx) {
+ThreadData& getThreadData(RslContext* ctx)
+{
     ThreadData* td = (ThreadData*)ctx->GetThreadData();
     if (!td) {
         td = new ThreadData;
@@ -162,11 +172,20 @@ ThreadData& getThreadData(RslContext* ctx) {
 //! A variable holding a grid's worth of values
 class SeRmanVar : public SeExprVarRef {
   public:
-    SeRmanVar(ThreadData& td) : SeExprVarRef(SeExprType().FP(3).Varying()), td(td), index(0) {}
+    SeRmanVar(ThreadData& td) : SeExprVarRef(SeExprType().FP(3).Varying()), td(td), index(0)
+    {
+    }
     // SeRmanVar(ThreadData& td) : td(td), index(0) {}
-    virtual bool isVec() { return 1; }  // treat all vars as vectors
-    void setIndex(int i) { index = i; }
-    virtual void eval(const SeExprVarNode* node, SeVec3d& result) {
+    virtual bool isVec()
+    {
+        return 1;
+    }  // treat all vars as vectors
+    void setIndex(int i)
+    {
+        index = i;
+    }
+    virtual void eval(const SeExprVarNode* node, SeVec3d& result)
+    {
         RtColor& c = td.varValues[index];
         result = c;
     }
@@ -183,17 +202,24 @@ class AttrVar : public SeExprVectorVarRef {
     SeVec3d value;
 
   public:
-    AttrVar() : name(""), value(0.) {}
+    AttrVar() : name(""), value(0.)
+    {
+    }
 
-    AttrVar(const std::string& nameIn) : value(0.) {
+    AttrVar(const std::string& nameIn) : value(0.)
+    {
         // change "::" to ":" (needed :: for parsing SE).
         size_t pos = nameIn.find("::");
         name = nameIn.substr(0, pos) + nameIn.substr(pos + 1, nameIn.size() - (pos - 1));
     }
 
-    std::string getName() { return name; }
+    std::string getName()
+    {
+        return name;
+    }
 
-    void doLookup() {
+    void doLookup()
+    {
         // make sure have enough space to hold result
         float fbuf16[16];
 
@@ -213,40 +239,47 @@ class AttrVar : public SeExprVectorVarRef {
 
         // found something
         switch (rxType) {
-            case RxInfoFloat:
-                // promote float to color grey scale
-                value.setValue(fbuf16[0], fbuf16[0], fbuf16[0]);
-                break;
-            case RxInfoColor:
-            case RxInfoNormal:
-            case RxInfoVector:
-            case RxInfoPoint:
-                // any of the tuples will do for color
-                value.setValue(fbuf16[0], fbuf16[1], fbuf16[2]);
-                break;
-            default:
-                // not an expected match
-                // stderr << "SeRmanExpr: Unexpected type for Option/Attribute" << name.c_str() << rxType <<".  Only
-                // Float or Color allowed.";
-                break;
+        case RxInfoFloat:
+            // promote float to color grey scale
+            value.setValue(fbuf16[0], fbuf16[0], fbuf16[0]);
+            break;
+        case RxInfoColor:
+        case RxInfoNormal:
+        case RxInfoVector:
+        case RxInfoPoint:
+            // any of the tuples will do for color
+            value.setValue(fbuf16[0], fbuf16[1], fbuf16[2]);
+            break;
+        default:
+            // not an expected match
+            // stderr << "SeRmanExpr: Unexpected type for Option/Attribute" << name.c_str() << rxType <<".  Only
+            // Float or Color allowed.";
+            break;
         }
     }
 
     // Implement the interface of SeExprVarRef
-    virtual void eval(const SeExprVarNode* node, SeVec3d& result) { result = value; }
+    virtual void eval(const SeExprVarNode* node, SeVec3d& result)
+    {
+        result = value;
+    }
 };
 
 //! The expression parsing/evaluator class. Derives from standard SeExpr
 class SeRmanExpr : public SeExpression {
   public:
-    SeRmanExpr(const std::string& expr, ThreadData& td) : SeExpression(expr), _td(td), _boundVarMap(-1) {}
+    SeRmanExpr(const std::string& expr, ThreadData& td) : SeExpression(expr), _td(td), _boundVarMap(-1)
+    {
+    }
 
-    virtual SeExprVarRef* resolveVar(const std::string& name) const {
+    virtual SeExprVarRef* resolveVar(const std::string& name) const
+    {
         if (name.find("::") != std::string::npos) {
             int i, size;
             for (i = 0, size = _attrrefs.size(); i < size; i++)
                 // AttrVar attr =  _attrrefs[i];
-                if (name == _attrrefs[i]->getName()) return _attrrefs[i];
+                if (name == _attrrefs[i]->getName())
+                    return _attrrefs[i];
 
             // didn't match so make new
             AttrVar* attrVar = new AttrVar(/*td,*/ name);
@@ -256,14 +289,16 @@ class SeRmanExpr : public SeExpression {
 
         const char* token = tokenize(name.c_str());
         for (int i = 0, size = _varrefs.size(); i < size; i++)
-            if (_varnames[i] == token) return _varrefs[i];
+            if (_varnames[i] == token)
+                return _varrefs[i];
         SeRmanVar* var = new SeRmanVar(_td);
         _varnames.push_back(token);
         _varrefs.push_back(var);
         return var;
     }
 
-    SeVarBinding* bindVars(const char* varMapHandle) {
+    SeVarBinding* bindVars(const char* varMapHandle)
+    {
         SeVarBinding*& binding = _bindings[varMapHandle];
         if (!binding) {
             binding = new SeVarBinding;
@@ -292,7 +327,8 @@ class SeRmanExpr : public SeExpression {
         return binding;
     }
 
-    void lookupAttrs() {
+    void lookupAttrs()
+    {
         int nattrs = _attrrefs.size();
 
         // fill in attrs
@@ -301,16 +337,21 @@ class SeRmanExpr : public SeExpression {
         }
     }
 
-    void setVarIndices() {
+    void setVarIndices()
+    {
         // set the varref indices to the currently bound varmap
         // note: we can't do this during bind because expression evals may be nested
         SeVarBinding* binding = _bindstack.back();
         if (binding) {
-            for (int i = 0, size = binding->size(); i < size; i++) _varrefs[i]->setIndex((*binding)[i]);
+            for (int i = 0, size = binding->size(); i < size; i++)
+                _varrefs[i]->setIndex((*binding)[i]);
         }
     }
 
-    void unbindVars() { _bindstack.pop_back(); }
+    void unbindVars()
+    {
+        _bindstack.pop_back();
+    }
 
   private:
     mutable std::vector<const char*> _varnames;  // ordered, unique list of var names
@@ -322,7 +363,8 @@ class SeRmanExpr : public SeExpression {
     int _boundVarMap;
 };
 
-void init(RixContext* ctx) {
+void init(RixContext* ctx)
+{
     tokenizer = (RixTokenStorage*)ctx->GetRixInterface(k_RixGlobalTokenData);
 
     // temporarily unset the expr plugins path
@@ -338,10 +380,12 @@ void init(RixContext* ctx) {
     // DefineSeExprPlugin (SeExprFunc::define);
 
     // restore environment
-    if (plugins_ptr) setenv("SE_EXPR_PLUGINS", plugins.c_str(), 1);
+    if (plugins_ptr)
+        setenv("SE_EXPR_PLUGINS", plugins.c_str(), 1);
 }
 
-int SeExprBind(RslContext* ctx, int argc, const RslArg* argv[]) {
+int SeExprBind(RslContext* ctx, int argc, const RslArg* argv[])
+{
     RslFloatIter result(argv[0]);
     const char* exprstr = *RslStringIter(argv[1]);
     const char* varmapHandle = *RslStringIter(argv[2]);
@@ -391,7 +435,8 @@ int SeExprBind(RslContext* ctx, int argc, const RslArg* argv[]) {
     return 0;
 }
 
-int SeExprEval(RslContext* ctx, int argc, const RslArg* argv[]) {
+int SeExprEval(RslContext* ctx, int argc, const RslArg* argv[])
+{
     int index = int(*RslFloatIter(argv[1]));
     RslColorArrayIter varValuesIter = argv[2];
     RslColorIter CiIter = argv[3];
@@ -419,11 +464,13 @@ int SeExprEval(RslContext* ctx, int argc, const RslArg* argv[]) {
 
         // expression evaluator is reentrant but functions may not be
         static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-        if (!isThreadSafe) pthread_mutex_lock(&mutex);
+        if (!isThreadSafe)
+            pthread_mutex_lock(&mutex);
 
         SeVec3d v = expr.evaluate();
 
-        if (!isThreadSafe) pthread_mutex_unlock(&mutex);
+        if (!isThreadSafe)
+            pthread_mutex_unlock(&mutex);
 
         if (!isfinite(v[0]) || !isfinite(v[1]) || !isfinite(v[2])) {
             char msg[] = "Shader Expression: %s: resulted in NAN. Setting val to 1";

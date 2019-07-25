@@ -33,7 +33,10 @@ class ExprPreviewWidget : public QWidget {
   public:
     ExprPreviewWidget(QWidget* parent);
     void makePreview(const QString& path);
-    void reset() { _pm->setPixmap(QPixmap()); }
+    void reset()
+    {
+        _pm->setPixmap(QPixmap());
+    }
 
   private:
     QLabel* _pm;
@@ -71,18 +74,22 @@ class ExprFileDialog : public QFileDialog {
     void addComboBox(QString s, QStringList sl);
     void showComboBox();
     void hideComboBox();
-    QComboBox* getComboBox() { return _combo; }
+    QComboBox* getComboBox()
+    {
+        return _combo;
+    }
     void setButtonName(const QString& str);
     void addSidebarShortcut(const QString& s);
 
-  private
-slots:
+  private slots:
     void handleOk();
     void editReturnPress();
     void gotoFavorites();
     void selChanged(const QString& path);
-    void resetDir() {
-        if (!_temppath.isEmpty()) setDirectory(_temppath);
+    void resetDir()
+    {
+        if (!_temppath.isEmpty())
+            setDirectory(_temppath);
         _temppath = "";
     }
 

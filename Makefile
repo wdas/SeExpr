@@ -2,7 +2,7 @@
 
 # External commands
 CMAKE ?= cmake
-CLANG_FORMAT ?= clang-format
+CLANG_FORMAT ?= ./src/build/disney-clang-format
 FIND ?= find
 MKDIR ?= mkdir -p
 PYTHON ?= python
@@ -43,12 +43,15 @@ all: $(BUILD)
 
 install: all
 	$(MAKE) -C $(BUILD) $@
+.PHONY: install
 
-test: install
-	$(MAKE) -C $(BUILD) $@
+checkDirty:
+	git diff --exit-code >/dev/null
+.PHONY: checkDirty
 
 clean:
 	$(RM_R) $(BUILD) Linux-* Darwin-*
+.PHONY: clean
 
 $(BUILD): $(CMAKE_FILES)
 	mkdir -p $(BUILD)
@@ -57,5 +60,19 @@ $(BUILD): $(CMAKE_FILES)
 
 format:
 	git ls-files '*.cpp' '*.h' | $(XARGS) $(CLANG_FORMAT) -i
+.PHONY: format
 
-precommit: format
+test: install
+	$(MAKE) -C $(BUILD) ARGS="--output-on-failure $(ARGS)" $@
+.PHONY: test
+
+# TODO: run this via cmake
+imagetest: install
+	$(PYTHON) src/tests/imageTestsReportNew.py runall
+.PHONY: imagetest
+
+precommit:
+	$(MAKE) format
+	$(MAKE) checkDirty
+	$(MAKE) test
+.PHONY: precommit

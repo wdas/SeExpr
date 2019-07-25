@@ -27,17 +27,24 @@ namespace SeExprInternal2 {
 template <class T>
 class DebugLock : public T {
   public:
-    DebugLock() : _locked(0) {}
-    void lock() {
+    DebugLock() : _locked(0)
+    {
+    }
+    void lock()
+    {
         T::lock();
         _locked = 1;
     }
-    void unlock() {
+    void unlock()
+    {
         assert(_locked);
         _locked = 0;
         T::unlock();
     }
-    bool locked() { return _locked != 0; }
+    bool locked()
+    {
+        return _locked != 0;
+    }
 
   private:
     int _locked;
@@ -48,8 +55,14 @@ class DebugLock : public T {
 template <class T>
 class AutoLock {
   public:
-    AutoLock(T& m) : _m(m) { _m.lock(); }
-    ~AutoLock() { _m.unlock(); }
+    AutoLock(T& m) : _m(m)
+    {
+        _m.lock();
+    }
+    ~AutoLock()
+    {
+        _m.unlock();
+    }
 
   private:
     T& _m;

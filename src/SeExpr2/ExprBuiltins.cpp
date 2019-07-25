@@ -65,8 +65,8 @@ static const char* atanh_docstring = "float atanh(float angle)\nhyperbolic arc t
 // clamping/rounding
 static const char* clamp_docstring = "float clamp(float x,float lo,float hi)\nconstrain x to range [lo,hi]";
 static const char* round_docstring = "float round(float x)\nconstrain x to range [lo,hi]";
-static const char* max_docstring = "float max(float a,float b)\ngreater of a and b";
-static const char* min_docstring = "float min(float a,float b)\nlesser of a and b";
+static const char* max_docstring = "float max(float a,float b,...)\ngreater of all inputs";
+static const char* min_docstring = "float min(float a,float b,...)\nlesser of all inputs";
 static const char* trunc_docstring = "float trunc(float a)\nnearest integer towards zero";
 static const char* floor_docstring = "float floor(float a)\nnext lower integer";
 static const char* ceil_docstring = "float ceil(float a)\nnext higher integer";
@@ -89,25 +89,35 @@ static const char* vturbulence_docstring =
     "vector vturbulence(vector v,int octaves=6,float lacunarity=2,float gain=.5)\nAbsolute value of each noise term is "
     "taken. This gives billowy appearance";
 
-double compress(double x, double lo, double hi) { return (hi - lo) * x + lo; }
+double compress(double x, double lo, double hi)
+{
+    return (hi - lo) * x + lo;
+}
 static const char* compress_docstring = "float compress(float x,float lo,float hi)\nRemaps x in [0,1] to [lo,hi]";
 
-double expand(double x, double lo, double hi) {
-    if (lo == hi) return x < lo ? 0 : 1;
+double expand(double x, double lo, double hi)
+{
+    if (lo == hi)
+        return x < lo ? 0 : 1;
     return (x - lo) / (hi - lo);
 }
 static const char* expand_docstring = "float expand(float x,float lo,float hi)\nRemaps x in [lo,hi] to [0,1]";
 
-double fit(double x, double a1, double b1, double a2, double b2) {
+double fit(double x, double a1, double b1, double a2, double b2)
+{
     return (x * (b2 - a2) - a1 * b2 + b1 * a2) / (b1 - a1);
 }
 static const char* fit_docstring =
     "float fit(float x,float a1,float b1,float a2,float b2)\nLinearly remaps x in [a1,b1] to [a2,b2]";
 
-double gamma(double x, double g) { return pow(x, 1 / g); }
+double gamma(double x, double g)
+{
+    return pow(x, 1 / g);
+}
 static const char* gamma_docstring = "float gamma(float x, float g)\nGamma correction of x with gamma factor g";
 
-double bias(double x, double b) {
+double bias(double x, double b)
+{
     static double C = 1 / log(0.5);
     return pow(x, log(b) * C);
 }
@@ -115,7 +125,8 @@ static const char* bias_docstring =
     "float bias(float x, float g)\nVariation of gamma where values less than 0.5 pull the curve down\nand values "
     "greater than 0.5 pull the curve up\npow(x,log(b)/log(0.5))";
 
-double contrast(double x, double c) {
+double contrast(double x, double c)
+{
     if (x < 0.5)
         return 0.5 * bias(1 - c, 2 * x);
     else
@@ -125,10 +136,14 @@ static const char* contrast_docstring =
     "float contrast(float x,float x)\nAdjust the contrast.&nbsp; For c from 0 to 0.5, the contrast is decreased.&nbsp; "
     "For c &gt; 0.5, the contrast is increased.";
 
-double boxstep(double x, double a) { return x < a ? 0.0 : 1.0; }
+double boxstep(double x, double a)
+{
+    return x < a ? 0.0 : 1.0;
+}
 static const char* boxstep_docstring = "float boxstep(float x,float a)\n if x < a then 0 otherwise 1";
 
-double linearstep(double x, double a, double b) {
+double linearstep(double x, double a, double b)
+{
     if (a < b) {
         return x < a ? 0 : (x > b ? 1 : (x - a) / (b - a));
     } else if (a > b) {
@@ -140,14 +155,19 @@ static const char* linearstep_docstring =
     "float linearstep(float x,float a,float b)\n if x &lt; a then 0, if x &gt; b then 1, and\nx transitions linearly "
     "when &lt; x &lt; b ";
 
-double smoothstep(double x, double a, double b) {
+double smoothstep(double x, double a, double b)
+{
     if (a < b) {
-        if (x < a) return 0;
-        if (x >= b) return 1;
+        if (x < a)
+            return 0;
+        if (x >= b)
+            return 1;
         x = (x - a) / (b - a);
     } else if (a > b) {
-        if (x <= b) return 1;
-        if (x > a) return 0;
+        if (x <= b)
+            return 1;
+        if (x > a)
+            return 0;
         x = 1 - (x - b) / (a - b);
     } else
         return boxstep(x, a);
@@ -157,14 +177,19 @@ static const char* smoothstep_docstring =
     "float smoothstep(float x,float a,float b)\n if x &lt; a then 0, if x &gt; b then 1, and\nx transitions smoothly "
     "(cubic) when &lt; x &lt; b";
 
-double gaussstep(double x, double a, double b) {
+double gaussstep(double x, double a, double b)
+{
     if (a < b) {
-        if (x < a) return 0;
-        if (x >= b) return 1;
+        if (x < a)
+            return 0;
+        if (x >= b)
+            return 1;
         x = 1 - (x - a) / (b - a);
     } else if (a > b) {
-        if (x <= b) return 1;
-        if (x > a) return 0;
+        if (x <= b)
+            return 1;
+        if (x > a)
+            return 0;
         x = (x - b) / (a - b);
     } else
         return boxstep(x, a);
@@ -174,11 +199,13 @@ static const char* gaussstep_docstring =
     "float gasussstep(float x,float a,float b)\n if x &lt; a then 0, if x &gt; b then 1, and\nx transitions smoothly "
     "(exponentially) when &lt; x &lt; b";
 
-double remap(double x, double source, double range, double falloff, double interp) {
+double remap(double x, double source, double range, double falloff, double interp)
+{
     range = fabs(range);
     falloff = fabs(falloff);
 
-    if (falloff == 0) return fabs(x - source) < range;
+    if (falloff == 0)
+        return fabs(x - source) < range;
 
     double a, b;
     if (x > source) {
@@ -190,12 +217,12 @@ double remap(double x, double source, double range, double falloff, double inter
     }
 
     switch (int(interp)) {
-        case 0:
-            return linearstep(x, b, a);
-        case 1:
-            return smoothstep(x, b, a);
-        default:
-            return gaussstep(x, b, a);
+    case 0:
+        return linearstep(x, b, a);
+    case 1:
+        return smoothstep(x, b, a);
+    default:
+        return gaussstep(x, b, a);
     }
 }
 static const char* remap_docstring =
@@ -210,18 +237,52 @@ static const char* remap_docstring =
     "&nbsp;&nbsp;&nbsp;&nbsp;int <b>smooth</b> = 1\n"
     "&nbsp;&nbsp;&nbsp;&nbsp;int <b>gaussian</b> = 2\n";
 
-double mix(double x, double y, double alpha) { return x * (1 - alpha) + y * alpha; }
+double mix(double x, double y, double alpha)
+{
+    return x * (1 - alpha) + y * alpha;
+}
 static const char* mix_docstring = "mix(float a,float b,float alpha)\nBlend of a and b according to alpha.";
 
-Vec3d hsiAdjust(const Vec3d& rgb, double h, double s, double i) {
+double max(int n, double* args)
+{
+    double value = args[0];
+    for (int i = 1; i < n; i++) {
+        value = args[i] > value ? args[i] : value;
+    }
+    return value;
+}
+double min(int n, double* args)
+{
+    double value = args[0];
+    for (int i = 1; i < n; i++) {
+        value = args[i] < value ? args[i] : value;
+    }
+    return value;
+}
+
+double average(int n, double* args)
+{
+    double sum = 0.0;
+    for (int i = 0; i < n; i++) {
+        sum += args[i];
+    }
+    double div = (double)n;
+    return sum / div;
+}
+static const char* average_docstring = "average(a,b,c,...)\nAverage all inputs.";
+
+Vec3d hsiAdjust(const Vec3d& rgb, double h, double s, double i)
+{
     Vec3d hsl = rgbtohsl(rgb);
     hsl[0] += h * (1.0 / 360);
     hsl[1] *= s;
     return hsltorgb(hsl) * i;
 }
 
-Vec3d hsi(int n, const Vec3d* args) {
-    if (n < 4) return 0.0;
+Vec3d hsi(int n, const Vec3d* args)
+{
+    if (n < 4)
+        return 0.0;
 
     double h = args[1][0];
     double s = args[2][0];
@@ -239,13 +300,15 @@ static const char* hsi_docstring =
     "color  hsi(color x, float h, float s, float i, float map=1)\n"
     "The hsi function shifts the hue by h\n"
     "(in degrees) and scales the saturation and intensity by s and i\n"
-    "respectively.&nbsp; An map may be supplied which will control the shift\n"
+    "respectively.&nbsp; A map may be supplied which will control the shift\n"
     "- the full shift will happen when the map is one and no shift will\n"
     "happen when the map is zero.&nbsp; The shift will be scaled back for\n"
     "values between zero and one.";
 
-Vec3d midhsi(int n, const Vec3d* args) {
-    if (n < 4) return 0.0;
+Vec3d midhsi(int n, const Vec3d* args)
+{
+    if (n < 4)
+        return 0.0;
 
     double h = args[1][0];
     double s = args[2][0];
@@ -257,8 +320,10 @@ Vec3d midhsi(int n, const Vec3d* args) {
         m = m * 2 - 1;
         // add falloff (if specified)
         double falloff = 1, interp = 0;
-        if (n >= 6) falloff = args[5][0];
-        if (n >= 7) interp = args[6][0];
+        if (n >= 6)
+            falloff = args[5][0];
+        if (n >= 7)
+            interp = args[6][0];
         if (m < 0)
             m = -remap(-m, 1, 0, falloff, interp);
         else
@@ -282,7 +347,8 @@ static const char* midhsi_docstring =
     "the control map is centered around the mid point (value of 0.5)\n"
     "and can scale the shift in both directions.";
 
-Vec3d rgbtohsl(const Vec3d& rgb) {
+Vec3d rgbtohsl(const Vec3d& rgb)
+{
     // RGB to HSL color space conversion
     // This is based on Foley, Van Dam (2nd ed; p. 595)
     // but extended to allow rgb values outside of 0..1
@@ -334,7 +400,8 @@ static const char* rgbtohsl_docstring =
     "hsl value (except for negative s values), the conversion is\n"
     "well-defined and reversible.";
 
-static double hslvalue(double x, double y, double H) {
+static double hslvalue(double x, double y, double H)
+{
     H -= floor(H);  // make sure hue is in range 0..1
 
     if (H < 1 / 6.)
@@ -347,7 +414,8 @@ static double hslvalue(double x, double y, double H) {
         return x;
 }
 
-Vec3d hsltorgb(const Vec3d& hsl) {
+Vec3d hsltorgb(const Vec3d& hsl)
+{
     // HSL to RGB color space conversion
     // This is based on Foley, Van Dam (2nd ed; p. 596)
     // but extended to allow rgb values outside of 0..1
@@ -387,17 +455,23 @@ static const char* hsltorgb_docstring =
     "hsl value (except for negative s values), the conversion is\n"
     "well-defined and reversible.";
 
-static Vec3d saturate(const Vec3d& Cin, double amt) {
+static Vec3d saturate(const Vec3d& Cin, double amt)
+{
     const Vec3d lum(.2126, .7152, .0722);  // rec709 luminance
     Vec3d result = Vec3d(Cin.dot(lum) * (1 - amt)) + Cin * amt;
-    if (result[0] < 0) result[0] = 0;
-    if (result[1] < 0) result[1] = 0;
-    if (result[2] < 0) result[2] = 0;
+    if (result[0] < 0)
+        result[0] = 0;
+    if (result[1] < 0)
+        result[1] = 0;
+    if (result[2] < 0)
+        result[2] = 0;
     return result;
 }
 
-Vec3d saturate(int n, const Vec3d* args) {
-    if (n < 2) return 0.0;
+Vec3d saturate(int n, const Vec3d* args)
+{
+    if (n < 2)
+        return 0.0;
     return saturate(args[0], args[1][0]);
 }
 static const char* saturate_docstring =
@@ -406,7 +480,20 @@ static const char* saturate_docstring =
     "The color is scaled around the rec709 luminance value,\n"
     "and negative results are clamped at zero.\n";
 
-double hash(int n, double* args) {
+Vec3d hue(int n, const Vec3d* args)
+{
+    if (n < 2)
+        return 0.0;
+    if (args[1][0] == 0)
+        return args[0];
+    return hsiAdjust(args[0], args[1][0], 1, 1);
+}
+static const char* hue_docstring =
+    "color hue(color val, float amt)\n"
+    "Shift the hue of color by amt in degrees.\n";
+
+double hash(int n, double* args)
+{
     // combine args into a single seed
     uint32_t seed = 0;
     for (int i = 0; i < n; i++) {
@@ -458,8 +545,10 @@ static const char* hash_docstring =
     "Like rand, but with no internal seeds. Any number of seeds may be given\n"
     "and the result will be a random function based on all the seeds.";
 
-double noise(int n, const Vec3d* args) {
-    if (n < 1) return 0;
+double noise(int n, const Vec3d* args)
+{
+    if (n < 1)
+        return 0;
     if (n == 1) {
         // 1 arg = vector arg
         double result;
@@ -468,26 +557,28 @@ double noise(int n, const Vec3d* args) {
         return .5 * result + .5;
     }
     // scalar args
-    if (n > 4) n = 4;
+    if (n > 4)
+        n = 4;
     double p[4];
-    for (int i = 0; i < n; i++) p[i] = args[i][0];
+    for (int i = 0; i < n; i++)
+        p[i] = args[i][0];
     double result;
     switch (n) {
-        case 1:
-            Noise<1, 1>(p, &result);
-            break;
-        case 2:
-            Noise<2, 1>(p, &result);
-            break;
-        case 3:
-            Noise<3, 1>(p, &result);
-            break;
-        case 4:
-            Noise<4, 1>(p, &result);
-            break;
-        default:
-            result = 0;
-            break;
+    case 1:
+        Noise<1, 1>(p, &result);
+        break;
+    case 2:
+        Noise<2, 1>(p, &result);
+        break;
+    case 3:
+        Noise<3, 1>(p, &result);
+        break;
+    case 4:
+        Noise<4, 1>(p, &result);
+        break;
+    default:
+        result = 0;
+        break;
     }
     return .5 * result + .5;
 }
@@ -498,7 +589,8 @@ static const char* noise_docstring =
     "float noise ( float x, float y, float z, float w )\n"
     "Original perlin noise at location (C2 interpolant)";
 
-double snoise(const Vec3d& p) {
+double snoise(const Vec3d& p)
+{
     double result;
     double args[3] = {p[0], p[1], p[2]};
     Noise<3, 1>(args, &result);
@@ -508,7 +600,8 @@ static const char* snoise_docstring =
     "float snoise ( vector v)\n"
     "signed noise w/ range -1 to 1 formed with original perlin noise at location (C2 interpolant)";
 
-Vec3d vnoise(const Vec3d& p) {
+Vec3d vnoise(const Vec3d& p)
+{
     Vec3d result;
     double args[3] = {p[0], p[1], p[2]};
     Noise<3, 3>(args, &result[0]);
@@ -518,12 +611,16 @@ static const char* vnoise_docstring =
     "vector vnoise ( vector v)\n"
     "vector noise formed with original perlin noise at location (C2 interpolant)";
 
-Vec3d cnoise(const Vec3d& p) { return .5 * vnoise(p) + Vec3d(.5); }
+Vec3d cnoise(const Vec3d& p)
+{
+    return .5 * vnoise(p) + Vec3d(.5);
+}
 static const char* cnoise_docstring =
     "color cnoise ( vector v)\n"
     "color noise formed with original perlin noise at location (C2 interpolant)";
 
-double snoise4(int n, const Vec3d* args) {
+double snoise4(int, const Vec3d* args)
+{
     double result;
     double procargs[4] = {args[0][0], args[0][1], args[0][2], args[1][0]};
     Noise<4, 1>(procargs, &result);
@@ -533,7 +630,8 @@ static const char* snoise4_docstring =
     "float snoise4 ( vector v,float t)\n"
     "4D signed noise w/ range -1 to 1 formed with original perlin noise at location (C2 interpolant)";
 
-Vec3d vnoise4(int n, const Vec3d* args) {
+Vec3d vnoise4(int, const Vec3d* args)
+{
     Vec3d result;
     double procargs[4] = {args[0][0], args[0][1], args[0][2], args[1][0]};
     Noise<4, 3>(procargs, &result[0]);
@@ -543,12 +641,16 @@ static const char* vnoise4_docstring =
     "vector vnoise4 ( vector v,float t)\n"
     "4D vector noise formed with original perlin noise at location (C2 interpolant)";
 
-Vec3d cnoise4(int n, const Vec3d* args) { return .5 * vnoise4(n, args) + Vec3d(.5); }
+Vec3d cnoise4(int n, const Vec3d* args)
+{
+    return .5 * vnoise4(n, args) + Vec3d(.5);
+}
 static const char* cnoise4_docstring =
     "color cnoise4 ( vector v,float t)\n"
     "4D color noise formed with original perlin noise at location (C2 interpolant)";
 
-double turbulence(int n, const Vec3d* args) {
+double turbulence(int n, const Vec3d* args)
+{
     // args: octaves, lacunarity, gain
     int octaves = 6;
     double lacunarity = 2;
@@ -556,14 +658,14 @@ double turbulence(int n, const Vec3d* args) {
     Vec3d p = 0.0;
 
     switch (n) {
-        case 4:
-            gain = args[3][0];
-        case 3:
-            lacunarity = args[2][0];
-        case 2:
-            octaves = int(clamp(args[1][0], 1, 8));
-        case 1:
-            p = args[0];
+    case 4:
+        gain = args[3][0];
+    case 3:
+        lacunarity = args[2][0];
+    case 2:
+        octaves = int(clamp(args[1][0], 1, 8));
+    case 1:
+        p = args[0];
     }
 
     double result = 0;
@@ -572,7 +674,8 @@ double turbulence(int n, const Vec3d* args) {
     return .5 * result + .5;
 }
 
-Vec3d vturbulence(int n, const Vec3d* args) {
+Vec3d vturbulence(int n, const Vec3d* args)
+{
     // args: octaves, lacunarity, gain
     int octaves = 6;
     double lacunarity = 2;
@@ -580,14 +683,14 @@ Vec3d vturbulence(int n, const Vec3d* args) {
     Vec3d p = 0.0;
 
     switch (n) {
-        case 4:
-            gain = args[3][0];
-        case 3:
-            lacunarity = args[2][0];
-        case 2:
-            octaves = int(clamp(args[1][0], 1, 8));
-        case 1:
-            p = args[0];
+    case 4:
+        gain = args[3][0];
+    case 3:
+        lacunarity = args[2][0];
+    case 2:
+        octaves = int(clamp(args[1][0], 1, 8));
+    case 1:
+        p = args[0];
     }
 
     Vec3d result;
@@ -596,9 +699,13 @@ Vec3d vturbulence(int n, const Vec3d* args) {
     return result;
 }
 
-Vec3d cturbulence(int n, const Vec3d* args) { return vturbulence(n, args) * .5 + Vec3d(.5); }
+Vec3d cturbulence(int n, const Vec3d* args)
+{
+    return vturbulence(n, args) * .5 + Vec3d(.5);
+}
 
-double fbm(int n, const Vec3d* args) {
+double fbm(int n, const Vec3d* args)
+{
     // args: octaves, lacunarity, gain
     int octaves = 6;
     double lacunarity = 2;
@@ -606,14 +713,14 @@ double fbm(int n, const Vec3d* args) {
     Vec3d p = 0.0;
 
     switch (n) {
-        case 4:
-            gain = args[3][0];
-        case 3:
-            lacunarity = args[2][0];
-        case 2:
-            octaves = int(clamp(args[1][0], 1, 8));
-        case 1:
-            p = args[0];
+    case 4:
+        gain = args[3][0];
+    case 3:
+        lacunarity = args[2][0];
+    case 2:
+        octaves = int(clamp(args[1][0], 1, 8));
+    case 1:
+        p = args[0];
     }
 
     double result = 0.0;
@@ -630,7 +737,8 @@ static const char* fbm_docstring =
     "twice the previous frequency. The gain< controls how much each \n"
     "frequency is scaled relative to the previous frequency.";
 
-Vec3d vfbm(int n, const Vec3d* args) {
+Vec3d vfbm(int n, const Vec3d* args)
+{
     // args: octaves, lacunarity, gain
     int octaves = 6;
     double lacunarity = 2;
@@ -638,14 +746,14 @@ Vec3d vfbm(int n, const Vec3d* args) {
     Vec3d p = 0.0;
 
     switch (n) {
-        case 4:
-            gain = args[3][0];
-        case 3:
-            lacunarity = args[2][0];
-        case 2:
-            octaves = int(clamp(args[1][0], 1, 8));
-        case 1:
-            p = args[0];
+    case 4:
+        gain = args[3][0];
+    case 3:
+        lacunarity = args[2][0];
+    case 2:
+        octaves = int(clamp(args[1][0], 1, 8));
+    case 1:
+        p = args[0];
     }
 
     Vec3d result = 0.0;
@@ -655,7 +763,8 @@ Vec3d vfbm(int n, const Vec3d* args) {
 }
 static const char* vfbm_docstring = "vector vfbm(vector vint octaves=6,float lacunarity=2,float gain=.5)";
 
-double fbm4(int n, const Vec3d* args) {
+double fbm4(int n, const Vec3d* args)
+{
     // args: octaves, lacunarity, gain
     int octaves = 6;
     double lacunarity = 2;
@@ -664,16 +773,16 @@ double fbm4(int n, const Vec3d* args) {
     float time = 0.0;
 
     switch (n) {
-        case 5:
-            gain = args[4][0];
-        case 4:
-            lacunarity = args[3][0];
-        case 3:
-            octaves = int(clamp(args[2][0], 1, 8));
-        case 2:
-            time = static_cast<float>(args[1][0]);
-        case 1:
-            p = args[0];
+    case 5:
+        gain = args[4][0];
+    case 4:
+        lacunarity = args[3][0];
+    case 3:
+        octaves = int(clamp(args[2][0], 1, 8));
+    case 2:
+        time = static_cast<float>(args[1][0]);
+    case 1:
+        p = args[0];
     }
 
     double result = 0.0;
@@ -690,7 +799,8 @@ static const char* fbm4_docstring =
     "twice the previous frequency. The gain< controls how much each \n"
     "frequency is scaled relative to the previous frequency.";
 
-Vec3d vfbm4(int n, const Vec3d* args) {
+Vec3d vfbm4(int n, const Vec3d* args)
+{
     // args: octaves, lacunarity, gain
     int octaves = 6;
     double lacunarity = 2;
@@ -699,16 +809,16 @@ Vec3d vfbm4(int n, const Vec3d* args) {
     float time = 0.0;
 
     switch (n) {
-        case 5:
-            gain = args[4][0];
-        case 4:
-            lacunarity = args[3][0];
-        case 3:
-            octaves = int(clamp(args[2][0], 1, 8));
-        case 2:
-            time = static_cast<float>(args[1][0]);
-        case 1:
-            p = args[0];
+    case 5:
+        gain = args[4][0];
+    case 4:
+        lacunarity = args[3][0];
+    case 3:
+        octaves = int(clamp(args[2][0], 1, 8));
+    case 2:
+        time = static_cast<float>(args[1][0]);
+    case 1:
+        p = args[0];
     }
 
     Vec3d result = 0.0;
@@ -718,13 +828,20 @@ Vec3d vfbm4(int n, const Vec3d* args) {
 }
 static const char* vfbm4_docstring = "vector vfbm4(vector v,float time,int octaves=6,float lacunarity=2,float gain=.5)";
 
-Vec3d cfbm(int n, const Vec3d* args) { return vfbm(n, args) * .5 + Vec3d(.5); }
+Vec3d cfbm(int n, const Vec3d* args)
+{
+    return vfbm(n, args) * .5 + Vec3d(.5);
+}
 static const char* cfbm_docstring = "color cfbm(vector vint octaves=6,float lacunarity=2,float gain=.5)";
 
-Vec3d cfbm4(int n, const Vec3d* args) { return vfbm4(n, args) * .5 + Vec3d(.5); }
+Vec3d cfbm4(int n, const Vec3d* args)
+{
+    return vfbm4(n, args) * .5 + Vec3d(.5);
+}
 static const char* cfbm4_docstring = "color cfbm4(vector v,float time,int octaves=6,float lacunarity=2,float gain=.5)";
 
-double cellnoise(const Vec3d& p) {
+double cellnoise(const Vec3d& p)
+{
     double result;
     double args[3] = {p[0], p[1], p[2]};
     CellNoise<3, 1>(args, &result);
@@ -735,7 +852,8 @@ static const char* cellnoise_docstring =
     "cellnoise generates a field of constant colored cubes based on the integer location.\n"
     "This is the same as the prman cellnoise function.";
 
-Vec3d ccellnoise(const Vec3d& p) {
+Vec3d ccellnoise(const Vec3d& p)
+{
     Vec3d result;
     double args[3] = {p[0], p[1], p[2]};
     CellNoise<3, 3>(args, &result[0]);
@@ -746,11 +864,11 @@ static const char* ccellnoise_docstring =
     "cellnoise generates a field of constant colored cubes based on the integer location.\n"
     "This is the same as the prman cellnoise function.";
 
-double pnoise(const Vec3d& p, const Vec3d& period) {
+double pnoise(const Vec3d& p, const Vec3d& period)
+{
     double result;
     double args[3] = {p[0], p[1], p[2]};
-    int pargs[3] = {std::max((int)1, (int)period[0]),
-                    std::max((int)1, (int)period[1]),
+    int pargs[3] = {std::max((int)1, (int)period[0]), std::max((int)1, (int)period[1]),
                     std::max((int)1, (int)period[2])};
     PNoise<3, 1>(args, pargs, &result);
     return result;
@@ -762,11 +880,15 @@ struct VoronoiPointData : public ExprFuncNode::Data {
     Vec3d points[27];
     Vec3d cell;
     double jitter;
-    VoronoiPointData() : jitter(-1) {}
+    VoronoiPointData() : jitter(-1)
+    {
+    }
 };
 
-static Vec3d* voronoi_points(VoronoiPointData& data, const Vec3d& cell, double jitter) {
-    if (cell == data.cell && jitter == data.jitter) return data.points;
+static Vec3d* voronoi_points(VoronoiPointData& data, const Vec3d& cell, double jitter)
+{
+    if (cell == data.cell && jitter == data.jitter)
+        return data.points;
     data.cell = cell;
     data.jitter = jitter;
 
@@ -782,23 +904,64 @@ static Vec3d* voronoi_points(VoronoiPointData& data, const Vec3d& cell, double j
     return data.points;
 }
 
-static void voronoi_f1_3d(VoronoiPointData& data, const Vec3d& p, double jitter, double& f1, Vec3d& pos1) {
+double manhattanDistance(const Vec3d& a, const Vec3d& b)
+{
+    return fabs(a[0] - b[0]) + fabs(a[1] - b[1]) + fabs(a[2] - b[2]);
+}
+
+double minkowskiDistance(const Vec3d& a, const Vec3d& b, double p)
+{
+    return pow(pow(fabs(a[0] - b[0]), p) + pow(fabs(a[1] - b[1]), p) + pow(fabs(a[2] - b[2]), p), 1 / p);
+}
+
+double chebyshevDistance(const Vec3d& a, const Vec3d& b)
+{
+    double x = fabs(a[0] - b[0]);
+    double y = fabs(a[1] - b[1]);
+    double z = fabs(a[2] - b[2]);
+    double res = x > y ? x : y;
+    res = res > z ? res : z;
+    return res;
+}
+
+static void voronoi_f1_3d(VoronoiPointData& data,
+                          const Vec3d& p,
+                          double jitter,
+                          double& f1,
+                          Vec3d& pos1,
+                          int distance,
+                          double exponent)
+{
     // from Advanced Renderman, page 257
     Vec3d thiscell(floor(p[0]) + 0.5, floor(p[1]) + 0.5, floor(p[2]) + 0.5);
 
     f1 = 1000;
     Vec3d* pos = voronoi_points(data, thiscell, jitter);
     Vec3d* end = pos + 27;
-
+    double dist;
     for (; pos != end; pos++) {
-        Vec3d offset = *pos - p;
-        double dist = offset.dot(offset);
+        if (distance == 4) {
+            if (exponent == 1.0) {
+                dist = manhattanDistance(*pos, p);
+            } else if (exponent == 2.0) {
+                Vec3d offset = *pos - p;
+                dist = sqrt(offset.dot(offset));
+            } else {
+                dist = minkowskiDistance(*pos, p, exponent);
+            }
+        } else if (distance == 3) {
+            dist = chebyshevDistance(*pos, p);
+        } else if (distance == 2) {
+            dist = manhattanDistance(*pos, p);
+        } else {
+            Vec3d offset = *pos - p;
+            dist = sqrt(offset.dot(offset));
+        }
         if (dist < f1) {
             f1 = dist;
-            pos1 = *pos;
+            pos1 = *pos;  // closest point
         }
     }
-    f1 = sqrt(f1);
 }
 
 static void voronoi_f1f2_3d(VoronoiPointData& data,
@@ -807,33 +970,48 @@ static void voronoi_f1f2_3d(VoronoiPointData& data,
                             double& f1,
                             Vec3d& pos1,
                             double& f2,
-                            Vec3d& pos2) {
+                            Vec3d& pos2,
+                            int distance,
+                            double exponent)
+{
     // from Advanced Renderman, page 258
     Vec3d thiscell(floor(p[0]) + 0.5, floor(p[1]) + 0.5, floor(p[2]) + 0.5);
     f1 = f2 = 1000;
     Vec3d* pos = voronoi_points(data, thiscell, jitter);
     Vec3d* end = pos + 27;
-
+    double dist;
     for (; pos != end; pos++) {
-        Vec3d offset = *pos - p;
-        double dist = offset.dot(offset);
+        if (distance == 4) {
+            if (exponent == 1.0) {
+                dist = manhattanDistance(*pos, p);
+            } else if (exponent == 2.0) {
+                Vec3d offset = *pos - p;
+                dist = sqrt(offset.dot(offset));
+            } else {
+                dist = minkowskiDistance(*pos, p, exponent);
+            }
+        } else if (distance == 3) {
+            dist = chebyshevDistance(*pos, p);
+        } else if (distance == 2) {
+            dist = manhattanDistance(*pos, p);
+        } else {
+            Vec3d offset = *pos - p;
+            dist = sqrt(offset.dot(offset));
+        }
         if (dist < f1) {
             f2 = f1;
             pos2 = pos1;
             f1 = dist;
-            pos1 = *pos;
+            pos1 = *pos;  // closest point
         } else if (dist < f2) {
             f2 = dist;
-            pos2 = *pos;
+            pos2 = *pos;  // 2nd closest point
         }
     }
-    f1 = sqrt(f1);
-    f2 = sqrt(f2);
 }
 
-Vec3d voronoiFn(VoronoiPointData& data, int n, const Vec3d* args) {
-    // args = p, type, jitter,
-    //        fbmScale, fbmOctaves, fbmLacunarity, fbmGain
+Vec3d voronoiUtil(VoronoiPointData& data, int n, const Vec3d* args, bool color)
+{
     Vec3d p;
     int type = 1;
     double jitter = 0.5;
@@ -841,21 +1019,27 @@ Vec3d voronoiFn(VoronoiPointData& data, int n, const Vec3d* args) {
     double fbmOctaves = 4;
     double fbmLacunarity = 2;
     double fbmGain = 0.5;
+    int distance = 1;
+    double exponent = 1;
     switch (n) {
-        case 7:
-            fbmGain = args[6][0];
-        case 6:
-            fbmLacunarity = args[5][0];
-        case 5:
-            fbmOctaves = args[4][0];
-        case 4:
-            fbmScale = args[3][0];
-        case 3:
-            jitter = clamp(args[2][0], 1e-3, 1);
-        case 2:
-            type = int(args[1][0]);
-        case 1:
-            p = args[0];
+    case 9:
+        exponent = args[8][0];
+    case 8:
+        distance = args[7][0];
+    case 7:
+        fbmGain = args[6][0];
+    case 6:
+        fbmLacunarity = args[5][0];
+    case 5:
+        fbmOctaves = args[4][0];
+    case 4:
+        fbmScale = args[3][0];
+    case 3:
+        jitter = clamp(args[2][0], 1e-3, 1);
+    case 2:
+        type = int(args[1][0]);
+    case 1:
+        p = args[0];
     }
 
     if (fbmScale > 0) {
@@ -867,104 +1051,69 @@ Vec3d voronoiFn(VoronoiPointData& data, int n, const Vec3d* args) {
         p += fbmScale * vfbm(4, fbmArgs);
     }
 
-    double f1, f2;
+    double f1, f2{1.0};
     Vec3d pos1, pos2;
     if (type >= 3)
-        voronoi_f1f2_3d(data, p, jitter, f1, pos1, f2, pos2);
+        voronoi_f1f2_3d(data, p, jitter, f1, pos1, f2, pos2, distance, exponent);
     else
-        voronoi_f1_3d(data, p, jitter, f1, pos1);
+        voronoi_f1_3d(data, p, jitter, f1, pos1, distance, exponent);
+    float scalefactor = 1.0;
+    if (distance == 2)
+        scalefactor = 0.5;
+
+    Vec3d col;
+    if (color) {
+        col = ccellnoise(pos1);
+    } else {
+        col = 1;
+    }
 
     switch (type) {
-        case 1:
-            pos1[0] += 10;
-            return cellnoise(pos1);
-        case 2:
-            return f1;
-        case 3:
-            return f2;
-        case 4:
-            return f2 - f1;
-        case 5: {
-            float scalefactor = static_cast<float>((pos2 - pos1).length() / ((pos1 - p).length() + (pos2 - p).length()));
-            return smoothstep(f2 - f1, 0, 0.1 * scalefactor);
-        }
+    case 1:
+        pos1[0] += 10;
+        return color ? col : cellnoise(pos1);
+    case 2:
+        return f1 * scalefactor * col;
+    case 3:
+        return f2 * scalefactor * col;
+    case 4:
+        return (f2 - f1) * col;
+    case 5: {
+        float scalefactor = static_cast<float>((pos2 - pos1).length() / ((pos1 - p).length() + (pos2 - p).length()));
+        return smoothstep(f2 - f1, 0, 0.1 * scalefactor) * col;
+    }
     }
 
     return 0.0;
+}
+Vec3d voronoiFn(VoronoiPointData& data, int n, const Vec3d* args)
+{
+    return voronoiUtil(data, n, args, false);
 }
 const static char* voronoi_docstring =
     "float voronoi(vector v, int type=1,float jitter=0.5, float fbmScale=0, int fbmOctaves=4,float fbmLacunarity=2, "
-    "float fbmGain=.5)\n"
-    "voronoi is a cellular noise pattern. It is a jittered variant of cellnoise.";
+    "float fbmGain=.5, int distanceType, float exponent)\n"
+    "voronoi is a cellular noise pattern. It is a jittered variant of cellnoise.\n"
+    "type: 1=random cell value, 2=distance to closest(f1), 3=distance to 2nd closest(f2), 4=f2-f1, 5=borders"
+    "distanceType: 1=Euclidean, 2=Manhattan, 3=Chebyshev, 4=Minkowski\n"
+    "exponent: when using minkowski, exponent controls shape. Values between 1 and 2 transition from Manhattan to "
+    "Euclidean";
 
-Vec3d cvoronoiFn(VoronoiPointData& data, int n, const Vec3d* args) {
-    // args = p, type, jitter,
-    //        fbmScale, fbmOctaves, fbmLacunarity, fbmGain
-    Vec3d p;
-    int type = 1;
-    double jitter = 0.5;
-    double fbmScale = 0;
-    double fbmOctaves = 4;
-    double fbmLacunarity = 2;
-    double fbmGain = 0.5;
-    switch (n) {
-        case 7:
-            fbmGain = args[6][0];
-        case 6:
-            fbmLacunarity = args[5][0];
-        case 5:
-            fbmOctaves = args[4][0];
-        case 4:
-            fbmScale = args[3][0];
-        case 3:
-            jitter = clamp(args[2][0], 1e-3, 1);
-        case 2:
-            type = int(args[1][0]);
-        case 1:
-            p = args[0];
-    }
-
-    if (fbmScale > 0) {
-        Vec3d fbmArgs[4];
-        fbmArgs[0] = 2 * p;
-        fbmArgs[1] = fbmOctaves;
-        fbmArgs[2] = fbmLacunarity;
-        fbmArgs[3] = fbmGain;
-        p += fbmScale * vfbm(4, fbmArgs);
-    }
-
-    double f1, f2;
-    Vec3d pos1, pos2;
-    if (type >= 3)
-        voronoi_f1f2_3d(data, p, jitter, f1, pos1, f2, pos2);
-    else
-        voronoi_f1_3d(data, p, jitter, f1, pos1);
-
-    Vec3d color = ccellnoise(pos1);
-    switch (type) {
-        case 1:
-            pos1[0] += 10;
-            return color;
-        case 2:
-            return f1 * color;
-        case 3:
-            return f2 * color;
-        case 4:
-            return (f2 - f1) * color;
-        case 5: {
-            float scalefactor = static_cast<float>((pos2 - pos1).length() / ((pos1 - p).length() + (pos2 - p).length()));
-            return smoothstep(f2 - f1, 0, 0.1 * scalefactor) * color;
-        }
-    }
-
-    return 0.0;
+Vec3d cvoronoiFn(VoronoiPointData& data, int n, const Vec3d* args)
+{
+    return voronoiUtil(data, n, args, true);
 }
 const static char* cvoronoi_docstring =
-    "color cvoronoi(vector v, int type=1,float jitter=0.5, float fbmScale=0, int fbmOctaves=4,float fbmLacunarity=2, "
-    "float fbmGain=.5)\n"
-    "returns color in cellular pattern. It is a jittered variant of cellnoise.";
+    "float cvoronoi(vector v, int type=1,float jitter=0.5, float fbmScale=0, int fbmOctaves=4,float fbmLacunarity=2, "
+    "float fbmGain=.5, int distanceType, float exponent)\n"
+    "returns a colored version of voronoi. It is a jittered variant of ccellnoise.\n"
+    "type: 1=random cell value, 2=distance to closest(f1), 3=distance to 2nd closest(f2), 4=f2-f1, 5=borders"
+    "distanceType: 1=Euclidean, 2=Manhattan, 3=Chebyshev, 4=Minkowski\n"
+    "exponent: when using minkowski, exponent controls shape. Values between 1 and 2 transition from Manhattan to "
+    "Euclidean";
 
-Vec3d pvoronoiFn(VoronoiPointData& data, int n, const Vec3d* args) {
+Vec3d pvoronoiFn(VoronoiPointData& data, int n, const Vec3d* args)
+{
     // args = p, jitter,
     //        fbmScale, fbmOctaves, fbmLacunarity, fbmGain
     Vec3d p;
@@ -973,19 +1122,25 @@ Vec3d pvoronoiFn(VoronoiPointData& data, int n, const Vec3d* args) {
     double fbmOctaves = 4;
     double fbmLacunarity = 2;
     double fbmGain = 0.5;
+    int distance = 1;
+    double exponent = 1;
     switch (n) {
-        case 6:
-            fbmGain = args[5][0];
-        case 5:
-            fbmLacunarity = args[4][0];
-        case 4:
-            fbmOctaves = args[3][0];
-        case 3:
-            fbmScale = args[2][0];
-        case 2:
-            jitter = clamp(args[1][0], 1e-3, 1);
-        case 1:
-            p = args[0];
+    case 8:
+        exponent = args[7][0];
+    case 7:
+        distance = args[6][0];
+    case 6:
+        fbmGain = args[5][0];
+    case 5:
+        fbmLacunarity = args[4][0];
+    case 4:
+        fbmOctaves = args[3][0];
+    case 3:
+        fbmScale = args[2][0];
+    case 2:
+        jitter = clamp(args[1][0], 1e-3, 1);
+    case 1:
+        p = args[0];
     }
 
     if (fbmScale > 0) {
@@ -999,57 +1154,95 @@ Vec3d pvoronoiFn(VoronoiPointData& data, int n, const Vec3d* args) {
 
     double f1;
     Vec3d pos1;
-    voronoi_f1_3d(data, p, jitter, f1, pos1);
+    voronoi_f1_3d(data, p, jitter, f1, pos1, distance, exponent);
     return pos1;
 }
 const static char* pvoronoi_docstring =
-    "color pvoronoi(vector v, int type=1,float jitter=0.5, float fbmScale=0, int fbmOctaves=4,float fbmLacunarity=2, "
-    "float fbmGain=.5)\n"
-    "returns center of voronoi cell.";
+    "color pvoronoi(vector v, float jitter=0.5, float fbmScale=0, int fbmOctaves=4,float fbmLacunarity=2, "
+    "float fbmGain=.5, int distanceType, float exponent)\n"
+    "returns center of voronoi cell.\n"
+    "distanceType: 1=Euclidean, 2=Manhattan, 3=Chebyshev, 4=Minkowski\n"
+    "exponent: when using minkowski, exponent controls shape. Values between 1 and 2 transition from Manhattan to "
+    "Euclidean";
 
 class CachedVoronoiFunc : public ExprFuncSimple {
   public:
     typedef Vec3d VoronoiFunc(VoronoiPointData& data, int n, const Vec3d* args);
-    CachedVoronoiFunc(VoronoiFunc* vfunc) : ExprFuncSimple(true), _vfunc(vfunc) {}
+    CachedVoronoiFunc(VoronoiFunc* vfunc) : ExprFuncSimple(true), _vfunc(vfunc)
+    {
+    }
 
-    virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const {
+    virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const override
+    {
         // check number of arguments
         int nargs = node->numChildren();
-        if (nargs < 1 || nargs > 7) {
-            node->addError("Wrong number of arguments, should be 1 to 7");
+        if (nargs < 1 || nargs > 9) {
+            node->addError("Wrong number of arguments, should be 1 to 9");
             return ExprType().Error();
         }
 
         bool valid = true;
         valid &= node->checkArg(0, ExprType().FP(3).Varying(), envBuilder);
-        for (int i = 1; i < nargs; i++) valid &= node->checkArg(i, ExprType().FP(1).Constant(), envBuilder);
+        for (int i = 1; i < nargs; i++)
+            valid &= node->checkArg(i, ExprType().FP(1).Constant(), envBuilder);
         return valid ? ExprType().FP(3).Varying() : ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const {
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* /*node*/, ArgHandle& /*args*/) const override
+    {
         return new VoronoiPointData();
     }
 
-    virtual void eval(ArgHandle args) {
-        VoronoiPointData* data = static_cast<VoronoiPointData*>(args.data);
+    virtual void eval(ArgHandle& args) override
+    {
+        VoronoiPointData data;
         int nargs = args.nargs();
         Vec3d* sevArgs = (Vec3d*)alloca(sizeof(Vec3d) * nargs);
 
         for (int i = 0; i < nargs; i++)
-            for (int j = 0; j < 3; j++) sevArgs[i][j] = args.inFp<3>(i)[j];
+            for (int j = 0; j < 3; j++)
+                sevArgs[i][j] = args.inFp<3>(i)[j];
 
-        Vec3d result = _vfunc(*data, nargs, sevArgs);
+        Vec3d result = _vfunc(data, nargs, sevArgs);
         double* out = &args.outFp;
-        for (int i = 0; i < 3; i++) out[i] = result[i];
+        for (int i = 0; i < 3; i++)
+            out[i] = result[i];
     }
 
-    virtual ~CachedVoronoiFunc() {}
+    virtual ~CachedVoronoiFunc()
+    {
+    }
 
   private:
     VoronoiFunc* _vfunc;
 } voronoi(voronoiFn), cvoronoi(cvoronoiFn), pvoronoi(pvoronoiFn);
 
-double dist(double ax, double ay, double az, double bx, double by, double bz) {
+double dist(int n, const Vec3d* args)
+{
+    double ax = 0.0, ay = 0.0, az = 0.0, bx = 0.0, by = 0.0, bz = 0.0;
+    if (n == 2) {
+        ax = args[0][0];
+        ay = args[0][1];
+        az = args[0][2];
+        bx = args[1][0];
+        by = args[1][1];
+        bz = args[1][2];
+    } else if (n == 4) {
+        ax = args[0][0];
+        ay = args[1][0];
+        az = 0;
+        bx = args[2][0];
+        by = args[3][0];
+        bz = 0;
+    } else if (n == 6) {
+        ax = args[0][0];
+        ay = args[1][0];
+        az = args[2][0];
+        bx = args[3][0];
+        by = args[4][0];
+        bz = args[5][0];
+    } else
+        return 0.0;
     double x = ax - bx;
     double y = ay - by;
     double z = az - bz;
@@ -1057,24 +1250,37 @@ double dist(double ax, double ay, double az, double bx, double by, double bz) {
 }
 static const char* dist_docstring =
     "float dist(vector a, vector b)\n"
-    "distance between two points";
+    "float dist(double ax, double ay, double bx, double by)\n"
+    "float dist(double ax, double ay, double az, double bx, double by, double bz)\n"
+    "distance between two points.\n"
+    "Can be specifed as two vectors, or four or six vector components ";
 
-double length(const Vec3d& v) { return sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]); }
+double length(const Vec3d& v)
+{
+    return sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+}
 static const char* length_docstring =
     "float length(vector v)\n"
     "length of vector";
 
-double hypot(double x, double y) { return sqrt(x * x + y * y); }
+double hypot(double x, double y)
+{
+    return sqrt(x * x + y * y);
+}
 static const char* hypot_docstring =
     "float hypot(vector v)\n"
     "length of 2d vector [x,y]";
 
-double dot(const Vec3d& a, const Vec3d& b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+double dot(const Vec3d& a, const Vec3d& b)
+{
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
 static const char* dot_docstring =
     "float dot(vector a,vector b)\n"
     "vector dot product";
 
-Vec3d norm(const Vec3d& a) {
+Vec3d norm(const Vec3d& a)
+{
     double len = length(a);
     if (len == 0)
         return 0.0;
@@ -1085,41 +1291,51 @@ static const char* norm_docstring =
     "vector norm(vector v)\n"
     "vector scaled to unit length";
 
-Vec3d cross(const Vec3d& a, const Vec3d& b) {
+Vec3d cross(const Vec3d& a, const Vec3d& b)
+{
     return Vec3d(a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]);
 }
 static const char* cross_docstring =
     "vector cross(vector a,vector b)\n"
     "vector cross product";
 
-double angle(const Vec3d& a, const Vec3d& b) {
+double angle(const Vec3d& a, const Vec3d& b)
+{
     double len = length(a) * length(b);
-    if (len == 0) return 0;
+    if (len == 0)
+        return 0;
     return acos(dot(a, b) / len);
 }
 static const char* angle_docstring =
     "float angle(vector a,vector b)\n"
     "angle between two vectors (in radians)";
 
-Vec3d ortho(const Vec3d& a, const Vec3d& b) { return norm(cross(a, b)); }
+Vec3d ortho(const Vec3d& a, const Vec3d& b)
+{
+    return norm(cross(a, b));
+}
 static const char* ortho_docstring =
     "vector angle(vector a,vector b)\n"
     "normalized vector orthogonal to a and b scaled to unit length";
 
-Vec3d rotate(int n, const Vec3d* args) {
-    if (n != 3) return 0.0;
+Vec3d rotate(int n, const Vec3d* args)
+{
+    if (n != 3)
+        return 0.0;
     const Vec3d& P = args[0];
     const Vec3d& axis = args[1];
     float angle = static_cast<float>(args[2][0]);
     double len = axis.length();
-    if (!len) return P;
+    if (!len)
+        return P;
     return P.rotateBy(axis / len, angle);
 }
 static const char* rotate_docstring =
     "vector rotate(vector v,vector axis,float angle)\n"
     "rotates v around axis by given angle (in radians)";
 
-Vec3d up(const Vec3d& P, const Vec3d& upvec) {
+Vec3d up(const Vec3d& P, const Vec3d& upvec)
+{
     // rotate vec so y-axis points to upvec
     Vec3d yAxis(0, 1, 0);
     return P.rotateBy(ortho(upvec, yAxis), angle(upvec, yAxis));
@@ -1128,30 +1344,36 @@ static const char* up_docstring =
     "vector up(vector P,vector upvec)\n"
     "rotates v such that the Y axis points in the given up direction";
 
-double cycle(double index, double loRange, double hiRange) {
+double cycle(double index, double loRange, double hiRange)
+{
     int lo = int(loRange);
     int hi = int(hiRange);
     int range = hi - lo + 1;
-    if (range <= 0) return lo;
+    if (range <= 0)
+        return lo;
     int result = int(index) % range;
-    if (result < 0) result += range;
+    if (result < 0)
+        result += range;
     return lo + result;
 }
 static const char* cycle_docstring =
     "int cycle(int index, int loRange, int hiRange )\n"
     "Cycles through values between loRange and hiRange based on supplied index.\n"
-    "This is an offset \"mod\" function. The result is rotates v such that the\n"
-    "Y axis points in the given up direction";
+    "This is an offset \"mod\" function.";
 
-double pick(int n, double* params) {
-    if (n < 3) return 0;
+double pick(int n, double* params)
+{
+    if (n < 3)
+        return 0;
     double index = hash(1, &params[0]);
     int loRange = int(params[1]);
     int hiRange = int(params[2]);
     int range = hiRange - loRange + 1;
-    if (range <= 0) return loRange;
+    if (range <= 0)
+        return loRange;
     int numWeights = n - 3;
-    if (numWeights > range) numWeights = range;
+    if (numWeights > range)
+        numWeights = range;
 
     // build cutoff points based on weights
     double* cutoffs = (double*)alloca(sizeof(double) * range);
@@ -1164,7 +1386,8 @@ double pick(int n, double* params) {
         weights[i] = weight;
     }
 
-    if (total == 0) return loRange;
+    if (total == 0)
+        return loRange;
 
     // scale value from [0..1] to [0..total] range
     index *= total;
@@ -1199,16 +1422,22 @@ static const char* pick_docstring =
     "to the supplied weights.&nbsp; Any weights not supplied are assumed to\n"
     "be 1.0.";
 
-double swatch(int n, double* params) { return choose(n, params); }
+double swatch(int n, double* params)
+{
+    return choose(n, params);
+}
 static const char* swatch_docstring =
     "color swatch(float index, color choice0, color choice1, color choice2, [...])\n"
     "Chooses one of the supplied color choices based on the index (assumed to be in range [0..1]).";
 
-double choose(int n, double* params) {
-    if (n < 3) return 0;
+double choose(int n, double* params)
+{
+    if (n < 3)
+        return 0;
     double key = params[0];
     // NaN protection
-    if (key != key) return 0;
+    if (std::isnan(key))
+        return 0;
     int nvals = n - 1;
     return params[1 + int(clamp(key * nvals, 0, nvals - 1))];
 }
@@ -1216,11 +1445,29 @@ static const char* choose_docstring =
     "float choose(float index,float choice1, float choice2, [...])\n"
     "Chooses one of the supplied choices based on the index (assumed to be in range [0..1]).";
 
-double wchoose(int n, double* params) {
-    if (n < 5) return 0;
+double chooseIndex(int n, double* params)
+{
+    if (n < 2)
+        return 0;
+    int key = params[0];
+    // NaN protection
+    if (std::isnan(key))
+        return 0;
+    int nvals = n - 1;
+    return params[int(cycle(key, 1, nvals))];
+}
+static const char* chooseIndex_docstring =
+    "float chooseIndex(int index,float choice1, float choice2, [...])\n"
+    "Cycles through the supplied choices based on the index (assumed to be in integer).";
+
+double wchoose(int n, double* params)
+{
+    if (n < 5)
+        return 0;
     double key = params[0];
     // NaN protection
-    if (key != key) return 0;
+    if (key != key)
+        return 0;
     int nvals = (n - 1) / 2;  // nweights = nvals
 
     // build cutoff points based on weights
@@ -1234,7 +1481,8 @@ double wchoose(int n, double* params) {
         weights[i] = weight;
     }
 
-    if (total == 0) return params[1];
+    if (total == 0)
+        return params[1];
 
     // scale value from [0..1] to [0..total] range
     key *= total;
@@ -1267,11 +1515,15 @@ static const char* wchoose_docstring =
     "Chooses one of the supplied choices based on the index (assumed to be in range[0..1]).\n"
     "The values will be distributed according to the supplied weights.";
 
-double spline(int n, double* params) {
-    if (n < 5) return 0;
+double spline(int n, double* params)
+{
+    if (n < 5)
+        return 0;
     double u = clamp(params[0], 0, 1);
-    if (u == 0) return params[2];
-    if (u == 1) return params[n - 2];
+    if (u == 0)
+        return params[2];
+    if (u == 1)
+        return params[n - 2];
     int nsegs = n - 4;
     double seg;
     u = modf(u * nsegs, &seg);
@@ -1289,14 +1541,19 @@ static const char* spline_docstring =
 template <class T>
 struct CurveData : public ExprFuncNode::Data {
     Curve<T> curve;
-    virtual ~CurveData() {}
+    virtual ~CurveData()
+    {
+    }
 };
 
 class CurveFuncX : public ExprFuncSimple {
   public:
-    CurveFuncX() : ExprFuncSimple(true) {}
+    CurveFuncX() : ExprFuncSimple(true)
+    {
+    }
 
-    virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const {
+    virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const
+    {
         // check number of arguments
         int nargs = node->numChildren();
         if ((nargs - 1) % 3) {
@@ -1314,7 +1571,8 @@ class CurveFuncX : public ExprFuncSimple {
         return valid ? ExprType().FP(1).Varying() : ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const {
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle& args) const
+    {
         CurveData<double>* data = new CurveData<double>;
         for (int i = 1; i < args.nargs() - 2; i += 3) {
             double pos = args.inFp<1>(i)[0];
@@ -1331,8 +1589,9 @@ class CurveFuncX : public ExprFuncSimple {
         return data;
     }
 
-    virtual void eval(ArgHandle args) {
-        CurveData<double>* data = static_cast<CurveData<double>*>(args.data);
+    virtual void eval(ArgHandle& args)
+    {
+        const CurveData<double>* data = static_cast<const CurveData<double>*>(args.data);
         double param = args.inFp<1>(0)[0];
         args.outFp = data->curve.getValue(param);
     }
@@ -1345,8 +1604,65 @@ static const char* curve_docstring =
     "0 - none, 1 - linear, 2 - smooth, 3 - spline, \n"
     "4-monotone (non oscillating spline)";
 
+class VCurveFuncX : public ExprFuncSimple {
+  public:
+    VCurveFuncX() : ExprFuncSimple(true)
+    {
+    }
+
+    virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const
+    {
+        // check number of arguments
+        int nargs = node->numChildren();
+        if ((nargs - 1) % 3) {
+            node->addError("Wrong number of arguments, should be multiple of 3 plus 1");
+            return ExprType().Error();
+        }
+
+        bool valid = true;
+        valid &= node->checkArg(0, ExprType().FP(1).Varying(), envBuilder);
+        for (int i = 1; i < nargs; i += 3) {
+            valid &= node->checkArg(i, ExprType().FP(1).Varying(), envBuilder);
+            valid &= node->checkArg(i + 1, ExprType().FP(1).Varying(), envBuilder);
+            valid &= node->checkArg(i + 2, ExprType().FP(1).Varying(), envBuilder);
+        }
+        return valid ? ExprType().FP(1).Varying() : ExprType().Error();
+    }
+
+    virtual void eval(ArgHandle& args)
+    {
+        Curve<double> curve;
+        for (int i = 1; i < args.nargs() - 2; i += 3) {
+            double pos = args.inFp<1>(i)[0];
+            double val = args.inFp<1>(i + 1)[0];
+            double interpDouble = args.inFp<1>(i + 2)[0];
+            int interpInt = (int)interpDouble;
+            Curve<double>::InterpType interpolant = (Curve<double>::InterpType)interpInt;
+            if (!Curve<double>::interpTypeValid(interpolant)) {
+                // TODO: fix error checking!
+            }
+            curve.addPoint(pos, val, interpolant);
+        }
+        curve.preparePoints();
+
+        double param = args.inFp<1>(0)[0];
+        args.outFp = curve.getValue(param);
+    }
+
+} vcurve;
+static const char* vcurve_docstring =
+    "float vcurve(float param,float pos0,float val0,int interp0,float pos1,float val1,int interp1,[...])\n\n"
+    "Interpolates a 1D ramp defined by control points at 'param'. Control points are specified \n"
+    "by triples of parameters pos_i, val_i, and interp_i. Interpolation codes are \n"
+    "0 - none, 1 - linear, 2 - smooth, 3 - spline, \n"
+    "4-monotone (non oscillating spline)\n"
+    "\n"
+    "This is a variant of curve(...) that allows varying position and value parameters.\n"
+    "It is significantly slower than curve(...), so should only be used when varying parameters are needed.\n";
+
 class CCurveFuncX : public ExprFuncSimple {
-    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const {
+    virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const
+    {
         // check number of arguments
         int nargs = node->numChildren();
         if ((nargs - 1) % 3) {
@@ -1364,11 +1680,12 @@ class CCurveFuncX : public ExprFuncSimple {
         return valid ? ExprType().FP(3).Varying() : ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const {
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle& args) const
+    {
         CurveData<Vec3d>* data = new CurveData<Vec3d>;
         for (int i = 1; i < args.nargs() - 2; i += 3) {
             double pos = args.inFp<1>(i)[0];
-            Vec3dRef val(&args.inFp<3>(i + 1)[0]);
+            Vec3dConstRef val(&args.inFp<3>(i + 1)[0]);
             double interpDouble = args.inFp<1>(i + 2)[0];
             int interpInt = (int)interpDouble;
             Curve<Vec3d>::InterpType interpolant = (Curve<Vec3d>::InterpType)interpInt;
@@ -1381,17 +1698,23 @@ class CCurveFuncX : public ExprFuncSimple {
         return data;
     }
 
-    virtual void eval(ArgHandle args) {
-        CurveData<Vec3d>* data = static_cast<CurveData<Vec3d>*>(args.data);
+    virtual void eval(ArgHandle& args)
+    {
+        const CurveData<Vec3d>* data = static_cast<const CurveData<Vec3d>*>(args.data);
         double param = args.inFp<1>(0)[0];
         Vec3d result = data->curve.getValue(param);
         double* out = &args.outFp;
-        for (int k = 0; k < 3; k++) out[k] = result[k];
+        for (int k = 0; k < 3; k++)
+            out[k] = result[k];
     }
 
   public:
-    CCurveFuncX() : ExprFuncSimple(true) {}  // Thread Safe
-    virtual ~CCurveFuncX() {}
+    CCurveFuncX() : ExprFuncSimple(true)
+    {
+    }  // Thread Safe
+    virtual ~CCurveFuncX()
+    {
+    }
 } ccurve;
 static const char* ccurve_docstring =
     "color curve(float param,float pos0,color val0,int interp0,float pos1,color val1,int interp1,[...])\n\n"
@@ -1402,13 +1725,16 @@ static const char* ccurve_docstring =
 
 class GetVar : public ExprFuncSimple {
     struct Data : public ExprFuncNode::Data {
-        typedef void (*func)(double* in, double* out);
-        Data(func fIn, int dim) : f(fIn), dim(dim) {}
+        typedef void (*func)(double* out, const double* in);
+        Data(func fIn, int dim) : f(fIn), dim(dim)
+        {
+        }
         func f;
         int dim;
     };
 
-    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const {
+    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const
+    {
         bool valid = true;
         valid &= node->checkArg(0, ExprType().String().Constant(), envBuilder);
         std::string varName = node->getStrArg(0);
@@ -1427,24 +1753,26 @@ class GetVar : public ExprFuncSimple {
         return varType.isValid() ? varType : ExprType().Error();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const {
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle&) const
+    {
         return new Data(node->type().isFP() ? getTemplatizedOp<Assign, Data::func>(node->type().dim()) : nullptr,
                         node->type().dim());
     }
 
     template <int d>
     struct Assign {
-        static void f(double* out, double* in) {
-            for (int k = 0; k < d; k++) out[k] = in[k];
+        static void f(double* out, const double* in)
+        {
+            for (int k = 0; k < d; k++)
+                out[k] = in[k];
         }
     };
 
-    virtual void eval(ArgHandle args) {
-        Data* data = static_cast<Data*>(args.data);
+    virtual void eval(ArgHandle& args)
+    {
+        const Data* data = static_cast<const Data*>(args.data);
         assert(data);
         double* out = &args.outFp;
-        // for(int i=0;i<data->dim;i++) std::cerr<<" "<<args.inFp<1>(0)[i];
-        // std::cerr<<std::endl;
         if (data->f)
             data->f(out, &args.inFp<1>(0)[0]);
         else
@@ -1452,8 +1780,12 @@ class GetVar : public ExprFuncSimple {
     }
 
   public:
-    GetVar() : ExprFuncSimple(true) {}  // Thread Safe
-    virtual ~GetVar() {}
+    GetVar() : ExprFuncSimple(true)
+    {
+    }  // Thread Safe
+    virtual ~GetVar()
+    {
+    }
 } getVar;
 static const char* getVar_docstring =
     "getVar(string varName,vector defaultValue)\n"
@@ -1466,7 +1798,8 @@ class PrintFuncX : public ExprFuncSimple {
     };
 
   public:
-    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const {
+    virtual ExprType prep(ExprFuncNode* node, bool, ExprVarEnvBuilder& envBuilder) const
+    {
         int nargs = node->numChildren();
         if (nargs < 1) {
             node->addError("Wrong number of arguments, should be GE 1");
@@ -1481,7 +1814,8 @@ class PrintFuncX : public ExprFuncSimple {
         return ExprType().FP(1).Constant();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const {
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode*, ArgHandle& args) const
+    {
         // parse format string
         unsigned int bakeStart = 0;
         int searchStart = 0;
@@ -1494,9 +1828,9 @@ class PrintFuncX : public ExprFuncSimple {
         int items = 0;
         while (1) {
             std::size_t percentStart = format.find('%', searchStart);
-            if (percentStart == std::string::npos) break;
+            if (percentStart == std::string::npos)
+                break;
             if (percentStart + 1 == format.length()) {
-                // node->addError("Unexpected end of format string");
                 delete data;
                 assert(false);
             } else if (format[percentStart + 1] == '%') {
@@ -1506,21 +1840,20 @@ class PrintFuncX : public ExprFuncSimple {
                 char c = format[percentStart + 1];
                 int code = (c == 'v') ? -1 : -2;
                 needed++;
-                if (bakeStart != percentStart) ranges.push_back(std::pair<int, int>(bakeStart, static_cast<int>(percentStart)));
+                if (bakeStart != percentStart)
+                    ranges.push_back(std::pair<int, int>(bakeStart, static_cast<int>(percentStart)));
                 ranges.push_back(std::pair<int, int>(code, code));
                 items++;
                 searchStart = static_cast<int>(percentStart + 2);
                 bakeStart = searchStart;
             } else {
-                // node->addError("Invalid format string, only %v is allowed");
                 delete data;
                 // TODO: check that this is correct
-                // return ExprType().Error().Varying();
-                // return false;
                 assert(false);
             }
         }
-        if (bakeStart != format.length()) ranges.push_back(std::pair<int, int>(bakeStart, static_cast<int>(format.length())));
+        if (bakeStart != format.length())
+            ranges.push_back(std::pair<int, int>(bakeStart, static_cast<int>(format.length())));
 
         if (items != args.nargs() - 1) {
             // node->addError("Wrong number of arguments for format string");
@@ -1534,8 +1867,9 @@ class PrintFuncX : public ExprFuncSimple {
         return data;
     }
 
-    virtual void eval(ArgHandle args) {
-        Data* data = (Data*)args.data;
+    virtual void eval(ArgHandle& args)
+    {
+        const Data* data = (const Data*)args.data;
         int item = 1;
         for (unsigned int i = 0; i < data->ranges.size(); i++) {
             const std::pair<int, int>& range = data->ranges[i];
@@ -1555,7 +1889,9 @@ class PrintFuncX : public ExprFuncSimple {
         args.outFp = 0;
     }
 
-    PrintFuncX() : ExprFuncSimple(false) {}  // not thread safe
+    PrintFuncX() : ExprFuncSimple(false)
+    {
+    }  // not thread safe
 
 } printf;
 static const char* printf_docstring =
@@ -1584,12 +1920,12 @@ public:
         valid &= node->checkArg(1,ExprType().FP(1).Constant(),envBuilder);
         return valid ?ExprType().FP(3).Varying():ExprType().Error();
     }
-    virtual ExprFuncNode::Data* evalConstant(ArgHandle args) const
+    virtual ExprFuncNode::Data* evalConstant(ArgHandle& args) const
     {
         //std::cerr<<"evalling const "<<args.inFp<1>(1)<<std::endl;
         return new MyData(args.inFp<1>(1)[0]);
     }
-    virtual void eval(ArgHandle args)
+    virtual void eval(ArgHandle& args)
     {
         MyData* data=static_cast<MyData*>(args.data);
 
@@ -1600,7 +1936,8 @@ static const char* testfunc_docstring="fdsA";
 
 #endif
 
-void defineBuiltins(ExprFunc::Define define, ExprFunc::Define3 define3) {
+void defineBuiltins(ExprFunc::Define, ExprFunc::Define3 define3)
+{
 // functions from math.h (global namespace)
 //#define FUNC(func)	  define(#func, ExprFunc(::func))
 #define FUNCADOC(name, func) define3(name, ExprFunc(::func), func##_docstring)
@@ -1653,8 +1990,8 @@ void defineBuiltins(ExprFunc::Define define, ExprFunc::Define3 define3) {
     // clamping
     FUNCDOC(clamp);
     FUNCDOC(round);
-    FUNCDOC(max);
-    FUNCDOC(min);
+    FUNCNDOC(max, 2, 50);
+    FUNCNDOC(min, 2, 50);
 
     // blending / remapping
     FUNCDOC(invert);
@@ -1670,7 +2007,9 @@ void defineBuiltins(ExprFunc::Define define, ExprFunc::Define3 define3) {
     FUNCDOC(gaussstep);
     FUNCDOC(remap);
     FUNCDOC(mix);
+    FUNCNDOC(average, 2, 50);
     FUNCNDOC(hsi, 4, 5);
+    FUNCNDOC(hue, 2, 2);
     FUNCNDOC(midhsi, 5, 7);
     FUNCDOC(hsltorgb);
     FUNCDOC(rgbtohsl);
@@ -1699,7 +2038,7 @@ void defineBuiltins(ExprFunc::Define define, ExprFunc::Define3 define3) {
     FUNCNDOC(cfbm4, 2, 5);
 
     // vectors
-    FUNCDOC(dist);
+    FUNCNDOC(dist, 2, 6);
     FUNCDOC(length);
     FUNCDOC(hypot);
     FUNCDOC(dot);
@@ -1714,17 +2053,19 @@ void defineBuiltins(ExprFunc::Define define, ExprFunc::Define3 define3) {
     FUNCDOC(cycle);
     FUNCNDOC(pick, 3, -1);
     FUNCNDOC(choose, 3, -1);
+    FUNCNDOC(chooseIndex, 3, -1);
     FUNCNDOC(wchoose, 4, -1);
     FUNCNDOC(swatch, 3, -1);
     FUNCNDOC(spline, 5, -1);
 
     // FuncX interface
     // noise
-    FUNCNDOC(voronoi, 1, 7);
-    FUNCNDOC(cvoronoi, 1, 7);
-    FUNCNDOC(pvoronoi, 1, 6);
+    FUNCNDOC(voronoi, 1, 9);
+    FUNCNDOC(cvoronoi, 1, 9);
+    FUNCNDOC(pvoronoi, 1, 8);
     // variations
     FUNCNDOC(curve, 1, -1);
+    FUNCNDOC(vcurve, 1, -1);
     FUNCNDOC(ccurve, 1, -1);
     FUNCNDOC(getVar, 2, 2);
     FUNCNDOC(printf, 1, -1);

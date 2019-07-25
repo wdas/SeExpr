@@ -4,23 +4,35 @@
 #include <iostream>
 
 struct Expr : public SeExpr2::Expression {
-    Expr(const std::string& s) : Expression(s) {}
+    Expr(const std::string& s) : Expression(s)
+    {
+    }
 
     struct SimpleVar : public SeExpr2::ExprVarRef {
-        SimpleVar() : ExprVarRef(SeExpr2::ExprType().FP(3).Varying()) { v[0] = v[1] = v[2] = 0; }
+        SimpleVar() : ExprVarRef(SeExpr2::ExprType().FP(3).Varying())
+        {
+            v[0] = v[1] = v[2] = 0;
+        }
         double v[3];
-        void eval(const char**) {}
-        void eval(double* result) override {
-            for (int k = 0; k < 3; k++) result[k] = v[k];
+        void eval(const char**)
+        {
+        }
+        void eval(double* result) override
+        {
+            for (int k = 0; k < 3; k++)
+                result[k] = v[k];
         }
     };
 
     mutable SimpleVar singleII, singleII2;
 
     mutable SeExpr2::VarBlockCreator creator;
-    SeExpr2::ExprVarRef* resolveVar(const std::string& name) const override {
-        if (name == "singleII") return &singleII;
-        if (name == "singleII2") return &singleII2;
+    SeExpr2::ExprVarRef* resolveVar(const std::string& name) const override
+    {
+        if (name == "singleII")
+            return &singleII;
+        if (name == "singleII2")
+            return &singleII2;
         return creator.resolveVar(name);
     }
 };
@@ -30,18 +42,19 @@ struct Expr : public SeExpr2::Expression {
 // For loop auto unroll.
 // Variable access using varRef!!! for paint3d u,v in map and rand()
 
-void run(int way) {
+void run(int way)
+{
     std::string exprStr;
     SeExpr2::PrintTiming timer("way " + std::to_string(way));
     switch (way) {
-        case 0:
-            exprStr = "singleII+singleII2";
-            break;
-        case 2:
-            exprStr = "singleI+singleI2";
-            break;
-        default:
-            throw std::runtime_error("Invalid way");
+    case 0:
+        exprStr = "singleII+singleII2";
+        break;
+    case 2:
+        exprStr = "singleI+singleI2";
+        break;
+    default:
+        throw std::runtime_error("Invalid way");
     }
     Expr e(exprStr);
     e.singleII.v[0] = 1.;
@@ -61,11 +74,14 @@ void run(int way) {
     }
     auto evaluator = e.creator.create();
     std::vector<double> PArray(10 * 3);
-    for (size_t i = 0; i < PArray.size(); i++) PArray[i] = i;
+    for (size_t i = 0; i < PArray.size(); i++)
+        PArray[i] = i;
     std::vector<double> CdArray(10 * 3);
-    for (size_t i = 0; i < CdArray.size(); i++) CdArray[i] = 2 * i;
+    for (size_t i = 0; i < CdArray.size(); i++)
+        CdArray[i] = 2 * i;
     std::vector<double> faceIdArray(10);
-    for (size_t i = 0; i < faceIdArray.size(); i++) faceIdArray[i] = 3 * i;
+    for (size_t i = 0; i < faceIdArray.size(); i++)
+        faceIdArray[i] = 3 * i;
     evaluator.Pointer(P) = PArray.data();
     evaluator.Pointer(Cd) = CdArray.data();
     evaluator.Pointer(faceId) = faceIdArray.data();
@@ -95,7 +111,8 @@ void run(int way) {
     }
 }
 
-int main() {
+int main()
+{
     run(0);
     run(2);
     run(0);

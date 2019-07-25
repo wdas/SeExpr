@@ -29,13 +29,16 @@
 
 namespace SeExpr2 {
 
-SpecExaminer::~SpecExaminer() {
+SpecExaminer::~SpecExaminer()
+{
     std::vector<const ControlSpec*>::iterator i = _specList.begin();
     std::vector<const ControlSpec*>::iterator const e = _specList.end();
-    for (; i != e; ++i) delete *i;
+    for (; i != e; ++i)
+        delete *i;
 };
 
-bool SpecExaminer::examine(const ExprNode* examinee) {
+bool SpecExaminer::examine(const ExprNode* examinee)
+{
     if (const ExprScalarAssignSpec* s_spec = ExprScalarAssignSpec::match(examinee)) {
         _specList.push_back(s_spec);
         return false;
@@ -56,23 +59,28 @@ bool SpecExaminer::examine(const ExprNode* examinee) {
     return true;
 };
 
-inline std::vector<const ControlSpec*>::const_iterator SpecExaminer::begin() const {
+inline std::vector<const ControlSpec*>::const_iterator SpecExaminer::begin() const
+{
     return _specList.begin();
 };
 
-inline std::vector<const ControlSpec*>::const_iterator const SpecExaminer::end() const {
+inline std::vector<const ControlSpec*>::const_iterator const SpecExaminer::end() const
+{
     return _specList.end();
 };
 
 //! Returns true if no newline separates comment and node
-inline bool isWS(const char* source, int start, int end) {
+inline bool isWS(const char* source, int start, int end)
+{
     for (int i = start; i < end; ++i)
-        if (source[i] != '\n') return false;
+        if (source[i] != '\n')
+            return false;
     return true;
 };
 
 //! Checks if there is whitespace in the range specified in the string
-inline std::string findComment(const ExprNode& node) {
+inline std::string findComment(const ExprNode& node)
+{
     const Expression& expr = *node.expr();
     typedef std::vector<std::pair<int, int> > Comments;
     const Comments& comments = expr.getComments();
@@ -87,7 +95,8 @@ inline std::string findComment(const ExprNode& node) {
 }
 
 ExprScalarAssignSpec::ExprScalarAssignSpec(const ExprAssignNode& node)
-    : ControlSpec(node), _min(0), _max(1), _val(static_cast<const ExprNumNode*>(node.child(0))->value()) {
+    : ControlSpec(node), _min(0), _max(1), _val(static_cast<const ExprNumNode*>(node.child(0))->value())
+{
     _name = node.name();
     std::string comment = findComment(node);
     // TODO: handle integer case
@@ -98,7 +107,8 @@ ExprScalarAssignSpec::ExprScalarAssignSpec(const ExprAssignNode& node)
     }
 }
 
-std::string ExprScalarAssignSpec::toString() const {
+std::string ExprScalarAssignSpec::toString() const
+{
     std::stringstream ss;
 
     ss << _name << ": " << value() << " in [" << _min << "," << _max << "]" << std::endl;
@@ -106,17 +116,22 @@ std::string ExprScalarAssignSpec::toString() const {
     return ss.str();
 }
 
-const ExprScalarAssignSpec* ExprScalarAssignSpec::match(const ExprNode* node) {
-    if (const ExprAssignNode* assign = isScalarAssign(node)) return new ExprScalarAssignSpec(*assign);
+const ExprScalarAssignSpec* ExprScalarAssignSpec::match(const ExprNode* node)
+{
+    if (const ExprAssignNode* assign = isScalarAssign(node))
+        return new ExprScalarAssignSpec(*assign);
 
     return 0;
 }
 
 ExprVectorAssignSpec::ExprVectorAssignSpec(const ExprAssignNode& node)
-    : ControlSpec(node), _min(0), _max(1),
-      _val(Vec3d(static_cast<const ExprNumNode*>(node.child(0)->child(0))->value(),
+    : ControlSpec(node)
+    , _min(0)
+    , _max(1)
+    , _val(Vec3d(static_cast<const ExprNumNode*>(node.child(0)->child(0))->value(),
                  static_cast<const ExprNumNode*>(node.child(0)->child(1))->value(),
-                 static_cast<const ExprNumNode*>(node.child(0)->child(2))->value())) {
+                 static_cast<const ExprNumNode*>(node.child(0)->child(2))->value()))
+{
     _name = node.name();
     std::string comment = findComment(node);
     int numParsed = sscanf(comment.c_str(), "#%lf,%lf\n", &_min, &_max);
@@ -126,7 +141,8 @@ ExprVectorAssignSpec::ExprVectorAssignSpec(const ExprAssignNode& node)
     }
 }
 
-std::string ExprVectorAssignSpec::toString() const {
+std::string ExprVectorAssignSpec::toString() const
+{
     std::stringstream ss;
 
     ss << _name << ": " << value() << " in [" << _min << "," << _max << "]" << std::endl;
@@ -136,8 +152,8 @@ std::string ExprVectorAssignSpec::toString() const {
 }
 
 template <class T>
-ExprCurveAssignSpec<T>::ExprCurveAssignSpec(const ExprAssignNode& node)
-    : ControlSpec(node), _vec() {
+ExprCurveAssignSpec<T>::ExprCurveAssignSpec(const ExprAssignNode& node) : ControlSpec(node), _vec()
+{
     _name = node.name();
     const ExprFuncNode* cnode = static_cast<const ExprFuncNode*>(node.child(0));
     _lookupText = cnode->child(0)->toString();
@@ -149,7 +165,8 @@ ExprCurveAssignSpec<T>::ExprCurveAssignSpec(const ExprAssignNode& node)
             (typename Curve<T>::InterpType) static_cast<const ExprNumNode*>(cnode->child(i + 2))->value()));
 }
 
-const ExprVectorAssignSpec* ExprVectorAssignSpec::match(const ExprNode* node) {
+const ExprVectorAssignSpec* ExprVectorAssignSpec::match(const ExprNode* node)
+{
     if (const ExprAssignNode* assign = isVectorAssign(node)) {
         return new ExprVectorAssignSpec(*assign);
     }
@@ -158,21 +175,25 @@ const ExprVectorAssignSpec* ExprVectorAssignSpec::match(const ExprNode* node) {
 }
 
 template <class T>
-std::string ExprCurveAssignSpec<T>::toString() const {
+std::string ExprCurveAssignSpec<T>::toString() const
+{
     std::stringstream ss;
 
     ss << _name << ": "
        << "curve(" << _lookupText;
     int num = _vec.size();
-    for (int i = 0; i < num; ++i) ss << _vec[i]._pos << _vec[i]._val << (int)_vec[i]._interp;
+    for (int i = 0; i < num; ++i)
+        ss << _vec[i]._pos << _vec[i]._val << (int)_vec[i]._interp;
     ss << ");";
 
     return ss.str();
 }
 
 template <class T>
-const ExprCurveAssignSpec<T>* ExprCurveAssignSpec<T>::match(const ExprNode* node) {
-    if (const ExprAssignNode* assign = isCurveAssign(node)) return new ExprCurveAssignSpec(*assign);
+const ExprCurveAssignSpec<T>* ExprCurveAssignSpec<T>::match(const ExprNode* node)
+{
+    if (const ExprAssignNode* assign = isCurveAssign(node))
+        return new ExprCurveAssignSpec(*assign);
 
     return 0;
 }
@@ -230,27 +251,29 @@ ExprCcurveAssignSpec::match(const ExprNode* node)
 
 #endif
 
-std::string ExprStrSpec::toString() const {
+std::string ExprStrSpec::toString() const
+{
     std::stringstream ss;
     ss << _name << ": \"" + _str + "\" ";
     switch (_type) {
-        case STRING:
-            ss << "STRING";
-            break;
-        case FILE:
-            ss << "FILE";
-            break;
-        case DIRECTORY:
-            ss << "DIRECTORY";
-            break;
-        default:
-            ss << "INVALID";
-            break;
+    case STRING:
+        ss << "STRING";
+        break;
+    case FILE:
+        ss << "FILE";
+        break;
+    case DIRECTORY:
+        ss << "DIRECTORY";
+        break;
+    default:
+        ss << "INVALID";
+        break;
     }
     return ss.str();
 }
 
-const ExprStrSpec* ExprStrSpec::match(const ExprNode* node) {
+const ExprStrSpec* ExprStrSpec::match(const ExprNode* node)
+{
     if (const ExprStrNode* strnode = isString(node)) {
         std::string comment = findComment(*node);
         char* name = new char[comment.length() + 1];
@@ -268,7 +291,8 @@ const ExprStrSpec* ExprStrSpec::match(const ExprNode* node) {
                 newType = DIRECTORY;
             else
                 valid = false;
-            if (valid) return new ExprStrSpec(*strnode, name, newType);
+            if (valid)
+                return new ExprStrSpec(*strnode, name, newType);
         }
         delete[] name;
         delete[] type;

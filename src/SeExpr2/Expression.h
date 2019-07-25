@@ -17,16 +17,21 @@
 #ifndef Expression_h
 #define Expression_h
 
-#include <string>
-#include <map>
-#include <set>
-#include <vector>
-#include <iomanip>
 #include <stdint.h>
+
+#include <atomic>
+#include <iomanip>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <set>
+#include <string>
+#include <vector>
+
+#include "Context.h"
+#include "Evaluator.h"
 #include "ExprConfig.h"
 #include "Vec.h"
-#include "Context.h"
-#include "ExprEnv.h"
 
 namespace llvm {
 class ExecutionEngine;
@@ -39,24 +44,27 @@ class ExprNode;
 class ExprVarNode;
 class ExprFunc;
 class Expression;
-class Interpreter;
 
 //! abstract class for implementing variable references
 class ExprVarRef {
-    ExprVarRef() : _type(ExprType().Error().Varying()) {};
+    ExprVarRef() : _type(ExprType().Error().Varying()){};
 
   public:
-    ExprVarRef(const ExprType& type) : _type(type) {};
+    ExprVarRef(const ExprType& type) : _type(type){};
 
-    virtual ~ExprVarRef() {}
+    virtual ~ExprVarRef()
+    {
+    }
 
     //! sets (current) type to given type
-    virtual void setType(const ExprType& type) {
+    virtual void setType(const ExprType& type)
+    {
         _type = type;
     };
 
     //! returns (current) type
-    virtual ExprType type() const {
+    virtual ExprType type() const
+    {
         return _type;
     };
 
@@ -76,10 +84,7 @@ class VarBlockCreator;
 class Expression {
   public:
     //! Types of evaluation strategies that are available
-    enum EvaluationStrategy {
-        UseInterpreter,
-        UseLLVM
-    };
+    enum EvaluationStrategy { UseInterpreter, UseLLVM };
     //! What evaluation strategy to use by default
     static EvaluationStrategy defaultEvaluationStrategy;
     //! Whether to debug expressions
@@ -99,52 +104,85 @@ class Expression {
         int endPos;
 
         Error(const std::string& errorIn, const int startPosIn, const int endPosIn)
-            : error(errorIn), startPos(startPosIn), endPos(endPosIn) {}
+            : error(errorIn), startPos(startPosIn), endPos(endPosIn)
+        {
+        }
     };
 
-    Expression(EvaluationStrategy be = Expression::defaultEvaluationStrategy);
+    Expression(EvaluationStrategy hint = Expression::defaultEvaluationStrategy);
     Expression(const std::string& e,
                const ExprType& type = ExprType().FP(3),
-               EvaluationStrategy be = Expression::defaultEvaluationStrategy,
+               EvaluationStrategy hint = Expression::defaultEvaluationStrategy,
                const Context& context = Context::global());
 
     virtual ~Expression();
 
     /** Sets desired return value.
         This will allow the evaluation to potentially be optimized. */
-    void setDesiredReturnType(const ExprType& type);
+    virtual void setDesiredReturnType(const ExprType& type) final;
 
     /** Set expression string to e.
         This invalidates all parsed state. */
-    void setExpr(const std::string& e);
+    virtual void setExpr(const std::string& e) final;
 
     //! Get the string that this expression is currently set to evaluate
-    const std::string& getExpr() const { return _expression; }
+    const std::string& getExpr() const
+    {
+        return _expression;
+    }
 
     /** Check expression syntax.  Expr will be parsed if needed.  If
         this returns false, the error message can be accessed via
         parseError() */
-    bool syntaxOK() const;
+    inline bool syntaxOK() const
+    {
+        return (bool)parseTree();
+    }
 
     /** Check if expression is valid.  Expr will be parsed if
     needed. Variables and functions will also be bound.  If this
     returns false, the error message can be accessed via
     parseError() */
-    bool isValid() const {
-        prepIfNeeded();
-        return _isValid;
+    inline bool isValid() const
+    {
+        return evaluator()->isValid();
+    }
+
+    ExprNode* parseTree() const
+    {
+        if (_parseTree)
+            return _parseTree;
+        parse();
+        return _parseTree;
+    }
+
+    Evaluator* evaluator() const
+    {
+        if (_evaluator)
+            return _evaluator;
+        prep();
+        return _evaluator;
     }
 
     /** Get parse error (if any).  First call syntaxOK or isValid
         to parse (and optionally bind) the expression. */
-    const std::string& parseError() const { return _parseError; }
+    const std::string& parseError() const
+    {
+        return _parseError;
+    }
 
     /** Get a reference to a list of parse errors in the expression.
         The error structure gives location information as well as the errors itself. */
-    const std::vector<Error>& getErrors() const { return _errors; }
+    const std::vector<Error>& getErrors() const
+    {
+        return _errors;
+    }
 
     /** Get a reference to a list of the ranges where comments occurred */
-    const std::vector<std::pair<int, int> >& getComments() const { return _comments; }
+    const std::vector<std::pair<int, int> >& getComments() const
+    {
+        return _comments;
+    }
 
     /** Check if expression is constant.
         Expr will be parsed if needed.  No binding is required. */
@@ -159,17 +197,29 @@ class Expression {
     bool usesFunc(const std::string& name) const;
 
     /** Returns whether the expression contains and calls to non-threadsafe */
-    bool isThreadSafe() const { return _threadUnsafeFunctionCalls.size() == 0; }
+    bool isThreadSafe() const
+    {
+        return _threadUnsafeFunctionCalls.size() == 0;
+    }
 
     /** Internal function where parse tree nodes can register violations in
         thread safety with the main class. */
-    void setThreadUnsafe(const std::string& functionName) const { _threadUnsafeFunctionCalls.push_back(functionName); }
+    void setThreadUnsafe(const std::string& functionName) const
+    {
+        _threadUnsafeFunctionCalls.push_back(functionName);
+    }
 
     /** Returns a list of functions that are not threadSafe **/
-    const std::vector<std::string>& getThreadUnsafeFunctionCalls() const { return _threadUnsafeFunctionCalls; }
+    const std::vector<std::string>& getThreadUnsafeFunctionCalls() const
+    {
+        return _threadUnsafeFunctionCalls;
+    }
 
     /** Get wantVec setting */
-    bool wantVec() const { return _wantVec; }
+    bool wantVec() const
+    {
+        return _wantVec;
+    }
 
     /** Determine if expression computes a vector (may be false even
         if wantVec is true).  Expr will be parsed and variables and
@@ -182,53 +232,101 @@ class Expression {
     const ExprType& returnType() const;
 
     /// Evaluate multiple blocks
+    inline void evalMultiple(VarBlock* varBlock, double* outputBuffer, size_t rangeStart, size_t rangeEnd) const
+    {
+        evaluator()->evalMultiple(varBlock, outputBuffer, rangeStart, rangeEnd);
+    }
+
     void evalMultiple(VarBlock* varBlock, int outputVarBlockOffset, size_t rangeStart, size_t rangeEnd) const;
 
-    // TODO: make this deprecated
-    /** Evaluates and returns float (check returnType()!) */
-    const double* evalFP(VarBlock* varBlock = nullptr) const;
+    // Evaluates and returns float (check returnType()!)
+    // Not thread-safe
+    inline const double* evalFP(VarBlock* varBlock = nullptr) const
+    {
+        _fpResults.resize(_desiredReturnType.dim());
+        evaluator()->evalFP(_fpResults.data(), varBlock);
+        return _fpResults.data();
+    }
 
-    // TODO: make this deprecated
-    /** Evaluates and returns string (check returnType()!) */
-    const char* evalStr(VarBlock* varBlock = nullptr) const;
+    // Evaluates and returns string (check returnType()!)
+    // Not thread-safe
+    inline const char* evalStr(VarBlock* varBlock = nullptr) const
+    {
+        _strResults.resize(_desiredReturnType.dim(), nullptr);  // assumed to be 1
+        free(_strResults[0]);
+        _strResults[0] = (char*)malloc(1024);  // max string size
+
+        evaluator()->evalStr(_strResults[0], varBlock);
+        return reinterpret_cast<const char*>(_strResults[0]);
+    }
+
+    // Evaluates and returns float (check returnType()!)
+    inline void evalFP(double* dst, VarBlock* varBlock = nullptr) const
+    {
+        evaluator()->evalFP(dst, varBlock);
+    }
+
+    // Evaluates and returns float (check returnType()!)
+    // Robustly promotes from scalar to vector by filling the dst buffer with N values if necessary
+    inline void evalFP(double* dst, size_t N, VarBlock* varBlock = nullptr) const
+    {
+        evaluator()->evalFP(dst, varBlock);
+        size_t dimComputed = _desiredReturnType.dim();
+        if (dimComputed == 1 && N > dimComputed)
+            std::fill_n(dst + 1, N - 1, dst[0]);
+    }
+
+    // Evaluates and returns string (check returnType()!)
+    inline void evalStr(char* dst, VarBlock* varBlock = nullptr) const
+    {
+        evaluator()->evalStr(dst, varBlock);
+    }
 
     /** Reset expr - force reparse/rebind */
-    void reset();
+    // if overridden, you must still call Expression::reset()!
+    virtual void reset();
 
     /** override resolveVar to add external variables */
-    virtual ExprVarRef* resolveVar(const std::string& name) const { return 0; }
+    virtual ExprVarRef* resolveVar(const std::string& /*name*/) const
+    {
+        return nullptr;
+    }
 
     /** override resolveFunc to add external functions */
-    virtual ExprFunc* resolveFunc(const std::string& name) const { return 0; }
+    virtual ExprFunc* resolveFunc(const std::string& /*name*/) const
+    {
+        return nullptr;
+    }
 
     /** records an error in prep or parse stage */
-    void addError(const std::string& error, const int startPos, const int endPos) const {
+    void addError(const std::string& error, const int startPos, const int endPos) const
+    {
         _errors.push_back(Error(error, startPos, endPos));
     }
 
     /** records a comment */
-    void addComment(int pos, int length) { _comments.push_back(std::pair<int, int>(pos, length + pos - 1)); }
+    void addComment(int pos, int length)
+    {
+        _comments.push_back(std::pair<int, int>(pos, length + pos - 1));
+    }
 
     /** Returns a read only map of local variables that were set **/
     // const LocalVarTable& getLocalVars() const {return _localVars;}
 
     /** An immutable reference to access context parameters from say ExprFuncX's */
-    const Context& context() const { return *_context; }
-    void setContext(const Context& context);
-
-    /** Debug printout of parse tree */
-    void debugPrintParseTree() const;
-
-    /** Debug printout of interpreter evaluation program  **/
-    void debugPrintInterpreter() const;
-
-    /** Debug printout of LLVM evaluation  **/
-    void debugPrintLLVM() const;
+    const Context& context() const
+    {
+        return *_context;
+    }
+    virtual void setContext(const Context& context) final;
 
     /** Set variable block creator (lifetime of expression must be <= block) **/
-    void setVarBlockCreator(const VarBlockCreator* varBlockCreator);
+    virtual void setVarBlockCreator(const VarBlockCreator* varBlockCreator) final;
 
-    const VarBlockCreator* varBlockCreator() const { return _varBlockCreator; }
+    const VarBlockCreator* varBlockCreator() const
+    {
+        return _varBlockCreator;
+    }
 
   private:
     /** No definition by design. */
@@ -237,15 +335,6 @@ class Expression {
 
     /** Parse, and remember parse error if any */
     void parse() const;
-
-    /** Parse, but only if not yet parsed */
-    void parseIfNeeded() const {
-        if (!_parsed) parse();
-    }
-
-    /** Prepare expression (bind vars/functions, etc.)
-    and remember error if any */
-    void prep() const;
 
     /** True if the expression wants a vector */
     bool _wantVec;
@@ -256,7 +345,7 @@ class Expression {
     /** The expression. */
     std::string _expression;
 
-    EvaluationStrategy _evaluationStrategy;
+    EvaluationStrategy _evaluationStrategyHint;
 
     /** Context for out of band function parameters */
     const Context* _context;
@@ -265,21 +354,16 @@ class Expression {
     /** Computed return type. */
     mutable ExprType _desiredReturnType;
 
-    /** Variable environment */
-    mutable ExprVarEnvBuilder _envBuilder;
     /** Parse tree (null if syntax is bad). */
-    mutable ExprNode* _parseTree;
+    mutable std::atomic<ExprNode*> _parseTree;
 
-    /** Prepare, but only if not yet prepped */
-    void prepIfNeeded() const {
-        if (!_prepped) prep();
-    }
+    /** Prepare expression (bind vars/functions, etc.)
+    and remember error if any */
+    void prep() const;
 
   private:
-    /** Flag if we are valid or not */
-    mutable bool _isValid;
-    /** Flag set once expr is parsed/prepped (parsing is automatic and lazy) */
-    mutable bool _parsed, _prepped;
+    mutable std::mutex _parseMutex;
+    mutable std::mutex _prepMutex;
 
     /** Cached parse error (returned by isValid) */
     mutable std::string _parseError;
@@ -296,42 +380,30 @@ class Expression {
     /** Functions used in this expr */
     mutable std::set<std::string> _funcs;
 
-    /** Local variable table */
-    // mutable LocalVarTable _localVars;
-
     /** Whether or not we have unsafe functions */
     mutable std::vector<std::string> _threadUnsafeFunctionCalls;
 
-    /** Interpreter */
-    mutable Interpreter* _interpreter;
-    mutable int _returnSlot;
-
-    // LLVM evaluation layer
-    mutable LLVMEvaluator* _llvmEvaluator;
+    mutable std::atomic<Evaluator*> _evaluator;
 
     // Var block creator
     const VarBlockCreator* _varBlockCreator = 0;
 
+    mutable std::vector<double> _fpResults;
+    mutable std::vector<char*> _strResults;
+
     /* internal */ public:
 
     //! add local variable (this is for internal use)
-    void addVar(const char* n) const { _vars.insert(n); }
+    void addVar(const char* n) const
+    {
+        _vars.insert(n);
+    }
 
     //! add function evaluation (this is for internal use)
-    void addFunc(const char* n) const { _funcs.insert(n); }
-
-    ////! get local variable reference (this is for internal use)
-    // ExprVarRef* resolveLocalVar(const char* n) const {
-    //    LocalVarTable::iterator iter = _localVars.find(n);
-    //    if (iter != _localVars.end()) return &iter->second;
-    //    return 0;
-    //}
-
-    /** get local variable reference. This is potentially useful for expression debuggers
-        and/or uses of expressions where mutable variables are desired */
-    /* ExprLocalVarRef* getLocalVar(const char* n) const { */
-    /*     return &_localVars[n];  */
-    /* } */
+    void addFunc(const char* n) const
+    {
+        _funcs.insert(n);
+    }
 };
 }
 

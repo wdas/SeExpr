@@ -31,7 +31,7 @@ struct StringFunc : public ExprFuncSimple {
     {
     };
 
-    virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const {
+    virtual ExprType prep(ExprFuncNode* node, bool scalarWanted, ExprVarEnvBuilder& envBuilder) const override {
         bool constant = true;
         for (int i = 0, iend = node->numChildren(); i < iend; ++i) {
             SeExpr2::ExprType t = node->child(i)->prep(!scalarWanted, envBuilder);
@@ -45,12 +45,12 @@ struct StringFunc : public ExprFuncSimple {
         return constant == true ? SeExpr2::ExprType().String().Constant() : SeExpr2::ExprType().String().Varying();
     }
 
-    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const {
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* /*node*/, ArgHandle& /*args*/) const override {
         return new StringData();
     }
 
-    virtual void eval(ArgHandle args) {
-        StringData& data = *reinterpret_cast<StringData*>(args.data);
+    virtual void eval(ArgHandle& args) override {
+        StringData& data = *reinterpret_cast<StringData*>(const_cast<ExprFuncNode::Data*>(args.data));
         data.clear();
         for (int i = 0, iend = args.nargs(); i < iend; ++i) {
             data += args.inStr(i);
@@ -58,7 +58,7 @@ struct StringFunc : public ExprFuncSimple {
                 data += "/";
             }
         }
-        args.outStr = const_cast<char*>(data.c_str());
+        args.outStr = const_cast<char*>(data.data());
     }
 } joinPath;
 ExprFunc joinPathFunc(joinPath, 2, 100);
@@ -76,13 +76,13 @@ struct StringExpression : public Expression {
     mutable Var stringVar;
 
     // Custom variable resolver, only allow ones we specify
-    ExprVarRef* resolveVar(const std::string& name) const {
+    ExprVarRef* resolveVar(const std::string& name) const  override {
         if (name == "stringVar") return &stringVar;
-        return 0;
+        return nullptr;
     }
 
     // Custom function resolver
-    ExprFunc* resolveFunc(const std::string& name) const {
+    ExprFunc* resolveFunc(const std::string& name) const override{
         if (name == "join_path") return &joinPathFunc;
         return 0;
     }

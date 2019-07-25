@@ -21,25 +21,52 @@
 #ifndef _MY_EXPR_EDITOR_H
 #define _MY_EXPR_EDITOR_H
 
-#include <QObject>
-#include <QMessageBox>
-#include <QGLWidget>
-#include <QHBoxLayout>
-#include <QSplitter>
-#include <QPalette>
-#include <QPushButton>
-#include <QFileDialog>
-#include <QSpacerItem>
-#include <QSizePolicy>
-
 #include <iostream>
 #include <fstream>
 
+#include <QFileDialog>
+#include <QGLWidget>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QMessageBox>
+#include <QObject>
+#include <QPalette>
+#include <QPushButton>
+#include <QSizePolicy>
+#include <QSpacerItem>
+#include <QSplitter>
+#include <QToolButton>
+
 #include "ExprEditor.h"
 
-class ExprGrapherWidget;
-class ExprBrowser;
 class QTabWidget;
+
+namespace SeExpr2 {
+
+class ExprBrowser;
+class ExprGrapherWidget;
+class ExprHelp;
+
+class ClickableLabel : public QLabel {
+    Q_OBJECT
+
+  public:
+    explicit ClickableLabel(QWidget* parent = nullptr);
+    explicit ClickableLabel(const QString& label);
+
+  signals:
+    void clicked();
+
+  protected:
+    virtual void enterEvent(QEvent* event) override;
+    virtual void leaveEvent(QEvent* event) override;
+
+    virtual void mousePressEvent(QMouseEvent* event) override;
+    virtual void mouseReleaseEvent(QMouseEvent* event) override;
+
+  private:
+    bool pressed{false};
+};
 
 class ExprDialog : public QDialog {
     Q_OBJECT
@@ -47,32 +74,38 @@ class ExprDialog : public QDialog {
   public:
     ExprEditor* editor;
     ExprBrowser* browser;
+    bool graph;  // flag for controlling whether expr gets eval'd for image preview
 
   private:
     ExprGrapherWidget* grapher;
-    QLabel* previewCommentLabel;
     QPushButton* acceptButton;
     QPushButton* cancelButton;
     ExprControlCollection* controls;
+    ExprHelp* exprHelp;
 
-    QPushButton* applyButton, *previewButton, *saveButton, *saveAsButton;
-    QPushButton* saveLocalButton, *clearButton;
-    QLineEdit* helpFindBox;
+    ClickableLabel *errorCountLabel, *warningCountLabel;
+    QPushButton *applyButton, *previewButton, *saveButton, *saveAsButton;
+    QPushButton *saveLocalButton, *clearButton;
     QTimer* showEditorTimer;
-    QTextBrowser* helpBrowser;
     QTextCursor cursor;
-    QString prevFind;
     int _currentEditorIdx;
+    QStringList history;
+    int currhistitem;
+    QString currentexprfile;
 
   public:
-    ExprDialog(QWidget* parent);
+    ExprDialog(QWidget* parent, bool graphMode = true);
 
-    std::string getExpressionString() { return editor->getExpr(); }
-
-    void setExpressionString(const std::string& str) {
-        clearExpression();
-        editor->setExpr(str, /*apply*/ true);
+    std::string getExpressionString()
+    {
+        return editor->getExpr();
     }
+
+    void setExpressionString(const std::string& str)
+    {
+        editor->setExpr(str);
+    }
+
 
     void show();
     int exec();
@@ -81,33 +114,37 @@ class ExprDialog : public QDialog {
     void showEditor(int idx);
 
   private:
-    void setupHelp(QTabWidget* tab);
+    void enableBackForwards();
 
   protected:
     void keyPressEvent(QKeyEvent* event);
-    void findHelper(QTextDocument::FindFlags flags);
     void closeEvent(QCloseEvent* event);
 
-signals:
+  signals:
     void preview();
     void expressionApplied();
     void dialogClosed();
-  private
-slots:
+    void forwardAvailable(bool);
+    void backwardAvailable(bool);
+
+  private slots:
     void previewExpression();
     void verifiedApply();
     void verifiedAccept();
-    void findNextInHelp();
-    void findPrevInHelp();
+    void reloadExpression();
     void _showEditor();
-  public
-slots:
+    void selectionChanged(const QString& str);
+    void histBackward();
+    void histForward();
+    void histAdd();
 
+  public slots:
     void applyExpression();
 
     void clearExpression();
 
     void reject();
 };
+}
 
 #endif

@@ -1,0 +1,27 @@
+#!/bin/bash
+rm -f plot.dat
+
+declare -a tests=(
+    "mandelbrot-control"
+    "mandelbrot-control2"
+    "mandelbrot-seexpr2"
+    "mandelbrot-seexpr2-varblock"
+    "mandelbrot-seexpr2-varblock2"
+    "mandelbrot-seexpr2-varblock3"
+)
+
+i=0
+for testname in "${tests[@]}"; do
+    echo "running $testname..."
+    testfile="`pf-makevar --absolute test SeExpr2`/$testname"
+    label=$(echo "$testname" | cut -d'-' -f 2,3)
+    if timing=$((TIMEFORMAT='%3R'; time $testfile $1 > /dev/null) 2>&1); then
+        echo -e "$i\t\"$label\"\t$timing" >> plot.dat
+    else
+        timing=0.0
+        echo -e "$i\t\"$label\"\t$timing" >> plot.dat
+    fi
+    i=$(($i+1))
+done
+
+gnuplot `pf-makevar --absolute src`/src/demos/mandelbrot/mandelbrot.gnu && eog figure.png

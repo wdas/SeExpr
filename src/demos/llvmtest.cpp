@@ -26,11 +26,14 @@ using namespace SeExpr2;
 class llvmexpr : public Expression {
   public:
     //! Constructor that takes the expression to parse
-    llvmexpr(const std::string &expr, const ExprType &type = ExprType().FP(3)) : Expression(expr, type) {}
+    llvmexpr(const std::string& expr, const ExprType& type = ExprType().FP(3)) : Expression(expr, type)
+    {
+    }
 };
 
 // TODO: turn off parsing output.
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[])
+{
     if (argc < 2) {
         std::cerr << "need a filename as argument\n";
         return 1;
@@ -40,7 +43,8 @@ int main(int argc, char *argv[]) {
     std::string line;
     std::ifstream FSProfileData(argv[1], std::ifstream::in);
     while (std::getline(FSProfileData, line)) {
-        if (!line.size() || line.at(0) == ';') continue;
+        if (!line.size() || line.at(0) == ';')
+            continue;
 
         string::size_type start = line.find_first_of('"');
         ++start;
@@ -60,19 +64,22 @@ int main(int argc, char *argv[]) {
             assert(false);
         }
 
-        const double *result = expr.evalFP();
+        const double* result = expr.evalFP();
 
-        for (int i = 0; i < dim; ++i) std::cout << result[i] << ' ';
+        for (int i = 0; i < dim; ++i)
+            std::cout << result[i] << ' ';
         std::cout << std::endl;
     }
 
-    if (!argv[2]) return 0;
+    if (!argv[2])
+        return 0;
     FSProfileData.close();
 
     // Test string
     FSProfileData.open(argv[2], std::ifstream::in);
     while (std::getline(FSProfileData, line)) {
-        if (!line.size() || line.at(0) == ';') continue;
+        if (!line.size() || line.at(0) == ';')
+            continue;
 
         std::cout << "exprStr: " << line << std::endl;
         llvmexpr expr(line, ExprType().String());
@@ -81,7 +88,7 @@ int main(int argc, char *argv[]) {
             assert(false);
         }
 
-        const char *result = expr.evalStr();
+        const char* result = expr.evalStr();
 
         std::cout << result;
     }

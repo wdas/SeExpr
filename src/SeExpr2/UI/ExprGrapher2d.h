@@ -21,15 +21,21 @@
 #ifndef ExprGrapher2d_h
 #define ExprGrapher2d_h
 
+#include <QLabel>
 #include <QObject>
 #include <QPalette>
 #include <QGLWidget>
 #include <QMouseEvent>
 
+#include <SeExpr2/VarBlock.h>
+
 #include "BasicExpression.h"
 
-class ExprGrapherWidget;
 class QLineEdit;
+
+namespace SeExpr2 {
+
+class ExprGrapherWidget;
 
 class ExprGrapherView : public QGLWidget {
     Q_OBJECT;
@@ -43,17 +49,23 @@ class ExprGrapherView : public QGLWidget {
     void setWindow(float xmin, float xmax, float ymin, float ymax, float z);
     void getWindow(float& xmin, float& xmax, float& ymin, float& ymax, float& z);
 
+    inline float* pixel(int x, int y)
+    {
+        return &_image[3 * (x + y * _height)];
+    }
+
   protected:
     void clear();
     void paintGL();
+    void mouseMoveEvent(QMouseEvent* event);
     void mousePressEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent* event);
-    void mouseMoveEvent(QMouseEvent* event);
     int event_oldx, event_oldy;
 
-signals:
+  signals:
     void scaleValueManipulated();
     void clicked();
+    void pixelHovered(int, int);
 
   private:
     float* _image;
@@ -66,24 +78,45 @@ signals:
     bool scaling, translating;
 };
 
+struct ExprGrapherSymbols : public SeExpr2::VarBlockCreator {
+    ExprGrapherSymbols()
+    {
+        u = registerVariable("u", SeExpr2::ExprType().FP(1).Varying());
+        v = registerVariable("v", SeExpr2::ExprType().FP(1).Varying());
+        P = registerVariable("P", SeExpr2::ExprType().FP(3).Varying());
+    }
+
+    int u;
+    int v;
+    int P;
+};
+
 class ExprGrapherWidget : public QWidget {
     Q_OBJECT
     QLineEdit* scale;
+    QLabel* _pixelLabel;
 
   public:
-    ExprGrapherView* view;
     BasicExpression expr;
+    ExprGrapherView* view;
 
     ExprGrapherWidget(QWidget* parent, int width, int height);
 
+    inline bool exprValid() const
+    {
+        return expr.getExpr().empty() || expr.isValid();
+    }
+
     void update();
-signals:
+
+  signals:
     void preview();
-  private
-slots:
+  private slots:
     void scaleValueEdited();
     void scaleValueManipulated();
     void forwardPreview();
+    void updatePixelLabel(int, int);
 };
+}
 
 #endif

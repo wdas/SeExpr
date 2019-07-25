@@ -27,22 +27,25 @@ using namespace SeExpr2;
 
 /// Examiner that builds a list of all variable references
 class VarListExaminer : public ConstExaminer {
-
   public:
-    virtual bool examine(T_NODE* examinee) {
+    virtual bool examine(T_NODE* examinee)
+    {
         if (const ExprVarNode* var = isVariable(examinee)) {
             _varList.push_back(var);
             return false;
         };
         return true;
     }
-    virtual void reset() {
+    virtual void reset()
+    {
         _varList.clear();
     };
-    inline int length() const {
+    inline int length() const
+    {
         return _varList.size();
     };
-    inline const ExprVarNode* var(int i) const {
+    inline const ExprVarNode* var(int i) const
+    {
         return _varList[i];
     };
 
@@ -57,21 +60,24 @@ class VarListExaminer : public ConstExaminer {
 class ListVarExpr : public Expression {
   public:
     //! Constructor that takes the expression to parse
-    ListVarExpr(const std::string& expr) : Expression(expr), _hasWalked(false), examiner(), walker(&examiner) {};
+    ListVarExpr(const std::string& expr) : Expression(expr), _hasWalked(false), examiner(), walker(&examiner){};
 
     //! Empty constructor
-    ListVarExpr() : Expression(), _hasWalked(false), examiner(), walker(&examiner) {};
+    ListVarExpr() : Expression(), _hasWalked(false), examiner(), walker(&examiner){};
 
-    void walk() {
+    void walk()
+    {
         _hasWalked = true;
-        walker.walk(_parseTree);
+        walker.walk(parseTree());
     };
 
-    bool hasWalked() {
+    bool hasWalked()
+    {
         return _hasWalked;
     };
 
-    int count() const {
+    int count() const
+    {
         if (isValid() && _hasWalked) {
             return examiner.length();
         };
@@ -84,16 +90,20 @@ class ListVarExpr : public Expression {
     ConstWalker walker;
 
     //! resolve function that only supports one external variable 'x'
-    ExprVarRef* resolveVar(const std::string& name) const {
+    ExprVarRef* resolveVar(const std::string&) const
+    {
         return 0;
     };
 };
 
-void quit(const std::string& str) {
-    if (str == "quit" || str == "q") exit(0);
+void quit(const std::string& str)
+{
+    if (str == "quit" || str == "q")
+        exit(0);
 };
 
-int main(int argc, char* argv[]) {
+int main()
+{
     ListVarExpr expr;
     std::string str;
 

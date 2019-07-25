@@ -1,24 +1,29 @@
 ---
-BasedOnStyle: "Google"
+BasedOnStyle: Google
 AccessModifierOffset: -2
 AlignEscapedNewlinesLeft: true
 AlignTrailingComments: true
 AllowAllParametersOfDeclarationOnNextLine: false
-AllowShortIfStatementsOnASingleLine: true
-ConstructorInitializerIndentWidth: 4
-AllowShortLoopsOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
 AlwaysBreakBeforeMultilineStrings: true
 AlwaysBreakTemplateDeclarations: true
 BinPackParameters: false
-BreakBeforeBraces: Attach
-BreakConstructorInitializersBeforeComma: false
+BreakBeforeBraces: WebKit
+BreakConstructorInitializersBeforeComma: true
 ColumnLimit: 120
-ConstructorInitializerAllOnOneLineOrOnePerLine: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
 Cpp11BracedListStyle: true
-IndentCaseLabels: true
+DerivePointerAlignment: false
+IndentCaseLabels: false
 IndentFunctionDeclarationAfterType: true
 IndentWidth: 4
-MaxEmptyLinesToKeep: 1
+MaxEmptyLinesToKeep: 2
+PointerBindsToType: true
+ReflowComments: false
+SortIncludes: false
 SpaceAfterControlStatementKeyword: true
 SpaceBeforeAssignmentOperators: true
 SpaceInEmptyParentheses: false
@@ -27,8 +32,5 @@ SpacesInAngles:  false
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 UseTab: Never
-PointerBindsToType: true
-#DerivePointerAlignment: false
-#AllowShortCaseLabelsOnASingleLine: true
 
 ...

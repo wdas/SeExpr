@@ -31,7 +31,8 @@ class immutable_hash_map {
     int _size;
     int _mask;
 
-    immutable_hash_map(key_type* keys, value_type* values, int size) : _size(size) {
+    immutable_hash_map(key_type* keys, value_type* values, int size) : _size(size)
+    {
         if (size <= 0) {
             _keys.resize(1, "");
             _values.resize(1);
@@ -46,7 +47,7 @@ class immutable_hash_map {
         _keys.resize(table_size);
         _values.resize(table_size);
 
-        key_type* kp = keys, *end = kp + size;
+        key_type *kp = keys, *end = kp + size;
         value_type* vp = values;
         while (kp != end) {
             int pos = find(*kp);
@@ -55,12 +56,19 @@ class immutable_hash_map {
         }
     }
 
-    const value_type& operator[](const key_type& key) const { return _values[find(key)]; }
+    const value_type& operator[](const key_type& key) const
+    {
+        return _values[find(key)];
+    }
 
-    int size() const { return _size; }
+    int size() const
+    {
+        return _size;
+    }
 
   private:
-    int find(const key_type& key) const {
+    int find(const key_type& key) const
+    {
         uint32_t hash = intptr_t(key) ^ (intptr_t(key) >> 32);
         // hash function from Thomas Wang (wang@cup.hp.com)
         hash = ~hash + (hash << 15);
@@ -72,8 +80,9 @@ class immutable_hash_map {
         while (1) {
             int pos = hash & _mask;
             const key_type& k = _keys[pos];
-            if (k == key || !k) return pos;  // found key or blank
-            hash++;                          // collision, keep looking
+            if (k == key || !k)
+                return pos;  // found key or blank
+            hash++;          // collision, keep looking
         }
     }
 };

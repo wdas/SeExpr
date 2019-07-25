@@ -26,11 +26,18 @@
     struct SimpleVar : public ExprVarRef {
     double val;  // independent variable
 
-    SimpleVar() : ExprVarRef(ExprType().FP(1).Varying()), val(0.0) {}
+    SimpleVar() : ExprVarRef(ExprType().FP(1).Varying()), val(0.0)
+    {
+    }
 
-    void eval(double* result) { result[0] = val; }
+    void eval(double* result)
+    {
+        result[0] = val;
+    }
 
-    void eval(char** result) {}
+    void eval(char** result)
+    {
+    }
 };
 
 //! Model representing all the functions that the grapher handles

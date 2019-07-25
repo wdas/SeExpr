@@ -23,11 +23,17 @@ bool ExprSpecParse(std::vector<Editable*>& literals,
                    std::vector<std::pair<int, int> >& comments,
                    const char* str);
 
-EditableExpression::EditableExpression() {}
+EditableExpression::EditableExpression()
+{
+}
 
-EditableExpression::~EditableExpression() { cleanup(); }
+EditableExpression::~EditableExpression()
+{
+    cleanup();
+}
 
-void EditableExpression::setExpr(const std::string& expr) {
+void EditableExpression::setExpr(const std::string& expr)
+{
     // get rid of old data
     cleanup();
 
@@ -60,13 +66,16 @@ void EditableExpression::setExpr(const std::string& expr) {
     }
 }
 
-void EditableExpression::cleanup() {
-    for (size_t i = 0; i < _editables.size(); i++) delete _editables[i];
+void EditableExpression::cleanup()
+{
+    for (size_t i = 0; i < _editables.size(); i++)
+        delete _editables[i];
     _editables.clear();
     _variables.clear();
 }
 
-std::string EditableExpression::getEditedExpr() const {
+std::string EditableExpression::getEditedExpr() const
+{
     int offset = 0;
     std::stringstream stream;
     for (size_t i = 0, sz = _editables.size(); i < sz; i++) {
@@ -79,7 +88,8 @@ std::string EditableExpression::getEditedExpr() const {
     return stream.str();
 }
 
-void EditableExpression::updateString(const EditableExpression& other) {
+void EditableExpression::updateString(const EditableExpression& other)
+{
     // TODO: move semantics?
     _variables = other._variables;
     _expr = other._expr;
@@ -92,13 +102,16 @@ void EditableExpression::updateString(const EditableExpression& other) {
     }
 }
 
-bool EditableExpression::controlsMatch(const EditableExpression& other) const {
-    if (_editables.size() != other._editables.size()) return false;
+bool EditableExpression::controlsMatch(const EditableExpression& other) const
+{
+    if (_editables.size() != other._editables.size())
+        return false;
 
     for (size_t i = 0, sz = _editables.size(); i < sz; i++) {
         const Editable& literal = *_editables[i];
         const Editable& otherLiteral = *other._editables[i];
-        if (!literal.controlsMatch(otherLiteral)) return false;
+        if (!literal.controlsMatch(otherLiteral))
+            return false;
     }
     return true;
 }

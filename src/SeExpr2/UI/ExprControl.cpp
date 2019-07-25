@@ -44,6 +44,7 @@
 #include <QToolTip>
 #include <QListWidget>
 #include <QTreeView>
+#include <QMimeData>
 
 #include "ExprControl.h"
 #include "ExprColorCurve.h"
@@ -51,55 +52,144 @@
 #include "ExprFileDialog.h"
 #include "Editable.h"
 
-/* XPM */
-static const char* refreshXPM[] = {
-    "20 20 4 1",            "# c #303030",          "a c #585858",          "b c #c3c3c3",
-    ". c #dcdcdc",          "....................", "....................", "....................",
-    ".......#aaaa#.......", ".....#########......", "....###bbbbb###.....", "....##b.....b##.....",
-    "...bb#b.....b##.....", "...bbbb....aaaaaa...", "...........aaaaaa...", "....##......####....",
-    "...####......##.....", "..######............", "..aaa#aa............", "....##......bbb.....",
-    "....##b...bbbab.....", "....a#abbbb##ab.....", ".....#a####aa#b.....", ".....aaaaaaa#.b.....",
-    "...................."};
+using namespace SeExpr2;
 
 /* XPM */
-static const char* graphXPM[] = {
-    "20 20 5 1",            "c c #000040",          "a c #303030",          "# c #58a8ff",
-    ". c #dcdcdc",          "b c #ff0000",          "..........#a.a......", "..........#a.a.....b",
-    "..........#.a.....bb", "..........#aa....bb.", "..........#.....bb..", "..........#....bb...",
-    "..........#....bb...", "....bbb...#...bb....", "...bbbbb..#..bbb....", "...b...bbb#.bbb.....",
-    "..bb....bb#bbb......", "##bb####bbbbb#######", ".bb......bbb....c.c.", ".bb.......#......c..",
-    ".b........#.....c.c.", "bb........#.........", "b.........#.........", "..........#.........",
-    "..........#.........", "..........#........."};
+static const char* refreshXPM[] = {"20 20 4 1",
+                                   "# c #303030",
+                                   "a c #585858",
+                                   "b c #c3c3c3",
+                                   ". c #dcdcdc",
+                                   "....................",
+                                   "....................",
+                                   "....................",
+                                   ".......#aaaa#.......",
+                                   ".....#########......",
+                                   "....###bbbbb###.....",
+                                   "....##b.....b##.....",
+                                   "...bb#b.....b##.....",
+                                   "...bbbb....aaaaaa...",
+                                   "...........aaaaaa...",
+                                   "....##......####....",
+                                   "...####......##.....",
+                                   "..######............",
+                                   "..aaa#aa............",
+                                   "....##......bbb.....",
+                                   "....##b...bbbab.....",
+                                   "....a#abbbb##ab.....",
+                                   ".....#a####aa#b.....",
+                                   ".....aaaaaaa#.b.....",
+                                   "...................."};
 
 /* XPM */
-static const char* directoryXPM[] = {
-    "20 20 3 1",            ". c None",             "# c #000000",          "a c #d8c59e",
-    "....................", "....................", "....................", "....................",
-    "...........#######..", "...........#aaaaa#..", "..##########aaaaa#..", "..#aaaaaaaaaaaaaa#..",
-    "..#aaaaaaaaaaaaaa#..", "..#aaaaaaaaaaaaaa#..", "..#aaaaaaaaaaaaaa#..", "..#aaaaaaaaaaaaaa#..",
-    "..#aaaaa##a##a##a#..", "..#aaaaa##a##a##a#..", "..#aaaaaaaaaaaaaa#..", "..################..",
-    "....................", "....................", "....................", "...................."};
+static const char* graphXPM[] = {"20 20 5 1",
+                                 "c c #000040",
+                                 "a c #303030",
+                                 "# c #58a8ff",
+                                 ". c #dcdcdc",
+                                 "b c #ff0000",
+                                 "..........#a.a......",
+                                 "..........#a.a.....b",
+                                 "..........#.a.....bb",
+                                 "..........#aa....bb.",
+                                 "..........#.....bb..",
+                                 "..........#....bb...",
+                                 "..........#....bb...",
+                                 "....bbb...#...bb....",
+                                 "...bbbbb..#..bbb....",
+                                 "...b...bbb#.bbb.....",
+                                 "..bb....bb#bbb......",
+                                 "##bb####bbbbb#######",
+                                 ".bb......bbb....c.c.",
+                                 ".bb.......#......c..",
+                                 ".b........#.....c.c.",
+                                 "bb........#.........",
+                                 "b.........#.........",
+                                 "..........#.........",
+                                 "..........#.........",
+                                 "..........#........."};
 
 /* XPM */
-static const char* fileXPM[] = {
-    "20 20 5 1",            ". c None",             "# c #000000",          "c c #303030",
-    "b c #a79b80",          "a c #ddcdaa",          "....................", "....................",
-    "....#########.......", "....#aaaaaaa##......", "....#aaaaaaa#b#.....", "....#aaaaaaa#bb#....",
-    "....#aaaaaaa####....", "....#aaaaaaaaaa#....", "....#aaaaaaaaaa#....", "....#aaaaaaaaaa#....",
-    "....#aaaaaaaaaa#....", "....#aaaaaaaaaa#....", "....#aaaaaaaaaa#....", "....#aaaaaaaaaa#....",
-    "....#aaaaaaaaaa#....", "....#accaccacca#....", "....#accaccacca#....", "....#aaaaaaaaaa#....",
-    "....############....", "...................."};
+static const char* directoryXPM[] = {"20 20 3 1",
+                                     ". c None",
+                                     "# c #000000",
+                                     "a c #d8c59e",
+                                     "....................",
+                                     "....................",
+                                     "....................",
+                                     "....................",
+                                     "...........#######..",
+                                     "...........#aaaaa#..",
+                                     "..##########aaaaa#..",
+                                     "..#aaaaaaaaaaaaaa#..",
+                                     "..#aaaaaaaaaaaaaa#..",
+                                     "..#aaaaaaaaaaaaaa#..",
+                                     "..#aaaaaaaaaaaaaa#..",
+                                     "..#aaaaaaaaaaaaaa#..",
+                                     "..#aaaaa##a##a##a#..",
+                                     "..#aaaaa##a##a##a#..",
+                                     "..#aaaaaaaaaaaaaa#..",
+                                     "..################..",
+                                     "....................",
+                                     "....................",
+                                     "....................",
+                                     "...................."};
 
-void ExprSlider::mousePressEvent(QMouseEvent* e) { mouseMoveEvent(e); }
+/* XPM */
+static const char* fileXPM[] = {"20 20 5 1",
+                                ". c None",
+                                "# c #000000",
+                                "c c #303030",
+                                "b c #a79b80",
+                                "a c #ddcdaa",
+                                "....................",
+                                "....................",
+                                "....#########.......",
+                                "....#aaaaaaa##......",
+                                "....#aaaaaaa#b#.....",
+                                "....#aaaaaaa#bb#....",
+                                "....#aaaaaaa####....",
+                                "....#aaaaaaaaaa#....",
+                                "....#aaaaaaaaaa#....",
+                                "....#aaaaaaaaaa#....",
+                                "....#aaaaaaaaaa#....",
+                                "....#aaaaaaaaaa#....",
+                                "....#aaaaaaaaaa#....",
+                                "....#aaaaaaaaaa#....",
+                                "....#aaaaaaaaaa#....",
+                                "....#accaccacca#....",
+                                "....#accaccacca#....",
+                                "....#aaaaaaaaaa#....",
+                                "....############....",
+                                "...................."};
 
-void ExprSlider::mouseMoveEvent(QMouseEvent* e) {
+ExprLineEdit::ExprLineEdit(int id, QWidget* parent) : QLineEdit(parent), _id(id), _signaling(0)
+{
+    connect(this, SIGNAL(textChanged(const QString&)), SLOT(textChangedCB(const QString&)));
+}
+
+void ExprLineEdit::textChangedCB(const QString& text)
+{
+    _signaling = 1;
+    emit textChanged(_id, text);
+    _signaling = 0;
+}
+
+void ExprSlider::mousePressEvent(QMouseEvent* e)
+{
+    mouseMoveEvent(e);
+}
+
+void ExprSlider::mouseMoveEvent(QMouseEvent* e)
+{
     float r = maximum() - minimum();
     float v = ((float)(e->x() - 2) * r / (width() - 5)) + minimum() + .5f;
     int iv = std::min(std::max((int)v, minimum()), maximum());
     setValue(iv);
 }
 
-void ExprSlider::paintEvent(QPaintEvent* e) {
+void ExprSlider::paintEvent(QPaintEvent* e)
+{
     Q_UNUSED(e);
     QPainter p(this);
 
@@ -116,7 +206,8 @@ void ExprSlider::paintEvent(QPaintEvent* e) {
         bcol = bcol.lighter(110);
         bgcol = bgcol.lighter(110);
         int mx = mapFromGlobal(QCursor::pos()).x();
-        if (abs(linepos - mx) < 4) dcol = dcol.lighter(200);
+        if (abs(linepos - mx) < 4)
+            dcol = dcol.lighter(200);
     }
 
     p.fillRect(1, 1, width() - 1, height() - 2, bgcol);
@@ -141,30 +232,43 @@ void ExprSlider::paintEvent(QPaintEvent* e) {
     p.drawRect(0, 0, width() - 1, height() - 1);
 }
 
-ExprChannelSlider::ExprChannelSlider(int id, QWidget* parent) : QWidget(parent), _id(id), _value(0) {}
+ExprChannelSlider::ExprChannelSlider(int id, QWidget* parent) : QWidget(parent), _id(id), _value(0)
+{
+}
 
-void ExprChannelSlider::paintEvent(QPaintEvent* e) {
+void ExprChannelSlider::paintEvent(QPaintEvent* e)
+{
     Q_UNUSED(e);
-    if (_value < 0 || _value > 1) return;
+    if (_value < 0 || _value > 1)
+        return;
     int x = int(_value * (width() - 3) + 0.5);
     QPainter p(this);
     p.fillRect(contentsRect(), _col);
     p.fillRect(x, 0, 3, height(), QColor(64, 64, 64));
 }
 
-void ExprChannelSlider::mousePressEvent(QMouseEvent* e) { mouseMoveEvent(e); }
+void ExprChannelSlider::mousePressEvent(QMouseEvent* e)
+{
+    mouseMoveEvent(e);
+}
 
-void ExprChannelSlider::mouseMoveEvent(QMouseEvent* e) { setValue(clamp(float(e->x() - 1) / (width() - 3), 0, 1)); }
+void ExprChannelSlider::mouseMoveEvent(QMouseEvent* e)
+{
+    setValue(clamp(float(e->x() - 1) / (width() - 3), 0, 1));
+}
 
-void ExprChannelSlider::setValue(float value) {
-    if (value == _value) return;
+void ExprChannelSlider::setValue(float value)
+{
+    if (value == _value)
+        return;
     _value = value;
     emit valueChanged(_id, value);
     update();
 }
 
 ExprControl::ExprControl(int id, Editable* editable, bool showColorLink)
-    : _id(id), _updating(false), _editable(editable) {
+    : _id(id), _updating(false), _editable(editable)
+{
     hbox = new QHBoxLayout(this);
     hbox->setSpacing(2);
     hbox->setMargin(0);
@@ -175,24 +279,27 @@ ExprControl::ExprControl(int id, Editable* editable, bool showColorLink)
     connect(_colorLinkCB, SIGNAL(stateChanged(int)), this, SLOT(linkStateChange(int)));
     hbox->addWidget(_colorLinkCB);
 
-    _label = new QLabel(QString("<b>") + editable->name.c_str() + "</b>");
-    _label->setFixedWidth(72);
+    _label = new QLabel(editable->name.c_str());
     _label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     _label->setIndent(2);
     _label->setAutoFillBackground(true);
+    _label->setWordWrap(true);
+    _label->setToolTip(editable->name.c_str());
     hbox->addWidget(_label);
-
+    int labelWidth = 120;
     if (!showColorLink) {
         _colorLinkCB->setHidden(true);
-        _label->setFixedWidth(84);
+        _label->setFixedWidth(labelWidth);
     } else {
         _colorLinkCB->setHidden(false);
-        _label->setFixedWidth(84 - _colorLinkCB->width() + 2);
+        _label->setFixedWidth(labelWidth - _colorLinkCB->width() + 2);
     }
 }
 
-void ExprControl::linkStateChange(int state) {
-    if (_updating) return;
+void ExprControl::linkStateChange(int state)
+{
+    if (_updating)
+        return;
 
     if (state == Qt::Checked) {
         emit linkColorLink(_id);
@@ -202,7 +309,8 @@ void ExprControl::linkStateChange(int state) {
     }
 }
 
-void ExprControl::linkDisconnect(int newId) {
+void ExprControl::linkDisconnect(int newId)
+{
     if (newId != _id) {
         _updating = 1;
         _colorLinkCB->setChecked(false);
@@ -211,10 +319,11 @@ void ExprControl::linkDisconnect(int newId) {
 }
 
 NumberControl::NumberControl(int id, NumberEditable* editable)
-    : ExprControl(id, editable, false), _numberEditable(editable) {
-
+    : ExprControl(id, editable, false), _numberEditable(editable)
+{
     // slider
     float smin = editable->min, smax = editable->max;
+    _isBool = _numberEditable->isInt && smin == 0 && smax == 1;
     if (!_numberEditable->isInt) {
         smin *= 1e5;
         smax *= 1e5;
@@ -228,51 +337,83 @@ NumberControl::NumberControl(int id, NumberEditable* editable)
     _slider->setMinimumWidth(0);
     _slider->setFixedHeight(16);
     _slider->setFocusPolicy(Qt::ClickFocus);
-    hbox->addWidget(_slider, 3);
+
     // edit box
     _edit = new ExprLineEdit(0, this);
     _edit->setMinimumWidth(0);
     _edit->setFixedHeight(16);
-    hbox->addWidget(_edit);
+    _edit->setFixedWidth(80);
+    _checkBox = new QCheckBox();
+    bool checkState = _numberEditable->v;
+    _checkBox->setChecked(checkState);
+    if (_isBool) {
+        hbox->addWidget(_checkBox);
+        connect(_checkBox, SIGNAL(toggled(bool)), SLOT(checkChanged(bool)));
+        _slider->setVisible(false);
+        _edit->setVisible(false);
+    } else {
+        hbox->addWidget(_slider, 3);
+        hbox->addWidget(_edit);
+        _checkBox->setVisible(false);
+    }
     connect(_edit, SIGNAL(textChanged(int, const QString&)), SLOT(editChanged(int, const QString&)));
     connect(_slider, SIGNAL(valueChanged(int)), SLOT(sliderChanged(int)));
     // show current values
     updateControl();
 }
+void NumberControl::checkChanged(bool checked)
+{
+    if (_updating)
+        return;
+    setValue(checked ? 1 : 0);
+}
 
-void NumberControl::sliderChanged(int value) {
-    if (_updating) return;
+void NumberControl::sliderChanged(int value)
+{
+    if (_updating)
+        return;
     setValue(_numberEditable->isInt ? value : value * 1e-5);
 }
 
-void NumberControl::editChanged(int id, const QString& text) {
+void NumberControl::editChanged(int id, const QString& text)
+{
     Q_UNUSED(id);
-    if (_updating) return;
+    if (_updating)
+        return;
     bool ok = 0;
     float val = text.toFloat(&ok);
-    if (!ok) return;
+    if (!ok)
+        return;
     setValue(val);
 }
 
-void NumberControl::updateControl() {
+void NumberControl::updateControl()
+{
     _updating = 1;
     int sliderval = int(_numberEditable->isInt ? _numberEditable->v : _numberEditable->v * 1e5);
-    if (sliderval != _slider->value()) _slider->setValue(sliderval);
+    if (sliderval != _slider->value())
+        _slider->setValue(sliderval);
     _edit->setText(QString("%1").arg(_numberEditable->v, 0, 'f', _numberEditable->isInt ? 0 : 3));
+    if (_isBool) {
+        bool checkState = _numberEditable->v;
+        _checkBox->setChecked(checkState);
+    }
     _updating = 0;
 }
 
-void NumberControl::setValue(float value) {
+void NumberControl::setValue(float value)
+{
     // std::cerr<<"In setValue "<<_id<<value<<std::endl;
-    if (fabs(_numberEditable->v - value) < 1e-5) return;
+    if (fabs(_numberEditable->v - value) < 1e-5)
+        return;
     _numberEditable->v = value;
     updateControl();
     emit controlChanged(_id);
 }
 
 VectorControl::VectorControl(int id, VectorEditable* editable)
-    : ExprControl(id, editable, true), _numberEditable(editable) {
-
+    : ExprControl(id, editable, false), _numberEditable(editable), _swatch(nullptr)
+{
     if (_numberEditable->isColor) {
         _swatch = new ExprCSwatchFrame(editable->v);
         _swatch->setFixedWidth(38);
@@ -298,7 +439,8 @@ VectorControl::VectorControl(int id, VectorEditable* editable)
         slider->setFixedHeight(6);
         // set color
         static const QColor rgb[3] = {QColor(128, 64, 64), QColor(64, 128, 64), QColor(64, 64, 128)};
-        if (_numberEditable->isColor) slider->setDisplayColor(rgb[i]);
+        if (_numberEditable->isColor)
+            slider->setDisplayColor(rgb[i]);
 
         connect(edit, SIGNAL(textChanged(int, const QString&)), SLOT(editChanged(int, const QString&)));
         connect(slider, SIGNAL(valueChanged(int, float)), SLOT(sliderChanged(int, float)));
@@ -307,7 +449,8 @@ VectorControl::VectorControl(int id, VectorEditable* editable)
     updateControl();
 }
 
-void VectorControl::swatchChanged(QColor gah) {
+void VectorControl::swatchChanged(QColor gah)
+{
     Q_UNUSED(gah);
     SeExpr2::Vec3d color = _swatch->getValue();
     setValue(0, color[0]);
@@ -315,35 +458,45 @@ void VectorControl::swatchChanged(QColor gah) {
     setValue(2, color[2]);
 }
 
-QColor VectorControl::getColor() {
-    return QColor::fromRgbF(
-        clamp(_numberEditable->v[0], 0, 1), clamp(_numberEditable->v[1], 0, 1), clamp(_numberEditable->v[2], 0, 1));
+QColor VectorControl::getColor()
+{
+    return QColor::fromRgbF(clamp(_numberEditable->v[0], 0, 1), clamp(_numberEditable->v[1], 0, 1),
+                            clamp(_numberEditable->v[2], 0, 1));
 }
 
-void VectorControl::setColor(QColor color) {
+void VectorControl::setColor(QColor color)
+{
     setValue(0, color.redF());
     setValue(1, color.greenF());
     setValue(2, color.blueF());
 }
 
-void VectorControl::sliderChanged(int id, float value) {
-    if (_updating) return;
+void VectorControl::sliderChanged(int id, float value)
+{
+    if (_updating)
+        return;
     setValue(id, _numberEditable->min + value * (_numberEditable->max - _numberEditable->min));
-    if (_numberEditable->isColor) emit linkColorEdited(_id, getColor());
+    if (_numberEditable->isColor)
+        emit linkColorEdited(_id, getColor());
 }
 
-void VectorControl::editChanged(int id, const QString& text) {
-    if (_updating) return;
+void VectorControl::editChanged(int id, const QString& text)
+{
+    if (_updating)
+        return;
     bool ok = 0;
     float val = text.toFloat(&ok);
-    if (!ok) return;
+    if (!ok)
+        return;
     setValue(id, val);
 }
 
-void VectorControl::updateControl() {
+void VectorControl::updateControl()
+{
     //    //std::cerr<<"In update control "<<_id<<std::endl;
     _updating = 1;
-    for (unsigned int i = 0; i < 3; i++) _edits[i]->setText(QString("%1").arg(_numberEditable->v[i], 0, 'f', 3));
+    for (unsigned int i = 0; i < 3; i++)
+        _edits[i]->setText(QString("%1").arg(_numberEditable->v[i], 0, 'f', 3));
     double min = _numberEditable->min, max = _numberEditable->max;
     for (unsigned int i = 0; i < 3; i++) {
         _sliders[i]->setValue((_numberEditable->v[i] - min) / (max - min));
@@ -364,23 +517,30 @@ void VectorControl::updateControl() {
     _updating = 0;
 }
 
-void VectorControl::setValue(int n, float value) {
-    if (n < 0 || n >= 3) return;
-    if (fabs(_numberEditable->v[n] - value) < 1e-5) return;
+void VectorControl::setValue(int n, float value)
+{
+    if (n < 0 || n >= 3)
+        return;
+    if (fabs(_numberEditable->v[n] - value) < 1e-5)
+        return;
     _numberEditable->v[n] = value;
-    if (_swatch) _swatch->setValue(_numberEditable->v);
+    if (_swatch)
+        _swatch->setValue(_numberEditable->v);
     updateControl();
     emit controlChanged(_id);
 }
 
 StringControl::StringControl(int id, StringEditable* editable)
-    : ExprControl(id, editable, false), _stringEditable(editable) {
+    : ExprControl(id, editable, false), _stringEditable(editable)
+{
     // make line edit
     _edit = new QLineEdit();
     _edit->setFixedHeight(20);
     connect(_edit, SIGNAL(textChanged(const QString&)), SLOT(textChanged(const QString&)));
+    _edit->setAcceptDrops(false);
     // make a button if we are a file or directory
     if (_stringEditable->type == "file" || _stringEditable->type == "directory") {
+        setAcceptDrops(true);
         QPushButton* button = new QPushButton();
         button->setFixedSize(20, 20);
 
@@ -401,31 +561,59 @@ StringControl::StringControl(int id, StringEditable* editable)
     updateControl();
 }
 
-void StringControl::fileBrowse() {
+void StringControl::dragEnterEvent(QDragEnterEvent* e)
+{
+    e->acceptProposedAction();
+}
+
+void StringControl::dropEvent(QDropEvent* e)
+{
+    e->acceptProposedAction();
+    const QMimeData* mimeData = e->mimeData();
+    if (mimeData->hasUrls()) {
+        QList<QUrl> urls = mimeData->urls();
+        if (!urls.isEmpty()) {
+            _edit->setText(urls.first().path());
+        }
+    } else if (mimeData->hasText()) {
+        _edit->setText(e->mimeData()->text());
+    }
+}
+
+void StringControl::fileBrowse()
+{
     ExprFileDialog dialog(this);
     dialog.setPreview();
     QString newFilename =
         dialog.getOpenFileName("Please choose a file", _edit->text(), tr("Images (*.tif *.tx *.jpg *.ptx *.png)"));
-    if (newFilename != "") _edit->setText(newFilename);
+    if (newFilename != "")
+        _edit->setText(newFilename);
 }
 
-void StringControl::directoryBrowse() {
+void StringControl::directoryBrowse()
+{
     ExprFileDialog dialog(this);
     dialog.setPreview();
     QString newFilename = dialog.getExistingDirectory("Please choose a file", _edit->text());
-    if (newFilename != "") _edit->setText(newFilename);
+    if (newFilename != "")
+        _edit->setText(newFilename);
 }
 
-void StringControl::updateControl() { _edit->setText(_stringEditable->v.c_str()); }
+void StringControl::updateControl()
+{
+    _edit->setText(_stringEditable->v.c_str());
+}
 
-void StringControl::textChanged(const QString& newText) {
-    if (_updating) return;
+void StringControl::textChanged(const QString& newText)
+{
+    if (_updating)
+        return;
     _stringEditable->v = newText.toStdString();
     emit controlChanged(_id);
 }
 
-CurveControl::CurveControl(int id, CurveEditable* editable)
-    : ExprControl(id, editable, false), _curveEditable(editable) {
+CurveControl::CurveControl(int id, CurveEditable* editable) : ExprControl(id, editable, false), _curveEditable(editable)
+{
     _curve = new ExprCurve(this, "Pos:", "Val:", "Interp:");
     _curve->setFixedHeight(80);
 
@@ -439,7 +627,8 @@ CurveControl::CurveControl(int id, CurveEditable* editable)
     // unneded? updateControl();
 }
 
-void CurveControl::curveChanged() {
+void CurveControl::curveChanged()
+{
     if (_curve && _curveEditable) {
         _curveEditable->cvs = _curve->_scene->_cvs;
         emit controlChanged(_id);
@@ -447,7 +636,8 @@ void CurveControl::curveChanged() {
 }
 
 CCurveControl::CCurveControl(int id, ColorCurveEditable* editable)
-    : ExprControl(id, editable, true), _curveEditable(editable) {
+    : ExprControl(id, editable, false), _curveEditable(editable)
+{
     _curve = new ExprColorCurve(this, "Pos:", "Val:", "Interp:");
     _curve->setFixedHeight(80);
 
@@ -461,34 +651,46 @@ CCurveControl::CCurveControl(int id, ColorCurveEditable* editable)
     // unneeded? updateControl();
 }
 
-void CCurveControl::curveChanged() {
+void CCurveControl::curveChanged()
+{
     if (_curve && _curveEditable) {
         _curveEditable->cvs = _curve->_scene->_cvs;
         emit controlChanged(_id);
     }
 }
 
-QColor CCurveControl::getColor() { return _curve->getSwatchColor(); }
+QColor CCurveControl::getColor()
+{
+    return _curve->getSwatchColor();
+}
 
-void CCurveControl::setColor(QColor color) { _curve->setSwatchColor(color); }
+void CCurveControl::setColor(QColor color)
+{
+    _curve->setSwatchColor(color);
+}
 
-struct ExprGraphPreview : public QWidget {
+struct SeExpr2::ExprGraphPreview : public QWidget {
     std::vector<float> x, y;
     std::vector<float> cpx, cpy;
     float xmin, xmax, ymin, ymax, dx, dy;
     ;
     float win_xmin, win_xmax, win_ymin, win_ymax, win_dx, win_dy;
     ;
-    ExprGraphPreview(QWidget* parent = 0) : QWidget(parent) {
+    ExprGraphPreview(QWidget* parent = 0) : QWidget(parent)
+    {
         win_xmin = -1.;
         win_xmax = 2.;
         win_ymin = -1;
         win_ymax = 2.;
     }
 
-    QPointF toScreen(float x, float y) { return QPointF((x - win_xmin) * win_dx, height() - (y - win_ymin) * win_dy); }
+    QPointF toScreen(float x, float y)
+    {
+        return QPointF((x - win_xmin) * win_dx, height() - (y - win_ymin) * win_dy);
+    }
 
-    void paintEvent(QPaintEvent* event) {
+    void paintEvent(QPaintEvent* event)
+    {
         QWidget::paintEvent(event);
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing, true);
@@ -527,7 +729,8 @@ struct ExprGraphPreview : public QWidget {
         painter.fillRect(area, brush);
         if (x.size() > 0) {
             path.moveTo(toScreen(x[0], y[0]));
-            for (int i = 1; i < (int)x.size(); i++) path.lineTo(toScreen(x[i], y[i]));
+            for (int i = 1; i < (int)x.size(); i++)
+                path.lineTo(toScreen(x[i], y[i]));
         }
         QRectF right(toScreen(xmax, ymax), toScreen(win_xmax, ymin));
         QRectF bottom(toScreen(xmin, ymin), toScreen(xmax, win_ymin));
@@ -548,7 +751,8 @@ struct ExprGraphPreview : public QWidget {
     }
 
 #ifdef SEEXPR_USE_ANIMLIB
-    void sample(const animlib::AnimCurve& curve) {
+    void sample(const animlib::AnimCurve& curve)
+    {
         int numKeys = curve.getNumKeys();
         x.clear();
         y.clear();
@@ -591,8 +795,8 @@ struct ExprGraphPreview : public QWidget {
 };
 
 AnimCurveControl::AnimCurveControl(int id, AnimCurveEditable* editable)
-    : ExprControl(id, editable, false), _editable(editable) {
-
+    : ExprControl(id, editable, false), _editable(editable)
+{
     _preview = new ExprGraphPreview();
     _preview->setMinimumWidth(200);
     _preview->setMinimumHeight(60);
@@ -623,7 +827,8 @@ AnimCurveControl::AnimCurveControl(int id, AnimCurveEditable* editable)
 #include <CE/CETool.h>
 #endif
 
-void AnimCurveControl::refreshClicked() {
+void AnimCurveControl::refreshClicked()
+{
     if (callback) {
 #ifdef SEEXPR_USE_ANIMLIB
         callback(_editable->link, _editable->curve);
@@ -634,7 +839,8 @@ void AnimCurveControl::refreshClicked() {
     }
 }
 
-void AnimCurveControl::editGraphClicked() {
+void AnimCurveControl::editGraphClicked()
+{
 #ifdef SEEXPR_USE_ANIMLIB
     QDialog* dialog = new QDialog(this);
     CETool* tool = new CETool;
@@ -666,33 +872,45 @@ void AnimCurveControl::editGraphClicked() {
 #endif
 }
 
-void AnimCurveControl::setAnimCurveCallback(AnimCurveCallback newCallback) { callback = newCallback; }
+void AnimCurveControl::setAnimCurveCallback(AnimCurveCallback newCallback)
+{
+    callback = newCallback;
+}
 
 AnimCurveControl::AnimCurveCallback AnimCurveControl::callback = 0;
 
 // Editing widget for color swatch
 ColorSwatchControl::ColorSwatchControl(int id, ColorSwatchEditable* editable)
-    : ExprControl(id, editable, false), _swatchEditable(editable), _indexLabel(false) {
+    : ExprControl(id, editable, false), _swatchEditable(editable), _indexLabel(false)
+{
     // include index labels if user specifies 'indices' as labelType
-    if (_swatchEditable->labelType == "indices") _indexLabel = true;
+    if (_swatchEditable->labelType == "indices")
+        _indexLabel = true;
     buildSwatchWidget();
 }
 
-void ColorSwatchControl::colorChanged(int index, SeExpr2::Vec3d value) {
-    if (_updating) return;
-    if (index >= 0 && index < int(_swatchEditable->colors.size())) _swatchEditable->change(index, value);
+void ColorSwatchControl::colorChanged(int index, SeExpr2::Vec3d value)
+{
+    if (_updating)
+        return;
+    if (index >= 0 && index < int(_swatchEditable->colors.size()))
+        _swatchEditable->change(index, value);
     emit controlChanged(_id);
 }
 
-void ColorSwatchControl::colorAdded(int index, SeExpr2::Vec3d value) {
-    if (_updating) return;
+void ColorSwatchControl::colorAdded(int index, SeExpr2::Vec3d value)
+{
+    if (_updating)
+        return;
     if (index >= 0 && index <= int(_swatchEditable->colors.size()))
         _swatchEditable->add(value);  // add to end; TODO insert
     emit controlChanged(_id);
 }
 
-void ColorSwatchControl::colorRemoved(int index) {
-    if (_updating) return;
+void ColorSwatchControl::colorRemoved(int index)
+{
+    if (_updating)
+        return;
     if (index >= 0 && index < int(_swatchEditable->colors.size())) {
         _swatchEditable->remove(index);
         _swatch->deleteLater();
@@ -702,7 +920,8 @@ void ColorSwatchControl::colorRemoved(int index) {
     emit controlChanged(_id);
 }
 
-void ColorSwatchControl::buildSwatchWidget() {
+void ColorSwatchControl::buildSwatchWidget()
+{
     _swatch = new ExprColorSwatchWidget(_indexLabel, this);
     connect(_swatch, SIGNAL(swatchChanged(int, SeExpr2::Vec3d)), this, SLOT(colorChanged(int, SeExpr2::Vec3d)));
     connect(_swatch, SIGNAL(swatchAdded(int, SeExpr2::Vec3d)), this, SLOT(colorAdded(int, SeExpr2::Vec3d)));
@@ -718,7 +937,8 @@ void ColorSwatchControl::buildSwatchWidget() {
 }
 
 DeepWaterControl::DeepWaterControl(int id, DeepWaterEditable* editable)
-    : ExprControl(id, editable, false), _deepWaterEditable(editable) {
+    : ExprControl(id, editable, false), _deepWaterEditable(editable)
+{
     _deepWater = new ExprDeepWater(this);
     _deepWater->setParams(editable->params);
 
@@ -726,7 +946,8 @@ DeepWaterControl::DeepWaterControl(int id, DeepWaterEditable* editable)
     connect(_deepWater->_scene, SIGNAL(deepWaterChanged()), SLOT(deepWaterChanged()));
 }
 
-void DeepWaterControl::deepWaterChanged() {
+void DeepWaterControl::deepWaterChanged()
+{
     if (_deepWater && _deepWaterEditable) {
         _deepWaterEditable->params = _deepWater->_scene->params;
         emit controlChanged(_id);

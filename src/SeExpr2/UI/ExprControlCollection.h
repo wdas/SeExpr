@@ -30,48 +30,53 @@
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QSlider>
+#include <QListWidget>
+#include <QStackedWidget>
 #include "ExprControl.h"
 
 class QVBoxLayout;
 class QRadioButton;
 class EditableExpression;
 
+namespace SeExpr2 {
+
 /// This class is the UI for adding widgets
 class ExprAddDialog : public QDialog {
     Q_OBJECT;
 
   public:
-    QLineEdit *variableName;
-    QTabWidget *tabWidget;
-    QLineEdit *intDefault;
-    QLineEdit *intMin;
-    QLineEdit *intMax;
-    QLineEdit *floatDefault;
-    QLineEdit *floatMin;
-    QLineEdit *floatMax;
-    QLineEdit *vectorDefault0;
-    QLineEdit *vectorDefault1;
-    QLineEdit *vectorDefault2;
-    QLineEdit *vectorMin;
-    QLineEdit *vectorMax;
-    QLineEdit *curveLookup;
-    QLineEdit *colorCurveLookup;
-    QLineEdit *animCurveLookup;
-    QLineEdit *animCurveLink;
-    QLineEdit *swatchLookup;
-    QLineEdit *deepWaterLookup;
-    QRadioButton *rainbowPaletteBtn;
-    QRadioButton *grayPaletteBtn;
+    QLineEdit* variableName;
+    QStackedWidget* stackWidget;
+    QListWidget* listWidget;
+    QLineEdit* intDefault;
+    QLineEdit* intMin;
+    QLineEdit* intMax;
+    QLineEdit* floatDefault;
+    QLineEdit* floatMin;
+    QLineEdit* floatMax;
+    QLineEdit* vectorDefault0;
+    QLineEdit* vectorDefault1;
+    QLineEdit* vectorDefault2;
+    QLineEdit* vectorMin;
+    QLineEdit* vectorMax;
+    QLineEdit* curveLookup;
+    QLineEdit* colorCurveLookup;
+    QLineEdit* animCurveLookup;
+    QLineEdit* animCurveLink;
+    QLineEdit* swatchLookup;
+    QLineEdit* deepWaterLookup;
+    QRadioButton* rainbowPaletteBtn;
+    QRadioButton* grayPaletteBtn;
     QColor color;
-    QPushButton *colorWidget;
-    QComboBox *stringTypeWidget;
-    QLineEdit *stringDefaultWidget;
-    QLineEdit *stringNameWidget;
+    QPushButton* colorWidget;
+    QComboBox* stringTypeWidget;
+    QLineEdit* stringDefaultWidget;
+    QLineEdit* stringNameWidget;
 
-    ExprAddDialog(int &count, QWidget *parent = 0);
-    const char *initSwatch();
-  private
-slots:
+    ExprAddDialog(int& count, QWidget* parent = 0);
+    const char* initSwatch();
+  private slots:
+    void listIndexChanged(int index);
     void colorChooseClicked();
 };
 
@@ -86,35 +91,38 @@ class ExprControlCollection : public QWidget {
     bool showAddButton;
 
     // holds a representation factored into the controls
-    EditableExpression *editableExpression;
+    EditableExpression* editableExpression;
 
   public:
-    ExprControlCollection(QWidget *parent = 0, bool showAddButton = true);
+    ExprControlCollection(QWidget* parent = 0, bool showAddButton = true);
     ~ExprControlCollection();
 
   private:
     // TODO: put back
-    std::vector<ExprControl *> _controls;
-    QVBoxLayout *controlLayout;
+    std::vector<ExprControl*> _controls;
+    QVBoxLayout* controlLayout;
 
   public:
     /// Request new text, given taking into account control id's new values
-    void updateText(const int id, QString &text);
+    void updateText(const int id, QString& text);
     /// Rebuild the controls given the new expressionText. Return any local variables found
-    bool rebuildControls(const QString &expressionText, std::vector<QString> &variables);
+    bool rebuildControls(const QString& expressionText, std::vector<QString>& variables);
 
     /// Number of controls
-    int numControls() { return _controls.size(); }
+    int numControls()
+    {
+        return _controls.size();
+    }
 
     void showEditor(int idx);
 
     /// Anim curve callback
-    static void setAnimCurveCallback(AnimCurveControl::AnimCurveCallback callback) {
+    static void setAnimCurveCallback(AnimCurveControl::AnimCurveCallback callback)
+    {
         AnimCurveControl::setAnimCurveCallback(callback);
     }
 
-  private
-slots:
+  private slots:
     /// When a user clicks "Add Widget" button
     void addControlDialog();
     /// Notification when by a control whenever it is edited
@@ -123,19 +131,19 @@ slots:
     void linkColorLink(int id);
     /// Notification by a control that a color is edited (when it is linked)
     void linkColorEdited(int id, QColor color);
-signals:
+  signals:
     /// Notification that a specific control was changed
     void controlChanged(int id);
     /// Gives information about when a link color was changed
     void linkColorOutput(QColor color);
     /// Emitted to request that a new widget string should be added to the expression
     /// i.e. after "Add Widget" was used
-    void insertString(const std::string &controlString);
-  public
-slots:
+    void insertString(const std::string& controlString);
+  public slots:
     /// Notification from outside that a linked color widget was changed
     /// and should be forwarded to any linked controls
     void linkColorInput(QColor color);
 };
+}
 
 #endif

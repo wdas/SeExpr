@@ -18,7 +18,8 @@
 #include <QTimer>
 #include <QFormLayout>
 
-GraphWindow::GraphWindow(QWidget* parent) : QFrame(parent), time(0) {
+GraphWindow::GraphWindow(QWidget* parent) : QFrame(parent), time(0)
+{
     //#########################################
     // Layout framework
     //#########################################
@@ -81,24 +82,29 @@ GraphWindow::GraphWindow(QWidget* parent) : QFrame(parent), time(0) {
     // If data,selection,or layout changes in model then redraw graph
     connect(functions, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), graph, SLOT(redraw()));
     connect(functions, SIGNAL(layoutChanged()), graph, SLOT(redraw()));
-    connect(table->selectionModel(),
-            SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+    connect(table->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
             SLOT(selectionChanged(const QItemSelection&, const QItemSelection&)));
 
     QTimer::singleShot(1, this, SLOT(updateTime()));
 }
 
-GraphWindow::~GraphWindow() { delete functions; }
+GraphWindow::~GraphWindow()
+{
+    delete functions;
+}
 
-void GraphWindow::addNewFunction() {
+void GraphWindow::addNewFunction()
+{
     QString text = edit->text();
-    if (text != QString("")) functions->addFunction(text);
+    if (text != QString(""))
+        functions->addFunction(text);
     edit->setText("");
     status->showMessage("");
     table->repaint();
 }
 
-void GraphWindow::findRootOrExtrema() {
+void GraphWindow::findRootOrExtrema()
+{
     Graph::OperationCode code = Graph::NONE;
     QObject* sender = QObject::sender();
     if (sender == rootbutton)
@@ -121,7 +127,8 @@ void GraphWindow::findRootOrExtrema() {
     }
 }
 
-void GraphWindow::selectionChanged(const QItemSelection& selected, const QItemSelection& unselected) {
+void GraphWindow::selectionChanged(const QItemSelection& selected, const QItemSelection& unselected)
+{
     status->showMessage("");
     QModelIndexList removeList = unselected.indexes();
     for (int i = 0; i < removeList.size(); i++) {
@@ -135,9 +142,11 @@ void GraphWindow::selectionChanged(const QItemSelection& selected, const QItemSe
     graph->repaint();
 }
 
-void GraphWindow::updateTime() {
+void GraphWindow::updateTime()
+{
     time += 1. / 24;
-    if (time > 1) time = 0;
+    if (time > 1)
+        time = 0;
     functions->setVar("t", time);
     timeSlider->setValue(time * 24);
     graph->repaint();

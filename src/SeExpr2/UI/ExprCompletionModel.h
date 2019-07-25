@@ -27,8 +27,10 @@
 #include <QtCore/QSize>
 #include <vector>
 
+namespace SeExpr2 {
+
 class ExprCompletionModel : public QAbstractItemModel  // ItemModel
-                            {
+{
   public:
     // clear/add functions (these are ones that will be resolved with resolveFunc()
     void clearFunctions();
@@ -43,22 +45,31 @@ class ExprCompletionModel : public QAbstractItemModel  // ItemModel
 
     ExprCompletionModel(QObject* parent = 0);
 
-    QModelIndex index(int row, int column, const QModelIndex&) const { return createIndex(row, column, nullptr); }
+    QModelIndex index(int row, int column, const QModelIndex&) const
+    {
+        return createIndex(row, column, nullptr);
+    }
 
-    QModelIndex parent(const QModelIndex&) const { return QModelIndex(); }
+    QModelIndex parent(const QModelIndex&) const
+    {
+        return QModelIndex();
+    }
 
-    int rowCount(const QModelIndex& parent = QModelIndex()) const {
+    int rowCount(const QModelIndex& parent = QModelIndex()) const
+    {
         Q_UNUSED(parent);
         int count = builtins.size() + functions.size() + variables.size() + local_variables.size();
         return count;
     }
 
-    int columnCount(const QModelIndex& parent) const {
+    int columnCount(const QModelIndex& parent) const
+    {
         Q_UNUSED(parent);
         return 2;
     }
 
-    QString getFirstLine(const std::string& all) const {
+    QString getFirstLine(const std::string& all) const
+    {
         size_t newline = all.find("\n");
         if (newline != std::string::npos)
             return QString(all.substr(0, newline).c_str());
@@ -68,7 +79,8 @@ class ExprCompletionModel : public QAbstractItemModel  // ItemModel
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
 
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const {
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const
+    {
         Q_UNUSED(orientation);
         if (role == Qt::DisplayRole)
             return QVariant("");
@@ -90,5 +102,6 @@ class ExprCompletionModel : public QAbstractItemModel  // ItemModel
     std::map<QString, int> functionNameToFunction;
     std::vector<QString> variables, variables_comment;
 };
+}
 
 #endif

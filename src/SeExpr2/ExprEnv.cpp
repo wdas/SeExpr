@@ -22,11 +22,18 @@
 
 namespace SeExpr2 {
 
-ExprVarEnv::~ExprVarEnv() { resetAndSetParent(0); }
+ExprVarEnv::~ExprVarEnv()
+{
+    resetAndSetParent(0);
+}
 
-void ExprVarEnv::resetAndSetParent(ExprVarEnv* parent) { _parent = parent; }
+void ExprVarEnv::resetAndSetParent(ExprVarEnv* parent)
+{
+    _parent = parent;
+}
 
-ExprLocalVar* ExprVarEnv::find(const std::string& name) {
+ExprLocalVar* ExprVarEnv::find(const std::string& name)
+{
     VarDictType::iterator iter = _map.find(name);
     if (iter != _map.end())
         return iter->second.get();
@@ -36,7 +43,8 @@ ExprLocalVar* ExprVarEnv::find(const std::string& name) {
         return 0;
 }
 
-ExprLocalFunctionNode* ExprVarEnv::findFunction(const std::string& name) {
+ExprLocalFunctionNode* ExprVarEnv::findFunction(const std::string& name)
+{
     FuncDictType::iterator iter = _functions.find(name);
     if (iter != _functions.end())
         return iter->second;
@@ -46,7 +54,8 @@ ExprLocalFunctionNode* ExprVarEnv::findFunction(const std::string& name) {
         return 0;
 }
 
-ExprLocalVar const* ExprVarEnv::lookup(const std::string& name) const {
+ExprLocalVar const* ExprVarEnv::lookup(const std::string& name) const
+{
     VarDictType::const_iterator iter = _map.find(name);
     if (iter != _map.end())
         return iter->second.get();
@@ -55,7 +64,8 @@ ExprLocalVar const* ExprVarEnv::lookup(const std::string& name) const {
     return 0;
 }
 
-void ExprVarEnv::addFunction(const std::string& name, ExprLocalFunctionNode* prototype) {
+void ExprVarEnv::addFunction(const std::string& name, ExprLocalFunctionNode* prototype)
+{
     // go to parent until we are at root (all functions globally declared)
     if (_parent)
         _parent->addFunction(name, prototype);
@@ -68,7 +78,8 @@ void ExprVarEnv::addFunction(const std::string& name, ExprLocalFunctionNode* pro
     }
 }
 
-void ExprVarEnv::add(const std::string& name, std::unique_ptr<ExprLocalVar> var) {
+void ExprVarEnv::add(const std::string& name, std::unique_ptr<ExprLocalVar> var)
+{
     VarDictType::iterator iter = _map.find(name);
     if (iter != _map.end()) {
         // throw std::runtime_error("Invalid creation of existing variable in same scope!");
@@ -78,7 +89,8 @@ void ExprVarEnv::add(const std::string& name, std::unique_ptr<ExprLocalVar> var)
         _map.insert(std::make_pair(name, std::move(var)));
 }
 
-size_t ExprVarEnv::mergeBranches(const ExprType& type, ExprVarEnv& env1, ExprVarEnv& env2) {
+size_t ExprVarEnv::mergeBranches(const ExprType& type, ExprVarEnv& env1, ExprVarEnv& env2)
+{
     typedef std::map<std::pair<ExprLocalVar*, ExprLocalVar*>, std::string> MakeMap;
     MakeMap phisToMake;
     /// For each thing in env1 see if env2 has an entry

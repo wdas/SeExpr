@@ -36,34 +36,36 @@ using namespace SeExpr2;
 //! Simple expression class to check all final types of tests
 class TypeTesterExpr : public TypeBuilderExpr {
   public:
-    typedef ExprType (*FindResultOne)(const ExprType &);
-    typedef ExprType (*FindResultTwo)(const ExprType &, const ExprType &);
-    typedef ExprType (*FindResultThree)(const ExprType &, const ExprType &, const ExprType &);
+    typedef ExprType (*FindResultOne)(const ExprType&);
+    typedef ExprType (*FindResultTwo)(const ExprType&, const ExprType&);
+    typedef ExprType (*FindResultThree)(const ExprType&, const ExprType&, const ExprType&);
 
     TypePrintExaminer _examiner;
     SeExpr2::ConstWalker _walker;
 
-    TypeTesterExpr() : TypeBuilderExpr(), _walker(&_examiner) {};
+    TypeTesterExpr() : TypeBuilderExpr(), _walker(&_examiner){};
 
-    TypeTesterExpr(const std::string &e) : TypeBuilderExpr(e), _walker(&_examiner) {};
+    TypeTesterExpr(const std::string& e) : TypeBuilderExpr(e), _walker(&_examiner){};
 
-    virtual ExprVarRef *resolveVar(const std::string &name) const {
+    virtual ExprVarRef* resolveVar(const std::string& name) const
+    {
         return TypeBuilderExpr::resolveVar(name);
     };
 
-    ExprFunc *resolveFunc(const std::string &name) const {
+    ExprFunc* resolveFunc(const std::string& name) const
+    {
         return TypeBuilderExpr::resolveFunc(name);
     };
 
-    void doTest(const std::string &testStr, ExprType expectedResult, ExprType actualResult);
+    void doTest(const std::string& testStr, ExprType expectedResult, ExprType actualResult);
 
-    void testOneVar(const std::string &testStr,
+    void testOneVar(const std::string& testStr,
                     // SingleWholeTypeIterator::ProcType proc);
-                    ExprType (*proc)(const ExprType &));
+                    ExprType (*proc)(const ExprType&));
 
-    void testTwoVars(const std::string &testStr,
+    void testTwoVars(const std::string& testStr,
                      // DoubleWholeTypeIterator::ProcType proc);
-                     ExprType (*proc)(const ExprType &, const ExprType &));
+                     ExprType (*proc)(const ExprType&, const ExprType&));
 };
 
 #endif  // TYPETESTS_H

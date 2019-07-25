@@ -26,42 +26,52 @@ class AST;
 // to lifetime of this node.
 class ASTHandle {
   public:
-    ASTHandle(std::shared_ptr<ASTNode> astRoot, ASTNode* node) : astRoot(astRoot), node(node) {}
+    ASTHandle(std::shared_ptr<ASTNode> astRoot, ASTNode* node) : astRoot(astRoot), node(node)
+    {
+    }
 
-    ASTType type() const { return node ? node->type() : ASTType::Invalid; }
+    ASTType type() const
+    {
+        return node ? node->type() : ASTType::Invalid;
+    }
 
-    boost::python::list children() const {
+    boost::python::list children() const
+    {
         boost::python::list ret;
-        for (const auto& it : node->children()) ret.append(new ASTHandle(astRoot, it.get()));
+        for (const auto& it : node->children())
+            ret.append(new ASTHandle(astRoot, it.get()));
         return ret;
     }
 
-    boost::python::object value() const {
+    boost::python::object value() const
+    {
         boost::python::object object;
         // exit(1);
-        if (!node) return object;
+        if (!node)
+            return object;
         switch (node->type()) {
-            case ASTType::Assign:
-                return boost::python::str(static_cast<typename ASTPolicy::Assign*>(node)->value());
-            case ASTType::Var:
-                return boost::python::str(static_cast<typename ASTPolicy::Var*>(node)->value());
-            case ASTType::Call:
-                return boost::python::str(static_cast<typename ASTPolicy::Call*>(node)->value());
-            case ASTType::String:
-                return boost::python::str(static_cast<typename ASTPolicy::String*>(node)->value());
-            case ASTType::Num:
-                return boost::python::object(static_cast<typename ASTPolicy::Num*>(node)->value());
-            case ASTType::BinaryOp:
-                return boost::python::object(static_cast<typename ASTPolicy::BinaryOp*>(node)->value());
-            case ASTType::UnaryOp:
-                return boost::python::object(static_cast<typename ASTPolicy::UnaryOp*>(node)->value());
-            default:
-                break;  // throw std::runtime_error("Value not supported by this type");
+        case ASTType::Assign:
+            return boost::python::str(static_cast<typename ASTPolicy::Assign*>(node)->value());
+        case ASTType::Var:
+            return boost::python::str(static_cast<typename ASTPolicy::Var*>(node)->value());
+        case ASTType::Call:
+            return boost::python::str(static_cast<typename ASTPolicy::Call*>(node)->value());
+        case ASTType::String:
+            return boost::python::str(static_cast<typename ASTPolicy::String*>(node)->value());
+        case ASTType::Num:
+            return boost::python::object(static_cast<typename ASTPolicy::Num*>(node)->value());
+        case ASTType::BinaryOp:
+            return boost::python::object(static_cast<typename ASTPolicy::BinaryOp*>(node)->value());
+        case ASTType::UnaryOp:
+            return boost::python::object(static_cast<typename ASTPolicy::UnaryOp*>(node)->value());
+        default:
+            break;  // throw std::runtime_error("Value not supported by this type");
         }
         return object;
     }
 
-    boost::python::object range() const {
+    boost::python::object range() const
+    {
         if (node) {
             auto r = node->range();
             return boost::python::make_tuple(r[0], r[1]);
@@ -79,27 +89,39 @@ class ASTHandle {
 /// Hold an AST class
 class AST {
   public:
-    AST(const std::string& s) : _expressionString(s) {
+    AST(const std::string& s) : _expressionString(s)
+    {
         SeParser<ASTPolicy> parser(s);
         ASTPolicy::Ptr rootUnique = parser.parse();
         _root = std::shared_ptr<ASTNode>(rootUnique.release());  // TODO: WHY!?
     }
 
-    ASTHandle* root() { return _root ? new ASTHandle(_root, _root.get()) : nullptr; }
+    ASTHandle* root()
+    {
+        return _root ? new ASTHandle(_root, _root.get()) : nullptr;
+    }
 
-    bool isValid() const { return !!_root; }
+    bool isValid() const
+    {
+        return !!_root;
+    }
 
     std::shared_ptr<ASTNode> _root;
     std::string _expressionString;
 };
 
-void translateParseError(ParseError const& e) { PyErr_SetString(PyExc_RuntimeError, e.what().c_str()); }
+void translateParseError(ParseError const& e)
+{
+    PyErr_SetString(PyExc_RuntimeError, e.what().c_str());
+}
 
 using namespace boost::python;
-BOOST_PYTHON_MODULE(core) {
+BOOST_PYTHON_MODULE(core)
+{
     register_exception_translator<ParseError>(&translateParseError);
-    class_<AST>("AST", init<std::string>()).def("isValid", &AST::isValid).def(
-        "root", &AST::root, return_value_policy<manage_new_object>())
+    class_<AST>("AST", init<std::string>())
+        .def("isValid", &AST::isValid)
+        .def("root", &AST::root, return_value_policy<manage_new_object>())
         //.def("edit",&AST::edit)
         ;
 

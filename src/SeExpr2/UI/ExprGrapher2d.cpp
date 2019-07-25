@@ -19,21 +19,30 @@
 * @author  jlacewel
 */
 
-#include "ExprGrapher2d.h"
-#include <QGridLayout>
-#include <QLineEdit>
 #include <QDoubleValidator>
+#include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QLineEdit>
+
+#include "ExprGrapher2d.h"
+#include "utils/concurrent-for.h"
+
+using namespace SeExpr2;
 
 ExprGrapherWidget::ExprGrapherWidget(QWidget* parent, int width, int height)
-    : view(new ExprGrapherView(*this, this, width, height)), expr("", SeExpr2::ExprType().FP(1)) {
+    : expr("", SeExpr2::ExprType().FP(1)), view(new ExprGrapherView(*this, this, width, height)), _pixelLabel(nullptr)
+{
+    static ExprGrapherSymbols symbols;
+    expr.setVarBlockCreator(&symbols);
+
     Q_UNUSED(parent);
-    setFixedSize(width, height + 30);
+    setMinimumSize(width, height + 30);
     QVBoxLayout* vbox = new QVBoxLayout;
     vbox->setMargin(0);
+    vbox->setMargin(2);
     setLayout(vbox);
-    vbox->addWidget(view, 0, Qt::AlignLeft | Qt::AlignTop);
+    vbox->addWidget(view, 0, Qt::AlignCenter | Qt::AlignTop);
     QHBoxLayout* hbox = new QHBoxLayout;
     vbox->addLayout(hbox);
     hbox->setMargin(0);
@@ -41,20 +50,29 @@ ExprGrapherWidget::ExprGrapherWidget(QWidget* parent, int width, int height)
     float xmin, xmax, ymin, ymax, z;
     view->getWindow(xmin, xmax, ymin, ymax, z);
     scale = new QLineEdit();
+    scale->setToolTip("sets the preview scale");
     QDoubleValidator* valValidator = new QDoubleValidator(0.0, 10000000.0, 6, scale);
-    scale->setValidator(valValidator);
     scale->setValidator(valValidator);
     scaleValueManipulated();
 
     connect(scale, SIGNAL(returnPressed()), this, SLOT(scaleValueEdited()));
     connect(view, SIGNAL(scaleValueManipulated()), this, SLOT(scaleValueManipulated()));
     connect(view, SIGNAL(clicked()), this, SLOT(forwardPreview()));
+    connect(view, SIGNAL(pixelHovered(int, int)), this, SLOT(updatePixelLabel(int, int)));
 
-    hbox->addWidget(new QLabel("Width"), 0);
+    hbox->addWidget(new QLabel("scale"), 0);
     hbox->addWidget(scale, 0);
+
+    hbox->addStretch(1);
+
+    _pixelLabel = new QLabel();
+    _pixelLabel->show();
+    hbox->addWidget(_pixelLabel, 0);
+    updatePixelLabel(0, 0);
 }
 
-void ExprGrapherWidget::scaleValueEdited() {
+void ExprGrapherWidget::scaleValueEdited()
+{
     float xmin, xmax, ymin, ymax, z;
     view->getWindow(xmin, xmax, ymin, ymax, z);
     float xdiff = xmax - xmin, ydiff = ymax - ymin;
@@ -70,35 +88,59 @@ void ExprGrapherWidget::scaleValueEdited() {
     view->setWindow(xmin, xmax, ymin, ymax, z);
 }
 
-void ExprGrapherWidget::scaleValueManipulated() {
+void ExprGrapherWidget::scaleValueManipulated()
+{
     float xmin, xmax, ymin, ymax, z;
     view->getWindow(xmin, xmax, ymin, ymax, z);
     scale->setText(QString("%1").arg(.5 * (xmax - xmin)));
 }
 
-void ExprGrapherWidget::update() {
-    expr.setDesiredReturnType(SeExpr2::ExprType().FP(3));
+void ExprGrapherWidget::updatePixelLabel(int x, int y)
+{
+    float* pixel = view->pixel(x, y);
+    QString rgbstr = QString("[ %1, %2, %3 ]")
+                         .arg(QString::number(pixel[0], 'f', 3), QString::number(pixel[1], 'f', 3),
+                              QString::number(pixel[2], 'f', 3));
+    _pixelLabel->setText(rgbstr);
+}
 
+void ExprGrapherWidget::update()
+{
     view->update();
 }
 
-void ExprGrapherWidget::forwardPreview() { emit preview(); }
+void ExprGrapherWidget::forwardPreview()
+{
+    emit preview();
+}
 
 ExprGrapherView::ExprGrapherView(ExprGrapherWidget& widget, QWidget* parent, int width, int height)
-    : QGLWidget(parent), widget(widget), _image(NULL), _width(width), _height(height), scaling(false),
-      translating(false) {
-    this->setFixedSize(width, height);
+    : QGLWidget(parent)
+    , widget(widget)
+    , _image(NULL)
+    , _width(width)
+    , _height(height)
+    , scaling(false)
+    , translating(false)
+{
+    this->setMinimumSize(width, height);
 
     _image = new float[3 * _width * _height];
     setWindow(-1, 1, -1, 1, 0);
-    clear();
+    update();
 
     setCursor(Qt::OpenHandCursor);
+
+    setMouseTracking(true);
 }
 
-ExprGrapherView::~ExprGrapherView() { delete[] _image; }
+ExprGrapherView::~ExprGrapherView()
+{
+    delete[] _image;
+}
 
-void ExprGrapherView::setWindow(float xmin, float xmax, float ymin, float ymax, float z) {
+void ExprGrapherView::setWindow(float xmin, float xmax, float ymin, float ymax, float z)
+{
     this->z = z;
     this->xmin = xmin;
     this->xmax = xmax;
@@ -109,7 +151,8 @@ void ExprGrapherView::setWindow(float xmin, float xmax, float ymin, float ymax, 
     dy = (ymax - ymin) / _height;
 }
 
-void ExprGrapherView::getWindow(float& xmin, float& xmax, float& ymin, float& ymax, float& z) {
+void ExprGrapherView::getWindow(float& xmin, float& xmax, float& ymin, float& ymax, float& z)
+{
     z = this->z;
     xmin = this->xmin;
     xmax = this->xmax;
@@ -117,7 +160,8 @@ void ExprGrapherView::getWindow(float& xmin, float& xmax, float& ymin, float& ym
     ymax = this->ymax;
 }
 
-void ExprGrapherView::clear() {
+void ExprGrapherView::clear()
+{
     for (int row = 0; row < _height; ++row) {
         for (int col = 0; col < _width; ++col) {
             int index = 3 * row * _width + 3 * col;
@@ -128,7 +172,8 @@ void ExprGrapherView::clear() {
     }
 }
 
-void ExprGrapherView::mousePressEvent(QMouseEvent* event) {
+void ExprGrapherView::mousePressEvent(QMouseEvent* event)
+{
     if (event->button() == Qt::MidButton) {
         setCursor(Qt::ClosedHandCursor);
         translating = true;
@@ -140,12 +185,15 @@ void ExprGrapherView::mousePressEvent(QMouseEvent* event) {
     event_oldx = event->x();
     event_oldy = event->y();
 }
-void ExprGrapherView::mouseReleaseEvent(QMouseEvent* event) {
-    if (event->button() == Qt::LeftButton) emit clicked();
+void ExprGrapherView::mouseReleaseEvent(QMouseEvent* event)
+{
+    if (event->button() == Qt::LeftButton)
+        emit clicked();
     scaling = translating = false;
     setCursor(Qt::OpenHandCursor);
 }
-void ExprGrapherView::mouseMoveEvent(QMouseEvent* event) {
+void ExprGrapherView::mouseMoveEvent(QMouseEvent* event)
+{
     int x = event->x(), y = event->y();
     float offsetx = dx * (x - event_oldx);
     float offsety = -dy * (y - event_oldy);
@@ -170,14 +218,18 @@ void ExprGrapherView::mouseMoveEvent(QMouseEvent* event) {
         emit scaleValueManipulated();
         update();
         repaint();
+    } else {
+        // flip y because Qt places origin at top left, but we store image data with origin at bottom left
+        y = _height - y;
+        emit pixelHovered(x, y);
     }
     event_oldx = x;
     event_oldy = y;
 }
 
-void ExprGrapherView::update() {
-
-    if (!widget.expr.isValid()) {
+void ExprGrapherView::update()
+{
+    if (!widget.exprValid()) {
         clear();
         updateGL();
         return;
@@ -185,29 +237,41 @@ void ExprGrapherView::update() {
 
     float dv = 1.0f / _height;
     float du = 1.0f / _width;
+    CONCURRENT_FOR(0, _height, 1, [&dv, &du, this](int row) {
+        static ExprGrapherSymbols symbols;
+        thread_local SeExpr2::SymbolTable symtab(symbols.create());
 
-    float y = .5 * dy + ymin;
-    float v = .5 * dv;
-    int index = 0;
-    for (int row = 0; row < _height; row++, y += dy, v += dv) {
+        float y = .5 * dy + ymin + dy * row;
+        float v = .5 * dv + dv * row;
+
         float x = .5 * dx + xmin;
         float u = .5 * du;
-        widget.expr.v.value = v;
+
+        double v_ = (double)v;
+        symtab.Pointer(symbols.v) = &v_;
         for (int col = 0; col < _width; col++, x += dy, u += du) {
-            widget.expr.u.value = u;
-            widget.expr.P.value = SeExpr2::Vec3d(x, y, z);
-            const double* value = widget.expr.evalFP();
+            int index = (row * _width + col) * 3;
+
+            double u_ = (double)u;
+            SeExpr2::Vec3d P(x, y, z);
+            symtab.Pointer(symbols.u) = &u_;
+            symtab.Pointer(symbols.P) = &P[0];
+
+            double value[3] = {0.0};
+            widget.expr.evalFP(&value[0], 3, &symtab);
+
             _image[index] = value[0];
             _image[index + 1] = value[1];
             _image[index + 2] = value[2];
             index += 3;
         }
-    }
+    });
 
     updateGL();
 }
 
-void ExprGrapherView::paintGL() {
+void ExprGrapherView::paintGL()
+{
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0.0f, (GLfloat)_width, 0.0, (GLfloat)_height, -1.0, 1.0);

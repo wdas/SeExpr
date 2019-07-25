@@ -20,7 +20,8 @@
 #include <iostream>
 
 #define SE_TEST_ASSERT(x) \
-    if (!(x)) std::cerr << "Test " << #x << " failed at " << __FILE__ << ":" << __LINE__ << std::endl;
+    if (!(x))             \
+        std::cerr << "Test " << #x << " failed at " << __FILE__ << ":" << __LINE__ << std::endl;
 
 #define SE_TEST_ASSERT_EQUAL(actual, expected)                                                                        \
     if ((actual) != (expected))                                                                                       \
