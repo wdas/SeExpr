@@ -585,7 +585,7 @@ void StringControl::fileBrowse()
     ExprFileDialog dialog(this);
     dialog.setPreview();
     QString newFilename =
-        dialog.getOpenFileName("Please choose a file", _edit->text(), tr("Images (*.tif *.tx *.jpg *.ptx *.png)"));
+        dialog.getOpenFileName("Please choose a file", _edit->text(), tr("All Files (*);;Images (*.tif *.tx *.jpg *.ptx *.png)"));
     if (newFilename != "")
         _edit->setText(newFilename);
 }
