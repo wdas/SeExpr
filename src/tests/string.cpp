@@ -100,11 +100,11 @@ TEST(StringTests, Constant) {
     EXPECT_STREQ(expr.evalStr(), "hello world !");
 
     // check that strings are correctly unescaped
-    StringExpression expr7("\"hello\\t\\n\\\"world\\\"\"");
+    StringExpression expr7("\"hello\\\\\\t\\n\\\"world\\\"\"");
     EXPECT_TRUE(expr7.isValid() == true);
     EXPECT_TRUE(expr7.returnType().isString() == true);
     EXPECT_TRUE(expr7.isConstant() == true);
-    EXPECT_STREQ(expr7.evalStr(), "hello\t\n\"world\"");
+    EXPECT_STREQ(expr7.evalStr(), "hello\\\t\n\"world\"");
 }
 
 TEST(StringTests, Variable) {
