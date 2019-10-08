@@ -1898,6 +1898,122 @@ static const char* printf_docstring =
     "printf(string format,[vec0, vec1,  ...])\n"
     "Prints out a string to STDOUT, Format parameter allowed is %v";
 
+
+// Format specifier categories for SPrintFuncX
+static const std::string _intSpec("diouxXc");
+static const std::string _doubleSpec("eEfFgGaA");
+static const std::string _strSpec("s");
+
+class SPrintFuncX : public ExprFuncSimple
+{
+    struct StringData : public SeExpr2::ExprFuncNode::Data, public std::string
+    {
+    };
+
+public:
+    SPrintFuncX() : ExprFuncSimple(false) {}  // not thread safe
+
+    virtual ExprType prep(ExprFuncNode* node, bool wantScalar, ExprVarEnvBuilder& envBuilder) const
+    {
+        int nargs = node->numChildren();
+        if (nargs < 1) {
+            node->addError("Wrong number of arguments, should be >= 1");
+            return ExprType().Error().Constant();
+        }
+        if (! node->checkArg(0, ExprType().String().Constant(), envBuilder)) {
+            node->addError("First argument must be a string.");
+            return ExprType().Error().Constant();
+        }
+
+        const std::string& format = static_cast<const ExprStrNode*>(node->child(0))->str();
+
+        static const std::string strSpec("s");
+        size_t searchStart = 0;
+        size_t exprArg = 1;
+        while (1) {
+            const size_t specStart = format.find('%', searchStart);
+            if (specStart == std::string::npos) break;
+            if (specStart + 1 == format.length()) {
+                node->addError("incomplete format specifier");
+                return ExprType().Error().Constant();
+            }
+            if (format[specStart + 1] == '%') {
+                searchStart = specStart + 2;  // Skip "%%"
+                continue;
+            }
+
+            const size_t specEnd = format.find_first_of(_intSpec + _doubleSpec + _strSpec, 
+                                                        specStart);
+            if (specEnd == std::string::npos) {
+                node->addError("incomplete format specifier");
+                return ExprType().Error().Constant();
+            }
+            if (_strSpec.find(format[specEnd]) != std::string::npos) {
+                if (! node->checkArg(exprArg, ExprType().String(), envBuilder)) {
+                    return ExprType().Error().Constant();
+                }
+            }
+            else {
+                if (! node->checkArg(exprArg, ExprType().FP(1), envBuilder)) {
+                    return ExprType().Error().Constant();
+                }
+            }
+            ++exprArg;
+            searchStart = specEnd + 1;
+        };
+        return ExprType().String().Constant();
+    }
+
+    virtual ExprFuncNode::Data* evalConstant(const ExprFuncNode* node, ArgHandle args) const
+    {
+        return new StringData();
+    }
+
+    virtual void eval(ArgHandle args)
+    {
+        StringData& result = *reinterpret_cast<StringData*>(args.data);
+        result.assign(args.inStr(0));
+
+        char fragment[255];
+        size_t searchStart = 0;
+        size_t exprArg = 1;
+        while (1) {
+            const size_t specStart = result.find('%', searchStart);
+            if (specStart == std::string::npos) break;
+            if (result[specStart + 1] == '%') {
+                result.erase(specStart, 1);
+                searchStart = specStart + 1;
+                continue;
+            }
+
+            const size_t specEnd = result.find_first_of(_intSpec + _doubleSpec + _strSpec, 
+                                                        specStart);
+            const std::string& spec = result.substr(specStart, specEnd - specStart + 1);
+            int fragLen = -1;
+            if (std::string::npos != _intSpec.find(result[specEnd]))
+                fragLen = snprintf(fragment, 255, spec.c_str(), 
+                                   int(args.inFp<1>(exprArg++)[0]));
+            else if (std::string::npos != _doubleSpec.find(result[specEnd]))
+                fragLen = snprintf(fragment, 255, spec.c_str(), 
+                                   args.inFp<1>(exprArg++)[0]);
+            else if (std::string::npos != _strSpec.find(result[specEnd]))
+                fragLen = snprintf(fragment, 255, spec.c_str(), 
+                                   args.inStr(exprArg++));
+            assert(fragLen >= 0);
+
+            result.replace(specStart, spec.size(), fragment);
+            searchStart += fragLen + 1;
+        };
+
+        args.outStr = const_cast<char*>(result.c_str());
+    }
+
+} sprintf;
+static const char* sprintf_docstring =
+    "sprintf(string format, [double|string, double|string, ...])\n"
+    "Returns a string formatted from the given values.  See 'man sprintf' for format details.";
+
+
 #if 0
 
 class TestFunc:public ExprFuncSimple
@@ -2070,5 +2186,7 @@ void defineBuiltins(ExprFunc::Define, ExprFunc::Define3 define3)
     FUNCNDOC(getVar, 2, 2);
     FUNCNDOC(printf, 1, -1);
     //        FUNCNDOC(testfunc,2,2);
+
+    FUNCNDOC(sprintf, 1, -1);
 }
 }

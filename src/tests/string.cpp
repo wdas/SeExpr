@@ -120,11 +120,11 @@ TEST(StringTests, Constant)
     EXPECT_STREQ(expr.evalStr(), "hello world !");
 
     // check that strings are correctly unescaped
-    StringExpression expr7("\"hello\\t\\n\\\"world\\\"\"");
+    StringExpression expr7("\"hello\\\\\\t\\n\\\"world\\\"\"");
     EXPECT_TRUE(expr7.isValid() == true);
     EXPECT_TRUE(expr7.returnType().isString() == true);
     EXPECT_TRUE(expr7.isConstant() == true);
-    EXPECT_STREQ(expr7.evalStr(), "hello\t\n\"world\"");
+    EXPECT_STREQ(expr7.evalStr(), "hello\\\t\n\"world\"");
 }
 
 TEST(StringTests, Variable)
@@ -144,6 +144,12 @@ TEST(StringTests, FunctionConst)
     EXPECT_TRUE(expr.returnType().isString() == true);
     EXPECT_TRUE(expr.isConstant() == true);
     EXPECT_STREQ(expr.evalStr(), "/home/foo/some/relative/path");
+
+    StringExpression expr2("sprintf(\"%04d\", 42)");
+    EXPECT_TRUE(expr2.isValid() == true);
+    EXPECT_TRUE(expr2.returnType().isString() == true);
+    EXPECT_TRUE(expr2.isConstant() == true);
+    EXPECT_STREQ(expr2.evalStr(), "0042");
 }
 
 TEST(StringTests, FunctionVarying)
