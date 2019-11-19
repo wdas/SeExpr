@@ -1,6 +1,6 @@
 <body>
-<title>SeExpr v3 FAQ</title>
-<h1>SeExpr v3 FAQ</h1>
+<title>SeExpr2 API FAQ</title>
+<h1>SeExpr2 API FAQ</h1>
 <a href="#whatsnew">What's new in SeExpr?</a>
 <div style="margin-left: 1em;">
 <p><a href="#typing">Variable Typing</a>
@@ -65,9 +65,9 @@
 <p>New recursive descent parser, only used for the Python AST Tools.</p>
 <p></p>
 <a name="versions"><h2>Which versions have these features?</h2></a>
-<p>Open source version 3.0 and above on <a href="https://github.com/wdas/SeExpr">https://github.com/wdas/SeExpr</a></p>
+<p>All tagged releases after v1.10.0 on <a href="https://github.com/wdas/SeExpr">https://github.com/wdas/SeExpr</a></p>
 <a name="port"><h2>What do I have to change in my code to use this version?</h2></a>
-<p>See <a href="./SeExpr_v3_Porting.html">Porting your code to SeExpr v3</a></p>
+<p>See <a href="./SeExpr2_api_porting.html">Porting your code to SeExpr2 API</a></p>
 <a name="llvm"><h2>What is LLVM? Can I switch it off?</h2></a>
 <p>From <a href="http://llvm.org/">http://llvm.org/</a>: "The LLVM Project is a collection of modular and reusable compiler and toolchain technologies." SeExpr uses LLVM under the hood for generating IR (intermediate representation) code from our expression language, to more efficiently evaluate the expressions. For more information, refer to <a href="http://llvm.org/docs/">http://llvm.org/docs/</a>; for a useful tutorial example, see <a href="http://llvm.org/docs/tutorial/index.html">http://llvm.org/docs/tutorial/index.html</a>.</p>
 <p>By default, expression evaluation will use LLVM if it's available; otherwise it will use our own internal interpreter. To switch off LLVM compilation and explicitly use the interpreter, set this environment variable:<p>
