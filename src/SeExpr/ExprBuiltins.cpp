@@ -118,8 +118,8 @@ static const char* gamma_docstring = "float gamma(float x, float g)\nGamma corre
 
 double bias(double x, double b)
 {
-    static double C = 1 / log(0.5);
-    return pow(x, log(b) * C);
+    const double C = 1.0 / std::log(0.5);
+    return std::pow(std::max(x, 0.0), std::log(std::max(b, 0.0)) * C);
 }
 static const char* bias_docstring =
     "float bias(float x, float g)\nVariation of gamma where values less than 0.5 pull the curve down\nand values "
