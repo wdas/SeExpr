@@ -29,7 +29,7 @@ bool ExprParseAction(SeExpr2::ExprNode*& parseTree,
                      std::string& error,
                      int& errorStart,
                      int& errorEnd,
-                     std::vector<std::pair<int, int> >& comments,
+                     std::vector<std::pair<int, int>>& comments,
                      const SeExpr2::Expression* expr,
                      const char* exprStr,
                      bool wantVec = true);

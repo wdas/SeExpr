@@ -61,7 +61,7 @@ class Interpreter : public Evaluator {
     /// Op function pointer arguments are (int* currOpData,double* currD,char** c,std::stack<int>& callStackurrS)
     typedef int (*OpF)(const int*, double*, char**);
 
-    std::vector<std::pair<OpF, int> > ops;
+    std::vector<std::pair<OpF, int>> ops;
 
     std::vector<int> opData;  // operands to op
 

@@ -1788,7 +1788,7 @@ static const char* getVar_docstring =
 
 class PrintFuncX : public ExprFuncSimple {
     struct Data : public ExprFuncNode::Data {
-        std::vector<std::pair<int, int> > ranges;
+        std::vector<std::pair<int, int>> ranges;
         std::string format;
     };
 
@@ -1818,7 +1818,7 @@ class PrintFuncX : public ExprFuncSimple {
         Data* data = new Data;
         data->format = args.inStr(0);
         std::string& format = data->format;
-        std::vector<std::pair<int, int> >& ranges = data->ranges;
+        std::vector<std::pair<int, int>>& ranges = data->ranges;
 
         int items = 0;
         while (1) {

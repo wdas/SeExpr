@@ -51,10 +51,10 @@ struct ParseData {
 };
 
 struct ParseState {
-    ParseState(std::vector<std::pair<int, int> >* comments) : yycolno(0), comments(comments)
+    ParseState(std::vector<std::pair<int, int>>* comments) : yycolno(0), comments(comments)
     {
     }
     int yycolno = 0;  // really buffer position
-    std::vector<std::pair<int, int> >* comments = 0;
+    std::vector<std::pair<int, int>>* comments = 0;
 };
 }
