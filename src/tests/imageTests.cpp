@@ -51,7 +51,7 @@ namespace SeExpr2 {
 
 class RandFuncX : public ExprFuncSimple {
     struct Data : public ExprFuncNode::Data {
-        std::vector<std::pair<int, int> > ranges;
+        std::vector<std::pair<int, int>> ranges;
         std::string format;
     };
 
@@ -83,7 +83,7 @@ class RandFuncX : public ExprFuncSimple {
 // map(string name, [float format-arg], [float u], [float v], [int channel])
 class MapFunc : public ExprFuncSimple {
     struct Data : public ExprFuncNode::Data {
-        std::vector<std::pair<int, int> > ranges;
+        std::vector<std::pair<int, int>> ranges;
         std::string format;
     };
 

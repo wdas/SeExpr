@@ -179,7 +179,7 @@ class Expression {
     }
 
     /** Get a reference to a list of the ranges where comments occurred */
-    const std::vector<std::pair<int, int> >& getComments() const
+    const std::vector<std::pair<int, int>>& getComments() const
     {
         return _comments;
     }
@@ -369,7 +369,7 @@ class Expression {
     mutable std::vector<Error> _errors;
 
     /** Cached comments */
-    mutable std::vector<std::pair<int, int> > _comments;
+    mutable std::vector<std::pair<int, int>> _comments;
 
     /** Variables used in this expr */
     mutable std::set<std::string> _vars;

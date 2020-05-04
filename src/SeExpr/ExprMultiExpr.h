@@ -25,7 +25,7 @@ class Expressions;
 typedef std::set<GlobalVal*>::iterator VariableHandle;
 typedef std::set<GlobalVal*>::iterator VariableSetHandle;
 typedef std::set<DExpression*>::iterator ExprHandle;
-typedef std::pair<ExprHandle, std::vector<DExpression*> > ExprEvalHandle;
+typedef std::pair<ExprHandle, std::vector<DExpression*>> ExprEvalHandle;
 
 class DExpression : public Expression {
     Expressions& context;

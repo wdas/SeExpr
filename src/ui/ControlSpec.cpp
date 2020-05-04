@@ -82,7 +82,7 @@ inline bool isWS(const char* source, int start, int end)
 inline std::string findComment(const ExprNode& node)
 {
     const Expression& expr = *node.expr();
-    typedef std::vector<std::pair<int, int> > Comments;
+    typedef std::vector<std::pair<int, int>> Comments;
     const Comments& comments = expr.getComments();
     const std::string& s = expr.getExpr();
 

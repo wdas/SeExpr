@@ -20,7 +20,7 @@
 
 bool ExprSpecParse(std::vector<Editable*>& literals,
                    std::vector<std::string>& variables,
-                   std::vector<std::pair<int, int> >& comments,
+                   std::vector<std::pair<int, int>>& comments,
                    const char* str);
 
 EditableExpression::EditableExpression()
@@ -39,7 +39,7 @@ void EditableExpression::setExpr(const std::string& expr)
 
     // run parser
     _expr = expr;
-    std::vector<std::pair<int, int> > comments;
+    std::vector<std::pair<int, int>> comments;
     ExprSpecParse(_editables, _variables, comments, _expr.c_str());
 
     for (Editables::iterator it = _editables.begin(); it != _editables.end();) {

@@ -17,6 +17,10 @@
 
 #include "LLVMEvaluator.h"
 
+#ifdef SEEXPR_ENABLE_LLVM
+#include <llvm/Support/Compiler.h>
+#endif
+
 namespace SeExpr2 {
 #ifdef SEEXPR_ENABLE_LLVM
 bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType)
@@ -69,7 +73,11 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType)
     };
     FunctionType* FT = FunctionType::get(Type::getVoidTy(*_llvmContext), ParamTys, false);
     Function* F = Function::Create(FT, Function::ExternalLinkage, uniqueName + "_func", TheModule.get());
+#if LLVM_VERSION_MAJOR > 4
+    F->addAttribute(llvm::AttributeList::FunctionIndex, llvm::Attribute::AlwaysInline);
+#else
     F->addAttribute(llvm::AttributeSet::FunctionIndex, llvm::Attribute::AlwaysInline);
+#endif
     {
         // label the function with names
         const char* names[] = {"outputPointer", "dataBlock", "indirectIndex"};
@@ -200,13 +208,13 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType)
 
     if (_debugging) {
         std::cerr << "Pre verified LLVM byte code " << std::endl;
-        TheModule->dump();
+        TheModule->print(llvm::errs(), nullptr);
     }
 
     // TODO: Find out if there is a new way to verify
     // if (verifyModule(*TheModule)) {
     //     std::cerr << "Logic error in code generation of LLVM alert developers" << std::endl;
-    //     TheModule->dump();
+    //     TheModule->print(llvm::errs(), nullptr);
     // }
     Module* altModule = TheModule.get();
 
@@ -235,7 +243,7 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType)
         if (_debugging) {
             std::cerr << "error in LLVM verifyModule\n";
             parseTree->dump();
-            altModule->dump();
+            altModule->print(llvm::errs(), nullptr);
         }
         parseTree->addError(raw.str());
         return false;
@@ -246,7 +254,11 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType)
     std::unique_ptr<llvm::legacy::PassManager> pm(new llvm::legacy::PassManager);
     std::unique_ptr<llvm::legacy::FunctionPassManager> fpm(new llvm::legacy::FunctionPassManager(altModule));
     builder.OptLevel = 3;
+#if LLVM_VERSION_MAJOR >= 4
+    builder.Inliner = llvm::createAlwaysInlinerLegacyPass();
+#else
     builder.Inliner = llvm::createAlwaysInlinerPass();
+#endif
     builder.populateModulePassManager(*pm);
     // fpm->add(new llvm::DataLayoutPass());
     builder.populateFunctionPassManager(*fpm);
@@ -267,7 +279,7 @@ bool LLVMEvaluator::prep(ExprNode* parseTree, ExprType desiredReturnType)
 
     if (_debugging) {
         std::cerr << "Pre verified LLVM byte code " << std::endl;
-        altModule->dump();
+        altModule->print(llvm::errs(), nullptr);
     }
 
     return true;
