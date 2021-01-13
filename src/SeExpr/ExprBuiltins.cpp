@@ -492,6 +492,115 @@ static const char* hue_docstring =
     "color hue(color val, float amt)\n"
     "Shift the hue of color by amt in degrees.\n";
 
+double screen(int n, double* args)
+{
+    if (n < 2) {
+        return 0.0;
+    }
+    double x = args[0];
+    double y = args[1];
+    double res;
+    res = 1 - (1 - x) * (1 - y);
+
+    if (n == 3) {
+        double a = args[2];
+        return mix(x, res, a);
+    }
+    return res;
+}
+
+static const char* screen_docstring =
+    "float screen(float x, float y)\n"
+    "float screen(float x, float y, float alpha)\n"
+    "Screens y over x. Layers input values by inverting, multiplying, and then inverting again.\n"
+    "If alpha is supplied, mix between input x and result of blending.\n"
+    "Equivalent to 1-(1-x)*(1-y)";
+
+double overlay(int n, double* args)
+{
+    if (n < 2) {
+        return 0.0;
+    }
+    double x = args[0];
+    double y = args[1];
+    double res;
+    if (x < 0.5) {
+        res = 2 * x * y;
+    } else {
+        res = 1 - 2 * (1 - x) * (1 - y);
+    }
+    if (n == 3) {
+        double a = args[2];
+        return mix(x, res, a);
+    }
+    return res;
+}
+
+static const char* overlay_docstring =
+    "float overlay(float x, float y)\n"
+    "float overlay(float x, float y, float alpha)\n"
+    "Overlays y over x. Combines screen and multiply, where values y darker than x become darker,\n"
+    "and values lighter than x become lighter.\n"
+    "If alpha is supplied, mix between input x and result of blending.\n";
+
+double hardLight(int n, double* args)
+{
+    if (n < 2) {
+        return 0.0;
+    }
+    double x = args[0];
+    double y = args[1];
+    double res;
+    if (y < 0.5) {
+        res = 2 * x * y;
+    } else {
+        res = 1 - 2 * (1 - x) * (1 - y);
+    }
+    if (n == 3) {
+        double a = args[2];
+        return mix(x, res, a);
+    }
+    return res;
+}
+
+static const char* hardLight_docstring =
+    "float hardLight(float x, float y)\n"
+    "float hardLight(float x, float y, float alpha)\n"
+    "Layers y over x using hardLight blending. Combines screen and multiply, where values y lighter than x become "
+    "darker,\n"
+    "and values lighter than x become darker.\n"
+    "If alpha is supplied, mix between input x and result of blending.\n";
+
+double softLight(int n, double* args)
+{
+    if (n < 2) {
+        return 0.0;
+    }
+
+    double x = args[0];
+    double y = args[1];
+    double res;
+
+    if (y < 0.5) {
+        res = 2 * x * y + x * x * (1 - 2 * y);
+    } else {
+        res = sqrt(x) * (2 * y - 1) + (2 * x) * (1 - y);
+    }
+
+    if (n == 3) {
+        double a = args[2];
+        return mix(x, res, a);
+    }
+    return res;
+}
+
+static const char* softLight_docstring =
+    "float softLight(float x, float y)\n"
+    "float softLight(float x, float y, float alpha)\n"
+    "Layers y over x using softLight blending. Similar to overlay, but results in less contrast.\n"
+    "If alpha is supplied, mix between input x and result of blending.\n";
+
+
 double hash(int n, double* args)
 {
     // combine args into a single seed
@@ -2009,6 +2118,10 @@ void defineBuiltins(ExprFunc::Define, ExprFunc::Define3 define3)
     FUNCDOC(hsltorgb);
     FUNCDOC(rgbtohsl);
     FUNCNDOC(saturate, 2, 2);
+    FUNCNDOC(screen, 2, 3);
+    FUNCNDOC(overlay, 2, 3);
+    FUNCNDOC(hardLight, 2, 3);
+    FUNCNDOC(softLight, 2, 3);
 
     // noise
     FUNCNDOC(hash, 1, -1);

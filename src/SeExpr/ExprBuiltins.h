@@ -98,6 +98,11 @@ Vec3d hue(int n, const Vec3d* args);
 Vec3d midhsi(int n, const Vec3d* args);
 Vec3d rgbtohsl(const Vec3d& rgb);
 Vec3d hsltorgb(const Vec3d& hsl);
+double screen(int n, double* args);
+double overlay(int n, double* args);
+double hardLight(int n, double* args);
+double softLight(int n, double* args);
+
 
 // noise
 double hash(int n, double* args);
