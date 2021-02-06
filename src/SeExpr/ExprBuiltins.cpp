@@ -230,10 +230,9 @@ static const char* remap_docstring =
     "source, float range, float falloff, float interp)\nGeneral remapping function.\n"
     "When x is within +/- <i>range</i> of source, the result is one.\n"
     "The result falls to zero beyond that range over <i>falloff</i> distance.\n"
-    "The falloff shape is controlled by <i>interp</i>. Numeric values\n"
-    "or named constants may be used:\n"
-    "&nbsp;&nbsp;&nbsp;&nbsp;int <b>linear</b>\n"
-    "= 0\n"
+    "The falloff shape is controlled by <i>interp</i>. Use the following numeric\n"
+    "values:\n"
+    "&nbsp;&nbsp;&nbsp;&nbsp;int <b>linear</b> = 0\n"
     "&nbsp;&nbsp;&nbsp;&nbsp;int <b>smooth</b> = 1\n"
     "&nbsp;&nbsp;&nbsp;&nbsp;int <b>gaussian</b> = 2\n";
 

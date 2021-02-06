@@ -111,10 +111,8 @@ x is
 within +/- <i>range</i> of source, the result is one.&nbsp; The
 result falls to zero beyond that range over <i>falloff</i>
 distance.&nbsp; The
-falloff shape is controlled by <i>interp</i>. Numeric values or named
-constants may be used:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;int <b>linear</b>
-= 0<br>
+falloff shape is controlled by <i>interp</i>. Use the following numeric values:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;int <b>linear</b> = 0<br>
 &nbsp;&nbsp;&nbsp;&nbsp;int <b>smooth</b> = 1<br>
 &nbsp;&nbsp;&nbsp;&nbsp;int <b>gaussian</b> = 2<br>
 </div>
