@@ -85,7 +85,7 @@ void Lexer::populateReservedWords()
         reservedWords["ERROR"] = ERROR;
         reservedWords["if"] = IF;
         reservedWords["else"] = ELSE;
-        // TODO: E, PI, linear, gaussian, smooth, box
+        // TODO: E, PI
     }
 }
 

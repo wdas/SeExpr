@@ -92,10 +92,6 @@ else			{ return ELSE; }
 
 PI			{ yylval.d = M_PI; return NUMBER; }
 E			{ yylval.d = M_E; return NUMBER; }
-linear			{ yylval.d = 0; return NUMBER; }
-smooth			{ yylval.d = 1; return NUMBER; }
-gaussian		{ yylval.d = 2; return NUMBER; }
-box			{ yylval.d = 3; return NUMBER; }
 
 {REAL}			{ yylval.d = atof(yytext); return NUMBER; }
 \"(\\\"|[^"\n])*\"	{ /* match quoted string, allow embedded quote, \" */
