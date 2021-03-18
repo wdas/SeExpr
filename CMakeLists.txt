@@ -185,6 +185,8 @@ else()
     endif()
 endif()
 
+set("PREGENERATED_ROOT" "${CMAKE_CURRENT_SOURCE_DIR}/windows7")
+
 # Set to release if nothing else defined
 if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING

@@ -24,7 +24,7 @@ find_package(OpenGL)
 if (Qt5_FOUND OR QT4_FOUND)
 
     BuildParserScanner(ExprSpecParserLex ExprSpecParser ExprSpec
-                       editor_parser_cpp)
+                       editor_parser_cpp ui)
 
     set(EDITOR_MOC_HDRS ExprBrowser.h ExprColorCurve.h
         ExprColorSwatch.h ExprControlCollection.h

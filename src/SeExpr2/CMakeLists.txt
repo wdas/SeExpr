@@ -36,8 +36,8 @@ find_program(SED_EXE sed)
 if ((BISON_EXE STREQUAL "BISON_EXE-NOTFOUND") OR
     (FLEX_EXE STREQUAL "FLEX_EXE-NOTFOUND") OR
     (SED_EXE STREQUAL "SED_EXE-NOTFOUND"))
-    # don't have flex/bison/sed, use pregenerated versions
-    set(parser_cpp generated/ExprParser.cpp generated/ExprParserLex.cpp)
+  # don't have flex/bison/sed, use pregenerated versions
+    set(parser_cpp ${PREGENERATED_ROOT}/SeExpr/generated/ExprParser.cpp ${PREGENERATED_ROOT}/SeExpr/generated/ExprParserLex.cpp)
 else()
     ## build the parser from the flex/yacc sources
     add_custom_command(
