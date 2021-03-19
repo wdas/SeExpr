@@ -13,7 +13,7 @@
 # You may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
 
-include_directories(${CMAKE_BINARY_DIR}/src/SeExpr2)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/../SeExpr2)
 
 set(TEST_DEST "share/test/SeExpr2")
 
