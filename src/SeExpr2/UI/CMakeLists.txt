@@ -24,7 +24,7 @@ find_package(OpenGL)
 if (Qt5_FOUND OR QT4_FOUND)
 
     BuildParserScanner(ExprSpecParserLex ExprSpecParser ExprSpec
-                       editor_parser_cpp)
+                       editor_parser_cpp ui)
 
     set(EDITOR_MOC_HDRS ExprBrowser.h ExprColorCurve.h
         ExprColorSwatch.h ExprControlCollection.h
@@ -86,7 +86,8 @@ if (Qt5_FOUND OR QT4_FOUND)
     set_property(TARGET SeExpr2Editor APPEND PROPERTY
                  COMPATIBLE_INTERFACE_STRING ${SeExpr2_MAJOR_VERSION})
 
-    include_directories(${CMAKE_BINARY_DIR}/src/SeExpr2)
+    include_directories(${CMAKE_CURRENT_BINARY_DIR}/../SeExpr2)
+    include_directories(${CMAKE_CURRENT_BINARY_DIR}/..)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(SeExpr2Editor SeExpr2)
 
