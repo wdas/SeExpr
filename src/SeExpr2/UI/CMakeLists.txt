@@ -87,6 +87,7 @@ if (Qt5_FOUND OR QT4_FOUND)
                  COMPATIBLE_INTERFACE_STRING ${SeExpr2_MAJOR_VERSION})
 
     include_directories(${CMAKE_CURRENT_BINARY_DIR}/../SeExpr2)
+    include_directories(${CMAKE_CURRENT_BINARY_DIR}/..)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(SeExpr2Editor SeExpr2)
 
