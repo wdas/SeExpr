@@ -72,13 +72,17 @@ set(BOOST_DIR /usr CACHE PATH "where boost is located")
 
 find_package(PythonInterp) # provides Python version check
 find_package(PythonLibs)
+# TODO: switch to FindPython
+#find_package(Python COMPONENTS Interpreter Development)
 
 if(PYTHON_VERSION_MAJOR LESS 3)
     set(BOOST_PYTHON_LIBNAME boost_python CACHE STRING "what library name for boost python")
+    set(PYTHON_CONFIG "python-config")
 else()
     # try to find boost_python3 in a way compatible with most distributions
     find_library(BOOST_PYTHON3_LIB NAMES "boost_python3" "boost_python3${PYTHON_VERSION_MINOR}")
     SET (BOOST_PYTHON_LIBNAME ${BOOST_PYTHON3_LIB} CACHE STRING "what library name for boost python")
+    set(PYTHON_CONFIG "python3-config")
 endif()
 
 set(GTEST_DIR "" CACHE STRING "Where to find GTEST")
