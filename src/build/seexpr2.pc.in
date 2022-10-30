@@ -1,7 +1,7 @@
 # pkg-config file for seexpr2
 prefix=@CMAKE_INSTALL_PREFIX@
-libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
-includedir=${prefix}/include
+libdir=@CMAKE_INSTALL_PKGCONFIG_LIBDIR@
+includedir=@CMAKE_INSTALL_PKGCONFIG_INCLUDEDIR@
 
 Name: seexpr2
 Description: SeExpr v2 Library
