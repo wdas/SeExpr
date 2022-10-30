@@ -12,7 +12,7 @@ class QGridLayout;
 class ExprColorFrame : public QFrame {
     Q_OBJECT
   public:
-    ExprColorFrame(SeExpr2::Vec3d value, QWidget *parent = 0);
+    ExprColorFrame(SeExpr2::Vec3d value, QWidget *parent = nullptr);
     ~ExprColorFrame() {}
 
     void setValue(const SeExpr2::Vec3d &value);
@@ -55,7 +55,7 @@ class ExprColorSwatchWidget : public QWidget {
     Q_OBJECT
 
   public:
-    ExprColorSwatchWidget(bool indexLabel, QWidget *parent = 0);
+    ExprColorSwatchWidget(bool indexLabel=false, QWidget *parent = nullptr);
     ~ExprColorSwatchWidget() {}
 
     // Convenience Functions

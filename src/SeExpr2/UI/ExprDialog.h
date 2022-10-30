@@ -65,7 +65,7 @@ class ExprDialog : public QDialog {
     int _currentEditorIdx;
 
   public:
-    ExprDialog(QWidget* parent);
+    ExprDialog(QWidget* parent=nullptr);
 
     std::string getExpressionString() { return editor->getExpr(); }
 
