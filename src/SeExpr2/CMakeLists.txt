@@ -89,20 +89,26 @@ else()
     add_library(SeExpr2 STATIC ${io_cpp} ${core_cpp} ${parser_cpp} ${llvm_cpp})
 endif()
 
-set_property(TARGET SeExpr2 PROPERTY VERSION ${SeExpr2_VERSION})
-set_property(TARGET SeExpr2 PROPERTY SOVERSION ${SeExpr2_MAJOR_VERSION})
+set_property(TARGET SeExpr2 PROPERTY VERSION ${seexpr2_VERSION})
+set_property(TARGET SeExpr2 PROPERTY SOVERSION ${seexpr2_MAJOR_VERSION})
 set_property(TARGET SeExpr2 PROPERTY
-             INTERFACE_SeExpr2_MAJOR_VERSION ${SeExpr2_MAJOR_VERSION})
+             INTERFACE_SeExpr2_MAJOR_VERSION ${seexpr2_MAJOR_VERSION})
 set_property(TARGET SeExpr2 APPEND PROPERTY
-             COMPATIBLE_INTERFACE_STRING ${SeExpr2_MAJOR_VERSION})
+             COMPATIBLE_INTERFACE_STRING ${seexpr2_MAJOR_VERSION})
 
 generate_export_header(SeExpr2)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/seexpr2_export.h"
         COMPONENT devel DESTINATION ${INCLUDE_DIR})
 
+# When targets are consumed downstream they should only add the top-level
+# $prefix/include directory.  Downstream consumers are expected to
+# use #include <project-name/header.h>.
+target_include_directories(SeExpr2 PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+
 ## Install binary and includes
-install(TARGETS SeExpr2 DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        EXPORT SeExpr2Targets)
+install(TARGETS SeExpr2
+        EXPORT ${PROJECT_NAME}
+        DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
         COMPONENT devel DESTINATION ${INCLUDE_DIR}

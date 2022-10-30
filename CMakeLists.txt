@@ -16,7 +16,7 @@
 cmake_minimum_required(VERSION 3.8.0)
 
 ## project name & version
-project(SeExpr2)
+project(seexpr2)
 
 # "API" version
 set(${PROJECT_NAME}_VERSION "2.0")
@@ -64,7 +64,7 @@ message(STATUS "CMAKE_INSTALL_LIBDIR = ${CMAKE_INSTALL_LIBDIR}")
 ## Install locations
 set(DOC_DIR "share/doc/${PROJECT_NAME}")
 set(CMAKE_DIR "share/cmake/${PROJECT_NAME}")
-set(INCLUDE_DIR "include/${PROJECT_NAME}")
+set(INCLUDE_DIR "${CMAKE_INSTALL_INCLUDEDIR}/SeExpr2")
 
 # Configuration options
 # TODO: find GTEST and boost and python the proper ways
@@ -269,18 +269,36 @@ if (${BUILD_TESTS})
     add_subdirectory(src/tests)
 endif ()
 
-# cmake packaging -- this is done after adding subdirectories so that
-# all exported targets are found by export() below.
-configure_file("src/build/seexpr2.pc.in" "seexpr2.pc" @ONLY)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/seexpr2.pc"
+if (IS_ABSOLUTE "${CMAKE_INSTALL_LIBDIR}")
+    set(CMAKE_INSTALL_PKGCONFIG_LIBDIR "${CMAKE_INSTALL_LIBDIR}")
+else()
+    set(CMAKE_INSTALL_PKGCONFIG_LIBDIR "\${prefix}/${CMAKE_INSTALL_LIBDIR}")
+endif()
+if (IS_ABSOLUTE "${CMAKE_INSTALL_INCLUDEDIR}")
+    set(CMAKE_INSTALL_PKGCONFIG_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}")
+else()
+    set(CMAKE_INSTALL_PKGCONFIG_INCLUDEDIR "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
+endif()
+configure_file("src/build/${PROJECT_NAME}.pc.in" "${PROJECT_NAME}.pc" @ONLY)
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
     COMPONENT devel DESTINATION share/pkgconfig)
 
-write_basic_package_version_file("seexpr2-version.cmake" VERSION ${SeExpr2_VERSION} COMPATIBILITY AnyNewerVersion)
+write_basic_package_version_file("${PROJECT_NAME}-config-version.cmake"
+    VERSION ${seexpr2_VERSION} COMPATIBILITY AnyNewerVersion)
 
 configure_package_config_file(
-    "src/build/seexpr2-config.cmake" "seexpr2-config.cmake"
+    "src/build/${PROJECT_NAME}-config.cmake" "${PROJECT_NAME}-config.cmake"
     INSTALL_DESTINATION ${CMAKE_DIR}
     PATH_VARS CMAKE_INSTALL_PREFIX CMAKE_INSTALL_LIBDIR CMAKE_INSTALL_INCLUDEDIR)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/seexpr2-config.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/seexpr2-version.cmake"
-    COMPONENT devel DESTINATION ${CMAKE_DIR})
+
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
+    COMPONENT devel DESTINATION "${CMAKE_DIR}")
+
+install(EXPORT ${PROJECT_NAME}
+        NAMESPACE ${PROJECT_NAME}::
+        FILE "${PROJECT_NAME}-exports.cmake"
+        DESTINATION "${CMAKE_DIR}"
+        COMPONENT "devel")

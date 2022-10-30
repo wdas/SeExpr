@@ -79,12 +79,12 @@ if (Qt5_FOUND OR QT4_FOUND)
                     ${editor_parser_cpp})
     endif()
 
-    set_property(TARGET SeExpr2Editor PROPERTY VERSION ${SeExpr2_VERSION})
+    set_property(TARGET SeExpr2Editor PROPERTY VERSION ${seexpr2_VERSION})
     set_property(TARGET SeExpr2Editor PROPERTY SOVERSION 3)
     set_property(TARGET SeExpr2Editor PROPERTY
-                 INTERFACE_SeExpr2Editor_MAJOR_VERSION ${SeExpr2_MAJOR_VERSION})
+                 INTERFACE_SeExpr2Editor_MAJOR_VERSION ${seexpr2_MAJOR_VERSION})
     set_property(TARGET SeExpr2Editor APPEND PROPERTY
-                 COMPATIBLE_INTERFACE_STRING ${SeExpr2_MAJOR_VERSION})
+                 COMPATIBLE_INTERFACE_STRING ${seexpr2_MAJOR_VERSION})
 
     include_directories(${CMAKE_CURRENT_BINARY_DIR}/../SeExpr2)
     include_directories(${CMAKE_CURRENT_BINARY_DIR}/..)
@@ -126,17 +126,17 @@ if (Qt5_FOUND OR QT4_FOUND)
     endif()
 
     ## Install library and includes
-    install(TARGETS SeExpr2Editor DESTINATION ${CMAKE_INSTALL_LIBDIR})
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ DESTINATION ${INCLUDE_DIR}/UI
+    install(TARGETS SeExpr2Editor
+            EXPORT ${PROJECT_NAME}
+            DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
+            DESTINATION ${INCLUDE_DIR}/UI
             FILES_MATCHING PATTERN "*.h")
 
     if(USE_PYTHON)
         # Generate python module expreditor2, using sip
         find_program(SIP_EXEC sip)
-
-        # Find python includes and libs. cmake doesn't seem to handle automatically
-        find_package(PythonInterp)
-        find_package(PythonLibs)
 
         macro(get_build_info NAME STORAGE)
             execute_process(
@@ -206,7 +206,9 @@ if (Qt5_FOUND OR QT4_FOUND)
             set_target_properties(expreditor2 PROPERTIES SUFFIX ".so")
         endif()
 
-        install(TARGETS expreditor2 DESTINATION ${CMAKE_INSTALL_PYTHON})
+        install(TARGETS expreditor2
+                EXPORT ${PROJECT_NAME}
+                DESTINATION ${CMAKE_INSTALL_PYTHON})
         install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
                 DESTINATION ${CMAKE_INSTALL_PYTHON})
     endif()
