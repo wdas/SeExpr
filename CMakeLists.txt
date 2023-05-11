@@ -80,7 +80,10 @@ if(PYTHON_VERSION_MAJOR LESS 3)
     set(PYTHON_CONFIG "python-config")
 else()
     # try to find boost_python3 in a way compatible with most distributions
-    find_library(BOOST_PYTHON3_LIB NAMES "boost_python3" "boost_python3${PYTHON_VERSION_MINOR}")
+    find_library(BOOST_PYTHON3_LIB NAMES
+                 "boost_python3${PYTHON_VERSION_MINOR}-mt"
+                 "boost_python3${PYTHON_VERSION_MINOR}"
+                 "boost_python3")
     SET (BOOST_PYTHON_LIBNAME ${BOOST_PYTHON3_LIB} CACHE STRING "what library name for boost python")
     set(PYTHON_CONFIG "python3-config")
 endif()
