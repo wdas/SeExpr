@@ -54,6 +54,8 @@ $(BUILD): $(CMAKE_FILES)
 	mkdir -p $(BUILD)
 	cd $(BUILD) && $(CMAKE) $(CMAKE_ARGS) $(EXTRA_CMAKE_ARGS) ../..
 	touch $@
+	rm -f build/compile_commands.json
+	ln -s $(FLAVOR)/compile_commands.json build/compile_commands.json
 
 format:
 	git ls-files '*.cpp' '*.h' | $(XARGS) $(CLANG_FORMAT) -i

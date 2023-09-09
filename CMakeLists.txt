@@ -27,6 +27,8 @@ enable_testing()
 
 ## Silence installation messages
 set(CMAKE_INSTALL_MESSAGE LAZY)
+## Generate compile_commands.json for use by tools.
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # macros
 include(GNUInstallDirs)
