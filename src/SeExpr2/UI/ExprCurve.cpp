@@ -428,15 +428,6 @@ void ExprCurve::openDetail() {
         for (ITERATOR i = dataNew.begin(); i != dataNew.end(); ++i) addPoint(i->_pos, i->_val, i->_interp);
         _scene->emitCurveChanged();
     }
-
-    if (dialog->exec() == QDialog::Accepted) {
-        // copy points back from child
-        _scene->removeAll();
-        const std::vector<T_CURVE::CV> &dataNew = curve->_scene->_cvs;
-        typedef std::vector<T_CURVE::CV>::const_iterator ITERATOR;
-        for (ITERATOR i = dataNew.begin(); i != dataNew.end(); ++i) addPoint(i->_pos, i->_val, i->_interp);
-        _scene->emitCurveChanged();
-    }
 }
 
 void ExprCurve::addPoint(const double x, const double y, T_INTERP interp, const bool select) {
