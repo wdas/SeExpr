@@ -185,7 +185,19 @@ else()
     add_definitions(-Wall -Wextra -Wno-unused-parameter)
     add_definitions(-pthread)
 
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -g -std=c++11")
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+    add_compile_options(-g)
+
+    # Support env CXXFLAGS_STD=c++17
+    if (DEFINED ENV{CXXFLAGS_STD})
+        set(cxx_std $ENV{CXXFLAGS_STD})
+        string(SUBSTRING ${cxx_std} 3 -1 cxx_std_version)
+        set(CMAKE_CXX_STANDARD ${cxx_std_version})
+    else()
+        set(CMAKE_CXX_STANDARD 17)
+    endif()
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
     if (ENABLE_SSE4)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.1")
     endif()
