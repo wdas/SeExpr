@@ -1,5 +1,3 @@
--include Makefile.config
-
 # External commands
 CMAKE ?= cmake
 CLANG_FORMAT ?= clang-format
@@ -21,14 +19,20 @@ BUILD = build/$(FLAVOR)
 # mac_pkg =
 
 ifdef prefix
-    CMAKE_ARGS += -DCMAKE_INSTALL_PREFIX=$(prefix)
+    CMAKE_ARGS += -D CMAKE_INSTALL_PREFIX=$(prefix)
 endif
 ifdef libdir
-    CMAKE_ARGS += -DCMAKE_INSTALL_LIBDIR=$(libdir)
+    CMAKE_ARGS += -D CMAKE_INSTALL_LIBDIR=$(libdir)
 endif
 ifdef FLAVOR
-    CMAKE_ARGS += -DFLAVOR=$(FLAVOR)
+    CMAKE_ARGS += -D FLAVOR=$(FLAVOR)
 endif
+ifdef ENABLE_LLVM_BACKEND
+    CMAKE_ARGS += -D ENABLE_LLVM_BACKEND=$(ENABLE_LLVM_BACKEND)
+endif
+
+-include Makefile.config
+
 
 CMAKE_FILES += Makefile
 CMAKE_FILES += $(wildcard CMakeLists.txt */*/CMakeLists.txt)
